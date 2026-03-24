@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
@@ -64,8 +65,11 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.journalentry.LoanJournalEntryCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.teller.domain.CashierSession;
+import org.apache.fineract.organisation.teller.domain.CashierSessionRepository;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -74,6 +78,8 @@ import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransa
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.springframework.dao.DataAccessException;
@@ -96,6 +102,9 @@ public class AccountingProcessorHelper {
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
+    private final CashierSessionRepository cashierSessionRepository;
+    private final PlatformSecurityContext securityContext;
 
     public LoanDTO populateLoanDtoFromDTO(
             final org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO accountingBridgeData) {
@@ -675,6 +684,26 @@ public class AccountingProcessorHelper {
             createDebitJournalEntryForSavings(office, currencyCode, creditAccount, savingsId, transactionId, transactionDate, amount);
         } else {
             createCreditJournalEntryForSavings(office, currencyCode, creditAccount, savingsId, transactionId, transactionDate, amount);
+        }
+    }
+
+    public void createCashBasedDebitJournalEntryForSavings(final Office office, final String currencyCode, final GLAccount account,
+            final Long savingsId, final String transactionId, final LocalDate transactionDate, final BigDecimal amount,
+            final Boolean isReversal) {
+        if (isReversal) {
+            createCreditJournalEntryForSavings(office, currencyCode, account, savingsId, transactionId, transactionDate, amount);
+        } else {
+            createDebitJournalEntryForSavings(office, currencyCode, account, savingsId, transactionId, transactionDate, amount);
+        }
+    }
+
+    public void createCashBasedCreditJournalEntryForSavings(final Office office, final String currencyCode, final GLAccount account,
+            final Long savingsId, final String transactionId, final LocalDate transactionDate, final BigDecimal amount,
+            final Boolean isReversal) {
+        if (isReversal) {
+            createDebitJournalEntryForSavings(office, currencyCode, account, savingsId, transactionId, transactionDate, amount);
+        } else {
+            createCreditJournalEntryForSavings(office, currencyCode, account, savingsId, transactionId, transactionDate, amount);
         }
     }
 
@@ -1268,6 +1297,41 @@ public class AccountingProcessorHelper {
 
     private boolean isOrganizationAccount(final int accountMappingTypeId) {
         return FinancialActivity.fromInt(accountMappingTypeId) != null;
+    }
+
+    /**
+     * Resolves the GL account to use for cash payments based on whether an active cashier session exists.
+     * <p>
+     * If the given payment type has {@code isCashPayment == true} and the current user has an open cashier session for
+     * the given office on the transaction date, the {@code CASH_AT_TELLER} (11140) financial-activity GL account is
+     * returned. Otherwise the {@code CASH_AT_MAINVAULT} (11130) financial-activity GL account is returned as fallback.
+     * </p>
+     * Returns an empty {@link Optional} when {@code paymentTypeId} is {@code null} or the payment type is not a cash
+     * payment, signalling callers to fall back to the product-specific fund-source mapping.
+     *
+     * @param paymentTypeId
+     *            the payment type id; may be {@code null}
+     * @param officeId
+     *            the office for which to look up the cashier session
+     * @param transactionDate
+     *            the transaction date
+     * @return an {@link Optional} containing the resolved {@link GLAccount}, or empty if not applicable
+     */
+    public Optional<GLAccount> resolveCashGLAccount(final Long paymentTypeId, final Long officeId, final LocalDate transactionDate) {
+        if (paymentTypeId == null) {
+            return Optional.empty();
+        }
+        final PaymentType paymentType = paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
+        if (paymentType.getIsCashPayment() == null || !paymentType.getIsCashPayment()) {
+            return Optional.empty();
+        }
+        final Long currentUserId = securityContext.authenticatedUser().getId();
+        final Optional<CashierSession> activeSession = cashierSessionRepository.findOpenSessionByUser(currentUserId, officeId,
+                transactionDate);
+        final int financialActivityId = activeSession.isPresent() ? FinancialActivity.CASH_AT_TELLER.getValue()
+                : FinancialActivity.CASH_AT_MAINVAULT.getValue();
+        return Optional.of(financialActivityAccountRepository.findByFinancialActivityTypeWithNotFoundDetection(financialActivityId)
+                .getGlAccount());
     }
 
     public BigDecimal createCreditJournalEntryOrReversalForClientPayments(final Office office, final String currencyCode,

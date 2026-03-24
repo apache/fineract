@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -476,8 +477,15 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             this.helper.createCreditJournalEntryForLoan(office, currencyCode, FinancialActivity.LIABILITY_TRANSFER.getValue(),
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, loanTransactionDTO.getAmount());
         } else {
-            this.helper.createCreditJournalEntryForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId,
-                    paymentTypeId, loanId, transactionId, transactionDate, loanTransactionDTO.getAmount());
+            final Optional<GLAccount> cashGLAccount = this.helper.resolveCashGLAccount(paymentTypeId, loanTransactionDTO.getOfficeId(),
+                    transactionDate);
+            if (cashGLAccount.isPresent()) {
+                this.helper.createCreditJournalEntryForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                        loanTransactionDTO.getAmount(), cashGLAccount.get());
+            } else {
+                this.helper.createCreditJournalEntryForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId,
+                        paymentTypeId, loanId, transactionId, transactionDate, loanTransactionDTO.getAmount());
+            }
         }
     }
 
@@ -816,8 +824,15 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                 }
 
             } else {
-                this.helper.createDebitJournalEntryForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId,
-                        paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount);
+                final Optional<GLAccount> cashGLAccount = this.helper.resolveCashGLAccount(paymentTypeId,
+                        loanTransactionDTO.getOfficeId(), transactionDate);
+                if (cashGLAccount.isPresent()) {
+                    this.helper.createDebitJournalEntryForLoan(office, currencyCode, loanId, transactionId, transactionDate,
+                            totalDebitAmount, cashGLAccount.get());
+                } else {
+                    this.helper.createDebitJournalEntryForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(),
+                            loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount);
+                }
             }
         }
 
