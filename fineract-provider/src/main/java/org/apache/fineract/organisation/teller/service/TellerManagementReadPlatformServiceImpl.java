@@ -285,7 +285,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                 + " LIMIT 1000";
 
         final List<Object> summaryParamsList = new ArrayList<>();
-        // cashier_txns section
+        // cashier_txns section: upper bound uses c.end_date (inclusive date, no +1)
         summaryParamsList.add(cashierId);
         summaryParamsList.add(currencyCode);
         if (fromDate != null) {
@@ -294,7 +294,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         if (toDate != null) {
             summaryParamsList.add(toDate);
         }
-        // savings section
+        // savings section: the summary SQL originally used c.end_date (not nextDay), so use toDate directly
         summaryParamsList.add(cashierId);
         summaryParamsList.add(currencyCode);
         if (fromDate != null) {
@@ -303,7 +303,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         if (toDate != null) {
             summaryParamsList.add(toDate);
         }
-        // loans section
+        // loans section: SQL uses DATE_ADD(c.end_date, 1 DAY) to make the upper bound inclusive of transactions
+        // on the end date itself when transaction_date is a timestamp; mirror that with plusDays(1)
         summaryParamsList.add(cashierId);
         summaryParamsList.add(currencyCode);
         if (fromDate != null) {
@@ -312,7 +313,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         if (toDate != null) {
             summaryParamsList.add(toDate.plusDays(1));
         }
-        // client section
+        // client section: same reasoning as loans — use plusDays(1) to match nextDay behaviour
         summaryParamsList.add(cashierId);
         summaryParamsList.add(currencyCode);
         if (fromDate != null) {
@@ -396,7 +397,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         final List<Object> paramsList = new ArrayList<>();
-        // cashier_txns section
+        // cashier_txns section: upper bound is c.end_date (exact date, no +1 needed for allocations)
         paramsList.add(cashierId);
         paramsList.add(currencyCode);
         if (fromDate != null) {
@@ -405,7 +406,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         if (toDate != null) {
             paramsList.add(toDate);
         }
-        // savings section
+        // savings, loans, client sections: SQL uses DATE_ADD(c.end_date, 1 DAY) to ensure transactions
+        // recorded on the end date itself are included; mirror that with plusDays(1) for explicit toDate
         paramsList.add(cashierId);
         paramsList.add(currencyCode);
         if (fromDate != null) {
