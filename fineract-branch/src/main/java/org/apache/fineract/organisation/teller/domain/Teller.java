@@ -91,9 +91,10 @@ public class Teller extends AbstractPersistableCustom<Long> {
                 .setStatus(status.getValue());
     }
 
-    public Map<String, Object> update(Office tellerOffice, final JsonCommand command) {
+    public Map<String, Object> update(Office tellerOffice, GLAccount newDebitAccount, GLAccount newCreditAccount,
+            final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
@@ -148,6 +149,22 @@ public class Teller extends AbstractPersistableCustom<Long> {
             if (status != TellerStatus.INVALID) {
                 this.status = status.getValue();
             }
+        }
+
+        final String debitAccountIdParamName = "debitAccountId";
+        final Long currentDebitAccountId = this.debitAccount != null ? this.debitAccount.getId() : null;
+        if (command.isChangeInLongParameterNamed(debitAccountIdParamName, currentDebitAccountId)) {
+            final Long newValue = command.longValueOfParameterNamed(debitAccountIdParamName);
+            actualChanges.put(debitAccountIdParamName, newValue);
+            this.debitAccount = newDebitAccount;
+        }
+
+        final String creditAccountIdParamName = "creditAccountId";
+        final Long currentCreditAccountId = this.creditAccount != null ? this.creditAccount.getId() : null;
+        if (command.isChangeInLongParameterNamed(creditAccountIdParamName, currentCreditAccountId)) {
+            final Long newValue = command.longValueOfParameterNamed(creditAccountIdParamName);
+            actualChanges.put(creditAccountIdParamName, newValue);
+            this.creditAccount = newCreditAccount;
         }
 
         return actualChanges;

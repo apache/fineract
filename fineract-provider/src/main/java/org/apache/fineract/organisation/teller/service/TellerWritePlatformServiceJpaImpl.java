@@ -28,6 +28,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivi
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
@@ -73,6 +74,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final JournalEntryRepository glJournalEntryRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
+    private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
 
     @Override
     @Transactional
@@ -120,7 +122,17 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final Teller teller = validateUserPriviledgeOnTellerAndRetrieve(currentUser, tellerId);
 
-            final Map<String, Object> changes = teller.update(tellerOffice, command);
+            final Long debitAccountId = command.longValueOfParameterNamed("debitAccountId");
+            final GLAccount debitAccount = debitAccountId != null
+                    ? this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(debitAccountId)
+                    : null;
+
+            final Long creditAccountId = command.longValueOfParameterNamed("creditAccountId");
+            final GLAccount creditAccount = creditAccountId != null
+                    ? this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(creditAccountId)
+                    : null;
+
+            final Map<String, Object> changes = teller.update(tellerOffice, debitAccount, creditAccount, command);
 
             if (!changes.isEmpty()) {
                 this.tellerRepositoryWrapper.saveAndFlush(teller);

@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.teller.starter;
 
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -63,9 +64,10 @@ public class OrganisationTellerConfiguration {
             OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepository staffRepository, CashierRepository cashierRepository,
             CashierTransactionRepository cashierTxnRepository, JournalEntryRepository glJournalEntryRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            CashierTransactionDataValidator cashierTransactionDataValidator) {
+            CashierTransactionDataValidator cashierTransactionDataValidator,
+            GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
         return new TellerWritePlatformServiceJpaImpl(context, fromApiJsonDeserializer, tellerRepositoryWrapper, officeRepositoryWrapper,
                 staffRepository, cashierRepository, cashierTxnRepository, glJournalEntryRepository,
-                financialActivityAccountRepositoryWrapper, cashierTransactionDataValidator);
+                financialActivityAccountRepositoryWrapper, cashierTransactionDataValidator, glAccountRepositoryWrapper);
     }
 }
