@@ -231,4 +231,5 @@
     <include file="parts/0210_add_cashier_session_id_fk_to_transactions.xml" relativeToChangelogFile="true" />
     <include file="parts/0211_add_supervisor_note_to_cashier_sessions.xml" relativeToChangelogFile="true" />
     <include file="parts/0212_add_cashier_session_id_to_cashier_transactions.xml" relativeToChangelogFile="true" />
+    <include file="parts/0213_add_cashiersession_permissions.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
