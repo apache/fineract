@@ -23,7 +23,10 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanOverAppliedCalculationType;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.springframework.stereotype.Component;
@@ -39,30 +42,47 @@ public final class LoanDisbursementValidator {
         final BigDecimal totalCapitalizedIncomeAdjustment = MathUtil.nullToZero(loan.getSummary().getTotalCapitalizedIncomeAdjustment());
         final BigDecimal netCapitalizedIncome = totalCapitalizedIncome.subtract(totalCapitalizedIncomeAdjustment);
 
-        if (loan.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
-            // Validate total disbursed amount (after this transaction) against max allowed
-            validateOverMaximumAmount(loan, totalDisbursed, netCapitalizedIncome);
-        } else {
-            if ((totalDisbursed.compareTo(loan.getApprovedPrincipal()) > 0)
-                    || (totalDisbursed.add(netCapitalizedIncome).compareTo(loan.getApprovedPrincipal()) > 0)) {
-                final String errorMsg = "Loan can't be disbursed, disburse amount is exceeding approved principal.";
-                throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", totalDisbursed,
-                        loan.getApprovedPrincipal());
-            }
+        final BigDecimal maxAllowed = calculateMaxAllowedDisbursement(loan);
+        BigDecimal total = totalDisbursed.add(netCapitalizedIncome);
+        if (total.compareTo(maxAllowed) > 0) {
+            throw new LoanDisbursalException(
+                "Disbursement exceeds allowed limit including over-applied threshold",
+                "disburse.amount.must.be.less.than.or.equal.to.max.allowed", total, maxAllowed);
         }
     }
 
     public void validateOverMaximumAmount(final Loan loan, final BigDecimal totalDisbursed, final BigDecimal capitalizedIncome) {
-        final BigDecimal maxDisbursedAmount = loanApplicationValidator.getOverAppliedMax(loan);
-        if (totalDisbursed.add(capitalizedIncome).compareTo(maxDisbursedAmount) > 0) {
+        final BigDecimal maxAllowed = calculateMaxAllowedDisbursement(loan);
+        BigDecimal total = totalDisbursed.add(capitalizedIncome);
+        if (total.compareTo(maxAllowed) > 0) {
             final String errorMessage = String.format(
-                    "Loan disbursal amount can't be greater than maximum applied loan amount calculation. "
-                            + "Total disbursed amount: %s  Maximum disbursal amount: %s",
-                    totalDisbursed.stripTrailingZeros().toPlainString(), maxDisbursedAmount.stripTrailingZeros().toPlainString());
+                "Disbursement exceeds allowed limit including over-applied threshold. Total disbursed amount: %s  Maximum allowed: %s",
+                total.stripTrailingZeros().toPlainString(), maxAllowed.stripTrailingZeros().toPlainString());
             throw new InvalidLoanStateTransitionException("disbursal",
-                    "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation", errorMessage, totalDisbursed,
-                    maxDisbursedAmount);
+                "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation", errorMessage, total, maxAllowed);
         }
+    }
+
+    private BigDecimal calculateMaxAllowedDisbursement(final Loan loan) {
+        final LoanProduct loanProduct = loan.getLoanProduct();
+        final BigDecimal approvedPrincipal = loan.getApprovedPrincipal() != null ? loan.getApprovedPrincipal()
+            : loan.getProposedPrincipal() != null ? loan.getProposedPrincipal() : BigDecimal.ZERO;
+        BigDecimal maxAllowed = approvedPrincipal;
+
+        if (loanProduct.getOverAppliedCalculationType() != null && loanProduct.getOverAppliedNumber() != null) {
+            final BigDecimal overAppliedMax = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
+            final LoanOverAppliedCalculationType calculationType = LoanOverAppliedCalculationType
+                    .valueOf(loanProduct.getOverAppliedCalculationType().toUpperCase());
+
+            if (calculationType.isPercentage()) {
+                final BigDecimal extra = MathUtil.percentageOf(approvedPrincipal, overAppliedMax, MoneyHelper.getMathContext());
+                maxAllowed = approvedPrincipal.add(extra);
+            } else {
+                maxAllowed = approvedPrincipal.add(overAppliedMax);
+            }
+        }
+
+        return maxAllowed;
     }
 
     public void validateDisburseDate(final Loan loan, final LocalDate disbursedOn, final LocalDate expectedDate) {
