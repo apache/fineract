@@ -31,4 +31,7 @@ public interface CashierTransactionRepository
     @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashier.id = :cashierId AND ct.txnType = :txnType AND ct.txnDate = :sessionDate")
     BigDecimal sumAmountByCashierAndTxnTypeAndDate(@Param("cashierId") Long cashierId, @Param("txnType") Integer txnType,
             @Param("sessionDate") LocalDate sessionDate);
+
+    @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashierSession.id = :sessionId AND ct.txnType = :txnType")
+    BigDecimal sumAmountBySessionAndTxnType(@Param("sessionId") Long sessionId, @Param("txnType") Integer txnType);
 }
