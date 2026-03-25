@@ -301,14 +301,17 @@ public class TellerApiResource {
                 .sortOrder(sortOrder).build();
         final LocalDate fromDate = parseDateParam(fromDateStr, "fromDate", dateFormat, locale);
         final LocalDate toDate = parseDateParam(toDateStr, "toDate", dateFormat, locale);
-        return this.readPlatformService.retrieveCashierTransactions(cashierId, false, fromDate, toDate, currencyCode, searchParameters);
+        return this.readPlatformService.retrieveCashierTransactions(cashierId, false, fromDate, toDate, currencyCode, searchParameters,
+                null);
     }
 
     @GET
     @Path("{tellerId}/cashiers/{cashierId}/summaryandtransactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve Transactions With Summary For Cashier", description = "")
+    @Operation(summary = "Retrieve Transactions With Summary For Cashier", description = "Returns a combined summary and transaction list for a cashier. "
+            + "When sessionId is omitted this is the legacy all-time view. "
+            + "When sessionId is provided only transactions belonging to that session are included (Option A).")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse.class))) })
     public CashierTransactionsWithSummaryData getTransactionsWithSummaryForCashier(
@@ -322,7 +325,8 @@ public class TellerApiResource {
             @QueryParam("fromDate") @Parameter(description = "fromDate") final String fromDateStr,
             @QueryParam("toDate") @Parameter(description = "toDate") final String toDateStr,
             @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
-            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
+            @QueryParam("locale") @Parameter(description = "locale") final String locale,
+            @QueryParam("sessionId") @Parameter(description = "Optional cashier session ID. When provided, only transactions for that session are returned. When omitted, all transactions for the cashier are returned (backwards-compatible behaviour).") final Long sessionId) {
 
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).offset(offset).orderBy(orderBy)
                 .sortOrder(sortOrder).build();
@@ -330,7 +334,7 @@ public class TellerApiResource {
         final LocalDate toDate = parseDateParam(toDateStr, "toDate", dateFormat, locale);
 
         return this.readPlatformService.retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode,
-                searchParameters);
+                searchParameters, sessionId);
     }
 
     @GET
