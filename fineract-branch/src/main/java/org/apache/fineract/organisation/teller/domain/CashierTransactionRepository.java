@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -34,4 +35,7 @@ public interface CashierTransactionRepository
 
     @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashierSession.id = :sessionId AND ct.txnType = :txnType")
     BigDecimal sumAmountBySessionAndTxnType(@Param("sessionId") Long sessionId, @Param("txnType") Integer txnType);
+
+    @Query("SELECT COALESCE(SUM(ct.txnAmount), 0) FROM CashierTransaction ct WHERE ct.cashierSession.id = :sessionId AND ct.txnType IN :txnTypes")
+    BigDecimal sumAmountBySessionAndTxnTypes(@Param("sessionId") Long sessionId, @Param("txnTypes") List<Integer> txnTypes);
 }
