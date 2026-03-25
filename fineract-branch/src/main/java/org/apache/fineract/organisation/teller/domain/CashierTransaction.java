@@ -59,6 +59,10 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "cashier_id", nullable = false)
     private Cashier cashier;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cashier_session_id", nullable = true)
+    private CashierSession cashierSession;
+
     @Column(name = "txn_type", nullable = false)
     private Integer txnType;
 

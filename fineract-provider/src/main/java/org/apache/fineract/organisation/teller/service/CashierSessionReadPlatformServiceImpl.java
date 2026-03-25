@@ -31,6 +31,8 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.teller.data.CashierSessionData;
 import org.apache.fineract.organisation.teller.data.CashierSessionSummaryData;
 import org.apache.fineract.organisation.teller.domain.CashierSessionStatus;
+import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
+import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.exception.CashierSessionNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,6 +42,7 @@ import org.springframework.jdbc.core.RowMapper;
 public class CashierSessionReadPlatformServiceImpl implements CashierSessionReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final CashierTransactionRepository cashierTransactionRepository;
 
     private static final class CashierSessionMapper implements RowMapper<CashierSessionData> {
 
@@ -116,18 +119,12 @@ public class CashierSessionReadPlatformServiceImpl implements CashierSessionRead
     public CashierSessionSummaryData getSessionSummary(final Long sessionId) {
         final CashierSessionData session = findSessionById(sessionId);
 
-        final String cashInSql = "select coalesce(sum(ct.txn_amount), 0) from m_cashier_transactions ct "
-                + "where ct.cashier_id = ? and ct.txn_date >= ? and ct.txn_type in (1, 101, 102)";
+        final BigDecimal totalCashIn = cashierTransactionRepository
+                .sumAmountBySessionAndTxnType(sessionId, CashierTxnType.INWARD_CASH_TXN.getId());
+        final BigDecimal totalCashOut = cashierTransactionRepository
+                .sumAmountBySessionAndTxnType(sessionId, CashierTxnType.OUTWARD_CASH_TXN.getId());
 
-        final String cashOutSql = "select coalesce(sum(ct.txn_amount), 0) from m_cashier_transactions ct "
-                + "where ct.cashier_id = ? and ct.txn_date >= ? and ct.txn_type in (2, 201, 202)";
-
-        final LocalDate sessionDate = session.getSessionDate();
         final BigDecimal openingAllocation = session.getOpeningAllocation() != null ? session.getOpeningAllocation() : BigDecimal.ZERO;
-
-        final BigDecimal totalCashIn = jdbcTemplate.queryForObject(cashInSql, BigDecimal.class, session.getCashierId(), sessionDate);
-        final BigDecimal totalCashOut = jdbcTemplate.queryForObject(cashOutSql, BigDecimal.class, session.getCashierId(), sessionDate);
-
         final BigDecimal safeTotalCashIn = totalCashIn != null ? totalCashIn : BigDecimal.ZERO;
         final BigDecimal safeTotalCashOut = totalCashOut != null ? totalCashOut : BigDecimal.ZERO;
 

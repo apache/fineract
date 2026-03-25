@@ -162,6 +162,7 @@
 
         <!-- Branch Module Entities -->
         <class>org.apache.fineract.organisation.teller.domain.CashierTransaction</class>
+        <class>org.apache.fineract.organisation.teller.domain.CashierSession</class>
         <class>org.apache.fineract.organisation.teller.domain.Teller</class>
         <class>org.apache.fineract.organisation.teller.domain.Cashier</class>
         <class>org.apache.fineract.organisation.teller.domain.TellerTransaction</class>

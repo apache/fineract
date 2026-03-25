@@ -48,6 +48,8 @@ import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.organisation.teller.data.CashierTransactionDataValidator;
 import org.apache.fineract.organisation.teller.domain.Cashier;
 import org.apache.fineract.organisation.teller.domain.CashierRepository;
+import org.apache.fineract.organisation.teller.domain.CashierSession;
+import org.apache.fineract.organisation.teller.domain.CashierSessionRepository;
 import org.apache.fineract.organisation.teller.domain.CashierTransaction;
 import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
@@ -73,6 +75,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final StaffRepository staffRepository;
     private final CashierRepository cashierRepository;
     private final CashierTransactionRepository cashierTxnRepository;
+    private final CashierSessionRepository cashierSessionRepository;
     private final JournalEntryRepository glJournalEntryRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
@@ -401,6 +404,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final CashierTransaction cashierTxn = CashierTransaction.fromJson(cashier, command);
             cashierTxn.setTxnType(txnType.getId());
+
+            // Link to active session if one exists
+            cashierSessionRepository.findOpenSession(cashier.getId(), cashier.getTeller().getId(), DateUtils.getBusinessLocalDate())
+                    .ifPresent(cashierTxn::setCashierSession);
 
             this.cashierTxnRepository.save(cashierTxn);
 

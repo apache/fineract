@@ -128,13 +128,10 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
         final BigDecimal resolvedSettledAmount = settledAmount != null ? settledAmount : BigDecimal.ZERO;
 
         // Compute expected cash: openingAllocation + sumCashIn - sumCashOut
-        final Long cashierId = session.getCashier().getId();
-        final LocalDate sessionDate = session.getSessionDate();
-
-        final BigDecimal sumCashIn = cashierTransactionRepository.sumAmountByCashierAndTxnTypeAndDate(cashierId,
-                CashierTxnType.INWARD_CASH_TXN.getId(), sessionDate);
-        final BigDecimal sumCashOut = cashierTransactionRepository.sumAmountByCashierAndTxnTypeAndDate(cashierId,
-                CashierTxnType.OUTWARD_CASH_TXN.getId(), sessionDate);
+        final BigDecimal sumCashIn = cashierTransactionRepository.sumAmountBySessionAndTxnType(
+                sessionId, CashierTxnType.INWARD_CASH_TXN.getId());
+        final BigDecimal sumCashOut = cashierTransactionRepository.sumAmountBySessionAndTxnType(
+                sessionId, CashierTxnType.OUTWARD_CASH_TXN.getId());
 
         final BigDecimal openingAllocation = session.getOpeningAllocation() != null ? session.getOpeningAllocation() : BigDecimal.ZERO;
         final BigDecimal safeCashIn = sumCashIn != null ? sumCashIn : BigDecimal.ZERO;

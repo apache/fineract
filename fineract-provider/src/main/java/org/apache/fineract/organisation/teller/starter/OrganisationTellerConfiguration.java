@@ -67,19 +67,21 @@ public class OrganisationTellerConfiguration {
     public TellerWritePlatformService tellerWritePlatformService(PlatformSecurityContext context,
             TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, TellerRepositoryWrapper tellerRepositoryWrapper,
             OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepository staffRepository, CashierRepository cashierRepository,
-            CashierTransactionRepository cashierTxnRepository, JournalEntryRepository glJournalEntryRepository,
+            CashierTransactionRepository cashierTxnRepository, CashierSessionRepository cashierSessionRepository,
+            JournalEntryRepository glJournalEntryRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
             CashierTransactionDataValidator cashierTransactionDataValidator,
             GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
         return new TellerWritePlatformServiceJpaImpl(context, fromApiJsonDeserializer, tellerRepositoryWrapper, officeRepositoryWrapper,
-                staffRepository, cashierRepository, cashierTxnRepository, glJournalEntryRepository,
+                staffRepository, cashierRepository, cashierTxnRepository, cashierSessionRepository, glJournalEntryRepository,
                 financialActivityAccountRepositoryWrapper, cashierTransactionDataValidator, glAccountRepositoryWrapper);
     }
 
     @Bean
     @ConditionalOnMissingBean(CashierSessionReadPlatformService.class)
-    public CashierSessionReadPlatformService cashierSessionReadPlatformService(JdbcTemplate jdbcTemplate) {
-        return new CashierSessionReadPlatformServiceImpl(jdbcTemplate);
+    public CashierSessionReadPlatformService cashierSessionReadPlatformService(JdbcTemplate jdbcTemplate,
+            CashierTransactionRepository cashierTransactionRepository) {
+        return new CashierSessionReadPlatformServiceImpl(jdbcTemplate, cashierTransactionRepository);
     }
 
     @Bean
