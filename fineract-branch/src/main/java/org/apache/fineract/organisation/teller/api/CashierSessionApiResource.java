@@ -39,6 +39,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.teller.data.CashierSessionData;
 import org.apache.fineract.organisation.teller.data.CashierSessionSummaryData;
 import org.apache.fineract.organisation.teller.service.CashierSessionReadPlatformService;
@@ -50,8 +51,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CashierSessionApiResource {
 
+    private static final String RESOURCE_NAME = "CASHIERSESSION";
+
     private final CashierSessionReadPlatformService readService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
+    private final PlatformSecurityContext context;
 
     /**
      * POST /tellers/{id}/cashiers/{cId}/sessions — Open a new cashier session.
@@ -66,6 +70,7 @@ public class CashierSessionApiResource {
             @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @Parameter(description = "currencyCode") final String currencyCode) {
+        context.authenticatedUser().validateHasCreatePermission(RESOURCE_NAME);
         final JsonObject json = new JsonObject();
         json.addProperty("currencyCode", currencyCode != null ? currencyCode : "");
         final CommandWrapper request = new CommandWrapperBuilder()
@@ -87,6 +92,7 @@ public class CashierSessionApiResource {
     public Optional<CashierSessionData> getActiveSession(
             @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME);
         return readService.findActiveSession(cashierId, tellerId);
     }
 
@@ -102,6 +108,7 @@ public class CashierSessionApiResource {
     public List<CashierSessionData> listSessions(
             @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME);
         return readService.findAllSessions(cashierId, tellerId);
     }
 
@@ -118,6 +125,7 @@ public class CashierSessionApiResource {
             @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @PathParam("sessionId") @Parameter(description = "sessionId") final Long sessionId) {
+        context.authenticatedUser().validateHasPermissionTo("CLOSE_CASHIERSESSION");
         final CommandWrapper request = new CommandWrapperBuilder()
                 .closeCashierSession(tellerId, cashierId, sessionId)
                 .withJson("{}")
@@ -138,6 +146,7 @@ public class CashierSessionApiResource {
             @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId,
             @PathParam("sessionId") @Parameter(description = "sessionId") final Long sessionId) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME);
         return readService.getSessionSummary(sessionId);
     }
 
@@ -152,6 +161,7 @@ public class CashierSessionApiResource {
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public List<CashierSessionData> getBranchDashboard(
             @PathParam("officeId") @Parameter(description = "officeId") final Long officeId) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME);
         return readService.findOpenSessionsByOffice(officeId);
     
     }
