@@ -666,18 +666,18 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    left join m_staff s on s.id = c.staff_id ");
             sqlBuilder.append("    where txn.cashier_id = ? ");
             sqlBuilder.append(" AND ((  txn.created_date between " + fromDateExpr + " AND " + toDateExprForCashierTxn
-                    + " ) or txn.txn_type = 101) ");
+                    + " ) or txn.txn_type = " + CashierTxnType.ALLOCATE.getId() + ") ");
             sqlBuilder.append(" and   txn.currency_code = ? ");
             sqlBuilder.append(" ) cashier_txns ");
             sqlBuilder.append("    UNION ");
             sqlBuilder.append("    (select sav_txn.id as txn_id, c.id as cashier_id, ");
             sqlBuilder.append("    case ");
             sqlBuilder.append("        when renum.enum_value in ('deposit','withdrawal fee', 'Pay Charge', 'Annual Fee') ");
-            sqlBuilder.append("            then 103 ");
+            sqlBuilder.append("            then " + CashierTxnType.INWARD_CASH_TXN.getId() + " "); // INWARD_CASH_TXN
             sqlBuilder.append("        when renum.enum_value in ('withdrawal', 'Waive Charge', 'Interest Posting', 'Overdraft Interest') ");
-            sqlBuilder.append("            then 104 ");
+            sqlBuilder.append("            then " + CashierTxnType.OUTWARD_CASH_TXN.getId() + " "); // OUTWARD_CASH_TXN
             sqlBuilder.append("        else ");
-            sqlBuilder.append("            105 ");
+            sqlBuilder.append("            105 "); // unclassified teller transaction
             sqlBuilder.append("    end as cash_txn_type, ");
             sqlBuilder.append("    sav_txn.amount as txn_amount, sav_txn.transaction_date as txn_date, ");
             sqlBuilder.append(
@@ -711,11 +711,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    case ");
             sqlBuilder.append(
                     "        when renum.enum_value in ('REPAYMENT_AT_DISBURSEMENT','REPAYMENT', 'RECOVERY_REPAYMENT', 'CHARGE_PAYMENT') ");
-            sqlBuilder.append("            then 103 ");
+            sqlBuilder.append("            then " + CashierTxnType.INWARD_CASH_TXN.getId() + " "); // INWARD_CASH_TXN
             sqlBuilder.append("        when renum.enum_value in ('DISBURSEMENT', 'WAIVE_INTEREST', 'WRITEOFF', 'WAIVE_CHARGES') ");
-            sqlBuilder.append("            then 104 ");
+            sqlBuilder.append("            then " + CashierTxnType.OUTWARD_CASH_TXN.getId() + " "); // OUTWARD_CASH_TXN
             sqlBuilder.append("        else ");
-            sqlBuilder.append("            105 ");
+            sqlBuilder.append("            105 "); // unclassified teller transaction
             sqlBuilder.append("    end as cash_txn_type, ");
             sqlBuilder.append("    loan_txn.amount as txn_amount, loan_txn.transaction_date as txn_date, ");
             sqlBuilder.append(
@@ -748,11 +748,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    SELECT cli_txn.id AS txn_id, c.id AS cashier_id, ");
             sqlBuilder.append("    case ");
             sqlBuilder.append("        WHEN renum.enum_value IN ('PAY_CHARGE') ");
-            sqlBuilder.append("            then 103 ");
+            sqlBuilder.append("            then " + CashierTxnType.INWARD_CASH_TXN.getId() + " "); // INWARD_CASH_TXN
             sqlBuilder.append("        WHEN renum.enum_value IN ('WAIVE_CHARGE') ");
-            sqlBuilder.append("            then 104 ");
+            sqlBuilder.append("            then " + CashierTxnType.OUTWARD_CASH_TXN.getId() + " "); // OUTWARD_CASH_TXN
             sqlBuilder.append("        else ");
-            sqlBuilder.append("            105 ");
+            sqlBuilder.append("            105 "); // unclassified teller transaction
             sqlBuilder.append("    end as cash_txn_type, ");
             sqlBuilder.append("    cli_txn.amount as txn_amount, cli_txn.transaction_date as txn_date, ");
             sqlBuilder.append(
