@@ -60,7 +60,7 @@ public class CashierTransactionDataValidator {
     public void validateSettleCashAndCashOutTransactions(final Long cashierId, String currencyCode, final BigDecimal transactionAmount) {
         final SearchParameters searchParameters = SearchParameters.builder().build();
         final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.tellerManagementReadPlatformService
-                .retrieveCashierTransactionsWithSummary(cashierId, false, null, null, currencyCode, searchParameters);
+                .retrieveCashierTransactionsWithSummary(cashierId, false, null, null, currencyCode, searchParameters, null);
         if (MathUtil.isGreaterThan(transactionAmount, cashierTxnWithSummary.getNetCash())) {
             throw new CashierInsufficientAmountException();
         }

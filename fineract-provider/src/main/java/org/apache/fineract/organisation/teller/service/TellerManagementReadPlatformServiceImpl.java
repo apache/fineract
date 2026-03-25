@@ -271,7 +271,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(final Long cashierId, final boolean includeAllTellers,
-            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
+            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters,
+            final Long sessionId) {
 
         sqlValidator.validate(searchParameters.getOrderBy());
         sqlValidator.validate(searchParameters.getSortOrder());
@@ -282,7 +283,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final String toDateExprForOtherTxn = toDate != null ? "?" : nextDay;
 
         final CashierTransactionSummaryMapper ctsm = new CashierTransactionSummaryMapper();
-        final String sql = "SELECT " + ctsm.cashierTxnSummarySchema(fromDateExpr, toDateExprForCashierTxn, toDateExprForOtherTxn)
+        final String sql = "SELECT " + ctsm.cashierTxnSummarySchema(fromDateExpr, toDateExprForCashierTxn, toDateExprForOtherTxn,
+                sessionId != null)
                 + " LIMIT 1000";
 
         final List<Object> summaryParamsList = new ArrayList<>();
@@ -294,6 +296,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
         if (toDate != null) {
             summaryParamsList.add(toDate);
+        }
+        // Option A: when sessionId is provided, add it as a parameter for the cashier_session_id = ? filter
+        // in the m_cashier_transactions (txn alias) subquery of the summary SQL
+        if (sessionId != null) {
+            summaryParamsList.add(sessionId);
         }
         // savings section: the summary SQL originally used c.end_date (not nextDay), so use toDate directly
         summaryParamsList.add(cashierId);
@@ -349,7 +356,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         final Page<CashierTransactionData> cashierTransactions = retrieveCashierTransactions(cashierId, includeAllTellers, fromDate, toDate,
-                currencyCode, searchParameters);
+                currencyCode, searchParameters, sessionId);
 
         CashierTransactionData cashierTxnTemplate = retrieveCashierTxnTemplate(cashierId);
 
@@ -361,7 +368,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Page<CashierTransactionData> retrieveCashierTransactions(final Long cashierId, final boolean includeAllTellers,
-            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
+            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters,
+            final Long sessionId) {
 
         sqlValidator.validate(searchParameters.getOrderBy());
         sqlValidator.validate(searchParameters.getSortOrder());
@@ -373,8 +381,12 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final String toDateExprForCashierTxn = toDate != null ? "?" : "c.end_date";
         final String toDateExprForOtherTxn = toDate != null ? "?" : nextDay;
 
+        // Option A: when sessionId is provided, filter m_cashier_transactions to the specific session only
+        final String sessionFilter = sessionId != null ? " AND txn.cashier_session_id = ?" : "";
+
         String sql = "SELECT * FROM (SELECT " + ctm.cashierTxnSchema() + " WHERE txn.cashier_id = ? AND txn.currency_code = ? "
-                + "AND ((txn.created_date between " + fromDateExpr + " AND " + toDateExprForCashierTxn + "  ) or txn.txn_type = 101))  cashier_txns "
+                + "AND ((txn.created_date between " + fromDateExpr + " AND " + toDateExprForCashierTxn + "  ) or txn.txn_type = 101)"
+                + sessionFilter + ")  cashier_txns "
                 + " union (select " + ctm.savingsTxnSchema() + " where sav_txn.is_reversed = false and c.id = ? and sav.currency_code = ? "
                 + "and sav_txn.transaction_date between " + fromDateExpr + " and " + toDateExprForOtherTxn
                 + " and renum.enum_value in ('deposit','withdrawal fee', 'Pay Charge', 'withdrawal', 'Annual Fee', 'Waive Charge', 'Interest Posting', 'Overdraft Interest') "
@@ -406,6 +418,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
         if (toDate != null) {
             paramsList.add(toDate);
+        }
+        // Option A: when sessionId is provided, add it for the txn.cashier_session_id = ? filter
+        // (txn is the alias for m_cashier_transactions in the cashier_txns sub-query)
+        if (sessionId != null) {
+            paramsList.add(sessionId);
         }
         // savings, loans, client sections: SQL uses DATE_ADD(c.end_date, 1 DAY) to ensure transactions
         // recorded on the end date itself are included; mirror that with plusDays(1) for explicit toDate
@@ -647,7 +664,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class CashierTransactionSummaryMapper implements RowMapper<CashierTransactionTypeTotalsData> {
 
-        public String cashierTxnSummarySchema(String fromDateExpr, String toDateExprForCashierTxn, String toDateExprForOtherTxn) {
+        public String cashierTxnSummarySchema(String fromDateExpr, String toDateExprForCashierTxn, String toDateExprForOtherTxn,
+                boolean filterBySession) {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
@@ -668,6 +686,10 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" AND ((  txn.created_date between " + fromDateExpr + " AND " + toDateExprForCashierTxn
                     + " ) or txn.txn_type = " + CashierTxnType.ALLOCATE.getId() + ") ");
             sqlBuilder.append(" and   txn.currency_code = ? ");
+            if (filterBySession) {
+                // Option A: filter to a specific cashier session when sessionId is provided
+                sqlBuilder.append(" AND txn.cashier_session_id = ? ");
+            }
             sqlBuilder.append(" ) cashier_txns ");
             sqlBuilder.append("    UNION ");
             sqlBuilder.append("    (select sav_txn.id as txn_id, c.id as cashier_id, ");

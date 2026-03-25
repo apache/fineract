@@ -56,9 +56,13 @@ public interface TellerManagementReadPlatformService {
     Collection<CashierData> retrieveCashiersForTellers(Long tellerId);
 
     Page<CashierTransactionData> retrieveCashierTransactions(Long cashierId, boolean includeAllTellers, LocalDate fromDate,
-            LocalDate toDate, String currencyCode, SearchParameters searchParameters);
+            LocalDate toDate, String currencyCode, SearchParameters searchParameters, Long sessionId);
 
+    /**
+     * Option A: sessionId is optional. When null, returns the all-time legacy view for the cashier (backwards
+     * compatible). When non-null, filters results to the specified cashier session only.
+     */
     CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(Long cashierId, boolean includeAllTellers, LocalDate fromDate,
-            LocalDate toDate, String currencyCode, SearchParameters searchParameters);
+            LocalDate toDate, String currencyCode, SearchParameters searchParameters, Long sessionId);
 
 }
