@@ -345,6 +345,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
     @Override
     public CommandProcessingResult allocateCashToCashier(final Long cashierId, JsonCommand command) {
+        this.cashierTransactionDataValidator.validateAllocateCashTransactions(cashierId, command);
         return doTransactionForCashier(cashierId, CashierTxnType.ALLOCATE, command); // For
                                                                                      // fund
                                                                                      // allocation
