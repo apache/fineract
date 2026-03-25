@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,9 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.teller.domain.CashierSession;
+import org.apache.fineract.organisation.teller.domain.CashierSessionRepository;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
@@ -118,6 +122,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,6 +165,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanTransactionService loanTransactionService;
     private final LoanAccountDomainServiceJpaHelper loanAccountDomainServiceJpaHelper;
     private final LoanJournalEntryPoster journalEntryPoster;
+    private final PlatformSecurityContext context;
+    private final CashierSessionRepository cashierSessionRepository;
 
     @Transactional
     @Override
@@ -239,6 +246,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             newRepaymentTransaction = LoanTransaction.repaymentType(repaymentTransactionType, loan.getOffice(), repaymentAmount,
                     paymentDetail, transactionDate, txnExternalId, chargeRefundChargeType);
         }
+        stampCashierSession(newRepaymentTransaction, loan.getOfficeId());
 
         LocalDate recalculateFrom = null;
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
@@ -398,6 +406,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final LoanTransaction newPaymentTransaction = LoanTransaction.loanPayment(null, loan.getOffice(), paymentAmout, paymentDetail,
                 transactionDate, txnExternalId, loanTransactionType);
+        stampCashierSession(newPaymentTransaction, loan.getOfficeId());
 
         if (loanTransactionType.isRepaymentAtDisbursement()) {
             handlePayDisbursementTransaction(loan, chargeId, newPaymentTransaction);
@@ -469,6 +478,23 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     }
 
+    /**
+     * Looks up an OPEN cashier session for the currently authenticated user (today, at the loan's office) and stamps
+     * its id on the transaction. Safe to call even when there is no authenticated user (batch jobs) or no active
+     * session -- in those cases the field is left null.
+     */
+    private void stampCashierSession(final LoanTransaction loanTransaction, final Long officeId) {
+        final AppUser currentUser = context.getAuthenticatedUserIfPresent();
+        if (currentUser == null) {
+            return;
+        }
+        final List<CashierSession> sessions = cashierSessionRepository.findOpenSessionByUser(currentUser.getId(), officeId,
+                DateUtils.getBusinessLocalDate());
+        if (!sessions.isEmpty()) {
+            loanTransaction.setCashierSessionId(sessions.get(0).getId());
+        }
+    }
+
     @Override
     public LoanTransaction makeRefund(final Long accountId, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
@@ -486,6 +512,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
         final LoanTransaction newRefundTransaction = LoanTransaction.refund(loan.getOffice(), refundAmount, paymentDetail, transactionDate,
                 txnExternalId);
+        stampCashierSession(newRefundTransaction, loan.getOfficeId());
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate,
                 HolidayStatusType.ACTIVE.getValue());
@@ -538,6 +565,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final Money amount = Money.of(loan.getCurrency(), transactionAmount);
         LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan, amount, paymentDetail, transactionDate, txnExternalId,
                 loan.getTotalOverpaidAsMoney());
+        stampCashierSession(disbursementTransaction, loan.getOfficeId());
 
         // Subtract Previous loan outstanding balance from netDisbursalAmount
         loan.deductFromNetDisbursalAmount(transactionAmount);
@@ -621,6 +649,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
         LoanTransaction newCreditBalanceRefundTransaction = LoanTransaction.creditBalanceRefund(loan, loan.getOffice(), refundAmount,
                 transactionDate, externalId, paymentDetail);
+        stampCashierSession(newCreditBalanceRefundTransaction, loan.getOfficeId());
 
         loanDownPaymentTransactionValidator.validateAccountStatus(loan, LoanEvent.LOAN_CREDIT_BALANCE_REFUND);
         loanTransactionValidator.validateRefundDateIsAfterLastRepayment(loan, newCreditBalanceRefundTransaction.getTransactionDate());
@@ -661,6 +690,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         final LoanTransaction newRefundTransaction = LoanTransaction.refundForActiveLoan(loan.getOffice(), refundAmount, paymentDetail,
                 transactionDate, txnExternalId);
+        stampCashierSession(newRefundTransaction, loan.getOfficeId());
         loanTransactionValidator.validateRefundDateIsAfterLastRepayment(loan, newRefundTransaction.getTransactionDate());
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate,
@@ -819,6 +849,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         LoanTransaction refundTransaction = LoanTransaction.refund(loan, loanTransactionType, transactionAmount, paymentDetail,
                 transactionDate, txnExternalId);
+        stampCashierSession(refundTransaction, loan.getOfficeId());
 
         final boolean isTransactionChronologicallyLatest = loanTransactionService.isChronologicallyLatestRepaymentOrWaiver(loan,
                 refundTransaction);
