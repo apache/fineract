@@ -32,6 +32,7 @@ import org.apache.fineract.organisation.teller.data.CashierSessionData;
 import org.apache.fineract.organisation.teller.data.CashierSessionSummaryData;
 import org.apache.fineract.organisation.teller.domain.CashierSessionStatus;
 import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
+import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.exception.CashierSessionNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -118,12 +119,13 @@ public class CashierSessionReadPlatformServiceImpl implements CashierSessionRead
     public CashierSessionSummaryData getSessionSummary(final Long sessionId) {
         final CashierSessionData session = findSessionById(sessionId);
 
-        // Cash-in types: 1 (legacy direct cash-in), 101 (ALLOCATE), 102 (SETTLE from client)
-        // Cash-out types: 2 (legacy direct cash-out), 201 (legacy savings cash-out), 202 (legacy loan cash-out)
-        final BigDecimal totalCashIn = cashierTransactionRepository
-                .sumAmountBySessionAndTxnTypes(sessionId, List.of(1, 101, 102));
-        final BigDecimal totalCashOut = cashierTransactionRepository
-                .sumAmountBySessionAndTxnTypes(sessionId, List.of(2, 201, 202));
+        // Cash-in: ALLOCATE (101) — cash allocated to cashier, SETTLE (102) — cash settled from client,
+        //          INWARD_CASH_TXN (103) — direct cash-in from savings/loan/client transactions.
+        // Cash-out: OUTWARD_CASH_TXN (104) — cash paid out for withdrawals/disbursements.
+        final BigDecimal totalCashIn = cashierTransactionRepository.sumAmountBySessionAndTxnTypes(sessionId,
+                List.of(CashierTxnType.ALLOCATE.getId(), CashierTxnType.SETTLE.getId(), CashierTxnType.INWARD_CASH_TXN.getId()));
+        final BigDecimal totalCashOut = cashierTransactionRepository.sumAmountBySessionAndTxnTypes(sessionId,
+                List.of(CashierTxnType.OUTWARD_CASH_TXN.getId()));
 
         final BigDecimal openingAllocation = session.getOpeningAllocation() != null ? session.getOpeningAllocation() : BigDecimal.ZERO;
         final BigDecimal safeTotalCashIn = totalCashIn != null ? totalCashIn : BigDecimal.ZERO;
