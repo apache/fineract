@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
  * Handles a delete cashier command.
  *
  * @author Markus Geiss
- * @see org.apache.fineract.organisation.teller.service.CashierWritePlatformService
+ * @see org.apache.fineract.organisation.teller.service.TellerWritePlatformService
  * @since 2.0.0
  */
 @Service
