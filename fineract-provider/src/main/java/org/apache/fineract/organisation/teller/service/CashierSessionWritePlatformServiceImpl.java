@@ -43,7 +43,6 @@ import org.apache.fineract.organisation.teller.domain.CashierSession;
 import org.apache.fineract.organisation.teller.domain.CashierSessionRepository;
 import org.apache.fineract.organisation.teller.domain.CashierSessionStatus;
 import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
-import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.domain.TellerRepositoryWrapper;
 import org.apache.fineract.organisation.teller.exception.CashierNotFoundException;
@@ -128,10 +127,12 @@ public class CashierSessionWritePlatformServiceImpl implements CashierSessionWri
         final BigDecimal resolvedSettledAmount = settledAmount != null ? settledAmount : BigDecimal.ZERO;
 
         // Compute expected cash: openingAllocation + sumCashIn - sumCashOut
-        final BigDecimal sumCashIn = cashierTransactionRepository.sumAmountBySessionAndTxnType(
-                sessionId, CashierTxnType.INWARD_CASH_TXN.getId());
-        final BigDecimal sumCashOut = cashierTransactionRepository.sumAmountBySessionAndTxnType(
-                sessionId, CashierTxnType.OUTWARD_CASH_TXN.getId());
+        // Cash-in types: 1 (legacy direct cash-in), 101 (ALLOCATE), 102 (SETTLE from client)
+        // Cash-out types: 2 (legacy direct cash-out), 201 (legacy savings cash-out), 202 (legacy loan cash-out)
+        final BigDecimal sumCashIn = cashierTransactionRepository.sumAmountBySessionAndTxnTypes(
+                sessionId, List.of(1, 101, 102));
+        final BigDecimal sumCashOut = cashierTransactionRepository.sumAmountBySessionAndTxnTypes(
+                sessionId, List.of(2, 201, 202));
 
         final BigDecimal openingAllocation = session.getOpeningAllocation() != null ? session.getOpeningAllocation() : BigDecimal.ZERO;
         final BigDecimal safeCashIn = sumCashIn != null ? sumCashIn : BigDecimal.ZERO;
