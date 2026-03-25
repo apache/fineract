@@ -24,12 +24,14 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.teller.domain.Cashier;
 import org.apache.fineract.organisation.teller.domain.Teller;
 import org.apache.fineract.organisation.teller.exception.CashierAlreadyAllocated;
+import org.apache.fineract.organisation.teller.exception.CashierAssignmentExpiredException;
 import org.apache.fineract.organisation.teller.exception.CashierDateRangeOutOfTellerDateRangeException;
 import org.apache.fineract.organisation.teller.exception.CashierInsufficientAmountException;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
@@ -68,6 +70,24 @@ public class CashierTransactionDataValidator {
         String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("txnAmount");
         validateSettleCashAndCashOutTransactions(cashierId, currencyCode, transactionAmount);
+    }
+
+    public void validateAllocateCashTransactions(final Long cashierId, final JsonCommand command) {
+        // Verify cashier exists (throws exception if not found)
+        final CashierData cashierData = this.tellerManagementReadPlatformService.findCashier(cashierId);
+
+        // Check cashier assignment is not expired
+        if (cashierData.getEndDate() != null && cashierData.getEndDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+            final String cashierName = cashierData.getStaffName() != null ? cashierData.getStaffName() : String.valueOf(cashierId);
+            throw new CashierAssignmentExpiredException(cashierName, cashierData.getEndDate());
+        }
+
+        // Validate currency code is present
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+        if (currencyCode == null || currencyCode.isBlank()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.cashier.allocation.currency.code.required",
+                    "Currency code is required for cashier cash allocation.");
+        }
     }
 
     public void validateCashierAllowedDateAndTime(final Cashier cashier, final Teller teller) {
