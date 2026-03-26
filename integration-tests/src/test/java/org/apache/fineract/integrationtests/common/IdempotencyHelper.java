@@ -94,9 +94,26 @@ public final class IdempotencyHelper {
     @Deprecated(forRemoval = true)
     public static Response updateBusinessStepOrder(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             String jobName, String jsonBodyToSend, String idempotencyKey) {
+        return updateBusinessStepOrder(requestSpec, responseSpec, jobName, jsonBodyToSend, true, idempotencyKey);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static Response updateBusinessStepOrderWithoutIdempotencyKey(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend) {
+        return updateBusinessStepOrder(requestSpec, responseSpec, jobName, jsonBodyToSend, false, null);
+    }
+
+    @Deprecated(forRemoval = true)
+    private static Response updateBusinessStepOrder(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            String jobName, String jsonBodyToSend, boolean useIdempotencyKey, String idempotencyKey) {
         Response response = Utils.performServerPutRaw(requestSpec, responseSpec,
-                BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END,
-                request -> request.header("Idempotency-Key", idempotencyKey).body(jsonBodyToSend));
+                BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END, request -> {
+                    RequestSpecification mappedRequest = request.body(jsonBodyToSend);
+                    if (useIdempotencyKey) {
+                        mappedRequest = mappedRequest.header("Idempotency-Key", idempotencyKey);
+                    }
+                    return mappedRequest;
+                });
         log.info("BusinessStepConfigurationHelper Response: {}", response.getBody().asString());
         return response;
     }
@@ -107,9 +124,27 @@ public final class IdempotencyHelper {
     @Deprecated(forRemoval = true)
     public static Response updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend, String idempotencyKey) {
+        return updateBusinessStepOrderWithError(requestSpec, responseSpec, jobName, jsonBodyToSend, true, idempotencyKey);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static Response updateBusinessStepOrderWithErrorWithoutIdempotencyKey(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend) {
+        return updateBusinessStepOrderWithError(requestSpec, responseSpec, jobName, jsonBodyToSend, false, null);
+    }
+
+    @Deprecated(forRemoval = true)
+    private static Response updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend, boolean useIdempotencyKey,
+            String idempotencyKey) {
         String url = BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END;
-        return Utils.performServerPutRaw(requestSpec, responseSpec, url,
-                request -> request.header("Idempotency-Key", idempotencyKey).body(jsonBodyToSend));
+        return Utils.performServerPutRaw(requestSpec, responseSpec, url, request -> {
+            RequestSpecification mappedRequest = request.body(jsonBodyToSend);
+            if (useIdempotencyKey) {
+                mappedRequest = mappedRequest.header("Idempotency-Key", idempotencyKey);
+            }
+            return mappedRequest;
+        });
     }
 
     private static final class BusinessStepWrapper {

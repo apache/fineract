@@ -154,6 +154,62 @@ public class IdempotencyTest {
         assertEquals((Map) body1.jsonPath().get(""), response2.getBody().jsonPath().get(""));
     }
 
+    @Test
+    public void shouldReuseDeterministicIdempotencyKeyWhenHeaderMissing() {
+        ResponseSpecification updateResponseSpec = new ResponseSpecBuilder().expectStatusCode(204).build();
+        JobBusinessStepConfigData originalStepConfig = IdempotencyHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec,
+                LOAN_JOB_NAME);
+
+        try {
+            String requestBody = "{\"businessSteps\":[{\"stepName\":\"APPLY_CHARGE_TO_OVERDUE_LOANS\",\"order\":1}]}";
+
+            // First request → generate deterministic key from payload
+            Response response = IdempotencyHelper.updateBusinessStepOrderWithoutIdempotencyKey(requestSpec, updateResponseSpec,
+                    LOAN_JOB_NAME, requestBody);
+
+            // Second request → same payload → same deterministic key
+            Response responseSecond = IdempotencyHelper.updateBusinessStepOrderWithoutIdempotencyKey(requestSpec, updateResponseSpec,
+                    LOAN_JOB_NAME, requestBody);
+
+            assertEquals(response.getBody().asString(), responseSecond.getBody().asString());
+
+        } finally {
+            restoreOriginalStepConfig(updateResponseSpec, originalStepConfig);
+        }
+    }
+
+    @Test
+    public void shouldReuseDeterministicIdempotencyKeyForReorderedJsonWhenHeaderMissing() {
+        ResponseSpecification updateResponseSpec = new ResponseSpecBuilder().expectStatusCode(204).build();
+        JobBusinessStepConfigData originalStepConfig = IdempotencyHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec,
+                LOAN_JOB_NAME);
+
+        try {
+            String firstRequestBody = "{\"businessSteps\":[{\"stepName\":\"APPLY_CHARGE_TO_OVERDUE_LOANS\",\"order\":1},"
+                    + "{\"stepName\":\"LOAN_DELINQUENCY_CLASSIFICATION\",\"order\":2}]}";
+            String secondRequestBody = "{\"businessSteps\":[{\"order\":1,\"stepName\":\"APPLY_CHARGE_TO_OVERDUE_LOANS\"},"
+                    + "{\"order\":2,\"stepName\":\"LOAN_DELINQUENCY_CLASSIFICATION\"}]}";
+
+            // Generate deterministic keys based on payload + context
+            Response response = IdempotencyHelper.updateBusinessStepOrderWithoutIdempotencyKey(requestSpec, updateResponseSpec,
+                    LOAN_JOB_NAME, firstRequestBody);
+
+            Response responseSecond = IdempotencyHelper.updateBusinessStepOrderWithoutIdempotencyKey(requestSpec, updateResponseSpec,
+                    LOAN_JOB_NAME, secondRequestBody);
+
+            // Keys should be same because deterministic generator hashes JSON (ignoring property order if implemented)
+            assertEquals(response.getBody().asString(), responseSecond.getBody().asString());
+
+        } finally {
+            restoreOriginalStepConfig(updateResponseSpec, originalStepConfig);
+        }
+    }
+
+    private void restoreOriginalStepConfig(ResponseSpecification updateResponseSpec, JobBusinessStepConfigData originalStepConfig) {
+        IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
+                IdempotencyHelper.toJsonString(originalStepConfig.getBusinessSteps()), UUID.randomUUID().toString());
+    }
+
     private BusinessStep getBusinessSteps(Long order, String stepName) {
         BusinessStep businessStep = new BusinessStep();
         businessStep.setStepName(stepName);

@@ -109,6 +109,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
             CommandSource commandSource = null;
             String idempotencyKey;
+            boolean isDeterministicKey = false;
             if (isRetry) {
                 commandSource = commandSourceService.getCommandSource(commandId);
                 idempotencyKey = commandSource.getIdempotencyKey();
@@ -116,9 +117,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 commandSource = commandSourceService.getCommandSource(commandId);
                 idempotencyKey = commandSource.getIdempotencyKey();
             } else {
-                idempotencyKey = idempotencyKeyResolver.resolve(wrapper);
+                IdempotencyKeyResolver.ResolvedKey resolved = idempotencyKeyResolver.resolveWithMeta(wrapper);
+                idempotencyKey = resolved.key();
+                isDeterministicKey = resolved.isDeterministic();
+                // idempotencyKey = idempotencyKeyResolver.resolve(wrapper);
             }
-            exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry);
+            exceptionWhenTheRequestAlreadyProcessed(wrapper, idempotencyKey, isRetry, isDeterministicKey);
 
             AppUser user = context.authenticatedUser(wrapper);
             if (commandSource == null) {
@@ -218,7 +222,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
     }
 
-    private void exceptionWhenTheRequestAlreadyProcessed(CommandWrapper wrapper, String idempotencyKey, boolean retry) {
+    private void exceptionWhenTheRequestAlreadyProcessed(CommandWrapper wrapper, String idempotencyKey, boolean retry,
+            boolean isDeterministicKey) {
         CommandSource command = commandSourceService.findCommandSource(wrapper, idempotencyKey);
         if (command == null) {
             return;
@@ -234,7 +239,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             }
             case PROCESSED -> throw new IdempotentCommandProcessSucceedException(wrapper, idempotencyKey, command);
             case ERROR -> {
-                if (!retry) {
+                if (!retry && !isDeterministicKey) {
                     throw new IdempotentCommandProcessFailedException(wrapper, idempotencyKey, command);
                 }
             }
