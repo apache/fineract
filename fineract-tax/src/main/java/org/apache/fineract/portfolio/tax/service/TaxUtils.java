@@ -49,8 +49,7 @@ public final class TaxUtils {
                     if (percentage != null) {
                         double percentageVal = percentage.doubleValue();
                         double tax = amountVal * percentageVal / cent_percentage;
-                        map.put(component,
-                                BigDecimal.valueOf(tax).setScale(scale, TemporaryConfigurationServiceContainer.getTaxRoundingMode()));
+                        map.put(component, BigDecimal.valueOf(tax));
                     }
                 }
             }
@@ -83,7 +82,12 @@ public final class TaxUtils {
     public static BigDecimal incomeAmount(final BigDecimal amount, final LocalDate date, final Set<TaxGroupMappings> taxGroupMappings,
             final int scale) {
         Map<TaxComponent, BigDecimal> map = splitTax(amount, date, taxGroupMappings, scale);
-        return incomeAmount(amount, map);
+        Map<TaxComponent, BigDecimal> roundedMap = new HashMap<>();
+        for (Map.Entry<TaxComponent, BigDecimal> entry : map.entrySet()) {
+            roundedMap.put(entry.getKey(), entry.getValue().setScale(scale, TemporaryConfigurationServiceContainer.getTaxRoundingMode()));
+        }
+
+        return incomeAmount(amount, roundedMap);
     }
 
     public static BigDecimal incomeAmount(final BigDecimal amount, final Map<TaxComponent, BigDecimal> map) {
@@ -141,7 +145,14 @@ public final class TaxUtils {
             return new HashMap<>();
         }
         BigDecimal baseAmount = extractBaseAmountFromTaxInclusive(taxInclusiveAmount, date, taxGroupMappings, scale);
-        return splitTax(baseAmount, date, taxGroupMappings, scale);
+        Map<TaxComponent, BigDecimal> rawMap = splitTax(baseAmount, date, taxGroupMappings, scale);
+
+        Map<TaxComponent, BigDecimal> roundedMap = new HashMap<>();
+        for (Map.Entry<TaxComponent, BigDecimal> entry : rawMap.entrySet()) {
+            roundedMap.put(entry.getKey(), entry.getValue().setScale(scale, TemporaryConfigurationServiceContainer.getTaxRoundingMode()));
+        }
+
+        return roundedMap;
     }
 
     private static BigDecimal getTotalPercentage(final LocalDate date, final Iterable<TaxGroupMappings> taxGroupMappings) {

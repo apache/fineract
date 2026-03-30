@@ -45,13 +45,19 @@ public class LoanChargeTaxDetails extends AbstractPersistableCustom<Long> {
     @Column(name = "amount_paid", scale = 6, precision = 19)
     private BigDecimal amountPaid;
 
+    @Column(name = "actual_amount", scale = 6, precision = 19, nullable = false)
+    private BigDecimal actualAmount;
+
     protected LoanChargeTaxDetails() {}
 
-    public LoanChargeTaxDetails(final LoanCharge loanCharge, final TaxComponent taxComponent, final BigDecimal amount) {
+    public LoanChargeTaxDetails(final LoanCharge loanCharge, final TaxComponent taxComponent, final BigDecimal amount,
+            final BigDecimal actualAmount) {
         this.loanCharge = loanCharge;
         this.taxComponent = taxComponent;
         this.amount = amount;
         this.amountPaid = BigDecimal.ZERO;
+        this.actualAmount = actualAmount;
+
     }
 
     public LoanCharge getLoanCharge() {
@@ -76,6 +82,14 @@ public class LoanChargeTaxDetails extends AbstractPersistableCustom<Long> {
 
     public void setAmountPaid(final BigDecimal amountPaid) {
         this.amountPaid = amountPaid;
+    }
+
+    public BigDecimal getActualTaxAmount() {
+        return this.actualAmount;
+    }
+
+    public void setActualTaxAmount(final BigDecimal actualTaxAmount) {
+        this.actualAmount = actualTaxAmount;
     }
 
 }

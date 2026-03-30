@@ -713,7 +713,15 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date, final boolean backdatedTxnsAllowedTill) {
         boolean isTaxAdded = false;
         if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
-            Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(), amount.scale());
+            Map<TaxComponent, BigDecimal> taxSplitRaw = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(),
+                    amount.scale());
+            Map<TaxComponent, BigDecimal> taxSplit = new HashMap<>();
+            taxSplitRaw.forEach((taxComponent, rawTax) -> {
+                if (rawTax != null) {
+                    BigDecimal roundedAmount = rawTax.setScale(amount.scale(), TemporaryConfigurationServiceContainer.getTaxRoundingMode());
+                    taxSplit.put(taxComponent, roundedAmount);
+                }
+            });
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
             if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
@@ -734,6 +742,15 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, withholdTransaction.getTransactionDate(),
                     this.taxGroup.getTaxGroupMappings(), amount.scale());
+            Map<TaxComponent, BigDecimal> roundedTaxSplit = new HashMap<>();
+            for (Map.Entry<TaxComponent, BigDecimal> entry : taxSplit.entrySet()) {
+                BigDecimal rawTax = entry.getValue();
+                if (rawTax != null) {
+                    BigDecimal roundedAmount = rawTax.setScale(amount.scale(), TemporaryConfigurationServiceContainer.getTaxRoundingMode());
+                    roundedTaxSplit.put(entry.getKey(), roundedAmount);
+                }
+            }
+            taxSplit = roundedTaxSplit;
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
             if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 if (withholdTransaction.getId() == null) {

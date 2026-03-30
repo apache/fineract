@@ -135,7 +135,7 @@ public final class LoanChargeTaxUtils {
         if (totalTaxAmount.compareTo(BigDecimal.ZERO) > 0) {
             loanCharge.setTaxAmount(totalTaxAmount);
             loanCharge.setAmountSansTax(amountSansTaxRounded);
-            createTaxDetails(loanCharge, taxSplitRounded);
+            createTaxDetails(loanCharge, taxSplitRounded, taxSplitRaw);
         } else {
             loanCharge.setAmountSansTax(inclusiveRounded);
             loanCharge.setTaxAmount(null);
@@ -155,10 +155,13 @@ public final class LoanChargeTaxUtils {
         loanCharge.getLoanChargeTaxDetails().clear();
     }
 
-    private static void createTaxDetails(final LoanCharge loanCharge, final Map<TaxComponent, BigDecimal> taxSplit) {
+    private static void createTaxDetails(final LoanCharge loanCharge, final Map<TaxComponent, BigDecimal> taxSplit,
+            final Map<TaxComponent, BigDecimal> taxSplitRaw) {
         loanCharge.getLoanChargeTaxDetails().clear();
-        taxSplit.entrySet().stream().filter(entry -> entry.getValue() != null && entry.getValue().compareTo(BigDecimal.ZERO) > 0).forEach(
-                entry -> loanCharge.getLoanChargeTaxDetails().add(new LoanChargeTaxDetails(loanCharge, entry.getKey(), entry.getValue())));
+        taxSplit.entrySet().stream().filter(entry -> entry.getValue() != null && entry.getValue().compareTo(BigDecimal.ZERO) > 0)
+                .forEach(entry -> loanCharge.getLoanChargeTaxDetails()
+                        .add(new LoanChargeTaxDetails(loanCharge, entry.getKey(), entry.getValue(), taxSplitRaw.get(entry.getKey()))));
+
     }
 
 }
