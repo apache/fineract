@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -52,7 +52,7 @@ public class TemplateIntegrationTest {
 
     @Disabled
     @Test
-    public void test() {
+    public void test() throws Exception {
 
         final HashMap<String, String> metadata = new HashMap<>();
         metadata.put("user", "resource_url");
@@ -64,8 +64,8 @@ public class TemplateIntegrationTest {
         ArrayList<?> get = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, "");
         final int entriesBeforeTest = get.size();
 
-        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL, new Gson().toJson(map),
-                "resourceId");
+        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, GET_TEMPLATES_URL,
+                new ObjectMapper().writeValueAsString(map), "resourceId");
 
         final String templateUrlForId = String.format("/fineract-provider/api/v1/templates/%s?tenantIdentifier=default", id);
 

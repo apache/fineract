@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.template.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.annotations.SerializedName;
 
 @JsonSerialize(using = TemplateTypeSerializer.class)
 public enum TemplateType {
 
-    @SerializedName("Document")
-    DOCUMENT(0, "Document"), @SerializedName("SMS")
+    @JsonProperty("Document")
+    DOCUMENT(0, "Document"), @JsonProperty("SMS")
     SMS(2, "SMS");
 
     /**

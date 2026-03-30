@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.template.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -90,14 +90,20 @@ public class Template extends AbstractPersistableCustom<Long> {
             break;
         }
 
-        final JsonArray array = command.arrayOfParameterNamed("mappers");
-
         final List<TemplateMapper> mappersList = new ArrayList<>();
 
-        for (final JsonElement element : array) {
-            mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(),
-                    element.getAsJsonObject().get("mapperskey").getAsString(),
-                    element.getAsJsonObject().get("mappersvalue").getAsString()));
+        try {
+            final ObjectMapper objectMapper = new ObjectMapper();
+            final JsonNode rootNode = objectMapper.readTree(command.json());
+            final JsonNode mappersNode = rootNode.get("mappers");
+            if (mappersNode != null && mappersNode.isArray()) {
+                for (final JsonNode element : mappersNode) {
+                    mappersList.add(new TemplateMapper(element.get("mappersorder").asInt(), element.get("mapperskey").asText(),
+                            element.get("mappersvalue").asText()));
+                }
+            }
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to parse template mappers from JSON", e);
         }
 
         return new Template(name, text, entity, type, mappersList);

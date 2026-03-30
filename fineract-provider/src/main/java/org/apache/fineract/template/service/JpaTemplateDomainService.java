@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.template.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -94,14 +94,21 @@ public class JpaTemplateDomainService implements TemplateDomainService {
         }
         template.setType(type);
 
-        final JsonArray array = command.arrayOfParameterNamed("mappers");
-        final List<TemplateMapper> mappersList = new ArrayList<>();
-        for (final JsonElement element : array) {
-            mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(),
-                    element.getAsJsonObject().get("mapperskey").getAsString(),
-                    element.getAsJsonObject().get("mappersvalue").getAsString()));
+        try {
+            final ObjectMapper objectMapper = new ObjectMapper();
+            final JsonNode rootNode = objectMapper.readTree(command.json());
+            final JsonNode mappersNode = rootNode.get("mappers");
+            final List<TemplateMapper> mappersList = new ArrayList<>();
+            if (mappersNode != null && mappersNode.isArray()) {
+                for (final JsonNode element : mappersNode) {
+                    mappersList.add(new TemplateMapper(element.get("mappersorder").asInt(), element.get("mapperskey").asText(),
+                            element.get("mappersvalue").asText()));
+                }
+            }
+            template.setMappers(mappersList);
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to parse template mappers from JSON", e);
         }
-        template.setMappers(mappersList);
 
         this.templateRepository.saveAndFlush(template);
 

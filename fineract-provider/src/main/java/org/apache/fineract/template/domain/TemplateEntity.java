@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.template.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.gson.annotations.SerializedName;
 
 @JsonSerialize(using = TemplateEntitySerializer.class)
 public enum TemplateEntity {
 
-    @SerializedName("client")
-    CLIENT(0, "client"), @SerializedName("loan")
+    @JsonProperty("client")
+    CLIENT(0, "client"), @JsonProperty("loan")
     LOAN(1, "loan");
 
     private final int id;

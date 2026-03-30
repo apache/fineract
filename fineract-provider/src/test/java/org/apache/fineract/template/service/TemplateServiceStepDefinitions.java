@@ -20,13 +20,10 @@ package org.apache.fineract.template.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java8.En;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,10 +72,8 @@ public class TemplateServiceStepDefinitions implements En {
         return tms.compile(template, scope);
     }
 
-    private Map<String, Object> parse(String data) {
-        Gson gson = new Gson();
-        Type ssMap = new TypeToken<Map<String, Object>>() {}.getType();
-        JsonElement json = JsonParser.parseString(data);
-        return gson.fromJson(json, ssMap);
+    private Map<String, Object> parse(String data) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {});
     }
 }
