@@ -599,7 +599,9 @@ public final class ChargesHelper {
     @Deprecated(forRemoval = true)
     public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String request) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");
+        ChargeRequest chargeRequest = GSON.fromJson(request, ChargeRequest.class);
+        PostChargesResponse response = Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(chargeRequest));
+        return response.getResourceId().intValue();
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -608,8 +610,10 @@ public final class ChargesHelper {
     @Deprecated(forRemoval = true)
     public static PostChargesResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String payload) {
-        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload, null);
-        return GSON.fromJson(response, PostChargesResponse.class);
+
+        ChargeRequest chargeRequest = GSON.fromJson(payload, ChargeRequest.class);
+
+        return Calls.ok(FineractClientHelper.getFineractClient().charges().createCharge(chargeRequest));
     }
 
     // TODO: Rewrite to use fineract-client instead!

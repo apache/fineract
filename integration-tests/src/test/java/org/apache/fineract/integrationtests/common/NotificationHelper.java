@@ -26,6 +26,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetNotificationsResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 
 @Slf4j
@@ -42,10 +43,10 @@ public final class NotificationHelper {
     @Deprecated(forRemoval = true)
     public static GetNotificationsResponse getNotifications(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String GET_NOTIFICATIONS_URL = NOTIFICATION_API_URL;
+
         log.info("-----------------------------GET NOTIFICATIONS-----------------------------------");
-        String response = Utils.performServerGet(requestSpec, responseSpec, GET_NOTIFICATIONS_URL);
-        return GSON.fromJson(response, GetNotificationsResponse.class);
+
+        return Calls.ok(() -> FineractClientHelper.getFineractClient().notifications().getAllNotifications(null, 1, 0, null, null));
     }
 
     // TODO: Rewrite to use fineract-client instead!
