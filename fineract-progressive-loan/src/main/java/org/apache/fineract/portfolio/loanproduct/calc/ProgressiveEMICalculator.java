@@ -1280,12 +1280,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
     }
 
     private boolean isPeriodContainsFeb29(final LocalDate repaymentPeriodFromDate, final LocalDate repaymentPeriodDueDate) {
-        if (repaymentPeriodFromDate.isLeapYear()) {
-            final LocalDate leapDay = LocalDate.of(repaymentPeriodFromDate.getYear(), 2, 29);
-            return DateUtils.isDateInRangeFromExclusiveToInclusive(leapDay, repaymentPeriodFromDate, repaymentPeriodDueDate);
-        } else {
-            return false;
+        for (int year = repaymentPeriodFromDate.getYear(); year <= repaymentPeriodDueDate.getYear(); year++) {
+            if (Year.isLeap(year)) {
+                final LocalDate leapDay = LocalDate.of(year, 2, 29);
+                if (DateUtils.isDateInRangeFromExclusiveToInclusive(leapDay, repaymentPeriodFromDate, repaymentPeriodDueDate)) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private Integer numberOfDaysFeb29PeriodOnly(final LocalDate repaymentPeriodFromDate, final LocalDate repaymentPeriodDueDate) {
