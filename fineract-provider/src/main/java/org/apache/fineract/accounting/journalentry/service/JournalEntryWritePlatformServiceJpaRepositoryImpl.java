@@ -337,13 +337,19 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         // is the transaction Id valid
         final List<JournalEntry> journalEntries = this.glJournalEntryRepository
                 .findUnReversedManualJournalEntriesByTransactionId(command.getTransactionId());
-        String reversalComment = command.stringValueOfParameterNamed("comments");
 
         if (journalEntries.size() <= 1) {
             throw new JournalEntriesNotFoundException(command.getTransactionId());
         }
-        final String reversalTransactionId = revertJournalEntry(journalEntries, reversalComment);
-        return new CommandProcessingResultBuilder().withTransactionId(reversalTransactionId).build();
+
+        // For manual journal entries, simply mark all entries in the transaction as reversed.
+        // No new offsetting entries should be created — this is not a transaction adjustment.
+        for (final JournalEntry journalEntry : journalEntries) {
+            journalEntry.setReversed(true);
+            helper.persistJournalEntry(journalEntry);
+        }
+
+        return new CommandProcessingResultBuilder().withTransactionId(command.getTransactionId()).build();
     }
 
     @Override
