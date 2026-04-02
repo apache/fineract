@@ -34,4 +34,10 @@ gradleExp/
 .run/
 .java-version
 
-.windsurf/
+.windsurf/allure-report*/
+allure-results*/
+*.log
+*.txt
+ci-logs*/
+e2e_jobs.json
+runs_*.txt

@@ -655,4 +655,15 @@ public class FixedDepositAccountHelper {
                 .getResourceId();
     }
 
+    public Long adjustFixedDepositTransaction(final Integer fixedDepositAccountId, final Integer transactionId,
+            final String transactionDate, final Double transactionAmount) {
+        LOG.info("--------------------------------- ADJUST FIXED DEPOSIT TRANSACTION --------------------------------");
+        final org.apache.fineract.client.models.PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest request = new org.apache.fineract.client.models.PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest()
+                .dateFormat("dd MMMM yyyy").locale("en").transactionDate(transactionDate).transactionAmount(transactionAmount);
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().fixedDepositAccountTransactions
+                        .adjustTransaction(fixedDepositAccountId.longValue(), transactionId.longValue(), request, "modify"))
+                .getResourceId();
+    }
+
 }

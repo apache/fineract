@@ -2629,6 +2629,17 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder adjustFixedDepositAccountTransaction(final Long accountId, final Long transactionId) {
+        this.actionName = "ADJUSTTRANSACTION";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.subentityId = transactionId;
+        this.transactionId = transactionId.toString();
+        this.href = "/fixeddepositaccounts/" + accountId + "/transactions/" + transactionId + "?command=modify";
+        return this;
+    }
+
     public CommandWrapperBuilder fixedDepositAccountActivation(final Long accountId) {
         this.actionName = ACTION_ACTIVATE;
         this.entityName = ENTITY_FIXEDDEPOSITACCOUNT;

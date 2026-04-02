@@ -3071,6 +3071,112 @@ public class FixedDepositTest extends IntegrationTest {
                 new JournalEntry[] { new JournalEntry(totalInterestPostedBeforeUndo, JournalEntry.TransactionType.DEBIT) });
     }
 
+    @Test
+    public void testFixedDepositAccountAdjustTransaction() {
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(clientId);
+
+        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, CASH_BASED, assetAccount, liabilityAccount,
+                incomeAccount, expenseAccount);
+        Assertions.assertNotNull(fixedDepositProductId);
+
+        Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
+                SUBMITTED_ON_DATE, WHOLE_TERM);
+        Assertions.assertNotNull(fixedDepositAccountId);
+
+        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
+                this.responseSpec, fixedDepositAccountId.toString());
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
+
+        fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
+
+        fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
+
+        // Find the deposit transaction created on activation
+        List<GetFixedDepositAccountsAccountIdTransactionsResponse> transactions = this.fixedDepositAccountHelper
+                .getFixedDepositTransactions(fixedDepositAccountId);
+        Assertions.assertNotNull(transactions);
+        Integer depositTransactionId = null;
+        for (GetFixedDepositAccountsAccountIdTransactionsResponse txn : transactions) {
+            if (txn.getTransactionType() != null && Boolean.TRUE.equals(txn.getTransactionType().getDeposit())) {
+                depositTransactionId = txn.getId() == null ? null : txn.getId().intValue();
+                break;
+            }
+        }
+        Assertions.assertNotNull(depositTransactionId);
+
+        // Capture deposit amount before adjust for journal entry assertions
+        HashMap accountSummaryBeforeAdjust = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
+        Float totalDepositsBeforeAdjust = (Float) accountSummaryBeforeAdjust.get("totalDeposits");
+        Assertions.assertNotNull(totalDepositsBeforeAdjust);
+        Assertions.assertTrue(totalDepositsBeforeAdjust > 0f, "Expected totalDeposits > 0 before adjust");
+
+        // Verify original deposit journal entries exist
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE,
+                new JournalEntry[] { new JournalEntry(totalDepositsBeforeAdjust, JournalEntry.TransactionType.DEBIT) });
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE,
+                new JournalEntry[] { new JournalEntry(totalDepositsBeforeAdjust, JournalEntry.TransactionType.CREDIT) });
+
+        // Adjust the deposit to a new amount
+        final double NEW_DEPOSIT_AMOUNT = 200000.0;
+        Long adjustResult = this.fixedDepositAccountHelper.adjustFixedDepositTransaction(fixedDepositAccountId, depositTransactionId,
+                ACTIVATION_DATE, NEW_DEPOSIT_AMOUNT);
+        Assertions.assertNotNull(adjustResult);
+
+        // 1. Verify original deposit transaction is marked reversed
+        List<GetFixedDepositAccountsAccountIdTransactionsResponse> transactionsAfterAdjust = this.fixedDepositAccountHelper
+                .getFixedDepositTransactions(fixedDepositAccountId);
+        boolean foundReversed = false;
+        for (GetFixedDepositAccountsAccountIdTransactionsResponse txn : transactionsAfterAdjust) {
+            if (txn.getId() != null && txn.getId().intValue() == depositTransactionId) {
+                Assertions.assertTrue(Boolean.TRUE.equals(txn.getReversed()),
+                        "Original deposit transaction must be marked reversed after adjust");
+                foundReversed = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(foundReversed, "Original deposit transaction must still be present after adjust");
+
+        // 2. Verify new deposit amount is reflected in account summary
+        HashMap accountSummaryAfterAdjust = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
+        Float totalDepositsAfterAdjust = (Float) accountSummaryAfterAdjust.get("totalDeposits");
+        Assertions.assertNotNull(totalDepositsAfterAdjust);
+        Assertions.assertEquals((float) NEW_DEPOSIT_AMOUNT, totalDepositsAfterAdjust, 0.01f,
+                "totalDeposits must reflect new amount after adjust");
+
+        // 3. Verify reversal journal entries (opposite of original) and new deposit entries
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE,
+                new JournalEntry[] { new JournalEntry(totalDepositsBeforeAdjust, JournalEntry.TransactionType.CREDIT) });
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE,
+                new JournalEntry[] { new JournalEntry(totalDepositsBeforeAdjust, JournalEntry.TransactionType.DEBIT) });
+    }
+
     @AfterEach
     public void tearDown() {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
