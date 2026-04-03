@@ -36,4 +36,7 @@ dependencies {
             )
 
     testImplementation 'org.assertj:assertj-core'
+    testImplementation 'com.github.tomakehurst:wiremock-jre8-standalone:2.35.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
