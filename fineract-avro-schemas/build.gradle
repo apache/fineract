@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
-
 // TODO: @vidakovic we should publish this lib to Maven Central; do in separate PR
 description = 'Fineract Avro Schemas'
 
-apply plugin: 'com.github.davidmc24.gradle.plugin.avro-base'
+apply plugin: 'eu.eventloopsoftware.avro-gradle-plugin'
 
 apply from: 'dependencies.gradle'
 
@@ -41,7 +39,7 @@ abstract class PreprocessAvroSchemasTask extends DefaultTask {
         def template = getBigDecimalTemplate().get().asFile.getText("UTF-8")
         def input = getInputDir().get().asFile
         def output = getOutputDir().get().asFile
-        
+
         input.eachFileRecurse { file ->
             if (file.isFile()) {
                 def relativePath = input.toPath().relativize(file.toPath())
@@ -59,10 +57,11 @@ tasks.register('preprocessAvroSchemas', PreprocessAvroSchemasTask) {
     outputDir = file("$buildDir/generated/avro/src/main/avro")
 }
 
-task buildJavaSdk(type: GenerateAvroJavaTask) {
-    source("$buildDir/generated/avro/src/main/avro")
-    outputDir = file("$buildDir/generated/java/src/main/java")
+avro {
+    sourceDirectory = "$buildDir/generated/avro/src/main/avro"
+    outputDirectory = "$buildDir/generated/java/src/main/java"
     templateDirectory = "$projectDir/src/main/resources/avro-generator-templates/"
+    enableDecimalLogicalType = true
 }
 
 spotless {
@@ -73,7 +72,13 @@ spotless {
     }
 }
 
-buildJavaSdk.dependsOn(preprocessAvroSchemas, spotlessJsonApply)
+tasks.named('avroGenerateJavaClasses') {
+    dependsOn tasks.named('preprocessAvroSchemas'), tasks.named('spotlessJsonApply')
+}
+
+def buildJavaSdk = tasks.register('buildJavaSdk') {
+    dependsOn tasks.named('avroGenerateJavaClasses')
+}
 
 sourceSets {
     main {

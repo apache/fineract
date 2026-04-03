@@ -128,7 +128,7 @@ plugins {
     id 'com.github.andygoossens.modernizer' version '1.10.0' apply false
     id 'com.github.spotbugs' version '6.0.26' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
-    id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
+    id "eu.eventloopsoftware.avro-gradle-plugin" version "0.1.2" apply false
     id 'org.openapi.generator' version '7.8.0' apply false
     id 'com.gradleup.shadow' version '9.3.2' apply false
     id 'me.champeau.jmh' version '0.7.1' apply false
