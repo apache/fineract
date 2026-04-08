@@ -18,23 +18,32 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.ClientHelper.CREATE_CLIENT_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PutClientsClientIdRequest;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ClientApiTest {
+
+    private static final Gson GSON = new JSON().getGson();
+    private static final String CLIENT_URL = "/fineract-provider/api/v1/clients";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -74,5 +83,30 @@ public class ClientApiTest {
         assertEquals(firstName, client.getFirstname());
         assertEquals(lastName, client.getLastname());
         assertEquals(externalId, client.getExternalId());
+    }
+
+    @Test
+    public void testUpdateClient() {
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, ClientHelper.defaultClientCreationRequest());
+        assertNotNull(clientId);
+
+        String newFirstName = "UpdatedFirstName";
+        String newLastName = "UpdatedLastName";
+
+        PutClientsClientIdRequest updateRequest = new PutClientsClientIdRequest()
+                .firstname(newFirstName)
+                .lastname(newLastName)
+                .dateFormat(Utils.DATE_FORMAT)
+                .locale("en");
+
+        String updateUrl = CLIENT_URL + "/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
+        String jsonResponse = Utils.performServerPut(requestSpec, responseSpec, updateUrl, GSON.toJson(updateRequest));
+
+        Map<String, Object> response = GSON.fromJson(jsonResponse, new TypeToken<Map<String, Object>>() {}.getType());
+        assertEquals(clientId, response.get("resourceId"));
+
+        GetClientsClientIdResponse updatedClient = ClientHelper.getClient(requestSpec, responseSpec, clientId);
+        assertEquals(newFirstName, updatedClient.getFirstname());
+        assertEquals(newLastName, updatedClient.getLastname());
     }
 }
