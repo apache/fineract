@@ -1,0 +1,17 @@
+= Two-factor authentication
+
+You can enable 2FA authentication. Depending on how you start Fineract add the following:
+
+. Use environment variables (best choice if you run with Docker Compose):
++
+[source,bash]
+----
+FINERACT_SECURITY_2FA_ENABLED=true
+----
+
+. Use JVM parameter (best choice if you run the Spring Boot JAR):
++
+[source,bash]
+----
+java -Dfineract.security.2fa.enabled=true -jar fineract-provider.jar
+----

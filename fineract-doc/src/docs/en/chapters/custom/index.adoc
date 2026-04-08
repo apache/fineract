@@ -1,6 +1,6 @@
 = Custom Modules
 
-NOTE: Currently modules are a proof of concept feature in Fineract.
+NOTE: Currently, modules are a proof of concept feature in Fineract.
 
 include::intro.adoc[leveloffset=+1]
 

@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
@@ -62,7 +62,7 @@ public final class EmailMessageJobEmailServiceImpl implements EmailMessageJobEma
             mimeMessageHelper.setText(emailMessageWithAttachmentData.getText(), true);
             mimeMessageHelper.setSubject(emailMessageWithAttachmentData.getSubject());
             final List<File> attachments = emailMessageWithAttachmentData.getAttachments();
-            if (attachments != null && attachments.size() > 0) {
+            if (attachments != null && !attachments.isEmpty()) {
                 for (final File attachment : attachments) {
                     if (attachment != null) {
                         mimeMessageHelper.addAttachment(attachment.getName(), attachment);

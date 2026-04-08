@@ -41,4 +41,14 @@ public class LoanDTO {
     private final boolean periodicAccrualBasedAccountingEnabled;
     @Setter
     private List<LoanTransactionDTO> newLoanTransactions;
+    @Setter
+    private boolean markedAsChargeOff;
+    @Setter
+    private boolean markedAsFraud;
+    private Long chargeOffReasonCodeValue;
+    private boolean markedAsWrittenOff;
+    private boolean merchantBuyDownFee;
+    private List<AdvancedMappingtDTO> buydownFeeAdvancedMappingData;
+    private List<AdvancedMappingtDTO> capitalizedIncomeAdvancedMappingData;
+    private AdvancedMappingtDTO writeOffReasonAdvancedMappingData;
 }

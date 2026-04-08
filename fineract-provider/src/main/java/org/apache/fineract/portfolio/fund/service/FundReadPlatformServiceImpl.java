@@ -20,28 +20,21 @@ package org.apache.fineract.portfolio.fund.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-
-    @Autowired
-    public FundReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class FundMapper implements RowMapper<FundData> {
 
@@ -62,7 +55,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 
     @Override
     @Cacheable(value = "funds", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
-    public Collection<FundData> retrieveAllFunds() {
+    public List<FundData> retrieveAllFunds() {
 
         this.context.authenticatedUser();
 

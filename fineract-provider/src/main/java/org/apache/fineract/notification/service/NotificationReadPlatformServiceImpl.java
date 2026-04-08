@@ -35,9 +35,7 @@ import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.data.NotificationMapperData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class NotificationReadPlatformServiceImpl implements NotificationReadPlatformService {
 
@@ -137,18 +135,18 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append(sql);
 
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-            if (searchParameters.isSortOrderProvided()) {
+            if (searchParameters.hasSortOrder()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));

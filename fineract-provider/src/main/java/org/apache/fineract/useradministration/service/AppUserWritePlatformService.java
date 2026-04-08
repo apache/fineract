@@ -25,6 +25,8 @@ public interface AppUserWritePlatformService {
 
     CommandProcessingResult createUser(JsonCommand command);
 
+    CommandProcessingResult changeUserPassword(Long userId, JsonCommand command);
+
     CommandProcessingResult updateUser(Long userId, JsonCommand command);
 
     CommandProcessingResult deleteUser(Long userId);

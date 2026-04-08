@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+
+title Command Processing Architecture (Level 2) - Dispatcher
+
+' left to right direction
+
+System_Boundary(dispatcherSystem, "Command Dispatcher") {
+    Container(dispatcherInterface, "Command Dispatcher (Interface)", "Interface", "Contract for command dispatching")
+    Container(dispatcherSync, "Synchronous Dispatcher", "Mediator Pattern", "Synchronous command execution")
+    Container(dispatcherAsync, "Asynchronous Dispatcher", "Mediator Pattern", "Asynchronous command execution")
+    Container(dispatcherNonBlocking, "Non-blocking Dispatcher", "Mediator Pattern", "Non-blocking command execution")
+    Container(dispatcherChronicle, "Chronicle Queue Dispatcher", "Mediator Pattern", "Command execution using high performance Chronicle Queue")
+}
+
+Rel(dispatcherSync, dispatcherInterface, "implements")
+Rel(dispatcherAsync, dispatcherInterface, "implements")
+Rel(dispatcherNonBlocking, dispatcherInterface, "implements")
+Rel(dispatcherChronicle, dispatcherInterface, "implements")
+
+@enduml

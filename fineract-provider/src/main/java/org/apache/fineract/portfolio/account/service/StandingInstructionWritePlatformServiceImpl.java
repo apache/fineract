@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
@@ -44,11 +45,9 @@ import org.apache.fineract.portfolio.account.exception.StandingInstructionNotFou
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class StandingInstructionWritePlatformServiceImpl implements StandingInstructionWritePlatformService {
 
@@ -94,34 +93,34 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
-        final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder().withEntityId(standingInstructionId)
+        final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //
+                .withEntityId(standingInstructionId) //
                 .withClientId(fromClientId);
         return builder.build();
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, Throwable realCause, final NonTransientDataAccessException dve) {
-
         if (realCause.getMessage().contains("name")) {
             final String name = command.stringValueOfParameterNamed(StandingInstructionApiConstants.nameParamName);
             throw new PlatformDataIntegrityException("error.msg.standinginstruction.duplicate.name",
                     "Standinginstruction with name `" + name + "` already exists", "name", name);
         }
         log.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        throw ErrorHandler.getMappable(dve, "error.msg.client.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
     private boolean isLoanToSavingsAccountTransfer(final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType) {
-        return fromAccountType.isLoanAccount() && toAccountType.isSavingsAccount();
+        return PortfolioAccountType.LOAN.equals(fromAccountType) && PortfolioAccountType.SAVINGS.equals(toAccountType);
     }
 
     private boolean isSavingsToLoanAccountTransfer(final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType) {
-        return fromAccountType.isSavingsAccount() && toAccountType.isLoanAccount();
+        return PortfolioAccountType.SAVINGS.equals(fromAccountType) && PortfolioAccountType.LOAN.equals(toAccountType);
     }
 
     private boolean isSavingsToSavingsAccountTransfer(final PortfolioAccountType fromAccountType,
             final PortfolioAccountType toAccountType) {
-        return fromAccountType.isSavingsAccount() && toAccountType.isSavingsAccount();
+        return PortfolioAccountType.SAVINGS.equals(fromAccountType) && PortfolioAccountType.SAVINGS.equals(toAccountType);
     }
 
     @Override
@@ -130,7 +129,11 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id)
                 .orElseThrow(() -> new StandingInstructionNotFoundException(id));
         final Map<String, Object> actualChanges = standingInstructionsForUpdate.update(command);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(id).with(actualChanges).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(id) //
+                .with(actualChanges) //
+                .build();
     }
 
     @Override
@@ -142,6 +145,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
         final Map<String, Object> actualChanges = new HashMap<>();
         actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
-        return new CommandProcessingResultBuilder().withEntityId(id).with(actualChanges).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(id) //
+                .with(actualChanges) //
+                .build();
     }
 }

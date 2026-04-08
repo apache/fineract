@@ -31,8 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.WorkingDaysHelper;
@@ -46,7 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoanRescheduleWithAdvancePaymentTest {
+public class LoanRescheduleWithAdvancePaymentTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleWithAdvancePaymentTest.class);
     private ResponseSpecification responseSpec;
@@ -84,28 +85,36 @@ public class LoanRescheduleWithAdvancePaymentTest {
      * enables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void enableConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
+        globalConfigurationHelper.updateGlobalConfiguration(
+                GlobalConfigurationConstants.IS_INTEREST_TO_BE_RECOVERED_FIRST_WHEN_GREATER_THAN_EMI,
+                new PutGlobalConfigurationsRequest().enabled(true));
     }
 
     /**
      * disables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void disableConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", false);
+        globalConfigurationHelper.updateGlobalConfiguration(
+                GlobalConfigurationConstants.IS_INTEREST_TO_BE_RECOVERED_FIRST_WHEN_GREATER_THAN_EMI,
+                new PutGlobalConfigurationsRequest().enabled(false));
     }
 
     /**
      * enables the configuration `is-principal-compounding-disabled-for-overdue-loans`
      **/
     private void enablePrincipalCompoundingConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", true);
+        globalConfigurationHelper.updateGlobalConfiguration(
+                GlobalConfigurationConstants.IS_PRINCIPAL_COMPOUNDING_DISABLED_FOR_OVERDUE_LOANS,
+                new PutGlobalConfigurationsRequest().enabled(true));
     }
 
     /**
      * disables the configuration `is-principal-compounding-disabled-for-overdue-loans`
      **/
     private void disablePrincipalCompoundingConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", false);
+        globalConfigurationHelper.updateGlobalConfiguration(
+                GlobalConfigurationConstants.IS_PRINCIPAL_COMPOUNDING_DISABLED_FOR_OVERDUE_LOANS,
+                new PutGlobalConfigurationsRequest().enabled(false));
     }
 
     /**

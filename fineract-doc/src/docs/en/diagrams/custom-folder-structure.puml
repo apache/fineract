@@ -32,7 +32,7 @@
     +++++++++ AcmeNoteAutoConfiguration.java
     +++++ resources
     ++++++ META-INF
-    +++++++ spring.factories
+    +++++++ spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
     +++++ build.gradle
     +++++ dependencies.gradle
     }

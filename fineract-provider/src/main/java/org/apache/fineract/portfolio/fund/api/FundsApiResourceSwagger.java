@@ -27,33 +27,13 @@ final class FundsApiResourceSwagger {
 
     private FundsApiResourceSwagger() {}
 
-    @Schema(description = "GetFundsResponse")
-    public static final class GetFundsResponse {
-
-        private GetFundsResponse() {}
-
-        @Schema(example = "1")
-        public Integer id;
-        @Schema(example = "EU Agri Fund")
-        public String name;
-    }
-
-    @Schema(description = "PostFundsRequest")
-    public static final class PostFundsRequest {
-
-        private PostFundsRequest() {}
-
-        @Schema(example = "EU Agri Fund")
-        public String name;
-    }
-
     @Schema(description = "PostFundsResponse")
     public static final class PostFundsResponse {
 
         private PostFundsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutFundsFundIdRequest")
@@ -63,6 +43,7 @@ final class FundsApiResourceSwagger {
 
         @Schema(example = "EU Agri Fund (2010-2020)")
         public String name;
+        private String externalId;
     }
 
     @Schema(description = "PutFundsFundIdResponse")
@@ -71,7 +52,7 @@ final class FundsApiResourceSwagger {
         private PutFundsFundIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutFundsFundIdRequest changes;
     }
 }

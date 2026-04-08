@@ -25,12 +25,17 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableKeywordGenerator;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadServiceImpl;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableUtil;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableWriteService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableWriteServiceImpl;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
-import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
-import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataServiceImpl;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,15 +47,27 @@ public class DataQueriesAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ReadWriteNonCoreDataService readWriteNonCoreDataService(final JdbcTemplate jdbcTemplate,
-            final DatabaseTypeResolver databaseTypeResolver, final DatabaseSpecificSQLGenerator sqlGenerator,
-            final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper, final GenericDataService genericDataService,
-            final DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ConfigurationDomainService configurationDomainService, final CodeReadPlatformService codeReadPlatformService,
-            final DataTableValidator dataTableValidator, final ColumnValidator columnValidator,
-            final NamedParameterJdbcTemplate namedParameterJdbcTemplate, final SqlInjectionPreventerService preventSqlInjectionService) {
-        return new ReadWriteNonCoreDataServiceImpl(jdbcTemplate, databaseTypeResolver, sqlGenerator, context, fromJsonHelper,
-                genericDataService, fromApiJsonDeserializer, configurationDomainService, codeReadPlatformService, dataTableValidator,
-                columnValidator, namedParameterJdbcTemplate, preventSqlInjectionService);
+    public DatatableReadService datatableReadService(final JdbcTemplate jdbcTemplate, final DatabaseSpecificSQLGenerator sqlGenerator,
+            final PlatformSecurityContext context, final GenericDataService genericDataService, final DataTableValidator dataTableValidator,
+            final SqlValidator sqlValidator, final SearchUtil searchUtil, final DatatableUtil datatableUtil) {
+        return new DatatableReadServiceImpl(jdbcTemplate, sqlGenerator, context, genericDataService, dataTableValidator, sqlValidator,
+                searchUtil, datatableUtil);
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DatatableWriteService datatableWriteService(final JdbcTemplate jdbcTemplate, final DatabaseTypeResolver databaseTypeResolver,
+            final DatabaseSpecificSQLGenerator sqlGenerator, final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
+            final GenericDataService genericDataService, final DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final ConfigurationDomainService configurationDomainService, final CodeReadPlatformService codeReadPlatformService,
+            final DataTableValidator dataTableValidator, final NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            final DatatableKeywordGenerator datatableKeywordGenerator, final SearchUtil searchUtil,
+            final BusinessEventNotifierService businessEventNotifierService, final DatatableReadService datatableReadService,
+            final DatatableUtil datatableUtil) {
+        return new DatatableWriteServiceImpl(jdbcTemplate, databaseTypeResolver, sqlGenerator, context, fromJsonHelper, genericDataService,
+                fromApiJsonDeserializer, configurationDomainService, codeReadPlatformService, dataTableValidator,
+                namedParameterJdbcTemplate, datatableKeywordGenerator, searchUtil, businessEventNotifierService, datatableReadService,
+                datatableUtil);
+    }
+
 }

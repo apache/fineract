@@ -83,12 +83,13 @@ public class BusinessConfigurationApiTest {
 
     @Test
     public void shouldUpdateStepOrder() {
+        ResponseSpecification updateResponseSpec = new ResponseSpecBuilder().expectStatusCode(204).build();
         JobBusinessStepConfigData originalStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec,
                 responseSpec, LOAN_JOB_NAME);
 
         List<BusinessStep> requestBody = new ArrayList<>();
         requestBody.add(getBusinessSteps(1L, APPLY_CHARGE_TO_OVERDUE_LOANS));
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 BusinessStepConfigurationHelper.toJsonString(requestBody));
 
         JobBusinessStepConfigData newStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec,
@@ -100,7 +101,7 @@ public class BusinessConfigurationApiTest {
 
         requestBody.add(getBusinessSteps(2L, LOAN_DELINQUENCY_CLASSIFICATION));
 
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 BusinessStepConfigurationHelper.toJsonString(requestBody));
         newStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
@@ -112,7 +113,7 @@ public class BusinessConfigurationApiTest {
         assertEquals(2L, loanDelinquencyStep.getOrder());
 
         requestBody.remove(1);
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 BusinessStepConfigurationHelper.toJsonString(requestBody));
 
         newStepConfig = BusinessStepConfigurationHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, LOAN_JOB_NAME);
@@ -121,7 +122,7 @@ public class BusinessConfigurationApiTest {
         assertEquals(1, newStepConfig.getBusinessSteps().size());
         assertEquals(1L, applyChargeStep.getOrder());
 
-        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        BusinessStepConfigurationHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 BusinessStepConfigurationHelper.toJsonString(originalStepConfig.getBusinessSteps()));
     }
 

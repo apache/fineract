@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
-import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -52,7 +54,7 @@ public class UpdateDatatableEntryOneToOneCommandStrategy implements CommandStrat
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
+        final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrlWithoutVersion(request));
         // Pluck out the datatable name, entity id & datatable entry id out of the relative path
         final String datatableName = pathParameters.get(1);
         final Long entityId = Long.parseLong(pathParameters.get(2));

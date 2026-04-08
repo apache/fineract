@@ -29,7 +29,7 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -92,7 +92,11 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             final Map<String, Object> changes = new LinkedHashMap<>();
             changes.put("restrictedProductsForMix", restrictedProductsAsMap.keySet());
             changes.put("removedProductsForMix", removedRestrictions);
-            return new CommandProcessingResultBuilder().withProductId(productId).with(changes).withCommandId(command.commandId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withProductId(productId) //
+                    .with(changes) //
+                    .withCommandId(command.commandId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
 
             handleDataIntegrityIssues(dve);
@@ -147,7 +151,10 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
                 final List<Long> removedRestrictedProductIds = this.productMixRepository.findRestrictedProductIdsByProductId(productId);
                 this.productMixRepository.deleteAll(existedProductMixes);
                 changes.put("removedProductsForMix", removedRestrictedProductIds);
-                return new CommandProcessingResultBuilder().with(changes).withProductId(productId).withCommandId(command.commandId())
+                return new CommandProcessingResultBuilder() //
+                        .with(changes) //
+                        .withProductId(productId) //
+                        .withCommandId(command.commandId()) //
                         .build();
             }
 
@@ -166,7 +173,11 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
                 this.productMixRepository.deleteAll(productMixesToRemove);
                 changes.put("removedProductsForMix", getProductIdsFromCollection(productMixesToRemove));
             }
-            return new CommandProcessingResultBuilder().with(changes).withProductId(productId).withCommandId(command.commandId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .with(changes) //
+                    .withProductId(productId) //
+                    .withCommandId(command.commandId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
 
             handleDataIntegrityIssues(dve);
@@ -192,7 +203,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
     private void handleDataIntegrityIssues(final NonTransientDataAccessException dve) {
         LOG.error("Error occurred.", dve);
-        throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.product.loan.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 
@@ -223,7 +234,10 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             }
             this.productMixRepository.deleteAll(existedProductMixes);
             changes.put("removedProductsForMix", getProductIdsFromCollection(existedProductMixes));
-            return new CommandProcessingResultBuilder().with(changes).withProductId(productId).build();
+            return new CommandProcessingResultBuilder() //
+                    .with(changes) //
+                    .withProductId(productId) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();

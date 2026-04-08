@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Container>
+
+title Command Processing Architecture (Level 2) - Hooks
+
+'left to right direction
+
+System_Boundary(commandSystem, "Command Processing") {
+    Container(hookManager, "Command Hook Manager", "Registry Patterns", "Maps hooks to handler lifecycle (before/after/error)")
+    Container(beforeHooks, "Command Before Hooks", "Multiple Instances", "Called before handler is executed")
+    Container(afterHooks, "Command After Hooks", "Multiple Instances", "Called after handler is executed")
+    Container(errorHooks, "Command Error Hooks", "Multiple Instances", "Called on handler error")
+    Container(headerHook, "Servlet Header Hook", "Interceptor Pattern", "Extracts HTTP headers")
+    Container(timestampHook, "Timestamp Hook", "Interceptor Pattern", "Applies current timestamp")
+    Container(usernameHook, "User name Hook", "Interceptor Pattern", "Get current user name via Spring Security")
+    Container(auditBeforeHook, "Audit Before Hook", "Interceptor Pattern", "Audit before")
+    Container(auditAfterHook, "Audit After Hook", "Interceptor Pattern", "Audit after")
+    Container(auditErrorHook, "Audit Error Hook", "Interceptor Pattern", "Audit error")
+}
+
+Rel(hookManager, beforeHooks, "Iterates before hooks")
+Rel(beforeHooks, headerHook, "Calls hook")
+Rel(beforeHooks, timestampHook, "Calls hook")
+Rel(beforeHooks, usernameHook, "Calls hook")
+Rel(beforeHooks, auditBeforeHook, "Calls hook")
+Rel(hookManager, afterHooks, "Iterates after hooks")
+Rel(afterHooks, auditAfterHook, "Calls hook")
+Rel(hookManager, errorHooks, "Iterates error hooks")
+Rel(errorHooks, auditErrorHook, "Calls hook")
+
+@enduml

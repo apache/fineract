@@ -40,7 +40,7 @@ public interface CalendarReadPlatformService {
 
     Collection<LocalDate> generateNextTenRecurringDates(CalendarData calendarData);
 
-    Collection<CalendarData> updateWithRecurringDates(Collection<CalendarData> calendarsData);
+    List<CalendarData> updateWithRecurringDates(Collection<CalendarData> calendarsData);
 
     CalendarData retrieveLoanCalendar(Long loanId);
 

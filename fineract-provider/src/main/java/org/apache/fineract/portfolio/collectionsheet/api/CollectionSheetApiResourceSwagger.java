@@ -39,11 +39,11 @@ final class CollectionSheetApiResourceSwagger {
             private PostCollectionSheetBulkRepaymentTransactions() {}
 
             @Schema(example = "10")
-            public Integer loanId;
+            public Long loanId;
             @Schema(example = "1221.36")
             public Double transactionAmount;
             @Schema(example = "19")
-            public Integer paymentTypeId;
+            public Long paymentTypeId;
             @Schema(example = "1245356")
             public Long receiptNumber;
         }
@@ -81,9 +81,9 @@ final class CollectionSheetApiResourceSwagger {
         }
 
         @Schema(example = "10")
-        public Integer groupId;
+        public Long groupId;
         @Schema(example = "10")
-        public Integer resourceId;
+        public Long resourceId;
         public PostCollectionSheetChanges changes;
     }
 }

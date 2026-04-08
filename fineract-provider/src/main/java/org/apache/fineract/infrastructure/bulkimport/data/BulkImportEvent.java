@@ -18,48 +18,38 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.data;
 
+import lombok.Getter;
+import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.domain.FineractEvent;
 import org.apache.poi.ss.usermodel.Workbook;
 
+@Getter
 public final class BulkImportEvent extends FineractEvent {
 
     private final Workbook workbook;
 
-    private final Long importId;
+    private final ImportDocument importDocument;
+
+    private final String fileName;
+
+    private final String fileType;
 
     private final String locale;
 
     private final String dateFormat;
 
-    private BulkImportEvent(final Object source, final Workbook workbook, final Long importId, final String locale, final String dateFormat,
-            FineractContext context) {
+    private final Long entityId;
+
+    public BulkImportEvent(final Object source, final Workbook workbook, final String fileName, String fileType,
+            final ImportDocument importDocument, final String locale, final String dateFormat, FineractContext context, Long entityId) {
         super(source, context);
         this.workbook = workbook;
-        this.importId = importId;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.importDocument = importDocument;
         this.locale = locale;
         this.dateFormat = dateFormat;
+        this.entityId = entityId;
     }
-
-    public static BulkImportEvent instance(final Object source, final Workbook workbook, final Long importId, final String locale,
-            final String dateFormat, FineractContext context) {
-        return new BulkImportEvent(source, workbook, importId, locale, dateFormat, context);
-    }
-
-    public Workbook getWorkbook() {
-        return workbook;
-    }
-
-    public Long getImportId() {
-        return importId;
-    }
-
-    public String getDateFormat() {
-        return dateFormat;
-    }
-
-    public String getLocale() {
-        return locale;
-    }
-
 }

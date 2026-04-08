@@ -21,32 +21,30 @@ Feature: COB Reader
 
   @cob
   Scenario Outline: LoanItemReader - run test
-    Given The LoanItemReader.read method with loanIds <loanIds>, lockedAccounts <lockedAccounts>
+    Given The LoanItemReader.read method with loanIds <loanIds>
     When LoanItemReader.read method executed
     Then The LoanItemReader.read result should match
 
     Examples:
-      |loanIds|lockedAccounts|
-      |1      |              |
-      |1,2    |3,4           |
+      |loanIds|
+      |1      |
+      |1,2    |
 
   @cob
   Scenario Outline: LoanItemReader - run test: null
-    Given The LoanItemReader.read method with loanIds <loanIds>, lockedAccounts <lockedAccounts>
+    Given The LoanItemReader.read method with loanIds <loanIds>
     When LoanItemReader.read method executed
     Then The LoanItemReader.read result null
 
     Examples:
-      |loanIds|lockedAccounts|
-      |       |              |
+      |loanIds|
+      |       |
 
   @cob
   Scenario Outline: LoanItemReader - run test: exception
-    Given The LoanItemReader.read method with loanIds <loanIds>, lockedAccounts <lockedAccounts>
+    Given The LoanItemReader.read method with loanIds <loanIds>
     Then throw exception LoanItemReader.read method
 
     Examples:
-      |loanIds|lockedAccounts|
-      |-1     |              |
-      |1      | 1            |
-      |0      |              |
+      |loanIds|
+      |-1     |

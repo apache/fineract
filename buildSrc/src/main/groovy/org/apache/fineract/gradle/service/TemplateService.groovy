@@ -27,6 +27,8 @@ import org.apache.fineract.gradle.FineractPluginExtension
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.nio.charset.Charset
+
 class TemplateService {
     private static final Logger log = LoggerFactory.getLogger(TemplateService.class)
 
@@ -35,7 +37,7 @@ class TemplateService {
     TemplateService(FineractPluginExtension.FineractPluginConfigTemplate config) {
         def dir = new File(config.templateDir);
 
-        this.config = new Configuration(Configuration.VERSION_2_3_31);
+        this.config = new Configuration(Configuration.VERSION_2_3_32);
         this.config.setDirectoryForTemplateLoading(dir)
         this.config.setDefaultEncoding("UTF-8");
         this.config.setLogTemplateExceptions(false);
@@ -58,7 +60,7 @@ class TemplateService {
         Template template = null;
 
         if(params.templateFile) {
-            template = new Template("template", new FileReader(new File(params.templateFile)), this.config)
+            template = new Template("template", new FileReader(new File(params.templateFile), Charset.forName("UTF-8")), this.config)
         }
         if(params.template) {
             template = new Template("template", new StringReader(params.template), this.config)
@@ -69,7 +71,7 @@ class TemplateService {
                 def output = new File(params.outputFile)
                 output.createNewFile()
 
-                template.process(data, new FileWriter(output, false))
+                template.process(data, new FileWriter(output, Charset.forName("UTF-8"), false))
             } else {
                 def output = new StringWriter()
 

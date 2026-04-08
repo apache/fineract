@@ -23,6 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet id="1" author="fineract">
+        <validCheckSum>9:d84ef333c3fa57cea3a6fd2af8f2fda4</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Loan COB"/>
             <column name="display_name" value="Loan COB"/>

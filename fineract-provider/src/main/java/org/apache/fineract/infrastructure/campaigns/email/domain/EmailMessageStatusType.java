@@ -32,20 +32,13 @@ public enum EmailMessageStatusType {
     public static EmailMessageStatusType fromInt(final Integer statusValue) {
 
         EmailMessageStatusType enumeration = EmailMessageStatusType.INVALID;
-        switch (statusValue) {
-            case 100:
-                enumeration = EmailMessageStatusType.PENDING;
-            break;
-            case 200:
-                enumeration = EmailMessageStatusType.SENT;
-            break;
-            case 300:
-                enumeration = EmailMessageStatusType.DELIVERED;
-            break;
-            case 400:
-                enumeration = EmailMessageStatusType.FAILED;
-            break;
-        }
+        enumeration = switch (statusValue) {
+            case 100 -> EmailMessageStatusType.PENDING;
+            case 200 -> EmailMessageStatusType.SENT;
+            case 300 -> EmailMessageStatusType.DELIVERED;
+            case 400 -> EmailMessageStatusType.FAILED;
+            default -> enumeration;
+        };
         return enumeration;
     }
 

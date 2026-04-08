@@ -18,43 +18,33 @@
  */
 package org.apache.fineract.portfolio.fund.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.Map;
-import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
 import org.apache.fineract.portfolio.fund.serialization.FundCommandFromApiJsonDeserializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FundWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final FundCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final FundRepository fundRepository;
-
-    @Autowired
-    public FundWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final FundCommandFromApiJsonDeserializer fromApiJsonDeserializer, final FundRepository fundRepository) {
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.fundRepository = fundRepository;
-    }
 
     @Transactional
     @Override
@@ -70,7 +60,10 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fundRepository.saveAndFlush(fund);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(fund.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -98,7 +91,11 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
                 this.fundRepository.saveAndFlush(fund);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(fund.getId()) //
+                    .with(changes) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -123,8 +120,8 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.fund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

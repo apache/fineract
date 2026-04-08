@@ -25,8 +25,6 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -42,14 +40,10 @@ import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccountChargeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -61,7 +55,6 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     // mappers
     private final SavingsAccountChargeDueMapper chargeDueMapper;
 
-    @Autowired
     public SavingsAccountChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
             final DropdownReadPlatformService dropdownReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
@@ -94,7 +87,6 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
         @Override
         public SavingsAccountChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final Long id = rs.getLong("id");
             final Long chargeId = rs.getLong("chargeId");
             final Long accountId = rs.getLong("accountId");
@@ -127,7 +119,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final Integer feeOnMonth = JdbcSupport.getInteger(rs, "feeOnMonth");
             final Integer feeOnDay = JdbcSupport.getInteger(rs, "feeOnDay");
             if (feeOnDay != null && feeOnMonth != null) {
-                feeOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(feeOnMonth).withDayOfMonth(feeOnDay);
+                feeOnMonthDay = DateUtils.safeMonthDay(feeOnMonth, feeOnDay);
             }
 
             final int chargeCalculation = rs.getInt("chargeCalculation");
@@ -163,26 +155,16 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 .retrieveSavingsCalculationTypes();
         final List<EnumOptionData> savingsChargeTimeTypeOptions = this.chargeDropdownReadPlatformService
                 .retrieveSavingsCollectionTimeTypes();
-        final List<EnumOptionData> clientChargeCalculationTypeOptions = null;
-        final List<EnumOptionData> clientChargeTimeTypeOptions = null;
 
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
-        // this field is applicable only for client charges
-        final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = null;
-        final List<EnumOptionData> shareChargeCalculationTypeOptions = null;
-        final List<EnumOptionData> shareChargeTimeTypeOptions = null;
-        final Collection<TaxGroupData> taxGroupOptions = null;
-
-        final String accountMappingForChargeConfig = null;
-        final List<GLAccountData> expenseAccountOptions = null;
-        final List<GLAccountData> assetAccountOptions = null;
+        // other fields is applicable only for client charges
 
         // TODO AA : revisit for merge conflict - Not sure method signature
-        return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
-                loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
-                savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions, clientChargeTimeTypeOptions, feeFrequencyOptions,
-                incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions,
-                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions);
+        return ChargeData.builder().chargeCalculationTypeOptions(allowedChargeCalculationTypeOptions)
+                .chargeTimeTypeOptions(allowedChargeTimeOptions).loanChargeCalculationTypeOptions(loansChargeCalculationTypeOptions)
+                .loanChargeTimeTypeOptions(loansChargeTimeTypeOptions)
+                .savingsChargeCalculationTypeOptions(savingsChargeCalculationTypeOptions)
+                .savingsChargeTimeTypeOptions(savingsChargeTimeTypeOptions).feeFrequencyOptions(feeFrequencyOptions).build();
     }
 
     @Override

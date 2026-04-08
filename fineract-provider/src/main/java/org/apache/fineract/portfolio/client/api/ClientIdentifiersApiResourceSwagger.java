@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Set;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierRequest;
 
 /**
  * Created by Chirag Gupta on 01/13/18.
@@ -38,40 +38,20 @@ final class ClientIdentifiersApiResourceSwagger {
             private GetClientsDocumentType() {}
 
             @Schema(example = "3")
-            public Integer id;
+            public Long id;
             @Schema(example = "Drivers License")
             public String name;
         }
 
         @Schema(example = "2")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         public GetClientsDocumentType documentType;
         @Schema(example = "12345")
         public String documentKey;
         @Schema(example = "Issued in the year 2--7")
         public String description;
-    }
-
-    @Schema(description = "GetClientsClientIdIdentifiersTemplateResponse")
-    public static final class GetClientsClientIdIdentifiersTemplateResponse {
-
-        private GetClientsClientIdIdentifiersTemplateResponse() {}
-
-        static final class GetClientsAllowedDocumentTypes {
-
-            private GetClientsAllowedDocumentTypes() {}
-
-            @Schema(example = "1")
-            public Integer id;
-            @Schema(example = "Passport")
-            public String name;
-            @Schema(example = "0")
-            public Integer position;
-        }
-
-        public Set<GetClientsAllowedDocumentTypes> allowedDocumentTypes;
     }
 
     @Schema(description = "PostClientsClientIdIdentifiersRequest")
@@ -80,24 +60,13 @@ final class ClientIdentifiersApiResourceSwagger {
         private PostClientsClientIdIdentifiersRequest() {}
 
         @Schema(example = "1")
-        public Integer documentTypeId;
+        public Long documentTypeId;
         @Schema(example = "KA-54677")
         public String documentKey;
         @Schema(example = "Document has been verified")
         public String description;
-    }
-
-    @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdRequest")
-    public static final class PutClientsClientIdIdentifiersIdentifierIdRequest {
-
-        private PutClientsClientIdIdentifiersIdentifierIdRequest() {}
-
-        @Schema(example = "4")
-        public Integer documentTypeId;
-        @Schema(example = "KA-94667")
-        public String documentKey;
-        @Schema(example = "Document has been updated")
-        public String description;
+        @Schema(example = "Active")
+        public String status;
     }
 
     @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdResponse")
@@ -106,12 +75,12 @@ final class ClientIdentifiersApiResourceSwagger {
         private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
-        public PutClientsClientIdIdentifiersIdentifierIdRequest changes;
+        public Long resourceId;
+        public ClientIdentifierRequest changes;
     }
 
     @Schema(description = "PostClientsClientIdIdentifiersResponse")
@@ -120,11 +89,11 @@ final class ClientIdentifiersApiResourceSwagger {
         private PostClientsClientIdIdentifiersResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
@@ -133,10 +102,10 @@ final class ClientIdentifiersApiResourceSwagger {
         private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "3")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

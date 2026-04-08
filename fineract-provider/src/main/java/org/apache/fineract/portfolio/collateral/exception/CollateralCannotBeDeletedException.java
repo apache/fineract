@@ -22,14 +22,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class CollateralCannotBeDeletedException extends AbstractPlatformDomainRuleException {
 
-    /*** enum of reasons of why Loan Charge cannot be waived **/
+    /*** enum of reasons of why Collateral cannot be deleted **/
     public enum LoanCollateralCannotBeDeletedReason {
 
         LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
-                return "This collateral cannot be updated as the loan it is associated with is not in submitted and pending approval stage";
+                return "This collateral cannot be deleted as the loan it is associated with is not in submitted and pending approval stage";
             }
             return name().toString();
         }

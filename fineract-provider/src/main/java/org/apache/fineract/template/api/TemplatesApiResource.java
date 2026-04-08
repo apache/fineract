@@ -25,28 +25,28 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -61,21 +61,17 @@ import org.apache.fineract.template.domain.TemplateEntity;
 import org.apache.fineract.template.domain.TemplateType;
 import org.apache.fineract.template.service.TemplateDomainService;
 import org.apache.fineract.template.service.TemplateMergeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/templates")
-@Consumes({ MediaType.APPLICATION_JSON })
+@Path("/v1/templates")
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Scope("singleton")
-
 @Tag(name = "User Generated Documents", description = "User Generated Documents(alternatively, Templates) are used for end-user features such as custom user defined document generation (AKA UGD). They are based on {{ moustache }} templates. Think of them as a sort of built-in \"mail merge\" functionality.\n"
         + "\n"
         + "User Generated Documents (and other types of templates) can aggregate data from several Apache Fineract back-end API calls via mappers. Mappers can even access non-Apache Fineract REST services from other servers. UGDs can render such data in tables, show images, etc. TBD: Please have a look at some of the Example UGDs included in Apache Fineract (or the Wiki page, for now.).\n"
         + "\n"
         + "UGDs can be assigned to an entity like client or loan and be of a type like Document or SMS. The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab). The Template Engine back-end runner does not actually need this metadata.")
+@RequiredArgsConstructor
 public class TemplatesApiResource {
 
     public static final String ID = "id";
@@ -94,29 +90,12 @@ public class TemplatesApiResource {
     private final TemplateMergeService templateMergeService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public TemplatesApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<Template> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<TemplateData> templateDataApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final TemplateDomainService templateService,
-            final TemplateMergeService templateMergeService,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.templateDataApiJsonSerializer = templateDataApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.templateService = templateService;
-        this.templateMergeService = templateMergeService;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
-
     @GET
     @Operation(summary = "Retrieve all UGDs", description = "Example Requests:\n" + "\n" + "templates\n" + "\n"
             + "It is also possible to get specific UGDs by entity and type:\n" + "\n" + "templates?type=0&entity=0\n"
             + "[Entity: Id]\n\n\n\n" + "\n\n" + "client: 0, loan: 1" + "\n\n" + "[Type: Id]\n\n\n\n"
             + "Document: 0, E-Mail (not yet): 1,  SMS: 2")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesResponse.class)))
     public String retrieveAll(@DefaultValue("-1") @QueryParam("typeId") @Parameter(description = "typeId") final int typeId,
             @DefaultValue("-1") @QueryParam("entityId") @Parameter(description = "entityId") final int entityId,
             @Context final UriInfo uriInfo) {
@@ -142,8 +121,7 @@ public class TemplatesApiResource {
     @Operation(summary = "Retrieve UGD Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for UGDs. The UGD data returned consists of any or all of:\n"
             + "\n" + "ARGUMENTS\n" + "name String entity String type String text String optional mappers Mapper optional\n"
             + "Example Request:\n" + "\n" + "templates/template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class)))
     public String template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
@@ -155,11 +133,11 @@ public class TemplatesApiResource {
     }
 
     @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Add a UGD", description = "Adds a new UGD.\n" + "\n" + "Mandatory Fields\n" + "name\n\n\n\n"
             + "Example Requests:\n" + "\n" + "templates/1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PostTemplatesRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PostTemplatesResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PostTemplatesResponse.class)))
     public String createTemplate(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createTemplate().withJson(apiRequestBodyAsJson).build();
 
@@ -171,8 +149,7 @@ public class TemplatesApiResource {
     @GET
     @Path("{templateId}")
     @Operation(summary = "Retrieve a UGD", description = "Example Requests:\n" + "\n" + "templates/1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateIdResponse.class)))
     public String retrieveOne(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
             @Context final UriInfo uriInfo) {
 
@@ -198,10 +175,10 @@ public class TemplatesApiResource {
 
     @PUT
     @Path("{templateId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a UGD", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class)))
     public String saveTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -215,8 +192,7 @@ public class TemplatesApiResource {
     @DELETE
     @Path("{templateId}")
     @Operation(summary = "Delete a UGD", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class)))
     public String deleteTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteTemplate(templateId).build();
@@ -228,6 +204,7 @@ public class TemplatesApiResource {
 
     @POST
     @Path("{templateId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.TEXT_HTML })
     public String mergeTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo,
             final String apiRequestBodyAsJson) throws IOException {

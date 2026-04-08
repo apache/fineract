@@ -11,3 +11,8 @@ IMPORTANT: This is a first attempt to introduce maintenance releases. Some detai
 - NO major (or "minor" framework upgrades); i. e. if we used Spring Boot "2.6.1" in version "1.6.0" of Fineract we can upgrade dependencies to "2.6.10" (unless it breaks something of course), but not to "2.7.2" of Spring Boot
 
 NOTE: The rest of the release process is the same as for normal releases. In the future we might have smaller time windows for reviews.
+
+== JIRA
+
+- Continuously update the <<Step 1: Heads-Up Email,JIRA umbrella issue>> to make sure we catch all ticket changes.
+- List tickets that have discrepancies, e. g. tickets still open while associated PR merged, ticket on wrong version (i. e. associated PR already merged before with another release).

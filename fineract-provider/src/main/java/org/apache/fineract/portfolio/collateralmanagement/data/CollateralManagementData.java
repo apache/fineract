@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
+import lombok.Getter;
 import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain;
 
-public final class CollateralManagementData {
+@Getter
+public final class CollateralManagementData implements Serializable {
 
     private String quality;
 

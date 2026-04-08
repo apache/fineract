@@ -19,20 +19,21 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -44,19 +45,17 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.apache.fineract.organisation.staff.data.BulkTransferLoanOfficerData;
-import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollectionData;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
+import org.apache.fineract.portfolio.loanaccount.data.BulkTransferLoanOfficerData;
+import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/loanreassignment")
+@Path("/v1/loans/loanreassignment")
 @Component
-@Scope("singleton")
 @Tag(name = "Bulk Loans", description = "")
+@RequiredArgsConstructor
 public class BulkLoansApiResource {
 
     public static final String OFFICE_ID = "officeId";
@@ -71,31 +70,15 @@ public class BulkLoansApiResource {
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 
     private final PlatformSecurityContext context;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final BulkLoansReadPlatformService bulkLoansReadPlatformService;
     private final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public BulkLoansApiResource(final PlatformSecurityContext context, final StaffReadPlatformService staffReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final BulkLoansReadPlatformService bulkLoansReadPlatformService,
-            final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.bulkLoansReadPlatformService = bulkLoansReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
-
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String loanReassignmentTemplate(@QueryParam(OFFICE_ID) final Long officeId,
             @QueryParam(FROM_LOAN_OFFICER_ID) final Long loanOfficerId, @Context final UriInfo uriInfo) {

@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.codes.serialization.CodeValueCommandFr
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
@@ -81,7 +82,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(code.getId()) //
-                    .withSubEntityId(codeValue.getId())//
+                    .withSubEntityId(codeValue.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -104,7 +105,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
         }
 
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.code.value.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
@@ -159,7 +160,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(codeId) //
-                    .withSubEntityId(codeValueId)//
+                    .withSubEntityId(codeValueId) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
@@ -167,8 +168,8 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             if (realCause.getMessage().contains("code_value")) {
                 throw new PlatformDataIntegrityException("error.msg.codeValue.in.use", "This code value is in use", codeValueId, dve);
             }
-            throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage(), dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.code.value.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + realCause.getMessage());
         }
     }
 }

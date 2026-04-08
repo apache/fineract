@@ -33,4 +33,9 @@ public abstract class GroupsBusinessEvent extends AbstractBusinessEvent<CommandP
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getResourceId();
+    }
 }

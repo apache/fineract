@@ -33,4 +33,9 @@ public abstract class LoanProductBusinessEvent extends AbstractBusinessEvent<Loa
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getId();
+    }
 }

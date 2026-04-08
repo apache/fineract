@@ -20,24 +20,27 @@ package org.apache.fineract.commands.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 
 import io.cucumber.java8.En;
+import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.retry.event.RetryEvent;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import org.apache.fineract.commands.domain.CommandSource;
+import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
+import org.apache.fineract.commands.exception.RollbackTransactionNotApprovedException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class CommandServiceStepDefinitions implements En {
 
@@ -49,22 +52,34 @@ public class CommandServiceStepDefinitions implements En {
     @Autowired
     private RetryRegistry retryRegistry;
 
+    @Autowired
+    private RetryConfigurationAssembler retryConfigurationAssembler;
+
     private PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 
     private DummyCommand command;
 
     private RetryEvent retryEvent;
 
+    private AtomicInteger counter = new AtomicInteger();
+
     public CommandServiceStepDefinitions() {
         Given("/^A command source write service$/", () -> {
             this.commandSourceWritePlatformService = new DummyCommandSourceWriteService(processAndLogCommandService);
             this.command = new DummyCommand();
-            this.retryRegistry.retry("executeCommand").getEventPublisher().onRetry(event -> {
+            FineractRequestContextHolder contextHolder = Mockito.spy(FineractRequestContextHolder.class);
+            ReflectionTestUtils.setField(processAndLogCommandService, "fineractRequestContextHolder", contextHolder);
+            Mockito.when(contextHolder.getAttribute(any(), any())).thenThrow(new CannotAcquireLockException("BLOW IT UP!!!"))
+                    .thenThrow(new ObjectOptimisticLockingFailureException("Dummy", new RuntimeException("BLOW IT UP!!!")))
+                    .thenThrow(new RollbackTransactionNotApprovedException(1L, null));
+            Retry retry1 = retryConfigurationAssembler.getRetryConfigurationForExecuteCommand();
+            assertNotNull(retry1);
+            retry1.getEventPublisher().onRetry(event -> {
                 log.warn("... retry event: {}", event);
 
+                counter.incrementAndGet();
                 CommandServiceStepDefinitions.this.retryEvent = event;
             });
-
         });
 
         When("/^The user executes the command via a command write service with exceptions$/", () -> {
@@ -83,47 +98,21 @@ public class CommandServiceStepDefinitions implements En {
             assertEquals(2, retryEvent.getNumberOfRetryAttempts());
         });
 
-        Then("/^The command processing service execute function should be called 3 times$/", () -> {
-            assertEquals(3, command.getCount());
+        Then("/^The command processing service execute function should be called 2 times$/", () -> {
+            assertEquals(2, counter.get());
         });
     }
 
     public static class DummyCommand extends CommandWrapper {
 
-        private AtomicInteger counter = new AtomicInteger();
-
         public DummyCommand() {
             super(null, null, null, null, null, null, null, null, null, null, "{}", null, null, null, null, null, null,
-                    UUID.randomUUID().toString());
-        }
-
-        @Override
-        public String taskPermissionName() {
-            // NOTE: simulating a failure scenario that triggers retries; using this function, because it is the first
-            // called in the command processing service
-
-            int step = counter.incrementAndGet();
-
-            log.warn("Round: {}", step);
-
-            if (step == 1) {
-                throw new CannotAcquireLockException("BLOW IT UP!!!");
-            } else if (step == 2) {
-                throw new ObjectOptimisticLockingFailureException("Dummy", new RuntimeException("BLOW IT UP!!!"));
-            } else if (step == 3) {
-                throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(new DummyCommandSource());
-            }
-
-            return "dummy";
+                    UUID.randomUUID().toString(), null, null);
         }
 
         @Override
         public String actionName() {
             return "dummy";
-        }
-
-        public int getCount() {
-            return counter.get();
         }
     }
 
@@ -141,7 +130,7 @@ public class CommandServiceStepDefinitions implements En {
             JsonCommand command = JsonCommand.from(json, null, null, wrapper.getEntityName(), wrapper.getEntityId(),
                     wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                     wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(), wrapper.getCreditBureauId(),
-                    wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
+                    wrapper.getOrganisationCreditBureauId(), wrapper.getJobName(), wrapper.getLoanExternalId());
 
             return this.processAndLogCommandService.executeCommand(wrapper, command, true);
         }
@@ -159,15 +148,6 @@ public class CommandServiceStepDefinitions implements En {
         @Override
         public Long deleteEntry(Long makerCheckerId) {
             return null;
-        }
-    }
-
-    @Entity
-    @Table(name = "m_portfolio_command_source")
-    public static class DummyCommandSource extends CommandSource {
-
-        public DummyCommandSource() {
-            setId(1L);
         }
     }
 }

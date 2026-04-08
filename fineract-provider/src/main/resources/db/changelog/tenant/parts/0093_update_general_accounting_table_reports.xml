@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <!-- Transaction Summary report -->
+    <changeSet author="fineract" id="3">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT
+            '${endDate}' AS TransactionDate,
+                a.product AS Product,
+                (SELECT enum_message_property FROM r_enum_value
+            WHERE enum_name = 'transaction_type_enum' and enum_id = a.transaction_type) TransactionType_Name,
+            (select value from m_payment_type where id = a.payment_type_id)  as PaymentType_Name,
+            a.chargetype as chargetype,
+                a.reversal_indicator AS Reversed,
+                a.Allocation_Type AS Allocation_Type,
+                '' AS Chargeoff_ReasonCode,
+            case when a.transaction_type  IN (2,23,21,22,24,4,5,8,6,27,9) AND a.reversal_indicator = false then sum(a.amount)*-1
+            when a.transaction_type  IN (2,23,21,22,24,4,5,8,6,27,9) AND a.reversal_indicator = true then sum(a.amount)*+1
+            when a.transaction_type  IN (1,10,25,20,26) AND a.reversal_indicator = false then sum(a.amount)*+1
+            when a.transaction_type  IN (1,10,25,20,26) AND a.reversal_indicator = true then sum(a.amount)*-1 end AS Transaction_Amount
+            FROM
+            (SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,d.payment_type_id,'' as chargetype, t.is_reversed AS reversal_indicator,
+            'Principal' AS Allocation_Type,
+            CASE when t.transaction_type_enum in (1,20) then (case when t.amount is null then 0 else t.amount end)  else (case when t.principal_portion_derived is null then 0 else t.principal_portion_derived end)  end amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            left join m_payment_detail d on d.id = t.payment_detail_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum not in (10,26)
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,d.payment_type_id,'',t.is_reversed AS reversal_indicator,
+            'Interest' AS Allocation_Type,case when t.interest_portion_derived is null then 0 else t.interest_portion_derived end AS amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            left join m_payment_detail d on d.id = t.payment_detail_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum not in (10,26)
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,d.payment_type_id,'', t.is_reversed AS reversal_indicator,
+            'Fees' AS Allocation_Type,case when t.fee_charges_portion_derived is null then 0 else t.fee_charges_portion_derived end  as amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            left join m_payment_detail d on d.id = t.payment_detail_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum not in (10,26)
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}'  AS transactiondate, t.id, l.name AS product, t.transaction_type_enum AS transaction_type,d.payment_type_id,'',
+            t.is_reversed AS reversal_indicator,
+            'Penalty' AS Allocation_Type,case when t.penalty_charges_portion_derived is null then 0 else t.penalty_charges_portion_derived end as amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            left join m_payment_detail d on d.id = t.payment_detail_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum not in (10,26)
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}'  AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,d.payment_type_id,'', t.is_reversed AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_Type, case when t.overpayment_portion_derived is null then 0 else t.overpayment_portion_derived end  as amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            left join m_payment_detail d on d.id = t.payment_detail_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum not in (10,26)
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,null,mc.name, t.is_reversed AS reversal_indicator,
+            'Fees' AS Allocation_Type,case when t.fee_charges_portion_derived is null then 0 else t.fee_charges_portion_derived end  as amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            join m_loan_charge_paid_by pd on pd.loan_transaction_id = t.id
+            join m_loan_charge c on c.id = pd.loan_charge_id
+            join m_charge mc on mc.id = c.charge_id  and mc.is_penalty = false
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 10 and t.is_reversed = '0'
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product, t.transaction_type_enum AS transaction_type,null,mc.name,
+            t.is_reversed AS reversal_indicator,
+            'Penalty' AS Allocation_Type,case when t.penalty_charges_portion_derived is null then 0 else t.penalty_charges_portion_derived end  as amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            join m_loan_charge_paid_by pd on pd.loan_transaction_id = t.id
+            join m_loan_charge c on c.id = pd.loan_charge_id
+            join m_charge mc on mc.id = c.charge_id and mc.is_penalty = true
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 10 and t.is_reversed = '0'
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,null,'', t.is_reversed AS reversal_indicator,
+            'Interest' AS Allocation_Type,case when t.interest_portion_derived is null then 0 else t.interest_portion_derived end AS amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 10 and t.is_reversed = '0'
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,null,mc.name, t.is_reversed AS reversal_indicator,
+            'Fees' AS Allocation_Type,case when t.fee_charges_portion_derived is null then 0 else t.fee_charges_portion_derived end  as amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            join m_loan_charge_paid_by pd on pd.loan_transaction_id  = t.id
+            join m_loan_charge c on c.id = pd.loan_charge_id
+            join m_charge mc on mc.id = c.charge_id  and mc.is_penalty = false
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 26
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product, t.transaction_type_enum AS transaction_type,null,mc.name,
+            t.is_reversed AS reversal_indicator,
+            'Penalty' AS Allocation_Type,case when t.penalty_charges_portion_derived is null then 0 else t.penalty_charges_portion_derived end AS amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            join m_loan_charge_paid_by pd on pd.loan_transaction_id  = t.id
+            join m_loan_charge c on c.id = pd.loan_charge_id
+            join m_charge mc on mc.id = c.charge_id and mc.is_penalty = true
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 26
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,null,'', t.is_reversed AS reversal_indicator,
+            'Interest' AS Allocation_Type,case when t.interest_portion_derived is null then 0 else t.interest_portion_derived end AS amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 26
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,null,'', t.is_reversed AS reversal_indicator,
+            'Principal' AS Allocation_Type,case when t.principal_portion_derived  is null then 0 else t.principal_portion_derived end AS amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 26
+            and (t.office_id = ${officeId})
+            UNION ALL
+            SELECT '${endDate}' AS transactiondate, t.id, l.name AS product,
+            t.transaction_type_enum AS transaction_type,null,'', t.is_reversed AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_Type,case when t.overpayment_portion_derived  is null then 0 else t.overpayment_portion_derived end AS amount
+            FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            WHERE t.submitted_on_date &lt;= '${endDate}'
+            and t.transaction_type_enum = 26
+            and (t.office_id = ${officeId})
+            ) a GROUP BY a.transactiondate,a.product, a.transaction_type,a.payment_type_id,a.chargetype, a.reversal_indicator, a.Allocation_Type
+            order by 1,2,3,4,5,6,7 "/>
+            <where>report_name='Transaction Summary Report'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

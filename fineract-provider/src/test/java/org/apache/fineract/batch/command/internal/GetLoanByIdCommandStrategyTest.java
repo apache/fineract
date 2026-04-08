@@ -24,11 +24,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -98,7 +98,7 @@ public class GetLoanByIdCommandStrategyTest {
     private BatchRequest getBatchRequest(final Long loanId, final String associations, final String exclude, final String fields) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/" + loanId;
+        String relativeUrl = "v1/loans/" + loanId;
 
         Set<String> queryParams = new HashSet<>();
         if (associations != null) {

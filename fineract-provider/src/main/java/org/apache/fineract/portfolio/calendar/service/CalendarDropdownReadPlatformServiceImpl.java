@@ -25,9 +25,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
-import org.springframework.stereotype.Service;
 
-@Service
 public class CalendarDropdownReadPlatformServiceImpl implements CalendarDropdownReadPlatformService {
 
     @Override

@@ -103,7 +103,6 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                 writeString(officeNameCol, row, office.getName().trim().replaceAll("[ )(]", "_"));
                 writeDate(activationDateCol, row, "" + office.getOpeningDate().getDayOfMonth() + "/"
                         + office.getOpeningDate().getMonthValue() + "/" + office.getOpeningDate().getYear(), dateCellStyle, dateFormat);
-
             }
         }
     }
@@ -116,6 +115,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
         dateCellStyle.setDataFormat(df);
         int rowIndex = 0;
         DateTimeFormatter outputFormat = new DateTimeFormatterBuilder().appendPattern(dateFormat).toFormatter();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
         try {
             if (clients != null) {
                 for (ClientData client : clients) {
@@ -126,7 +126,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     writeString(nameCol, row, client.getDisplayName().replaceAll("[ )(] ", "_") + "(" + client.getId() + ")");
 
                     if (client.getActivationDate() != null) {
-                        writeDate(activationDateCol, row, outputFormat.format(client.getActivationDate()), dateCellStyle, dateFormat);
+                        writeDate(activationDateCol, row, client.getActivationDate().format(formatter), dateCellStyle, dateFormat);
                     }
                     if (containsClientExtId) {
                         if (!client.getExternalId().isEmpty()) {

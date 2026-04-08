@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.notification.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,7 +37,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class NotificationMapper extends AbstractPersistableCustom {
+public class NotificationMapper extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "notification_id")

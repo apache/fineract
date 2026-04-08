@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="1">
+        <update tableName="stretchy_report">
+            <column name="report_name" value="Disbursal Vs Awaitingdisbursal" />
+            <where>report_name = 'Disbursal_Vs_Awaitingdisbursal'</where>
+        </update>
+        <update tableName="stretchy_report">
+            <column name="report_name" value="Demand Vs Collection" />
+            <where>report_name = 'Demand_Vs_Collection'</where>
+        </update>
+    </changeSet>
+    <!-- ClientTrendsByDay -->
+    <changeSet author="fineract" id="22" context="mysql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, cl.activation_date AS days
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))
+            GROUP BY days
+            "/>
+            <where>id='149' AND report_name = 'ClientTrendsByDay'</where>
+        </update>
+    </changeSet>
+    <!-- ClientTrendsByWeek -->
+    <changeSet author="fineract" id="3" context="mysql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, WEEK(cl.activation_date) AS Weeks
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 WEEK) AND DATE(NOW()))
+            GROUP BY Weeks
+            "/>
+            <where>id='150' AND report_name = 'ClientTrendsByWeek'</where>
+        </update>
+    </changeSet>
+    <!-- ClientTrendsByMonth -->
+    <changeSet author="fineract" id="4" context="mysql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, MONTHNAME(cl.activation_date) AS Months
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 MONTH) AND DATE(NOW()))
+            GROUP BY Months
+            "/>
+            <where>id='151' AND report_name = 'ClientTrendsByMonth'</where>
+        </update>
+    </changeSet>
+    <!-- LoanTrendsByDay -->
+    <changeSet author="fineract" id="25" context="mysql" runOnChange="true">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, ln.disbursedon_date AS days
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))
+            GROUP BY days
+            "/>
+            <where>id='152' AND report_name = 'LoanTrendsByDay'</where>
+        </update>
+    </changeSet>
+    <!-- LoanTrendsByWeek -->
+    <changeSet author="fineract" id="6" context="mysql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, WEEK(ln.disbursedon_date) AS Weeks
+            FROM m_office o
+                LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 WEEK) AND DATE(NOW()))
+            GROUP BY Weeks
+            "/>
+            <where>id='153' AND report_name = 'LoanTrendsByWeek'</where>
+        </update>
+    </changeSet>
+    <!-- LoanTrendsByMonth -->
+    <changeSet author="fineract" id="27" context="mysql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, MONTHNAME(ln.disbursedon_date) AS Months
+            FROM m_office o
+                LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN (CURDATE() - INTERVAL 12 MONTH) AND DATE(NOW()))
+            GROUP BY Months
+            "/>
+            <where>id='154' AND report_name = 'LoanTrendsByMonth'</where>
+        </update>
+    </changeSet>
+        <!-- ClientTrendsByDay -->
+    <changeSet author="fineract" id="29" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, cl.activation_date AS days
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN (current_date - INTERVAL '12 DAY') AND DATE(NOW()- INTERVAL '1 DAY'))
+            GROUP BY days
+            "/>
+            <where>id='149' AND report_name = 'ClientTrendsByDay'</where>
+        </update>
+    </changeSet>
+    <!-- ClientTrendsByWeek -->
+    <changeSet author="fineract" id="10" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, WEEK(cl.activation_date) AS Weeks
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN (current_date - INTERVAL '12 WEEK') AND DATE(NOW()))
+            GROUP BY Weeks
+            "/>
+            <where>id='150' AND report_name = 'ClientTrendsByWeek'</where>
+        </update>
+    </changeSet>
+    <!-- ClientTrendsByMonth -->
+    <changeSet author="fineract" id="11" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, MONTHNAME(cl.activation_date) AS Months
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN (current_date - INTERVAL '12 MONTH') AND DATE(NOW()))
+            GROUP BY Months
+            "/>
+            <where>id='151' AND report_name = 'ClientTrendsByMonth'</where>
+        </update>
+    </changeSet>
+    <!-- LoanTrendsByDay -->
+    <changeSet author="fineract" id="12" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, ln.disbursedon_date AS days
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN (current_date - INTERVAL '12 DAY') AND DATE(NOW()- INTERVAL '1 DAY'))
+            GROUP BY days
+            "/>
+            <where>id='152' AND report_name = 'LoanTrendsByDay'</where>
+        </update>
+    </changeSet>
+    <!-- LoanTrendsByWeek -->
+    <changeSet author="fineract" id="13" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, WEEK(ln.disbursedon_date) AS Weeks
+            FROM m_office o
+                LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN (current_date - INTERVAL '12 WEEK') AND DATE(NOW()))
+            GROUP BY Weeks
+            "/>
+            <where>id='153' AND report_name = 'LoanTrendsByWeek'</where>
+        </update>
+    </changeSet>
+    <!-- LoanTrendsByMonth -->
+    <changeSet author="fineract" id="14" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, MONTHNAME(ln.disbursedon_date) AS Months
+            FROM m_office o
+                LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN (current_date - INTERVAL '12 MONTH') AND DATE(NOW()))
+            GROUP BY Months
+            "/>
+            <where>id='154' AND report_name = 'LoanTrendsByMonth'</where>
+        </update>
+    </changeSet>
+    <!-- Demand Vs Collection -->
+    <changeSet author="fineract" id="15">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT amount.AmountDue-amount.AmountPaid as AmountDue, amount.AmountPaid as AmountPaid FROM
+            (SELECT
+            (COALESCE(SUM(ls.principal_amount),0) - COALESCE(SUM(ls.principal_writtenoff_derived),0)
+             + COALESCE(SUM(ls.interest_amount),0) - COALESCE(SUM(ls.interest_writtenoff_derived),0)
+             - COALESCE(SUM(ls.interest_waived_derived),0)
+             + COALESCE(SUM(ls.fee_charges_amount),0) - COALESCE(SUM(ls.fee_charges_writtenoff_derived),0)
+             - COALESCE(SUM(ls.fee_charges_waived_derived),0)
+             + COALESCE(SUM(ls.penalty_charges_amount),0) - COALESCE(SUM(ls.penalty_charges_writtenoff_derived),0)
+             - COALESCE(SUM(ls.penalty_charges_waived_derived),0)
+            ) AS AmountDue,
+            (COALESCE(SUM(ls.principal_completed_derived),0) - COALESCE(SUM(ls.principal_writtenoff_derived),0) + COALESCE(SUM(ls.interest_completed_derived),0) - COALESCE(SUM(ls.interest_writtenoff_derived),0)
+             - COALESCE(SUM(ls.interest_waived_derived),0)
+             + COALESCE(SUM(ls.fee_charges_completed_derived),0) - COALESCE(SUM(ls.fee_charges_writtenoff_derived),0)
+             - COALESCE(SUM(ls.fee_charges_waived_derived),0)
+             + COALESCE(SUM(ls.penalty_charges_completed_derived),0) - COALESCE(SUM(ls.penalty_charges_writtenoff_derived),0)
+             - COALESCE(SUM(ls.penalty_charges_waived_derived),0)
+            ) AS AmountPaid
+            FROM m_office o
+            LEFT JOIN m_client cl ON o.id = cl.office_id
+            LEFT JOIN m_loan ln ON cl.id = ln.client_id
+            LEFT JOIN m_loan_repayment_schedule ls ON ln.id = ls.loan_id
+            WHERE
+             (o.hierarchy LIKE CONCAT((SELECT ino.hierarchy FROM m_office ino WHERE ino.id = ${officeId}),'%'))) as amount
+            "/>
+            <where>id='155' AND report_name = 'Demand Vs Collection'</where>
+        </update>
+    </changeSet>
+    <!-- Disbursal Vs Awaitingdisbursal -->
+    <changeSet author="fineract" id="16">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT awaitinddisbursal.amount-disbursedAmount.amount as amountToBeDisburse, disbursedAmount.amount as disbursedAmount from
+            (SELECT COUNT(ln.id) AS noOfLoans, COALESCE(SUM(ln.principal_amount),0) AS amount FROM m_office o
+            LEFT JOIN m_client cl ON cl.office_id = o.id
+            LEFT JOIN m_loan ln ON cl.id = ln.client_id
+            WHERE (ln.loan_status_id=200 OR ln.loan_status_id=300) AND
+                o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+            ) awaitinddisbursal,
+            (SELECT COUNT(ltrxn.id) as count, COALESCE(SUM(ltrxn.amount),0) as amount FROM m_office o
+            LEFT JOIN m_client cl ON cl.office_id = o.id
+            LEFT JOIN m_loan ln ON cl.id = ln.client_id
+            LEFT JOIN m_loan_transaction ltrxn ON ln.id = ltrxn.loan_id
+            WHERE ltrxn.is_reversed = false AND ltrxn.transaction_type_enum=1 AND
+                o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+            ) disbursedAmount
+            "/>
+            <where>id='156' AND report_name = 'Disbursal Vs Awaitingdisbursal'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

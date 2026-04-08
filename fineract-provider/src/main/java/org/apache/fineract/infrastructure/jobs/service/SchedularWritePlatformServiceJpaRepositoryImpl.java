@@ -148,13 +148,14 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
             isStopExecution = true;
         } else if (!isStopExecution) {
             scheduledJobDetail.setCurrentlyRunning(true);
+            scheduledJobDetail.setMismatchedJob(false);
         }
         this.scheduledJobDetailsRepository.save(scheduledJobDetail);
         return isStopExecution;
     }
 
     @SuppressWarnings("unused")
-    private boolean fallbackProcessJobDetailForExecution(Exception e) {
+    public boolean fallbackProcessJobDetailForExecution(Exception e) {
         return false;
     }
 

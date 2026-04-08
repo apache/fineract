@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_parameter")
-public class ReportParameter extends AbstractPersistableCustom {
+public class ReportParameter extends AbstractPersistableCustom<Long> {
 
     protected ReportParameter() {
         //

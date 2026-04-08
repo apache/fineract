@@ -42,28 +42,33 @@ public class FineractHookListener implements HookListener {
 
     @Override
     public void onApplicationEvent(final HookEvent event) {
-        ThreadLocalContextUtil.init(event.getContext());
+        try {
+            ThreadLocalContextUtil.init(event.getContext());
 
-        final AppUser appUser = event.getAppUser();
+            final AppUser appUser = event.getAppUser();
 
-        final HookEventSource hookEventSource = (HookEventSource) event.getSource();
-        final FineractContext fineractContext = event.getContext();
-        final String entityName = hookEventSource.getEntityName();
-        final String actionName = hookEventSource.getActionName();
-        final String payload = event.getPayload();
+            final HookEventSource hookEventSource = (HookEventSource) event.getSource();
+            final FineractContext fineractContext = event.getContext();
+            final String entityName = hookEventSource.getEntityName();
+            final String actionName = hookEventSource.getActionName();
+            final String payload = event.getPayload();
 
-        final List<Hook> hooks = hookReadPlatformService.retrieveHooksByEvent(hookEventSource.getEntityName(),
-                hookEventSource.getActionName());
+            final List<Hook> hooks = hookReadPlatformService.retrieveHooksByEvent(hookEventSource.getEntityName(),
+                    hookEventSource.getActionName());
 
-        for (final Hook hook : hooks) {
-            final HookProcessor processor = hookProcessorProvider.getProcessor(hook);
-            try {
-                processor.process(hook, payload, entityName, actionName, fineractContext);
-            } catch (Throwable e) {
-                log.error("Hook {} failed in HookProcessor {} for tenantIdentifier/user {}/{}, entityName: {}, actionName: {}, payload {} ",
-                        hook.getId(), processor.getClass().getSimpleName(), fineractContext.getTenantContext().getTenantIdentifier(),
-                        appUser.getDisplayName(), entityName, actionName, payload, e);
+            for (final Hook hook : hooks) {
+                final HookProcessor processor = hookProcessorProvider.getProcessor(hook);
+                try {
+                    processor.process(hook, payload, entityName, actionName, fineractContext);
+                } catch (Throwable e) {
+                    log.error(
+                            "Hook {} failed in HookProcessor {} for tenantIdentifier/user {}/{}, entityName: {}, actionName: {}, payload {} ",
+                            hook.getId(), processor.getClass().getSimpleName(), fineractContext.getTenantContext().getTenantIdentifier(),
+                            appUser.getDisplayName(), entityName, actionName, payload, e);
+                }
             }
+        } finally {
+            ThreadLocalContextUtil.reset();
         }
     }
 }

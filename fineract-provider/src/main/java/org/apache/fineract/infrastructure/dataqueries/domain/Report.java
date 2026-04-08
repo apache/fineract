@@ -19,6 +19,13 @@
 package org.apache.fineract.infrastructure.dataqueries.domain;
 
 import com.google.gson.JsonArray;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,13 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -43,7 +43,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
-public final class Report extends AbstractPersistableCustom {
+public final class Report extends AbstractPersistableCustom<Long> {
 
     @Column(name = "report_name", nullable = false, unique = true)
     private String reportName;
@@ -72,9 +72,6 @@ public final class Report extends AbstractPersistableCustom {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
-
-    @Column(name = "self_service_user_report")
-    private boolean isSelfServiceUserReport;
 
     public static Report fromJson(final JsonCommand command, final Collection<String> reportTypes) {
 

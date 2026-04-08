@@ -75,7 +75,7 @@ public class EmailMessageAssembler {
         if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.staffIdParamName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.staffIdParamName, element);
             staff = this.staffRepository.findOneWithNotFoundDetection(staffId);
-            emailAddress = staff.emailAddress();
+            emailAddress = staff.getEmailAddress();
         }
 
         final String message = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.messageParamName, element);

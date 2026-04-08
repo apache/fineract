@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +43,9 @@ public class ShareProductHelper {
     private static final String IN_MULTIPLES_OF = "0";
     private static final String USD = "USD";
 
-    private String productName = Utils.randomNameGenerator("SHARE_PRODUCT_", 6);
-    private String shortName = Utils.randomNameGenerator("", 4);
-    private String description = Utils.randomNameGenerator("", 20);
+    private String productName = Utils.uniqueRandomStringGenerator("SHARE_PRODUCT_", 6);
+    private String shortName = Utils.uniqueRandomStringGenerator("", 4);
+    private String description = Utils.randomStringGenerator("", 20);
     private String totalShares = "10000";
     private final String currencyCode = USD;
     private String sharesIssued = "10000";
@@ -62,7 +63,12 @@ public class ShareProductHelper {
 
     private List<Map<String, String>> charges = null;
     private List<Map<String, String>> marketPrices = null;
+    private Account[] accountList = null;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", this.productName);
@@ -93,6 +99,10 @@ public class ShareProductHelper {
             map.put("marketPricePeriods", marketPrices);
         }
 
+        if (this.accountingRule.equals(CASH_BASED)) {
+            map.putAll(getAccountMappingForCashBased());
+        }
+
         String shareProductCreateJson = new Gson().toJson(map);
         LOG.info("{}", shareProductCreateJson);
         return shareProductCreateJson;
@@ -100,6 +110,12 @@ public class ShareProductHelper {
 
     public ShareProductHelper withCashBasedAccounting() {
         this.accountingRule = CASH_BASED;
+        return this;
+    }
+
+    public ShareProductHelper withCashBasedAccounting(final Account[] account_list) {
+        this.accountingRule = CASH_BASED;
+        this.accountList = account_list;
         return this;
     }
 
@@ -131,6 +147,10 @@ public class ShareProductHelper {
     }
 
     @SuppressWarnings("unchecked")
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyShareProduct(Map<String, Object> shareProductData) {
         String productName = (String) shareProductData.get("name");
         Assertions.assertEquals(this.productName, productName);
@@ -196,5 +216,34 @@ public class ShareProductHelper {
         // ArrayList<Map<String, String>> marketPrices = (ArrayList<Map<String,
         // String>>)shareProductData.get("marketPricePeriods") ;
 
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    private Map<String, String> getAccountMappingForCashBased() {
+        final Map<String, String> map = new HashMap<>();
+        if (accountList != null) {
+            for (int i = 0; i < this.accountList.length; i++) {
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("shareReferenceId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("shareSuspenseId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.EQUITY)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("shareEquityId", ID);
+                }
+                if (this.accountList[i].getAccountType().equals(Account.AccountType.INCOME)) {
+                    final String ID = this.accountList[i].getAccountID().toString();
+                    map.put("incomeFromFeeAccountId", ID);
+                }
+            }
+        }
+        return map;
     }
 }

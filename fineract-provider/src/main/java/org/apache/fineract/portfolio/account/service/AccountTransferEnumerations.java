@@ -107,6 +107,11 @@ public final class AccountTransferEnumerations {
                     optionData = new EnumOptionData(AccountTransferType.INTEREST_TRANSFER.getValue().longValue(),
                             AccountTransferType.INTEREST_TRANSFER.getCode(), "Interest Transfer");
                 break;
+                case LOAN_DOWN_PAYMENT:
+                    optionData = new EnumOptionData(AccountTransferType.LOAN_DOWN_PAYMENT.getValue().longValue(),
+                            AccountTransferType.LOAN_DOWN_PAYMENT.getCode(), "Loan Down Payment");
+                break;
+
             }
         }
         return optionData;

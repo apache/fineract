@@ -25,10 +25,10 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum ReportMailingJobStretchyReportParamDateOption {
 
-    INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"), TODAY(1,
-            "ReportMailingJobStretchyReportParamDateOption.TODAY", "Today"), YESTERDAY(2,
-                    "ReportMailingJobStretchyReportParamDateOption.YESTERDAY",
-                    "Yesterday"), TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow");
+    INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"), //
+    TODAY(1, "ReportMailingJobStretchyReportParamDateOption.TODAY", "Today"), //
+    YESTERDAY(2, "ReportMailingJobStretchyReportParamDateOption.YESTERDAY", "Yesterday"), //
+    TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow"); //
 
     private final String code;
     private final String value;
@@ -109,27 +109,13 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     }
 
     /**
-     * @return true if the enum is equals to "INVALID"
-     */
-    public boolean isInvalid() {
-        return this.equals(INVALID);
-    }
-
-    /**
-     * @return true if the enum is not equals to "INVALID"
-     */
-    public boolean isValid() {
-        return !this.isInvalid();
-    }
-
-    /**
      * @return list of valid ReportMailingJobStretchyReportParamDateOption values
      **/
     public static Object[] validValues() {
         List<Object> validValues = new ArrayList<>();
 
         for (ReportMailingJobStretchyReportParamDateOption constant : ReportMailingJobStretchyReportParamDateOption.values()) {
-            if (constant.isValid()) {
+            if (constant != INVALID) {
                 validValues.add(constant.value);
             }
         }
@@ -159,7 +145,7 @@ public enum ReportMailingJobStretchyReportParamDateOption {
         List<EnumOptionData> options = new ArrayList<>();
 
         for (ReportMailingJobStretchyReportParamDateOption constant : ReportMailingJobStretchyReportParamDateOption.values()) {
-            if (constant.isValid()) {
+            if (constant != INVALID) {
                 options.add(constant.toEnumOptionData());
             }
         }

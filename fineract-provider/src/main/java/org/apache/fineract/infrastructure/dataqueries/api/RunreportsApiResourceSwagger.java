@@ -38,4 +38,5 @@ final class RunreportsApiResourceSwagger {
         public List<ResultsetColumnHeaderData> columnHeaders;
         public List<ResultsetRowData> data;
     }
+
 }

@@ -22,22 +22,21 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +47,7 @@ public class SchedulerJobsTest {
     private RequestSpecification requestSpec;
     private SchedulerJobHelper schedulerJobHelper;
     private Boolean originalSchedulerStatus;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -62,6 +62,7 @@ public class SchedulerJobsTest {
             Boolean active = (Boolean) schedulerJob.get("active");
             originalJobStatus.put(jobId, active);
         }
+        globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @AfterEach
@@ -86,7 +87,6 @@ public class SchedulerJobsTest {
     }
 
     @Test
-    @Disabled // TODO FINERACT-1167
     public void testFlippingSchedulerStatus() throws InterruptedException {
         // Retrieving Status of Scheduler
         Boolean schedulerStatus = schedulerJobHelper.getSchedulerStatus();
@@ -137,14 +137,15 @@ public class SchedulerJobsTest {
 
     @Test
     public void testTriggeringManualExecutionOfAllSchedulerJobs() {
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             for (String jobName : schedulerJobHelper.getAllSchedulerJobNames()) {
                 schedulerJobHelper.executeAndAwaitJob(jobName);
             }
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 }

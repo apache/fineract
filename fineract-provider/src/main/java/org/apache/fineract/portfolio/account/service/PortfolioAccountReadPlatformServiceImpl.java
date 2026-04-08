@@ -31,13 +31,10 @@ import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountDTO;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.exception.AccountTransferNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccountReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -47,7 +44,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     private final PortfolioLoanAccountMapper loanAccountMapper;
     private final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
 
-    @Autowired
     public PortfolioAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.jdbcTemplate = jdbcTemplate;
         this.savingsAccountMapper = new PortfolioSavingsAccountMapper();

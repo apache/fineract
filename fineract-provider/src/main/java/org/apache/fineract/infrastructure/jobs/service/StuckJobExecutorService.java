@@ -20,5 +20,5 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 public interface StuckJobExecutorService {
 
-    void executeStuckJob(String jobName, Long jobId);
+    void resumeStuckJob(String jobName);
 }

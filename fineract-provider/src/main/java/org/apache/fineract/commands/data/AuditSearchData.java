@@ -18,21 +18,20 @@
  */
 package org.apache.fineract.commands.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.fineract.useradministration.data.AppUserData;
 
 /**
  * Immutable data object representing audit search results.
  */
-@RequiredArgsConstructor
-@Getter
-public final class AuditSearchData {
 
-    private final Collection<AppUserData> appUsers;
-    private final List<String> actionNames;
-    private final List<String> entityNames;
-    private final Collection<ProcessingResultLookup> statuses;
+public record AuditSearchData(Collection<AppUserData> appUsers, List<String> actionNames, List<String> entityNames,
+        Collection<ProcessingResultLookup> statuses) implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
 }

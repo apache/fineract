@@ -18,21 +18,22 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
 
@@ -42,7 +43,7 @@ import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityT
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
+public class FineractEntityToEntityMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "rel_id")
@@ -69,7 +70,6 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
     }
 
     public Map<String, Object> updateMap(final JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.fromEnityType, this.fromId)) {
@@ -95,10 +95,8 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
             actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
             this.endDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
         }
-        if (startDate != null && endDate != null) {
-            if (endDate.isBefore(startDate)) {
-                throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
-            }
+        if (endDate != null && DateUtils.isBefore(endDate, startDate)) {
+            throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
         }
 
         return actualChanges;

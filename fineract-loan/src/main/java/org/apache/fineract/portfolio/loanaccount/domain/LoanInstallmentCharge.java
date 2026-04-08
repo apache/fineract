@@ -1,0 +1,321 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.loanaccount.domain;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+
+@Entity
+@Getter
+@Table(name = "m_loan_installment_charge")
+public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
+    private LoanCharge loancharge;
+
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "loan_schedule_id", nullable = false)
+    private LoanRepaymentScheduleInstallment installment;
+
+    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+    private BigDecimal amount;
+
+    @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountPaid;
+
+    @Setter
+    @Column(name = "amount_waived_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountWaived;
+
+    @Column(name = "amount_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountWrittenOff;
+
+    @Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
+    private BigDecimal amountOutstanding;
+
+    @Column(name = "amount_through_charge_payment", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountThroughChargePayment;
+
+    @Setter
+    @Column(name = "is_paid_derived", nullable = false)
+    private boolean paid = false;
+
+    @Setter
+    @Column(name = "waived", nullable = false)
+    private boolean waived = false;
+
+    public LoanInstallmentCharge() {
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    public int compareTo(LoanInstallmentCharge o) {
+        return this.installment.getInstallmentNumber().compareTo(o.installment.getInstallmentNumber());
+    }
+
+    public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loancharge, final LoanRepaymentScheduleInstallment installment) {
+        this.loancharge = loancharge;
+        this.installment = installment;
+        this.amount = amount;
+        this.amountOutstanding = amount;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+    }
+
+    public void copyFrom(final LoanInstallmentCharge loanChargePerInstallment) {
+        this.amount = loanChargePerInstallment.amount;
+        this.installment = loanChargePerInstallment.installment;
+        this.amountOutstanding = calculateOutstanding();
+        this.paid = determineIfFullyPaid();
+    }
+
+    public void waive() {
+        this.amountWaived = this.amountOutstanding;
+        this.amountOutstanding = BigDecimal.ZERO;
+        this.paid = false;
+        this.waived = true;
+    }
+
+    public void undoWaive() {
+        this.amountOutstanding = this.amountWaived;
+        this.amountWaived = BigDecimal.ZERO;
+        this.paid = false;
+        this.waived = false;
+    }
+
+    public Money getAmountWaived(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountWaived);
+    }
+
+    public Money getAmountOutstanding(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountOutstanding);
+    }
+
+    private boolean determineIfFullyPaid() {
+        if (this.amount == null) {
+            return true;
+        }
+        return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
+    }
+
+    public void undoWaive(final BigDecimal amountOutstanding, final BigDecimal amountWaived) {
+        this.amountOutstanding = amountOutstanding;
+        this.amountWaived = amountWaived;
+    }
+
+    private BigDecimal calculateOutstanding() {
+        if (this.amount == null) {
+            return null;
+        }
+        BigDecimal amountPaidLocal = BigDecimal.ZERO;
+        if (this.amountPaid != null) {
+            amountPaidLocal = this.amountPaid;
+        }
+
+        BigDecimal amountWaivedLocal = BigDecimal.ZERO;
+        if (this.amountWaived != null) {
+            amountWaivedLocal = this.amountWaived;
+        }
+
+        BigDecimal amountWrittenOffLocal = BigDecimal.ZERO;
+        if (this.amountWrittenOff != null) {
+            amountWrittenOffLocal = this.amountWrittenOff;
+        }
+
+        final BigDecimal totalAccountedFor = amountPaidLocal.add(amountWaivedLocal).add(amountWrittenOffLocal);
+
+        return this.amount.subtract(totalAccountedFor);
+    }
+
+    public Money getAmount(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amount);
+    }
+
+    public Money getAmountPaid(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountPaid);
+    }
+
+    private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
+        return getAmount(currency).minus(getAmountWaived(currency)).minus(getAmountPaid(currency)).getAmount();
+    }
+
+    public boolean isPending() {
+        return !MathUtil.isZero(this.amountOutstanding);
+    }
+
+    public boolean isChargeAmountpaid(MonetaryCurrency currency) {
+        Money amounPaidThroughChargePayment = Money.of(currency, this.amountThroughChargePayment);
+        Money paid = Money.of(currency, this.amountPaid);
+        return amounPaidThroughChargePayment.isEqualTo(paid);
+    }
+
+    public LoanRepaymentScheduleInstallment getRepaymentInstallment() {
+        return this.installment;
+    }
+
+    public Money updatePaidAmountBy(final Money incrementBy, final Money feeAmount) {
+
+        Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
+        final Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
+        Money amountPaidPreviously = amountPaidToDate;
+        Money amountPaidOnThisCharge;
+        if (incrementBy.isGreaterThanOrEqualTo(amountOutstanding)) {
+            amountPaidOnThisCharge = amountOutstanding;
+            amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = BigDecimal.ZERO;
+        } else {
+            amountPaidOnThisCharge = incrementBy;
+            amountPaidToDate = amountPaidToDate.plus(incrementBy);
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
+        }
+        Money amountFromChargePayment = Money.of(incrementBy.getCurrency(), this.amountThroughChargePayment);
+        if (amountPaidPreviously.isGreaterThanZero()) {
+            amountFromChargePayment = amountFromChargePayment.plus(feeAmount);
+        } else {
+            amountFromChargePayment = feeAmount;
+        }
+        this.amountThroughChargePayment = amountFromChargePayment.getAmount();
+        if (determineIfFullyPaid()) {
+            Money waivedAmount = getAmountWaived(incrementBy.getCurrency());
+            if (waivedAmount.isGreaterThanZero()) {
+                this.waived = true;
+            } else {
+                this.paid = true;
+            }
+        }
+
+        return amountPaidOnThisCharge;
+    }
+
+    public Money getAmountWrittenOff(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountWrittenOff);
+    }
+
+    public void resetPaidAmount(final MonetaryCurrency currency) {
+        this.amountPaid = BigDecimal.ZERO;
+        this.amountOutstanding = calculateAmountOutstanding(currency);
+        this.paid = false;
+    }
+
+    public void undoWaiveFlag() {
+        this.waived = false;
+    }
+
+    public void setOutstandingAmount(final BigDecimal amountOutstanding) {
+        this.amountOutstanding = amountOutstanding;
+    }
+
+    public void resetToOriginal(final MonetaryCurrency currency) {
+        this.amountPaid = BigDecimal.ZERO;
+        this.amountWaived = BigDecimal.ZERO;
+        this.amountWrittenOff = BigDecimal.ZERO;
+        this.amountThroughChargePayment = BigDecimal.ZERO;
+        this.amountOutstanding = calculateAmountOutstanding(currency);
+        this.paid = false;
+        this.waived = false;
+
+    }
+
+    public Money getAmountThroughChargePayment(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountThroughChargePayment);
+    }
+
+    public Money getUnpaidAmountThroughChargePayment(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountThroughChargePayment).minus(this.amountPaid);
+    }
+
+    private void updateAmountThroughChargePayment(final MonetaryCurrency currency) {
+        Money amountThroughChargePayment = getAmountThroughChargePayment(currency);
+        if (amountThroughChargePayment.isGreaterThanZero() && amountThroughChargePayment.isGreaterThan(this.getAmount(currency))) {
+            this.amountThroughChargePayment = this.getAmount();
+        }
+    }
+
+    public Money updateWaivedAndAmountPaidThroughChargePaymentAmount(final MonetaryCurrency currency) {
+        updateWaivedAmount(currency);
+        updateAmountThroughChargePayment(currency);
+        return getAmountWaived(currency);
+    }
+
+    private void updateWaivedAmount(final MonetaryCurrency currency) {
+        Money waivedAmount = getAmountWaived(currency);
+        if (waivedAmount.isGreaterThanZero()) {
+            if (waivedAmount.isGreaterThan(this.getAmount(currency))) {
+                this.amountWaived = this.getAmount();
+                this.amountOutstanding = BigDecimal.ZERO;
+                this.paid = false;
+                this.waived = true;
+            } else if (waivedAmount.isLessThan(this.getAmount(currency))) {
+                this.paid = false;
+                this.waived = false;
+            }
+        }
+    }
+
+    public void updateInstallment(LoanRepaymentScheduleInstallment installment) {
+        this.installment = installment;
+    }
+
+    public Money undoPaidAmountBy(final Money incrementBy, final Money feeAmount) {
+
+        Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
+
+        Money amountToDeductOnThisCharge;
+        if (incrementBy.isGreaterThanOrEqualTo(amountPaidToDate)) {
+            amountToDeductOnThisCharge = amountPaidToDate;
+            amountPaidToDate = Money.zero(incrementBy.getCurrency());
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = this.amount;
+        } else {
+            amountToDeductOnThisCharge = incrementBy;
+            amountPaidToDate = amountPaidToDate.minus(incrementBy);
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
+        }
+        this.amountThroughChargePayment = feeAmount.getAmount();
+        this.paid = determineIfFullyPaid();
+
+        return amountToDeductOnThisCharge;
+    }
+
+    public LoanCharge getLoanCharge() {
+        return this.loancharge;
+    }
+
+    public LoanInstallmentChargeData toData() {
+        return LoanInstallmentChargeData.builder().installmentNumber(installment.getInstallmentNumber()).dueDate(installment.getDueDate())
+                .amount(amount).amountOutstanding(amountOutstanding).amountWaived(amountWaived).paid(paid).waived(waived).build();
+    }
+}

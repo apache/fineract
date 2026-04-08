@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.GetTaxesGroupResponse;
+import org.apache.fineract.client.models.PostTaxesGroupRequest;
+import org.apache.fineract.client.models.PostTaxesGroupResponse;
+import org.apache.fineract.client.util.Calls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +41,10 @@ public final class TaxGroupHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
     private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/group?" + Utils.TENANT_IDENTIFIER;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createTaxGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Collection<Integer> taxComponentIds) {
         LOG.info("---------------------------------CREATING A TAX GROUP---------------------------------------------");
@@ -44,15 +52,23 @@ public final class TaxGroupHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("name", randomNameGenerator("Tax_component_Name_", 5));
+        map.put("name", Utils.randomStringGenerator("Tax_group_Name_", 5));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("taxComponents", getTaxGroupComponents(taxComponentIds));
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<HashMap<String, String>> getTaxGroupComponents(final Collection<Integer> taxComponentIds) {
         List<HashMap<String, String>> taxGroupComponents = new ArrayList<>();
         for (Integer taxComponentId : taxComponentIds) {
@@ -61,6 +77,10 @@ public final class TaxGroupHelper {
         return taxGroupComponents;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, String> getTaxComponentMap(final Integer taxComponentId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("taxComponentId", String.valueOf(taxComponentId));
@@ -68,8 +88,16 @@ public final class TaxGroupHelper {
         return map;
     }
 
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
+    public static PostTaxesGroupResponse createTaxGroup(PostTaxesGroupRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.createTaxGroup(request));
+    }
+
+    public static GetTaxesGroupResponse retrieveTaxGroup(Long taxGroupId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.retrieveTaxGroup(taxGroupId));
+    }
+
+    public static List<GetTaxesGroupResponse> retrieveAllTaxGroups() {
+        return Calls.ok(FineractClientHelper.getFineractClient().taxGroups.retrieveAllTaxGroups());
     }
 
 }

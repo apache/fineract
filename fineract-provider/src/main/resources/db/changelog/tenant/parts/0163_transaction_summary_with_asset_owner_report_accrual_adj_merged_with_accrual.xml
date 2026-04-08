@@ -1,0 +1,1174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="1">
+        <update tableName="stretchy_report">
+            <column name="report_sql"
+                    value="WITH
+
+slt_except_charge_adj_and_accrual AS (
+    SELECT '${endDate}' AS transactiondate,
+        t.id,
+        l.name,
+        d.payment_type_id,
+        t.transaction_type_enum,
+        t.amount,
+        t.overpayment_portion_derived,
+        t.principal_portion_derived,
+        t.interest_portion_derived,
+        t.fee_charges_portion_derived,
+        t.penalty_charges_portion_derived,
+        e.status,
+        e.settlement_date,
+        e.owner_id,
+        m.charged_off_on_date,
+        t.transaction_date,
+        m.charge_off_reason_cv_id
+    FROM m_loan_transaction t
+        JOIN m_loan m ON m.id = t.loan_id
+        JOIN m_product_loan l ON l.id = m.product_id
+        LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+        LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+        AND e.settlement_date &lt; '${endDate}'
+        AND e.effective_date_to &gt;= '${endDate}'
+    WHERE t.submitted_on_date = '${endDate}'
+        AND t.transaction_type_enum not in (10, 26, 34)
+        AND (t.office_id = ${officeId})
+),
+
+slt_charge_adj AS (
+    SELECT '${endDate}' AS transactiondate,
+        t.id,
+        l.name,
+        t.transaction_type_enum,
+        d.payment_type_id,
+        t.overpayment_portion_derived,
+        t.principal_portion_derived,
+        t.interest_portion_derived,
+        t.fee_charges_portion_derived,
+        t.penalty_charges_portion_derived,
+        t.amount,
+        e.status,
+        e.settlement_date,
+        e.owner_id,
+        m.charged_off_on_date,
+        t.transaction_date,
+        m.charge_off_reason_cv_id
+    FROM m_loan_transaction t
+        JOIN m_loan m ON m.id = t.loan_id
+        JOIN m_product_loan l ON l.id = m.product_id
+        LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+        LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+        AND e.settlement_date &lt; '${endDate}'
+        AND e.effective_date_to &gt;= '${endDate}'
+    WHERE t.submitted_on_date = '${endDate}'
+        AND t.transaction_type_enum = 26
+        AND (t.office_id = ${officeId})
+),
+
+rlt_except_charge_adj_and_accrual AS (
+    SELECT '${endDate}' AS transactiondate,
+        t.id,
+        l.name,
+        t.transaction_type_enum,
+        d.payment_type_id,
+        t.overpayment_portion_derived,
+        t.principal_portion_derived,
+        t.interest_portion_derived,
+        t.fee_charges_portion_derived,
+        t.penalty_charges_portion_derived,
+        t.amount,
+        e.status,
+        e.settlement_date,
+        e.owner_id,
+        m.charged_off_on_date,
+        t.transaction_date,
+        m.charge_off_reason_cv_id
+    FROM m_loan_transaction t
+        JOIN m_loan m ON m.id = t.loan_id
+        JOIN m_product_loan l ON l.id = m.product_id
+        LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+        LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+        AND e.settlement_date &lt; '${endDate}'
+        AND e.effective_date_to &gt;= '${endDate}'
+    WHERE t.reversed_on_date = '${endDate}'
+        AND t.transaction_type_enum not in (10, 26, 34)
+        AND (t.office_id = ${officeId})
+),
+
+rlt_charge_adj AS (
+    SELECT '${endDate}' AS transactiondate,
+        t.id,
+        l.name,
+        t.transaction_type_enum,
+        d.payment_type_id,
+        t.overpayment_portion_derived,
+        t.principal_portion_derived,
+        t.interest_portion_derived,
+        t.fee_charges_portion_derived,
+        t.penalty_charges_portion_derived,
+        t.amount,
+        e.status,
+        e.settlement_date,
+        e.owner_id,
+        m.charged_off_on_date,
+        t.transaction_date,
+        m.charge_off_reason_cv_id
+    FROM m_loan_transaction t
+        JOIN m_loan m ON m.id = t.loan_id
+        JOIN m_product_loan l ON l.id = m.product_id
+        LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+        LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+        AND e.settlement_date &lt; '${endDate}'
+        AND e.effective_date_to &gt;= '${endDate}'
+    WHERE t.reversed_on_date = '${endDate}'
+        AND t.transaction_type_enum = 26
+        AND (t.office_id = ${officeId})
+
+),
+
+active_external_asset_owner_transfers AS (
+    SELECT '${endDate}' AS transactiondate,
+        t.id,
+        p.name,
+        t.owner_id,
+        dt.principal_outstanding_derived,
+        dt.interest_outstanding_derived,
+        dt.fee_charges_outstanding_derived,
+        dt.penalty_charges_outstanding_derived,
+        dt.total_overpaid_derived
+    FROM m_external_asset_owner_transfer t
+        JOIN m_loan l ON l.id = t.loan_id
+        JOIN m_client c ON c.id = l.client_id
+        JOIN m_product_loan p ON p.id = l.product_id
+        JOIN m_external_asset_owner_transfer_details dt ON dt.asset_owner_transfer_id = t.id
+    WHERE t.status = 'ACTIVE'
+        AND c.office_id = ${officeId}
+        AND t.settlement_date = '${endDate}'
+),
+
+buyback_external_asset_owner_transfers AS (
+    SELECT '${endDate}' AS transactiondate,
+        t.id,
+        p.name,
+        dt.principal_outstanding_derived,
+        dt.interest_outstanding_derived,
+        dt.fee_charges_outstanding_derived,
+        dt.penalty_charges_outstanding_derived,
+        dt.total_overpaid_derived,
+        l.charged_off_on_date,
+        t.settlement_date,
+        l.charge_off_reason_cv_id
+    FROM m_external_asset_owner_transfer t
+        JOIN m_loan l ON l.id = t.loan_id
+        JOIN m_client c ON c.id = l.client_id
+        JOIN m_product_loan p ON p.id = l.product_id
+        JOIN m_external_asset_owner_transfer_details dt ON dt.asset_owner_transfer_id = t.id
+    WHERE t.status = 'BUYBACK'
+        AND c.office_id = ${officeId}
+        AND t.settlement_date = '${endDate}'
+)
+
+SELECT '${endDate}' AS TransactionDate,
+    a.product AS Product,
+    CASE
+        WHEN a.transaction_type = 9999 THEN 'Asset Transfer'
+        WHEN a.transaction_type = 99999 THEN 'Asset Buyback'
+        ELSE (
+            SELECT enum_message_property
+            FROM r_enum_value
+            WHERE enum_name = 'transaction_type_enum'
+                AND enum_id = a.transaction_type
+        )
+    END AS TransactionType_Name,
+    (SELECT value FROM m_payment_type WHERE id = a.payment_type_id) AS PaymentType_Name,
+    a.chargetype AS chargetype,
+    a.reversal_indicator AS Reversed,
+    a.Allocation_Type AS Allocation_Type,
+    (SELECT code_value FROM m_code_value WHERE id = a.charge_off_reason_id) AS Chargeoff_ReasonCode,
+    CASE
+        WHEN a.transaction_type = 9999 THEN sum(a.amount) * + 1
+        WHEN a.transaction_type = 99999 THEN sum(a.amount) * - 1
+        WHEN a.transaction_type IN (2, 23, 21, 22, 24, 4, 5, 8, 6, 27, 9, 26, 28, 31, 33)
+        AND a.reversal_indicator = false THEN sum(a.amount) * -1
+        WHEN a.transaction_type IN (2, 23, 21, 22, 24, 4, 5, 8, 6, 27, 9, 26, 28, 31, 33)
+        AND a.reversal_indicator = true THEN sum(a.amount) * + 1
+        WHEN a.transaction_type IN (1, 10, 25, 20)
+        AND a.reversal_indicator = false THEN sum(a.amount) * + 1
+        WHEN a.transaction_type IN (1, 10, 25, 20)
+        AND a.reversal_indicator = true THEN sum(a.amount) * -1
+    END AS Transaction_Amount,
+    (SELECT external_id FROM m_external_asset_owner WHERE id = a.asset_owner_id) AS Asset_owner_id
+FROM (
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Principal' AS Allocation_Type,
+            CASE
+                WHEN t.transaction_type_enum in (1) THEN (
+                    CASE
+                        WHEN t.amount is null THEN 0
+                        WHEN t.overpayment_portion_derived is null THEN t.amount
+                        WHEN t.overpayment_portion_derived is not null THEN t.amount - t.overpayment_portion_derived
+                        ELSE t.amount
+                    END
+                )
+                ELSE (
+                    CASE
+                        WHEN t.principal_portion_derived is null THEN 0
+                        ELSE t.principal_portion_derived
+                    end
+                )
+            END amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Interest' AS Allocation_Type,
+            CASE
+                WHEN t.interest_portion_derived is null THEN 0
+                ELSE t.interest_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Fees' AS Allocation_Type,
+            CASE
+                WHEN t.fee_charges_portion_derived is null THEN 0
+                ELSE t.fee_charges_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Penalty' AS Allocation_Type,
+            CASE
+                WHEN t.penalty_charges_portion_derived is null THEN 0
+                ELSE t.penalty_charges_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_Type,
+            CASE
+                WHEN t.overpayment_portion_derived is null THEN 0
+                ELSE t.overpayment_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            10 AS transaction_type,
+            null AS payment_type_id,
+            mc.name AS chargetype,
+            false AS reversal_indicator,
+            'Fees' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                WHEN t.transaction_type_enum = 34 THEN pd.amount * -1
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = false
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.submitted_on_date = '${endDate}'
+            AND t.transaction_type_enum in (10, 34)
+            AND t.is_reversed = false
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            10 AS transaction_type,
+            null AS payment_type_id,
+            mc.name AS chargetype,
+            false AS reversal_indicator,
+            'Penalty' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                WHEN t.transaction_type_enum = 34 THEN pd.amount * -1
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = true
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.submitted_on_date = '${endDate}'
+            AND t.transaction_type_enum in (10, 34)
+            AND t.is_reversed = false
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            10 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Interest' AS Allocation_Type,
+            CASE
+                WHEN t.interest_portion_derived is null THEN 0
+                WHEN t.transaction_type_enum = 34 THEN t.interest_portion_derived * -1
+                ELSE t.interest_portion_derived
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.submitted_on_date = '${endDate}'
+            AND t.transaction_type_enum in (10, 34)
+            AND t.is_reversed = false
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            d.payment_type_id,
+            mc.name AS chargetype,
+            false AS reversal_indicator,
+            'Fees' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = false
+            LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.submitted_on_date = '${endDate}'
+            AND t.transaction_type_enum = 26
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            d.payment_type_id,
+            mc.name AS chargetype,
+            false AS reversal_indicator,
+            'Penalty' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = true
+            LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.submitted_on_date = '${endDate}'
+            AND t.transaction_type_enum = 26
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Interest' AS Allocation_Type,
+            CASE
+                WHEN t.interest_portion_derived is null THEN 0
+                ELSE t.interest_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_charge_adj AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Principal' AS Allocation_Type,
+            CASE
+                WHEN t.principal_portion_derived is null THEN 0
+                ELSE t.principal_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_charge_adj AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_Type,
+            CASE
+                WHEN t.overpayment_portion_derived is null THEN 0
+                ELSE t.overpayment_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM slt_charge_adj AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Principal' AS Allocation_Type,
+            CASE
+                WHEN t.transaction_type_enum in (1) THEN (
+                    CASE
+                        WHEN t.amount is null THEN 0
+                        WHEN t.overpayment_portion_derived is null THEN t.amount
+                        WHEN t.overpayment_portion_derived is not null THEN t.amount - t.overpayment_portion_derived
+                        ELSE t.amount
+                    END
+                )
+                ELSE (
+                    CASE
+                        WHEN t.principal_portion_derived is null THEN 0
+                        ELSE t.principal_portion_derived
+                    end
+                )
+            END amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Interest' AS Allocation_Type,
+            CASE
+                WHEN t.interest_portion_derived is null THEN 0
+                ELSE t.interest_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Fees' AS Allocation_Type,
+            CASE
+                WHEN t.fee_charges_portion_derived is null THEN 0
+                ELSE t.fee_charges_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Penalty' AS Allocation_Type,
+            CASE
+                WHEN t.penalty_charges_portion_derived is null THEN 0
+                ELSE t.penalty_charges_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_Type,
+            CASE
+                WHEN t.overpayment_portion_derived is null THEN 0
+                ELSE t.overpayment_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_except_charge_adj_and_accrual AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            10 AS transaction_type,
+            null AS payment_type_id,
+            mc.name AS chargetype,
+            true AS reversal_indicator,
+            'Fees' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                WHEN t.transaction_type_enum = 34 THEN pd.amount * -1
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = false
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.reversed_on_date = '${endDate}'
+            AND t.transaction_type_enum in (10, 34)
+            AND t.is_reversed = true
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            10 AS transaction_type,
+            null AS payment_type_id,
+            mc.name AS chargetype,
+            true AS reversal_indicator,
+            'Penalty' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                WHEN t.transaction_type_enum = 34 THEN pd.amount * -1
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = true
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.reversed_on_date = '${endDate}'
+            AND t.transaction_type_enum in (10, 34)
+            AND t.is_reversed = true
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            10 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Interest' AS Allocation_Type,
+            CASE
+                WHEN t.interest_portion_derived is null THEN 0
+                WHEN t.transaction_type_enum = 34 THEN t.interest_portion_derived * -1
+                ELSE t.interest_portion_derived
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.reversed_on_date = '${endDate}'
+            AND t.transaction_type_enum in (10, 34)
+            AND t.is_reversed = true
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            d.payment_type_id,
+            mc.name AS chargetype,
+            true AS reversal_indicator,
+            'Fees' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = false
+            LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.reversed_on_date = '${endDate}'
+            AND t.transaction_type_enum = 26
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            l.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            d.payment_type_id,
+            mc.name AS chargetype,
+            true AS reversal_indicator,
+            'Penalty' AS Allocation_Type,
+            CASE
+                WHEN pd.amount is null THEN 0
+                ELSE pd.amount
+            END AS amount,
+            CASE
+                WHEN e.status = 'ACTIVE'
+                AND e.settlement_date &lt; '${endDate}' THEN e.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (m.charged_off_on_date &lt;= t.transaction_date) THEN m.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM m_loan_transaction t
+            JOIN m_loan m ON m.id = t.loan_id
+            JOIN m_product_loan l ON l.id = m.product_id
+            JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id
+            JOIN m_loan_charge c ON c.id = pd.loan_charge_id
+            JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = true
+            LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id
+            LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id
+            AND e.settlement_date &lt; '${endDate}'
+            AND e.effective_date_to &gt;= '${endDate}'
+        WHERE t.reversed_on_date = '${endDate}'
+            AND t.transaction_type_enum = 26
+            AND (t.office_id = ${officeId})
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Interest' AS Allocation_Type,
+            CASE
+                WHEN t.interest_portion_derived is null THEN 0
+                ELSE t.interest_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_charge_adj AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Principal' AS Allocation_Type,
+            CASE
+                WHEN t.principal_portion_derived is null THEN 0
+                ELSE t.principal_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_charge_adj AS t
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            t.transaction_type_enum AS transaction_type,
+            t.payment_type_id,
+            '' AS chargetype,
+            true AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_Type,
+            CASE
+                WHEN t.overpayment_portion_derived is null THEN 0
+                ELSE t.overpayment_portion_derived
+            END AS amount,
+            CASE
+                WHEN t.status = 'ACTIVE'
+                AND t.settlement_date &lt; '${endDate}' THEN t.owner_id
+            END AS asset_owner_id,
+            CASE
+                WHEN t.transaction_type_enum = 27
+                OR (t.charged_off_on_date &lt;= t.transaction_date) THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM rlt_charge_adj AS t
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            9999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Principal' AS Allocation_type,
+            t.principal_outstanding_derived AS amount,
+            t.owner_id AS asset_owner_id,
+            null AS charge_off_reason_id
+        FROM active_external_asset_owner_transfers AS t
+        WHERE t.principal_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            9999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Interest' AS Allocation_type,
+            t.interest_outstanding_derived AS amount,
+            t.owner_id AS asset_owner_id,
+            null AS charge_off_reason_id
+        FROM active_external_asset_owner_transfers AS t
+        WHERE t.interest_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            9999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Fees' AS Allocation_type,
+            t.fee_charges_outstanding_derived AS amount,
+            t.owner_id AS asset_owner_id,
+            null AS charge_off_reason_id
+        FROM active_external_asset_owner_transfers AS t
+        WHERE t.fee_charges_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            9999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Penalty' AS Allocation_type,
+            t.penalty_charges_outstanding_derived AS amount,
+            t.owner_id AS asset_owner_id,
+            null AS charge_off_reason_id
+        FROM active_external_asset_owner_transfers AS t
+        WHERE t.penalty_charges_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT t.transactiondate,
+            t.id,
+            t.name AS product,
+            9999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_type,
+            t.total_overpaid_derived AS amount,
+            t.owner_id AS asset_owner_id,
+            null AS charge_off_reason_id
+        FROM active_external_asset_owner_transfers AS t
+        WHERE t.total_overpaid_derived &gt; 0
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            99999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Principal' AS Allocation_type,
+            t.principal_outstanding_derived AS amount,
+            null AS asset_owner_id,
+            CASE
+                WHEN t.charged_off_on_date &lt;= t.settlement_date THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM buyback_external_asset_owner_transfers AS t
+        WHERE t.principal_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            99999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Interest' AS Allocation_type,
+            t.interest_outstanding_derived AS amount,
+            null AS asset_owner_id,
+            CASE
+                WHEN t.charged_off_on_date &lt;= t.settlement_date THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM buyback_external_asset_owner_transfers AS t
+        WHERE t.interest_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            99999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Fees' AS Allocation_type,
+            t.fee_charges_outstanding_derived AS amount,
+            null AS asset_owner_id,
+            CASE
+                WHEN t.charged_off_on_date &lt;= t.settlement_date THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM buyback_external_asset_owner_transfers AS t
+        WHERE t.fee_charges_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            99999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Penalty' AS Allocation_type,
+            t.penalty_charges_outstanding_derived AS amount,
+            null AS asset_owner_id,
+            CASE
+                WHEN t.charged_off_on_date &lt;= t.settlement_date THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM buyback_external_asset_owner_transfers AS t
+        WHERE t.penalty_charges_outstanding_derived &gt; 0
+
+        UNION ALL
+
+        SELECT '${endDate}' AS transactiondate,
+            t.id,
+            t.name AS product,
+            99999 AS transaction_type,
+            null AS payment_type_id,
+            '' AS chargetype,
+            false AS reversal_indicator,
+            'Unallocated Credit (UNC)' AS Allocation_type,
+            t.total_overpaid_derived * -1 AS amount,
+            null AS asset_owner_id,
+            CASE
+                WHEN t.charged_off_on_date &lt;= t.settlement_date THEN t.charge_off_reason_cv_id
+            END AS charge_off_reason_id
+        FROM buyback_external_asset_owner_transfers AS t
+        WHERE t.total_overpaid_derived &gt; 0
+
+    ) a
+GROUP BY a.transactiondate,
+    a.product,
+    a.transaction_type,
+    a.payment_type_id,
+    a.chargetype,
+    a.reversal_indicator,
+    a.Allocation_Type,
+    a.asset_owner_id,
+    a.charge_off_reason_id
+ORDER BY 1,2,3,4,5,6,7,8,9,10"/>
+            <where>report_name='Transaction Summary Report with Asset Owner'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

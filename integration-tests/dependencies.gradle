@@ -20,15 +20,30 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    tomcat 'org.apache.tomcat:tomcat:9.0.69@zip'
-    testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
+    tomcat 'org.apache.tomcat:tomcat:10.1.49@zip'
+    def providerMainOutput = project(':fineract-provider').extensions.getByType(SourceSetContainer).named('main').get().output
+    testImplementation( providerMainOutput,
+            project(path: ':fineract-core', configuration: 'runtimeElements'),
+            project(path: ':fineract-accounting', configuration: 'runtimeElements'),
+            project(path: ':fineract-investor', configuration: 'runtimeElements'),
+            project(path: ':fineract-charge', configuration: 'runtimeElements'),
+            project(path: ':fineract-rates', configuration: 'runtimeElements'),
+            project(path: ':fineract-tax', configuration: 'runtimeElements'),
+            project(path: ':fineract-loan', configuration: 'runtimeElements'),
+            project(path: ':fineract-savings', configuration: 'runtimeElements'),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
-            project(path: ':fineract-client', configuration: 'runtimeElements'),
-            'io.cucumber:cucumber-spring',
-            'com.intuit.karate:karate-junit5',
-            // 'com.google.code.gson:gson',
+            project(path: ':fineract-progressive-loan', configuration: 'runtimeElements')
             )
+
+    // Retrofit client for existing tests
+    testImplementation project(path: ':fineract-client', configuration: 'runtimeElements')
+
+    // Feign client - exclude fineract-client module to avoid Retrofit/Feign model conflicts
+    // Both generated and hand-written Feign services are available in feign.services package
+    testImplementation(project(path: ':fineract-client-feign', configuration: 'runtimeElements')) {
+        exclude group: 'org.apache.fineract', module: 'fineract-client'
+    }
     testImplementation ('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
@@ -39,9 +54,18 @@ dependencies {
         exclude group: 'org.apache.sling'
         exclude group: 'com.sun.xml.bind'
     }
+    testImplementation 'org.apache.groovy:groovy-xml'
+    testImplementation 'org.apache.groovy:groovy-json'
     testImplementation 'org.awaitility:awaitility'
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
+    testImplementation 'org.assertj:assertj-core'
+
+    testImplementation 'org.mapstruct:mapstruct'
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor'
+
+    testImplementation 'org.wiremock:wiremock-standalone'
+    testImplementation 'com.google.guava:guava'
+    testImplementation 'com.github.romankh3:image-comparison'
 }

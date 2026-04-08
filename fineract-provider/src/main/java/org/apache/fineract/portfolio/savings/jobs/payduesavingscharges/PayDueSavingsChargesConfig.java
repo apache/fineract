@@ -23,21 +23,22 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPla
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class PayDueSavingsChargesConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     @Autowired
@@ -45,13 +46,14 @@ public class PayDueSavingsChargesConfig {
 
     @Bean
     protected Step payDueSavingsChargesStep() {
-        return steps.get(JobName.PAY_DUE_SAVINGS_CHARGES.name()).tasklet(payDueSavingsChargesTasklet()).build();
+        return new StepBuilder(JobName.PAY_DUE_SAVINGS_CHARGES.name(), jobRepository)
+                .tasklet(payDueSavingsChargesTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job payDueSavingsChargesJob() {
-        return jobs.get(JobName.PAY_DUE_SAVINGS_CHARGES.name()).start(payDueSavingsChargesStep()).incrementer(new RunIdIncrementer())
-                .build();
+        return new JobBuilder(JobName.PAY_DUE_SAVINGS_CHARGES.name(), jobRepository).start(payDueSavingsChargesStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

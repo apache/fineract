@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
+import jakarta.ws.rs.core.UriInfo;
 import java.util.Map;
-import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
@@ -37,6 +40,7 @@ import org.springframework.stereotype.Component;
  * raised by {@link DatatablesApiResource} and map those errors to appropriate status codes in BatchResponse.
  */
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy {
 
@@ -54,7 +58,7 @@ public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy 
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final String relativeUrl = request.getRelativeUrl();
+        final String relativeUrl = relativeUrlWithoutVersion(request);
         final String relativeUrlSubString = StringUtils.substringAfter(relativeUrl, "/");
 
         // uriInfo will contain the query parameter value(s) that are sent in the actual batch uri.
@@ -79,6 +83,7 @@ public class GetDatatableEntryByQueryCommandStrategy implements CommandStrategy 
                     case "columnFilter" -> columnFilter = entry.getValue();
                     case "valueFilter" -> valueFilter = entry.getValue();
                     case "resultColumns" -> resultColumns = entry.getValue();
+                    default -> log.warn("Query parameter could not be mapped: {}", entry.getKey());
                 }
             }
         }

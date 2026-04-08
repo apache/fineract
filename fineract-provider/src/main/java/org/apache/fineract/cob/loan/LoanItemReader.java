@@ -18,29 +18,29 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.domain.LoanAccountLock;
+import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
-import org.springframework.batch.item.ExecutionContext;
+import org.springframework.lang.NonNull;
 
-public class LoanItemReader extends AbstractLoanItemReader {
+@Slf4j
+public class LoanItemReader extends AbstractLoanItemReader<Loan> {
 
-    public LoanItemReader(LoanRepository loanRepository) {
+    private final BeforeStepLockingItemReaderHelper<LoanAccountLock> beforeStepLockingItemReaderHelper;
+
+    public LoanItemReader(LoanRepository loanRepository,
+            BeforeStepLockingItemReaderHelper<LoanAccountLock> beforeStepLockingItemReaderHelper) {
         super(loanRepository);
+        this.beforeStepLockingItemReaderHelper = beforeStepLockingItemReaderHelper;
     }
 
     @BeforeStep
-    @SuppressWarnings({ "unchecked" })
-    public void beforeStep(@NotNull StepExecution stepExecution) {
-
-        ExecutionContext executionContext = stepExecution.getExecutionContext();
-        ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
-        List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-        setAlreadyLockedOrProcessedAccounts(
-                (List<Long>) jobExecutionContext.get(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS));
-        setRemainingData(new ArrayList<>(loanIds));
+    public void beforeStep(@NonNull StepExecution stepExecution) {
+        setRemainingData(beforeStepLockingItemReaderHelper.filterRemainingData(stepExecution));
     }
+
 }

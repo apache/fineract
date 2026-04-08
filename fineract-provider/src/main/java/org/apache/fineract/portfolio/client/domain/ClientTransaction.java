@@ -18,6 +18,16 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,29 +36,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 @Entity
 @Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
-public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
+public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", nullable = false)
@@ -81,7 +82,7 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     private boolean reversed;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
-    private String externalId;
+    private ExternalId externalId;
 
     /*
      * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
@@ -98,9 +99,8 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     protected ClientTransaction() {}
 
     public static ClientTransaction payCharge(final Client client, final Office office, PaymentDetail paymentDetail,
-            final LocalDate transactionDate, final Money amount, final String currencyCode) {
+            final LocalDate transactionDate, final Money amount, final String currencyCode, final ExternalId externalId) {
         final boolean isReversed = false;
-        final String externalId = null;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), transactionDate, amount,
                 isReversed, externalId, currencyCode);
     }
@@ -108,14 +108,14 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     public static ClientTransaction waiver(final Client client, final Office office, final LocalDate transactionDate, final Money amount,
             final String currencyCode) {
         final boolean isReversed = false;
-        final String externalId = null;
+        final ExternalId externalId = ExternalId.empty();
         final PaymentDetail paymentDetail = null;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.WAIVE_CHARGE.getValue(), transactionDate, amount,
                 isReversed, externalId, currencyCode);
     }
 
     public ClientTransaction(Client client, Office office, PaymentDetail paymentDetail, Integer typeOf, LocalDate transactionDate,
-            Money amount, boolean reversed, String externalId, String currencyCode) {
+            Money amount, boolean reversed, ExternalId externalId, String currencyCode) {
 
         this.client = client;
         this.office = office;
@@ -227,6 +227,10 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LocalDate getSubmittedOnDate() {
         return this.submittedOnDate;
+    }
+
+    public ExternalId getExternalId() {
+        return this.externalId;
     }
 
 }

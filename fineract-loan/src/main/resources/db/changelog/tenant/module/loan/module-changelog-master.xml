@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+  <!-- Sequence is starting from 1000 to make it easier to move existing liquibase changesets here -->
+  <include relativeToChangelogFile="true" file="parts/1001_add_audit_fields_to_loan_charge.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1002_add_payment_allocation_rule.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1003_add_loan_product_auto_repayment_down_payment_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1004_add_external_event_configuration_for_down_payment_transaction_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1005_add_loan_product_repayment_start_date_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1006_add_downpayment_transaction_enum_permissions.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1007_add_loan_product_schedule_extension_for_down_payment_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1008_add_loan_installment_delinquency_tag.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1009_refactor_loan_Installment_delinquency_tag.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1010_introduce_loan_schedule_type_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1011_add_delinquency_actions_table.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1012_introduce_loan_schedule_processing_type_configuration.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1013_add_loan_account_delinquency_pause_changed_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1014_add_loan_account_custom_snapshot_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1015_remove_disable_schedule_extension_column.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1016_add_credit_allocation_rule.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1017_add_fee_and_penalty_adjustments_to_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1018_rename_credited_principal_back_to_credits_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1019_add_fixed_length.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1020_add_re_aged_flag_to_loan_installment.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1021_add_loan_status_change_history.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1022_add_interest_refund_support.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1023_add_charge_off_behaviour.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1024_accrual_adjustment_transaction_type.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1025_store_pre_closure_strategy_to_loan_level.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1026_add_interest_recognition_flag.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1027_add_capitalized_income_transaction_type.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1028_remove_suboptimal_indexes.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1029_add_installment_amount_in_multiples_of_to_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1030_add_loan_undo_contract_termination_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1031_loan_merchant_buy_down_fee.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1032_add_classification_to_loan_transaction.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1033_add_reage_reasons_for_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1034_loan_reamortization_parameters.xml"/>
+</databaseChangeLog>

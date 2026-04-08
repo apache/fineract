@@ -18,22 +18,21 @@
  */
 package org.apache.fineract.useradministration.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import java.util.Collection;
+import jakarta.persistence.PersistenceException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
@@ -42,10 +41,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
-import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.apache.fineract.useradministration.api.AppUserApiConstant;
+import org.apache.fineract.organisation.staff.domain.StaffRepository;
+import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
@@ -63,11 +60,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-@Service
 @Slf4j
 @RequiredArgsConstructor
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
@@ -80,8 +75,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final RoleRepository roleRepository;
     private final UserDataValidator fromApiJsonDeserializer;
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
-    private final StaffRepositoryWrapper staffRepositoryWrapper;
-    private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final StaffRepository staffRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     @Transactional
@@ -105,26 +100,16 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             Staff linkedStaff;
             if (staffId != null) {
-                linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
+                linkedStaff = this.staffRepository.findByOffice(staffId, userOffice.getId())
+                        .orElseThrow(() -> new StaffNotFoundException(staffId));
             } else {
                 linkedStaff = null;
             }
 
-            Collection<Client> clients;
-            if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.hasParameter(AppUserConstants.CLIENTS)) {
-                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
-                for (JsonElement clientElement : clientsArray) {
-                    clientIds.add(clientElement.getAsLong());
-                }
-                clients = this.clientRepositoryWrapper.findAll(clientIds);
-            } else {
-                clients = null;
+            AppUser appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, command);
+            if (this.configurationDomainService.isForcePasswordResetOnFirstLoginEnabled()) {
+                appUser.updatePasswordResetRequired(true);
             }
-
-            AppUser appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
@@ -156,32 +141,49 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Override
     @Transactional
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    public CommandProcessingResult changeUserPassword(final Long userId, final JsonCommand command) {
+        try {
+            this.context.authenticatedUser(new CommandWrapperBuilder().changeUserPassword(userId).build());
+            this.fromApiJsonDeserializer.validateForChangePassword(command.json(),
+                    this.context.authenticatedUser(new CommandWrapperBuilder().changeUserPassword(userId).build()));
+            final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+            final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
+            final Map<String, Object> changes = userToUpdate.changePassword(command, this.platformPasswordEncoder);
+            if (!changes.isEmpty()) {
+                userToUpdate.updatePasswordResetRequired(false);
+                this.appUserRepository.saveAndFlush(userToUpdate);
+                if (currentPasswordToSaveAsPreview != null) {
+                    this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);
+                }
+            }
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(userId) //
+                    .withOfficeId(userToUpdate.getOffice().getId()) //
+                    .with(changes) //
+                    .build();
+        } catch (final DataIntegrityViolationException dve) {
+            throw handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+        } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
+            log.error("changeUserPassword: JpaSystemException | PersistenceException | AuthenticationServiceException", dve);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            throw handleDataIntegrityIssues(command, throwable, dve);
+        }
+    }
+
+    @Override
+    @Transactional
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
         try {
-            this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
+            final AppUser currentUser = this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(), currentUser);
 
             final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
 
-            Collection<Client> clients = null;
-            boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
-            if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)) {
-                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
-            }
-
-            if (isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
-                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
-                for (JsonElement clientElement : clientsArray) {
-                    clientIds.add(clientElement.getAsLong());
-                }
-                clients = this.clientRepositoryWrapper.findAll(clientIds);
-            }
-
-            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
+            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
 
             if (changes.containsKey("officeId")) {
                 final Long officeId = (Long) changes.get("officeId");
@@ -193,7 +195,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 final Long staffId = (Long) changes.get("staffId");
                 Staff linkedStaff = null;
                 if (staffId != null) {
-                    linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userToUpdate.getOffice().getId());
+                    linkedStaff = this.staffRepository.findByOffice(staffId, userToUpdate.getOffice().getId())
+                            .orElseThrow(() -> new StaffNotFoundException(staffId));
                 }
                 userToUpdate.changeStaff(linkedStaff);
             }
@@ -206,6 +209,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             }
 
             if (!changes.isEmpty()) {
+                if ((changes.containsKey("password") || changes.containsKey("passwordEncoded")) && !currentUser.getId().equals(userId)
+                        && this.configurationDomainService.isForcePasswordResetOnFirstLoginEnabled()) {
+                    userToUpdate.updatePasswordResetRequired(true);
+                }
                 this.appUserRepository.saveAndFlush(userToUpdate);
 
                 if (currentPasswordToSaveAsPreview != null) {
@@ -238,12 +245,20 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         AppUserPreviousPassword currentPasswordToSaveAsPreview = null;
 
         if (passWordEncodedValue != null) {
-            PageRequest pageRequest = PageRequest.of(0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC, "removalDate");
-            final List<AppUserPreviousPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
-                    pageRequest);
-            for (AppUserPreviousPassword aPreviewPassword : nLastUsedPasswords) {
-                if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
-                    throw new PasswordPreviouslyUsedException();
+            final Integer passwordReuseRestrictionCount = this.configurationDomainService.getPasswordReuseRestrictionCount();
+            if (passwordReuseRestrictionCount != null) {
+                List<AppUserPreviousPassword> previousPasswords;
+                if (passwordReuseRestrictionCount == 0) {
+                    previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
+                            PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.DESC, "removalDate"));
+                } else {
+                    PageRequest pageRequest = PageRequest.of(0, passwordReuseRestrictionCount, Sort.Direction.DESC, "removalDate");
+                    previousPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(), pageRequest);
+                }
+                for (AppUserPreviousPassword aPreviewPassword : previousPasswords) {
+                    if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
+                        throw new PasswordPreviouslyUsedException();
+                    }
                 }
             }
 
@@ -279,34 +294,24 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         user.delete();
         this.appUserRepository.save(user);
 
-        return new CommandProcessingResultBuilder().withEntityId(userId).withOfficeId(user.getOffice().getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(userId) //
+                .withOfficeId(user.getOffice().getId()) //
+                .build();
     }
 
     /*
      * Return an exception to throw, no matter what the data integrity issue is.
      */
-    private PlatformDataIntegrityException handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final Exception dve) {
+    private RuntimeException handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
-        // naming
-        // of the constraint
+        // naming of the constraint
         if (realCause.getMessage().contains("username_org")) {
             final String username = command.stringValueOfParameterNamed("username");
-            final StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(username)
-                    .append(" already exists.");
-            return new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username",
-                    username);
+            final String defaultMessage = "User with username " + username + " already exists.";
+            return new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessage, "username", username);
         }
-
-        // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
-        // naming
-        // of the constraint
-        if (realCause.getMessage().contains("unique_self_client")) {
-            return new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist",
-                    "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
-        }
-
         log.error("handleDataIntegrityIssues: Neither duplicate username nor existing user; unknown error occured", dve);
-        return new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+        return ErrorHandler.getMappable(dve, "error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 }

@@ -18,116 +18,106 @@
  */
 package org.apache.fineract.infrastructure.sms.api;
 
+import static org.apache.fineract.infrastructure.core.api.DateParam.FROM_DATE_PARAM;
+import static org.apache.fineract.infrastructure.core.api.DateParam.TO_DATE_PARAM;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
-import java.util.Collection;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.journalentry.api.DateParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.sms.data.SmsData;
+import org.apache.fineract.infrastructure.sms.data.request.SmsCreationRequest;
+import org.apache.fineract.infrastructure.sms.data.request.SmsUpdateRequest;
+import org.apache.fineract.infrastructure.sms.param.SmsRequestParam;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
 import org.springframework.stereotype.Component;
 
-@Path("/sms")
-@Consumes({ MediaType.APPLICATION_JSON })
+@Path("/v1/sms")
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Tag(name = "SMS", description = "")
 @RequiredArgsConstructor
 public class SmsApiResource {
 
-    private final String resourceNameForPermissions = "SMS";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "SMS";
 
     private final PlatformSecurityContext context;
     private final SmsReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<SmsData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final DefaultToApiJsonSerializer<String> apiJsonSerializer;
 
     @GET
-    public String retrieveAll(@Context final UriInfo uriInfo) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final Collection<SmsData> smsMessages = readPlatformService.retrieveAll();
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, smsMessages);
+    public List<SmsData> retrieveAll() {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        return readPlatformService.retrieveAll();
     }
 
     @POST
-    public String create(final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSms().withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    @Consumes({ MediaType.APPLICATION_JSON })
+    public CommandProcessingResult create(final SmsCreationRequest smsCreationRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSms()
+                .withJson(apiJsonSerializer.serialize(smsCreationRequest)).build();
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET
     @Path("{resourceId}")
-    public String retrieveOne(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
-        final SmsData smsMessage = readPlatformService.retrieveOne(resourceId);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, smsMessage);
+    public SmsData retrieveOne(@PathParam("resourceId") final Long resourceId) {
+        return readPlatformService.retrieveOne(resourceId);
     }
 
     @GET
     @Path("{campaignId}/messageByStatus")
-    public String retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId, @Context final UriInfo uriInfo,
-            @QueryParam("status") final Long status, @QueryParam("fromDate") final DateParam fromDateParam,
-            @QueryParam("toDate") final DateParam toDateParam, @QueryParam("locale") final String locale,
-            @QueryParam("dateFormat") final String dateFormat, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+    public Page<SmsData> retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId,
+            @BeanParam SmsRequestParam smsRequestParam) {
+        context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(smsRequestParam.getLimit())
+                .offset(smsRequestParam.getOffset()).orderBy(smsRequestParam.getOrderBy()).sortOrder(smsRequestParam.getSortOrder())
+                .build();
 
-        LocalDate fromDate = null;
-        if (fromDateParam != null) {
-            fromDate = fromDateParam.getDate("fromDate", dateFormat, locale);
-        }
-        LocalDate toDate = null;
-        if (toDateParam != null) {
-            toDate = toDateParam.getDate("toDate", dateFormat, locale);
-        }
+        final DateFormat dateFormat = Optional.ofNullable(smsRequestParam.getRawDateFormat()).map(DateFormat::new).orElse(null);
+        final LocalDate fromDate = Optional.ofNullable(smsRequestParam.getFromDate())
+                .map(fromDateParam -> fromDateParam.getDate(FROM_DATE_PARAM, dateFormat, smsRequestParam.getLocale())).orElse(null);
+        final LocalDate toDate = Optional.ofNullable(smsRequestParam.getToDate())
+                .map(toDateParam -> toDateParam.getDate(TO_DATE_PARAM, dateFormat, smsRequestParam.getLocale())).orElse(null);
 
-        final Page<SmsData> smsMessages = readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, status.intValue(), fromDate,
+        return readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, smsRequestParam.getStatus().intValue(), fromDate,
                 toDate);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return toApiJsonSerializer.serialize(settings, smsMessages);
     }
 
     @PUT
     @Path("{resourceId}")
-    public String update(@PathParam("resourceId") final Long resourceId, final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSms(resourceId).withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    @Consumes({ MediaType.APPLICATION_JSON })
+    public CommandProcessingResult update(@PathParam("resourceId") final Long resourceId, final SmsUpdateRequest smsUpdateRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSms(resourceId)
+                .withJson(apiJsonSerializer.serialize(smsUpdateRequest)).build();
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE
     @Path("{resourceId}")
-    public String delete(@PathParam("resourceId") final Long resourceId) {
+    public CommandProcessingResult delete(@PathParam("resourceId") final Long resourceId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSms(resourceId).build();
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 }

@@ -84,7 +84,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         this.dataValidator.validateForUpdateRunningBalance(command);
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue(),
                 command.parsedJson());
-        CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder()
+        CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId());
         if (officeId == null) {
             updateRunningBalance();
@@ -175,7 +175,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
 
                 params.add(new Object[] { Boolean.TRUE, runningBalance, officeRunningBalance,
-                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getOffsetDateTimeOfTenant(), entryData.getId() });
+                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getAuditOffsetDateTime(), entryData.getId() });
                 batchIndex++;
                 if (batchIndex == batchUpdateSize || index == entryDataList.size() - 1) {
                     this.jdbcTemplate.batchUpdate(sql, params);
@@ -212,7 +212,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         for (JournalEntryData entryData : entryDataList) {
             BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
             params.add(new Object[] { runningBalance, platformSecurityContext.authenticatedUser().getId(),
-                    DateUtils.getOffsetDateTimeOfTenant(), entryData.getId() });
+                    DateUtils.getAuditOffsetDateTime(), entryData.getId() });
         }
         this.jdbcTemplate.batchUpdate(sql, params);
     }
@@ -278,7 +278,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             final EnumOptionData entryType = AccountingEnumerations.journalEntryType(entryTypeId);
 
             return new JournalEntryData(id, officeId, null, null, glAccountId, null, accountType, null, entryType, amount, null, null, null,
-                    null, null, null, null, null, null, null, null, null, null, null, null);
+                    null, null, null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 

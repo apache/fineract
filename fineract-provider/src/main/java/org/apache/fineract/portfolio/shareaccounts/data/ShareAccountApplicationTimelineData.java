@@ -22,9 +22,11 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 @RequiredArgsConstructor
 @Getter
+@JsonLocalDateArrayFormat
 public class ShareAccountApplicationTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;

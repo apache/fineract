@@ -18,16 +18,30 @@
  */
 package org.apache.fineract.cob.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
+import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
+import org.apache.fineract.cob.exceptions.AccountLockCannotBeOverruledException;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,23 +53,93 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 class InlineLoanCOBExecutorServiceImplTest {
 
     @InjectMocks
     private InlineLoanCOBExecutorServiceImpl testObj;
     @Mock
     private TransactionTemplate transactionTemplate;
-
     @Mock
     private InlineLoanCOBExecutionDataParser dataParser;
+    @Mock
+    private RetrieveLoanIdService retrieveIdService;
+    @Mock
+    private FineractProperties fineractProperties;
+    @Mock
+    private FineractProperties.FineractQueryProperties fineractQueryProperties;
+    @Mock
+    private FineractProperties.FineractApiProperties fineractApiProperties;
+    @Mock
+    private FineractProperties.FineractBodyItemSizeLimitProperties fineractBodyItemSizeLimitProperties;
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     void shouldExceptionThrownIfLoanIsAlreadyLocked() {
         JsonCommand command = mock(JsonCommand.class);
+        COBIdAndLastClosedBusinessDate loan = mock(COBIdAndLastClosedBusinessDate.class);
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
 
-        when(dataParser.parseExecution(any())).thenReturn(List.of(3L));
-        when(transactionTemplate.execute(any())).thenThrow(new LoanAccountLockCannotBeOverruledException(""));
-        assertThrows(LoanAccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
+        when(transactionTemplate.execute(any())).thenThrow(new AccountLockCannotBeOverruledException(""));
+        when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+        when(fineractProperties.getApi()).thenReturn(fineractApiProperties);
+        when(dataParser.parseExecution(any())).thenReturn(List.of(1L));
+        when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(65000);
+        when(fineractApiProperties.getBodyItemSizeLimit()).thenReturn(fineractBodyItemSizeLimitProperties);
+        when(fineractBodyItemSizeLimitProperties.getInlineLoanCob()).thenReturn(1000);
+        when(retrieveIdService.retrieveLoanIdsBehindDateOrNull(any(), anyList())).thenReturn(List.of(loan));
+        assertThrows(AccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
+    }
+
+    @Test
+    void shouldListBePartitioned() {
+        JsonCommand command = mock(JsonCommand.class);
+        COBIdAndLastClosedBusinessDate loan1 = mock(COBIdAndLastClosedBusinessDate.class);
+        COBIdAndLastClosedBusinessDate loan2 = mock(COBIdAndLastClosedBusinessDate.class);
+        COBIdAndLastClosedBusinessDate loan3 = mock(COBIdAndLastClosedBusinessDate.class);
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        LocalDate businessDate = LocalDate.now(ZoneId.systemDefault());
+        businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDates.put(BusinessDateType.COB_DATE, businessDate.minusDays(1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
+
+        when(transactionTemplate.execute(any())).thenThrow(new AccountLockCannotBeOverruledException(""));
+        when(fineractProperties.getQuery()).thenReturn(fineractQueryProperties);
+        when(fineractProperties.getApi()).thenReturn(fineractApiProperties);
+        when(dataParser.parseExecution(any())).thenReturn(List.of(1L, 2L, 3L));
+        when(fineractQueryProperties.getInClauseParameterSizeLimit()).thenReturn(2);
+        when(fineractApiProperties.getBodyItemSizeLimit()).thenReturn(fineractBodyItemSizeLimitProperties);
+        when(fineractBodyItemSizeLimitProperties.getInlineLoanCob()).thenReturn(1000);
+        when(retrieveIdService.retrieveLoanIdsBehindDateOrNull(any(), anyList())).thenReturn(List.of(loan1, loan2, loan3));
+        assertThrows(AccountLockCannotBeOverruledException.class, () -> testObj.executeInlineJob(command, "INLINE_LOAN_COB"));
+        verify(retrieveIdService, times(2)).retrieveLoanIdsBehindDateOrNull(any(), anyList());
+    }
+
+    @Test
+    void shouldOldestCloseBusinessDateReturnWithCorrectDate()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        COBIdAndLastClosedBusinessDate loan1 = mock(COBIdAndLastClosedBusinessDate.class);
+        COBIdAndLastClosedBusinessDate loan2 = mock(COBIdAndLastClosedBusinessDate.class);
+        COBIdAndLastClosedBusinessDate loan3 = mock(COBIdAndLastClosedBusinessDate.class);
+        when(loan1.getLastClosedBusinessDate()).thenReturn(null);
+        when(loan2.getLastClosedBusinessDate()).thenReturn(LocalDate.of(2023, 1, 10));
+        when(loan3.getLastClosedBusinessDate()).thenReturn(LocalDate.of(2023, 1, 11));
+        assertEquals(LocalDate.of(2023, 1, 10), getOldestCOBBusinessDate().invoke(testObj, List.of(loan1, loan2, loan3)));
+    }
+
+    private Method getOldestCOBBusinessDate() throws NoSuchMethodException {
+        Method method = InlineCommonLockableCOBExecutorService.class.getDeclaredMethod("getOldestCOBBusinessDate", List.class);
+        method.setAccessible(true);
+        return method;
     }
 }

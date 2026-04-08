@@ -25,16 +25,16 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class EntityDatatableCheckAlreadyExistsException extends AbstractPlatformDomainRuleException {
 
-    public EntityDatatableCheckAlreadyExistsException(final String entityName, final Long status, final String datatableName) {
+    public EntityDatatableCheckAlreadyExistsException(final String entityName, final Integer status, final String datatable) {
         super("error.msg.entityDatatableCheck.duplicate.entry", "the entity datatable check for status: '" + status
-                + "' and datatable name '" + datatableName + "' on entity '" + entityName + "' already exist", "status", "datatableName",
-                "entity", status, datatableName, entityName);
+                + "' and datatable name '" + datatable + "' on entity '" + entityName + "' already exist", "status", "datatable", "entity",
+                status, datatable, entityName);
     }
 
-    public EntityDatatableCheckAlreadyExistsException(final String entityName, long status, String datatableName, long productId) {
+    public EntityDatatableCheckAlreadyExistsException(final String entityName, Integer status, String datatable, Long productId) {
         super("error.msg.entityDatatableCheck.duplicate.entry",
-                "the entity datatable check for status: '" + status + "' and datatable name '" + datatableName + "' on entity '"
-                        + entityName + "' and product id '" + productId + "' already exist",
-                "status", "datatableName", "entity", "productId", status, datatableName, entityName, productId);
+                "the entity datatable check for status: '" + status + "' and datatable name '" + datatable + "' on entity '" + entityName
+                        + "' and product id '" + productId + "' already exist",
+                "status", "datatable", "entity", "productId", status, datatable, entityName, productId);
     }
 }

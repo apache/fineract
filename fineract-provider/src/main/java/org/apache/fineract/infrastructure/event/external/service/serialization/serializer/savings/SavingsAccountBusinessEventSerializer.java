@@ -25,14 +25,14 @@ import org.apache.fineract.avro.savings.v1.SavingsAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsAccountBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.savings.SavingsAccountDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SavingsAccountBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class SavingsAccountBusinessEventSerializer implements BusinessEventSerializer {
 
     private final SavingsAccountReadPlatformService service;
     private final SavingsAccountDataMapper mapper;
@@ -43,7 +43,7 @@ public class SavingsAccountBusinessEventSerializer extends AbstractBusinessEvent
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         SavingsAccountBusinessEvent event = (SavingsAccountBusinessEvent) rawEvent;
         SavingsAccountData data = service.retrieveOne(event.get().getId());
         return mapper.map(data);

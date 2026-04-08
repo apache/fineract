@@ -26,8 +26,15 @@ import java.util.Set;
  ***/
 public enum AdHocJsonInputParams {
 
-    ID("id"), NAME("name"), QUERY("query"), TABLENAME("tableName"), TABLEFIELDS("tableFields"), ACTIVE("isActive"), REPORT_RUN_FREQUENCY(
-            "reportRunFrequency"), REPORT_RUN_EVERY("reportRunEvery"), EMAIL("email");
+    ID("id"), //
+    NAME("name"), //
+    QUERY("query"), //
+    TABLENAME("tableName"), //
+    TABLEFIELDS("tableFields"), //
+    ACTIVE("isActive"), //
+    REPORT_RUN_FREQUENCY("reportRunFrequency"), //
+    REPORT_RUN_EVERY("reportRunEvery"), //
+    EMAIL("email"); //
 
     private final String value;
 
@@ -49,7 +56,7 @@ public enum AdHocJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public String getValue() {

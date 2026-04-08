@@ -100,7 +100,6 @@ final class UsersApiResourceSwagger {
 
         public Collection<OfficeData> allowedOffices;
         public Collection<RoleData> availableRoles;
-        public Collection<RoleData> selfServiceRoles;
     }
 
     @Schema(description = "PostUsersRequest")
@@ -127,11 +126,15 @@ final class UsersApiResourceSwagger {
         @Schema(example = "1")
         public Long staffId;
         @Schema(example = "[2,3]")
-        public List<String> roles;
+        public List<Long> roles;
+        @Schema(example = "[2,3]")
+        public List<Long> clients;
         @Schema(example = "true")
         public Boolean sendPasswordToEmail;
         @Schema(example = "true")
-        public Boolean isSelfServiceUser;
+        public Boolean passwordNeverExpires;
+        @Schema(example = "true")
+        public Boolean isLoginRetriesEnabled;
     }
 
     @Schema(description = "PostUsersResponse")
@@ -147,6 +150,43 @@ final class UsersApiResourceSwagger {
         public Long resourceId;
     }
 
+    @Schema(description = "ChangePwdUsersUserIdRequest")
+    public static final class ChangePwdUsersUserIdRequest {
+
+        private ChangePwdUsersUserIdRequest() {
+
+        }
+
+        @Schema(example = "password")
+        public String password;
+        @Schema(example = "repeatPassword")
+        public String repeatPassword;
+    }
+
+    @Schema(description = "ChangePwdUsersUserIdResponse")
+    public static final class ChangePwdUsersUserIdResponse {
+
+        private ChangePwdUsersUserIdResponse() {
+
+        }
+
+        static final class ChangePwdUsersUserIdResponseChanges {
+
+            private ChangePwdUsersUserIdResponseChanges() {
+
+            }
+
+            @Schema(example = "true")
+            public boolean password;
+        }
+
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "11")
+        public Long resourceId;
+        public ChangePwdUsersUserIdResponseChanges changes;
+    }
+
     @Schema(description = "PutUsersUserIdRequest")
     public static final class PutUsersUserIdRequest {
 
@@ -156,10 +196,26 @@ final class UsersApiResourceSwagger {
 
         @Schema(example = "Test")
         public String firstname;
-        @Schema(example = "window75")
+        @Schema(example = "User")
+        public String lastname;
+        @Schema(example = "whatever@mifos.org")
+        public String email;
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "1")
+        public Long staffId;
+        @Schema(example = "[2,3]")
+        public List<Long> roles;
+        @Schema(example = "[2,3]")
+        public List<Long> clients;
+        @Schema(example = "password")
         public String password;
-        @Schema(example = "window75")
+        @Schema(example = "repeatPassword")
         public String repeatPassword;
+        @Schema(example = "true")
+        public Boolean sendPasswordToEmail;
+        @Schema(example = "true")
+        public Boolean isLoginRetriesEnabled;
     }
 
     @Schema(description = "PutUsersUserIdResponse")
@@ -177,8 +233,6 @@ final class UsersApiResourceSwagger {
 
             @Schema(example = "Test")
             public String firstname;
-            @Schema(example = "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51")
-            public String passwordEncoded;
         }
 
         @Schema(example = "1")

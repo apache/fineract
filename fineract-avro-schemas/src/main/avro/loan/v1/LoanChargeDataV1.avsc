@@ -232,6 +232,53 @@
                 "null",
                 "string"
             ]
+        },
+        {
+            "default": null,
+            "name": "externalLoanId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "externalOwnerId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "customData",
+            "type": [
+                "null",
+                {
+                    "values": "bytes",
+                    "type": "map"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "originators",
+            "doc": "List of originators attached to the parent loan for revenue sharing",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.OriginatorDetailsV1"
+                }
+            ]
         }
     ]
 }

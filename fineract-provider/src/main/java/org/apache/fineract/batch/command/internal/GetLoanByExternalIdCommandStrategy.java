@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +61,7 @@ public class GetLoanByExternalIdCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
 
         // Expected pattern - loans\/external-id\/[\w\d_-]+\?associations=transactions
-        final String relativeUrl = request.getRelativeUrl();
+        final String relativeUrl = relativeUrlWithoutVersion(request);
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
         final String loanExternalIdPathParameter = pathParameters.get(2);
 

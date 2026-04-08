@@ -18,15 +18,18 @@
  */
 package org.apache.fineract.portfolio.charge.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.Collection;
 import java.util.Map;
-import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
@@ -45,46 +48,25 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChargeWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final JdbcTemplate jdbcTemplate;
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
+    private final JdbcTemplate jdbcTemplate;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final GLAccountRepositoryWrapper glAccountRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
     private final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper;
-
-    @Autowired
-    public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
-            final LoanProductRepository loanProductRepository, final JdbcTemplate jdbcTemplate,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
-            final TaxGroupRepositoryWrapper taxGroupRepository, final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper) {
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.jdbcTemplate = jdbcTemplate;
-        this.chargeRepository = chargeRepository;
-        this.loanProductRepository = loanProductRepository;
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.glAccountRepository = glAccountRepository;
-        this.taxGroupRepository = taxGroupRepository;
-        this.paymentTyperepositoryWrapper = paymentTyperepositoryWrapper;
-    }
 
     @Transactional
     @Override
@@ -126,7 +108,10 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
                     FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES, charge.getId());
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(charge.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -189,7 +174,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             final String paymentTypeIdParamName = "paymentTypeId";
             if (changes.containsKey(paymentTypeIdParamName)) {
 
-                final Integer paymentTypeIdNewValue = command.integerValueOfParameterNamed(paymentTypeIdParamName);
+                final Long paymentTypeIdNewValue = command.longValueOfParameterNamed(paymentTypeIdParamName);
 
                 PaymentType paymentType = null;
                 if (paymentTypeIdNewValue != null) {
@@ -214,7 +199,11 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 this.chargeRepository.save(chargeForUpdate);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(chargeId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(chargeId) //
+                    .with(changes) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -249,22 +238,23 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
         this.chargeRepository.save(chargeForDelete);
 
-        return new CommandProcessingResultBuilder().withEntityId(chargeForDelete.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(chargeForDelete.getId()) //
+                .build();
     }
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("name")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.charge.duplicate.name", "Charge with name `" + name + "` already exists",
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 

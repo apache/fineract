@@ -72,7 +72,10 @@ public class ExternalServiceWritePlatformServiceJpaRepositoryImpl implements Ext
             }
         }
         return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()).withEntityId(externalServiceId).with(changesList).build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(externalServiceId) //
+                .with(changesList) //
+                .build();
         //
 
     }

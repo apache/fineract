@@ -25,14 +25,24 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class ActuatorIntegrationTest {
 
     private static final String INFO_URL = "/fineract-provider/actuator/info";
 
+    @BeforeEach
+    public void setup() {
+        Utils.initializeRESTAssured();
+    }
+
     @Test
     public void testActuatorGitBuildInfo() {
+        log.info(INFO_URL);
         Response response = RestAssured.given().headers("Content-Type", ContentType.JSON, "Accept", ContentType.JSON).when().get(INFO_URL)
                 .then().contentType(ContentType.JSON).extract().response();
 

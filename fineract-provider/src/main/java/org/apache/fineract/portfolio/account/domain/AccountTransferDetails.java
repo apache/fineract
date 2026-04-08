@@ -18,17 +18,17 @@
  */
 package org.apache.fineract.portfolio.account.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -37,7 +37,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
 @Table(name = "m_account_transfer_details")
-public class AccountTransferDetails extends AbstractPersistableCustom {
+public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "from_office_id", nullable = false)

@@ -23,9 +23,10 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -47,6 +48,7 @@ public class LoanWorkbookPopulatorTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
@@ -54,14 +56,15 @@ public class LoanWorkbookPopulatorTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
     public void testLoanWorkbookPopulate() throws IOException {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         // in order to populate helper sheets
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets
@@ -82,16 +85,17 @@ public class LoanWorkbookPopulatorTest {
         Integer outcome_lp_creaion = loanTransactionHelper.getLoanProductId(jsonLoanProduct);
         Assertions.assertNotNull(outcome_lp_creaion, "Could not create Loan Product");
 
-        String jsonFund = "{\n" + "\t\"name\": \"" + Utils.randomNameGenerator("Fund_Name", 9) + "\"\n" + "}";
+        String jsonFund = "{\n" + "\t\"name\": \"" + Utils.uniqueRandomStringGenerator("Fund_Name", 9) + "\"\n" + "}";
         Integer outcome_fund_creation = FundsResourceHandler.createFund(jsonFund, requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
-        Integer position = 1;
-        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
-                position);
+        Long position = 1L;
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long outcome_payment_creation = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
         Workbook workbook = loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");

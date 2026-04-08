@@ -1,0 +1,12 @@
+{
+    "name": "LoanAccountsStayedLockedDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [{
+        "name": "loanAccounts",
+        "type": {
+            "type": "array",
+            "items": "org.apache.fineract.avro.loan.v1.LoanAccountStayedLockedDataV1"
+        }
+    }]
+}

@@ -21,17 +21,17 @@
 -->
 
 
-<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
-    version="2.0">
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
+          https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd" version="3.0">
 
     <persistence-unit-metadata>
         <persistence-unit-defaults>
             <delimited-identifiers/>
             <entity-listeners>
                 <entity-listener
-                    class="org.springframework.data.jpa.domain.support.AuditingEntityListener" />
+                        class="org.springframework.data.jpa.domain.support.AuditingEntityListener"/>
             </entity-listeners>
         </persistence-unit-defaults>
     </persistence-unit-metadata>

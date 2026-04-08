@@ -28,10 +28,10 @@ public interface EntityDatatableChecksWritePlatformService {
 
     CommandProcessingResult deleteCheck(Long entityDatatableCheckId);
 
-    void runTheCheck(Long entityId, String entityName, Integer statusCode, String foreignKeyColumn, String entitySubtype);
+    void runTheCheck(Long entityId, String entityName, Integer status, String foreignKeyColumn, String entitySubtype);
 
-    void runTheCheckForProduct(Long entityId, String entityName, Long statusCode, String foreignKeyColumn, long productLoanId);
+    void runTheCheckForProduct(Long entityId, String entityName, Integer status, String foreignKeyColumn, long productLoanId);
 
-    boolean saveDatatables(Long status, String entity, Long entityId, Long productId, JsonArray data);
+    boolean saveDatatables(Integer status, String entity, Long entityId, Long productId, JsonArray data);
 
 }

@@ -1,0 +1,41 @@
+= Commands
+
+This is the write-side of the architecture...
+
+== Dispatcher
+
+The synchronous command dispatcher is the default implementation that is used to dispatch and execute commands. We have already prototypes for other dispatch modes (asynchronous and non-blocking), but they need extensive testing before they can be used in production. When ready they can be dropped in without any further code changes. The default synchronous dispatcher is automatically disabled if an alternative command dispatcher implementation is provided by Spring Framework's dependency injection mechanism.
+
+.Command Processing Architecture Level 2 - Dispatcher
+[plantuml, format=svg]
+----
+include::{diagramsdir}/command-architecture-level-2-dispatcher.puml[]
+----
+
+.Command Dispatcher
+[source,java]
+----
+include::{rootdir}/fineract-command/src/main/java/org/apache/fineract/command/core/CommandDispatcher.java[lines=19..]
+----
+
+== Synchronous
+
+TBD
+
+== Asynchronous
+
+NOTE: Early phase of development. There is a prototype available in module `fineract-command-async`, but needs extensive testing before it can be used in production.
+
+TBD
+
+== LMAX Disruptor
+
+NOTE: Early phase of development. There is a prototype available in module `fineract-command-disruptor`, but needs extensive testing before it can be used in production.
+
+TBD
+
+== Chronicle Queue
+
+NOTE: Early phase of development. No prototype available yet, but most likely module `fineract-command-chronicle` will be used.
+
+TBD

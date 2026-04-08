@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <!-- Create table m_external_asset_owner_transfer_journal_entry_mapping -->
+    <changeSet author="fineract" id="1" context="mysql">
+        <createTable tableName="m_external_asset_owner_transfer_journal_entry_mapping">
+            <column autoIncrement="true" name="id" type="BIGINT" remarks="Internal ID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="journal_entry_id" type="bigint" remarks="Journal entry ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_transfer_id" type="bigint" remarks="Owner transfer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks=""/>
+            <column name="created_on_utc" type="DATETIME" remarks=""/>
+            <column name="last_modified_by" type="bigint" remarks=""/>
+            <column name="last_modified_on_utc" type="DATETIME" remarks=""/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="1" context="postgresql">
+        <createTable tableName="m_external_asset_owner_transfer_journal_entry_mapping">
+            <column autoIncrement="true" name="id" type="BIGINT" remarks="Internal ID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="journal_entry_id" type="bigint" remarks="Journal entry ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_transfer_id" type="bigint" remarks="Owner transfer">
+            </column>
+            <column name="created_by" type="bigint" remarks=""/>
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE" remarks=""/>
+            <column name="last_modified_by" type="bigint" remarks=""/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE" remarks=""/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="2">
+        <addForeignKeyConstraint baseColumnNames="created_by"
+                                 baseTableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_transfer_je_mapping_created_by" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by"
+                                 baseTableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_transfer_je_mapping_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+
+        <addForeignKeyConstraint baseColumnNames="journal_entry_id"
+                                 baseTableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_transfer_je_mapping_journal_entry_id" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="acc_gl_journal_entry" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="owner_transfer_id"
+                                 baseTableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_transfer_je_mapping_owner_transfer_id"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_external_asset_owner_transfer" validate="true"/>
+    </changeSet>
+
+    <!-- Create table m_external_asset_owner_journal_entry_mapping -->
+    <changeSet author="fineract" id="3" context="mysql">
+        <createTable tableName="m_external_asset_owner_journal_entry_mapping">
+            <column autoIncrement="true" name="id" type="BIGINT" remarks="Internal ID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="journal_entry_id" type="bigint" remarks="Journal entry ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_id" type="bigint" remarks="Owner">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks=""/>
+            <column name="created_on_utc" type="DATETIME" remarks=""/>
+            <column name="last_modified_by" type="bigint" remarks=""/>
+            <column name="last_modified_on_utc" type="DATETIME" remarks=""/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="3" context="postgresql">
+        <createTable tableName="m_external_asset_owner_journal_entry_mapping">
+            <column autoIncrement="true" name="id" type="BIGINT" remarks="Internal ID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="journal_entry_id" type="bigint" remarks="Journal entry ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_id" type="bigint" remarks="Owner">
+            </column>
+            <column name="created_by" type="bigint" remarks=""/>
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE" remarks=""/>
+            <column name="last_modified_by" type="bigint" remarks=""/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE" remarks=""/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="4">
+        <addForeignKeyConstraint baseColumnNames="created_by"
+                                 baseTableName="m_external_asset_owner_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_je_mapping_created_by" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by"
+                                 baseTableName="m_external_asset_owner_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_je_mapping_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+
+        <addForeignKeyConstraint baseColumnNames="journal_entry_id"
+                                 baseTableName="m_external_asset_owner_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_je_mapping_journal_entry_id" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="acc_gl_journal_entry" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="owner_id"
+                                 baseTableName="m_external_asset_owner_journal_entry_mapping"
+                                 constraintName="FK_ext_asset_owner_je_mapping_owner_id"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_external_asset_owner" validate="true"/>
+    </changeSet>
+    <!-- Add index to m_external_asset_owner_transfer_loan_mapping of loan_id -->
+    <changeSet id="5" author="fineract">
+        <createIndex tableName="m_external_asset_owner_transfer_loan_mapping"
+                     indexName="IND_m_ext_asset_owner_transfer_loan_mapping_loan_id">
+            <column name="loan_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,121 @@
+= Loan Charges
+
+== Overview
+
+Loan charge products can be created with different charge time types and charge calculation types. The created charge product can be associated with loan products or individual loan accounts to automate fee and penalty application throughout the loan lifecycle.
+
+=== Benefits
+
+* Automates charge application at disbursement, specified dates, or installment schedules
+* Supports multiple calculation methods including flat amounts and various percentage-based calculations
+* Handles multi-disbursement loans with distinct first disbursement vs. tranche disbursement behavior
+* Provides penalty automation for overdue installments
+* Enables flexible fee structures for different loan products
+
+== Charge Time Types and Calculation Types
+
+The following charge time types and corresponding calculation types are supported for loans:
+
+|===
+| Charge Time Type | Description | Available Charge Calculation Types
+
+| Disbursement
+| Charged at the time of first disbursement. For multi-disbursement loans, it applies only to the first disbursement.
+a|
+- *Flat*: Fixed amount defined at charge creation
+- *% amount*: Percentage charged on approved loan amount
+- *% interest*: Percentage charged on total interest amount as per first disbursement  
+- *% loan amount + interest*: Percentage charged on the disbursed amount plus total interest as per first disbursement
+- *% disbursement amount*: Percentage charged on actual disbursement amount
+
+| Specified Due Date
+| Charge applied on a specific date defined by the user within the loan lifecycle.
+a|
+- *Flat*: Fixed amount defined at charge creation
+- *% amount*: Percentage charged on approved loan amount
+- *% interest*: Percentage charged on total interest amount as per first disbursement
+- *% loan amount + interest*: Percentage charged on the disbursed amount plus total interest as per first disbursement
+
+| Installment Fees
+| Charged with each repayment installment throughout the loan term.
+a|
+- *Flat*: Fixed amount per installment
+- *% amount*: Percentage of approved amount divided across installments
+- *% loan amount + interest*: Percentage of principal plus interest for each installment
+
+| Overdue Fees
+| Penalties automatically applied when installments become overdue.
+a|
+- *Flat*: Fixed penalty amount per overdue installment
+- *% amount*: Percentage penalty based on overdue amount
+
+| Tranche Disbursement  
+| Charged for each disbursement tranche in multi-disbursement loans.
+a|
+- *Flat*: Fixed amount per disbursement tranche
+- *% disbursement amount*: Percentage charged on each disbursement tranche amount
+|===
+
+== API Endpoints
+
+=== Charge Product Management
+
+* *Endpoint*: `/v1/charges`
+* *Methods*: `GET` (list all charges), `POST` (create charge)
+* *Purpose*: Manage charge product definitions
+
+* *Endpoint*: `/v1/charges/{chargeId}`  
+* *Methods*: `GET` (retrieve), `PUT` (update), `DELETE` (delete)
+* *Purpose*: Individual charge product operations
+
+* *Endpoint*: `/v1/charges/template`
+* *Methods*: `GET`
+* *Purpose*: Retrieve charge creation template with dropdown options
+
+=== Loan Charge Management
+
+* *Endpoint*: `/v1/loans/{loanId}/charges`
+* *Alternative*: `/v1/loans/external-id/{loanExternalId}/charges`
+* *Methods*: `GET` (list loan charges), `POST` (add charge to loan)
+* *Purpose*: Manage charges on specific loans
+
+* *Endpoint*: `/v1/loans/{loanId}/charges/{chargeId}`
+* *Alternative*: `/v1/loans/external-id/{loanExternalId}/charges/external-id/{chargeExternalId}`
+* *Methods*: `GET` (retrieve), `PUT` (update), `DELETE` (remove), `POST` (execute commands)
+* *Purpose*: Individual loan charge operations
+
+* *Endpoint*: `/v1/loans/{loanId}/charges/template`
+* *Methods*: `GET`  
+* *Purpose*: Get template for adding charges to loans
+
+=== Charge Commands
+
+Loan charges support command-based operations via `POST` requests with `command` query parameter:
+
+* `POST /v1/loans/{loanId}/charges/{chargeId}?command=waive` - Waive charge
+* `POST /v1/loans/{loanId}/charges/{chargeId}?command=pay` - Pay charge directly
+
+== Configuration
+
+=== Charge Product Setup
+
+1. *Charge Time Type*: Select when the charge should be applied (disbursement, specified date, installments, overdue, or tranche)
+2. *Charge Calculation Type*: Choose calculation method (flat amount or percentage-based)
+3. *Amount/Percentage*: Define the charge amount or percentage value
+4. *Currency*: Must match the loan product currency
+5. *Penalty Flag*: Mark charges as penalties for reporting purposes
+6. *Active Status*: Enable/disable charge availability
+
+=== Loan Product Association
+
+* Associate default charges to loan products during product configuration
+* Default charges are automatically applied when loans are created from the product
+* Individual charges can be added to specific loans regardless of product defaults
+
+=== Validation Rules
+
+* Charge currency must match loan currency
+* Specified due dates must fall within the loan term
+* Percentage values must be within valid ranges (0-100)
+* Overdue charges require penalty flag to be enabled
+* Disbursement charges can only be added before loan disbursement

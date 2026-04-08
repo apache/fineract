@@ -18,33 +18,34 @@
  */
 package com.acme.fineract.loan.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@RequiredArgsConstructor
 public class AcmeNoopJobConfiguration {
 
-    @Autowired
-    private JobBuilderFactory jobs;
-    @Autowired
-    private StepBuilderFactory steps;
-    @Autowired
-    private AcmeNoopJobTasklet tasklet;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final AcmeNoopJobTasklet tasklet;
 
     @Bean
     protected Step acmeNoopJobStep() {
-        return steps.get(AcmeJobName.ACME_NOOP_JOB.name()).tasklet(tasklet).build();
+        return new StepBuilder(AcmeJobName.ACME_NOOP_JOB.name(), jobRepository).tasklet(tasklet, transactionManager).build();
     }
 
     @Bean
     public Job acmeNoopJob() {
-        return jobs.get(AcmeJobName.ACME_NOOP_JOB.name()).start(acmeNoopJobStep()).incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(AcmeJobName.ACME_NOOP_JOB.name(), jobRepository).start(acmeNoopJobStep()).incrementer(new RunIdIncrementer())
+                .build();
     }
 
 }

@@ -28,22 +28,23 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -58,14 +59,12 @@ import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.data.RolePermissionsData;
 import org.apache.fineract.useradministration.service.PermissionReadPlatformService;
 import org.apache.fineract.useradministration.service.RoleReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/roles")
+@Path("/v1/roles")
 @Component
-@Scope("singleton")
 @Tag(name = "Roles", description = "An API capability to support management of application roles for user administration.")
+@RequiredArgsConstructor
 public class RolesApiResource {
 
     public static final String ID = "id";
@@ -96,24 +95,7 @@ public class RolesApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public RolesApiResource(final PlatformSecurityContext context, final RoleReadPlatformService readPlatformService,
-            final PermissionReadPlatformService permissionReadPlatformService,
-            final DefaultToApiJsonSerializer<RoleData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<RolePermissionsData> permissionsToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.roleReadPlatformService = readPlatformService;
-        this.permissionReadPlatformService = permissionReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.permissionsToApiJsonSerializer = permissionsToApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
-
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Roles", description = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n" + "roles?fields=name")
     @ApiResponses({
@@ -149,7 +131,6 @@ public class RolesApiResource {
 
     @GET
     @Path("{roleId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Role", description = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n" + "roles/1?fields=name")
     @ApiResponses({
@@ -224,7 +205,6 @@ public class RolesApiResource {
 
     @GET
     @Path("{roleId}/permissions")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Role's Permissions", description = "Example Requests:\n" + "\n" + "roles/1/permissions")
     @ApiResponses({
@@ -271,7 +251,6 @@ public class RolesApiResource {
      */
     @DELETE
     @Path("{roleId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Role", description = "Description : Delete the role in case role is not associated with any users.")
     @ApiResponses({

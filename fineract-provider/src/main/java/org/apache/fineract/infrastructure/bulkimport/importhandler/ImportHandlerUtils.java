@@ -21,6 +21,8 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler;
 import com.google.common.base.Splitter;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -40,6 +42,7 @@ import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 
+@Slf4j
 public final class ImportHandlerUtils {
 
     private ImportHandlerUtils() {
@@ -50,10 +53,18 @@ public final class ImportHandlerUtils {
         Integer noOfEntries = 0;
         // getLastRowNum and getPhysicalNumberOfRows showing false values
         // sometimes
-        while (sheet.getRow(noOfEntries + 1) != null && sheet.getRow(noOfEntries + 1).getCell(primaryColumn) != null) {
+        int maxRows = sheet.getLastRowNum();
+        while (noOfEntries < maxRows) {
+            Row row = sheet.getRow(noOfEntries + 1);
+            if (row == null) {
+                break;
+            }
+            Cell cell = row.getCell(primaryColumn);
+            if (cell == null || cell.getCellType() == CellType.BLANK) {
+                break;
+            }
             noOfEntries++;
         }
-
         return noOfEntries;
     }
 
@@ -73,20 +84,20 @@ public final class ImportHandlerUtils {
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
-                CellValue val = null;
+                CellValue value;
                 try {
-                    val = eval.evaluate(c);
-                } catch (NullPointerException npe) {
-                    return null;
+                    value = eval.evaluate(c);
+                    return ((Double) value.getNumberValue()).longValue();
+                } catch (Exception e) {
+                    log.error("Cell evaluation error: ", e);
                 }
-                return ((Double) val.getNumberValue()).longValue();
             }
+            return null;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return ((Double) c.getNumericCellValue()).longValue();
         } else {
             return Long.parseLong(row.getCell(colIndex).getStringCellValue());
         }
-        return null;
     }
 
     public static String readAsString(int colIndex, Row row) {
@@ -98,26 +109,20 @@ public final class ImportHandlerUtils {
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
-                CellValue val = null;
+                CellValue value;
                 try {
-                    val = eval.evaluate(c);
-                } catch (NullPointerException npe) {
-                    return null;
-                }
+                    value = eval.evaluate(c);
 
-                String res = trimEmptyDecimalPortion(val.getStringValue());
-                if (res != null) {
-                    if (!res.equals("")) {
+                    String res = trimEmptyDecimalPortion(value.getStringValue());
+
+                    if (StringUtils.isNotEmpty(res)) {
                         return res.trim();
-                    } else {
-                        return null;
                     }
-                } else {
-                    return null;
+                } catch (Exception e) {
+                    log.error("Cell evaluation error: ", e);
                 }
-            } else {
-                return null;
             }
+            return null;
         } else if (c.getCellType() == CellType.STRING) {
             String res = trimEmptyDecimalPortion(c.getStringCellValue().trim());
             return res.trim();
@@ -145,8 +150,7 @@ public final class ImportHandlerUtils {
             return null;
         }
 
-        LocalDate localDate = LocalDate.ofInstant(c.getDateCellValue().toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        return localDate;
+        return LocalDate.ofInstant(c.getDateCellValue().toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
     public static Boolean readAsBoolean(int colIndex, Row row) {
@@ -157,13 +161,13 @@ public final class ImportHandlerUtils {
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
-                CellValue val = null;
+                CellValue value;
                 try {
-                    val = eval.evaluate(c);
-                } catch (NullPointerException npe) {
-                    return false;
+                    value = eval.evaluate(c);
+                    return value.getBooleanValue();
+                } catch (Exception e) {
+                    log.error("Cell evaluation error: ", e);
                 }
-                return val.getBooleanValue();
             }
             return false;
         } else if (c.getCellType() == CellType.BOOLEAN) {
@@ -186,13 +190,13 @@ public final class ImportHandlerUtils {
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
-                CellValue val = null;
+                CellValue value;
                 try {
-                    val = eval.evaluate(c);
-                } catch (NullPointerException npe) {
-                    return null;
+                    value = eval.evaluate(c);
+                    return ((Double) value.getNumberValue()).intValue();
+                } catch (Exception e) {
+                    log.error("Cell evaluation error: ", e);
                 }
-                return ((Double) val.getNumberValue()).intValue();
             }
             return null;
         } else if (c.getCellType() == CellType.NUMERIC) {
@@ -210,16 +214,15 @@ public final class ImportHandlerUtils {
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
-                CellValue val = null;
+                CellValue value;
                 try {
-                    val = eval.evaluate(c);
-                } catch (NullPointerException npe) {
-                    return 0.0;
+                    value = eval.evaluate(c);
+                    return value.getNumberValue();
+                } catch (Exception e) {
+                    log.error("Cell evaluation error: ", e);
                 }
-                return val.getNumberValue();
-            } else {
-                return 0.0;
             }
+            return 0.0;
         } else if (c.getCellType() == CellType.NUMERIC) {
             return row.getCell(colIndex).getNumericCellValue();
         } else {
@@ -322,7 +325,7 @@ public final class ImportHandlerUtils {
                             return 0L;
                         }
                     } else {
-                        return 0L;
+                        return null;
                     }
                 }
             }

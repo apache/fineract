@@ -28,17 +28,23 @@ import org.apache.fineract.avro.loan.v1.DelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanAmountDataV1;
 import org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1;
+import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CurrencyDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanChargeDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanDelinquencyRangeDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventWithCustomDataSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -47,31 +53,38 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class LoanDelinquencyRangeChangeBusinessEventSerializer
+        extends AbstractBusinessEventWithCustomDataSerializer<LoanDelinquencyRangeChangeBusinessEvent> {
 
     private final LoanReadPlatformService service;
 
     private final LoanDelinquencyRangeDataMapper mapper;
 
+    private final LoanChargeReadPlatformService loanChargeReadPlatformService;
+
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
+
     private final LoanChargeDataMapper chargeMapper;
 
     private final CurrencyDataMapper currencyMapper;
+    private final AvroDateTimeMapper dataTimeMapper;
+    private final LoanInstallmentLevelDelinquencyEventProducer installmentLevelDelinquencyEventProducer;
+    private final List<ExternalEventCustomDataSerializer<LoanDelinquencyRangeChangeBusinessEvent>> externalEventCustomDataSerializers;
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanDelinquencyRangeChangeBusinessEvent event = (LoanDelinquencyRangeChangeBusinessEvent) rawEvent;
         LoanAccountData data = service.retrieveOne(event.get().getId());
         Long id = data.getId();
         String accountNumber = data.getAccountNo();
         String externalId = data.getExternalId().getValue();
         MonetaryCurrency loanCurrency = event.get().getCurrency();
-        List<LoanChargeDataRangeViewV1> charges = event//
-                .get()//
-                .getRepaymentScheduleInstallments()//
+        CollectionData delinquentData = delinquencyReadPlatformService.calculateLoanCollectionData(id);
+        String delinquentDate = dataTimeMapper.mapLocalDate(delinquentData.getDelinquentDate());
+
+        List<LoanChargeDataRangeViewV1> charges = loanChargeReadPlatformService.retrieveLoanCharges(id)//
                 .stream()//
-                .flatMap(installment -> installment.getInstallmentCharges().stream())//
-                .map(LoanInstallmentCharge::getLoancharge)//
-                .map(charge -> chargeMapper.mapRangeView(charge.toData()))//
+                .map(chargeMapper::mapRangeView)//
                 .toList();
         LoanAmountDataV1 amount = LoanAmountDataV1.newBuilder()//
                 .setPrincipalAmount(calculateDataSummary(event.get(),
@@ -87,6 +100,10 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
                 .build();
 
         DelinquencyRangeDataV1 delinquencyRange = mapper.map(data.getDelinquencyRange());
+
+        List<LoanInstallmentDelinquencyBucketDataV1> installmentsDelinquencyData = installmentLevelDelinquencyEventProducer
+                .calculateInstallmentLevelDelinquencyData(event.get(), data.getCurrency());
+
         LoanAccountDelinquencyRangeDataV1.Builder builder = LoanAccountDelinquencyRangeDataV1.newBuilder();
         return builder//
                 .setLoanId(id)//
@@ -96,13 +113,15 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
                 .setCharges(charges)//
                 .setAmount(amount)//
                 .setCurrency(currencyMapper.map(data.getCurrency()))//
-                .build();
+                .setDelinquentDate(delinquentDate)//
+                .setInstallmentDelinquencyBuckets(installmentsDelinquencyData)//
+                .setCustomData(collectCustomData(event)).build();
     }
 
     private BigDecimal calculateDataSummary(Loan loan, BiFunction<Loan, LoanRepaymentScheduleInstallment, BigDecimal> mapper) {
-        return loan.getRepaymentScheduleInstallments().stream().map(installment -> mapper.apply(loan, installment)).reduce(BigDecimal.ZERO,
-                BigDecimal::add);
-
+        return loan.getRepaymentScheduleInstallments().stream()
+                .filter(installment -> DateUtils.isBeforeBusinessDate(installment.getDueDate()))
+                .map(installment -> mapper.apply(loan, installment)).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
@@ -113,5 +132,10 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
     @Override
     public Class<? extends GenericContainer> getSupportedSchema() {
         return LoanAccountDelinquencyRangeDataV1.class;
+    }
+
+    @Override
+    protected List<ExternalEventCustomDataSerializer<LoanDelinquencyRangeChangeBusinessEvent>> getExternalEventCustomDataSerializers() {
+        return externalEventCustomDataSerializers;
     }
 }

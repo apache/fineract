@@ -20,13 +20,14 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    tomcat 'org.apache.tomcat:tomcat:9.0.69@zip'
+    tomcat 'org.apache.tomcat:tomcat:10.1.49@zip'
     testImplementation( files("$rootDir/fineract-provider/build/classes/java/main/"),
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             'org.junit.jupiter:junit-jupiter-api',
             'com.icegreen:greenmail-junit5',
-            'org.bouncycastle:bcpkix-jdk15to18',
-            'org.bouncycastle:bcprov-jdk15to18',
+            'org.bouncycastle:bcpkix-jdk18on',
+            'org.bouncycastle:bcprov-jdk18on',
+            'org.bouncycastle:bcutil-jdk18on',
             )
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'

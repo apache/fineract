@@ -56,7 +56,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -89,6 +89,7 @@ public class SavingsAccountAssembler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountAssembler.class);
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
+    private final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper;
     private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
@@ -99,16 +100,19 @@ public class SavingsAccountAssembler {
     private final FromJsonHelper fromApiJsonHelper;
     private final JdbcTemplate jdbcTemplate;
     private final ConfigurationDomainService configurationDomainService;
+    private final ExternalIdFactory externalIdFactory;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+            final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
+        this.savingsAccountTransactionDataSummaryWrapper = savingsAccountTransactionDataSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.staffRepository = staffRepository;
@@ -119,6 +123,7 @@ public class SavingsAccountAssembler {
         savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
         this.jdbcTemplate = jdbcTemplate;
         this.configurationDomainService = configurationDomainService;
+        this.externalIdFactory = externalIdFactory;
     }
 
     /**
@@ -320,14 +325,14 @@ public class SavingsAccountAssembler {
         }
 
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
-                externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
-                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges, allowOverdraft,
-                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
+                externalIdFactory.create(externalId), accountType, submittedOnDate, submittedBy, interestRate,
+                interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,
+                allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
 
-        account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
+        account.validateNewApplicationState(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
 
@@ -343,7 +348,7 @@ public class SavingsAccountAssembler {
         List<SavingsAccountTransaction> savingsAccountTransactions = null;
         if (backdatedTxnsAllowedTill) {
             LocalDate pivotDate = account.getSummary().getInterestPostedTillDate();
-            boolean isNotPresent = pivotDate == null ? true : false;
+            boolean isNotPresent = pivotDate == null;
             if (!isNotPresent) {
                 // Get savings account transactions
                 if (isRelaxingDaysConfigForPivotDateEnabled()) {
@@ -376,7 +381,7 @@ public class SavingsAccountAssembler {
             }
         }
 
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
         return account;
     }
 
@@ -403,7 +408,7 @@ public class SavingsAccountAssembler {
         } else {
             account.getSummary().setRunningBalanceOnPivotDate(BigDecimal.ZERO);
         }
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        account.setHelpers(this.savingsAccountTransactionDataSummaryWrapper, this.savingsHelper);
         return account;
     }
 
@@ -416,7 +421,7 @@ public class SavingsAccountAssembler {
     }
 
     public void setHelpers(final SavingsAccount account) {
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
     }
 
     /**
@@ -460,9 +465,9 @@ public class SavingsAccountAssembler {
                 product.isMinRequiredBalanceEnforced(), product.minRequiredBalance(), product.maxAllowedLienLimit(),
                 product.isLienAllowed(), product.nominalAnnualInterestRateOverdraft(), product.minOverdraftForInterestCalculation(),
                 product.withHoldTax());
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
 
-        account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
+        account.validateNewApplicationState(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
 
@@ -470,10 +475,10 @@ public class SavingsAccountAssembler {
     }
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
-        savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper, this.configurationDomainService);
     }
 
     public void assignSavingAccountHelpers(final SavingsAccountData savingsAccountData) {
-        savingsAccountData.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        savingsAccountData.setHelpers(this.savingsAccountTransactionDataSummaryWrapper, this.savingsHelper);
     }
 }

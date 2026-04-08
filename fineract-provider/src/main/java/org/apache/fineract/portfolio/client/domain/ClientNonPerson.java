@@ -18,29 +18,30 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
 @Table(name = "m_client_non_person")
-public class ClientNonPerson extends AbstractPersistableCustom {
+public class ClientNonPerson extends AbstractPersistableCustom<Long> {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false, unique = true)
@@ -116,8 +117,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
 
     private void validateIncorpValidityTillDate(final Client client, final List<ApiParameterError> dataValidationErrors) {
         if (getIncorpValidityTillLocalDate() != null && client.dateOfBirthLocalDate() != null
-                && client.dateOfBirthLocalDate().isAfter(getIncorpValidityTillLocalDate())) {
-
+                && DateUtils.isAfter(client.dateOfBirthLocalDate(), getIncorpValidityTillLocalDate())) {
             final String defaultUserMessage = "incorpvaliditytill date cannot be after the incorporation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.incorpValidityTill.after.incorp.date",
                     defaultUserMessage, ClientApiConstants.incorpValidityTillParamName, this.incorpValidityTill);

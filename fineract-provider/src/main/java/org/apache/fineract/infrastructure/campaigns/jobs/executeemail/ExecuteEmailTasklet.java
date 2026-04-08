@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.campaigns.jobs.executeemail;
 
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,8 +29,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
@@ -179,7 +179,7 @@ public class ExecuteEmailTasklet implements Tasklet {
             switch (entry.getKey()) {
                 case "selectOffice":
                     if (client.getStaff() != null) {
-                        actualParams.put(entry.getKey(), client.getStaff().officeId().toString());
+                        actualParams.put(entry.getKey(), client.getStaff().getOffice().getId().toString());
                     } else {
                         actualParams.put(entry.getKey(), client.getOffice().getId().toString());
                     }
@@ -193,6 +193,8 @@ public class ExecuteEmailTasklet implements Tasklet {
                 case "environementUrl":
                     actualParams.put(entry.getKey(), entry.getKey());
                 break;
+                default:
+                    log.warn("Query parameter could not be mapped: {}", entry.getKey());
             }
         }
         return actualParams;

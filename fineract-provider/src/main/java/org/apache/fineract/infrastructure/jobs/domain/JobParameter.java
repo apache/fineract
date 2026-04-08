@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.jobs.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class JobParameter extends AbstractPersistableCustom {
+public class JobParameter extends AbstractPersistableCustom<Long> {
 
     @Column(name = "job_id", nullable = false)
     private Long jobId;

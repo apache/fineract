@@ -78,6 +78,6 @@ public class ClientApiCollectionConstants extends ClientApiConstants {
 
     protected static final Set<String> CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(amountParamName,
             transactionDateParamName, dateFormatParamName, localeParamName, paymentTypeIdParamName, transactionAccountNumberParamName,
-            checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+            checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName, externalIdParamName));
 
 }

@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -37,45 +38,30 @@ import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
-import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadService;
 import org.apache.fineract.portfolio.interestratechart.service.InterestIncentivesEnumerations;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadService;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartEnumerations;
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestIncentiveData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestRateChartData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestRateChartSlabData;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountInterestRateChartNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class DepositAccountInterestRateChartReadPlatformServiceImpl implements DepositAccountInterestRateChartReadPlatformService {
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private static final DepositAccountInterestRateChartMapper CHART_ROW_MAPPER = new DepositAccountInterestRateChartMapper();
     private final DepositAccountInterestRateChartExtractor chartExtractor;
-    private final InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService;
-    private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
+    private final InterestRateChartDropdownReadService chartDropdownReadPlatformService;
+    private final InterestIncentiveDropdownReadService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-
-    @Autowired
-    public DepositAccountInterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
-            final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
-        this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        chartExtractor = new DepositAccountInterestRateChartExtractor(sqlGenerator);
-    }
 
     @Override
     public DepositAccountInterestRateChartData retrieveOne(Long chartId) {
@@ -182,8 +168,8 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                 clientClassificationOptions);
     }
 
-    private static final class DepositAccountInterestRateChartExtractor
-            implements ResultSetExtractor<Collection<DepositAccountInterestRateChartData>> {
+    public static final class DepositAccountInterestRateChartExtractor
+            implements ResultSetExtractor<List<DepositAccountInterestRateChartData>> {
 
         DepositAccountInterestRateChartMapper chartMapper = new DepositAccountInterestRateChartMapper();
         InterestRateChartSlabExtractor chartSlabsMapper = new InterestRateChartSlabExtractor();
@@ -194,7 +180,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             return this.schemaSql;
         }
 
-        private DepositAccountInterestRateChartExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
+        public DepositAccountInterestRateChartExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
@@ -220,7 +206,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         }
 
         @Override
-        public Collection<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public List<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             List<DepositAccountInterestRateChartData> chartDataList = new ArrayList<>();
 

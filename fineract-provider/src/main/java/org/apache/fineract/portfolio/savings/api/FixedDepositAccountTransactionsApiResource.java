@@ -18,21 +18,29 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -44,19 +52,17 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/fixeddepositaccounts/{fixedDepositAccountId}/transactions")
+@Path("/v1/fixeddepositaccounts/{fixedDepositAccountId}/transactions")
 @Component
-@Scope("singleton")
 @Tag(name = "Fixed Deposit Account Transactions", description = "")
+@RequiredArgsConstructor
 public class FixedDepositAccountTransactionsApiResource {
 
     private final PlatformSecurityContext context;
@@ -64,27 +70,12 @@ public class FixedDepositAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
                     DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName, DepositsApiConstants.amountParamName,
                     DepositsApiConstants.dateParamName, DepositsApiConstants.paymentDetailDataParamName,
                     DepositsApiConstants.runningBalanceParamName, DepositsApiConstants.reversedParamName));
-
-    @Autowired
-    public FixedDepositAccountTransactionsApiResource(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<SavingsAccountTransactionData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
-    }
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
@@ -92,8 +83,8 @@ public class FixedDepositAccountTransactionsApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Fixed Deposit Account Transaction Template", operationId = "retrieveTemplateFixedDepositAccountTransaction")
     public String retrieveTemplate(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             // @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
@@ -112,9 +103,23 @@ public class FixedDepositAccountTransactionsApiResource {
     }
 
     @GET
-    @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List fixed deposit account transactions", operationId = "retrieveAllFixedDepositAccountTransactions")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FixedDepositAccountTransactionsApiResourceSwagger.GetFixedDepositAccountsAccountIdTransactionsResponse.class)))) })
+    public String retrieveAll(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId, @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
+        final Collection<SavingsAccountTransactionData> transactions = this.savingsAccountReadPlatformService
+                .retrieveAllTransactions(fixedDepositAccountId, DepositAccountType.FIXED_DEPOSIT);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, transactions, FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+    }
+
+    @GET
+    @Path("{transactionId}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a fixed deposit account transaction", operationId = "retrieveOneFixedDepositAccountTransaction")
     public String retrieveOne(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             @PathParam("transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
 
@@ -160,6 +165,12 @@ public class FixedDepositAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Adjust Transaction | Undo transaction", description = "Adjust Transaction:\n\nThis command modifies the given transaction.\n\n"
+            + "Undo transaction:\n\nThis command reverses the given transaction.\n\n" + "Showing request/response for 'Adjust Transaction'")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountTransactionsApiResourceSwagger.PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountTransactionsApiResourceSwagger.PostFixedDepositAccountsFixedDepositAccountIdTransactionsTransactionIdResponse.class))),
+            @ApiResponse(responseCode = "default", description = "error occurred") })
     public String adjustTransaction(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             @PathParam("transactionId") final Long transactionId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
@@ -173,10 +184,11 @@ public class FixedDepositAccountTransactionsApiResource {
 
         CommandProcessingResult result = null;
         if (is(commandParam, DepositsApiConstants.COMMAND_UNDO_TRANSACTION)) {
-            final CommandWrapper commandRequest = builder.undoSavingsAccountTransaction(fixedDepositAccountId, transactionId).build();
+            final CommandWrapper commandRequest = builder.undoFixedDepositAccountTransaction(fixedDepositAccountId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, DepositsApiConstants.COMMAND_ADJUST_TRANSACTION)) {
-            final CommandWrapper commandRequest = builder.adjustSavingsAccountTransaction(fixedDepositAccountId, transactionId).build();
+            final CommandWrapper commandRequest = builder.adjustFixedDepositAccountTransaction(fixedDepositAccountId, transactionId)
+                    .build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 

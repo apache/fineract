@@ -7,110 +7,112 @@
 |spring.datasource.hikari.driverClassName
 |FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME
 |org.mariadb.jdbc.Driver
-|TBD
+|The correct driver name for the database that will be used with fineract.
 
 |spring.datasource.hikari.jdbcUrl
 |FINERACT_HIKARI_JDBC_URL
 |jdbc:mariadb://localhost:3306/fineract_tenants
-|TBD
+|The database connection string for the database with tenant information that will be used with fineract.
 
 |spring.datasource.hikari.username
 |FINERACT_HIKARI_USERNAME
 |root
-|TBD
+|The username for the database with tenant information that will be used with fineract
 
 |spring.datasource.hikari.password
 |FINERACT_HIKARI_PASSWORD
 |mysql
-|TBD
+|The password for the database with tenant information that will be used with fineract
 
 |spring.datasource.hikari.minimumIdle
 |FINERACT_HIKARI_MINIMUM_IDLE
 |3
-|TBD
+|The minimum number of connections in hakari pool that will be maintained when the system is idle
 
 |spring.datasource.hikari.maximumPoolSize
 |FINERACT_HIKARI_MAXIMUM_POOL_SIZE
 |10
-|TBD
+|The maximum number of connections that hikari can create in the pool.
 
 |spring.datasource.hikari.idleTimeout
 |FINERACT_HIKARI_IDLE_TIMEOUT
 |60000
-|TBD
+|The maximum time in milliseconds that a connection is allowed to sit idle in the pool.
 
 |spring.datasource.hikari.connectionTimeout
 |FINERACT_HIKARI_CONNECTION_TIMEOUT
 |20000
-|TBD
+|The maximum time in milliseconds that hikari will wait for a connection to be established.
 
 |spring.datasource.hikari.connectionTestquery
 |FINERACT_HIKARI_TEST_QUERY
 |SELECT 1
-|TBD
+|The query that will be used to test the database connection.
 
 |spring.datasource.hikari.autoCommit
 |FINERACT_HIKARI_AUTO_COMMIT
 |true
-|TBD
+|If set to true, the connections in the pool will be in auto-commit mode.
 
 |spring.datasource.hikari.dataSourceProperties['cachePrepStmts']
 |FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS
 |true
-|TBD
+|If set to true, hikari caches compiled SQL statements to avoid the overhead of re-parsing and re-compiling SQL queries.
 
 |spring.datasource.hikari.dataSourceProperties['prepStmtCacheSize']
 |FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE
 |250
-|TBD
+|The maximum number of prepared statements that hikari can cache.
 
 |spring.datasource.hikari.dataSourceProperties['prepStmtCacheSqlLimit']
 |FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT
 |2048
-|TBD
+|This property sets the upper limit for the size of individual SQL queries that can be stored in the cache. If a SQL query exceeds this limit in terms of character length, it will not be cached, even if caching is enabled.
 
 |spring.datasource.hikari.dataSourceProperties['useServerPrepStmts']
 |FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS
 |true
-|TBD
+|This property determines if the connection should leverage server-side prepared statements rather than client-side ones.
 
 |spring.datasource.hikari.dataSourceProperties['useLocalSessionState']
 |FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE
 |true
-|TBD
+|This property allows the connection pool to locally track changes to session-specific properties (like character sets or time zones) rather than sending these queries to the database repeatedly.
 
 |spring.datasource.hikari.dataSourceProperties['rewriteBatchedStatements']
 |FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS
 |true
-|TBD
+|This property, when set to true, allows the JDBC driver to rewrite batched SQL statements into a more efficient single query format before sending them to the database.
+
 
 |spring.datasource.hikari.dataSourceProperties['cacheResultSetMetadata']
 |FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA
 |true
-|TBD
+|This property, when set to true, enables the caching of metadata for ResultSet objects. This metadata includes details such as column names, types, and other relevant schema information.
 
 |spring.datasource.hikari.dataSourceProperties['cacheServerConfiguration']
 |FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION
 |true
-|TBD
+|When set to true, this property allows the JDBC driver to cache the server configuration settings, which include properties such as session state, character sets, and other configuration details relevant to the database server.
+
 
 |spring.datasource.hikari.dataSourceProperties['elideSetAutoCommits']
 |FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS
 |true
-|TBD
+|When set to true, this property prevents the JDBC driver from issuing a SET autocommit command on the database connection during its initialization.
 
 |spring.datasource.hikari.dataSourceProperties['maintainTimeStats']
 |FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS
 |false
-|TBD
+|When set to true, this property enables HikariCP to track and maintain statistics regarding various timing metrics related to connection pool operations, such as connection acquisition times.
 
 |spring.datasource.hikari.dataSourceProperties['logSlowQueries']
 |FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES
 |true
-|TBD
+|When set to true, this property enables HikariCP to log SQL queries that exceed a specified execution time threshold, allowing developers and administrators to identify and analyze performance issues related to slow-running queries.
 
 |spring.datasource.hikari.dataSourceProperties['dumpQueriesOnException']
 |FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION
 |true
-|TBD
+| When set to true, this property instructs HikariCP to log the SQL statements that caused exceptions during execution. This includes capturing the query text and any associated parameters.
 |===

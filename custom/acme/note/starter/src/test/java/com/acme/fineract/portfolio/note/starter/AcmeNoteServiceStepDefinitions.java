@@ -21,7 +21,6 @@ package com.acme.fineract.portfolio.note.starter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java8.En;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 public class AcmeNoteServiceStepDefinitions implements En {
@@ -33,16 +32,13 @@ public class AcmeNoteServiceStepDefinitions implements En {
     private ApplicationContextRunner contextRunner;
 
     public AcmeNoteServiceStepDefinitions() {
-        Given("/^An auto configuration (.*) and a service configuration (.*)$/",
-                (String autoConfigurationClassName, String configurationClassName) -> {
-                    contextRunner = new ApplicationContextRunner()
-                            .withConfiguration(AutoConfigurations.of(Class.forName(autoConfigurationClassName)))
-                            .withPropertyValues("acme.note.enabled", "true")
-                            .withUserConfiguration(Class.forName(configurationClassName.trim()));
-                });
+        Given("/^A service configuration (.*)$/", (String configurationClassName) -> {
+            contextRunner = new ApplicationContextRunner().withPropertyValues("acme.note.enabled", "true")
+                    .withUserConfiguration(Class.forName(configurationClassName.trim()));
+        });
 
         When("/^The user retrieves the service of interface class (.*)$/", (String interfaceClassName) -> {
-            contextRunner.run((ctx) -> {
+            contextRunner.run(ctx -> {
                 this.interfaceClass = Class.forName(interfaceClassName.trim());
 
                 assertThat(this.interfaceClass.isInterface()).isTrue();

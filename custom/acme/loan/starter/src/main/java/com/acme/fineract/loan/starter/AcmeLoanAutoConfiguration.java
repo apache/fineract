@@ -26,11 +26,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScans;
 
 @AutoConfiguration
-@ComponentScans({ @ComponentScan("com.acme.fineract.loan.cob"), @ComponentScan("com.acme.fineract.loan.processor"),
-        @ComponentScan("com.acme.fineract.loan.job") })
+@ComponentScan(basePackages = { "com.acme.fineract.loan.cob", "com.acme.fineract.loan.processor", "com.acme.fineract.loan.job" })
 @ConditionalOnProperty("acme.loan.enabled")
 public class AcmeLoanAutoConfiguration {
 

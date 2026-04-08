@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.core.exceptionmapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.Response;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.security.exception.InvalidInstanceTypeMethodException;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class InvalidInstanceTypeMethodExceptionMapperTest {
         assertEquals(Response.Status.METHOD_NOT_ALLOWED.getStatusCode(), response.getStatus());
         assertNotNull(response.getEntity());
         final ApiGlobalErrorResponse errorResponse = (ApiGlobalErrorResponse) response.getEntity();
-        assertEquals(String.valueOf(Response.Status.METHOD_NOT_ALLOWED.getReasonPhrase()), errorResponse.getHttpStatusCode());
+        assertEquals(String.valueOf(Response.Status.METHOD_NOT_ALLOWED.getStatusCode()), errorResponse.getHttpStatusCode());
         assertEquals("Invalid instance type called in api request for the method POST", errorResponse.getDeveloperMessage());
         assertEquals("error.msg.invalid.instance.type", errorResponse.getUserMessageGlobalisationCode());
         assertEquals("Invalid method POST used with request to this instance type.", errorResponse.getDefaultUserMessage());

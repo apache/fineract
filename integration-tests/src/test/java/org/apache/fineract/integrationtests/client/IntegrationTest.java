@@ -18,26 +18,27 @@
  */
 package org.apache.fineract.integrationtests.client;
 
-import com.google.common.truth.BigDecimalSubject;
-import com.google.common.truth.BooleanSubject;
-import com.google.common.truth.ComparableSubject;
-import com.google.common.truth.DoubleSubject;
-import com.google.common.truth.FloatSubject;
-import com.google.common.truth.IntegerSubject;
-import com.google.common.truth.IterableSubject;
-import com.google.common.truth.LongSubject;
-import com.google.common.truth.OptionalSubject;
-import com.google.common.truth.StringSubject;
-import com.google.common.truth.Subject;
-import com.google.common.truth.Truth;
-import com.google.common.truth.Truth8;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
-import java.security.SecureRandom;
 import java.util.Optional;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.FineractClient;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.assertj.core.api.AbstractBigDecimalAssert;
+import org.assertj.core.api.AbstractBooleanAssert;
+import org.assertj.core.api.AbstractDoubleAssert;
+import org.assertj.core.api.AbstractFloatAssert;
+import org.assertj.core.api.AbstractIntegerAssert;
+import org.assertj.core.api.AbstractLongAssert;
+import org.assertj.core.api.AbstractStringAssert;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.IterableAssert;
+import org.assertj.core.api.ObjectAssert;
+import org.assertj.core.api.OptionalAssert;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -46,7 +47,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 /**
- * Integration Test for /documents API.
+ * Base Integration Test class
  *
  * @author Michael Vorburger.ch
  */
@@ -56,31 +57,27 @@ import retrofit2.Response;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public abstract class IntegrationTest {
 
-    private static final SecureRandom random = new SecureRandom();
+    protected static final String DATETIME_PATTERN = "dd MMMM yyyy";
+    protected static final String LOCALE = "en";
+    protected GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+    protected BusinessDateHelper businessDateHelper = new BusinessDateHelper();
 
-    private FineractClient fineract;
+    protected FineractClient fineractClient() {
+        return FineractClientHelper.getFineractClient();
+    }
 
-    protected FineractClient fineract() {
-        if (fineract == null) {
-            String url = System.getProperty("fineract.it.url", "https://localhost:8443/fineract-provider/api/v1/");
-            // insecure(true) should *ONLY* ever be used for https://localhost:8443, NOT in real clients!!
-            fineract = FineractClient.builder().insecure(true).baseURL(url).tenant("default").basicAuth("mifos", "password")
-                    .logging(Level.NONE).build();
-        }
-        return fineract;
+    protected FineractClient newFineractClient(String username, String password) {
+        return FineractClientHelper.createNewFineractClient(username, password, this::customizeFineractClient);
     }
 
     /**
-     * See {@link FineractClient#DATE_FORMAT}.
+     * Callback to customize FineractClient
+     *
+     * @param builder
+     *            FineractClient.Builder.
      */
-    protected String dateFormat() {
-        return FineractClient.DATE_FORMAT;
-    }
+    protected void customizeFineractClient(FineractClient.Builder builder) {
 
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    protected String random() {
-        return Long.toString(random.nextLong());
     }
 
     // This method just makes it easier to use Calls.ok() in tests (it avoids having to static import)
@@ -92,54 +89,56 @@ public abstract class IntegrationTest {
         return Calls.okR(call);
     }
 
-    // as above, avoids import static CallSubject.assertThat
-    protected <T> CallSubject assertThat(Call<T> call) {
-        return CallSubject.assertThat(call);
+    public static IterableAssert<?> assertThat(Iterable<?> actual) {
+        return Assertions.assertThat(actual);
     }
 
-    // as above, this avoids issues with e.g. the Eclipse compiler getting confused which assertThat is which
-    public static IterableSubject assertThat(Iterable<?> actual) {
-        return Truth.assertThat(actual);
+    public static AbstractBigDecimalAssert<?> assertThat(BigDecimal actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static <T extends Comparable<?>> ComparableSubject<T> assertThat(T actual) {
-        return Truth.assertThat(actual);
+    public static <T> ObjectAssert<T> assertThat(T actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static BigDecimalSubject assertThat(BigDecimal actual) {
-        return Truth.assertThat(actual);
+    public static AbstractLongAssert<?> assertThat(Long actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static Subject assertThat(Object actual) {
-        return Truth.assertThat(actual);
+    public static AbstractDoubleAssert<?> assertThat(Double actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static LongSubject assertThat(Long actual) {
-        return Truth.assertThat(actual);
+    public static AbstractFloatAssert<?> assertThat(Float actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static DoubleSubject assertThat(Double actual) {
-        return Truth.assertThat(actual);
+    public static AbstractIntegerAssert<?> assertThat(Integer actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static FloatSubject assertThat(Float actual) {
-        return Truth.assertThat(actual);
+    public static AbstractBooleanAssert<?> assertThat(Boolean actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static IntegerSubject assertThat(Integer actual) {
-        return Truth.assertThat(actual);
+    public static AbstractStringAssert<?> assertThat(String actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static BooleanSubject assertThat(Boolean actual) {
-        return Truth.assertThat(actual);
+    public static <T> OptionalAssert<T> assertThat(Optional<T> actual) {
+        return Assertions.assertThat(actual);
     }
 
-    public static StringSubject assertThat(String actual) {
-        return Truth.assertThat(actual);
-    }
-
-    // from truth-java8-extension
-    public static OptionalSubject assertThat(Optional<?> actual) {
-        return Truth8.assertThat(actual);
+    protected void runAt(String date, Runnable runnable) {
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date(date).dateFormat(DATETIME_PATTERN).locale("en"));
+            runnable.run();
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 }

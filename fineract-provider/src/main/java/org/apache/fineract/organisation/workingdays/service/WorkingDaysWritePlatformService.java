@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.organisation.workingdays.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.Map;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface WorkingDaysWritePlatformService {
 
-    CommandProcessingResult updateWorkingDays(JsonCommand command);
+    @Transactional
+    Map<String, Object> updateWorkingDays(WorkingDaysUpdateRequest request);
 }

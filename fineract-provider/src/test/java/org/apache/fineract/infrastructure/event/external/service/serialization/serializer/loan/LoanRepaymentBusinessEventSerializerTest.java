@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,12 +28,15 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.fineract.avro.generic.v1.CurrencyDataV1;
@@ -39,20 +44,22 @@ import org.apache.fineract.avro.loan.v1.LoanRepaymentDueDataV1;
 import org.apache.fineract.avro.loan.v1.RepaymentDueDataV1;
 import org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentDueBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanRepaymentPastDueDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentPastDueService;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,16 +86,21 @@ public class LoanRepaymentBusinessEventSerializerTest {
 
     private MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
+    private static final String CUSTOM_DATA_PREFIX = "test_data_loan_repayment_business_event";
+
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
-        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+        moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
+        moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
     }
 
     @AfterEach
     public void reset() {
+        ThreadLocalContextUtil.reset();
         moneyHelper.close();
     }
 
@@ -96,14 +108,13 @@ public class LoanRepaymentBusinessEventSerializerTest {
     public void testLoanRepaymentEventPayloadSerialization() throws IOException {
         // given
         LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper, pastDueDataMapper,
-                pastDueService);
+                pastDueService, createCustomDataForEvents());
 
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
 
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
@@ -116,12 +127,9 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanForProcessing.getId()).thenReturn(1L);
         when(loanForProcessing.getAccountNumber()).thenReturn("0001");
         when(loanForProcessing.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-        when(loanCurrency.getCode()).thenReturn("CODE");
-        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
-        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
         when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
         when(pastDueDataMapper.map(any())).thenReturn(pastDueAmount);
         when(pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing)).thenReturn(null);
@@ -137,24 +145,27 @@ public class LoanRepaymentBusinessEventSerializerTest {
         RepaymentPastDueDataV1 pastDue = new RepaymentPastDueDataV1(BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0));
         LoanRepaymentDueDataV1 expectedSerializedData = new LoanRepaymentDueDataV1(1L, "0001", "externalId", currency, repaymentDue,
-                pastDue);
+                pastDue, data.getCustomData());
 
         assertEquals(data, expectedSerializedData);
 
+        assertNotNull(data.getCustomData());
+        final Map<String, ByteBuffer> customData = data.getCustomData();
+        assertEquals(CUSTOM_DATA_PREFIX + "_1", new String(customData.get("test_key_1").array(), UTF_8));
+        assertEquals(CUSTOM_DATA_PREFIX + "_2", new String(customData.get("test_key_2").array(), UTF_8));
     }
 
     @Test
     public void testLoanRepaymentEventLoanIdMandatoryFieldValidation() {
         // given
         LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper, pastDueDataMapper,
-                pastDueService);
+                pastDueService, createCustomDataForEvents());
 
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
 
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
-        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
 
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
@@ -168,12 +179,9 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanForProcessing.getId()).thenReturn(null);
         when(loanForProcessing.getAccountNumber()).thenReturn("0001");
         when(loanForProcessing.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
-        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanForProcessing.getSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-        when(loanCurrency.getCode()).thenReturn("CODE");
-        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
-        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
         when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
         when(pastDueDataMapper.map(any())).thenReturn(pastDueAmount);
         when(pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing)).thenReturn(null);
@@ -183,4 +191,40 @@ public class LoanRepaymentBusinessEventSerializerTest {
         assertTrue(exceptionThrown.getMessage().contains("does not accept null values"));
     }
 
+    private List<ExternalEventCustomDataSerializer<LoanRepaymentBusinessEvent>> createCustomDataForEvents() {
+        return List.of(new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final LoanRepaymentBusinessEvent event) {
+                return ByteBuffer.wrap(CUSTOM_DATA_PREFIX.getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_1";
+            }
+        }, new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final LoanRepaymentBusinessEvent event) {
+                return ByteBuffer.wrap((CUSTOM_DATA_PREFIX + "_1").getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_1";
+            }
+        }, new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final LoanRepaymentBusinessEvent event) {
+                return ByteBuffer.wrap((CUSTOM_DATA_PREFIX + "_2").getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_2";
+            }
+        });
+    }
 }

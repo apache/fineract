@@ -24,32 +24,33 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPoster;
+import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 public class PostInterestForSavingConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private SavingsAccountReadPlatformService savingAccountReadPlatformService;
     @Autowired
     private ConfigurationDomainService configurationDomainService;
     @Autowired
-    private SavingsSchedularInterestPoster savingsSchedularInterestPoster;
+    private SavingsSchedularInterestPosterTask savingsSchedularInterestPosterTask;
     @Autowired
     private SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     @Autowired
@@ -63,12 +64,13 @@ public class PostInterestForSavingConfig {
 
     @Bean
     protected Step postInterestForSavingStep(PostInterestForSavingTasklet postInterestForSavingTasklet) {
-        return steps.get(JobName.POST_INTEREST_FOR_SAVINGS.name()).tasklet(postInterestForSavingTasklet).build();
+        return new StepBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository)
+                .tasklet(postInterestForSavingTasklet, transactionManager).build();
     }
 
     @Bean
     public Job postInterestForSavingJob(PostInterestForSavingTasklet postInterestForSavingTasklet) {
-        return jobs.get(JobName.POST_INTEREST_FOR_SAVINGS.name()).start(postInterestForSavingStep(postInterestForSavingTasklet))
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository)
+                .start(postInterestForSavingStep(postInterestForSavingTasklet)).incrementer(new RunIdIncrementer()).build();
     }
 }

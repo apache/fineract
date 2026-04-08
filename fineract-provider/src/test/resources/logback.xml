@@ -20,6 +20,7 @@
 
 -->
 <configuration scan="false">
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" /> <!-- this hides the warning related to jansi in windows -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>false</resetJUL>
     </contextListener>

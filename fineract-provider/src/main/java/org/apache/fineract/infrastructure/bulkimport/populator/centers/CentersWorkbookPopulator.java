@@ -95,10 +95,10 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(CenterConstants.ACTIVATION_DATE_COL, rowHeader, "Activation Date*");
         writeString(CenterConstants.SUBMITTED_ON_DATE_COL, rowHeader, "Submitted On Date");
         writeString(CenterConstants.MEETING_START_DATE_COL, rowHeader, "Meeting Start Date* (On or After)");
-        writeString(CenterConstants.IS_REPEATING_COL, rowHeader, "Repeat*");
-        writeString(CenterConstants.FREQUENCY_COL, rowHeader, "Frequency*");
-        writeString(CenterConstants.INTERVAL_COL, rowHeader, "Interval*");
-        writeString(CenterConstants.REPEATS_ON_DAY_COL, rowHeader, "Repeats On*");
+        writeString(CenterConstants.IS_REPEATING_COL, rowHeader, "Repeat");
+        writeString(CenterConstants.FREQUENCY_COL, rowHeader, "Frequency");
+        writeString(CenterConstants.INTERVAL_COL, rowHeader, "Interval");
+        writeString(CenterConstants.REPEATS_ON_DAY_COL, rowHeader, "Repeats On");
         writeString(CenterConstants.GROUP_NAMES_STARTING_COL, rowHeader, "Group Names* (Enter in consecutive cells horizontally)");
         writeString(CenterConstants.LOOKUP_OFFICE_NAME_COL, rowHeader, "Office Name");
         writeString(CenterConstants.LOOKUP_OFFICE_OPENING_DATE_COL, rowHeader, "Opening Date");

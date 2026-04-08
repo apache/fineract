@@ -18,23 +18,23 @@
  */
 package org.apache.fineract.portfolio.shareproducts.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -237,7 +237,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setUnitPrice(BigDecimal unitPrice) {
         boolean returnValue = false;
-        if (this.unitPrice.compareTo(unitPrice) == 0 ? Boolean.FALSE : Boolean.TRUE) {
+        if (this.unitPrice.compareTo(unitPrice) != 0) {
             this.unitPrice = unitPrice;
             returnValue = true;
         }
@@ -353,7 +353,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setshareCapitalValue(BigDecimal shareCapitalValue) {
         boolean updated = false;
-        if (this.shareCapital == null || this.shareCapital.compareTo(shareCapitalValue) == 0 ? Boolean.FALSE : Boolean.TRUE) {
+        if (this.shareCapital == null || this.shareCapital.compareTo(shareCapitalValue) != 0) {
             this.shareCapital = shareCapitalValue;
             updated = true;
         }
@@ -395,8 +395,8 @@ public class ShareProduct extends AbstractAuditableCustom {
         BigDecimal marketValue = this.unitPrice;
         if (this.marketPrice != null && !this.marketPrice.isEmpty()) {
             for (ShareProductMarketPrice data : this.marketPrice) {
-                LocalDate futureDate = data.getStartDate();
-                if (currentDate.compareTo(futureDate) == 0 ? Boolean.TRUE : Boolean.FALSE || currentDate.isAfter(futureDate)) {
+                LocalDate startDate = data.getStartDate();
+                if (!DateUtils.isAfter(startDate, currentDate)) {
                     marketValue = data.getPrice();
                 }
             }
@@ -406,7 +406,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public void addSubscribedShares(final Long subscribedShares) {
         if (this.totalSubscribedShares == null) {
-            this.totalSubscribedShares = Long.valueOf(0);
+            this.totalSubscribedShares = 0L;
         }
         this.totalSubscribedShares += subscribedShares;
     }

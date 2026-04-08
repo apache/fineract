@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import static org.apache.fineract.batch.command.CommandStrategyUtils.relativeUrlWithoutVersion;
+
 import com.google.common.base.Splitter;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -59,10 +61,10 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
+        final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrlWithoutVersion(request));
         final Long loanId = Long.parseLong(pathParameters.get(1));
 
-        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
+        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z\\-]+");
         final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
 
         if (!commandMatcher.find()) {

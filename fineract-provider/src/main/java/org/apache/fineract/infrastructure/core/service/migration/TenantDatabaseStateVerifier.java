@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Objects;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -41,12 +41,11 @@ public class TenantDatabaseStateVerifier {
 
     private final LiquibaseProperties liquibaseProperties;
     private final DatabaseIndependentQueryService dbQueryService;
-
-    private final FineractProperties fineractProperties;
+    private final DatabaseTypeResolver databaseTypeResolver;
 
     public boolean isFirstLiquibaseMigration(DataSource dataSource) {
-        boolean databaseChangelogTableExists = dbQueryService.isTablePresent(dataSource, "DATABASECHANGELOG");
-        return !databaseChangelogTableExists;
+        String tableName = "DATABASECHANGELOG";
+        return !dbQueryService.isTablePresent(dataSource, databaseTypeResolver.isPostgreSQL() ? tableName.toLowerCase() : tableName);
     }
 
     public boolean isFlywayPresent(DataSource dataSource) {
@@ -73,8 +72,8 @@ public class TenantDatabaseStateVerifier {
 
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         Integer result = jdbcTemplate.queryForObject(
-                "SELECT COUNT(script) FROM schema_version " + "WHERE version = :latestFlywayVersion "
-                        + "AND script = :latestFlywayScriptName " + "AND checksum = :latestFlywayScriptChecksum " + "AND success = 1",
+                "SELECT COUNT(script) FROM schema_version WHERE version = :latestFlywayVersion "
+                        + "AND script = :latestFlywayScriptName AND checksum = :latestFlywayScriptChecksum AND success = 1",
                 paramMap, Integer.class);
         return Objects.equals(result, 1);
     }

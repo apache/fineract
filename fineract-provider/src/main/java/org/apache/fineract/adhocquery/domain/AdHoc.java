@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.adhocquery.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.adhocquery.api.AdHocJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 
 @Getter
 @Setter
@@ -68,10 +67,7 @@ public class AdHoc extends AbstractAuditableCustom {
     public static AdHoc fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed(AdHocJsonInputParams.NAME.getValue());
 
-        String commandQuery = command.stringValueOfParameterNamed(AdHocJsonInputParams.QUERY.getValue());
-
-        SQLInjectionValidator.validateAdhocQuery(commandQuery);
-        final String query = commandQuery;
+        final String query = command.stringValueOfParameterNamed(AdHocJsonInputParams.QUERY.getValue());
         final String tableName = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLENAME.getValue());
         final String tableFields = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLEFIELDS.getValue());
         final String email = command.stringValueOfParameterNamed(AdHocJsonInputParams.EMAIL.getValue());

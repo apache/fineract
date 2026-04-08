@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementData;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralTemplateData;
@@ -33,24 +34,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ClientCollateralManagementReadPlatformServiceImpl implements ClientCollateralManagementReadPlatformService {
 
     private final PlatformSecurityContext context;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final LoanTransactionRepository loanTransactionRepository;
-
-    @Autowired
-    public ClientCollateralManagementReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
-            final LoanTransactionRepository loanTransactionRepository) {
-        this.context = context;
-        this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
-        this.loanTransactionRepository = loanTransactionRepository;
-    }
 
     @Override
     public List<ClientCollateralManagementData> getClientCollaterals(final Long clientId, final Long prodId) {
@@ -91,7 +83,7 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
                 LoanTransaction loanTransaction = this.loanTransactionRepository.findById(transactionId)
                         .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
                 LoanTransactionData loanTransactionData = LoanTransactionData.instance(loanTransaction.getLoan().getId(),
-                        loanTransaction.getCreatedDateTime(), loanTransaction.getOutstandingLoanBalance(),
+                        loanTransaction.getCreatedDate().orElse(null), loanTransaction.getOutstandingLoanBalance(),
                         loanTransaction.getPrincipalPortion());
                 loanTransactionDataList.add(loanTransactionData);
             }

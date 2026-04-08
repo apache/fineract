@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.rate.service;
 
-import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.portfolio.rate.data.RateData;
 
@@ -27,9 +26,9 @@ import org.apache.fineract.portfolio.rate.data.RateData;
  */
 public interface RateReadService {
 
-    Collection<RateData> retrieveAllRates();
+    List<RateData> retrieveAllRates();
 
-    Collection<RateData> retrieveLoanApplicableRates();
+    List<RateData> retrieveLoanApplicableRates();
 
     RateData retrieveOne(Long rateId);
 

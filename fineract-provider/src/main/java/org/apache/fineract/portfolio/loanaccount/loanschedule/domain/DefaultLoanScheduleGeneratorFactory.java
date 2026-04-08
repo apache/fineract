@@ -18,29 +18,36 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DefaultLoanScheduleGeneratorFactory implements LoanScheduleGeneratorFactory {
 
+    private final ProgressiveLoanScheduleGenerator progressiveLoanScheduleGenerator;
+    private final CumulativeFlatInterestLoanScheduleGenerator cumulativeFlatInterestLoanScheduleGenerator;
+    private final CumulativeDecliningBalanceInterestLoanScheduleGenerator cumulativeDecliningBalanceInterestLoanScheduleGenerator;
+
     @Override
-    public LoanScheduleGenerator create(final InterestMethod interestMethod) {
+    public LoanScheduleGenerator create(final LoanScheduleType loanScheduleType, final InterestMethod interestMethod) {
+        return switch (loanScheduleType) {
+            case CUMULATIVE -> cumulativeLoanScheduleGenerator(interestMethod);
+            case PROGRESSIVE -> progressiveLoanScheduleGenerator(interestMethod);
+        };
+    }
 
-        LoanScheduleGenerator loanScheduleGenerator = null;
+    private LoanScheduleGenerator cumulativeLoanScheduleGenerator(final InterestMethod interestMethod) {
+        return switch (interestMethod) {
+            case FLAT -> cumulativeFlatInterestLoanScheduleGenerator;
+            case DECLINING_BALANCE -> cumulativeDecliningBalanceInterestLoanScheduleGenerator;
+            case INVALID -> null;
+        };
+    }
 
-        switch (interestMethod) {
-            case FLAT:
-                loanScheduleGenerator = new FlatInterestLoanScheduleGenerator();
-            break;
-            case DECLINING_BALANCE:
-                loanScheduleGenerator = new DecliningBalanceInterestLoanScheduleGenerator();
-            break;
-            case INVALID:
-            break;
-        }
-
-        return loanScheduleGenerator;
+    private LoanScheduleGenerator progressiveLoanScheduleGenerator(final InterestMethod interestMethod) {
+        return progressiveLoanScheduleGenerator;
     }
 
 }

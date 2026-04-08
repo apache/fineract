@@ -23,6 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="send_async_events_job">
+        <validCheckSum>9:2d837bbeff195e3f40203bda09a2872d</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Send Asynchronous Events"/>
             <column name="display_name" value="Send Asynchronous Events"/>

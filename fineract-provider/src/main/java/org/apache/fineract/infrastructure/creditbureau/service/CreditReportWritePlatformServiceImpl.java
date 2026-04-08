@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import jakarta.persistence.PersistenceException;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -25,15 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurations;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureau;
@@ -57,16 +57,16 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
 
     private final CreditBureauRepository creditBureauRepository;
     private final CreditReportRepository creditReportRepository;
-    private final ThitsaWorksCreditBureauIntegrationWritePlatformService thitsaWorksCreditBureauIntegrationWritePlatformService;
+    private final ExternalCreditBureauIntegrationWritePlatformService externalCreditBureauIntegrationWritePlatformService;
 
     @Autowired
     public CreditReportWritePlatformServiceImpl(final PlatformSecurityContext context, final CreditBureauRepository creditBureauRepository,
             final CreditReportRepository creditReportRepository,
-            final ThitsaWorksCreditBureauIntegrationWritePlatformService thitsaWorksCreditBureauIntegrationWritePlatformService) {
+            final ExternalCreditBureauIntegrationWritePlatformService externalCreditBureauIntegrationWritePlatformService) {
         this.context = context;
         this.creditBureauRepository = creditBureauRepository;
         this.creditReportRepository = creditReportRepository;
-        this.thitsaWorksCreditBureauIntegrationWritePlatformService = thitsaWorksCreditBureauIntegrationWritePlatformService;
+        this.externalCreditBureauIntegrationWritePlatformService = externalCreditBureauIntegrationWritePlatformService;
     }
 
     @Override
@@ -81,14 +81,16 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
 
             if (Objects.equals(creditBureauName, CreditBureauConfigurations.THITSAWORKS.toString())) {
 
-                CreditBureauReportData reportobj = this.thitsaWorksCreditBureauIntegrationWritePlatformService
-                        .getCreditReportFromThitsaWorks(command);
+                CreditBureauReportData reportobj = this.externalCreditBureauIntegrationWritePlatformService
+                        .getCreditReportFromExternalCredit(command);
 
                 Map<String, Object> reportMap = Map.of("name", reportobj.getName(), "gender", reportobj.getGender(), "address",
                         reportobj.getAddress(), "creditScore", reportobj.getCreditScore(), "borrowerInfo", reportobj.getBorrowerInfo(),
                         "openAccounts", reportobj.getOpenAccounts(), "closedAccounts", reportobj.getClosedAccounts());
 
-                return new CommandProcessingResultBuilder().withCreditReport(reportMap).build();
+                return new CommandProcessingResultBuilder() //
+                        .withCreditReport(reportMap) //
+                        .build();
             }
 
             baseDataValidator.reset().failWithCode(CREDIT_BUREAU_HAS_NOT_BEEN_INTEGRATED);
@@ -115,8 +117,7 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
         String responseMessage = null;
 
         if (Objects.equals(creditBureauName, CreditBureauConfigurations.THITSAWORKS.toString())) {
-            responseMessage = this.thitsaWorksCreditBureauIntegrationWritePlatformService.addCreditReport(bureauId, creditReport,
-                    fileDetail);
+            responseMessage = this.externalCreditBureauIntegrationWritePlatformService.addCreditReport(bureauId, creditReport, fileDetail);
         } else {
 
             baseDataValidator.reset().failWithCode(CREDIT_BUREAU_HAS_NOT_BEEN_INTEGRATED);
@@ -174,7 +175,9 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
 
             }
 
-            return new CommandProcessingResultBuilder().withEntityId(creditReport.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(creditReport.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTokenDataIntegrityIssues(dve.getMostSpecificCause());
             return CommandProcessingResult.empty();
@@ -202,18 +205,17 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             try {
                 this.creditReportRepository.delete(creditReport);
             } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-                throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-                        "Unknown data integrity issue with resource: " + dve.getMostSpecificCause(), dve);
+                throw ErrorHandler.getMappable(dve, "error.msg.cund.unknown.data.integrity.issue",
+                        "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
             }
         }
-        return new CommandProcessingResultBuilder().withEntityId(creditReport.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(creditReport.getId()) //
+                .build();
     }
 
     private void handleTokenDataIntegrityIssues(final Throwable realCause) {
-
-        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(realCause, "error.msg.cund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
-
     }
-
 }

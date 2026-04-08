@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -33,6 +34,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -52,11 +54,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
+@RequiredArgsConstructor
 public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWritePlatformService {
 
     private final CalendarRepository calendarRepository;
@@ -69,23 +69,6 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepository;
 
-    @Autowired
-    public CalendarWritePlatformServiceJpaRepositoryImpl(final CalendarRepository calendarRepository,
-            final CalendarHistoryRepository calendarHistoryRepository, final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService,
-            final ConfigurationDomainService configurationDomainService, final GroupRepositoryWrapper groupRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final ClientRepositoryWrapper clientRepository) {
-        this.calendarRepository = calendarRepository;
-        this.calendarHistoryRepository = calendarHistoryRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.loanWritePlatformService = loanWritePlatformService;
-        this.configurationDomainService = configurationDomainService;
-        this.groupRepository = groupRepository;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.clientRepository = clientRepository;
-    }
-
     @Override
     public CommandProcessingResult createCalendar(final JsonCommand command) {
 
@@ -96,7 +79,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         Group centerOrGroup = null;
         if (command.getGroupId() != null) {
             centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(command.getGroupId());
-            entityActivationDate = centerOrGroup.getActivationLocalDate();
+            entityActivationDate = centerOrGroup.getActivationDate();
             entityType = centerOrGroup.isCenter() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
             entityId = command.getGroupId();
         } else if (command.getLoanId() != null) {
@@ -106,7 +89,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             entityId = command.getLoanId();
         } else if (command.getClientId() != null) {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(command.getClientId());
-            entityActivationDate = client.getActivationLocalDate();
+            entityActivationDate = client.getActivationDate();
             entityType = CalendarEntityType.CLIENTS;
             entityId = command.getClientId();
         }
@@ -116,7 +99,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
-        if (entityActivationDate == null || newCalendar.getStartDateLocalDate().isBefore(entityActivationDate)) {
+        if (entityActivationDate == null || DateUtils.isBefore(newCalendar.getStartDateLocalDate(), entityActivationDate)) {
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
             String dateAsString = "";
             if (entityActivationDate != null) {
@@ -213,8 +196,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         Boolean areActiveEntitiesSynced = false;
         final Long calendarId = command.entityId();
 
-        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
-                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        final Collection<LoanStatus> loanStatuses = new ArrayList<>(
+                Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE));
 
         final Integer numberOfActiveLoansSyncedWithThisCalendar = this.calendarInstanceRepository.countOfLoansSyncedWithCalendar(calendarId,
                 loanStatuses);
@@ -303,7 +286,10 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             }
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(calendarForUpdate.getId()).with(changes)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(calendarForUpdate.getId()) //
+                .with(changes) //
                 .build();
     }
 
@@ -313,7 +299,10 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
         this.calendarRepository.delete(calendarForDelete);
-        return new CommandProcessingResultBuilder().withCommandId(null).withEntityId(calendarId).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(null) //
+                .withEntityId(calendarId) //
+                .build();
     }
 
     @Override
@@ -324,7 +313,10 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final CalendarInstance newCalendarInstance = new CalendarInstance(calendarForUpdate, entityId, entityTypeId);
         this.calendarInstanceRepository.save(newCalendarInstance);
 
-        return new CommandProcessingResultBuilder().withCommandId(null).withEntityId(calendarForUpdate.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(null) //
+                .withEntityId(calendarForUpdate.getId()) //
+                .build();
     }
 
     @Override
@@ -335,6 +327,9 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository
                 .findByCalendarIdAndEntityIdAndEntityTypeId(calendarId, entityId, entityTypeId);
         this.calendarInstanceRepository.saveAndFlush(calendarInstanceForUpdate);
-        return new CommandProcessingResultBuilder().withCommandId(null).withEntityId(calendarForUpdate.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(null) //
+                .withEntityId(calendarForUpdate.getId()) //
+                .build();
     }
 }

@@ -23,25 +23,28 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
+@Service
+@ConditionalOnMissingBean(value = NoteReadPlatformService.class, ignored = NoteReadPlatformServiceImpl.class)
 public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public NoteReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class NoteMapper implements RowMapper<NoteData> {
 
@@ -61,12 +64,8 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final Long loanId = JdbcSupport.getLong(rs, "loanId");
             final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-            // final Long depositAccountId = JdbcSupport.getLong(rs,
-            // "depositAccountId");
-            // final Long savingAccountId = JdbcSupport.getLong(rs,
-            // "savingAccountId");
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
-            final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
+            final EnumOptionData noteType = NoteType.toEnumOptionData(noteTypeId);
             final String note = rs.getString("note");
             final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
@@ -78,8 +77,10 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final String updatedByUsername = rs.getString("modifiedBy");
             final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
             final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
-            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
-                    createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
+
+            return NoteData.builder().id(id).clientId(clientId).groupId(groupId).loanId(loanId).loanTransactionId(transactionId)
+                    .noteType(noteType).note(note).createdOn(createdDate).createdById(createdById).createdByUsername(createdByUsername)
+                    .updatedOn(lastModifiedDate).updatedById(lastModifiedById).updatedByUsername(updatedByUsername).build();
         }
     }
 
@@ -103,7 +104,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
     }
 
     @Override
-    public Collection<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
+    public List<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         final NoteMapper rm = new NoteMapper();
         List<Object> paramList = new ArrayList<>(Arrays.asList(resourceId));
@@ -139,6 +140,10 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             break;
             case GROUP:
                 conditionSql = " n.group_id = ? ";
+            break;
+            case SHARE_ACCOUNT:
+                paramList.add(NoteType.SHARE_ACCOUNT.getValue());
+                conditionSql = " n.share_account_id = ? and note_type_enum = ? ";
             break;
             default:
             break;

@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -59,14 +61,17 @@ public class LoanCalculateRepaymentPastDueServiceTest {
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
         underTest = new LoanCalculateRepaymentPastDueService();
-        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+        moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.UP));
+        moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.UP);
     }
 
     @AfterEach
     public void reset() {
+        ThreadLocalContextUtil.reset();
         moneyHelper.close();
     }
 
@@ -75,7 +80,7 @@ public class LoanCalculateRepaymentPastDueServiceTest {
         // given
         LocalDate businessDate = DateUtils.getBusinessLocalDate();
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MonetaryCurrency loanCurrency = new MonetaryCurrency("CODE", 1, 1);
         // repayments
 
         // closed repayment
@@ -106,9 +111,6 @@ public class LoanCalculateRepaymentPastDueServiceTest {
                 repaymentInstallment_2, repaymentInstallment_upcoming);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepayments);
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
-        when(loanCurrency.getCode()).thenReturn("CODE");
-        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
-        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
 
         // when
         LoanRepaymentPastDueData pastDueAmount = underTest.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing);

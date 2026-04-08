@@ -21,13 +21,13 @@ Feature: Note Feature
 
   @modules
   Scenario Outline: Verify that the dummy service returns the correct message
-    Given An auto configuration <autoConfigurationClass> and a service configuration <configurationClass>
+    Given A service configuration <configurationClass>
     When The user retrieves the service of interface class <interfaceClass>
     Then The service class should match <serviceClass>
 
     Examples:
-      | autoConfigurationClass                                           | configurationClass                                                 | interfaceClass                                                      | serviceClass                                                                         |
-      | org.apache.fineract.portfolio.note.starter.NoteAutoConfiguration | com.acme.fineract.portfolio.note.starter.TestDefaultConfiguration  | org.apache.fineract.portfolio.note.service.NoteReadPlatformService  | org.apache.fineract.portfolio.note.service.NoteReadPlatformServiceImpl               |
-      | org.apache.fineract.portfolio.note.starter.NoteAutoConfiguration | com.acme.fineract.portfolio.note.starter.TestDefaultConfiguration  | org.apache.fineract.portfolio.note.service.NoteWritePlatformService | org.apache.fineract.portfolio.note.service.NoteWritePlatformServiceJpaRepositoryImpl |
-      | org.apache.fineract.portfolio.note.starter.NoteAutoConfiguration | com.acme.fineract.portfolio.note.starter.TestOverrideConfiguration | org.apache.fineract.portfolio.note.service.NoteReadPlatformService  | com.acme.fineract.portfolio.note.service.AcmeNoteReadPlatformService                 |
-      | org.apache.fineract.portfolio.note.starter.NoteAutoConfiguration | com.acme.fineract.portfolio.note.starter.TestOverrideConfiguration | org.apache.fineract.portfolio.note.service.NoteWritePlatformService | com.acme.fineract.portfolio.note.service.AcmeNoteWritePlatformService                |
+      | configurationClass                                                 | interfaceClass                                                      | serviceClass                                                            |
+      | com.acme.fineract.portfolio.note.starter.TestDefaultConfiguration  | org.apache.fineract.portfolio.note.service.NoteReadPlatformService  | org.apache.fineract.portfolio.note.service.NoteReadPlatformServiceImpl  |
+      | com.acme.fineract.portfolio.note.starter.TestDefaultConfiguration  | org.apache.fineract.portfolio.note.service.NoteWritePlatformService | org.apache.fineract.portfolio.note.service.NoteWritePlatformServiceImpl |
+      | com.acme.fineract.portfolio.note.starter.TestOverrideConfiguration | org.apache.fineract.portfolio.note.service.NoteReadPlatformService  | com.acme.fineract.portfolio.note.service.AcmeNoteReadPlatformService    |
+      | com.acme.fineract.portfolio.note.starter.TestOverrideConfiguration | org.apache.fineract.portfolio.note.service.NoteWritePlatformService | com.acme.fineract.portfolio.note.service.AcmeNoteWritePlatformService   |

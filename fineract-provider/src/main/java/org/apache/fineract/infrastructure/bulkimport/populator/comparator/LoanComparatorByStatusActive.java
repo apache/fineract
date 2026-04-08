@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator.comparator;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 
@@ -25,7 +26,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
  * Sorting the loan values based on loan status giving priority to active loans
  */
 
-public class LoanComparatorByStatusActive implements Comparator<LoanAccountData> {
+public class LoanComparatorByStatusActive implements Comparator<LoanAccountData>, Serializable {
 
     @Override
     public int compare(LoanAccountData o1, LoanAccountData o2) {

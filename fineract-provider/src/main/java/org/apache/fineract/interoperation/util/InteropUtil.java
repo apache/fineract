@@ -26,7 +26,7 @@ public final class InteropUtil {
 
     }
 
-    public static final String ISO8601_DATE_TIME_FORMAT = "yyyy-MM-ddTHH:mm:ss.SSS[-HH:MM]";
+    public static final String ISO8601_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS[-HH:MM]";
     public static final String ISO8601_DATE_FORMAT = "yyyy-MM-dd";
 
     public static final Locale DEFAULT_LOCALE = Locale.US;

@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.organisation.teller.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.PersistenceException;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
@@ -32,6 +34,7 @@ import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -51,20 +54,14 @@ import org.apache.fineract.organisation.teller.domain.TellerRepositoryWrapper;
 import org.apache.fineract.organisation.teller.exception.CashierExistForTellerException;
 import org.apache.fineract.organisation.teller.exception.CashierNotFoundException;
 import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
-import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@AllArgsConstructor
+@Slf4j
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -76,26 +73,6 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final JournalEntryRepository glJournalEntryRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
-
-    @Autowired
-    public TellerWritePlatformServiceJpaImpl(final PlatformSecurityContext context,
-            final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TellerRepositoryWrapper tellerRepositoryWrapper,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final StaffRepository staffRepository,
-            CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
-            JournalEntryRepository glJournalEntryRepository,
-            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            final CashierTransactionDataValidator cashierTransactionDataValidator) {
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.tellerRepositoryWrapper = tellerRepositoryWrapper;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.staffRepository = staffRepository;
-        this.cashierRepository = cashierRepository;
-        this.cashierTxnRepository = cashierTxnRepository;
-        this.glJournalEntryRepository = glJournalEntryRepository;
-        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
-        this.cashierTransactionDataValidator = cashierTransactionDataValidator;
-    }
 
     @Override
     @Transactional
@@ -206,16 +183,15 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleTellerDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("m_tellers_name_unq")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.teller.duplicate.name", "Teller with name `" + name + "` already exists",
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.teller.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.teller.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
     @Override
@@ -379,8 +355,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             this.fromApiJsonDeserializer.validateForCashTxnForCashier(command.json());
 
+            // TODO: can we please remove this whole block?!? this is 20 lines of dead code!!!
             final String entityType = command.stringValueOfParameterNamed("entityType");
-            final Long entityId = command.longValueOfParameterNamed("entityId");
             if (entityType != null) {
                 if (entityType.equals("loan account")) {
                     // TODO : Check if loan account exists
@@ -429,8 +405,6 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final Long time = System.currentTimeMillis();
             final String uniqueVal = String.valueOf(time) + currentUser.getId() + cashierOffice.getId();
             final String transactionId = Long.toHexString(Long.parseLong(uniqueVal));
-            ClientTransaction clientTransaction = null;
-            final Long shareTransactionId = null;
 
             final JournalEntry debitJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                // detail
@@ -439,10 +413,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.DEBIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
-                    null, null, clientTransaction, shareTransactionId); // Loan
-                                                                        // and
-                                                                        // Savings
-                                                                        // Txn
+                    null, null, null, null); // Loan
+                                             // and
+                                             // Savings
+                                             // Txn
 
             final JournalEntry creditJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                 // detail
@@ -451,10 +425,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.CREDIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
-                    null, null, clientTransaction, shareTransactionId); // Loan
-                                                                        // and
-                                                                        // Savings
-                                                                        // Txn
+                    null, null, null, null); // Loan
+                                             // and
+                                             // Savings
+                                             // Txn
 
             this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
             this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);

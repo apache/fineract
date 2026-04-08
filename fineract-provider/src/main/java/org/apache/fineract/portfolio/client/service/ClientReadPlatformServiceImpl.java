@@ -32,54 +32,36 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
-import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
-import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.organisation.office.data.OfficeData;
-import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
-import org.apache.fineract.portfolio.address.data.AddressData;
-import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientCollateralManagementData;
 import org.apache.fineract.portfolio.client.data.ClientData;
-import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
 import org.apache.fineract.portfolio.client.data.ClientTimelineData;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
-import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.client.mapper.ClientMapper;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
-import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -87,10 +69,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     // data mappers
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -99,70 +78,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
     private final ParentGroupsMapper clientGroupsMapper = new ParentGroupsMapper();
 
-    private final AddressReadPlatformService addressReadPlatformService;
-    private final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService;
-    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
-    private final ConfigurationDomainService configurationDomainService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ClientMapper clientMapper;
-
-    @Override
-    public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
-        this.context.authenticatedUser();
-
-        final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
-        AddressData address = null;
-
-        final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-
-        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(null);
-
-        final Boolean isAddressEnabled = configurationDomainService.isAddressEnabled();
-        if (isAddressEnabled) {
-            address = this.addressReadPlatformService.retrieveTemplate();
-        }
-
-        final ClientFamilyMembersData familyMemberOptions = this.clientFamilyMembersReadPlatformService.retrieveTemplate();
-
-        Collection<StaffData> staffOptions = null;
-
-        final boolean loanOfficersOnly = false;
-        if (staffInSelectedOfficeOnly) {
-            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
-        } else {
-            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(defaultOfficeId,
-                    loanOfficersOnly);
-        }
-        if (CollectionUtils.isEmpty(staffOptions)) {
-            staffOptions = null;
-        }
-        final List<CodeValueData> genderOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
-
-        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
-
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
-
-        final List<CodeValueData> clientNonPersonConstitutionOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_NON_PERSON_CONSTITUTION));
-
-        final List<CodeValueData> clientNonPersonMainBusinessLineOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_NON_PERSON_MAIN_BUSINESS_LINE));
-
-        final List<EnumOptionData> clientLegalFormOptions = ClientEnumerations.legalForm(LegalForm.values());
-
-        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
-                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getName(), null);
-
-        return ClientData.template(defaultOfficeId, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices, staffOptions, null,
-                genderOptions, savingsProductDatas, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
-                clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, familyMemberOptions,
-                new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates);
-    }
 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
@@ -179,7 +98,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
-        final String appUserID = String.valueOf(context.authenticatedUser().getId());
 
         // if (searchParameters.isScopedByOfficeHierarchy()) {
         // this.context.validateAccessRights(searchParameters.getHierarchy());
@@ -192,11 +110,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
 
         if (searchParameters != null) {
-            if (searchParameters.isSelfUser()) {
-                sqlBuilder.append(
-                        " and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ? ) ");
-                paramList.add(appUserID);
-            }
 
             final String extraCriteria = buildSqlStringFromClientCriteria(this.clientToDataMapper.schema(), searchParameters, paramList);
 
@@ -204,18 +117,18 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                 sqlBuilder.append(" and (").append(extraCriteria).append(")");
             }
 
-            if (searchParameters.isOrderByRequested()) {
+            if (searchParameters.hasOrderBy()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-                if (searchParameters.isSortOrderProvided()) {
+                if (searchParameters.hasSortOrder()) {
                     sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                     this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
                 }
             }
 
-            if (searchParameters.isLimited()) {
+            if (searchParameters.hasLimit()) {
                 sqlBuilder.append(" ");
-                if (searchParameters.isOffset()) {
+                if (searchParameters.hasOffset()) {
                     sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
                 } else {
                     sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -227,7 +140,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private String buildSqlStringFromClientCriteria(String schemaSql, final SearchParameters searchParameters, List<Object> paramList) {
 
-        String sqlSearch = searchParameters.getSqlSearch();
         final Long officeId = searchParameters.getOfficeId();
         final String externalId = searchParameters.getExternalId();
         final String displayName = searchParameters.getName();
@@ -236,13 +148,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String status = searchParameters.getStatus();
 
         String extraCriteria = "";
-        if (sqlSearch != null) {
-            sqlSearch = sqlSearch.replaceAll(" display_name ", " c.display_name ");
-            sqlSearch = sqlSearch.replaceAll("display_name ", "c.display_name ");
-            extraCriteria = " and (" + sqlSearch + ")";
-            this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
-        }
-
         if (officeId != null) {
             extraCriteria += " and c.office_id = ? ";
             paramList.add(officeId);
@@ -275,13 +180,18 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             extraCriteria += " and c.lastname like ? ";
         }
 
-        if (searchParameters.isScopedByOfficeHierarchy()) {
+        if (searchParameters.hasHierarchy()) {
             paramList.add(searchParameters.getHierarchy() + "%");
             extraCriteria += " and o.hierarchy like ? ";
         }
 
-        if (searchParameters.isOrphansOnly()) {
+        if (searchParameters.getOrphansOnly()) {
             extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
+        }
+
+        if (searchParameters.hasLegalForm()) {
+            paramList.add(searchParameters.getLegalForm());
+            extraCriteria += " and c.legal_form_enum = ? ";
         }
 
         if (StringUtils.isNotBlank(extraCriteria)) {
@@ -308,8 +218,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             for (ClientCollateralManagement clientCollateralManagement : clientCollateralManagements) {
                 BigDecimal total = clientCollateralManagement.getTotal();
                 BigDecimal totalCollateral = clientCollateralManagement.getTotalCollateral(total);
-                clientCollateralManagementDataSet
-                        .add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total, totalCollateral));
+                clientCollateralManagementDataSet.add(new ClientCollateralManagementData(clientCollateralManagement.getId(),
+                        clientCollateralManagement.getCollaterals().getName(), clientCollateralManagement.getQuantity(),
+                        clientCollateralManagement.getCollaterals().getPctToBase(),
+                        clientCollateralManagement.getCollaterals().getBasePrice(), total, totalCollateral));
             }
 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
@@ -641,49 +553,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String lastname = rs.getString("lastname");
             final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
-
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
 
             return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
         }
-    }
-
-    private Long defaultToUsersOfficeIfNull(final Long officeId) {
-        Long defaultOfficeId = officeId;
-        if (defaultOfficeId == null) {
-            defaultOfficeId = this.context.authenticatedUser().getOffice().getId();
-        }
-        return defaultOfficeId;
-    }
-
-    @Override
-    public ClientData retrieveAllNarrations(final String clientNarrations) {
-        final List<CodeValueData> narrations = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
-        final Collection<CodeValueData> clientTypeOptions = null;
-        final Collection<CodeValueData> clientClassificationOptions = null;
-        final Collection<CodeValueData> clientNonPersonConstitutionOptions = null;
-        final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
-        final List<EnumOptionData> clientLegalFormOptions = null;
-        return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions,
-                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null);
-    }
-
-    @Override
-    public LocalDate retrieveClientTransferProposalDate(Long clientId) {
-        final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id = ? ";
-        try {
-            return this.jdbcTemplate.queryForObject(sql, LocalDate.class, clientId);
-        } catch (final EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public Collection<Long> retrieveUserClients(Long aUserID) {
-        String sql = "SELECT  m.client_id FROM m_selfservice_user_client_mapping m INNER JOIN m_client c ON c.id = m.client_id WHERE m.appuser_id = ?";
-        return jdbcTemplate.queryForList(sql, Long.class, aUserID);
     }
 
     @Override
@@ -864,4 +738,26 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
+    @Override
+    public ClientData retrieveAllNarrations(final String clientNarrations) {
+        final List<CodeValueData> narrations = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
+        final Collection<CodeValueData> clientTypeOptions = null;
+        final Collection<CodeValueData> clientClassificationOptions = null;
+        final Collection<CodeValueData> clientNonPersonConstitutionOptions = null;
+        final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
+        final List<EnumOptionData> clientLegalFormOptions = null;
+        return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions,
+                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null);
+    }
+
+    @Override
+    public LocalDate retrieveClientTransferProposalDate(final Long clientId) {
+        final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id = ?";
+        try {
+            return this.jdbcTemplate.queryForObject(sql, LocalDate.class, clientId);
+        } catch (final EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

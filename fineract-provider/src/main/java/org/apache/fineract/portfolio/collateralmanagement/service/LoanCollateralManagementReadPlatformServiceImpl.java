@@ -31,11 +31,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @Transactional(readOnly = true)
 public class LoanCollateralManagementReadPlatformServiceImpl implements LoanCollateralManagementReadPlatformService {
 
@@ -43,7 +40,6 @@ public class LoanCollateralManagementReadPlatformServiceImpl implements LoanColl
     private LoanCollateralManagementRepository loanCollateralManagementRepository;
     private LoanRepository loanRepository;
 
-    @Autowired
     public LoanCollateralManagementReadPlatformServiceImpl(final PlatformSecurityContext context,
             final LoanCollateralManagementRepository loanCollateralManagementRepository, final LoanRepository loanRepository) {
         this.context = context;

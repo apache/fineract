@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -45,13 +46,11 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDated
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@RequiredArgsConstructor
 public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements RepaymentWithPostDatedChecksWritePlatformService {
 
     public static final String NAME = "name";
@@ -71,14 +70,6 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanRepository loanRepository;
 
-    @Autowired
-    public RepaymentWithPostDatedChecksWritePlatformServiceImpl(final PostDatedChecksRepository postDatedChecksRepository,
-            final FromJsonHelper fromApiJsonHelper, final LoanRepository loanRepository) {
-        this.postDatedChecksRepository = postDatedChecksRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.loanRepository = loanRepository;
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult updatePostDatedChecks(JsonCommand command) {
@@ -87,7 +78,10 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
                 .orElseThrow(() -> new PostDatedCheckNotFoundException(command.entityId()));
         Map<String, Object> changes = postDatedChecks.updatePostDatedChecks(command);
         this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId()).with(changes)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.entityId()) //
+                .with(changes) //
                 .build();
     }
 
@@ -138,8 +132,11 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
             }
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(Integer.toUnsignedLong(installmentId))
-                .withLoanId(postDatedChecks.getLoan().getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(Integer.toUnsignedLong(installmentId)) //
+                .withLoanId(postDatedChecks.getLoan().getId()) //
+                .build();
     }
 
     private void validateForBounce(JsonCommand command) {
@@ -231,7 +228,10 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
     @Override
     public CommandProcessingResult deletePostDatedChecks(final JsonCommand command) {
         this.postDatedChecksRepository.deleteById(command.entityId());
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withLoanId(command.getLoanId())
-                .withEntityId(command.entityId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withLoanId(command.getLoanId()) //
+                .withEntityId(command.entityId()) //
+                .build();
     }
 }

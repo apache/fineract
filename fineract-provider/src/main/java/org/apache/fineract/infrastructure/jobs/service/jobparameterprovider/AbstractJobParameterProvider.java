@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.jobparameterprovider;
 
-public abstract class AbstractJobParameterProvider implements JobParameterProvider {
+import java.util.List;
+
+public abstract class AbstractJobParameterProvider<T> implements JobParameterProvider<T> {
 
     @Override
     public boolean canProvideParametersForJob(String jobName) {
-        return jobName.equals(getJobName());
+        return getJobNames().contains(jobName);
     }
 
-    protected abstract String getJobName();
+    protected abstract List<String> getJobNames();
 }

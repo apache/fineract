@@ -30,13 +30,13 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.webT
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import jakarta.persistence.PersistenceException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -108,7 +109,10 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
 
             this.hookRepository.saveAndFlush(hook);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(hook.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(hook.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleHookDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -193,7 +197,9 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
-        return new CommandProcessingResultBuilder().withEntityId(hookId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(hookId) //
+                .build();
     }
 
     private Hook retrieveHookBy(final Long hookId) {
@@ -309,8 +315,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             throw new PlatformDataIntegrityException("error.msg.hook.duplicate.name", "A hook with name '" + name + "' already exists",
                     "name", name);
         }
-
-        throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

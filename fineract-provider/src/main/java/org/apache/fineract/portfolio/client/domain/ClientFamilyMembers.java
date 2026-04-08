@@ -19,18 +19,18 @@
 
 package org.apache.fineract.portfolio.client.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_family_members")
-public class ClientFamilyMembers extends AbstractPersistableCustom {
+public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_id")

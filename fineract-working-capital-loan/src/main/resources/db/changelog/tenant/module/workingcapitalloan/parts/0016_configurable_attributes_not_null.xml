@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Update existing NULL values to false and set column defaults for rolling deployment safety -->
+    <changeSet author="fineract" id="wclp-0016-1">
+        <update tableName="m_wc_loan_product_configurable_attributes">
+            <column name="delinquency_bucket_classification_overridable" valueBoolean="false"/>
+            <where>delinquency_bucket_classification_overridable IS NULL</where>
+        </update>
+        <update tableName="m_wc_loan_product_configurable_attributes">
+            <column name="discount_default_overridable" valueBoolean="false"/>
+            <where>discount_default_overridable IS NULL</where>
+        </update>
+        <update tableName="m_wc_loan_product_configurable_attributes">
+            <column name="period_payment_frequency_overridable" valueBoolean="false"/>
+            <where>period_payment_frequency_overridable IS NULL</where>
+        </update>
+        <update tableName="m_wc_loan_product_configurable_attributes">
+            <column name="period_payment_frequency_type_overridable" valueBoolean="false"/>
+            <where>period_payment_frequency_type_overridable IS NULL</where>
+        </update>
+    </changeSet>
+
+    <!-- Set column defaults to false so old code inserting NULLs gets false during rolling deployment -->
+    <changeSet author="fineract" id="wclp-0016-2">
+        <addDefaultValue tableName="m_wc_loan_product_configurable_attributes"
+                         columnName="delinquency_bucket_classification_overridable"
+                         columnDataType="BOOLEAN"
+                         defaultValueBoolean="false"/>
+        <addDefaultValue tableName="m_wc_loan_product_configurable_attributes"
+                         columnName="discount_default_overridable"
+                         columnDataType="BOOLEAN"
+                         defaultValueBoolean="false"/>
+        <addDefaultValue tableName="m_wc_loan_product_configurable_attributes"
+                         columnName="period_payment_frequency_overridable"
+                         columnDataType="BOOLEAN"
+                         defaultValueBoolean="false"/>
+        <addDefaultValue tableName="m_wc_loan_product_configurable_attributes"
+                         columnName="period_payment_frequency_type_overridable"
+                         columnDataType="BOOLEAN"
+                         defaultValueBoolean="false"/>
+    </changeSet>
+
+</databaseChangeLog>

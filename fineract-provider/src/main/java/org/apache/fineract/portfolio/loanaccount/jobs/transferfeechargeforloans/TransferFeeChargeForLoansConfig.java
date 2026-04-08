@@ -24,21 +24,22 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatfo
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class TransferFeeChargeForLoansConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private LoanChargeReadPlatformService loanChargeReadPlatformService;
     @Autowired
@@ -48,12 +49,13 @@ public class TransferFeeChargeForLoansConfig {
 
     @Bean
     protected Step transferFeeChargeForLoansStep() {
-        return steps.get(JobName.TRANSFER_FEE_CHARGE_FOR_LOANS.name()).tasklet(transferFeeChargeForLoansTasklet()).build();
+        return new StepBuilder(JobName.TRANSFER_FEE_CHARGE_FOR_LOANS.name(), jobRepository)
+                .tasklet(transferFeeChargeForLoansTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job transferFeeChargeForLoansJob() {
-        return jobs.get(JobName.TRANSFER_FEE_CHARGE_FOR_LOANS.name()).start(transferFeeChargeForLoansStep())
+        return new JobBuilder(JobName.TRANSFER_FEE_CHARGE_FOR_LOANS.name(), jobRepository).start(transferFeeChargeForLoansStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

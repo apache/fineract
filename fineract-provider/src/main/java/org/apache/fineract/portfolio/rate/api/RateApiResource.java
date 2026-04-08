@@ -20,42 +20,37 @@
 package org.apache.fineract.portfolio.rate.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
 
-@Path("/rates")
+@Path("/v1/rates")
 @Component
-@Scope("singleton")
 @Tag(name = "Rate", description = "")
+@RequiredArgsConstructor
 public class RateApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -64,71 +59,46 @@ public class RateApiResource {
     private final PlatformSecurityContext context;
     private final RateReadService readPlatformService;
     private final DefaultToApiJsonSerializer<RateData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public RateApiResource(final PlatformSecurityContext context, final RateReadService rateReadService,
-            final DefaultToApiJsonSerializer<RateData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = rateReadService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Path("{rateId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveRate(@PathParam("rateId") Long rateId, @Context final UriInfo uriInfo) {
+    public RateData retrieveRate(@PathParam("rateId") Long rateId) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        final RateData rate = this.readPlatformService.retrieveOne(rateId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return this.toApiJsonSerializer.serialize(settings, rate, RESPONSE_DATA_PARAMETERS);
+        return this.readPlatformService.retrieveOne(rateId);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createRate(final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createRate().withJson(apiRequestBodyAsJson).build();
+    public CommandProcessingResult createRate(final RateRequest rateRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createRate().withJson(toApiJsonSerializer.serialize(rateRequest))
+                .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getAllRates(@Context final UriInfo uriInfo) {
+    public List<RateData> getAllRates() {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        Collection<RateData> rates = this.readPlatformService.retrieveAllRates();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        return this.toApiJsonSerializer.serialize(settings, rates, RESPONSE_DATA_PARAMETERS);
+        return readPlatformService.retrieveAllRates();
     }
 
     @PUT
     @Path("{rateId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateRate(@PathParam("rateId") Long rateId, final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRate(rateId).withJson(apiRequestBodyAsJson).build();
+    public CommandProcessingResult updateRate(@PathParam("rateId") Long rateId, final RateRequest rateRequest) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRate(rateId)
+                .withJson(toApiJsonSerializer.serialize(rateRequest)).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
 }

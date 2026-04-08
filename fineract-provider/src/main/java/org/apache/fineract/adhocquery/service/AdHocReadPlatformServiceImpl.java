@@ -21,40 +21,32 @@ package org.apache.fineract.adhocquery.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.Collection;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AdHocMapper adHocRowMapper;
 
-    @Autowired
-    public AdHocReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
-        this.adHocRowMapper = new AdHocMapper(sqlGenerator);
-    }
-
     @Override
-    public Collection<AdHocData> retrieveAllAdHocQuery() {
+    public List<AdHocData> retrieveAllAdHocQuery() {
         final String sql = "select " + this.adHocRowMapper.schema() + " order by r.id";
 
         return this.jdbcTemplate.query(sql, this.adHocRowMapper); // NOSONAR
     }
 
     @Override
-    public Collection<AdHocData> retrieveAllActiveAdHocQuery() {
+    public List<AdHocData> retrieveAllActiveAdHocQuery() {
         final String sql = "select " + adHocRowMapper.schema() + " where r." + sqlGenerator.escape("is_active") + " = true order by r.id";
 
         return jdbcTemplate.query(sql, adHocRowMapper); // NOSONAR
@@ -70,7 +62,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
         }
     }
 
-    protected static final class AdHocMapper implements RowMapper<AdHocData> {
+    public static final class AdHocMapper implements RowMapper<AdHocData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
 

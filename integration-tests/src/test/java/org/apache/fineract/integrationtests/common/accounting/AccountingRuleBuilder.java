@@ -31,7 +31,7 @@ public class AccountingRuleBuilder {
     private String description;
 
     public AccountingRuleBuilder() {
-        name = Utils.randomStringGenerator("ACCOUNTRULE_NAME_", 5);
+        name = Utils.uniqueRandomStringGenerator("ACCOUNTRULE_NAME_", 5);
         description = name;
     }
 

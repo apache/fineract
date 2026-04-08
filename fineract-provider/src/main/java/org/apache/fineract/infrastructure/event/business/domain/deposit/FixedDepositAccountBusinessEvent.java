@@ -33,4 +33,9 @@ public abstract class FixedDepositAccountBusinessEvent extends AbstractBusinessE
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getId();
+    }
 }

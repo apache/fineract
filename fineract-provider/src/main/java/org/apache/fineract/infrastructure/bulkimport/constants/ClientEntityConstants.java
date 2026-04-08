@@ -38,8 +38,8 @@ public final class ClientEntityConstants {
     public static final int REMARKS_COL = 11;// L
     public static final int EXTERNAL_ID_COL = 12;// M
     public static final int ACTIVE_COL = 13;// N
-    public static final int ACTIVATION_DATE_COL = 14;// O
-    public static final int SUBMITTED_ON_COL = 15; // P
+    public static final int SUBMITTED_ON_COL = 14;// O
+    public static final int ACTIVATION_DATE_COL = 15; // P
     public static final int ADDRESS_ENABLED = 16;// Q
     public static final int ADDRESS_TYPE_COL = 17;// R
     public static final int STREET_COL = 18;// S

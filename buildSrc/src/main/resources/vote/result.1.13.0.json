@@ -1,0 +1,56 @@
+{
+  "approve": {
+    "binding": [
+      {
+        "name": "James Dailey",
+        "email": "jdailey@apache.org"
+      },
+      {
+        "name": "Victor Manuel Romero Rodriguez",
+        "email": "victor.romero@fintecheando.mx"
+      },
+      {
+        "name": "Terence Monteiro",
+        "email": "terence.placker@gmail.com"
+      }
+    ],
+    "nonBinding": [
+      {
+        "name": "Adam Monsen",
+        "email": "amonsen@mifos.org"
+      },
+      {
+        "name": "Bharath Gowda",
+        "email": "bgowda@mifos.org"
+      },
+      {
+        "name": "Aleksandar Vidakovic",
+        "email": "cheetah@monkeysintown.com"
+      },
+      {
+        "name": "Ed Cable",
+        "email": "edcable@mifos.org"
+      },
+      {
+        "name": "Felix van Hove",
+        "email": "fvanhove@gmx.de.invalid"
+      },
+      {
+        "name": "Ahmed adel",
+        "email": "a7med3del1973@gmail.com"
+      }
+    ]
+  },
+  "disapprove": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  },
+  "noOpinion": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  }
+}

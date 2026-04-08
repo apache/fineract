@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -75,7 +75,7 @@ public class CreateTransactionLoanCommandStrategyTest {
     private BatchRequest getBatchRequest(final Long loanId, final String command) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/" + loanId + "/transactions?command=" + command;
+        String relativeUrl = "v1/loans/" + loanId + "/transactions?command=" + command;
 
         br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
         br.setRelativeUrl(relativeUrl);

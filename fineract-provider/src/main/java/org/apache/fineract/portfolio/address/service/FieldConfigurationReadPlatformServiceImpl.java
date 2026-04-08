@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.address.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
@@ -58,14 +57,13 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
             final boolean is_mandatory = rs.getBoolean("is_mandatory");
             final String validation_regex = rs.getString("validation_regex");
 
-            return FieldConfigurationData.instance(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory,
-                    validation_regex);
+            return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory, validation_regex);
 
         }
     }
 
     @Override
-    public Collection<FieldConfigurationData> retrieveFieldConfiguration(final String entity) {
+    public List<FieldConfigurationData> retrieveFieldConfiguration(final String entity) {
         this.context.authenticatedUser();
 
         final FieldMapper rm = new FieldMapper();

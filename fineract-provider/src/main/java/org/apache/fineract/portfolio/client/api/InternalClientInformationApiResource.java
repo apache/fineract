@@ -23,19 +23,21 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -44,9 +46,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Profile("test")
+@Profile(FineractProfiles.TEST)
 @Component
-@Path("/internal/client")
+@Path("/v1/internal/client")
 @RequiredArgsConstructor
 @Slf4j
 public class InternalClientInformationApiResource implements InitializingBean {
@@ -56,6 +58,7 @@ public class InternalClientInformationApiResource implements InitializingBean {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void afterPropertiesSet() {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -69,8 +72,9 @@ public class InternalClientInformationApiResource implements InitializingBean {
 
     @GET
     @Path("{clientId}/audit")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Get internal client audit fields", operationId = "getInternalClientAuditFields")
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public String getClientAuditFields(@Context final UriInfo uriInfo, @PathParam("clientId") Long clientId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");

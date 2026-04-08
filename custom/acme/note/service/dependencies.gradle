@@ -18,6 +18,7 @@
  */
 
 dependencies {
+    implementation(project(':fineract-core'))
     implementation(project(':fineract-provider'))
     compileOnly('org.springframework.boot:spring-boot-autoconfigure')
 }

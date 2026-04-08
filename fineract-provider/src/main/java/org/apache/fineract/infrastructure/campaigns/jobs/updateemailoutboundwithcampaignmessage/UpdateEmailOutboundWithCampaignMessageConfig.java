@@ -26,20 +26,22 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class UpdateEmailOutboundWithCampaignMessageConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private EmailCampaignReadPlatformService emailCampaignReadPlatformService;
     @Autowired
@@ -53,14 +55,14 @@ public class UpdateEmailOutboundWithCampaignMessageConfig {
 
     @Bean
     protected Step updateEmailOutboundWithCampaignMessageStep() {
-        return steps.get(JobName.UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name())
-                .tasklet(updateEmailOutboundWithCampaignMessageTasklet()).build();
+        return new StepBuilder(JobName.UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name(), jobRepository)
+                .tasklet(updateEmailOutboundWithCampaignMessageTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job updateEmailOutboundWithCampaignMessageJob() {
-        return jobs.get(JobName.UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name()).start(updateEmailOutboundWithCampaignMessageStep())
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name(), jobRepository)
+                .start(updateEmailOutboundWithCampaignMessageStep()).incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

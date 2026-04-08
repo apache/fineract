@@ -26,14 +26,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -45,16 +46,13 @@ import org.apache.fineract.spm.service.ScorecardService;
 import org.apache.fineract.spm.service.SpmService;
 import org.apache.fineract.spm.util.ScorecardMapper;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Path("/surveys/scorecards")
+@Path("/v1/surveys/scorecards")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Score Card", description = "")
+@RequiredArgsConstructor
 public class ScorecardApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -63,20 +61,8 @@ public class ScorecardApiResource {
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ScorecardReadPlatformService scorecardReadPlatformService;
 
-    @Autowired
-    public ScorecardApiResource(final PlatformSecurityContext securityContext, final SpmService spmService,
-            final ScorecardService scorecardService, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final ScorecardReadPlatformService scorecardReadPlatformService) {
-        this.securityContext = securityContext;
-        this.spmService = spmService;
-        this.scorecardService = scorecardService;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.scorecardReadPlatformService = scorecardReadPlatformService;
-    }
-
     @GET
     @Path("{surveyId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @Operation(summary = "List all Scorecard entries", description = "List all Scorecard entries for a survey.")
@@ -106,7 +92,6 @@ public class ScorecardApiResource {
 
     @GET
     @Path("{surveyId}/clients/{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     public List<ScorecardData> findBySurveyAndClient(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId,
@@ -120,7 +105,6 @@ public class ScorecardApiResource {
 
     @GET
     @Path("clients/{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {

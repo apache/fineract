@@ -21,24 +21,28 @@ package org.apache.fineract.cob.loan;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.data.RepositoryItemWriter;
+import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> {
 
-    private final LoanAccountLockRepository accountLockRepository;
+    private final LockingService<LoanAccountLock> loanLockingService;
 
     @Override
-    public void write(@NotNull List<? extends Loan> items) throws Exception {
-        super.write(items);
-        List<Long> loanIds = items.stream().map(AbstractPersistableCustom::getId).toList();
-        accountLockRepository.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
+    public void write(@NonNull Chunk<? extends Loan> items) throws Exception {
+        if (!items.isEmpty()) {
+            super.write(items);
+            List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
+            loanLockingService.deleteByLoanIdInAndLockOwner(loanIds, getLockOwner());
+        }
     }
 
     protected abstract LockOwner getLockOwner();

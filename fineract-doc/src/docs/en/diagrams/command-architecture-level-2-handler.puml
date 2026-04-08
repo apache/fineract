@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+
+title Command Processing Architecture (Level 2) - Handlers
+
+left to right direction
+
+System_Boundary(commandSystem, "Command Processing") {
+    Container(handlerManager, "Command Handler Registry", "Registry Pattern", "Maps command types to handlers")
+    Container(handlers, "Command Handlers", "Multiple Instances", "Execute specific business logic")
+}
+
+Container_Ext(businessService, "SomeService", "Business Service", "Some domain operations")
+
+ContainerDb_Ext(db, "Database", "Business data")
+
+Rel(handlerManager, handlers, "Returns handler")
+Rel(handlers, businessService, "Map commands to business service functions")
+Rel(businessService, db, "Store data")
+
+@enduml

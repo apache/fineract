@@ -18,6 +18,34 @@
  */
 
 dependencies {
+    modules {
+        module("io.swagger.core.v3:swagger-annotations") {
+            replacedBy("io.swagger.core.v3:swagger-annotations-jakarta")
+        }
+    }
+
+    implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-cob'))
+    implementation(project(path: ':fineract-command'))
+    implementation(project(path: ':fineract-command-audit'))
+    implementation(project(path: ':fineract-command-jdbc'))
+    implementation(project(path: ':fineract-validation'))
+    implementation(project(path: ':fineract-accounting'))
+    implementation(project(path: ':fineract-investor'))
+    implementation(project(path: ':fineract-rates'))
+    implementation(project(path: ':fineract-charge'))
+    implementation(project(path: ':fineract-loan'))
+    implementation(project(path: ':fineract-savings'))
+    implementation(project(path: ':fineract-branch'))
+    implementation(project(path: ':fineract-document'))
+    implementation(project(path: ':fineract-progressive-loan'))
+    implementation(project(path: ':fineract-report'))
+    implementation(project(path: ':fineract-tax'))
+    implementation(project(path: ':fineract-loan-origination'))
+    implementation(project(path: ':fineract-security'))
+    implementation(project(path: ':fineract-working-capital-loan'))
+    implementation(project(path: ':fineract-mix'))
+
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
@@ -31,15 +59,26 @@ dependencies {
             )
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
+            'org.springframework.boot:spring-boot-starter-oauth2-authorization-server',
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.boot:spring-boot-starter-data-jdbc',
             'org.springframework.batch:spring-batch-integration',
             'org.springframework.boot:spring-boot-starter-integration',
             'org.springframework.integration:spring-integration-event',
             'org.springframework.integration:spring-integration-jms',
+            'org.springframework.integration:spring-integration-kafka',
+            'org.springframework.kafka:spring-kafka',
+
+            'io.micrometer:micrometer-registry-prometheus',
+            'io.micrometer:micrometer-registry-otlp',
+            'io.micrometer:micrometer-registry-cloudwatch2',
+
+            'io.awspring.cloud:spring-cloud-aws-starter',
 
             'org.apache.avro:avro',
             'jakarta.ws.rs:jakarta.ws.rs-api',
@@ -75,20 +114,23 @@ dependencies {
             'javax.cache:cache-api',
 
             'com.github.spotbugs:spotbugs-annotations',
-            'io.swagger.core.v3:swagger-annotations',
+            'io.swagger.core.v3:swagger-annotations-jakarta',
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8',
             'com.squareup.retrofit2:converter-gson',
             'com.sun.activation:jakarta.activation',
             'com.sun.mail:jakarta.mail',
 
-            'org.springdoc:springdoc-openapi-ui',
-            'org.springdoc:springdoc-openapi-common',
-            'org.springdoc:springdoc-openapi-security',
+            'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot2',
+            'io.github.resilience4j:resilience4j-spring-boot3',
+            'org.reflections:reflections',
             )
+
+    implementation 'software.amazon.msk:aws-msk-iam-auth'
+
+    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta'
 
     implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
@@ -107,7 +149,7 @@ dependencies {
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.apache.activemq:activemq-broker') {
+    implementation ('org.apache.activemq:activemq-client') {
         exclude group: 'org.apache.geronimo.specs'
         exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }
@@ -120,9 +162,12 @@ dependencies {
     implementation ('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
     }
-    implementation ('com.amazonaws:aws-java-sdk-s3') {
-        exclude group: 'commons-logging'
+    implementation('org.apache.commons:commons-csv'){}
+    implementation ('software.amazon.awssdk:s3') {
     }
+    implementation ('software.amazon.awssdk:auth') {
+    }
+
     implementation ('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
         exclude group: 'javax.activation'
@@ -149,8 +194,6 @@ dependencies {
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(
-            'org.apache.bval:org.apache.bval.bundle',
-
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient'
@@ -160,11 +203,24 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
 
+    implementation 'ch.qos.logback.contrib:logback-json-classic'
+    implementation 'ch.qos.logback.contrib:logback-jackson'
+    implementation 'org.codehaus.janino:janino'
+
+    implementation 'org.apache.commons:commons-math3'
+
+    implementation 'io.github.classgraph:classgraph'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
     testImplementation( 'io.cucumber:cucumber-spring',
             'io.github.classgraph:classgraph',
+            'io.cucumber:cucumber-core',
+            'io.cucumber:cucumber-java',
+            'io.cucumber:cucumber-java8',
+            'io.cucumber:cucumber-junit-platform-engine',
             )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
@@ -174,5 +230,4 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation ('org.mockito:mockito-inline')
-
 }

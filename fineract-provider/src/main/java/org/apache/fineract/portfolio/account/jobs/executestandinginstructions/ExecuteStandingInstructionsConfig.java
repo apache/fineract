@@ -24,21 +24,23 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatfo
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class ExecuteStandingInstructionsConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     @Autowired
@@ -50,12 +52,13 @@ public class ExecuteStandingInstructionsConfig {
 
     @Bean
     protected Step executeStandingInstructionsStep() {
-        return steps.get(JobName.EXECUTE_STANDING_INSTRUCTIONS.name()).tasklet(executeStandingInstructionsTasklet()).build();
+        return new StepBuilder(JobName.EXECUTE_STANDING_INSTRUCTIONS.name(), jobRepository)
+                .tasklet(executeStandingInstructionsTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job executeStandingInstructionsJob() {
-        return jobs.get(JobName.EXECUTE_STANDING_INSTRUCTIONS.name()).start(executeStandingInstructionsStep())
+        return new JobBuilder(JobName.EXECUTE_STANDING_INSTRUCTIONS.name(), jobRepository).start(executeStandingInstructionsStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

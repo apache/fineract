@@ -48,6 +48,10 @@ public class CurrencyHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public CurrencyHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
@@ -61,6 +65,10 @@ public class CurrencyHelper {
         return getCurrencies(CURRENCY_URL_SELECTED, PERMITTED_CURRENCY_ARRAY_SELECTED);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private ArrayList<Currency> getCurrencies(final String getUrl, final List<String> permittedCurrencyArrays) {
         LOG.info("--------------------------------- GET CURRENCY OPTIONS -------------------------------");
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getUrl).andReturn().asString();
@@ -78,6 +86,10 @@ public class CurrencyHelper {
         return currencyList;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List<String> updateCurrencies(final List<String> currencies) {
         LOG.info("--------------------------------- UPDATE CURRENCY OPTIONS -------------------------------");
         final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log().ifError().when()
@@ -89,6 +101,10 @@ public class CurrencyHelper {
         return responseMap.get("changes").get("currencies");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private String getUpdateJSON(final List<String> currencies) {
         final HashMap<String, List<String>> map = new HashMap<>();
         map.put("currencies", currencies);

@@ -1,0 +1,29 @@
+github:
+  description: "Apache Fineract"
+  homepage: https://fineract.apache.org
+  labels:
+    - apache
+    - banking
+    - finance
+    - fintech
+    - group-lending
+    - group-savings
+    - java
+    - lending
+    - loans
+    - microfinance
+    - savings
+    - social-impact
+    - tech4good
+  enabled_merge_buttons:
+    merge: true
+    squash: false
+    rebase: false
+  protected_branches:
+    develop:
+      required_linear_history: false
+      required_signatures: true
+      required_conversation_resolution: true
+notifications:
+  commits: commits@fineract.apache.org
+  pullrequests: issues@fineract.apache.org

@@ -23,9 +23,9 @@ import org.apache.fineract.gradle.FineractPluginExtension.FineractPluginEmailPar
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import javax.mail.*
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeMessage
+import jakarta.mail.*
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeMessage
 
 class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class)
@@ -73,8 +73,8 @@ class EmailService {
             if(params.bcc) {
                 msg.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(params.bcc))
             }
-            msg.setSubject(params.subject)
-            msg.setText(params.message);
+            msg.setSubject(params.subject, "UTF-8")
+            msg.setText(params.message, "UTF-8");
 
             Transport.send(msg);
 

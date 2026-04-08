@@ -40,12 +40,9 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData;
 import org.apache.fineract.portfolio.client.data.ClientData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class StandingInstructionHistoryReadPlatformServiceImpl implements StandingInstructionHistoryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -58,7 +55,6 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
     // pagination
     private final PaginationHelper paginationHelper;
 
-    @Autowired
     public StandingInstructionHistoryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;
@@ -111,10 +107,10 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
-            if (accountType.isSavingsAccount()) {
+            if (PortfolioAccountType.SAVINGS.equals(accountType)) {
                 sqlBuilder.append(" fromsavacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
-            } else if (accountType.isLoanAccount()) {
+            } else if (PortfolioAccountType.LOAN.equals(accountType)) {
                 sqlBuilder.append(" fromloanacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
             }
@@ -140,18 +136,18 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
         }
 
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-            if (searchParameters.isSortOrderProvided()) {
+            if (searchParameters.hasSortOrder()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));

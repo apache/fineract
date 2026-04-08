@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.client.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -42,7 +42,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
     private final PlatformSecurityContext context;
 
     @Override
-    public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
+    public List<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
 
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();

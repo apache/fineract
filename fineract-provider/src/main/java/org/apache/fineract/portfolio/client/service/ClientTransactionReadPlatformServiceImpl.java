@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -33,6 +34,8 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
+import org.apache.fineract.portfolio.client.domain.ClientTransaction;
+import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionType;
 import org.apache.fineract.portfolio.client.exception.ClientTransactionNotFoundException;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
@@ -50,6 +53,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ClientTransactionMapper clientTransactionMapper = new ClientTransactionMapper();
     private final PaginationHelper paginationHelper;
+    private final ClientTransactionRepository clientTransactionRepository;
 
     private static final class ClientTransactionMapper implements RowMapper<ClientTransactionData> {
 
@@ -103,7 +107,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
                 final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString("paymentTypeName");
-                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
+                    final PaymentTypeData paymentType = PaymentTypeData.builder().id(paymentTypeId).name(typeName).build();
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");
@@ -139,9 +143,9 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
         // apply limit and offsets
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -173,6 +177,11 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientTransactionNotFoundException(clientId, transactionId, e);
         }
+    }
+
+    @Override
+    public ClientTransaction retrieveTransactionByExternalId(ExternalId transactionExternalId) {
+        return clientTransactionRepository.findByExternalId(transactionExternalId);
     }
 
 }

@@ -24,20 +24,22 @@ import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class GetDeliveryReportsFromSmsGatewayConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private SmsMessageRepository smsMessageRepository;
     @Autowired
@@ -47,13 +49,14 @@ public class GetDeliveryReportsFromSmsGatewayConfig {
 
     @Bean
     protected Step getDeliveryReportsFromSmsGatewayStep() {
-        return steps.get(JobName.GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY.name()).tasklet(getDeliveryReportsFromSmsGatewayTasklet()).build();
+        return new StepBuilder(JobName.GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY.name(), jobRepository)
+                .tasklet(getDeliveryReportsFromSmsGatewayTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job getDeliveryReportsFromSmsGatewayJob() {
-        return jobs.get(JobName.GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY.name()).start(getDeliveryReportsFromSmsGatewayStep())
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY.name(), jobRepository)
+                .start(getDeliveryReportsFromSmsGatewayStep()).incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

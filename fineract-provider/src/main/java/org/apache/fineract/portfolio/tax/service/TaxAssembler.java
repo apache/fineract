@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
@@ -42,23 +43,13 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+@RequiredArgsConstructor
 public class TaxAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
     private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
-
-    @Autowired
-    public TaxAssembler(final FromJsonHelper fromApiJsonHelper, final GLAccountRepositoryWrapper glAccountRepositoryWrapper,
-            final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
-        this.taxComponentRepositoryWrapper = taxComponentRepositoryWrapper;
-    }
 
     public TaxComponent assembleTaxComponentFrom(final JsonCommand command) {
         final JsonElement element = command.parsedJson();
@@ -70,7 +61,7 @@ public class TaxAssembler {
         final BigDecimal percentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(TaxApiConstants.percentageParamName, element);
         final Integer debitAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(TaxApiConstants.debitAccountTypeParamName,
                 element);
-        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAcountIdParamName, element);
+        final Long debitAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.debitAccountIdParamName, element);
         GLAccountType debitGlAccountType = null;
         if (debitAccountType != null) {
             debitGlAccountType = GLAccountType.fromInt(debitAccountType);
@@ -79,7 +70,7 @@ public class TaxAssembler {
         if (debitAccountId != null) {
             debitGlAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(debitAccountId);
             if (!debitGlAccount.getType().equals(debitAccountType) || debitGlAccount.isHeaderAccount()) {
-                baseDataValidator.parameter(TaxApiConstants.debitAcountIdParamName).value(debitAccountId)
+                baseDataValidator.parameter(TaxApiConstants.debitAccountIdParamName).value(debitAccountId)
                         .failWithCode("not.a.valid.account");
             }
         }
@@ -90,12 +81,12 @@ public class TaxAssembler {
         if (creditAccountType != null) {
             creditGlAccountType = GLAccountType.fromInt(creditAccountType);
         }
-        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAcountIdParamName, element);
+        final Long creditAccountId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.creditAccountIdParamName, element);
         GLAccount creditGlAccount = null;
         if (creditAccountId != null) {
             creditGlAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(creditAccountId);
             if (!creditGlAccount.getType().equals(creditAccountType) || creditGlAccount.isHeaderAccount()) {
-                baseDataValidator.parameter(TaxApiConstants.creditAcountIdParamName).value(creditAccountId)
+                baseDataValidator.parameter(TaxApiConstants.creditAccountIdParamName).value(creditAccountId)
                         .failWithCode("not.a.valid.account");
             }
         }

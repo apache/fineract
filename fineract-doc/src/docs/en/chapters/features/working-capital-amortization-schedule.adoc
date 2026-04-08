@@ -1,0 +1,201 @@
+= Working Capital Loan — Projected Amortization Schedule
+
+== Overview
+
+Dynamically updated amortization schedule for Working Capital (WC) Loans — zero-interest, discount/fee-based products with flexible, sales-based repayments. Uses EIR methodology for income recognition, deferral, and NPV calculation.
+
+Each payment period is exactly *one day*: period `N` date = `expectedDisbursementDate + N days`.
+
+== Lifecycle
+
+[cols="1,3",options="header"]
+|===
+| Stage | Behavior
+
+| *Create* | `generateModel()` — initial schedule from application parameters.
+| *Disburse* | `addDisbursement()` — recalculates with actual disbursement amounts/date, preserves applied payments.
+| *Repayment* | `applyPayment()` — records payment, full schedule rebuild.
+|===
+
+== Input Parameters
+
+[cols="2,1,4",options="header"]
+|===
+| Parameter | Type | Description
+
+| `originationFeeAmount` | Money | Upfront discount/fee. Amortized over lifecycle.
+| `netDisbursementAmount` | Money | Principal disbursed. Must be positive.
+| `totalPaymentValue` | Money | Merchant's TPV.
+| `periodPaymentRate` | BigDecimal | Rate applied to TPV (e.g., 0.18 = 18%).
+| `npvDayCount` | Integer | Day-count convention (e.g., 360). Must be positive.
+| `expectedDisbursementDate` | Date | Loan start date.
+|===
+
+== Formulas
+
+----
+expectedPaymentAmount = (TPV × periodPaymentRate) / npvDayCount
+loanTerm             = roundUp((netDisbursement + originationFee) / expectedPayment)
+EIR                  = RATE(loanTerm, -expectedPayment, netDisbursement)   // Newton-Raphson, tol=1E-10, max 100 iter
+paymentsLeft         = max(0, paymentNo - appliedPaymentCount)
+discountFactor       = 1 / (1 + EIR) ^ paymentsLeft                       // model wrapper: returns 1.0 if ≤ 0
+npvSource            = actualPayment (if applied) or forecastPayment (if not)
+npvValue             = max(0, npvSource × discountFactor)   // row 0: -netDisbursementAmount (unclamped)
+----
+
+== Schedule Fields
+
+[cols="2,4",options="header"]
+|===
+| Field | Formula / Description
+
+| `paymentNo` | 1-based. Row 0 = disbursement.
+| `paymentDate` | `expectedDisbursementDate + paymentNo` days.
+| `count` | `loanTerm + appliedPaymentCount - paymentNo`. Can be negative for tail periods.
+| `paymentsLeft` | `max(0, paymentNo - appliedPaymentCount)`. Zero for row 0.
+| `expectedPaymentAmount` | Constant. Row 0: `-netDisbursementAmount`. Tail: null.
+| `forecastPaymentAmount` | Expected payment reduced by excess (backward from last period), clamped to zero. Row 0: null.
+| `discountFactor` | `1/(1+EIR)^paymentsLeft`. Row 0 and paid periods: 1.0.
+| `npvValue` | `max(0, npvSource × DF)`. Row 0: `-netDisbursementAmount`.
+| `balance` | `balance[i-1]×(1+EIR) - expectedPayment`. Row 0: `+netDisbursementAmount`. Tail: null.
+| `expectedAmortizationAmount` | `min(balance[i] + expectedPayment - balance[i-1], originationFee)`. Row 0 / tail: null.
+| `netAmortizationAmount` | Paid: `min(totalNetAmort - cumulativeActualAmort_before, originationFee)` where `cumulativeActualAmort_before` excludes the current period. Unpaid: 0. Row 0: null.
+| `actualPaymentAmount` | Actual cash paid. Null if no payment.
+| `actualAmortizationAmount` | Cursor-based: `actualPayment/expectedPayment` periods of expected amortization consumed. Null if no payment.
+| `incomeModification` | Paid: `actualAmort - expectedAmort`. Unpaid: `-expectedAmort`. Row 0 / tail: null.
+| `deferredBalance` | `originationFee - cumulativeActualAmort`. Row 0: `originationFee`. Tail: null.
+|===
+
+=== Disbursement Row (paymentNo = 0)
+
+[cols="1,2"]
+|===
+| `count` | `loanTerm + appliedPaymentCount`
+| `paymentsLeft` | 0
+| `expectedPaymentAmount` | `-netDisbursementAmount`
+| `forecastPaymentAmount` | null
+| `discountFactor` | 1.0
+| `npvValue` | `-netDisbursementAmount`
+| `balance` | `+netDisbursementAmount`
+| `deferredBalance` | `originationFeeAmount`
+| all other nullable fields | null
+|===
+
+=== Tail Periods
+
+Appended when shortfall remains after loanTerm. Each forecasts `min(remainingShortfall, expectedPayment)`. Structural fields (`paymentNo`, `paymentDate`, `count`, `paymentsLeft`) are always set. Among nullable fields, only `forecastPaymentAmount`, `discountFactor`, `npvValue`, `netAmortizationAmount` (zero) are populated; rest are null. Trailing rows with zero forecast are trimmed.
+
+== Calculation Algorithm
+
+. *Balances & expected amortizations*: `balance[i] = balance[i-1]×(1+EIR) - expectedPayment`. Expected amort capped at `originationFee`.
+. *Aggregate payments by date* (same-date payments summed). Payments must occupy consecutive day slots starting from day 1.
+. *Shortfall/excess analysis*: compare each applied payment to expected.
+. *Cursor-based actual amortization*: cursor advances by `actualPayment/expectedPayment` periods; interpolates partial periods.
+. *Excess distribution*: reduces forecast payments backward from last period.
+. *Tail periods*: appended for remaining shortfall.
+. *Total net amortization*: `-netDisbursement + Σ(npvSource[i] × DF[i]) + tailNpv`.
+. *Assemble rows*, trim trailing zero-forecast.
+
+== API Endpoints
+
+=== GET /v1/working-capital-loans/{loanId}/amortization-schedule
+
+Example Request:
+
+ GET /fineract-provider/api/v1/working-capital-loans/1/amortization-schedule
+
+Example Response (first 3 payments shown):
+
+[source,json]
+----
+{
+  "originationFeeAmount": 1000.00,
+  "netDisbursementAmount": 9000.00,
+  "totalPaymentValue": 100000.00,
+  "periodPaymentRate": 0.18,
+  "npvDayCount": 360,
+  "expectedDisbursementDate": "2019-01-01",
+  "expectedPaymentAmount": 50.00,
+  "loanTerm": 200,
+  "effectiveInterestRate": 0.0010678144878363462,
+  "payments": [
+    {
+      "paymentNo": 0,
+      "paymentDate": "2019-01-01",
+      "count": 200,
+      "paymentsLeft": 0,
+      "expectedPaymentAmount": -9000.00,
+      "forecastPaymentAmount": null,
+      "discountFactor": 1,
+      "npvValue": -9000.00,
+      "balance": 9000.00,
+      "expectedAmortizationAmount": null,
+      "netAmortizationAmount": null,
+      "actualPaymentAmount": null,
+      "actualAmortizationAmount": null,
+      "incomeModification": null,
+      "deferredBalance": 1000.00
+    },
+    {
+      "paymentNo": 1,
+      "paymentDate": "2019-01-02",
+      "count": 199,
+      "paymentsLeft": 1,
+      "expectedPaymentAmount": 50.00,
+      "forecastPaymentAmount": 50.00,
+      "discountFactor": 0.998933324523691,
+      "npvValue": 49.95,
+      "balance": 8959.61,
+      "expectedAmortizationAmount": 9.61,
+      "netAmortizationAmount": 0.00,
+      "actualPaymentAmount": null,
+      "actualAmortizationAmount": null,
+      "incomeModification": -9.61,
+      "deferredBalance": 1000.00
+    },
+    {
+      "paymentNo": 2,
+      "paymentDate": "2019-01-03",
+      "count": 198,
+      "paymentsLeft": 2,
+      "expectedPaymentAmount": 50.00,
+      "forecastPaymentAmount": 50.00,
+      "discountFactor": 0.9978677868439537,
+      "npvValue": 49.89,
+      "balance": 8919.18,
+      "expectedAmortizationAmount": 9.57,
+      "netAmortizationAmount": 0.00,
+      "actualPaymentAmount": null,
+      "actualAmortizationAmount": null,
+      "incomeModification": -9.57,
+      "deferredBalance": 1000.00
+    }
+  ]
+}
+----
+
+== Database
+
+.Table: `m_wc_loan_amortization_model`
+[cols="2,1,3",options="header"]
+|===
+| Column | Type | Description
+
+| `id` | BIGINT | PK, auto-increment.
+| `version` | INT | Optimistic lock.
+| `loan_id` | BIGINT | FK → `m_wc_loan`. Unique.
+| `json_model` | LONGTEXT (MySQL/MariaDB) / TEXT (PostgreSQL) | Serialized model (Gson). `@JsonExclude` on `MathContext`, `MonetaryCurrency`; restored via `forDeserialization()`.
+| `business_date` | DATE | Last generated/updated.
+| `last_modified_on_utc` | DATETIME(6) / TIMESTAMP WITH TIME ZONE | Audit. MySQL / PostgreSQL.
+| `json_model_version` | VARCHAR(10) | Currently `"1"`.
+|===
+
+=== Rebuild Flow
+
+Every state change triggers full rebuild: aggregate payments → build payment list (1 to loanTerm, actual or null) → balances → payment analysis → cursor amortizations → excess distribution → tail → net amortization → assemble rows → trim.
+
+== TVM Functions
+
+*RATE*: Newton-Raphson solving `pv×(1+r)^n + pmt×((1+r)^n−1)/r = 0`. Initial guess: `2×(pmt×n+pv)/(pv×n)`, fallback 0.01. Tolerance 1E-10, max 100 iterations.
+
+*Discount Factor*: `1/(1+eir)^days`. Returns 1.0 when days=0. Throws `IllegalArgumentException` for negative days. The model wraps this via `safeDiscountFactor()` which additionally returns 1.0 when the computed result is ≤ 0.

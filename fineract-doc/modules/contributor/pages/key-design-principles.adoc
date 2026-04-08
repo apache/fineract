@@ -1,0 +1,54 @@
+= Key Design Principles
+
+== RESTful API
+
+The platform exposes all its functionality via a *practically-RESTful API*, that communicates using JSON.
+
+We use the term *practically-RESTful* in order to make it clear we are not trying to be fully REST compliant but still maintain important RESTful attributes like:
+
+* **Stateless**: The platform maintains no conversational or session-based state. This allows for horizontal scaling.
+* **Resource-oriented**: The API is focused around a set of resources using HTTP vocabulary and conventions (GET, PUT, POST, DELETE, HTTP status codes). This results in a simple and consistent API for clients.
+
+See the online API Documentation for more details.
+
+== Multi-tenanted
+
+The Fineract platform has been developed with support for multi-tenancy at the core of its design. This means that it is just as easy to use the platform for Software-as-a-Service (SaaS) type offerings as it is for local installations.
+
+The platform uses an approach that isolates an FI's data per database/schema.
+
+== Extensible
+
+While each tenant will have a set of core tables, the platform tables can be extended in different ways for each tenant through the use of Data tables functionality.
+
+== Package Structure
+
+The intention is for platform code to be packaged in a "vertical slice" way (as opposed to technical layers like controller/service/dao).
+
+Source code location: `fineract-provider/src/main/java/org/apache/fineract`
+
+Major modules include:
+* accounting
+* useradministration
+* infrastructure
+* portfolio
+** charge
+** client
+** fund
+** loanaccount
+
+Within each vertical slice, there is a common packaging structure:
+* `api` - `XXXApiResource.java` (REST API implementation)
+* `handler` - `XXXCommandHandler.java` (Specific handlers)
+* `service` - Read + Write services for the functional area
+* `domain` - Object-Oriented concepts (Entities)
+* `data` - Data Transfer Objects (DTOs)
+* `serialization` - JSON conversion logic
+
+== Maker-Checker (Four-Eyes Principle)
+
+Enables applications to support a maker-checker style workflow process. Commands that pass validation will be persisted. Maker-checker can be enabled/disabled at a fine-grained level for any state-changing API.
+
+== Fine-Grained Access Control
+
+A fine-grained permission is associated with each API. Administrators have granular control over what roles or users have access to specific functions.

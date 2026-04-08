@@ -24,11 +24,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.auditing.JpaAuditingHandlerRegistrar;
 import org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl;
 import org.apache.fineract.infrastructure.core.persistence.DatabaseSelectingPersistenceUnitPostProcessor;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
@@ -46,6 +47,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
@@ -75,15 +77,16 @@ public class JPAConfig extends JpaBaseConfiguration {
     @Bean
     @Primary
     @DependsOn("tenantDatabaseUpgradeService")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
-        Map<String, Object> vendorProperties = getVendorProperties();
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder,
+            PersistenceManagedTypes persistenceManagedTypes) {
+        Map<String, Object> vendorProperties = getVendorProperties(getDataSource());
         String[] packagesToScan = getPackagesToScan();
         return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu").packages(packagesToScan)
                 .jta(false).build();
     }
 
     @Override
-    protected Map<String, Object> getVendorProperties() {
+    protected Map<String, Object> getVendorProperties(DataSource dataSource) {
         Map<String, Object> vendorProperties = new HashMap<>();
         vendorProperties.put(PersistenceUnitProperties.WEAVING, "static");
         vendorProperties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_CLOSE_ON_COMMIT, "true");
@@ -92,7 +95,6 @@ public class JPAConfig extends JpaBaseConfiguration {
         return vendorProperties;
     }
 
-    @Override
     protected String[] getPackagesToScan() {
         Set<String> packagesToScan = new HashSet<>();
         packagesToScan.add("org.apache.fineract");

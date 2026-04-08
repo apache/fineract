@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Container>
+
+title Command Processing Architecture (Level 1) - Core Components
+
+left to right direction
+
+Person(client, "Client", "User or external system")
+
+System_Boundary(fineractSystem, "Fineract") {
+    Container(api, "Fineract REST API", "JAX-RS/Jersey", "Entry point for all commands")
+
+    System_Boundary(commandSystem, "Command Processing") {
+        Container(dispatcher, "Command Dispatcher", "Mediator Pattern", "Coordinates command execution")
+        Container(hookManager, "Command Hook Manager", "Registry/Interceptor Patterns", "Maps hooks to handler lifecycle (before/after/error)")
+        Container(handlerManager, "Command Handler Manager", "Registry Pattern", "Maps command types to handlers")
+    }
+}
+
+Rel(client, api, "Sends requests", "HTTP/JSON")
+Rel(api, dispatcher, "Converts request into command")
+Rel(dispatcher, hookManager, "Call before handler")
+Rel(dispatcher, hookManager, "Call after handler")
+Rel(dispatcher, hookManager, "Call on handler error")
+Rel(dispatcher, handlerManager, "Handle command")
+
+@enduml

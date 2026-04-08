@@ -58,7 +58,7 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void centerNameToCenterIdMap() {
-        centerNameToCenterId = new HashMap<String, Long>();
+        centerNameToCenterId = new HashMap<>();
         for (CenterData centerData : allCenters) {
             centerNameToCenterId.put(centerData.getName(), centerData.getId());
         }
@@ -68,12 +68,12 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
         int rowIndex = 1;
         int officeIndex = 0;
         int startIndex = 1;
-        officeNameToBeginEndIndexesOfCenters = new HashMap<Integer, Integer[]>();
+        officeNameToBeginEndIndexesOfCenters = new HashMap<>();
         Row row = centerSheet.createRow(rowIndex);
         for (OfficeData office : offices) {
             startIndex = rowIndex + 1;
             writeString(OFFICE_NAME_COL, row, office.getName());
-            ArrayList<String> centersList = new ArrayList<String>();
+            ArrayList<String> centersList;
 
             if (officeToCenters.containsKey(office.getName().trim().replaceAll("[ )(]", "_"))) {
                 centersList = officeToCenters.get(office.getName().trim().replaceAll("[ )(]", "_"));

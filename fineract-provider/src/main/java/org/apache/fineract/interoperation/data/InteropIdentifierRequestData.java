@@ -21,9 +21,9 @@ package org.apache.fineract.interoperation.data;
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_ACCOUNT_ID;
 
 import com.google.gson.JsonObject;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;

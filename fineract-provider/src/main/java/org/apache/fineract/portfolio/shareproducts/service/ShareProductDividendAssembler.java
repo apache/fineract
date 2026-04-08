@@ -20,10 +20,11 @@ package org.apache.fineract.portfolio.shareproducts.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
@@ -35,21 +36,12 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatf
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendPayOutDetails;
 import org.apache.fineract.portfolio.shareproducts.exception.ShareAccountsNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+@RequiredArgsConstructor
 public class ShareProductDividendAssembler {
 
     private final ShareProductReadPlatformService shareProductReadPlatformService;
     private final ShareAccountReadPlatformService shareAccountReadPlatformService;
-
-    @Autowired
-    public ShareProductDividendAssembler(final ShareProductReadPlatformService shareProductReadPlatformService,
-            final ShareAccountReadPlatformService shareAccountReadPlatformService) {
-        this.shareProductReadPlatformService = shareProductReadPlatformService;
-        this.shareAccountReadPlatformService = shareAccountReadPlatformService;
-    }
 
     public ShareProductDividendPayOutDetails calculateDividends(final Long productId, final BigDecimal amount,
             final LocalDate dividendPeriodStartDate, final LocalDate dividendPeriodEndDate) {
@@ -106,16 +98,16 @@ public class ShareProductDividendAssembler {
                 if (status.isApproved() && !type.isChargePayment()) {
 
                     LocalDate shareStartDate = purchasedSharesData.getPurchasedDate();
-                    if (shareStartDate.isBefore(lastDividendPostDate)) {
+                    if (DateUtils.isBefore(shareStartDate, lastDividendPostDate)) {
                         shareStartDate = lastDividendPostDate;
                     }
-                    int numberOfPurchseDays = Math.toIntExact(ChronoUnit.DAYS.between(shareStartDate, postingDate));
+                    int numberOfPurchseDays = DateUtils.getExactDifferenceInDays(shareStartDate, postingDate);
                     if (type.isPurchased() && numberOfPurchseDays < minimumActivePeriod) {
                         continue;
                     }
 
                     if (lastDividendAppliedDate != null) {
-                        numberOfShareDaysPerAccount += Math.toIntExact(ChronoUnit.DAYS.between(lastDividendAppliedDate, shareStartDate))
+                        numberOfShareDaysPerAccount += DateUtils.getExactDifferenceInDays(lastDividendAppliedDate, shareStartDate)
                                 * numberOfShares;
                     }
                     lastDividendAppliedDate = shareStartDate;
@@ -128,8 +120,7 @@ public class ShareProductDividendAssembler {
                 }
             }
             if (lastDividendAppliedDate != null) {
-                numberOfShareDaysPerAccount += Math.toIntExact(ChronoUnit.DAYS.between(lastDividendAppliedDate, postingDate))
-                        * numberOfShares;
+                numberOfShareDaysPerAccount += DateUtils.getExactDifferenceInDays(lastDividendAppliedDate, postingDate) * numberOfShares;
             }
             numberOfShareDays += numberOfShareDaysPerAccount;
             numberOfSharesdaysPerAccount.put(accountData.getId(), numberOfShareDaysPerAccount);

@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,14 +36,18 @@ public class CustomDateTimeProviderTest {
 
     @BeforeEach
     public void init() {
-
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ThreadLocalContextUtil.reset();
     }
 
     @Test
     public void instanceDateProvider() {
         Optional<TemporalAccessor> dateTimeProvider = CustomDateTimeProvider.INSTANCE.getNow();
-        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime now = DateUtils.getLocalDateTimeOfSystem();
         assertTrue(dateTimeProvider.isPresent());
         assertTrue(dateTimeProvider.get() instanceof LocalDateTime);
 
@@ -56,8 +60,8 @@ public class CustomDateTimeProviderTest {
 
     @Test
     public void tenantDateProvider() {
-        Optional<TemporalAccessor> dateTimeProvider = CustomDateTimeProvider.TENANT.getNow();
-        OffsetDateTime now = OffsetDateTime.now(DateUtils.getDateTimeZoneOfTenant());
+        Optional<TemporalAccessor> dateTimeProvider = CustomDateTimeProvider.UTC.getNow();
+        OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
         assertTrue(dateTimeProvider.isPresent());
         assertTrue(dateTimeProvider.get() instanceof OffsetDateTime);
 
@@ -67,5 +71,4 @@ public class CustomDateTimeProviderTest {
         assertEquals(now.getHour(), ((OffsetDateTime) dateTimeProvider.get()).getHour());
         assertEquals(now.getMinute(), ((OffsetDateTime) dateTimeProvider.get()).getMinute());
     }
-
 }

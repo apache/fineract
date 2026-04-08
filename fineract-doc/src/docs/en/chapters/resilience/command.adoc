@@ -7,13 +7,13 @@ TBD
 .Retry-able service function `executeCommand`
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java[lines=73..151]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java[lines=73..151]
 ----
 
 .Fallback function `fallbackExecuteCommand`
 [source,java]
 ----
-include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java[lines=166..174]
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java[lines=166..174]
 ----
 
 .Retry configuration for `executeCommand`

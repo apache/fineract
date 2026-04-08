@@ -19,9 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
 import java.util.List;
-import java.util.Map;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
-import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -30,8 +28,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class SavingsAccountSheetPopulator extends AbstractWorkbookPopulator {
 
     private List<SavingsAccountData> savingsAccountDataList;
-    private Map<ClientData, List<SavingsAccountData>> clientToSavingsMap;
-
     private static final int SAVINGS_ACCOUNT_ID_COL = 0;
     private static final int SAVING_ACCOUNT_NO = 1;
     private static final int CURRENCY_COL = 2;

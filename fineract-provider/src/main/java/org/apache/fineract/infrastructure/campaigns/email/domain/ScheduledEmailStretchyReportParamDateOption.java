@@ -20,11 +20,10 @@ package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 public enum ScheduledEmailStretchyReportParamDateOption {
 
-    INVALID(0, "scheduledEmailStretchyReportParamDateOption.invalid", "invalid"), TODAY(1,
-            "scheduledEmailStretchyReportParamDateOption.today", "today"),
-    // YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday",
-    // "yesterday"),
-    TOMORROW(3, "scheduledEmailStretchyReportParamDateOption.tomorrow", "tomorrow");
+    INVALID(0, "scheduledEmailStretchyReportParamDateOption.invalid", "invalid"), //
+    TODAY(1, "scheduledEmailStretchyReportParamDateOption.today", "today"), //
+    // YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday", "yesterday"),
+    TOMORROW(3, "scheduledEmailStretchyReportParamDateOption.tomorrow", "tomorrow"); //
 
     private final String code;
     private final String value;

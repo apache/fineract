@@ -16,15 +16,73 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+plugins {
+    id 'com.gradle.develocity' version '3.18.2'
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.0.2'
+}
+
+def isCI = System.getenv('JENKINS_URL') != null
+
+develocity {
+    projectId = "fineract"
+    server = "https://develocity.apache.org"
+    buildScan {
+        uploadInBackground = !isCI
+        publishing.onlyIf { it.authenticated }
+        obfuscation {
+            ipAddresses { addresses ->
+                addresses.collect { address ->
+                    "0.0.0.0"
+                }
+            }
+        }
+    }
+}
+
+buildCache {
+    local {
+        enabled = true
+    }
+}
+
 rootProject.name='fineract'
+include ':fineract-core'
+include ':fineract-security'
+include ':fineract-cob'
+include ':fineract-validation'
+include ':fineract-command'
+include ':fineract-command-test'
+include ':fineract-command-jdbc'
+include ':fineract-command-audit'
+include ':fineract-command-async'
+include ':fineract-command-disruptor'
+include ':fineract-accounting'
 include ':fineract-provider'
+include ':fineract-branch'
+include ':fineract-document'
+include ':fineract-investor'
+include ':fineract-rates'
+include ':fineract-charge'
+include ':fineract-tax'
+include ':fineract-loan-origination'
+include ':fineract-loan'
+include ':fineract-savings'
+include ':fineract-report'
+include ':fineract-mix'
 include ':fineract-war'
 include ':integration-tests'
 include ':twofactor-tests'
 include ':oauth2-tests'
 include ':fineract-client'
+include ':fineract-client-feign'
 include ':fineract-doc'
 include ':fineract-avro-schemas'
+include ':fineract-e2e-tests-core'
+include ':fineract-e2e-tests-runner'
+include 'fineract-progressive-loan'
+include 'fineract-progressive-loan-embeddable-schedule-generator'
+include 'fineract-working-capital-loan'
 // NOTE: custom Docker image with all custom modules included
 include ':custom:docker'
 // NOTE: dynamically load custom modules with pattern "custom -> company -> category -> module"

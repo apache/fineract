@@ -18,58 +18,20 @@
  */
 package org.apache.fineract.cob.domain;
 
-import java.time.OffsetDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Version;
-import lombok.Getter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.NoArgsConstructor;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_loan_account_locks")
 @NoArgsConstructor
-@Getter
-public class LoanAccountLock {
+public class LoanAccountLock extends AccountLock {
 
-    @Id
-    @Column(name = "loan_id", nullable = false)
-    private Long loanId;
+    private static final long serialVersionUID = 5267165818666471447L;
 
-    @Version
-    @Column(name = "version")
-    private Long version;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "lock_owner", nullable = false)
-    private LockOwner lockOwner;
-
-    @Column(name = "lock_placed_on", nullable = false)
-    private OffsetDateTime lockPlacedOn;
-
-    @Column(name = "error")
-    private String error;
-
-    @Column(name = "stacktrace")
-    private String stacktrace;
-
-    public LoanAccountLock(Long loanId, LockOwner lockOwner) {
-        this.loanId = loanId;
-        this.lockOwner = lockOwner;
-        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
+    public LoanAccountLock(Long loanId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
+        super(loanId, lockOwner, lockPlacedOnCobBusinessDate);
     }
 
-    public void setError(String errorMessage, String stacktrace) {
-        this.error = errorMessage;
-        this.stacktrace = stacktrace;
-    }
-
-    public void setNewLockOwner(LockOwner newLockOwner) {
-        this.lockOwner = newLockOwner;
-        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
-    }
 }

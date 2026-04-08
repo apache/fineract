@@ -27,29 +27,21 @@ public enum AccountTransferType {
     ACCOUNT_TRANSFER(1, "accountTransferType.account.transfer"), //
     LOAN_REPAYMENT(2, "accountTransferType.loan.repayment"), //
     CHARGE_PAYMENT(3, "accountTransferType.charge.payment"), //
-    INTEREST_TRANSFER(4, "accountTransferType.interest.transfer"); //
+    INTEREST_TRANSFER(4, "accountTransferType.interest.transfer"), //
+    LOAN_DOWN_PAYMENT(5, "accountTransferType.loan.downpayment"); //
 
     private final Integer value;
     private final String code;
 
     public static AccountTransferType fromInt(final Integer statusValue) {
-
-        AccountTransferType enumeration = AccountTransferType.INVALID;
-        switch (statusValue) {
-            case 1:
-                enumeration = AccountTransferType.ACCOUNT_TRANSFER;
-            break;
-            case 2:
-                enumeration = AccountTransferType.LOAN_REPAYMENT;
-            break;
-            case 3:
-                enumeration = AccountTransferType.CHARGE_PAYMENT;
-            break;
-            case 4:
-                enumeration = AccountTransferType.INTEREST_TRANSFER;
-            break;
-        }
-        return enumeration;
+        return switch (statusValue) {
+            case 1 -> AccountTransferType.ACCOUNT_TRANSFER;
+            case 2 -> AccountTransferType.LOAN_REPAYMENT;
+            case 3 -> AccountTransferType.CHARGE_PAYMENT;
+            case 4 -> AccountTransferType.INTEREST_TRANSFER;
+            case 5 -> AccountTransferType.LOAN_DOWN_PAYMENT;
+            default -> AccountTransferType.INVALID;
+        };
     }
 
     AccountTransferType(final Integer value, final String code) {
@@ -84,4 +76,9 @@ public enum AccountTransferType {
     public boolean isInterestTransfer() {
         return this.value.equals(AccountTransferType.INTEREST_TRANSFER.getValue());
     }
+
+    public boolean isLoanDownPayment() {
+        return this.value.equals(AccountTransferType.LOAN_DOWN_PAYMENT.getValue());
+    }
+
 }

@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.collateral.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Set;
+import org.apache.fineract.portfolio.collateral.data.LoansLoanIdCollateralsRequest;
 
 /**
  * Created by Chirag Gupta on 12/01/17.
@@ -38,7 +38,7 @@ final class CollateralsApiResourceSwagger {
             private GetCollateralTypeResponse() {}
 
             @Schema(example = "8")
-            public Integer id;
+            public Long id;
             @Schema(example = "Gold")
             public String name;
         }
@@ -62,7 +62,7 @@ final class CollateralsApiResourceSwagger {
         }
 
         @Schema(example = "12")
-        public Integer id;
+        public Long id;
         public GetCollateralTypeResponse type;
         @Schema(example = "50000")
         public Long value;
@@ -71,31 +71,13 @@ final class CollateralsApiResourceSwagger {
         public GetCollateralCurrencyResponse currency;
     }
 
-    @Schema(description = "PostLoansLoanIdCollateralsRequest")
-    public static final class PostLoansLoanIdCollateralsRequest {
-
-        private PostLoansLoanIdCollateralsRequest() {}
-
-        @Schema(example = "9")
-        public Integer collateralTypeId;
-    }
-
     @Schema(description = "PostLoansLoanIdCollateralsResponse")
     public static final class PostLoansLoanIdCollateralsResponse {
 
         private PostLoansLoanIdCollateralsResponse() {}
 
         @Schema(example = "12")
-        public Integer resourceId;
-    }
-
-    @Schema(description = "PutLoansLoandIdCollateralsCollateralIdRequest")
-    public static final class PutLoansLoandIdCollateralsCollateralIdRequest {
-
-        private PutLoansLoandIdCollateralsCollateralIdRequest() {}
-
-        @Schema(example = "22 Carat Gold chain weighing 12 grams")
-        public String description;
+        public Long resourceId;
     }
 
     @Schema(description = "PutLoansLoanIdCollateralsCollateralIdResponse")
@@ -104,30 +86,10 @@ final class CollateralsApiResourceSwagger {
         private PutLoansLoanIdCollateralsCollateralIdResponse() {}
 
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "12")
-        public Integer resourceId;
-        public PutLoansLoandIdCollateralsCollateralIdRequest changes;
-    }
-
-    @Schema(description = "GetLoansLoanIdCollateralsTemplateResponse")
-    public static final class GetLoansLoanIdCollateralsTemplateResponse {
-
-        private GetLoansLoanIdCollateralsTemplateResponse() {}
-
-        static final class GetCollateralsTemplateAllowedTypes {
-
-            private GetCollateralsTemplateAllowedTypes() {}
-
-            @Schema(example = "9")
-            public Integer id;
-            @Schema(example = "Silver")
-            public String name;
-            @Schema(example = "0")
-            public Integer position;
-        }
-
-        public Set<GetCollateralsTemplateAllowedTypes> allowedCollateralTypes;
+        public Long resourceId;
+        public LoansLoanIdCollateralsRequest changes;
     }
 
     @Schema(description = "DeleteLoansLoanIdCollateralsCollateralIdResponse")
@@ -136,8 +98,8 @@ final class CollateralsApiResourceSwagger {
         private DeleteLoansLoanIdCollateralsCollateralIdResponse() {}
 
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "12")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

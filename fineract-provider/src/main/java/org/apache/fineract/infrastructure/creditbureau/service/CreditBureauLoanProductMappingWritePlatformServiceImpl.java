@@ -76,7 +76,10 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
         this.creditBureauLoanProductMappingRepository.saveAndFlush(cb_lp);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cb_lp.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(cb_lp.getId()) //
+                .build();
 
     }
 
@@ -91,6 +94,9 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
         final CreditBureauLoanProductMapping cblpmapping = this.creditBureauLoanProductMappingRepository.getReferenceById(mappingid);
         cblpmapping.setActive(active);
         this.creditBureauLoanProductMappingRepository.saveAndFlush(cblpmapping);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cblpmapping.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(cblpmapping.getId()) //
+                .build();
     }
 }

@@ -1,0 +1,19 @@
+{
+    "name": "UnpaidChargeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "chargeId",
+            "type": "long"
+        },
+        {
+            "name": "chargeName",
+            "type": "string"
+        },
+        {
+            "name": "outstandingAmount",
+            "type": "bigdecimal"
+        }
+    ]
+}

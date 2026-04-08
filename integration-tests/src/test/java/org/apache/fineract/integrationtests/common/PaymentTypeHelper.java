@@ -24,97 +24,75 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.fineract.client.models.GetPaymentTypesResponse;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PaymentTypeCreateResponse;
+import org.apache.fineract.client.models.PaymentTypeData;
+import org.apache.fineract.client.models.PaymentTypeDeleteResponse;
+import org.apache.fineract.client.models.PaymentTypeUpdateRequest;
+import org.apache.fineract.client.models.PaymentTypeUpdateResponse;
+import org.apache.fineract.client.util.Calls;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
+@Slf4j
 public final class PaymentTypeHelper {
 
-    private PaymentTypeHelper() {
+    public PaymentTypeHelper() {
 
     }
 
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";
     private static final String CREATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "?" + Utils.TENANT_IDENTIFIER;
 
-    public static ArrayList<GetPaymentTypesResponse> getSystemPaymentType(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-        String response = Utils.performServerGet(requestSpec, responseSpec,
-                PAYMENTTYPE_URL + "?onlyWithCode=true&" + Utils.TENANT_IDENTIFIER);
-        Type paymentTypeList = new TypeToken<ArrayList<GetPaymentTypesResponse>>() {}.getType();
-        return new Gson().fromJson(response, paymentTypeList);
+    public List<PaymentTypeData> getAllPaymentTypes(final Boolean onlyWithCode) {
+        log.info("-------------------------------GETTING ALL PAYMENT TYPES-------------------------------------------");
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.getAllPaymentTypes(onlyWithCode));
     }
 
-    public static Integer createPaymentType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String name, final String description, final Boolean isCashPayment, final Integer position) {
-        // system.out.println("---------------------------------CREATING A
-        // PAYMENT
-        // TYPE---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_PAYMENTTYPE_URL,
-                getJsonToCreatePaymentType(name, description, isCashPayment, position), "resourceId");
+    public PaymentTypeCreateResponse createPaymentType(final PaymentTypeCreateRequest paymentTypeRequest) {
+        log.info("---------------------------------CREATING A PAYMENT TYPE---------------------------------------------");
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.createPaymentType(paymentTypeRequest));
     }
 
-    public static String getJsonToCreatePaymentType(final String name, final String description, final Boolean isCashPayment,
-            final Integer position) {
-        HashMap hm = new HashMap();
-        hm.put("name", name);
-        if (description != null) {
-            hm.put("description", description);
-        }
-        hm.put("isCashPayment", isCashPayment);
-        if (position != null) {
-            hm.put("position", position);
-        }
-
-        // system.out.println("------------------------CREATING PAYMENT
-        // TYPE-------------------------" + hm);
-        return new Gson().toJson(hm);
-    }
-
-    public static void verifyPaymentTypeCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedPaymentTypeID) {
-        // system.out.println("------------------------------CHECK PAYMENT
-        // DETAILS------------------------------------\n");
-        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + generatedPaymentTypeID + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "id");
+    public void verifyPaymentTypeCreatedOnServer(final Long generatedPaymentTypeID) {
+        log.info("-------------------------------CHECK PAYMENT DETAILS-------------------------------------------");
+        PaymentTypeData response = Calls
+                .ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(generatedPaymentTypeID));
+        Long responsePaymentTypeID = response.getId();
         assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
-    public static PaymentTypeDomain retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec,
-            final Integer paymentTypeId) {
+    public PaymentTypeData retrieveById(final Long paymentTypeId) {
+        log.info("-------------------------------GETTING PAYMENT TYPE-------------------------------------------");
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.retrieveOnePaymentType(paymentTypeId));
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public PaymentTypeDomain retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec, final Long paymentTypeId) {
         final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
-        // system.out.println("---------------------------------GET PAYMENT
-        // TYPE---------------------------------------------");
+        log.info("-------------------------------GETTING PAYMENT TYPE-------------------------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "");
         final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());
-
     }
 
-    public static HashMap<String, String> updatePaymentType(final int id, HashMap request, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-        final String UPDATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
-        // system.out.println("---------------------------------UPDATE PAYMENT
-        // TYPE " +
-        // id + "---------------------------------------------");
-        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, UPDATE_PAYMENTTYPE_URL, new Gson().toJson(request),
-                "changes");
-        return hash;
+    public PaymentTypeUpdateResponse updatePaymentType(final Long paymentTypeId,
+            PaymentTypeUpdateRequest putPaymentTypesPaymentTypeIdRequest) {
+        log.info("-------------------------------UPDATING PAYMENT TYPE-------------------------------------------");
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.updatePaymentType(paymentTypeId,
+                putPaymentTypesPaymentTypeIdRequest));
     }
 
-    public static Integer deletePaymentType(final int id, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-        final String DELETE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
-        // system.out.println("---------------------------------DELETING PAYMENT
-        // TYPE "
-        // + id + "--------------------------------------------");
-        return Utils.performServerDelete(requestSpec, responseSpec, DELETE_PAYMENTTYPE_URL, "resourceId");
+    public PaymentTypeDeleteResponse deletePaymentType(final Long paymentTypeId) {
+        log.info("-------------------------------DELETING PAYMENT TYPE-------------------------------------------");
+        return Calls.ok(FineractClientHelper.getFineractClient().paymentTypes.deleteCodePaymentType(paymentTypeId));
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
     }
-
 }

@@ -27,50 +27,41 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.SurveyData;
 import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.service.SpmService;
 import org.apache.fineract.spm.util.SurveyMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Path("/surveys")
+@Path("/v1/surveys")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Spm-Surveys", description = "")
+@RequiredArgsConstructor
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;
     private final SpmService spmService;
 
-    @Autowired
-    public SpmApiResource(final PlatformSecurityContext securityContext, final SpmService spmService) {
-        this.securityContext = securityContext;
-        this.spmService = spmService;
-    }
-
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @Operation(summary = "List all Surveys", description = "")
+    @Operation(summary = "List all Surveys", operationId = "fetchAllSurveys", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SurveyData.class)))) })
     public List<SurveyData> fetchAllSurveys(@QueryParam("isActive") final Boolean isActive) {
@@ -92,7 +83,6 @@ public class SpmApiResource {
 
     @GET
     @Path("/{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @Operation(summary = "Retrieve a Survey", description = "")

@@ -88,20 +88,4 @@ final class SearchApiResourceSwagger {
         public Long maxOutstandingAmount;
     }
 
-    @Schema(description = "PostAdhocQuerySearchResponse")
-    public static final class PostAdhocQuerySearchResponse {
-
-        private PostAdhocQuerySearchResponse() {
-
-        }
-
-        @Schema(example = "HFC")
-        public String officeName;
-        @Schema(example = "01 BC3M")
-        public String loanProductName;
-        @Schema(example = " 5692.41")
-        public Long loanOutStanding;
-        @Schema(example = "76.4")
-        public Long percentage;
-    }
 }

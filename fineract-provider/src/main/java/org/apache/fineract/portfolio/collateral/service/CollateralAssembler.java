@@ -25,29 +25,20 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.collateral.domain.LoanCollateral;
 import org.apache.fineract.portfolio.collateral.domain.LoanCollateralRepository;
 import org.apache.fineract.portfolio.collateral.exception.CollateralNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class CollateralAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final LoanCollateralRepository loanCollateralRepository;
-
-    @Autowired
-    public CollateralAssembler(final FromJsonHelper fromApiJsonHelper, final CodeValueRepositoryWrapper codeValueRepository,
-            final LoanCollateralRepository loanCollateralRepository) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.codeValueRepository = codeValueRepository;
-        this.loanCollateralRepository = loanCollateralRepository;
-    }
 
     public Set<LoanCollateral> fromParsedJson(final JsonElement element) {
 

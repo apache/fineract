@@ -23,6 +23,9 @@ import java.util.HashMap;
 
 public class AccountNumberPreferencesTestBuilder {
 
+    private static final String ACCOUNT_TYPE = "accountType";
+    private static final String PREFIX_TYPE = "prefixType";
+
     private String clientAccountType = "1";
     private String clientPrefixType = "101";
     private String loanAccountType = "2";
@@ -36,48 +39,48 @@ public class AccountNumberPreferencesTestBuilder {
 
     public String clientBuild() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("accountType", clientAccountType);
-        map.put("prefixType", clientPrefixType);
+        map.put(ACCOUNT_TYPE, clientAccountType);
+        map.put(PREFIX_TYPE, clientPrefixType);
 
         return new Gson().toJson(map);
     }
 
     public String loanBuild() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("accountType", loanAccountType);
-        map.put("prefixType", loanPrefixType);
+        map.put(ACCOUNT_TYPE, loanAccountType);
+        map.put(PREFIX_TYPE, loanPrefixType);
 
         return new Gson().toJson(map);
     }
 
     public String savingsBuild() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("accountType", savingsAccountType);
-        map.put("prefixType", savingsPrefixType);
+        map.put(ACCOUNT_TYPE, savingsAccountType);
+        map.put(PREFIX_TYPE, savingsPrefixType);
 
         return new Gson().toJson(map);
     }
 
     public String groupsBuild() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("accountType", groupsAccountType);
-        map.put("prefixType", groupsPrefixType);
+        map.put(ACCOUNT_TYPE, groupsAccountType);
+        map.put(PREFIX_TYPE, groupsPrefixType);
 
         return new Gson().toJson(map);
     }
 
     public String centerBuild() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("accountType", centerAccountType);
-        map.put("prefixType", centerPrefixType);
+        map.put(ACCOUNT_TYPE, centerAccountType);
+        map.put(PREFIX_TYPE, centerPrefixType);
 
         return new Gson().toJson(map);
     }
 
     public String invalidDataBuild(String accountType, String prefixType) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("accountType", accountType);
-        map.put("prefixType", prefixType);
+        map.put(ACCOUNT_TYPE, accountType);
+        map.put(PREFIX_TYPE, prefixType);
 
         return new Gson().toJson(map);
     }
@@ -85,7 +88,7 @@ public class AccountNumberPreferencesTestBuilder {
     public String updatePrefixType(final String prefixType) {
 
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("prefixType", prefixType);
+        map.put(PREFIX_TYPE, prefixType);
         return new Gson().toJson(map);
     }
 }

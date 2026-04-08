@@ -330,6 +330,14 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "downPaymentPeriod",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

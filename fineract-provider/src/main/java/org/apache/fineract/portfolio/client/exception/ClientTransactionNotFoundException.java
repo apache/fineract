@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.exception;
 
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -27,6 +28,12 @@ public class ClientTransactionNotFoundException extends AbstractPlatformDomainRu
         super("error.msg.client.transaction.not.found.exception",
                 "The Transaction with id `" + transactionId + "` does not exist for a Client with id `" + clientId, transactionId,
                 clientId);
+    }
+
+    public ClientTransactionNotFoundException(final Long clientId, final ExternalId transactionId) {
+        super("error.msg.client.transaction.not.found.exception",
+                "The Transaction with id `" + transactionId.getValue() + "` does not exist for a Client with id `" + clientId,
+                transactionId.getValue(), clientId);
     }
 
     public ClientTransactionNotFoundException(Long clientId, Long transactionId, EmptyResultDataAccessException e) {

@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsResponse;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -38,16 +41,19 @@ import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class SkipRepaymentOnMonthFirstTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SkipRepaymentOnMonthFirstTest.class);
@@ -55,7 +61,6 @@ public class SkipRepaymentOnMonthFirstTest {
     private RequestSpecification requestSpec;
     private GlobalConfigurationHelper globalConfigurationHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private CalendarHelper calendarHelper;
 
     @BeforeEach
     public void setup() {
@@ -63,39 +68,26 @@ public class SkipRepaymentOnMonthFirstTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 
-    @Test
     public void testSkippingRepaymentOnFirstDayOfMonth() {
-        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
-
-        // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(globalConfig);
-
-        String configName = "skip-repayment-on-first-day-of-month";
         boolean newBooleanValue = true;
-
-        for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
-            if (globalConfig.get(configIndex).get("name").equals(configName)) {
-                String configId = globalConfig.get(configIndex).get("id").toString();
-                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
-                        this.responseSpec, configId.toString(), newBooleanValue);
-                Assertions.assertNotNull(updateConfigId);
-                break;
-            }
-        }
-
+        PutGlobalConfigurationsResponse response = globalConfigurationHelper.updateGlobalConfiguration(
+                GlobalConfigurationConstants.SKIP_REPAYMENT_ON_FIRST_DAY_OF_MONTH,
+                new PutGlobalConfigurationsRequest().enabled(newBooleanValue));
+        Assertions.assertNotNull(response);
     }
 
     @Test
     public void checkRepaymentSkipOnFirstDayOfMonth() {
+        testSkippingRepaymentOnFirstDayOfMonth();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);

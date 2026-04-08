@@ -123,7 +123,10 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         this.clientFamilyRepository.saveAndFlush(clientFamilyMembers);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMembers.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(clientFamilyMembers.getId()) //
+                .build();
 
     }
 
@@ -238,7 +241,10 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(familyMember.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(familyMember.getId()) //
+                .build();
 
     }
 
@@ -349,31 +355,25 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         this.clientFamilyRepository.saveAndFlush(clientFamilyMember);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(clientFamilyMember.getId()) //
+                .build();
     }
 
     @Override
     public CommandProcessingResult deleteFamilyMember(Long clientFamilyMemberId, JsonCommand command) {
-        // TODO Auto-generated method stub
-
         this.context.authenticatedUser();
 
         apiJsonDeserializer.validateForDelete(clientFamilyMemberId);
 
-        ClientFamilyMembers clientFamilyMember = null;
+        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
+        clientFamilyRepository.delete(clientFamilyMember);
 
-        if (clientFamilyMemberId != null) {
-            clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
-            clientFamilyRepository.delete(clientFamilyMember);
-
-        }
-
-        if (clientFamilyMember != null) {
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
-        } else {
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(Long.valueOf(clientFamilyMemberId))
-                    .build();
-        }
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(clientFamilyMember.getId()) //
+                .build();
 
     }
 

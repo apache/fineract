@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
@@ -32,13 +33,11 @@ import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDe
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class ProvisioningCriteriaReadPlatformServiceImpl implements ProvisioningCriteriaReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -46,19 +45,6 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
     private final LoanProductReadPlatformService loanProductReaPlatformService;
-
-    @Autowired
-    public ProvisioningCriteriaReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
-            final GLAccountReadPlatformService glAccountReadPlatformService,
-            final LoanProductReadPlatformService loanProductReaPlatformService) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.loanProductReaPlatformService = loanProductReaPlatformService;
-    }
 
     @Override
     public ProvisioningCriteriaData retrievePrivisiongCriteriaTemplate() {
@@ -91,7 +77,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     }
 
     @Override
-    public Collection<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
+    public List<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
         ProvisioningCriteriaRowMapper mapper = new ProvisioningCriteriaRowMapper();
         final String sql = "select " + mapper.schema();
         return this.jdbcTemplate.query(sql, mapper); // NOSONAR
@@ -135,13 +121,13 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
 
     private static final class ProvisioningCriteriaDefinitionRowMapper implements RowMapper<ProvisioningCriteriaDefinitionData> {
 
-        private final StringBuilder sqlQuery = new StringBuilder()
-                .append("pc.id, pc.criteria_id, pc.category_id, mpc.category_name, pc.min_age, pc.max_age, ")
-                .append("pc.provision_percentage, pc.liability_account, pc.expense_account, lia.gl_code as liabilitycode, expe.gl_code as expensecode, ")
-                .append("lia.name as liabilityname, expe.name as expensename ").append("from m_provisioning_criteria_definition as pc ")
-                .append("LEFT JOIN acc_gl_account lia ON lia.id = pc.liability_account ")
-                .append("LEFT JOIN acc_gl_account expe ON expe.id = pc.expense_account ")
-                .append("LEFT JOIN m_provision_category mpc ON mpc.id = pc.category_id");
+        private static final String PROVISIONING_CRITERIA_DEFINITION_SCHEMA = """
+                pc.id, pc.criteria_id, pc.category_id, mpc.category_name, pc.min_age, pc.max_age,
+                pc.provision_percentage, pc.liability_account, pc.expense_account, lia.gl_code as liabilitycode, expe.gl_code as expensecode,
+                lia.name as liabilityname, expe.name as expensename from m_provisioning_criteria_definition as pc
+                LEFT JOIN acc_gl_account lia ON lia.id = pc.liability_account
+                LEFT JOIN acc_gl_account expe ON expe.id = pc.expense_account
+                LEFT JOIN m_provision_category mpc ON mpc.id = pc.category_id\s""";
 
         @Override
         public ProvisioningCriteriaDefinitionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
@@ -167,7 +153,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         }
 
         public String schema() {
-            return sqlQuery.toString();
+            return PROVISIONING_CRITERIA_DEFINITION_SCHEMA;
         }
     }
 

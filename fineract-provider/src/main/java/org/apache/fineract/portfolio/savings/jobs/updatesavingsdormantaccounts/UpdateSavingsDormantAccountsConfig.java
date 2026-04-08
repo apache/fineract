@@ -21,30 +21,32 @@ package org.apache.fineract.portfolio.savings.jobs.updatesavingsdormantaccounts;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class UpdateSavingsDormantAccountsConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
 
     @Bean
     protected Step updateSavingsDormantAccountsStep(UpdateSavingsDormantAccountsTasklet updateSavingsDormantAccountsTasklet) {
-        return steps.get(JobName.UPDATE_SAVINGS_DORMANT_ACCOUNTS.name()).tasklet(updateSavingsDormantAccountsTasklet).build();
+        return new StepBuilder(JobName.UPDATE_SAVINGS_DORMANT_ACCOUNTS.name(), jobRepository)
+                .tasklet(updateSavingsDormantAccountsTasklet, transactionManager).build();
     }
 
     @Bean
     public Job updateSavingsDormantAccountsJob(UpdateSavingsDormantAccountsTasklet updateSavingsDormantAccountsTasklet) {
-        return jobs.get(JobName.UPDATE_SAVINGS_DORMANT_ACCOUNTS.name())
+        return new JobBuilder(JobName.UPDATE_SAVINGS_DORMANT_ACCOUNTS.name(), jobRepository)
                 .start(updateSavingsDormantAccountsStep(updateSavingsDormantAccountsTasklet)).incrementer(new RunIdIncrementer()).build();
     }
 }

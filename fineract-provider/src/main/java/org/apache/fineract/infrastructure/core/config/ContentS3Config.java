@@ -19,14 +19,19 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.google.common.base.Strings;
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
 @Slf4j
 @Configuration
@@ -34,11 +39,25 @@ public class ContentS3Config {
 
     @Bean
     @ConditionalOnProperty("fineract.content.s3.enabled")
-    public AmazonS3 contentS3Client(FineractProperties fineractProperties) {
-        return AmazonS3ClientBuilder.standard()
-                .withCredentials(
-                        new AWSStaticCredentialsProvider(new BasicAWSCredentials(fineractProperties.getContent().getS3().getAccessKey(),
-                                fineractProperties.getContent().getS3().getSecretKey())))
-                .build();
+    public S3Client contentS3Client(FineractProperties fineractProperties) {
+        S3ClientBuilder builder = S3Client.builder().credentialsProvider(getCredentialProvider(fineractProperties.getContent().getS3()));
+
+        if (!Strings.isNullOrEmpty(fineractProperties.getContent().getS3().getRegion())) {
+            builder.region(Region.of(fineractProperties.getContent().getS3().getRegion()));
+        }
+        if (!Strings.isNullOrEmpty(fineractProperties.getContent().getS3().getEndpoint())) {
+            builder.endpointOverride(URI.create(fineractProperties.getContent().getS3().getEndpoint()))
+                    .forcePathStyle(fineractProperties.getContent().getS3().getPathStyleAddressingEnabled());
+        }
+
+        return builder.build();
+    }
+
+    private AwsCredentialsProvider getCredentialProvider(FineractProperties.FineractContentS3Properties s3Properties) {
+        if (Strings.isNullOrEmpty(s3Properties.getAccessKey()) || Strings.isNullOrEmpty(s3Properties.getSecretKey())) {
+            return DefaultCredentialsProvider.create();
+        }
+
+        return StaticCredentialsProvider.create(AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey()));
     }
 }

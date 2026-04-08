@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.search.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
+@Getter
 public final class AdHocSearchQueryData {
 
     @SuppressWarnings("unused")

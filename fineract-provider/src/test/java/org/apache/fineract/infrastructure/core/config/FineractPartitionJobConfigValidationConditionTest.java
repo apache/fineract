@@ -66,16 +66,6 @@ class FineractPartitionJobConfigValidationConditionTest {
     }
 
     @Test
-    public void testApplicationStartup_ShouldApplicationStartupFails_WhenPartitionSizeInvalid() {
-        try (MockedStatic<ExplicitConfigurationPropertiesFactory> propertyFactory = Mockito
-                .mockStatic(ExplicitConfigurationPropertiesFactory.class)) {
-            propertyFactory.when(() -> ExplicitConfigurationPropertiesFactory.getProperty(context, "fineract.partitioned-job",
-                    FineractProperties.FineractPartitionedJob.class)).thenReturn(getInvalidPartitionSize());
-            assertTrue(testObj.matches(context, metadata));
-        }
-    }
-
-    @Test
     public void testApplicationStartup_ShouldApplicationStart_WhenConfigValid() {
         try (MockedStatic<ExplicitConfigurationPropertiesFactory> propertyFactory = Mockito
                 .mockStatic(ExplicitConfigurationPropertiesFactory.class)) {
@@ -92,20 +82,9 @@ class FineractPartitionJobConfigValidationConditionTest {
         partitionedJobProperty.setJobName("LOAN_COB");
         partitionedJobProperty.setPartitionSize(100);
         partitionedJobProperty.setChunkSize(10);
-        partitionedJobProperty.setThreadCount(10);
-        jobProperties.add(partitionedJobProperty);
-        partitionedJob.setPartitionedJobProperties(jobProperties);
-        return partitionedJob;
-    }
-
-    private FineractProperties.FineractPartitionedJob getInvalidPartitionSize() {
-        FineractProperties.FineractPartitionedJob partitionedJob = new FineractProperties.FineractPartitionedJob();
-        List<FineractProperties.PartitionedJobProperty> jobProperties = new ArrayList<>();
-        FineractProperties.PartitionedJobProperty partitionedJobProperty = new FineractProperties.PartitionedJobProperty();
-        partitionedJobProperty.setJobName("LOAN_COB");
-        partitionedJobProperty.setPartitionSize(99);
-        partitionedJobProperty.setChunkSize(10);
-        partitionedJobProperty.setThreadCount(10);
+        partitionedJobProperty.setThreadPoolCorePoolSize(10);
+        partitionedJobProperty.setThreadPoolMaxPoolSize(20);
+        partitionedJobProperty.setThreadPoolQueueCapacity(10);
         jobProperties.add(partitionedJobProperty);
         partitionedJob.setPartitionedJobProperties(jobProperties);
         return partitionedJob;
@@ -118,7 +97,9 @@ class FineractPartitionJobConfigValidationConditionTest {
         partitionedJobProperty.setJobName("LOAN_COB");
         partitionedJobProperty.setPartitionSize(0);
         partitionedJobProperty.setChunkSize(1);
-        partitionedJobProperty.setThreadCount(1);
+        partitionedJobProperty.setThreadPoolCorePoolSize(1);
+        partitionedJobProperty.setThreadPoolMaxPoolSize(1);
+        partitionedJobProperty.setThreadPoolQueueCapacity(1);
         jobProperties.add(partitionedJobProperty);
         partitionedJob.setPartitionedJobProperties(jobProperties);
         return partitionedJob;

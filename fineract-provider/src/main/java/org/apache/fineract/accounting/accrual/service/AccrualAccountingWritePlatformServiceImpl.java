@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.accounting.accrual.service;
 
+import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.ACCRUE_TILL_PARAM_NAME;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME;
-import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.accrueTillParamName;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,22 +33,20 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
-import org.springframework.stereotype.Service;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 
-@Service
 @RequiredArgsConstructor
 public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccountingWritePlatformService {
 
-    private final LoanAccrualPlatformService loanAccrualPlatformService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final AccrualAccountingDataValidator accountingDataValidator;
 
     @Override
     public CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command) {
         this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
-        LocalDate tillDate = command.localDateValueOfParameterNamed(accrueTillParamName);
+        LocalDate tillDate = command.localDateValueOfParameterNamed(ACCRUE_TILL_PARAM_NAME);
         try {
-            this.loanAccrualPlatformService.addPeriodicAccruals(tillDate);
+            this.loanAccrualsProcessingService.addPeriodicAccruals(tillDate);
         } catch (MultiException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -59,5 +57,4 @@ public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccount
         }
         return CommandProcessingResult.empty();
     }
-
 }

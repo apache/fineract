@@ -25,6 +25,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -46,9 +48,11 @@ import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountNumberPreferencesTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesTest.class);
@@ -308,7 +312,7 @@ public class AccountNumberPreferencesTest {
 
     private void createAndValidateCenter(Boolean isAccountPreferenceSetUp) {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
 
         String name = "CenterCreation" + new Timestamp(new java.util.Date().getTime());
         this.centerId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);

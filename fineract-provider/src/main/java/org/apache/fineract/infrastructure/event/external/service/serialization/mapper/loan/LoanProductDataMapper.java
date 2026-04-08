@@ -22,9 +22,11 @@ import org.apache.fineract.avro.loan.v1.LoanProductDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = AvroMapperConfig.class)
 public interface LoanProductDataMapper {
 
+    @Mapping(target = "customData", ignore = true)
     LoanProductDataV1 map(LoanProductData source);
 }

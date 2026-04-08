@@ -19,10 +19,10 @@
 package org.apache.fineract.portfolio.shareproducts.service;
 
 import com.google.gson.JsonElement;
+import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
-import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -30,6 +30,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToG
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareProductDividentsCreateBusinessEvent;
@@ -43,9 +44,7 @@ import org.apache.fineract.portfolio.shareproducts.exception.DividentProcessingE
 import org.apache.fineract.portfolio.shareproducts.serialization.ShareProductDataSerializer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
 @RequiredArgsConstructor
 public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareProductWritePlatformService {
@@ -136,7 +135,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(productId) //
-                    .withSubEntityId(dividendPayOutDetails.getId())//
+                    .withSubEntityId(dividendPayOutDetails.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
@@ -183,20 +182,16 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
 
     private void handleDataIntegrityIssues(final Exception e) {
         log.error("Unknown data integrity issue with resource", e);
-        throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(e, "error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
         if (realCause.getMessage().contains("'name'")) {
             final String name = command.stringValueOfParameterNamed(ShareProductApiConstants.name_paramname);
             throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name",
                     "Share Product with name `" + name + "` already exists", "name", name);
         }
-
-        log.error("Unknown data integrity issue with resource", dve);
-        throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        handleDataIntegrityIssues(dve);
     }
 }

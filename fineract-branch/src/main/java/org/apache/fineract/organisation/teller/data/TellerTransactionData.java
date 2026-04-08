@@ -1,0 +1,79 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.organisation.teller.data;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
+/**
+ * {@code TellerTransactionData} represents an immutable data object for a transction.
+ *
+ * @version 1.0.0
+ *
+ * @since 2.0.0
+ * @see java.io.Serializable
+ * @since 2.0.0
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+public final class TellerTransactionData implements Serializable {
+
+    private Long id;
+    private Long officeId;
+    private Long tellerId;
+    private Long cashierId;
+    private Long clientId;
+    private EnumOptionData type;
+    private Double amount;
+    private LocalDate postingDate;
+
+    /**
+     * Creates a new teller transaction data object.
+     *
+     * @param id
+     *            - id of the transaction
+     * @param officeId
+     *            - id of the related office
+     * @param tellerId
+     *            - id of the related teller
+     * @param cashierId
+     *            - id of the cashier
+     * @param clientId
+     *            - id of the client
+     * @param type
+     *            - type of transaction (eg receipt, payment, open, close, settle)
+     * @param amount
+     *            - amount of the transaction
+     * @param postingDate
+     *            - posting date of the transaction
+     * @return the new created {@code TellerTransactionData}
+     */
+    public static TellerTransactionData instance(final Long id, final Long officeId, final Long tellerId, final Long cashierId,
+            final Long clientId, final EnumOptionData type, final Double amount, final LocalDate postingDate) {
+        return new TellerTransactionData().setId(id).setOfficeId(officeId).setTellerId(tellerId).setCashierId(cashierId)
+                .setClientId(clientId).setType(type).setAmount(amount).setPostingDate(postingDate);
+    }
+}

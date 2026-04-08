@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
+public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_credit_check_mandatory")
     private boolean creditCheckMandatory;

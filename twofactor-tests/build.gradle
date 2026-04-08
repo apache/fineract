@@ -28,20 +28,17 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
-// enable when all tests are migrated
-tasks.cucumber.onlyIf {false}
-
 // Allow external drivers to be used for the tests without packaging it
 // mainly due to license incompatibilities
 configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:8.0.31'
+    driver 'com.mysql:mysql-connector-j'
 }
 
 cargo {
-    containerId "tomcat9x"
+    containerId "tomcat10x"
 
     // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
     deployable {
@@ -60,7 +57,7 @@ cargo {
         startStopTimeout = 240000
         sharedClasspath = configurations.driver
         containerProperties {
-            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -Dfineract.security.2fa.enabled=true '
+            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth2.enabled=false -Dfineract.security.2fa.enabled=true '
             if (project.hasProperty('dbType')) {
                 if ('postgresql'.equalsIgnoreCase(dbType)) {
                     jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.postgresql.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=postgres -Dfineract.tenant.host=localhost -Dfineract.tenant.port=5432 -Dfineract.tenant.username=root -Dfineract.tenant.password=postgres'
@@ -76,6 +73,7 @@ cargo {
             property 'cargo.start.jvmargs', jvmArgs
             property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
             property 'cargo.tomcat.connector.keystorePass', 'openmf'
+            property 'cargo.tomcat.connector.keystoreType', 'JKS'
             property 'cargo.tomcat.httpSecure', true
             property 'cargo.tomcat.connector.sslProtocol', 'TLS'
             property 'cargo.tomcat.connector.clientAuth', false

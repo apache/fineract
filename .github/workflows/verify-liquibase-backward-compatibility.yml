@@ -1,0 +1,163 @@
+name: Verify Liquibase Backward Compatibility
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  liquibase-backward-compatibility-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    services:
+      postgresql:
+        image: postgres:18.3
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd="pg_isready -q -d postgres -U root"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=5
+
+    env:
+      DB_USER: root
+      DB_PASSWORD: postgres
+      DB_NAME: fineract_default
+      TZ: Asia/Kolkata
+
+    steps:
+      - name: Checkout the base branch (`develop`)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.event.pull_request.base.repo.full_name }}
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -U $DB_USER; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
+      - name: Init base schema
+        run: |
+          ./gradlew --no-daemon createPGDB -PdbName=fineract_tenants
+          ./gradlew --no-daemon createPGDB -PdbName=$DB_NAME
+
+      - name: Start backend on base branch
+        run: |
+          ./gradlew :fineract-provider:devRun --args="\
+          --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
+          --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
+          --spring.datasource.hikari.username=root \
+          --spring.datasource.hikari.password=postgres \
+          --fineract.tenant.host=localhost \
+          --fineract.tenant.port=5432 \
+          --fineract.tenant.username=root \
+          --fineract.tenant.password=postgres" &
+          BACKEND_PID=$!
+          echo $BACKEND_PID > backend.pid
+
+          # Wait for Actuator to come up (adjust host/port/path if needed)
+          ACTUATOR_URL="https://localhost:8443/fineract-provider/actuator/health"
+          TIMEOUT_SECONDS=600
+          INTERVAL_SECONDS=2
+
+          echo "Waiting for backend Actuator: $ACTUATOR_URL (timeout ${TIMEOUT_SECONDS}s)..."
+
+          start_ts=$(date +%s)
+          while true; do
+            # If the process died, fail fast
+            if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+              echo "Backend process exited before Actuator became available."
+              exit 1
+            fi
+
+            # Check endpoint
+            if curl -kfsS "$ACTUATOR_URL" >/dev/null 2>&1; then
+              echo "Actuator is up."
+              break
+            fi
+
+            # Timeout
+            now_ts=$(date +%s)
+            if [ $((now_ts - start_ts)) -ge "$TIMEOUT_SECONDS" ]; then
+              echo "Timed out waiting for Actuator."
+              exit 1
+            fi
+
+            sleep "$INTERVAL_SECONDS"
+          done
+
+      - name: Stop backend
+        run: |
+          kill $(cat backend.pid)
+          sleep 10
+
+      - name: Checkout the PR branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Start backend on PR branch
+        run: |
+          ./gradlew :fineract-provider:devRun --args="\
+          --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
+          --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
+          --spring.datasource.hikari.username=root \
+          --spring.datasource.hikari.password=postgres \
+          --fineract.tenant.host=localhost \
+          --fineract.tenant.port=5432 \
+          --fineract.tenant.username=root \
+          --fineract.tenant.password=postgres" &
+          BACKEND_PID=$!
+          echo $BACKEND_PID > backend.pid
+
+          # Wait for Actuator to come up (adjust host/port/path if needed)
+          ACTUATOR_URL="https://localhost:8443/fineract-provider/actuator/health"
+          TIMEOUT_SECONDS=600
+          INTERVAL_SECONDS=2
+
+          echo "Waiting for backend Actuator: $ACTUATOR_URL (timeout ${TIMEOUT_SECONDS}s)..."
+
+          start_ts=$(date +%s)
+          while true; do
+            # If the process died, fail fast
+            if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+              echo "Backend process exited before Actuator became available."
+              exit 1
+            fi
+
+            # Check endpoint
+            if curl -kfsS "$ACTUATOR_URL" >/dev/null 2>&1; then
+              echo "Actuator is up."
+              break
+            fi
+
+            # Timeout
+            now_ts=$(date +%s)
+            if [ $((now_ts - start_ts)) -ge "$TIMEOUT_SECONDS" ]; then
+              echo "Timed out waiting for Actuator."
+              exit 1
+            fi
+
+            sleep "$INTERVAL_SECONDS"
+          done
+      - name: Stop backend
+        run: |
+          kill $(cat backend.pid)
+          sleep 10

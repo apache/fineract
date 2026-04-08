@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Container>
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+
+AddElementTag("future", $bgColor="white", $fontColor="grey")
+AddRelTag("error", $lineColor="red", $lineStyle="dashed")
+
+title Command Processing Architecture (Level 2) - Store
+
+System_Boundary(commandSystem, "Command Processing") {
+    Container(store, "Command Store", "Repository Patterns", "Stores commands including request and response data")
+    Container(auditBeforeHook, "Audit Before Hook", "Interceptor Pattern", "Audit before")
+    Container(auditAfterHook, "Audit After Hook", "Interceptor Pattern", "Audit after")
+    Container(auditErrorHook, "Audit Error Hook", "Interceptor Pattern", "Audit error")
+}
+
+ContainerDb_Ext(pgDb, "Database", "PostgreSQL")
+ContainerDb_Ext(mysqlDb, "Database", "MySQL")
+Container_Ext(file, "File System")
+ContainerDb_Ext(dynamoDb, "Database", "Dynamo DB", $tags="future")
+ContainerDb_Ext(otherDb, "...", "Other Storage", $tags="future")
+
+Rel(auditBeforeHook, store, "Uses")
+Rel(auditAfterHook, store, "Uses")
+Rel(auditErrorHook, store, "Uses")
+Rel(store, pgDb, "read/writes", "JDBC")
+Rel(store, mysqlDb, "read/writes", "JDBC")
+Rel(store, file, "writes", "On Error", $tags="error")
+Rel(store, dynamoDb, "read/writes")
+Rel(store, otherDb, "read/writes")
+
+@enduml

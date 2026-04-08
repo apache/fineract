@@ -28,21 +28,22 @@ import org.apache.fineract.infrastructure.reportmailingjob.service.ReportMailing
 import org.apache.fineract.infrastructure.reportmailingjob.validation.ReportMailingJobValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class ExecuteReportMailingJobsConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private ReportMailingJobRepository reportMailingJobRepository;
     @Autowired
@@ -60,12 +61,13 @@ public class ExecuteReportMailingJobsConfig {
 
     @Bean
     protected Step executeReportMailingJobsStep() {
-        return steps.get(JobName.EXECUTE_REPORT_MAILING_JOBS.name()).tasklet(executeReportMailingJobsTasklet()).build();
+        return new StepBuilder(JobName.EXECUTE_REPORT_MAILING_JOBS.name(), jobRepository)
+                .tasklet(executeReportMailingJobsTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job executeReportMailingJobsJob() {
-        return jobs.get(JobName.EXECUTE_REPORT_MAILING_JOBS.name()).start(executeReportMailingJobsStep())
+        return new JobBuilder(JobName.EXECUTE_REPORT_MAILING_JOBS.name(), jobRepository).start(executeReportMailingJobsStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 

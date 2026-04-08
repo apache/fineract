@@ -1,0 +1,549 @@
+= Buy Down Fee
+
+== Overview
+
+Buy Down Fee is a specialized fee mechanism in Apache Fineract that allows financial institutions to collect upfront fees from borrowers to reduce their effective interest rate over the loan term. This feature is particularly designed for 0% interest "buy down" loans where a merchant fee is collected and amortized into interest/fee income over the life of the loan.
+
+The key characteristic of Buy Down Fee is that the amortized fee is **NOT visible to the customer** and **NOT affecting the repayment schedule** - it operates as a background process for proper revenue recognition while maintaining transparency in customer-facing loan terms.
+
+== Purpose
+
+This functionality enables financial institutions to:
+
+* **Interest Rate Reduction**: Borrowers can reduce their effective interest rate by paying an upfront fee
+* **Merchant Fee Support**: Enables 0% interest loan products with merchant-paid fees
+* **Revenue Recognition**: Provides controlled amortization of fee income over the loan term
+* **Customer Transparency**: Fee amortization is invisible to customers, maintaining clean loan presentation
+* **Accounting Integration**: Proper journal entries and accounting treatment for fee transactions
+
+== Supported Loan Type
+
+[IMPORTANT]
+====
+Buy Down Fee is only supported for loans that have **all** of the following:
+
+* **Advanced Payment Allocation Strategy** (transaction processing strategy)
+* **Progressive Loan Schedule** (loan schedule type)
+
+Other transaction processing strategies or loan schedule types are not supported.
+====
+
+== Configuration at Loan Product Level
+
+Buy Down Fee must be configured on the loan product.
+
+The configuration options include:
+
+* *Enable Buy Down Fee*: Boolean toggle (`enableBuyDownFee`) (default: disabled)
+* *Calculation Mode*: Only "Flat" is currently supported (`buyDownFeeCalculationType`)
+* *Amortization Strategy*: Only "EQUAL_AMORTIZATION" is supported (`buyDownFeeStrategy`)
+** Daily equal portions are recognized over the life of the loan
+* *Income Type*: Specifies allocation rule (`buyDownFeeIncomeType`)
+
+Options:
+* FEE
+* INTEREST
+
+=== GL Mapping
+
+Required GL Account mappings when Buy Down Fee is enabled:
+
+* *Buy Down Expense Account*: `buyDownExpenseAccountId` - mandatory when enabled
+* *Deferred Income Liability Account*: `deferredIncomeLiabilityAccountId` - mandatory when enabled  
+* *Income from Buy Down Account*: `incomeFromBuyDownAccountId` - mandatory when enabled
+
+[IMPORTANT]
+====
+All GL accounts become mandatory when `enableBuyDownFee` is set to `true`.
+====
+
+=== Configuration Dependencies
+
+When `enableBuyDownFee` is set to `true`, all following parameters become mandatory:
+
+* `buyDownFeeCalculationType` - must be "FLAT"
+* `buyDownFeeStrategy` - must be "EQUAL_AMORTIZATION"
+* `buyDownFeeIncomeType` - must be "FEE" or "INTEREST"
+* `buyDownExpenseAccountId` - must reference a valid GL account
+* `deferredIncomeLiabilityAccountId` - must reference a valid GL account
+* `incomeFromBuyDownAccountId` - must reference a valid GL account
+
+== Validation Rules
+
+=== Product Level Validations
+
+* Buy Down Fee can only be enabled for Progressive Loan products
+* When `enableBuyDownFee` is `true`, all related parameters become mandatory
+* Calculation type must be `FLAT` (other types not yet supported)
+* Strategy must be `EQUAL_AMORTIZATION` (other strategies not yet supported)
+* Income type must be either `FEE` or `INTEREST`
+* Both expense and income GL accounts must be provided and valid
+* GL accounts must have correct account types (EXPENSE and INCOME respectively)
+* `deferredIncomeLiabilityAccountId` mapping requirements:
+  - Must be a valid LIABILITY type GL account
+  - Represents temporary holding of not-yet-recognized income
+  - Used to track unamortized Buy Down Fee portion
+  - Cannot be zero or null when Buy Down Fee is enabled
+
+=== Transaction Level Validations
+
+* Buy Down Fee transactions can only be added to active loans
+* Transaction amount must be positive (greater than zero)
+* Transaction date cannot be before the first disbursement date
+* Loan must have Buy Down Fee enabled in its product configuration
+* Transaction date cannot be in the future
+* Client/Group must be active
+* Loan must be disbursed
+* Multiple Buy Down Fee transactions per loan are supported
+
+=== Adjustment Validations
+
+* Original Buy Down Fee transaction must exist
+* Adjustment amount cannot exceed remaining balance (amount - previous adjustments)
+* Adjustment date cannot be before original transaction date
+* Cannot reverse Buy Down Fee transaction if it has linked adjustments
+
+Buy down fee adjustments are related to the buy down fee transaction (they have relation with type ADJUSTMENT between them), and there can be more than one adjustment to the same buy down fee transaction.
+
+== Error Responses
+
+=== Common Error Codes
+
+* `buy.down.fee.not.enabled`: Buy Down Fee not enabled for loan product
+* `cannot.be.before.first.disbursement.date`: Invalid transaction date
+* `cannot.be.more.than.remaining.amount`: Adjustment exceeds balance
+* `loan.transaction.not.found`: Referenced transaction not found
+
+=== Error Response Example
+
+[source,json]
+----
+{
+  "developerMessage": "Buy down fee is not enabled for this loan product",
+  "httpStatusCode": "400",
+  "defaultUserMessage": "Buy down fee is not enabled for this loan product",
+  "userMessageGlobalisationCode": "buy.down.fee.not.enabled",
+  "errors": [
+    {
+      "developerMessage": "Buy down fee is not enabled for this loan product",
+      "defaultUserMessage": "Buy down fee is not enabled for this loan product",
+      "userMessageGlobalisationCode": "buy.down.fee.not.enabled",
+      "parameterName": null
+    }
+  ]
+}
+----
+
+=== Configuration Error Messages
+
+* **"Buy Down Fee calculation type is required"**: Provide `buyDownFeeCalculationType` when enabling Buy Down Fee
+* **"Buy Down Fee strategy is required"**: Provide `buyDownFeeStrategy` when enabling Buy Down Fee  
+* **"Buy Down Fee income type is required"**: Provide `buyDownFeeIncomeType` when enabling Buy Down Fee
+* **"Buy Down expense account is required"**: Provide valid `buyDownExpenseAccountId`
+* **"Deferred income liability account is required"**: Provide valid `deferredIncomeLiabilityAccountId`
+* **"Income from Buy Down account is required"**: Provide valid `incomeFromBuyDownAccountId`
+* **"Buy Down fees can only be added to active loans"**: Ensure loan status is ACTIVE before adding Buy Down Fee transactions
+
+== Behavior and Calculations
+
+* Buy Down Fee transactions can only be added to active loans
+* Transaction amount must be positive (greater than zero)
+* Transaction date cannot be before the first disbursement date
+* Loan must have Buy Down Fee enabled in its product configuration
+
+=== Daily Amortization
+
+* Recognized daily using the configured strategy
+* Recognized portions move from Deferred Income to Income from Buy Down
+
+==== Special Handling
+
+* *Preclosure*: Remaining balance recognized in full on the preclosure date
+* *Charge-off*: Amortization stops and remaining balance is charged off
+
+== Transaction Types Introduced
+
+* Buy Down Fee
+* Buy Down Fee Amortization
+* Buy Down Fee Adjustment
+* Buy Down Fee Amortization Adjustment
+
+=== Buy Down Fee Transaction
+
+The Buy Down Fee transaction in Apache Fineract performs the following actions:
+
+* Creates a distinct loan transaction
+** Separately tracked with its own transaction type ("Buy Down Fee")
+** Not merged with disbursements or repayments
+* Triggers accounting entries
+** Debits "Buy Down Expense Account" (Expense)
+** Credits "Deferred Income Liability Account" (Liability)
+** Does not recognize income upfront
+* Initiates daily amortization
+** Source for daily income recognition through "Buy Down Fee Amortization" transactions
+** Progressively converts the deferred amount to recognized income
+
+==== Accounting Entries
+
+[cols="2*"]
+|===
+|Scenario |Debit |Credit
+
+|Buy Down Fee
+|Buy Down Expense Account
+|Deferred Income Liability Account
+|===
+
+=== Buy Down Fee Amortization
+
+A Buy Down Fee Amortization transaction in Apache Fineract does the following:
+
+* *Recognizes Deferred Income Over Time*: Transfers a portion of the buy down fee (originally posted as a liability) into recognized income, based on a configured daily amortization strategy.
+
+* *Daily Posting*: The system automatically creates this transaction each day from the date of buy down fee until the loan maturity or until the full amount is amortized. This is handled by a background job during the COB (Close of Business) process.
+
+* *Uses Equal Amortization*: The default and only supported strategy is Equal Amortization, which divides the total buy down fee evenly over the remaining number of days until the loan matures.
+
+==== Accounting Entries
+
+[cols="2*"]
+|===
+|Scenario |Debit |Credit
+
+|Daily amortization
+|Deferred Income Liability Account
+|Income from Buy Down Account
+|===
+
+==== Stops on Events
+
+* *Preclosure*: Triggers final amortization for remaining unrecognized income
+* *Charge-off*: Halts further amortization; the remaining deferred income is charged off using Charge-off Expense Account
+
+=== Buy Down Fee Adjustment
+
+A Buy Down Fee Adjustment transaction in Apache Fineract serves to reduce the balance of an existing buy down fee transaction.
+
+==== Purpose
+
+* Correct overcharged or misposted buy down fee amounts
+* Reflect fee waivers or negotiated reductions
+* Support backdated corrections if needed
+
+==== Transaction Behavior
+
+* It is a credit-type transaction, reducing the buy down fee balance
+* Can be backdated, but not dated before the original buy down fee transaction
+
+==== Validation Rules
+
+* The adjustment amount cannot exceed remaining balance (amount - previous adjustments)
+* Adjustment date cannot be before original transaction date
+* Adjustment date cannot be before disbursement date
+* Adjustment date cannot be in the future
+* Cannot reverse Buy Down Fee transaction if it has linked adjustments
+* Loan must be in Active, Closed, or Overpaid status
+* Buy Down Fee must be enabled on the loan product
+* Loan must use Progressive Schedule
+
+==== Accounting Entries
+
+[cols="3*"]
+|===
+|Scenario |Debit |Credit
+
+|Buy Down Fee Adjustment
+|Deferred Income Liability Account
+|Buy Down Expense Account
+|===
+
+=== Buy Down Fee Amortization Adjustment
+
+A Buy Down Fee Amortization Adjustment in Apache Fineract is a special transaction type used to reverse previously recognized income from buy down fee amortization.
+
+==== Purpose
+
+* Automatically generated when a Buy Down Fee transaction is reversed
+* Reverses all already recognized portions (amortized income) linked to the original Buy Down Fee transaction
+
+==== When It Occurs
+
+* *Trigger*: Only initiated during the reversal of a Buy Down Fee transaction
+* Reverses all amortization that has occurred up to that point
+* Restores Deferred Income balances and reverses income recognition
+
+==== Accounting Entries
+
+[cols="3*"]
+|===
+|Transaction Type |Debit |Credit
+
+|Buy Down Fee Amortization Adjustment
+|Income from Buy Down Account
+|Deferred Income Liability Account
+|===
+
+==== Key Characteristics
+
+* *System-Generated Only*: Cannot be created manually by API or UI
+* *Ensures Accounting Integrity*: Keeps amortized and unrecognized balances aligned after reversals
+* *Links to Original Amortization*: Maintains traceability by referencing the reversed Buy Down Fee transaction
+
+== API Endpoints
+
+=== Configure Buy Down Fee on Loan Product
+
+* *Endpoint*: `/loanproducts`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    ...
+    "enableBuyDownFee": true,                    // Mandatory
+    "buyDownFeeCalculationType": "FLAT",         // Mandatory when enabled
+    "buyDownFeeStrategy": "EQUAL_AMORTIZATION",  // Mandatory when enabled
+    "buyDownFeeIncomeType": "FEE",              // Mandatory when enabled
+    "buyDownExpenseAccountId": 123,             // Mandatory when enabled
+    "deferredIncomeLiabilityAccountId": 456,    // Mandatory when enabled
+    "incomeFromBuyDownAccountId": 789           // Mandatory when enabled
+}
+----
+
+=== Add Buy Down Fee
+
+* *Endpoint*: `/loans/{loanId}/transactions?command=buyDownFee`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions?command=buyDownFee`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    "transactionDate": "2025-05-01",    // Mandatory
+    "dateFormat": "yyyy-MM-dd",         // Mandatory
+    "locale": "en",                     // Mandatory
+    "transactionAmount": 100.0,         // Mandatory
+    "paymentTypeId": 1,                 // Optional
+    "note": "Buy down fee",             // Optional
+    "externalId": "BUYDOWN-001"         // Optional
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "resourceId": 1,
+    "resourceExternalId": "BUYDOWN-001"
+}
+----
+
+=== Get Buy Down Fee Amortization Info
+
+* *Endpoint*: `/loans/{loanId}/buydown-fees`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/buydown-fees`
+* *Method*: `GET`
+
+==== Response Body
+
+[source,json]
+----
+[
+    {
+        "id": 1,
+        "loanId": 123,
+        "transactionId": 456,
+        "buyDownFeeDate": "2025-05-01",
+        "buyDownFeeAmount": 100.0,
+        "amortizedAmount": 5.0,
+        "notYetAmortizedAmount": 95.0,
+        "adjustedAmount": 0.0,
+        "chargedOffAmount": 0.0
+    }
+]
+----
+
+=== Add Buy Down Fee Adjustment
+
+* *Endpoint*: `/loans/{loanId}/transactions/{buyDownFeeTransactionId}?command=buyDownFeeAdjustment`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions/{buyDownFeeTransactionId}?command=buyDownFeeAdjustment`
+* *Method*: `POST`
+
+[source,json]
+----
+{
+    "transactionDate": "2025-05-01",    // Mandatory
+    "dateFormat": "yyyy-MM-dd",         // Mandatory
+    "locale": "en",                     // Mandatory
+    "transactionAmount": 50.0,          // Mandatory
+    "paymentTypeId": 1,                 // Optional
+    "note": "Buy down fee adjustment",  // Optional
+    "externalId": "BUYDOWNADJ-001"      // Optional
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "resourceId": 1,
+    "resourceExternalId": "BUYDOWNADJ-001"
+}
+----
+
+=== Buy Down Fee Template API (to retrieve limits)
+
+* *Endpoint*: `/loans/{loanId}/transactions/template?command=buyDownFee`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions/template?command=buyDownFee`
+* *Method*: `GET`
+
+[source,json]
+----
+{
+    "paymentTypeOptions": [],  // List of available payment types
+    "currency": {...},         // Currency configuration
+    "date": [2025, 5, 29],     // Return the current date
+    "amount": 0                // Return the maximum amount that can be applied
+}
+----
+
+=== Buy Down Fee Adjustment Template API (to retrieve limits)
+
+* *Endpoint*: `/loans/{loanId}/transactions/template?command=buyDownFeeAdjustment`
+* *Alternative Endpoint*: `/loans/external-id/{loanExternalId}/transactions/template?command=buyDownFeeAdjustment`
+* *Method*: `GET`
+
+[source,json]
+----
+{
+    "paymentTypeOptions": [],  // List of available payment types
+    "currency": {...},         // Currency configuration
+    "date": [2025, 5, 29],     // Return the current date
+    "amount": 0                // Return the maximum amount that can be adjusted
+}
+----
+
+== Database Structure
+
+=== Configuration
+
+==== Loan Product Table (`m_product_loan`)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`enable_buy_down_fee` |`BOOLEAN` |Enable buy down fee feature (default: `false`)
+|`buy_down_fee_calculation_type` |`VARCHAR` |Calculation method (ENUM: `FLAT`)
+|`buy_down_fee_strategy` |`VARCHAR` |Amortization strategy (ENUM: `EQUAL_AMORTIZATION`)
+|`buy_down_fee_income_type` |`VARCHAR` |Income type (ENUM: `FEE`, `INTEREST`)
+|===
+
+=== Balances
+
+==== Buy Down Fee Balance Table (`m_loan_buy_down_fee_balance`)
+
+[cols="3*"]
+|===
+|Field |Data Type |Description
+
+|`id` |`BIGINT` |Primary Key (auto-increment)
+|`version` |`BIGINT` |Version for optimistic locking (NOT NULL)
+|`loan_id` |`BIGINT` |Foreign Key to `m_loan.id` (NOT NULL)
+|`loan_transaction_id` |`BIGINT` |Foreign Key to `m_loan_transaction.id` (NOT NULL)
+|`amount` |`DECIMAL(19,6)` |Buy down fee transaction amount (NOT NULL)
+|`date` |`DATE` |Buy down fee transaction date (NOT NULL)
+|`unrecognized_amount` |`DECIMAL(19,6)` |Not yet amortized amount (NOT NULL)
+|`charged_off_amount` |`DECIMAL(19,6)` |Charged-off balance (nullable)
+|`amount_adjustment` |`DECIMAL(19,6)` |Total adjustment amount (nullable)
+|`created_by` |`BIGINT` |User who created the record (NOT NULL)
+|`created_on_utc` |`DATETIME` |Creation timestamp in UTC (NOT NULL)
+|`last_modified_by` |`BIGINT` |Last modifier user ID (NOT NULL)
+|`last_modified_on_utc` |`DATETIME` |Last modification timestamp in UTC (NOT NULL)
+|===
+
+=== Constraints and Indexes
+
+* **Primary Key:** `id`
+* **Foreign Keys:**
+  - `loan_id` → `m_loan(id)`
+  - `loan_transaction_id` → `m_loan_transaction(id)`
+  - `created_by` → `m_appuser(id)`
+  - `last_modified_by` → `m_appuser(id)`
+
+=== Related Transaction Types
+
+Buy Down Fee operations are stored in `m_loan_transaction` table with these transaction types:
+
+* `BUY_DOWN_FEE` - Initial buy down fee creation
+* `BUY_DOWN_FEE_ADJUSTMENT` - Adjustment to existing buy down fee
+* `BUY_DOWN_FEE_AMORTIZATION` - Daily amortization transaction
+* `BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT` - Adjustment to amortization
+
+== Accounting Entries
+
+[cols="3*"]
+|===
+|Transaction Type |Debit |Credit
+
+|Buy Down Fee
+|Buy Down Expense Account
+|Deferred Income Liability Account
+
+|Buy Down Fee Amortization
+|Deferred Income Liability Account
+|Income from Buy Down Account
+
+|Buy Down Fee Adjustment
+|Deferred Income Liability Account
+|Buy Down Expense Account
+
+|Buy Down Fee Amortization Adjustment
+|Income from Buy Down Account
+|Deferred Income Liability Account
+|===
+
+== Business Events
+
+=== Triggered for Buy Down Fee
+
+* `LoanBuyDownFeeTransactionCreatedBusinessEvent`
+* `LoanBalanceChangedBusinessEvent`
+
+=== Daily Amortization
+
+* `LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent`
+* `LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent`
+
+=== Buy Down Fee Adjustment
+
+* `LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent`
+* `LoanBalanceChangedBusinessEvent`
+
+=== Reversal
+
+* `LoanAdjustTransactionBusinessEvent`
+
+== Available Disbursement Calculation
+
+Buy Down Fee does not affect the available disbursement amount calculation:
+
+```
+Available Disbursement = Approved Loan Amount 
+                       - Total Disbursed Amount 
+                       - Total Capitalized Income
+```
+
+Buy Down Fee transactions are separate from the loan disbursement logic and do not reduce the available disbursement amount.
+
+== Notes
+
+[IMPORTANT]
+====
+* Buy down fee transactions support backdating
+* Adjustment transactions must not predate the original buy down fee
+* No automatic reversal is supported; must be handled manually via dedicated transactions
+* Proper GL accounts must be set for Buy Down Expense, Deferred Income Liability, and Income from Buy Down to enable this functionality
+====

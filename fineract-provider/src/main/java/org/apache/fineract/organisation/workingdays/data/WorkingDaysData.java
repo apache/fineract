@@ -18,52 +18,37 @@
  */
 package org.apache.fineract.organisation.workingdays.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-public class WorkingDaysData {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldNameConstants
+public class WorkingDaysData implements Serializable {
 
-    private final Long id;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private final String recurrence;
+    private Long id;
 
-    private final EnumOptionData repaymentRescheduleType;
+    private String recurrence;
 
-    private final Boolean extendTermForDailyRepayments;
+    private EnumOptionData repaymentRescheduleType;
 
-    private final Boolean extendTermForRepaymentsOnHolidays;
+    private Boolean extendTermForDailyRepayments;
 
-    // template date
+    private Boolean extendTermForRepaymentsOnHolidays;
+
     @SuppressWarnings("unused")
-    private final Collection<EnumOptionData> repaymentRescheduleOptions;
+    private Collection<EnumOptionData> repaymentRescheduleOptions;
 
-    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType, Boolean extendTermForDailyRepayments,
-            Boolean extendTermForRepaymentsOnHolidays) {
-        this.id = id;
-        this.recurrence = recurrence;
-        this.repaymentRescheduleType = repaymentRescheduleType;
-        this.repaymentRescheduleOptions = null;
-        this.extendTermForDailyRepayments = extendTermForDailyRepayments;
-        this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
-    }
-
-    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType,
-            Collection<EnumOptionData> repaymentRescheduleOptions, Boolean extendTermForDailyRepayments,
-            Boolean extendTermForRepaymentsOnHolidays) {
-        this.id = id;
-        this.recurrence = recurrence;
-        this.repaymentRescheduleType = repaymentRescheduleType;
-        this.repaymentRescheduleOptions = repaymentRescheduleOptions;
-        this.extendTermForDailyRepayments = extendTermForDailyRepayments;
-        this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
-    }
-
-    public WorkingDaysData(WorkingDaysData data, Collection<EnumOptionData> repaymentRescheduleOptions) {
-        this.id = data.id;
-        this.recurrence = data.recurrence;
-        this.repaymentRescheduleType = data.repaymentRescheduleType;
-        this.repaymentRescheduleOptions = repaymentRescheduleOptions;
-        this.extendTermForDailyRepayments = data.extendTermForDailyRepayments;
-        this.extendTermForRepaymentsOnHolidays = data.extendTermForRepaymentsOnHolidays;
-    }
 }

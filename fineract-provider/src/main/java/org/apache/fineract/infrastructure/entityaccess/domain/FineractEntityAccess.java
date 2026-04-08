@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,7 +40,7 @@ import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConst
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class FineractEntityAccess extends AbstractPersistableCustom {
+public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
 
     @Column(name = "entity_type", length = 50)
     private String entityType;

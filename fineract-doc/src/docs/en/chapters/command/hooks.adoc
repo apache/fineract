@@ -1,0 +1,47 @@
+= Command Hooks
+
+TBD
+
+.Command Processing Architecture Level 2 - Hooks
+[plantuml, format=svg]
+----
+include::{diagramsdir}/command-architecture-level-2-hook.puml[]
+----
+
+== Hook Manager
+
+.Command Hook Manager
+[source,java]
+----
+include::{rootdir}/fineract-command/src/main/java/org/apache/fineract/command/core/CommandHookManager.java[lines=19..]
+----
+
+== Before Hooks
+
+TBD
+
+.Command Hook Before
+[source,java]
+----
+include::{rootdir}/fineract-command/src/main/java/org/apache/fineract/command/core/CommandHookBefore.java[lines=19..]
+----
+
+== After Hooks
+
+TBD
+
+.Command Hook After
+[source,java]
+----
+include::{rootdir}/fineract-command/src/main/java/org/apache/fineract/command/core/CommandHookAfter.java[lines=19..]
+----
+
+== Error Hooks
+
+TBD
+
+.Command Hook Error
+[source,java]
+----
+include::{rootdir}/fineract-command/src/main/java/org/apache/fineract/command/core/CommandHookError.java[lines=19..]
+----

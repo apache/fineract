@@ -18,17 +18,17 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_client_charge_paid_by")
-public class ClientChargePaidBy extends AbstractPersistableCustom {
+public class ClientChargePaidBy extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_transaction_id", nullable = false)

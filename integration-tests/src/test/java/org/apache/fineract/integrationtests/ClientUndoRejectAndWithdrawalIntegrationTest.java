@@ -314,9 +314,4 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         status = this.clientHelper.activateClientWithDiffDateOption(clientId, ClientHelper.CREATED_DATE_PLUS_TWO);
 
     }
-
-    private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    }
-
 }

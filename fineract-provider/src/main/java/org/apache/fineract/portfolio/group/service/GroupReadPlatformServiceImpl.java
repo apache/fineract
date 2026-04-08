@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
@@ -41,22 +42,23 @@ import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
+import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
+@RequiredArgsConstructor
 public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     public static final String ID = "id";
@@ -68,31 +70,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final CenterReadPlatformService centerReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final ColumnValidator columnValidator;
-
-    @Autowired
-    public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final CenterReadPlatformService centerReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.centerReadPlatformService = centerReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.paginationParametersDataValidator = paginationParametersDataValidator;
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @Override
     public GroupGeneralData retrieveTemplate(final Long officeId, final boolean isCenterGroup, final boolean staffInSelectedOfficeOnly) {
@@ -156,15 +141,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final SQLBuilder extraCriteria = getGroupExtraCriteria(searchParameters);
         extraCriteria.addCriteria(" o.hierarchy like ", hierarchySearchString);
         sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
-        if (parameters.isOrderByRequested()) {
+        if (parameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
                     searchParameters.getSortOrder());
         }
 
-        if (parameters.isLimited()) {
+        if (parameters.hasLimit()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
         }
@@ -187,17 +172,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
 
-        if (searchParameters != null && searchParameters.isOrphansOnly()) {
+        if (searchParameters != null && searchParameters.getOrphansOnly()) {
             sqlBuilder.append(" and g.parent_id is NULL");
         }
 
         if (parameters != null) {
-            if (parameters.isOrderByRequested()) {
+            if (parameters.hasOrderBy()) {
                 sqlBuilder.append(parameters.orderBySql());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.orderBySql());
             }
 
-            if (parameters.isLimited()) {
+            if (parameters.hasLimit()) {
                 sqlBuilder.append(parameters.limitSql());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
             }
@@ -263,6 +248,23 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final List<CodeValueData> closureReasons = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return GroupGeneralData.withClosureReasons(closureReasons);
+    }
+
+    @Override
+    public GroupGeneralData retrieveGroupAndMembersDetails(Long groupId) {
+        GroupGeneralData groupAccount = retrieveOne(groupId);
+
+        // get group associations
+        final Collection<ClientData> membersOfGroup = clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
+        if (!CollectionUtils.isEmpty(membersOfGroup)) {
+            final Collection<ClientData> activeClientMembers = null;
+            final Collection<CalendarData> calendarsData = null;
+            final CalendarData collectionMeetingCalendar = null;
+            final Collection<GroupRoleData> groupRoles = null;
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, activeClientMembers, groupRoles, calendarsData,
+                    collectionMeetingCalendar);
+        }
+        return groupAccount;
     }
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {

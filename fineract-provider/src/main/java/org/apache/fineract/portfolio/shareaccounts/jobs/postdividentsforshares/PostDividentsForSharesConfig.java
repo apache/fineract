@@ -23,21 +23,22 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendR
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedularService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class PostDividentsForSharesConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     @Autowired
@@ -45,13 +46,14 @@ public class PostDividentsForSharesConfig {
 
     @Bean
     protected Step postDividentsForSharesStep() {
-        return steps.get(JobName.POST_DIVIDENTS_FOR_SHARES.name()).tasklet(postDividentsForSharesTasklet()).build();
+        return new StepBuilder(JobName.POST_DIVIDENTS_FOR_SHARES.name(), jobRepository)
+                .tasklet(postDividentsForSharesTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job postDividentsForSharesJob() {
-        return jobs.get(JobName.POST_DIVIDENTS_FOR_SHARES.name()).start(postDividentsForSharesStep()).incrementer(new RunIdIncrementer())
-                .build();
+        return new JobBuilder(JobName.POST_DIVIDENTS_FOR_SHARES.name(), jobRepository).start(postDividentsForSharesStep())
+                .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean

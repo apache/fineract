@@ -7,15 +7,15 @@ on:
   - cron: "0 0 * * *"
 permissions:
   contents: read
-
 jobs:
   stale:
     permissions:
       issues: write  # for actions/stale to close stale issues
       pull-requests: write  # for actions/stale to close stale PRs
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-    - uses: actions/stale@6f05e4244c9a0b2ed3401882b05d701dd0a7289b # v7
+    - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         # stale-issue-message: 'Stale issue message'

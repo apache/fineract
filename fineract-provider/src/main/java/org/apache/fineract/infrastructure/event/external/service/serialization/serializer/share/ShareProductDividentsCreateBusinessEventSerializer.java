@@ -25,14 +25,14 @@ import org.apache.fineract.avro.share.v1.ShareProductDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareProductDividentsCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.share.ShareProductDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ShareProductDividentsCreateBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class ShareProductDividentsCreateBusinessEventSerializer implements BusinessEventSerializer {
 
     private final ShareProductReadPlatformService service;
     private final ShareProductDataMapper mapper;
@@ -43,7 +43,7 @@ public class ShareProductDividentsCreateBusinessEventSerializer extends Abstract
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         ShareProductDividentsCreateBusinessEvent event = (ShareProductDividentsCreateBusinessEvent) rawEvent;
         ShareProductData data = (ShareProductData) service.retrieveOne(event.get(), false);
         return mapper.map(data);

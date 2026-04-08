@@ -38,6 +38,17 @@
                 "null",
                 "org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1"
             ]
+        },
+        {
+            "default": null,
+            "name": "customData",
+            "type": [
+                "null",
+                {
+                    "values": "bytes",
+                    "type": "map"
+                }
+            ]
         }
     ]
 }

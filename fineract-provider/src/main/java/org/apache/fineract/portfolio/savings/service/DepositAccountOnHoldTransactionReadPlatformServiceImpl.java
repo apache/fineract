@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -32,29 +33,17 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements DepositAccountOnHoldTransactionReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ColumnValidator columnValidator;
     private final PaginationHelper paginationHelper;
-    private final DepositAccountOnHoldTransactionsMapper mapper;
-
-    @Autowired
-    public DepositAccountOnHoldTransactionReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
-        this.mapper = new DepositAccountOnHoldTransactionsMapper();
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-    }
+    private final DepositAccountOnHoldTransactionsMapper mapper = new DepositAccountOnHoldTransactionsMapper();
 
     @Override
     public Page<DepositAccountOnHoldTransactionData> retriveAll(Long savingsId, Long guarantorFundingId,
@@ -71,19 +60,19 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
             paramObj.add(guarantorFundingId);
         }
 
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
 
-            if (searchParameters.isSortOrderProvided()) {
+            if (searchParameters.hasSortOrder()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -105,16 +94,18 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
             sqlBuilder.append(" tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append(" tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append(" tr.is_reversed as reversed, sa.account_no as savingsAccNum, ");
-            sqlBuilder.append("sc.display_name as savingsClientName, ml.id as loanid, sa.id as savingid, ");
-            sqlBuilder.append(" ml.account_no as loanAccountNum, lc.display_name as loanClientName");
+            sqlBuilder.append(" COALESCE(sc.display_name, sg.display_name) as savingsClientName, ml.id as loanid, sa.id as savingid, ");
+            sqlBuilder.append(" ml.account_no as loanAccountNum, COALESCE(lc.display_name, lg.display_name) as loanClientName");
             sqlBuilder.append(" from m_savings_account sa  ");
             sqlBuilder.append(" join m_deposit_account_on_hold_transaction tr on sa.id = tr.savings_account_id ");
-            sqlBuilder.append(" join m_client sc on sc.id = sa.client_id");
+            sqlBuilder.append(" left join m_client sc on sc.id = sa.client_id");
+            sqlBuilder.append(" left join m_group sg on sg.id = sa.group_id");
             sqlBuilder.append(" left join m_guarantor_transaction gt on gt.deposit_on_hold_transaction_id = tr.id ");
             sqlBuilder.append(" left join m_guarantor_funding_details mgfd on mgfd.id=gt.guarantor_fund_detail_id");
             sqlBuilder.append(" left join m_portfolio_account_associations  pa on pa.id=mgfd.account_associations_id");
             sqlBuilder.append(" left join m_loan ml on ml.id = pa.loan_account_id");
             sqlBuilder.append(" left join m_client lc on lc.id = ml.client_id");
+            sqlBuilder.append(" left join m_group lg on lg.id = ml.group_id");
 
             this.schemaSql = sqlBuilder.toString();
         }

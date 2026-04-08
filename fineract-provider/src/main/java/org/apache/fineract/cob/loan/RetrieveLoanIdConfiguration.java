@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.cob.loan;
 
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Configuration
 public class RetrieveLoanIdConfiguration {
@@ -30,9 +32,12 @@ public class RetrieveLoanIdConfiguration {
     @Autowired
     private LoanRepository loanRepository;
 
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     @Bean
     @ConditionalOnMissingBean
     public RetrieveLoanIdService retrieveLoanIdService() {
-        return new RetrieveAllNonClosedLoanIdServiceImpl(loanRepository);
+        return new RetrieveAllNonClosedIdServiceImpl(loanRepository, namedParameterJdbcTemplate);
     }
 }

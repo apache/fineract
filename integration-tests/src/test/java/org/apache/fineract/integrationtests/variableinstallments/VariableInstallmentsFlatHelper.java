@@ -39,6 +39,10 @@ public class VariableInstallmentsFlatHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(VariableInstallmentsFlatHelper.class);
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createLoanProductWithVaribleConfig(final boolean multiDisburseLoan, final String accountingRule,
             final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
@@ -56,6 +60,10 @@ public class VariableInstallmentsFlatHelper {
         return loanProductJSON;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
@@ -76,6 +84,10 @@ public class VariableInstallmentsFlatHelper {
         return loanApplicationJSON;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createDeleteVariations(ArrayList<Map> deletedInstallments) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -87,6 +99,10 @@ public class VariableInstallmentsFlatHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createDeletedMap(ArrayList<Map> deletedItems) {
         ArrayList toReturn = new ArrayList<>();
         for (Map map : deletedItems) {
@@ -98,6 +114,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createAddVariations() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -109,6 +129,10 @@ public class VariableInstallmentsFlatHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createNewInstallments() {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -118,6 +142,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createModifiyVariations(Map firstSchedule) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -129,6 +157,10 @@ public class VariableInstallmentsFlatHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createNewInstallments(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -138,6 +170,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createModifiyDateVariations(String[] date, String[] newdate, String[] principal) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -149,6 +185,10 @@ public class VariableInstallmentsFlatHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createDateModifyMap(String[] date, String[] newdate, String[] principal) {
         ArrayList toReturn = new ArrayList<>();
         for (int i = 0; i < date.length; i++) {
@@ -163,6 +203,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createModifyMap(Map firstSchedule) {
         ArrayList toReturn = new ArrayList<>();
         ArrayList dueDate = (ArrayList) firstSchedule.get("dueDate");
@@ -173,6 +217,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String createAllVariations() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -186,6 +234,10 @@ public class VariableInstallmentsFlatHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createDeletedMap(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -194,6 +246,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static ArrayList createModifyMap(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -203,6 +259,10 @@ public class VariableInstallmentsFlatHelper {
         return toReturn;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String formatDate(ArrayList list) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, (int) list.get(0));
@@ -213,10 +273,18 @@ public class VariableInstallmentsFlatHelper {
         return requiredFormat.format(date);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map<String, Object> createModifyVarations() {
         return null;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static ArrayList<Map> constructVerifyData(String[] dates, String[] installments) {
         ArrayList<Map> toReturn = new ArrayList<>();
         for (int i = 0; i < dates.length; i++) {

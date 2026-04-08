@@ -60,14 +60,11 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 public class StandingInstructionReadPlatformServiceImpl implements StandingInstructionReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -84,7 +81,6 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     // pagination
     private final PaginationHelper paginationHelper;
 
-    @Autowired
     public StandingInstructionReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
@@ -192,7 +188,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         if (toAccountId != null && fromAccount != null) {
             toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.getCurrencyCode());
+                    fromAccount.getCurrencyCodeFromCurrency());
             mostRelevantToClientId = toAccount.getClientId();
         }
 
@@ -243,7 +239,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     private Collection<PortfolioAccountData> retrieveToAccounts(final PortfolioAccountData excludeThisAccountFromOptions,
             final Integer toAccountType, final Long toClientId) {
 
-        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCode() : null;
+        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCodeFromCurrency()
+                : null;
 
         PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(toAccountType, toClientId, currencyCode, null, null);
         Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService
@@ -298,10 +295,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
-            if (accountType.isSavingsAccount()) {
+            if (PortfolioAccountType.SAVINGS.equals(accountType)) {
                 sqlBuilder.append(" fromsavacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
-            } else if (accountType.isLoanAccount()) {
+            } else if (PortfolioAccountType.LOAN.equals(accountType)) {
                 sqlBuilder.append(" fromloanacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
             }
@@ -309,18 +306,18 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         }
 
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-            if (searchParameters.isSortOrderProvided()) {
+            if (searchParameters.hasSortOrder()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -442,9 +439,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             MonthDay recurrenceOnMonthDay = null;
             final Integer recurrenceOnDay = JdbcSupport.getInteger(rs, "recurrenceOnDay");
             final Integer recurrenceOnMonth = JdbcSupport.getInteger(rs, "recurrenceOnMonth");
-            if (recurrenceOnDay != null) {
-                recurrenceOnMonthDay = MonthDay.now(DateUtils.getDateTimeZoneOfTenant()).withMonth(recurrenceOnMonth)
-                        .withDayOfMonth(recurrenceOnDay);
+            if (recurrenceOnDay != null && recurrenceOnMonth != null) {
+                recurrenceOnMonthDay = DateUtils.safeMonthDay(recurrenceOnMonth, recurrenceOnDay);
             }
 
             final Integer transferType = rs.getInt("transferType");

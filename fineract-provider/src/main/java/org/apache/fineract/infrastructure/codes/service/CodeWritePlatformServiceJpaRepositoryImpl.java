@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.codes.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.Map;
-import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.Code;
 import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.codes.serialization.CodeCommandFromApi
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "codes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('cv')")
+    @CacheEvict(value = "codes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('CD')")
     public CommandProcessingResult createCode(final JsonCommand command) {
 
         try {
@@ -70,7 +71,10 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             final Code code = Code.fromJson(command);
             this.codeRepository.saveAndFlush(code);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(code.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(code.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -83,7 +87,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "codes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('cv')")
+    @CacheEvict(value = "codes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('CD')")
     public CommandProcessingResult updateCode(final Long codeId, final JsonCommand command) {
 
         try {
@@ -115,7 +119,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "codes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('cv')")
+    @CacheEvict(value = "codes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('CD')")
     public CommandProcessingResult deleteCode(final Long codeId) {
 
         this.context.authenticatedUser();
@@ -129,10 +133,12 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             this.codeRepository.delete(code);
             this.codeRepository.flush();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + dve.getMostSpecificCause(), dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.cund.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
         }
-        return new CommandProcessingResultBuilder().withEntityId(codeId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(codeId) //
+                .build();
     }
 
     private Code retrieveCodeBy(final Long codeId) {
@@ -150,7 +156,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         }
 
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.cund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

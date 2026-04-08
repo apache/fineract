@@ -1,0 +1,243 @@
+name: Verify API Backward Compatibility
+
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  api-compatibility-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      TZ: Asia/Kolkata
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.event.pull_request.base.repo.full_name }}
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          path: baseline
+
+      - name: Checkout PR branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          path: current
+
+      - name: Compute merge-base commit
+        id: merge-base
+        run: |
+          cd baseline
+          # For fork PRs, fetch PR head from the local current/ checkout
+          git fetch "${GITHUB_WORKSPACE}/current" HEAD --no-tags 2>/dev/null || true
+          MERGE_BASE=$(git merge-base ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.sha }})
+          echo "Merge-base commit: ${MERGE_BASE}"
+          echo "sha=${MERGE_BASE}" >> "$GITHUB_OUTPUT"
+          BASE_HEAD=$(git rev-parse ${{ github.event.pull_request.base.ref }})
+          if [ "${MERGE_BASE}" != "${BASE_HEAD}" ]; then
+            echo "::notice::PR is not rebased on latest ${{ github.event.pull_request.base.ref }}. Using merge-base ${MERGE_BASE} as baseline (branch HEAD: ${BASE_HEAD})."
+          fi
+
+      - name: Reset baseline to merge-base
+        working-directory: baseline
+        run: git checkout ${{ steps.merge-base.outputs.sha }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Generate baseline spec
+        working-directory: baseline
+        run: ./gradlew :fineract-provider:resolve --no-daemon
+
+      - name: Generate PR spec
+        working-directory: current
+        run: ./gradlew :fineract-provider:resolve --no-daemon
+
+      - name: Sanitize specs
+        run: |
+          python3 -c "
+          import json, sys
+
+          def sanitize(path):
+              with open(path) as f:
+                  spec = json.load(f)
+              fixed = 0
+              for path_item in spec.get('paths', {}).values():
+                  for op in path_item.values():
+                      if not isinstance(op, dict) or 'requestBody' not in op:
+                          continue
+                      for media in op['requestBody'].get('content', {}).values():
+                          if 'schema' not in media:
+                              media['schema'] = {'type': 'object'}
+                              fixed += 1
+              if fixed:
+                  with open(path, 'w') as f:
+                      json.dump(spec, f)
+              print(f'{path}: fixed {fixed} entries')
+
+          sanitize('${GITHUB_WORKSPACE}/baseline/fineract-provider/build/resources/main/static/fineract.json')
+          sanitize('${GITHUB_WORKSPACE}/current/fineract-provider/build/resources/main/static/fineract.json')
+          "
+
+      - name: Check breaking changes
+        id: breaking-check
+        continue-on-error: true
+        working-directory: current
+        run: |
+          set -o pipefail
+          ./gradlew :fineract-provider:checkBreakingChanges \
+            -PapiBaseline="${GITHUB_WORKSPACE}/baseline/fineract-provider/build/resources/main/static/fineract.json" \
+            --no-daemon --quiet 2>&1 | tail -50
+
+      - name: Build report
+        if: steps.breaking-check.outcome == 'failure'
+        id: report
+        run: |
+          REPORT_DIR="current/fineract-provider/build/swagger-brake"
+
+          python3 -c "
+          import json, glob, os
+          from collections import defaultdict
+
+          RULE_DESC = {
+              'R001': 'Standard API changed to beta',
+              'R002': 'Path deleted',
+              'R003': 'Request media type deleted',
+              'R004': 'Request parameter deleted',
+              'R005': 'Request parameter enum value deleted',
+              'R006': 'Request parameter location changed',
+              'R007': 'Request parameter made required',
+              'R008': 'Request parameter type changed',
+              'R009': 'Request attribute removed',
+              'R010': 'Request type changed',
+              'R011': 'Request enum value deleted',
+              'R012': 'Response code deleted',
+              'R013': 'Response media type deleted',
+              'R014': 'Response attribute removed',
+              'R015': 'Response type changed',
+              'R016': 'Response enum value deleted',
+              'R017': 'Request parameter constraint changed',
+          }
+
+          report_dir = '${REPORT_DIR}'
+          files = sorted(glob.glob(os.path.join(report_dir, '*.json')))
+          if not files:
+              body = 'Breaking change detected but no report file found.'
+          else:
+              with open(files[0]) as f:
+                  data = json.load(f)
+
+              all_changes = []
+              for items in data.get('breakingChanges', {}).values():
+                  all_changes.extend(items)
+
+              if not all_changes:
+                  body = 'Breaking change detected but no details available in report.'
+              else:
+                  def detail(c):
+                      for key in ('attributeName', 'attribute', 'name', 'mediaType', 'enumValue', 'code'):
+                          v = c.get(key)
+                          if v:
+                              val = v.rsplit('.', 1)[-1]
+                              if key in ('attributeName', 'attribute', 'name'):
+                                  return val
+                              return f'{key}={val}'
+                      return '-'
+
+                  groups = defaultdict(list)
+                  for c in all_changes:
+                      groups[(c.get('ruleCode', '?'), detail(c))].append(c)
+
+                  lines = []
+                  lines.append('| Rule | Description | Detail | Affected endpoints | Count |')
+                  lines.append('|------|-------------|--------|--------------------|-------|')
+                  for (rule, det), items in sorted(groups.items()):
+                      desc = RULE_DESC.get(rule, '')
+                      eps = sorted(set(
+                          f'{c.get(\"method\",\"\")} {c.get(\"path\",\"\")}'
+                          for c in items if c.get('path')
+                      ))
+                      ep_str = ', '.join(f'\`{e}\`' for e in eps[:5])
+                      if len(eps) > 5:
+                          ep_str += f' +{len(eps)-5} more'
+                      lines.append(f'| {rule} | {desc} | \`{det}\` | {ep_str} | {len(items)} |')
+
+                  lines.append('')
+                  lines.append(f'**Total: {len(all_changes)} violations across {len(groups)} unique changes**')
+                  body = '\n'.join(lines)
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('has_report=true\n')
+
+          report_file = '${GITHUB_WORKSPACE}/breaking-changes-report.md'
+          with open(report_file, 'w') as f:
+              f.write('## Breaking API Changes Detected\n\n')
+              f.write(body)
+              f.write('\n\n> **Note:** This check is informational only and does not block the PR.\n')
+
+          # Also write to step summary
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('## Breaking API Changes Detected\n\n')
+              f.write(body)
+              f.write('\n\n> **Note:** This check is informational only and does not block the PR.\n')
+          "
+
+      - name: Comment on PR
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          MARKER="<!-- swagger-brake-report -->"
+
+          # Find existing comment by marker
+          COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" | head -1)
+
+          if [ "${{ steps.breaking-check.outcome }}" == "failure" ] && [ -f "${GITHUB_WORKSPACE}/breaking-changes-report.md" ]; then
+            # Prepend marker to the report
+            BODY="${MARKER}
+          $(cat ${GITHUB_WORKSPACE}/breaking-changes-report.md)"
+
+            if [ -n "$COMMENT_ID" ]; then
+              gh api "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}" \
+                -X PATCH -f body="${BODY}"
+            else
+              gh pr comment "${PR_NUMBER}" --repo ${{ github.repository }} --body "${BODY}"
+            fi
+          elif [ -n "$COMMENT_ID" ]; then
+            # No breaking changes anymore, delete the old comment
+            gh api "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}" -X DELETE
+          fi
+
+      - name: Report no breaking changes
+        if: steps.breaking-check.outcome == 'success'
+        run: |
+          echo "## No Breaking API Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The API contract is backward compatible." >> $GITHUB_STEP_SUMMARY
+
+      - name: Archive breaking change report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: api-compatibility-report
+          path: current/fineract-provider/build/swagger-brake/
+          retention-days: 30
+
+      - name: Fail if breaking changes detected
+        if: steps.breaking-check.outcome == 'failure'
+        run: |
+          echo "::error::Breaking API changes detected. See the report above for details."
+          exit 1

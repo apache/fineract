@@ -18,18 +18,21 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.api;
 
+import static org.apache.fineract.util.StreamResponseUtil.DISPOSITION_TYPE_ATTACHMENT;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
 import org.apache.fineract.infrastructure.bulkimport.exceptions.ImportTypeNotFoundException;
@@ -38,54 +41,45 @@ import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
+import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
+import org.apache.fineract.util.StreamResponseUtil;
 import org.springframework.stereotype.Component;
 
-@Path("/imports")
+@Path("/v1/imports")
 @Component
-@Scope("singleton")
 @Tag(name = "Bulk Import", description = "")
+@RequiredArgsConstructor
 public class BulkImportApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSION = "IMPORT";
-
-    private final PlatformSecurityContext context;
     private final BulkImportWorkbookService bulkImportWorkbookService;
+    private final DocumentReadPlatformService documentReadPlatformService;
     private final DefaultToApiJsonSerializer<ImportData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
-    @Autowired
-    public BulkImportApiResource(final PlatformSecurityContext context, final BulkImportWorkbookService bulkImportWorkbookService,
-            final DefaultToApiJsonSerializer<ImportData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
-
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveImportDocuments(@Context final UriInfo uriInfo, @QueryParam("entityType") final String entityType) {
-
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         Collection<ImportData> importData = new ArrayList<>();
+
         if (entityType.equals(GlobalEntityType.CLIENT.getCode())) {
-            final Collection<ImportData> importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTITY);
-            final Collection<ImportData> importForClientPerson = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_PERSON);
+            final var importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTITY);
+            final var importForClientPerson = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_PERSON);
+
             if (importForClientEntity != null) {
                 importData.addAll(importForClientEntity);
             }
+
             if (importForClientPerson != null) {
                 importData.addAll(importForClientPerson);
             }
         } else {
             final GlobalEntityType type = GlobalEntityType.fromCode(entityType);
+
             if (type == null) {
                 throw new ImportTypeNotFoundException(entityType);
             }
+
             importData = this.bulkImportWorkbookService.getImports(type);
         }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -94,17 +88,31 @@ public class BulkImportApiResource {
 
     @GET
     @Path("getOutputTemplateLocation")
-    public String retriveOutputTemplateLocation(@QueryParam("importDocumentId") final String importDocumentId) {
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
-        final DocumentData documentData = this.bulkImportWorkbookService.getOutputTemplateLocation(importDocumentId);
-        return this.toApiJsonSerializer.serialize(documentData.fileLocation());
+    public String retriveOutputTemplateLocation(@QueryParam("importDocumentId") final Long importDocumentId) {
+        final var imporData = bulkImportWorkbookService.getImport(importDocumentId);
+
+        return Optional.ofNullable(imporData)
+                .flatMap(importData -> Optional.ofNullable(documentReadPlatformService.retrieveDocument(imporData.getDocumentId())))
+                .map(DocumentData::getLocation).orElse(null);
     }
 
     @GET
     @Path("downloadOutputTemplate")
     @Produces("application/vnd.ms-excel")
-    public Response getOutputTemplate(@QueryParam("importDocumentId") final String importDocumentId) {
-        return bulkImportWorkbookService.getOutputTemplate(importDocumentId);
-    }
+    public Response getOutputTemplate(@QueryParam("importDocumentId") final Long importDocumentId) {
+        final var importData = bulkImportWorkbookService.getImport(importDocumentId);
+        if (importData == null) {
+            throw new DocumentNotFoundException("IMPORT", importDocumentId, -1L);
+        }
+        final var doc = documentReadPlatformService.retrieveDocument(importData.getDocumentId());
+        if (doc == null) {
+            throw new DocumentNotFoundException("IMPORT", importDocumentId, importData.getDocumentId());
+        }
+        final var content = documentReadPlatformService.retrieveDocumentContent(doc.getParentEntityType(), doc.getParentEntityId(),
+                doc.getId());
+        final var streamResponseData = StreamResponseUtil.StreamResponseData.builder().type(content.getContentType())
+                .fileName(content.getFileName()).stream(content.getStream()).dispositionType(DISPOSITION_TYPE_ATTACHMENT).build();
 
+        return StreamResponseUtil.ok(streamResponseData);
+    }
 }

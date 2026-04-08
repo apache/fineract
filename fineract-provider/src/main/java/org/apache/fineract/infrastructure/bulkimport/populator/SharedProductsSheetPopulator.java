@@ -101,8 +101,7 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
             LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                LocalDate futureDate = data.getFromDate();
-                if (currentDate.isAfter(futureDate)) {
+                if (DateUtils.isBefore(data.getFromDate(), currentDate)) {
                     marketValue = data.getShareValue();
                 }
             }

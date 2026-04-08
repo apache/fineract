@@ -44,7 +44,7 @@ final class ClientTransactionsApiResourceSwagger {
                 private GetClientsClientIdTransactionsType() {}
 
                 @Schema(example = "1")
-                public Integer id;
+                public Long id;
                 @Schema(example = "clientTransactionType.payCharge")
                 public String code;
                 @Schema(example = "PAY_CHARGE")
@@ -70,9 +70,9 @@ final class ClientTransactionsApiResourceSwagger {
             }
 
             @Schema(example = "226")
-            public Integer id;
+            public Long id;
             @Schema(example = "1")
-            public Integer officeId;
+            public Long officeId;
             @Schema(example = "Head Office")
             public String officeName;
             public GetClientsClientIdTransactionsType type;
@@ -98,9 +98,9 @@ final class ClientTransactionsApiResourceSwagger {
         private GetClientsClientIdTransactionsTransactionIdResponse() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
         public GetClientsClientIdTransactionsResponse.GetClientsPageItems.GetClientsClientIdTransactionsType type;
@@ -121,10 +121,10 @@ final class ClientTransactionsApiResourceSwagger {
         private PostClientsClientIdTransactionsTransactionIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "189")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "222")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

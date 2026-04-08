@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -32,7 +33,10 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorEnumerations;
 
 @Getter
-public class GuarantorData {
+public class GuarantorData implements IGuarantor {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final Long loanId;
@@ -202,5 +206,9 @@ public class GuarantorData {
 
     public boolean isStaffMember() {
         return GuarantorType.STAFF.getValue().equals(this.guarantorType.getId().intValue());
+    }
+
+    public boolean isExistingGroup() {
+        return GuarantorType.GROUP.getValue().equals(this.guarantorType.getId().intValue());
     }
 }

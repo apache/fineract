@@ -18,15 +18,10 @@
  */
 package org.apache.fineract.notification.service;
 
-import static java.util.stream.Collectors.toSet;
-
-import java.util.Collection;
-import java.util.Set;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.deposit.FixedDepositAccountCreateBusinessEvent;
@@ -50,8 +45,6 @@ import org.apache.fineract.infrastructure.event.business.domain.share.ShareAccou
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareProductDividentsCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.data.NotificationData;
-import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -62,19 +55,14 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepository;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationDomainServiceImpl implements NotificationDomainService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
     private final PlatformSecurityContext context;
-    private final NotificationEventPublisher notificationEventPublisher;
-    private final AppUserRepository appUserRepository;
+    private final UserNotificationService userNotificationService;
 
     @PostConstruct
     public void addListeners() {
@@ -108,7 +96,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
                 new ShareAccountApprovedListener());
     }
 
-    private class ClientCreatedListener implements BusinessEventListener<ClientCreateBusinessEvent> {
+    private final class ClientCreatedListener implements BusinessEventListener<ClientCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(ClientCreateBusinessEvent event) {
@@ -118,7 +106,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class CenterCreatedListener implements BusinessEventListener<CentersCreateBusinessEvent> {
+    private final class CenterCreatedListener implements BusinessEventListener<CentersCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(CentersCreateBusinessEvent event) {
@@ -128,7 +116,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class GroupCreatedListener implements BusinessEventListener<GroupsCreateBusinessEvent> {
+    private final class GroupCreatedListener implements BusinessEventListener<GroupsCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(GroupsCreateBusinessEvent event) {
@@ -138,7 +126,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class SavingsAccountDepositListener implements BusinessEventListener<SavingsDepositBusinessEvent> {
+    private final class SavingsAccountDepositListener implements BusinessEventListener<SavingsDepositBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsDepositBusinessEvent event) {
@@ -149,7 +137,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class ShareProductDividendCreatedListener implements BusinessEventListener<ShareProductDividentsCreateBusinessEvent> {
+    private final class ShareProductDividendCreatedListener implements BusinessEventListener<ShareProductDividentsCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(ShareProductDividentsCreateBusinessEvent event) {
@@ -159,7 +147,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class FixedDepositAccountCreatedListener implements BusinessEventListener<FixedDepositAccountCreateBusinessEvent> {
+    private final class FixedDepositAccountCreatedListener implements BusinessEventListener<FixedDepositAccountCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(FixedDepositAccountCreateBusinessEvent event) {
@@ -169,7 +157,8 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class RecurringDepositAccountCreatedListener implements BusinessEventListener<RecurringDepositAccountCreateBusinessEvent> {
+    private final class RecurringDepositAccountCreatedListener
+            implements BusinessEventListener<RecurringDepositAccountCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(RecurringDepositAccountCreateBusinessEvent event) {
@@ -180,7 +169,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class SavingsAccountApprovedListener implements BusinessEventListener<SavingsApproveBusinessEvent> {
+    private final class SavingsAccountApprovedListener implements BusinessEventListener<SavingsApproveBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsApproveBusinessEvent event) {
@@ -201,7 +190,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class SavingsPostInterestListener implements BusinessEventListener<SavingsPostInterestBusinessEvent> {
+    private final class SavingsPostInterestListener implements BusinessEventListener<SavingsPostInterestBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsPostInterestBusinessEvent event) {
@@ -211,7 +200,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanCreatedListener implements BusinessEventListener<LoanCreatedBusinessEvent> {
+    private final class LoanCreatedListener implements BusinessEventListener<LoanCreatedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanCreatedBusinessEvent event) {
@@ -221,7 +210,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanApprovedListener implements BusinessEventListener<LoanApprovedBusinessEvent> {
+    private final class LoanApprovedListener implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApprovedBusinessEvent event) {
@@ -231,7 +220,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanClosedListener implements BusinessEventListener<LoanCloseBusinessEvent> {
+    private final class LoanClosedListener implements BusinessEventListener<LoanCloseBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanCloseBusinessEvent event) {
@@ -241,7 +230,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanCloseAsRescheduledListener implements BusinessEventListener<LoanCloseAsRescheduleBusinessEvent> {
+    private final class LoanCloseAsRescheduledListener implements BusinessEventListener<LoanCloseAsRescheduleBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanCloseAsRescheduleBusinessEvent event) {
@@ -251,7 +240,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanChargebackTransactionListener implements BusinessEventListener<LoanChargebackTransactionBusinessEvent> {
+    private final class LoanChargebackTransactionListener implements BusinessEventListener<LoanChargebackTransactionBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanChargebackTransactionBusinessEvent event) {
@@ -264,7 +253,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanMakeRepaymentListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
+    private final class LoanMakeRepaymentListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
@@ -274,7 +263,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanProductCreatedListener implements BusinessEventListener<LoanProductCreateBusinessEvent> {
+    private final class LoanProductCreatedListener implements BusinessEventListener<LoanProductCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanProductCreateBusinessEvent event) {
@@ -284,7 +273,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class SavingsAccountCreatedListener implements BusinessEventListener<SavingsCreateBusinessEvent> {
+    private final class SavingsAccountCreatedListener implements BusinessEventListener<SavingsCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsCreateBusinessEvent event) {
@@ -294,7 +283,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class SavingsAccountClosedListener implements BusinessEventListener<SavingsCloseBusinessEvent> {
+    private final class SavingsAccountClosedListener implements BusinessEventListener<SavingsCloseBusinessEvent> {
 
         @Override
         public void onBusinessEvent(SavingsCloseBusinessEvent event) {
@@ -304,7 +293,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class ShareAccountCreatedListener implements BusinessEventListener<ShareAccountCreateBusinessEvent> {
+    private final class ShareAccountCreatedListener implements BusinessEventListener<ShareAccountCreateBusinessEvent> {
 
         @Override
         public void onBusinessEvent(ShareAccountCreateBusinessEvent event) {
@@ -314,7 +303,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class ShareAccountApprovedListener implements BusinessEventListener<ShareAccountApproveBusinessEvent> {
+    private final class ShareAccountApprovedListener implements BusinessEventListener<ShareAccountApproveBusinessEvent> {
 
         @Override
         public void onBusinessEvent(ShareAccountApproveBusinessEvent event) {
@@ -327,22 +316,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private void buildNotification(String permission, String objectType, Long objectIdentifier, String notificationContent,
             String eventType, Long appUserId, Long officeId) {
 
-        String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        Set<Long> userIds = getNotifiableUserIds(officeId, permission);
-        NotificationData notificationData = new NotificationData().setObjectType(objectType).setObjectId(objectIdentifier)
-                .setAction(eventType).setActorId(appUserId).setContent(notificationContent).setRead(false).setSystemGenerated(false)
-                .setTenantIdentifier(tenantIdentifier).setOfficeId(officeId).setUserIds(userIds);
-        try {
-            notificationEventPublisher.broadcastNotification(notificationData);
-        } catch (Exception e) {
-            // We want to avoid rethrowing the exception to stop the business transaction from rolling back
-            log.error("Error while broadcasting notification event", e);
-        }
+        userNotificationService.notifyUsers(permission, objectType, objectIdentifier, notificationContent, eventType, appUserId, officeId);
     }
 
-    private Set<Long> getNotifiableUserIds(Long officeId, String permission) {
-        Collection<AppUser> users = appUserRepository.findByOfficeId(officeId);
-        Collection<AppUser> usersWithPermission = users.stream().filter(aU -> aU.hasAnyPermission(permission, "ALL_FUNCTIONS")).toList();
-        return usersWithPermission.stream().map(AppUser::getId).collect(toSet());
-    }
 }

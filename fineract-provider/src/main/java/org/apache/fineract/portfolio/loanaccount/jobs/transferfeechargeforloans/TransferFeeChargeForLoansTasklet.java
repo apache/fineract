@@ -64,7 +64,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                             .retrieveInstallmentLoanCharges(chargeData.getId(), true);
                     PortfolioAccountData portfolioAccountData = null;
                     for (final LoanInstallmentChargeData installmentChargeData : chargePerInstallments) {
-                        if (!installmentChargeData.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                        if (!DateUtils.isDateInTheFuture(installmentChargeData.getDueDate())) {
                             if (portfolioAccountData == null) {
                                 portfolioAccountData = accountAssociationsReadPlatformService
                                         .retriveLoanLinkedAssociation(chargeData.getLoanId());
@@ -79,7 +79,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                             transferFeeCharge(accountTransferDTO, errors);
                         }
                     }
-                } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                } else if (chargeData.getDueDate() != null && !DateUtils.isDateInTheFuture(chargeData.getDueDate())) {
                     final PortfolioAccountData portfolioAccountData = accountAssociationsReadPlatformService
                             .retriveLoanLinkedAssociation(chargeData.getLoanId());
                     final boolean isExceptionForBalanceCheck = false;

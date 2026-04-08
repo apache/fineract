@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.sms.service;
 
+import jakarta.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -31,59 +33,52 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.sms.data.SmsData;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageEnumerations;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
 import org.apache.fineract.infrastructure.sms.exception.SmsNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final SmsMapper smsRowMapper;
     private final PaginationHelper paginationHelper;
     private final ColumnValidator columnValidator;
+    private final SqlValidator sqlValidator;
+    private SmsMapper smsRowMapper;
 
-    @Autowired
-    public SmsReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
+    @PostConstruct
+    public void init() {
         this.smsRowMapper = new SmsMapper();
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
     }
 
     private static final class SmsMapper implements RowMapper<SmsData> {
 
-        final String schema;
+        private static final String SMS_SCHEMA = """
+                 smo.id as id,
+                smo.group_id as groupId,
+                smo.client_id as clientId,
+                smo.staff_id as staffId,
+                smo.status_enum as statusId,
+                smo.mobile_no as mobileNo,
+                smo.message as message,
+                smc.provider_id as providerId,
+                smc.campaign_name as campaignName
+                from sms_messages_outbound smo
+                join sms_campaign smc on smc.id = smo.campaign_id\s""";
 
-        SmsMapper() {
-            final StringBuilder sql = new StringBuilder(300);
-            sql.append("smo.id as id, ");
-            sql.append("smo.group_id as groupId, ");
-            sql.append("smo.client_id as clientId, ");
-            sql.append("smo.staff_id as staffId, ");
-            sql.append("smo.status_enum as statusId, ");
-            sql.append("smo.mobile_no as mobileNo, ");
-            sql.append("smo.message as message, ");
-            sql.append("smc.provider_id as providerId, ");
-            sql.append("smc.campaign_name as campaignName ");
-            sql.append("from sms_messages_outbound smo ");
-            sql.append("join sms_campaign smc on smc.id = smo.campaign_id ");
-
-            this.schema = sql.toString();
-        }
+        SmsMapper() {}
 
         public String schema() {
-            return this.schema;
+            return SMS_SCHEMA;
         }
 
         public String tableName() {
@@ -113,7 +108,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAll() {
+    public List<SmsData> retrieveAll() {
 
         final String sql = "select " + this.smsRowMapper.schema();
 
@@ -131,20 +126,24 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllPending(final Long campaignId, final Integer limit) {
+    public List<SmsData> retrieveAllPending(final Long campaignId, final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
-        String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.PENDING.getValue();
+        String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = ?";
+        List<Object> params = new ArrayList<>();
+        params.add(SmsMessageStatusType.PENDING.getValue());
+
         if (campaignId != null) {
-            sql += " and smo.campaign_id = " + campaignId;
+            sql += " and smo.campaign_id = ?";
+            params.add(campaignId);
         }
 
         sql += sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.smsRowMapper, params.toArray()); // NOSONAR
     }
 
     @Override
-    public Collection<SmsData> retrieveAllSent(final Integer limit) {
+    public List<SmsData> retrieveAllSent(final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum IN ("
                 + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue() + "," + SmsMessageStatusType.SENT.getValue() + ")"
@@ -180,7 +179,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllDelivered(final Integer limit) {
+    public List<SmsData> retrieveAllDelivered(final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.DELIVERED.getValue()
                 + sqlPlusLimit;
@@ -189,7 +188,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     }
 
     @Override
-    public Collection<SmsData> retrieveAllFailed(final Integer limit) {
+    public List<SmsData> retrieveAllFailed(final Integer limit) {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.FAILED.getValue()
                 + sqlPlusLimit;
@@ -200,6 +199,9 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     @Override
     public Page<SmsData> retrieveSmsByStatus(final Long campaignId, final SearchParameters searchParameters, final Integer status,
             final LocalDate dateFrom, final LocalDate dateTo) {
+        sqlValidator.validate(searchParameters.getOrderBy());
+        sqlValidator.validate(searchParameters.getSortOrder());
+
         final StringBuilder sqlBuilder = new StringBuilder(200);
         final Object[] objectArray = new Object[10];
         int arrayPos = 0;
@@ -225,10 +227,10 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
             arrayPos = arrayPos + 1;
         }
 
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-            if (searchParameters.isSortOrderProvided()) {
+            if (searchParameters.hasSortOrder()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
@@ -236,9 +238,9 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
             sqlBuilder.append(" order by smo.submittedon_date, smo.id");
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));

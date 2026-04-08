@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class COBBulkEventConfigurationTest {
 
     @Mock
@@ -69,16 +71,21 @@ public class COBBulkEventConfigurationTest {
     @InjectMocks
     private COBBusinessStepServiceImpl underTest;
 
+    @Mock
+    private ReloaderService reloaderService;
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
+        when(reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @AfterEach
     public void tearDown() {
-        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        ThreadLocalContextUtil.reset();
     }
 
     @Test

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +29,11 @@ import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadP
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.JobIsNotFoundOrNotEnabledException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
-import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -48,6 +50,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     @Override
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void onApplicationEvent(ContextRefreshedEvent event) {
         // If the instance is not Batch Enabled will not load the Jobs
         if (!fineractProperties.getMode().isBatchManagerEnabled()) {
@@ -63,7 +66,11 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
             final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
                     .retrieveAllJobs(fineractProperties.getNodeId());
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
-                jobRegisterService.scheduleJob(jobDetails);
+                try {
+                    jobRegisterService.scheduleJob(jobDetails);
+                } catch (JobIsNotFoundOrNotEnabledException e) {
+                    log.warn("{}", e.getMessage());
+                }
                 jobDetails.setTriggerMisfired(false);
                 schedularWritePlatformService.saveOrUpdate(jobDetails);
             }

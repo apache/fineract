@@ -1,0 +1,26 @@
+name: Fineract PR Compliance
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  verify-title:
+    name: Validate Jira Ticket ID
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Verify Title Format
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          regex="^FINERACT-[0-9]+: "
+
+          if [[ ! "$title" =~ $regex ]]; then
+            echo "::error::PR title '$title' is invalid."
+            echo "::error::It must start with a Jira Ticket ID (e.g., 'FINERACT-123: Description...')."
+            exit 1
+          fi
+          echo "Success: PR title matches the required format."

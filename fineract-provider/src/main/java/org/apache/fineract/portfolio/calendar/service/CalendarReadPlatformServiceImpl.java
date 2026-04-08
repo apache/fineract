@@ -39,10 +39,8 @@ import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 @RequiredArgsConstructor
 public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformService {
 
@@ -251,7 +249,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if (isSkipRepaymentOnFirstMonthEnabled) {
-            numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            numberOfDays = this.configurationDomainService.retreivePeriodInNumberOfDaysForSkipMeetingDate().intValue();
         }
 
         final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, periodStartDate, periodEndDate,
@@ -265,10 +263,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 + " ci.entity_type_enum = ?";
         try {
             int calendarInstaneId = this.jdbcTemplate.queryForObject(query, Integer.class, entityId, calendarId, entityTypeId);
-            if (calendarInstaneId > 0) {
-                return true;
-            }
-            return false;
+            return calendarInstaneId > 0;
         } catch (final EmptyResultDataAccessException e) {
             return false;
         }
@@ -284,7 +279,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             periodStartDate = fromDate;
         } else {
             final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
-            if (seedDate.isBefore(currentDate.minusYears(1))) {
+            if (DateUtils.isBefore(seedDate, currentDate.minusYears(1))) {
                 periodStartDate = currentDate.minusYears(1);
             } else {
                 periodStartDate = recurrenceStartDate;
@@ -299,7 +294,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         if (tillDate != null) {
             if (endDate != null) {
-                if (endDate.isAfter(tillDate)) {
+                if (DateUtils.isAfter(endDate, tillDate)) {
                     // to retrieve meeting dates tillspecified date (tillDate)
                     periodEndDate = tillDate;
                 }
@@ -307,7 +302,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 // end date is null then fetch meeting dates tillDate
                 periodEndDate = tillDate;
             }
-        } else if (endDate == null || endDate.isAfter(currentDate.plusYears(1))) {
+        } else if (endDate == null || DateUtils.isAfter(endDate, currentDate.plusYears(1))) {
             periodEndDate = currentDate.plusYears(1);
         }
         return periodEndDate;
@@ -333,7 +328,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if (isSkipRepaymentOnFirstMonthEnabled) {
-            numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            numberOfDays = configurationDomainService.retreivePeriodInNumberOfDaysForSkipMeetingDate().intValue();
         }
 
         if (lastMeetingDate != null && !calendarData.isBetweenStartAndEndDate(lastMeetingDate)
@@ -360,8 +355,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
-        final Collection<CalendarData> recuCalendarsData = new ArrayList<>();
+    public List<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
+        final List<CalendarData> recuCalendarsData = new ArrayList<>();
         final boolean withHistory = true;
         final LocalDate tillDate = null;
         for (final CalendarData calendarData : calendarsData) {

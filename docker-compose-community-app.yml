@@ -16,7 +16,6 @@
 # under the License.
 #
 
-version: '3.7'
 services:
   # Frontend service
   community-app:

@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.notification.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class Notification extends AbstractPersistableCustom {
+public class Notification extends AbstractPersistableCustom<Long> {
 
     @Column(name = "object_type")
     private String objectType;

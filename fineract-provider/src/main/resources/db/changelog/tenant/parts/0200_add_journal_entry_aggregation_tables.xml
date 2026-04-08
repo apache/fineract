@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet id="1" author="fineract"  context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_journal_entry_aggregation_summary"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_journal_entry_aggregation_summary">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_journal_entry_aggregation_summary"/>
+            </column>
+            <column name="gl_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="office_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_type_enum" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aggregated_on_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_on_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_owner_id" type="BIGINT"/>
+            <column name="debit_amount" type="DECIMAL(19, 6)"/>
+            <column name="credit_amount" type="DECIMAL(19, 6)"/>
+            <column defaultValueBoolean="false" name="manual_entry" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_execution_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="timestamp with time zone"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="timestamp with time zone"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_CREATED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_LAST_MODIFIED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+        <addForeignKeyConstraint baseColumnNames="office_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_OFFICE_ID" referencedColumnNames="id" referencedTableName="m_office"/>
+        <addForeignKeyConstraint baseColumnNames="gl_account_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_GL_ACCOUNT_ID" referencedColumnNames="id" referencedTableName="acc_gl_account"/>
+        <addForeignKeyConstraint baseColumnNames="job_execution_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_JOB_EXECUTION_ID" referencedColumnNames="job_execution_id" referencedTableName="batch_job_execution"/>
+    </changeSet>
+
+    <changeSet id="2" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="submitted_on_date,gl_account_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_journal_entry_aggregation_summary on m_journal_entry_aggregation_summary(submitted_on_date,gl_account_id);
+        </sql>
+    </changeSet>
+    <changeSet id="3" author="fineract"  context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_journal_entry_aggregation_tracking"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_journal_entry_aggregation_tracking">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_journal_entry_aggregation_tracking"/>
+            </column>
+            <column name="aggregated_on_date_from" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aggregated_on_date_to" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_on_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_execution_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="timestamp with time zone"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="timestamp with time zone"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="job_execution_id" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_JOB_EXECUTION_ID" referencedColumnNames="job_execution_id" referencedTableName="batch_job_execution"/>
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_CREATED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_LAST_MODIFIED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+       </changeSet>
+
+    <changeSet id="6" author="fineract" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_journal_entry_aggregation_summary"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_journal_entry_aggregation_summary">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_journal_entry_aggregation_summary"/>
+            </column>
+            <column name="gl_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="office_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_type_enum" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aggregated_on_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_on_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_owner_id" type="BIGINT"/>
+            <column name="debit_amount" type="DECIMAL(19, 6)"/>
+            <column name="credit_amount" type="DECIMAL(19, 6)"/>
+            <column defaultValueBoolean="false" name="manual_entry" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_execution_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_CREATED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_LAST_MODIFIED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+        <addForeignKeyConstraint baseColumnNames="office_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_OFFICE_ID" referencedColumnNames="id" referencedTableName="m_office"/>
+        <addForeignKeyConstraint baseColumnNames="gl_account_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_GL_ACCOUNT_ID" referencedColumnNames="id" referencedTableName="acc_gl_account"/>
+        <addForeignKeyConstraint baseColumnNames="job_execution_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_JOB_EXECUTION_ID" referencedColumnNames="JOB_EXECUTION_ID" referencedTableName="BATCH_JOB_EXECUTION"/>
+    </changeSet>
+
+    <changeSet id="7" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="submitted_on_date,gl_account_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_journal_entry_aggregation_summary on m_journal_entry_aggregation_summary(submitted_on_date,gl_account_id);
+        </sql>
+    </changeSet>
+    <changeSet id="8" author="fineract"  context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_journal_entry_aggregation_tracking"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_journal_entry_aggregation_tracking">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_journal_entry_aggregation_tracking"/>
+            </column>
+            <column name="aggregated_on_date_from" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aggregated_on_date_to" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_on_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_execution_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="job_execution_id" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_JOB_EXECUTION_ID" referencedColumnNames="JOB_EXECUTION_ID" referencedTableName="BATCH_JOB_EXECUTION"/>
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_CREATED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_journal_entry_aggregation_tracking" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_TRACKING_ON_LAST_MODIFIED_BY" referencedColumnNames="id" referencedTableName="m_appuser"/>
+    </changeSet>
+    <changeSet id="4" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="submitted_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(submitted_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="5" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="aggregated_on_date_to"/>
+            </not>
+        </preConditions>
+        <sql>
+            create unique index concurrently idx2_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(aggregated_on_date_to);
+        </sql>
+    </changeSet>
+    <changeSet id="9" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="submitted_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(submitted_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="10" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="aggregated_on_date_to"/>
+            </not>
+        </preConditions>
+        <sql>
+            create unique index idx2_m_journal_entry_aggregation_tracking on m_journal_entry_aggregation_tracking(aggregated_on_date_to);
+        </sql>
+    </changeSet>
+    <changeSet id="11" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_trac_job_exec_id on m_journal_entry_aggregation_tracking(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="12" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_tracking" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_trac_job_exec_id on m_journal_entry_aggregation_tracking(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="13" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_job_exec_id on m_journal_entry_aggregation_summary(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="14" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="job_execution_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_job_exec_id on m_journal_entry_aggregation_summary(job_execution_id);
+        </sql>
+    </changeSet>
+    <changeSet id="15" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="product_id,entity_type_enum"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_prod_id_entity_type on m_journal_entry_aggregation_summary(product_id, entity_type_enum);
+        </sql>
+    </changeSet>
+    <changeSet id="16" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="product_id,entity_type_enum"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_prod_id_entity_type on m_journal_entry_aggregation_summary(product_id, entity_type_enum);
+        </sql>
+    </changeSet>
+    <changeSet id="17" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="aggregated_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_aggr_date on m_journal_entry_aggregation_summary(aggregated_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="18" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="aggregated_on_date"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_aggr_date on m_journal_entry_aggregation_summary(aggregated_on_date);
+        </sql>
+    </changeSet>
+    <changeSet id="19" author="fineract"  runInTransaction="false" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="office_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index concurrently idx_m_jour_ent_aggr_sum_office_id on m_journal_entry_aggregation_summary(office_id);
+        </sql>
+    </changeSet>
+    <changeSet id="20" author="fineract"  runInTransaction="false" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="m_journal_entry_aggregation_summary" columnNames="office_id"/>
+            </not>
+        </preConditions>
+        <sql>
+            create index idx_m_jour_ent_aggr_sum_office_id on m_journal_entry_aggregation_summary(office_id);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

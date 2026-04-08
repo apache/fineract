@@ -33,4 +33,9 @@ public abstract class ClientBusinessEvent extends AbstractBusinessEvent<Client> 
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getId();
+    }
 }

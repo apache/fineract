@@ -19,15 +19,24 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -39,17 +48,23 @@ import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Order(2)
+@ExtendWith({ SavingsTestLifecycleExtension.class })
 public class SavingsInterestPostingJobIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingJobIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME = "SA_PINT";
 
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -58,6 +73,7 @@ public class SavingsInterestPostingJobIntegrationTest {
     private SchedulerJobHelper scheduleJobHelper;
     private JournalEntryHelper journalEntryHelper;
     private AccountHelper accountHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -68,13 +84,13 @@ public class SavingsInterestPostingJobIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
     public void testSavingsBalanceCheckAfterDailyInterestPostingJob() {
         // client activation, savings activation and 1st transaction date
         final String startDate = "10 April 2022";
-        final String jobName = "Post Interest For Savings";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
@@ -86,7 +102,7 @@ public class SavingsInterestPostingJobIntegrationTest {
          * Runs Post interest posting job and verify the new account created with accounting configuration set as none
          * is picked up by job
          */
-        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 48);
@@ -99,7 +115,6 @@ public class SavingsInterestPostingJobIntegrationTest {
     @Test
     public void testSavingsDailyInterestPostingJobWithAccountingNone() {
         final String startDate = "10 April 2022";
-        final String jobName = "Post Interest For Savings";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
@@ -117,7 +132,6 @@ public class SavingsInterestPostingJobIntegrationTest {
     public void testDuplicateOverdraftInterestPostingJob() {
         // client activation, savings activation and 1st transaction date
         final String startDate = "01 July 2022";
-        final String jobName = "Post Interest For Savings";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
@@ -125,7 +139,7 @@ public class SavingsInterestPostingJobIntegrationTest {
 
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
@@ -140,36 +154,48 @@ public class SavingsInterestPostingJobIntegrationTest {
 
     @Test
     public void testSavingsDailyInterestPostingJob() {
-        // client activation, savings activation and 1st transaction date
-        final String startDate = "10 April 2022";
-        final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
+        LocalDate today = Utils.getLocalDateOfTenant();
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, today);
+            // client activation, savings activation and 1st transaction date
+            final String startDate = "10 April 2022";
+            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            Assertions.assertNotNull(clientID);
 
-        final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        /***
-         * Runs Post interest posting job and verify the new account created with accounting configuration set as none
-         * is picked up by job
-         */
-        this.scheduleJobHelper.executeAndAwaitJob(jobName);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
-        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+            /***
+             * Runs Post interest posting job and verify the new account created with accounting configuration set as
+             * none is picked up by job
+             */
+            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+            ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+            HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
+            for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+                LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+            }
+            assertEquals("2.7405", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
+            assertEquals("[2022, 4, 12]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
+            List<Integer> submittedOnDateStringList = (List<Integer>) interestPostingTransaction.get("submittedOnDate");
+            LocalDate submittedOnDate = submittedOnDateStringList.stream().collect(
+                    Collectors.collectingAndThen(Collectors.toList(), list -> LocalDate.of(list.get(0), list.get(1), list.get(2))));
+            assertTrue(DateUtils.isEqual(submittedOnDate, today), "Submitted On Date check for Interest Posting transaction");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
-        assertEquals("2.7405", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
-        assertEquals("[2022, 4, 12]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
+
     }
 
     @Test
     public void testSavingsDailyOverdraftInterestPostingJob() {
         // client activation, savings activation and 1st transaction date
         final String startDate = "10 April 2022";
-        final String jobName = "Post Interest For Savings";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
@@ -177,10 +203,8 @@ public class SavingsInterestPostingJobIntegrationTest {
 
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        /***
-         * Runs Post interest posting job and verify the new account created with Overdraft is posting negative interest
-         */
-        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        // Runs Post interest posting job and verify the new account created with Overdraft is posting negative interest
+        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
@@ -196,7 +220,6 @@ public class SavingsInterestPostingJobIntegrationTest {
     @Test
     public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJob() {
         final String startDate = "21 June 2022";
-        final String jobName = "Post Interest For Savings";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
@@ -208,7 +231,7 @@ public class SavingsInterestPostingJobIntegrationTest {
         Float balance = Float.parseFloat("800.0");
         assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 800");
 
-        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 5);
@@ -304,8 +327,8 @@ public class SavingsInterestPostingJobIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 
 }

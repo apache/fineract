@@ -25,7 +25,6 @@ import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -46,11 +45,19 @@ public class CampaignsHelper {
 
     private static final String BUSINESS_RULE_OPTIONS = "businessRulesOptions";
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public CampaignsHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createCampaign(String reportName, Integer triggerType) {
         log.info("---------------------------------CREATING A CAMPAIGN---------------------------------------------");
         final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
@@ -58,6 +65,25 @@ public class CampaignsHelper {
                 "resourceId");
     }
 
+    public Integer createCampaignWithName(String reportName, Integer triggerType, String campaignName) {
+        log.info("---------------------------------CREATING A CAMPAIGN WITH NAME---------------------------------------------");
+        final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_SMS_CAMPAIGNS_URL,
+                getCreateCampaignJSONWithName(reportName, triggerType, campaignName), "resourceId");
+    }
+
+    public List<HashMap> createCampaignWithNameExpectingError(ResponseSpecification errorResponseSpec, String reportName,
+            Integer triggerType, String campaignName) {
+        log.info("---------------------------------CREATING A CAMPAIGN WITH NAME (EXPECTING ERROR)---------------------");
+        final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, errorResponseSpec, CREATE_SMS_CAMPAIGNS_URL,
+                getCreateCampaignJSONWithName(reportName, triggerType, campaignName), "errors");
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyCampaignCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId) {
         log.info("------------------------------CHECK CAMPAIGN DETAILS------------------------------------\n");
@@ -66,6 +92,10 @@ public class CampaignsHelper {
         assertEquals(generatedCampaignId, responseCampaignId, "ERROR IN CREATING THE CAMPAIGN");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer updateCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId, String reportName, Integer triggerType) {
         log.info("------------------------------UPDATE CAMPAIGN DETAILS------------------------------------\n");
@@ -74,6 +104,10 @@ public class CampaignsHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer deleteCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId) {
         log.info("------------------------------DELETE CAMPAIGN DETAILS------------------------------------\n");
@@ -81,6 +115,10 @@ public class CampaignsHelper {
         return Utils.performServerDelete(requestSpec, responseSpec, DELETE_SMS_CAMPAIGNS_URL, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer performActionsOnCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedCampaignId, String command) {
         log.info("------------------------------PERFORM ACTION ON CAMPAIGN DETAILS------------------------------------\n");
@@ -91,6 +129,10 @@ public class CampaignsHelper {
                 "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object performActionsOnCampaignWithFailure(final Integer generatedCampaignId, String command, String actionDate,
             String responseJsonAttribute) {
         log.info("--------------------------PERFORM ACTION ON CAMPAIGN DETAILS WITH FAILURE-------------------------------\n");
@@ -100,7 +142,15 @@ public class CampaignsHelper {
                 getJSONForCampaignAction(command, actionDate), responseJsonAttribute);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String getCreateCampaignJSON(String reportName, Integer triggerType) {
+        return getCreateCampaignJSONWithName(reportName, triggerType, Utils.randomStringGenerator("Campaign_Name_", 5));
+    }
+
+    public String getCreateCampaignJSONWithName(String reportName, Integer triggerType, String campaignName) {
         final HashMap<String, Object> map = new HashMap<>();
         final HashMap<String, Object> paramValueMap = new HashMap<>();
         Long reportId = getSelectedReportId(reportName);
@@ -108,11 +158,11 @@ public class CampaignsHelper {
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
             map.put("recurrenceStartDate",
-                    LocalDateTime.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+                    Utils.getLocalDateTimeOfTenant().plusMinutes(1).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
             map.put("frequency", 1);
             map.put("interval", "1");
         }
-        map.put("campaignName", Utils.randomNameGenerator("Campaign_Name_", 5));
+        map.put("campaignName", campaignName);
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");
@@ -128,6 +178,10 @@ public class CampaignsHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String getUpdateCampaignJSON(String reportName, Integer triggerType) {
         final HashMap<String, Object> map = new HashMap<>();
         final HashMap<String, Object> paramValueMap = new HashMap<>();
@@ -136,9 +190,9 @@ public class CampaignsHelper {
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
             map.put("recurrenceStartDate",
-                    LocalDateTime.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+                    Utils.getLocalDateTimeOfTenant().plusMinutes(1).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
         }
-        map.put("campaignName", Utils.randomNameGenerator("Campaign_Name_", 5));
+        map.put("campaignName", Utils.randomStringGenerator("Campaign_Name_", 5));
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");
@@ -154,6 +208,10 @@ public class CampaignsHelper {
         return json;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String getJSONForCampaignAction(String command, String actionDate) {
         final HashMap<String, Object> map = new HashMap<>();
         String dateString = "close".equalsIgnoreCase(command) ? "closureDate" : "activationDate";
@@ -169,6 +227,10 @@ public class CampaignsHelper {
         return getReports(BUSINESS_RULE_OPTIONS);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private List<ReportData> getReports(String jsonAttributeToGetBack) {
         log.info("--------------------------------- GET REPORTS OPTIONS -------------------------------");
         Assert.notNull(jsonAttributeToGetBack, "jsonAttributeToGetBack may not be null");

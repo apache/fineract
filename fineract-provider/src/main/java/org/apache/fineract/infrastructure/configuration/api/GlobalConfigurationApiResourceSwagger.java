@@ -47,7 +47,15 @@ final class GlobalConfigurationApiResourceSwagger {
         @Schema(example = "true")
         public boolean enabled;
         @Schema(example = "2")
-        public Long description;
+        public Long value;
+        @Schema(example = "20 September 2011")
+        public String dateValue;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "random text")
+        public String stringValue;
     }
 
     @Schema(description = "PutGlobalConfigurationsResponse")
@@ -61,6 +69,12 @@ final class GlobalConfigurationApiResourceSwagger {
 
             @Schema(example = "true")
             public boolean enabled;
+            @Schema(example = "2")
+            public Long value;
+            @Schema(example = "20 September 2011")
+            public String dateValue;
+            @Schema(example = "random text")
+            public String stringValue;
         }
 
         @Schema(example = "4")

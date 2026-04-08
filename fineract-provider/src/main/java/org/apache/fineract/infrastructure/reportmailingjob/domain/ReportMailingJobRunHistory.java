@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,7 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
+public class ReportMailingJobRunHistory extends AbstractPersistableCustom<Long> {
 
     private static final long serialVersionUID = -3757370929988421076L;
 

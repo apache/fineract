@@ -18,52 +18,39 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Objects;
-import java.util.TreeMap;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.processor.AbstractItemProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.AfterStep;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemProcessor;
+import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
+import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
+import org.springframework.lang.NonNull;
 
-@RequiredArgsConstructor
-@Slf4j
-public abstract class AbstractLoanItemProcessor implements ItemProcessor<Loan, Loan> {
+public abstract class AbstractLoanItemProcessor extends AbstractItemProcessor<Loan> {
 
-    private final COBBusinessStepService cobBusinessStepService;
+    private final ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService;
 
-    @Setter(AccessLevel.PROTECTED)
-    private ExecutionContext executionContext;
-    private LocalDate businessDate;
+    public AbstractLoanItemProcessor(COBBusinessStepService cobBusinessStepService,
+            ProgressiveLoanModelProcessingService progressiveLoanModelProcessingService) {
+        super(cobBusinessStepService);
+        this.progressiveLoanModelProcessingService = progressiveLoanModelProcessingService;
+    }
 
     @Override
-    public Loan process(@NotNull Loan item) throws Exception {
-        TreeMap<Long, String> businessStepMap = (TreeMap<Long, String>) executionContext.get(LoanCOBConstant.BUSINESS_STEP_MAP);
-
-        Loan alreadyProcessedLoan = cobBusinessStepService.run(businessStepMap, item);
-        alreadyProcessedLoan.setLastClosedBusinessDate(businessDate);
-        return alreadyProcessedLoan;
+    public Loan process(@NonNull Loan loan) throws Exception {
+        if (needToRebuildModel(loan)) {
+            progressiveLoanModelProcessingService.recalculateModelAndSave(loan.getId());
+        }
+        return super.process(loan);
     }
 
-    @AfterStep
-    public ExitStatus afterStep(@NotNull StepExecution stepExecution) {
-        return ExitStatus.COMPLETED;
+    private boolean needToRebuildModel(Loan loan) {
+        return loan.isProgressiveSchedule() && !progressiveLoanModelProcessingService.hasValidModel(loan.getId(),
+                ProgressiveLoanInterestScheduleModel.getModelVersion());
     }
 
-    protected void setBusinessDate(StepExecution stepExecution) {
-        this.businessDate = LocalDate.parse(
-                Objects.requireNonNull(
-                        (String) stepExecution.getJobExecution().getExecutionContext().get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)),
-                DateTimeFormatter.ISO_DATE);
+    @Override
+    public void setLastRun(Loan processedLoan) {
+        processedLoan.setLastClosedBusinessDate(getBusinessDate());
     }
 
 }

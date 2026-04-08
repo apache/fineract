@@ -33,9 +33,11 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
+import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +47,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePlatformService {
 
-    private final LoanAccountDomainService loanAccountDomainService;
     private final LoanAssembler loanAssembler;
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final LoanUtilService loanUtilService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
+    private final LoanScheduleService loanScheduleService;
+    private final LoanAccountService loanAccountService;
 
     @Override
     public CommandProcessingResult addLoanScheduleVariations(final Long loanId, final JsonCommand command) {
@@ -60,7 +64,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
         }
         loanScheduleAssembler.assempleVariableScheduleFrom(loan, command.json());
 
-        loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountService.saveLoanWithDataIntegrityViolationChecks(loan);
         final Map<String, Object> changes = new HashMap<>();
         List<LoanTermVariationsData> newVariationsData = new ArrayList<>();
         List<LoanTermVariations> modifiedVariations = loan.getLoanTermVariations();
@@ -96,8 +100,9 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
         loan.getLoanTermVariations().clear();
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
-        loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
+        loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+        loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
+        loanAccountService.saveLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanScheduleVariationsDeletedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withLoanId(loanId) //

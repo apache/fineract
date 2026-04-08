@@ -1,0 +1,18 @@
+= HTTP Basic Authentication
+
+By default Fineract is configured with a HTTP Basic Authentication scheme, so you actually don't have to do anything if you want to use it. But if you would like to explicitly choose this authentication scheme then there are two ways to enable it:
+
+. Use environment variables (best choice if you run with Docker Compose):
++
+[source,bash]
+----
+FINERACT_SECURITY_BASICAUTH_ENABLED=true
+FINERACT_SECURITY_OAUTH_ENABLED=false
+----
+ 
+. Use JVM parameters (best choice if you run the Spring Boot JAR):
++
+[source,bash]
+----
+java -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth2.enabled=false -jar fineract-provider.jar
+----

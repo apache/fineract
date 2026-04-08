@@ -18,62 +18,31 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.cob.domain.LoanAccountLock;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.cob.service.RetrieveIdService;
+import org.apache.fineract.cob.tasklet.ApplyCommonLockTasklet;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
-@RequiredArgsConstructor
-public class ApplyLoanLockTasklet implements Tasklet {
+public class ApplyLoanLockTasklet extends ApplyCommonLockTasklet<LoanAccountLock> {
 
-    private final LoanAccountLockRepository accountLockRepository;
-
-    @Override
-    public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
-        ExecutionContext executionContext = contribution.getStepExecution().getExecutionContext();
-        List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-
-        List<LoanAccountLock> accountLocks = accountLockRepository.findAllByLoanIdIn(loanIds);
-
-        Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap = accountLocks.stream()
-                .filter(e -> LockOwner.LOAN_COB_PARTITIONING.equals(e.getLockOwner()))
-                .collect(Collectors.toMap(LoanAccountLock::getLoanId, Function.identity()));
-
-        List<Long> alreadyLockedByChunkProcessingAccountIds = accountLocks.stream()
-                .filter(e -> LockOwner.LOAN_COB_CHUNK_PROCESSING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();
-
-        List<Long> toBeProcessedLoanIds = new ArrayList<>(alreadySoftLockedAccountsMap.keySet());
-
-        for (Long loanId : toBeProcessedLoanIds) {
-            upgradeToHardLock(loanId, alreadySoftLockedAccountsMap);
-        }
-
-        toBeProcessedLoanIds.addAll(alreadyLockedByChunkProcessingAccountIds);
-        List<Long> alreadyLockedByInlineCOBOrProcessedLoanIds = new ArrayList<>(loanIds);
-        alreadyLockedByInlineCOBOrProcessedLoanIds.removeAll(toBeProcessedLoanIds);
-
-        executionContext.put(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS,
-                new ArrayList<>(alreadyLockedByInlineCOBOrProcessedLoanIds));
-        return RepeatStatus.FINISHED;
+    public ApplyLoanLockTasklet(FineractProperties fineractProperties, LockingService<LoanAccountLock> loanLockingService,
+            RetrieveIdService retrieveIdService, TransactionTemplate transactionTemplate) {
+        super(fineractProperties, loanLockingService, retrieveIdService, transactionTemplate);
     }
 
-    private void upgradeToHardLock(Long loanId, Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap) {
-        LoanAccountLock loanAccountLock = alreadySoftLockedAccountsMap.get(loanId);
-        // Upgrade lock
-        loanAccountLock.setNewLockOwner(LockOwner.LOAN_COB_CHUNK_PROCESSING);
-        accountLockRepository.save(loanAccountLock);
+    @Override
+    public String getCOBParameter() {
+        return COBConstant.COB_PARAMETER;
+    }
+
+    @Override
+    public LockOwner getLockOwner() {
+        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
     }
 }

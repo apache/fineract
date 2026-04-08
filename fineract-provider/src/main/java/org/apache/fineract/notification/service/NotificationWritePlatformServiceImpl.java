@@ -27,10 +27,8 @@ import org.apache.fineract.notification.domain.Notification;
 import org.apache.fineract.notification.domain.NotificationMapper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @Transactional
 @RequiredArgsConstructor
 public class NotificationWritePlatformServiceImpl implements NotificationWritePlatformService {
@@ -39,26 +37,6 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
     private final NotificationGeneratorReadRepositoryWrapper notificationGeneratorReadRepositoryWrapper;
     private final AppUserRepository appUserRepository;
     private final NotificationMapperWritePlatformService notificationMapperWritePlatformService;
-
-    @Override
-    public Long notify(Long userId, String objectType, Long objectIdentifier, String action, Long actorId, String notificationContent,
-            boolean isSystemGenerated) {
-
-        Long generatedNotificationId = insertIntoNotificationGenerator(objectType, objectIdentifier, action, actorId, notificationContent,
-                isSystemGenerated);
-        insertIntoNotificationMapper(userId, generatedNotificationId);
-        return generatedNotificationId;
-    }
-
-    private Long insertIntoNotificationMapper(Long userId, Long generatedNotificationId) {
-        AppUser appUser = this.appUserRepository.findById(userId).orElse(null);
-        NotificationMapper notificationMapper = new NotificationMapper()
-                .setNotification(this.notificationGeneratorReadRepositoryWrapper.findById(generatedNotificationId)).setUserId(appUser)
-                .setRead(false).setCreatedAt(DateUtils.getLocalDateTimeOfSystem());
-
-        this.notificationMapperWritePlatformService.create(notificationMapper);
-        return notificationMapper.getId();
-    }
 
     private Long insertIntoNotificationGenerator(String objectType, Long objectIdentifier, String action, Long actorId,
             String notificationContent, boolean isSystemGenerated) {

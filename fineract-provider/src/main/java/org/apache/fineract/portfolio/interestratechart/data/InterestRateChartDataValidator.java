@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -115,10 +116,8 @@ public class InterestRateChartDataValidator {
             isPrimaryGroupingByAmount = false;
         }
 
-        if (fromDate != null && toDate != null) {
-            if (fromDate.isAfter(toDate)) {
-                baseDataValidator.parameter(fromDateParamName).value(fromDate).failWithCode("from.date.is.after.to.date");
-            }
+        if (toDate != null && DateUtils.isAfter(fromDate, toDate)) {
+            baseDataValidator.parameter(fromDateParamName).value(fromDate).failWithCode("from.date.is.after.to.date");
         }
 
         // validate chart Slabs - mandatory when creating
@@ -177,11 +176,8 @@ public class InterestRateChartDataValidator {
         if (isPrimaryGroupingByAmount == null) {
             isPrimaryGroupingByAmount = false;
         }
-
-        if (fromDate != null && toDate != null) {
-            if (fromDate.isAfter(toDate)) {
-                baseDataValidator.parameter(fromDateParamName).value(fromDate).failWithCode("from.date.is.after.to.date");
-            }
+        if (toDate != null && DateUtils.isAfter(fromDate, toDate)) {
+            baseDataValidator.parameter(fromDateParamName).value(fromDate).failWithCode("from.date.is.after.to.date");
         }
 
         validateChartSlabs(element, baseDataValidator, isPrimaryGroupingByAmount);

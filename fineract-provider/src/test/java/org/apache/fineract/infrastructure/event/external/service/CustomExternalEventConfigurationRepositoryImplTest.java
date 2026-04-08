@@ -23,28 +23,26 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import javax.persistence.EntityManager;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.persistence.EntityManager;
 import org.apache.fineract.infrastructure.event.external.exception.ExternalEventConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.event.external.repository.CustomExternalEventConfigurationRepositoryImpl;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class CustomExternalEventConfigurationRepositoryImplTest {
 
     @Mock
     private EntityManager entityManager;
+    @InjectMocks
     private CustomExternalEventConfigurationRepositoryImpl underTest;
-
-    @BeforeEach
-    public void setUp() {
-        underTest = new CustomExternalEventConfigurationRepositoryImpl(entityManager);
-    }
 
     @Test
     public void givenConfigurationExistsThenReturnConfiguration() {

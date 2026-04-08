@@ -9,7 +9,7 @@ You first need to close the release in JIRA so that the about to be released ver
 .Command
 [source,bash]
 ----
-% ./gradlew fineractReleaseStep4
+./gradlew fineractReleaseStep4
 ----
 
 CAUTION: This task is not yet automated!

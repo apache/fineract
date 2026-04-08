@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 
 @Converter(autoApply = true)
 public class ExternalIdConverter implements AttributeConverter<ExternalId, String> {
@@ -32,7 +33,7 @@ public class ExternalIdConverter implements AttributeConverter<ExternalId, Strin
 
     @Override
     public ExternalId convertToEntityAttribute(String externalId) {
-        return StringUtils.isBlank(externalId) ? ExternalId.empty() : new ExternalId(externalId);
+        return StringUtils.isBlank(externalId) ? ExternalId.empty() : ExternalIdFactory.produce(externalId);
     }
 
 }

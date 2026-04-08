@@ -1,0 +1,23 @@
+= Command Processing
+
+NOTE: This is an ongoing effort to migrate to an improved link:++https://martinfowler.com/bliki/CQRS.html[CQRS]++[CQRS] sub-system. Please read Jira ticket https://issues.apache.org/jira/browse/FINERACT-2169[FINERACT-2169] to see the current progress.
+
+include::intro.adoc[leveloffset=+1]
+
+include::architecture.adoc[leveloffset=+1]
+
+include::command.adoc[leveloffset=+1]
+
+include::handler.adoc[leveloffset=+1]
+
+include::hooks.adoc[leveloffset=+1]
+
+include::store.adoc[leveloffset=+1]
+
+include::audit.adoc[leveloffset=+1]
+
+include::idempotency.adoc[leveloffset=+1]
+
+include::observability.adoc[leveloffset=+1]
+
+include::refactoring.adoc[leveloffset=+1]

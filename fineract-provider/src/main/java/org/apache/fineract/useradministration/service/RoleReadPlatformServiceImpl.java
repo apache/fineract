@@ -22,22 +22,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.portfolio.self.registration.SelfServiceApiConstants;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final RoleMapper roleRowMapper;
 
-    @Autowired
     public RoleReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.roleRowMapper = new RoleMapper();
@@ -55,14 +50,6 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         final String sql = "select " + this.roleRowMapper.schema() + " where r.is_disabled = false order by r.id";
 
         return this.jdbcTemplate.query(sql, this.roleRowMapper); // NOSONAR
-    }
-
-    @Override
-    public Collection<RoleData> retrieveAllSelfServiceRoles() {
-        final String role = SelfServiceApiConstants.SELF_SERVICE_USER_ROLE;
-        final String sql = "select " + this.roleRowMapper.schema() + " where r.name = ? order by r.id";
-
-        return this.jdbcTemplate.query(sql, this.roleRowMapper, role); // NOSONAR
     }
 
     @Override

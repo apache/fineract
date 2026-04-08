@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -42,7 +43,11 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
+import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -60,6 +65,7 @@ import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProd
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositAccountHelper;
 import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDepositAccountStatusChecker;
@@ -67,13 +73,19 @@ import org.apache.fineract.integrationtests.common.recurringdeposit.RecurringDep
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareAccountTransactionHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductHelper;
+import org.apache.fineract.integrationtests.common.shares.ShareProductTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountingScenarioIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);
@@ -116,7 +128,7 @@ public class AccountingScenarioIntegrationTest {
     private SchedulerJobHelper schedulerJobHelper;
     private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
 
-    private TimeZone systemTimeZone;
+    private TimeZone tenantTimeZone;
 
     @BeforeEach
     public void setup() {
@@ -131,8 +143,9 @@ public class AccountingScenarioIntegrationTest {
         this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
-        this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
+        this.tenantTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
     }
 
     @Test
@@ -271,7 +284,6 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     public void checkAccountingWithSavingsFlow() {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -280,6 +292,104 @@ public class AccountingScenarioIntegrationTest {
 
         final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
                 liabilityAccount);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsID);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        // Checking initial Account entries.
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liablilityAccountInitialEntry);
+
+        // First Transaction-Deposit
+        this.savingsAccountHelper.depositToSavingsAccount(savingsID, DEPOSIT_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        Float balance = SP_BALANCE + SP_DEPOSIT_AMOUNT;
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Deposit");
+
+        LOG.info("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
+        final JournalEntry[] assetAccountFirstTransactionEntry = {
+                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liabililityAccountFirstTransactionEntry = {
+                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountFirstTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
+                liabililityAccountFirstTransactionEntry);
+
+        // Second Transaction-Withdrawal
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        balance -= SP_WITHDRAWAL_AMOUNT;
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Withdrawal");
+
+        LOG.info("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
+        final JournalEntry[] assetAccountSecondTransactionEntry = {
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] liabililityAccountSecondTransactionEntry = {
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountSecondTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
+                liabililityAccountSecondTransactionEntry);
+
+        // Third Transaction-Add Charges for Withdrawal Fee
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
+        ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
+        assertEquals(1, chargesPendingState.size());
+        HashMap savingsChargeForPay = chargesPendingState.get(0);
+        HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsID, (Integer) savingsChargeForPay.get("id"));
+        Float chargeAmount = (Float) paidCharge.get("amount");
+
+        // Withdrawal after adding Charge of type Withdrawal Fee
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT_ADJUSTED, SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
+        balance = balance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
+
+        final JournalEntry[] liabililityAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountThirdTransactionEntry = {
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] incomeAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountThirdTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
+                liabililityAccountThirdTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, TRANSACTION_DATE, incomeAccountThirdTransactionEntry);
+
+        // Verifying Balance after applying Charge for Withdrawal Fee
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
+    }
+
+    @Test
+    public void checkAccountingWithSavingsFlowUsingAccrualAccounting() {
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer savingsProductID = createSavingsProductWithAccrualAccounting(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount,
+                expenseAccount, liabilityAccount);
+        final GetSavingsProductsProductIdResponse savingsProductsResponse = SavingsProductHelper.getSavingsProductById(requestSpec,
+                responseSpec, savingsProductID);
+        Assertions.assertNotNull(savingsProductsResponse);
+        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings());
+        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings().getSavingsControlAccount());
+        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings().getInterestPayableAccount());
 
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
         final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -366,7 +476,6 @@ public class AccountingScenarioIntegrationTest {
     @Test
     public void testFixedDepositAccountingFlow() {
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(requestSpec, responseSpec);
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
@@ -471,6 +580,12 @@ public class AccountingScenarioIntegrationTest {
         Integer recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
         Assertions.assertNotNull(recurringDepositProductId);
+        final GetRecurringDepositProductsProductIdResponse recurringDepositProductsProduct = RecurringDepositProductHelper
+                .getRecurringDepositProductById(requestSpec, responseSpec, recurringDepositProductId);
+        Assertions.assertNotNull(recurringDepositProductsProduct);
+        Assertions.assertNotNull(recurringDepositProductsProduct.getAccountingMappings());
+        Assertions.assertNotNull(recurringDepositProductsProduct.getAccountingMappings().getSavingsControlAccount());
+        Assertions.assertNull(recurringDepositProductsProduct.getAccountingMappings().getInterestPayableAccount());
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
                 VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, RecurringDepositTest.WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
@@ -541,7 +656,7 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
-        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, requestSpec, responseSpec);
+        return FixedDepositAccountHelper.applyFixedDepositApplicationGetId(fixedDepositApplicationJSON, requestSpec, responseSpec);
     }
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, Account... accounts) {
@@ -561,6 +676,15 @@ public class AccountingScenarioIntegrationTest {
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
                 .build(clientID, productID, penalInterestType);
         return RecurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, requestSpec, responseSpec);
+    }
+
+    public static Integer createSavingsProductWithAccrualAccounting(final String minOpenningBalance, final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestPostingPeriodTypeAsQuarterly() //
+                .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
     @Test
@@ -802,8 +926,8 @@ public class AccountingScenarioIntegrationTest {
 
         final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
-        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
-        final ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final LocalDate localDate = LocalDate.now(this.tenantTimeZone.toZoneId());
+        final ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.tenantTimeZone.toZoneId());
         ZonedDateTime zonedDate = currentDate.minusDays(4);
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(zonedDate);
 
@@ -904,7 +1028,7 @@ public class AccountingScenarioIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
-        Calendar todayDate = Calendar.getInstance(this.systemTimeZone);
+        Calendar todayDate = Calendar.getInstance(this.tenantTimeZone);
 
         todayDate.add(Calendar.DATE, -4);
 
@@ -912,7 +1036,7 @@ public class AccountingScenarioIntegrationTest {
 
         todayDate.add(Calendar.MONTH, 2);
 
-        todayDate = Calendar.getInstance(this.systemTimeZone);
+        todayDate = Calendar.getInstance(this.tenantTimeZone);
         todayDate.add(Calendar.DATE, -2);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
@@ -1112,4 +1236,69 @@ public class AccountingScenarioIntegrationTest {
         return LocalDate.parse(dateAsString, Utils.dateFormatter);
     }
 
+    @Test
+    public void checkAccountingWithSharingFlow() {
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account equityAccount = this.accountHelper.createEquityAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer shareProductID = createSharesProduct(assetAccount, incomeAccount, equityAccount, liabilityAccount);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        Assertions.assertNotNull(clientID);
+        final Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientID, "1000");
+        Assertions.assertNotNull(savingsAccountId);
+        final Integer shareAccountId = createShareAccount(clientID, shareProductID, savingsAccountId);
+        Assertions.assertNotNull(shareAccountId);
+        final Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
+        Assertions.assertNotNull(shareAccountData);
+        // Approve share Account
+        final Map<String, Object> approveMap = new HashMap<>();
+        approveMap.put("note", "Share Account Approval Note");
+        approveMap.put("dateFormat", "dd MMMM yyyy");
+        approveMap.put("approvedDate", "01 Jan 2016");
+        approveMap.put("locale", "en");
+        final String approve = new Gson().toJson(approveMap);
+        ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
+        // Activate Share Account
+        final Map<String, Object> activateMap = new HashMap<>();
+        activateMap.put("dateFormat", "dd MMMM yyyy");
+        activateMap.put("activatedDate", "01 Jan 2016");
+        activateMap.put("locale", "en");
+        final String activateJson = new Gson().toJson(activateMap);
+        ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
+
+        // Checking sharing entries.
+        final JournalEntry[] assetAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liabilityAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] checkJournalEntryForEquityAccount = {
+                new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "01 Jan 2016", assetAccountEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, "01 Jan 2016", liabilityAccountEntry);
+        this.journalEntryHelper.checkJournalEntryForEquityAccount(equityAccount, "01 Jan 2016", checkJournalEntryForEquityAccount);
+
+        final String transactionId = this.journalEntryHelper.getJournalEntryTransactionIdByAccount(assetAccount, "01 Jan 2016",
+                assetAccountEntry);
+        Assertions.assertNotEquals("", transactionId);
+
+        final GetJournalEntriesTransactionIdResponse journalEntriesTransactionIdResponse = this.journalEntryHelper
+                .getJournalEntries(transactionId);
+        Assertions.assertNotNull(journalEntriesTransactionIdResponse);
+    }
+
+    public static Integer createSharesProduct(final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW SHARE PRODUCT ---------------------------------------");
+        final String shareProductJSON = new ShareProductHelper().withCashBasedAccounting(accounts).build();
+        return ShareProductTransactionHelper.createShareProduct(shareProductJSON, requestSpec, responseSpec);
+    }
+
+    private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId) {
+        final String shareAccountJSON = new ShareAccountHelper().withClientId(String.valueOf(clientId))
+                .withProductId(String.valueOf(productId)).withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId))
+                .withSubmittedDate("01 Jan 2016").withApplicationDate("01 Jan 2016").withRequestedShares("100").build();
+        return ShareAccountTransactionHelper.createShareAccount(shareAccountJSON, requestSpec, responseSpec);
+    }
 }

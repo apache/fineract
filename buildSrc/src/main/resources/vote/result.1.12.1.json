@@ -1,0 +1,48 @@
+{
+  "approve": {
+    "binding": [
+      {
+        "name": "Bharath Gowda",
+        "email": "bgowda@mifos.org"
+      },
+      {
+        "name": "Petri Tuomola",
+        "email": "petri@tuomola.org"
+      },
+      {
+        "name": "Victor Manuel Romero Rodriguez",
+        "email": "victor.romero@fintecheando.mx"
+      },
+      {
+        "name": "Aleksandar Vidakovic",
+        "email": "cheetah@monkeysintown.com"
+      },
+      {
+        "name": "Ádám Sághy",
+        "email": "adamsaghy@gmail.com"
+      }
+    ],
+    "nonBinding": [
+      {
+        "name": "Kigred",
+        "email": "kigred.developer@gmail.com"
+      },
+      {
+        "name": "Adam Monsen",
+        "email": "amonsen@mifos.org"
+      }
+    ]
+  },
+  "disapprove": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  },
+  "noOpinion": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  }
+}

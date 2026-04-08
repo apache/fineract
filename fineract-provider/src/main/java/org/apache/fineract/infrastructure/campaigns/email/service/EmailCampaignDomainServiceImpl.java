@@ -20,10 +20,10 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
@@ -55,7 +55,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
                 new SendEmailOnLoanRepayment());
     }
 
-    private class SendEmailOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
+    private final class SendEmailOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
@@ -68,7 +68,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         }
     }
 
-    private class SendEmailOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
+    private final class SendEmailOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanRejectedBusinessEvent event) {
@@ -81,7 +81,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         }
     }
 
-    private class SendEmailOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
+    private final class SendEmailOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
         public void onBusinessEvent(LoanApprovedBusinessEvent event) {
@@ -117,8 +117,6 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     }
 
     private List<EmailCampaign> retrieveEmailCampaigns(String paramValue) {
-        List<EmailCampaign> emailCampaigns = emailCampaignRepository.findActiveEmailCampaigns("%" + paramValue + "%",
-                SmsCampaignTriggerType.TRIGGERED.getValue());
-        return emailCampaigns;
+        return emailCampaignRepository.findActiveEmailCampaigns("%" + paramValue + "%", SmsCampaignTriggerType.TRIGGERED.getValue());
     }
 }

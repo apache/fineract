@@ -18,18 +18,18 @@
  */
 package org.apache.fineract.accounting.provisioning.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,7 +43,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Accessors(chain = true)
 @Entity
 @Table(name = "m_provisioning_history")
-public class ProvisioningEntry extends AbstractPersistableCustom {
+public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;

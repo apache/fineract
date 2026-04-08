@@ -34,25 +34,30 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PaymentTypeData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeDomain;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class RepaymentWithPostDatedChecksTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
     private LoanTransactionHelper loanTransactionHelper;
+    private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
@@ -60,6 +65,7 @@ public class RepaymentWithPostDatedChecksTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
@@ -131,12 +137,14 @@ public class RepaymentWithPostDatedChecksTest {
         String name = "PDC";
         String description = PaymentTypeHelper.randomNameGenerator("PDC", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(name).description(description).isCashPayment(isCashPayment).position(position));
+        Long paymentTypeId = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeId);
-        PaymentTypeHelper.verifyPaymentTypeCreatedOnServer(requestSpec, responseSpec, paymentTypeId);
-        PaymentTypeDomain paymentTypeResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
+        paymentTypeHelper.verifyPaymentTypeCreatedOnServer(paymentTypeId);
+        PaymentTypeData paymentTypeResponse = paymentTypeHelper.retrieveById(paymentTypeId);
         Assertions.assertEquals(name, paymentTypeResponse.getName());
 
         // Repay for the installment 1 using post dated check
@@ -180,7 +188,7 @@ public class RepaymentWithPostDatedChecksTest {
         map.put("name", "AMANA BANK");
         map.put("amount", amount.toString());
         map.put("accountNo", "900400500621");
-        map.put("checkNo", Utils.randomNumberGenerator(9).toString());
+        map.put("checkNo", Utils.uniqueRandomNumberGenerator(9).toString());
 
         return map;
     }

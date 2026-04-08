@@ -1,0 +1,108 @@
+= Backdated interest modification
+
+In the previous implementation we were only allowing the interest rate modification from current date and from now on we will allow Interest modification backdated on progressive loans as well.
+
+[IMPORTANT]
+====
+Only available on progressive loans.
+====
+
+== Functionality
+Validations updated to allow backdated interest change, even on charged-off or otherwise closed loan. Making progressive loans more flexible.
+
+1. Interest rate can be modified from backdate any date from first disbursement date
+
+2. Interest will be affected from the applied date itself.
+
+3. Backdate can be done on already paid Installments as well
+
+4. Repayment schedule will be recalculated with New EMI and Interest from the Interest applied schedule date
+
+- Backdated PAID Installments and Unpaid/Partial Paid Installment EMI would be changed as per the new calculated EMI
+
+5. Installments paid Interest amount will be reverse replayed as per the new Interest rate from the applied date
+
+- Transactions will be reversed replayed if there is any change is allocations
+
+- Accrual adjustments will be done during reverse replay (during the COB process)
+
+6. No of Installments will remain the same, only EMI and Interest would get affected
+
+7. Backdated Interest modification allowed on the loan that is charged off
+- If the repayment that was made before the charge-off is reversed and replayed due to backdated Interest modification,then the accounting entry of the reversed transaction and replayed transaction should follow standard accounting rules and not charge-off accounting rules
+
+8. Backdated interest modification allowed on the loan that is overpaid, and CBR is complete.
+- Any action that triggers the recalculation (ex: reversal of backdated transaction) on the CBR loan will result in treating CBR as a credit transaction during reverse-replay. Same logic to be applied if the backdated interest modification is allowed on CBR loan accounts.
+
+9. Asset transfer (externalization)
+- If the repayment that was made before the asset owner change got reversed and replayed due to backdated Interest modification,
+then, the accounting entry for the reversed transaction and replayed transaction include the tag of the current asset owner
+
+10. Since backdated Interest modification is allowed on CBR/overpaid loans, we can keep the modification open on closed loans as well
+
+- system will do the chronological reverse-replay when the backdated Interest is changed on closed loans, schedule and transaction will be allocated accordingly
+
+
+== API endpoints
+=== Create reschedule loans request (create reschedule)
+
+* *Endpoint*: `/rescheduleloans`
+* *Method*: `POST`
+
+.Example interest rate change request
+[source,json]
+----
+{
+    "loanId": 1,                        // Mandatory
+    "newInterestRate": 1,               // Mandatory for interest rate change type reschedule
+    "rescheduleFromDate": "2024-01-01", // Mandatory
+    "rescheduleReasonId": 54,           // Mandatory
+    "submittedOnDate": "2024-01-01",    // Mandatory
+    "dateFormat": "yyyy-MM-dd",         // Mandatory
+    "locale": "en"                      // Mandatory
+}
+----
+
+.Example interest rate change response
+[source,json]
+----
+{
+    "resourceId": 1,
+    "loanId": 1,
+    "clientId": 1,
+    "officeId": 1
+}
+----
+
+=== Update reschedule loans request (approve reschedule)
+
+* *Endpoint*: `/rescheduleloans/<reschedule_Id>`
+* *Method*: `POST`
+
+.Example reschedule approve request
+[source,json]
+----
+{
+    "approvedOnDate": "2024-01-01",     // Mandatory for approval
+    "submittedOnDate": "2024-01-01",    // Mandatory
+    "dateFormat": "yyyy-MM-dd",         // Mandatory
+    "locale": "en"                      // Mandatory
+}
+----
+
+.Example reschedule approve response
+[source,json]
+----
+{
+  "changes": {
+    "approvedByUserId": 1,
+    "approvedOnDate": "2024-01-01",
+    "dateFormat": "yyyy-MM-dd",
+    "locale": "en"
+  },
+  "clientId": 186,
+  "loanId": 188,
+  "officeId": 1,
+  "resourceId": 35
+}
+----

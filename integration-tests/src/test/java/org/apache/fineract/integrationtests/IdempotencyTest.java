@@ -19,22 +19,25 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.fineract.cob.data.BusinessStep;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
 import org.apache.fineract.integrationtests.common.IdempotencyHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,6 +61,7 @@ public class IdempotencyTest {
 
     @Test
     public void shouldUpdateStepOrder() {
+        ResponseSpecification updateResponseSpec = new ResponseSpecBuilder().expectStatusCode(204).build();
         JobBusinessStepConfigData originalStepConfig = IdempotencyHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec,
                 LOAN_JOB_NAME);
 
@@ -65,13 +69,13 @@ public class IdempotencyTest {
 
         List<BusinessStep> requestBody = new ArrayList<>();
         requestBody.add(getBusinessSteps(1L, APPLY_CHARGE_TO_OVERDUE_LOANS));
-        Response response = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response response = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        Response responseSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response responseSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        Assertions.assertEquals(response.getBody().asString(), responseSecond.getBody().asString());
-        Assertions.assertNull(response.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertNotNull(responseSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertEquals(response.getBody().asString(), responseSecond.getBody().asString());
+        assertNull(response.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertNotNull(responseSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
 
         idempotencyKeyHeader = UUID.randomUUID().toString();
 
@@ -84,13 +88,13 @@ public class IdempotencyTest {
 
         requestBody.add(getBusinessSteps(2L, LOAN_DELINQUENCY_CLASSIFICATION));
 
-        Response update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        Response updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        Response updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        Assertions.assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertEquals(update.getBody().asString(), updateSecond.getBody().asString());
+        assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertEquals(update.getBody().asString(), updateSecond.getBody().asString());
 
         newStepConfig = IdempotencyHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
@@ -103,14 +107,14 @@ public class IdempotencyTest {
 
         requestBody.remove(1);
         idempotencyKeyHeader = UUID.randomUUID().toString();
-        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
-        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKeyHeader);
 
-        Assertions.assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertEquals(update.getBody().asString(), updateSecond.getBody().asString());
+        assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertEquals(update.getBody().asString(), updateSecond.getBody().asString());
 
         newStepConfig = IdempotencyHelper.getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, LOAN_JOB_NAME);
         applyChargeStep = newStepConfig.getBusinessSteps().stream()
@@ -120,19 +124,19 @@ public class IdempotencyTest {
 
         idempotencyKeyHeader = UUID.randomUUID().toString();
 
-        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        update = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(originalStepConfig.getBusinessSteps()), idempotencyKeyHeader);
-        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, responseSpec, LOAN_JOB_NAME,
+        updateSecond = IdempotencyHelper.updateBusinessStepOrder(requestSpec, updateResponseSpec, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(originalStepConfig.getBusinessSteps()), idempotencyKeyHeader);
 
-        Assertions.assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertEquals(update.getBody().asString(), updateSecond.getBody().asString());
+        assertNull(update.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertNotNull(updateSecond.header(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertEquals(update.getBody().asString(), updateSecond.getBody().asString());
 
     }
 
     @Test
-    public void shoudTheSecondRequestWithSameIdempotencyKeyWillFailureToo() {
+    public void shouldTheSecondRequestWithSameIdempotencyKeyWillFailureToo() {
         ResponseSpecification responseSpecForError = new ResponseSpecBuilder().expectStatusCode(400).build();
         List<BusinessStep> requestBody = new ArrayList<>();
         String idempotencyKey = UUID.randomUUID().toString();
@@ -140,13 +144,14 @@ public class IdempotencyTest {
 
         Response response1 = IdempotencyHelper.updateBusinessStepOrderWithError(requestSpec, responseSpecForError, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKey);
-        Assertions.assertNull(response1.getHeader(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        String originalBody = response1.getBody().asString();
+        assertNull(response1.getHeader(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        ResponseBody body1 = response1.getBody();
+        assertNotNull(body1);
 
         Response response2 = IdempotencyHelper.updateBusinessStepOrderWithError(requestSpec, responseSpecForError, LOAN_JOB_NAME,
                 IdempotencyHelper.toJsonString(requestBody), idempotencyKey);
-        Assertions.assertNotNull(response2.getHeader(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
-        Assertions.assertEquals(originalBody, response2.getBody().asString());
+        assertNotNull(response2.getHeader(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER));
+        assertEquals((Map) body1.jsonPath().get(""), response2.getBody().jsonPath().get(""));
     }
 
     private BusinessStep getBusinessSteps(Long order, String stepName) {

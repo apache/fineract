@@ -94,7 +94,8 @@ public final class Message implements Serializable {
     private Notification notification;
 
     public enum Priority {
-        NORMAL, HIGH
+        NORMAL, //
+        HIGH //
     }
 
     public static final class Builder {

@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.spm.service;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.List;
-import javax.persistence.EntityExistsException;
-import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -29,31 +31,20 @@ import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.domain.SurveyRepository;
 import org.apache.fineract.spm.domain.SurveyValidator;
 import org.apache.fineract.spm.exception.SurveyNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class SpmService {
 
     private final PlatformSecurityContext securityContext;
     private final SurveyRepository surveyRepository;
     private final SurveyValidator surveyValidator;
 
-    @Autowired
-    public SpmService(final PlatformSecurityContext securityContext, final SurveyRepository surveyRepository,
-            final SurveyValidator surveyValidator) {
-
-        this.securityContext = securityContext;
-        this.surveyRepository = surveyRepository;
-        this.surveyValidator = surveyValidator;
-    }
-
     public List<Survey> fetchValidSurveys() {
         this.securityContext.authenticatedUser();
 
-        return this.surveyRepository.fetchActiveSurveys(DateUtils.getLocalDateTimeOfSystem());
+        return this.surveyRepository.fetchActiveSurveys(DateUtils.getLocalDateOfTenant());
     }
 
     public List<Survey> fetchAllSurveys() {
@@ -70,7 +61,7 @@ public class SpmService {
     public Survey createSurvey(final Survey survey) {
         this.securityContext.authenticatedUser();
         this.surveyValidator.validate(survey);
-        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), DateUtils.getLocalDateTimeOfSystem());
+        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), DateUtils.getLocalDateOfTenant());
 
         if (previousSurvey != null) {
             this.deactivateSurvey(previousSurvey.getId());
@@ -135,17 +126,14 @@ public class SpmService {
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {
-
         if (realCause.getMessage().contains("m_survey_scorecards")) {
             throw new PlatformDataIntegrityException("error.msg.survey.cannot.be.modified.as.used.in.client.survey",
                     "Survey can not be edited as it is already used in client survey", "name", key);
         }
-
         if (realCause.getMessage().contains("key")) {
             throw new PlatformDataIntegrityException("error.msg.survey.duplicate.key", "Survey with key already exists", "name", key);
         }
-
-        throw new PlatformDataIntegrityException("error.msg.survey.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.survey.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

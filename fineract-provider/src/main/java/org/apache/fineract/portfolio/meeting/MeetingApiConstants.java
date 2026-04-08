@@ -20,9 +20,7 @@ package org.apache.fineract.portfolio.meeting;
 
 public final class MeetingApiConstants {
 
-    private MeetingApiConstants() {
-
-    }
+    private MeetingApiConstants() {}
 
     public static final String MEETING_RESOURCE_NAME = "meeting";
 
@@ -31,7 +29,6 @@ public final class MeetingApiConstants {
     public static final String dateFormatParamName = "dateFormat";
 
     // meetings parameters
-    public static final String idParamName = "id";
     public static final String meetingDateParamName = "meetingDate";
     public static final String calendarIdParamName = "calendarId";
     public static final String clientsAttendanceParamName = "clientsAttendance";

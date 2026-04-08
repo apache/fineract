@@ -28,20 +28,19 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
-// enable when all tests are migrated
-tasks.cucumber.onlyIf { false }
-
 // Allow external drivers to be used for the tests without packaging it
 // mainly due to license incompatibilities
 configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:8.0.31'
+    driver 'com.mysql:mysql-connector-j'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }
 
 cargo {
-    containerId "tomcat9x"
+    containerId "tomcat10x"
 
     // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
     deployable {
@@ -57,7 +56,7 @@ cargo {
             downloadDir = file("$buildDir/download")
             extractDir = file("$buildDir/tomcat-integration-tests")
         }
-        startStopTimeout = 300000
+        startStopTimeout = 1200000
         sharedClasspath = configurations.driver
         containerProperties {
             def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED '
@@ -79,6 +78,7 @@ cargo {
             property 'cargo.start.jvmargs', jvmArgs
             property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
             property 'cargo.tomcat.connector.keystorePass', 'openmf'
+            property 'cargo.tomcat.connector.keystoreType', 'JKS'
             property 'cargo.tomcat.httpSecure', true
             property 'cargo.tomcat.connector.sslProtocol', 'TLS'
             property 'cargo.tomcat.connector.clientAuth', false
@@ -90,11 +90,79 @@ cargo {
 
 cargoRunLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.dependsOn ':fineract-war:war'
-cargoStartLocal.mustRunAfter 'testClasses'
 
-test {
-    dependsOn(cargoStartLocal)
-    finalizedBy cargoStopLocal
+import java.net.HttpURLConnection
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
+tasks.register('waitForFineract') {
+    doLast {
+        int timeoutSeconds = (project.findProperty('waitForFineractTimeoutSeconds') ?: '600') as int
+        int waited = 0
+        int interval = 5
+
+        TrustManager[] trustAllCerts = [
+            new X509TrustManager() {
+                java.security.cert.X509Certificate[] getAcceptedIssuers() { return null }
+                void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+            }
+        ] as TrustManager[]
+
+        SSLContext sc = SSLContext.getInstance("SSL")
+        sc.init(null, trustAllCerts, new java.security.SecureRandom())
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
+        HttpsURLConnection.setDefaultHostnameVerifier({ hostname, session -> true })
+
+        URL url = new URL("https://localhost:8443/fineract-provider/actuator/health")
+        println "Waiting for Fineract startup (timeout: ${timeoutSeconds}s)..."
+
+        while (waited < timeoutSeconds) {
+            try {
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+                connection.setConnectTimeout(2000)
+                connection.setReadTimeout(2000)
+                connection.setRequestMethod("GET")
+                int responseCode = connection.getResponseCode()
+                if (responseCode == 200) {
+                    println "Fineract is up!"
+                    return
+                }
+            } catch (Exception ignored) { }
+            sleep(interval * 1000)
+            waited += interval
+            println "Still waiting..."
+        }
+
+        throw new GradleException("Fineract did not start within ${timeoutSeconds} seconds")
+    }
+}
+
+tasks.named('test').configure {
+    if (!project.hasProperty('cargoDisabled')) {
+        dependsOn cargoStartLocal, waitForFineract
+        finalizedBy cargoStopLocal
+    }
+}
+
+if (!project.hasProperty('cargoDisabled')) {
+    cargoStartLocal.mustRunAfter testClasses
+    waitForFineract.mustRunAfter cargoStartLocal
+}
+
+// Configure proper test output directories
+sourceSets {
+    test {
+        output.resourcesDir = layout.buildDirectory.dir('resources/test').get().asFile
+        java.destinationDirectory = layout.buildDirectory.dir('classes/java/test').get().asFile
+    }
+}
+
+tasks.named('compileTestJava') {
+    outputs.cacheIf { true }
 }
 
 // NOTE: Gradle suggested these dependencies

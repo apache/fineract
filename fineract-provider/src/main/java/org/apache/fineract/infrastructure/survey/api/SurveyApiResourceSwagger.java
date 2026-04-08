@@ -86,7 +86,7 @@ final class SurveyApiResourceSwagger {
         @Schema(example = "201")
         public Long ppi_fryingpans_cd_q10_fryingpans;
         @Schema(example = "2014-12-02 20:30:00")
-        public ZonedDateTime Date;
+        public ZonedDateTime date;
         @Schema(example = "Y-m-d H:i:s")
         public ZonedDateTime dateFormat;
         @Schema(example = "en_GB")

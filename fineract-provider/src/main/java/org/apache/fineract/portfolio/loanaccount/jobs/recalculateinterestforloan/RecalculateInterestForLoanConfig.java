@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.recalculateinterestforloan;
 
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -25,21 +26,27 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformServic
 import org.apache.fineract.portfolio.loanaccount.service.RecalculateInterestPoster;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class RecalculateInterestForLoanConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
-
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private LoanReadPlatformService loanReadPlatformService;
@@ -48,25 +55,37 @@ public class RecalculateInterestForLoanConfig {
     private LoanWritePlatformService loanWritePlatformService;
 
     @Autowired
-    private RecalculateInterestPoster recalculateInterestPoster;
+    private ApplicationContext applicationContext;
 
     @Autowired
     private OfficeReadPlatformService officeReadPlatformService;
 
+    @Autowired
+    @Qualifier(TaskExecutorConstant.DEFAULT_TASK_EXECUTOR_BEAN_NAME)
+    private ThreadPoolTaskExecutor taskExecutor;
+
     @Bean
     protected Step recalculateInterestForLoanStep() {
-        return steps.get(JobName.RECALCULATE_INTEREST_FOR_LOAN.name()).tasklet(recalculateInterestForLoanTasklet()).build();
+        return new StepBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository)
+                .tasklet(recalculateInterestForLoanTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job recalculateInterestForLoanJob() {
-        return jobs.get(JobName.RECALCULATE_INTEREST_FOR_LOAN.name()).start(recalculateInterestForLoanStep())
+        return new JobBuilder(JobName.RECALCULATE_INTEREST_FOR_LOAN.name(), jobRepository).start(recalculateInterestForLoanStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean
+    @Scope("prototype")
+    @ConditionalOnMissingBean(RecalculateInterestPoster.class)
+    public RecalculateInterestPoster recalculateInterestPoster() {
+        return new RecalculateInterestPoster(loanWritePlatformService);
+    }
+
+    @Bean
     public RecalculateInterestForLoanTasklet recalculateInterestForLoanTasklet() {
-        return new RecalculateInterestForLoanTasklet(loanReadPlatformService, loanWritePlatformService, recalculateInterestPoster,
-                officeReadPlatformService);
+        return new RecalculateInterestForLoanTasklet(loanReadPlatformService, loanWritePlatformService, applicationContext,
+                officeReadPlatformService, taskExecutor);
     }
 }

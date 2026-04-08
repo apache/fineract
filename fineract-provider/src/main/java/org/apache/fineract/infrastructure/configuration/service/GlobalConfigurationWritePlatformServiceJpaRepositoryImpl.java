@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurati
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +47,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     private final GlobalConfigurationRepositoryWrapper repository;
     private final GlobalConfigurationDataValidator globalConfigurationDataValidator;
     private final ConfigurationDomainService configurationDomainService;
+    private final GlobalConfigurationPropertyUpdateService globalConfigurationPropertyUpdateService;
 
     @Transactional
     @Override
@@ -56,14 +57,18 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 
             final GlobalConfigurationProperty configItemForUpdate = this.repository.findOneWithNotFoundDetection(configId);
 
-            final Map<String, Object> changes = configItemForUpdate.update(command);
+            final Map<String, Object> changes = globalConfigurationPropertyUpdateService.update(configItemForUpdate, command);
 
             if (!changes.isEmpty()) {
                 this.configurationDomainService.removeGlobalConfigurationPropertyDataFromCache(configItemForUpdate.getName());
                 this.repository.save(configItemForUpdate);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(configId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(configId) //
+                    .with(changes) //
+                    .build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -90,9 +95,8 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final Throwable realCause, final NonTransientDataAccessException dve) {
-
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.globalConfiguration.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.globalConfiguration.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

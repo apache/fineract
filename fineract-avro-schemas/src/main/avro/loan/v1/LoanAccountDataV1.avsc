@@ -8,7 +8,7 @@
             "name": "id",
             "type": [
                 "null",
-                "int"
+                "long"
             ]
         },
         {
@@ -22,6 +22,30 @@
         {
             "default": null,
             "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "externalOwnerId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "settlementDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "purchasePriceRatio",
             "type": [
                 "null",
                 "string"
@@ -585,6 +609,17 @@
         },
         {
             "default": null,
+            "name": "loanTermVariations",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanTermVariationsDataV1"
+                }
+            ]
+        },
+        {
+            "default": null,
             "name": "clientActiveLoanOptions",
             "type": [
                 "null",
@@ -687,6 +722,14 @@
         },
         {
             "default": null,
+            "name": "daysInYearCustomStrategy",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
             "name": "isInterestRecalculationEnabled",
             "type": [
                 "null",
@@ -747,6 +790,76 @@
             "type": [
                 "null",
                 "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "enableInstallmentLevelDelinquency",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "enableDownPayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "disbursedAmountPercentageForDownPayment",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "enableAutoRepaymentForDownPayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "interestRecognitionOnDisbursementDate",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "customData",
+            "type": [
+                "null",
+                {
+                    "values": "bytes",
+                    "type": "map"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "originators",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.OriginatorDetailsV1"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "actualNoTerm",
+            "type": [
+                "null",
+                "int"
             ]
         }
     ]

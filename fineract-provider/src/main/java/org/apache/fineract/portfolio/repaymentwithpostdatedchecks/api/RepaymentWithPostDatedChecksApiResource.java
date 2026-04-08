@@ -27,16 +27,17 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,14 +47,12 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksData;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.RepaymentWithPostDatedChecksReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/postdatedchecks")
+@Path("/v1/loans/{loanId}/postdatedchecks")
 @Component
-@Scope("singleton")
 @Tag(name = "repayment with post dated checks", description = "Repay with post dated checks")
+@RequiredArgsConstructor
 public class RepaymentWithPostDatedChecksApiResource {
 
     private final PlatformSecurityContext context;
@@ -62,20 +61,7 @@ public class RepaymentWithPostDatedChecksApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final RepaymentWithPostDatedChecksReadPlatformService repaymentWithPostDatedChecksReadPlatformService;
 
-    @Autowired
-    public RepaymentWithPostDatedChecksApiResource(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
-            final DefaultToApiJsonSerializer<PostDatedChecksData> apiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
-            final RepaymentWithPostDatedChecksReadPlatformService repaymentWithPostDatedChecksReadPlatformService) {
-        this.context = context;
-        this.fromJsonHelper = fromJsonHelper;
-        this.apiJsonSerializer = apiJsonSerializer;
-        this.commandsSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
-        this.repaymentWithPostDatedChecksReadPlatformService = repaymentWithPostDatedChecksReadPlatformService;
-    }
-
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Get All Post Dated Checks", description = "Get All Post dated Checks")
     @ApiResponses({
@@ -89,7 +75,6 @@ public class RepaymentWithPostDatedChecksApiResource {
 
     @GET
     @Path("{installmentId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Get Post Dated Check", description = "Get Post Dated Check")
     @ApiResponses({
@@ -130,7 +115,6 @@ public class RepaymentWithPostDatedChecksApiResource {
 
     @DELETE
     @Path("{postDatedCheckId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete Post Dated Check", description = "Delete Post Dated Check")
     @ApiResponses({

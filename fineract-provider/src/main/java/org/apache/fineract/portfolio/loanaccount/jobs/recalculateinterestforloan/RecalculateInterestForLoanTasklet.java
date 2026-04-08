@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
@@ -43,6 +44,9 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,12 +54,14 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanWritePlatformService loanWritePlatformService;
-    private final RecalculateInterestPoster recalculateInterestPoster;
+    private final ApplicationContext applicationContext;
     private final OfficeReadPlatformService officeReadPlatformService;
+    @Qualifier(TaskExecutorConstant.CONFIGURABLE_TASK_EXECUTOR_BEAN_NAME)
+    private final ThreadPoolTaskExecutor taskExecutor;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        Map<String, JobParameter> jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters().getParameters();
+        Map<String, JobParameter<?>> jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters().getParameters();
         if (!jobParameters.isEmpty()) {
             final String officeId = (String) jobParameters.get("officeId").getValue();
             log.debug("recalculateInterest: officeId={}", officeId);
@@ -91,8 +97,8 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
     private void recalculateInterest(OfficeData office, int threadPoolSize, int batchSize) {
         final int pageSize = batchSize * threadPoolSize;
-
-        final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+        taskExecutor.setCorePoolSize(threadPoolSize);
+        taskExecutor.setMaxPoolSize(threadPoolSize);
 
         Long maxLoanIdInList = 0L;
         final String officeHierarchy = office.getHierarchy() + "%";
@@ -103,70 +109,28 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         do {
             int totalFilteredRecords = loanIds.size();
             log.debug("Starting accrual - total filtered records - {}", totalFilteredRecords);
-            recalculateInterest(loanIds, threadPoolSize, batchSize, executorService);
+            recalculateInterest(loanIds, threadPoolSize);
             maxLoanIdInList += pageSize + 1;
             loanIds = Collections.synchronizedList(
                     this.loanReadPlatformService.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
         } while (!CollectionUtils.isEmpty(loanIds));
-
-        executorService.shutdownNow();
     }
 
-    private void recalculateInterest(List<Long> loanIds, int threadPoolSize, int batchSize, final ExecutorService executorService) {
-
-        List<Callable<Void>> posters = new ArrayList<>();
-        int fromIndex = 0;
-        int size = loanIds.size();
-        double toGetCeilValue = size / ((double) threadPoolSize);
-        batchSize = (int) Math.ceil(toGetCeilValue);
-
-        if (batchSize == 0) {
+    private void recalculateInterest(List<Long> loanIds, int threadPoolSize) {
+        if (loanIds == null || loanIds.isEmpty()) {
             return;
         }
 
-        int toIndex = (batchSize > size - 1) ? size : batchSize;
-        while (toIndex < size && loanIds.get(toIndex - 1).equals(loanIds.get(toIndex))) {
-            toIndex++;
-        }
-        boolean lastBatch = false;
-        int loopCount = size / batchSize + 1;
+        int actualBatchSize = (int) Math.ceil(loanIds.size() / (double) threadPoolSize);
 
-        for (long i = 0; i < loopCount; i++) {
-            List<Long> subList = safeSubList(loanIds, fromIndex, toIndex);
-            recalculateInterestPoster.setLoanIds(subList);
-            recalculateInterestPoster.setLoanWritePlatformService(loanWritePlatformService);
-            posters.add(recalculateInterestPoster);
-            if (lastBatch) {
-                break;
-            }
-            if (toIndex + batchSize > size - 1) {
-                lastBatch = true;
-            }
-            fromIndex = fromIndex + (toIndex - fromIndex);
-            toIndex = (toIndex + batchSize > size - 1) ? size : toIndex + batchSize;
-            while (toIndex < size && loanIds.get(toIndex - 1).equals(loanIds.get(toIndex))) {
-                toIndex++;
-            }
-        }
-
-        try {
-            List<Future<Void>> responses = executorService.invokeAll(posters);
-            checkCompletion(responses);
-        } catch (InterruptedException e1) {
-            log.error("Interrupted while recalculateInterest", e1);
-        }
-    }
-
-    private <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {
-        int size = list.size();
-        if (fromIndex >= size || toIndex <= 0 || fromIndex >= toIndex) {
-            return Collections.emptyList();
-        }
-
-        fromIndex = Math.max(0, fromIndex);
-        toIndex = Math.min(size, toIndex);
-
-        return list.subList(fromIndex, toIndex);
+        List<Future<Void>> responses = ListUtils.partition(loanIds, actualBatchSize).stream().filter(subList -> !subList.isEmpty())
+                .map(subList -> {
+                    RecalculateInterestPoster recalculateInterestPoster = applicationContext.getBean(RecalculateInterestPoster.class);
+                    recalculateInterestPoster.setLoanIds(subList);
+                    recalculateInterestPoster.setFineractContext(ThreadLocalContextUtil.getContext());
+                    return (Callable<Void>) recalculateInterestPoster;
+                }).map(taskExecutor::submit).toList();
+        checkCompletion(responses);
     }
 
     private void checkCompletion(List<Future<Void>> responses) {

@@ -199,6 +199,7 @@ public class GroupImportHandler implements ImportHandler {
 
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
+                successCount++;
             } catch (RuntimeException ex) {
                 errorCount++;
                 LOG.error("Problem occurred in importEntity function", ex);
@@ -240,13 +241,27 @@ public class GroupImportHandler implements ImportHandler {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("group_" + result.getGroupId().toString() + "_CollectionMeeting");
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, meetings.get(rowIndex).getLocale()));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataValueSerializer());
 
-        String payload = gsonBuilder.create().toJson(calendarData);
+        String payload;
+        CalendarData modifiedCalendarData;
+        if (calendarData.isRepeating() == false) {
+            modifiedCalendarData = new CalendarData(calendarData.getTitle(), calendarData.getDescription(), calendarData.getStartDate(),
+                    calendarData.isRepeating(), null, calendarData.getInterval(), calendarData.getRepeatsOnDay(),
+                    calendarData.getDateFormat(), calendarData.getLocale(), calendarData.getTypeId());
+
+        } else {
+            modifiedCalendarData = new CalendarData(calendarData.getTitle(), calendarData.getDescription(), calendarData.getStartDate(),
+                    calendarData.isRepeating(), calendarData.getFrequency(), calendarData.getInterval(), calendarData.getRepeatsOnDay(),
+                    calendarData.getDateFormat(), calendarData.getLocale(), calendarData.getTypeId());
+
+        }
+        payload = gsonBuilder.create().toJson(modifiedCalendarData);
+
         CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
                 result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create());
+                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create(), null, null);
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
                 .withJson(payload) //
@@ -257,7 +272,7 @@ public class GroupImportHandler implements ImportHandler {
 
     private CommandProcessingResult importGroup(final List<GroupGeneralData> groups, final int rowIndex, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, groups.get(rowIndex).getLocale()));
         Type clientCollectionType = new TypeToken<Collection<ClientData>>() {
 
         }.getType();

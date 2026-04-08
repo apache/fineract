@@ -21,37 +21,27 @@ package org.apache.fineract.useradministration.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
 import org.apache.fineract.useradministration.data.PasswordPreferencesDataValidator;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicy;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicyRepository;
 import org.apache.fineract.useradministration.exception.PasswordValidationPolicyNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements PasswordPreferencesWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PasswordPreferencesWritePlatformServiceJpaRepositoryImpl.class);
     private final PasswordValidationPolicyRepository validationRepository;
     private final PasswordPreferencesDataValidator dataValidator;
-
-    @Autowired
-    public PasswordPreferencesWritePlatformServiceJpaRepositoryImpl(final PasswordValidationPolicyRepository validationPolicyRepository,
-            final PasswordPreferencesDataValidator dataValidator) {
-        this.validationRepository = validationPolicyRepository;
-        this.dataValidator = dataValidator;
-
-    }
 
     @Transactional
     @Override
@@ -91,9 +81,9 @@ public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements
                     .with(changes) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            LOG.error("Error occured.", dve);
-            throw new PlatformDataIntegrityException("error.msg.password.validation.policy.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.", dve);
+            log.error("Error occured.", dve);
+            throw ErrorHandler.getMappable(dve, "error.msg.password.validation.policy.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         }
     }
 }

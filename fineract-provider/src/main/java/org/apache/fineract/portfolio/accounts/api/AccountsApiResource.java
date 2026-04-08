@@ -24,21 +24,21 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -52,111 +52,63 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
-import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
-import org.apache.fineract.portfolio.products.exception.ResourceNotFoundException;
+import org.apache.fineract.portfolio.accounts.data.request.AccountRequest;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
+import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/accounts/{type}")
+@Path("/v1/accounts/{type}")
 @Component
-@Scope("singleton")
 @Tag(name = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
+@RequiredArgsConstructor
 public class AccountsApiResource {
 
-    private final ApplicationContext applicationContext;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer;
     private final PlatformSecurityContext platformSecurityContext;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
-    @Autowired
-    public AccountsApiResource(final ApplicationContext applicationContext, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer, final PlatformSecurityContext platformSecurityContext,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.applicationContext = applicationContext;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.platformSecurityContext = platformSecurityContext;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
+    private final ShareAccountReadPlatformService shareAccountReadPlatformService;
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Share Account Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "accounts/share/template?clientId=1\n"
             + "\n" + "\n" + "accounts/share/template?clientId=1&productId=1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.GetAccountsTypeTemplateResponse.class))) })
-    public String template(@PathParam("type") @Parameter(description = "type") final String accountType,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.GetAccountsTypeTemplateResponse.class)))
+    public ShareAccountData template(@PathParam("type") @Parameter(description = "type") final String accountType,
             @QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @QueryParam("productId") @Parameter(description = "productId") final Long productId, @Context final UriInfo uriInfo) {
-        try {
-            this.platformSecurityContext.authenticatedUser();
-            String serviceName = accountType + AccountsApiConstants.READPLATFORM_NAME;
-            AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName);
-            final AccountData accountData = service.retrieveTemplate(clientId, productId);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());
-        } catch (BeansException e) {
-            throw new ResourceNotFoundException(e);
-        }
+            @QueryParam("productId") @Parameter(description = "productId") final Long productId) {
+        this.platformSecurityContext.authenticatedUser();
+        return shareAccountReadPlatformService.retrieveTemplate(clientId, productId);
     }
 
     @GET
     @Path("{accountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a share application/account", description = "Retrieves a share application/account\n\n"
             + "Example Requests :\n" + "\n" + "shareaccount/1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.GetAccountsTypeAccountIdResponse.class))) })
-    public String retrieveAccount(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.GetAccountsTypeAccountIdResponse.class)))
+    public ShareAccountData retrieveAccount(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @PathParam("type") @Parameter(description = "type") final String accountType, @Context final UriInfo uriInfo) {
-        try {
-            String serviceName = accountType + AccountsApiConstants.READPLATFORM_NAME;
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName);
-            AccountData data = service.retrieveOne(accountId, settings.isTemplate());
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
-        } catch (BeansException e) {
-            throw new ResourceNotFoundException(e);
-        }
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return shareAccountReadPlatformService.retrieveOne(accountId, settings.isTemplate());
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List share applications/accounts", description = "Lists share applications/accounts\n\n" + "Example Requests:\n"
             + "\n" + "shareaccount")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.GetAccountsTypeResponse.class))) })
-    public String retrieveAllAccounts(@PathParam("type") @Parameter(description = "type") final String accountType,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.GetAccountsTypeResponse.class)))
+    public Page<AccountData> retrieveAllAccounts(@PathParam("type") @Parameter(description = "type") final String accountType,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
-            @QueryParam("limit") @Parameter(description = "limit") final Integer limit, @Context final UriInfo uriInfo) {
-        try {
-            String serviceName = accountType + AccountsApiConstants.READPLATFORM_NAME;
-            AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName);
-            Page<AccountData> data = service.retrieveAll(offset, limit);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
-        } catch (BeansException e) {
-            throw new ResourceNotFoundException(e);
-        }
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
+        return shareAccountReadPlatformService.retrieveAll(offset, limit);
     }
 
     @POST
@@ -166,16 +118,14 @@ public class AccountsApiResource {
             + "Mandatory Fields: clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate\n\n"
             + "Optional Fields: accountNo, externalId\n\n"
             + "Inherited from Product (if not provided): minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeResponse.class))) })
-    public String createAccount(@PathParam("type") @Parameter(description = "type") final String accountType,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-        CommandWrapper commandWrapper = null;
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeResponse.class)))
+    public CommandProcessingResult createAccount(@PathParam("type") @Parameter(description = "type") final String accountType,
+            @Parameter(hidden = true) AccountRequest accountRequest) {
         this.platformSecurityContext.authenticatedUser();
-        commandWrapper = new CommandWrapperBuilder().createAccount(accountType).withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.toApiJsonSerializer.serialize(commandProcessingResult);
+        CommandWrapper commandWrapper = new CommandWrapperBuilder().createAccount(accountType)
+                .withJson(toApiJsonSerializer.serialize(accountRequest)).build();
+        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
     }
 
     @POST
@@ -200,20 +150,17 @@ public class AccountsApiResource {
             + "requestedDate is requsted date of shares redeem\n" + "\n" + "requestedShares is number of shares to be redeemed\n\n"
             + "Mandatory Fields: dateFormat,locale,requestedDate,requestedShares\n\n"
             + "Showing request/response for 'Reject additional shares request on a share account'\n\n"
-            + "For more info visit this link - https://fineract.apache.org/legacy-docs/apiLive.htm#shareaccounts")
+            + "For more info visit this link - https://fineract.apache.org/docs/legacy/#shareaccounts")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdResponse.class))) })
-    public String handleCommands(@PathParam("type") @Parameter(description = "type") final String accountType,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdResponse.class)))
+    public CommandProcessingResult handleCommands(@PathParam("type") @Parameter(description = "type") final String accountType,
             @PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-        CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
-        commandWrapper = new CommandWrapperBuilder().createAccountCommand(accountType, accountId, commandParam)
+        CommandWrapper commandWrapper = new CommandWrapperBuilder().createAccountCommand(accountType, accountId, commandParam)
                 .withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.toApiJsonSerializer.serialize(commandProcessingResult);
+        return this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
     }
 
     @PUT
@@ -222,16 +169,14 @@ public class AccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Modify a share application", description = "Share application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PutAccountsTypeAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PutAccountsTypeAccountIdResponse.class))) })
-    public String updateAccount(@PathParam("type") @Parameter(description = "type") final String accountType,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PutAccountsTypeAccountIdResponse.class)))
+    public CommandProcessingResult updateAccount(@PathParam("type") @Parameter(description = "type") final String accountType,
             @PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+            @Parameter(hidden = true) AccountRequest accountRequest) {
         this.platformSecurityContext.authenticatedUser();
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAccount(accountType, accountId)
-                .withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+                .withJson(toApiJsonSerializer.serialize(accountRequest)).build();
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @GET
@@ -248,12 +193,11 @@ public class AccountsApiResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Upload shared accounts template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    public String postSharedAccountsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
+    public Long postSharedAccountsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat,
             @PathParam("type") @Parameter(description = "type") final String accountType) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.SHARE_ACCOUNTS.toString(),
-                uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.SHARE_ACCOUNTS.toString(), uploadedInputStream, fileDetail,
+                locale, dateFormat);
     }
 }

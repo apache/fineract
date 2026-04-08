@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -26,12 +27,30 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -43,17 +62,21 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
+import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unchecked" })
-public class LoanSpecificDueDateChargeAfterMaturityTest {
+public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrationTest {
 
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
-    public static final String DEPOSIT_AMOUNT = "7000";
+    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
+    private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    private static final String MINIMUM_OPENING_BALANCE = "1000.0";
+    private static final String DEPOSIT_AMOUNT = "7000";
     private static final Logger LOG = LoggerFactory.getLogger(LoanSpecificDueDateChargeAfterMaturityTest.class);
     private static final String DATE_OF_JOINING = "01 January 2011";
     private static final Float LP_PRINCIPAL = 10000.0f;
@@ -63,12 +86,16 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
     private static final String LOAN_APPLICATION_SUBMISSION_DATE = "03 March 2011";
     private static final String LOAN_TERM_FREQUENCY = "1";
     private static final String INDIVIDUAL_LOAN = "individual";
+    private static final BusinessDateHelper BUSINESS_DATE_HELPER = new BusinessDateHelper();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DATETIME_PATTERN).toFormatter();
+    private static final ChargesHelper CHARGES_HELPER = new ChargesHelper();
     private static RequestSpecification requestSpec;
     private static ResponseSpecification responseSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-    private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private static LoanTransactionHelper loanTransactionHelper;
+    private static AccountHelper accountHelper;
+    private static PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
+    private static Integer commonLoanProductId;
+    private static PostClientsResponse client;
 
     public static Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
@@ -79,64 +106,24 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
-    @BeforeEach
-    public void setup() {
+    @BeforeAll
+    public static void setupCommon() {
         Utils.initializeRESTAssured();
+        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
-    }
-
-    @Test
-    public void onlyNonInterestBearingLoanCanAcceptChargeAfterMaturity() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingWithInterestRecalculationEnabled(assetAccount,
-                incomeAccount, expenseAccount, overpaymentAccount);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "1");
-
-        final float PENALTY_PORTION = 100.0f;
-
-        Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
-
-        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(EXPECTED_DISBURSAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        LocalDate targetDate = LocalDate.of(2011, 3, 4);
-        final String loanDisbursementDate = dateFormatter.format(targetDate);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        targetDate = LocalDate.of(2011, 4, 5);
-        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
-
-        final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanID + "/charges?" + Utils.TENANT_IDENTIFIER;
-        ResponseSpecification response403Spec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final HashMap response = Utils.performServerPost(requestSpec, response403Spec, ADD_CHARGES_URL,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge1AddedDate,
-                        String.valueOf(PENALTY_PORTION)),
-                "");
-        assertEquals("validation.msg.domain.rule.violation", response.get("userMessageGlobalisationCode"));
-
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        accountHelper = new AccountHelper(requestSpec, responseSpec);
+        periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+        commonLoanProductId = createLoanProduct("500", "15", "4", assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
     }
 
     @Test
@@ -176,7 +163,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         LocalDate targetDate = LocalDate.of(2011, 3, 4);
-        final String loanDisbursementDate = dateFormatter.format(targetDate);
+        final String loanDisbursementDate = DATE_FORMATTER.format(targetDate);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
         loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
@@ -192,7 +179,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         assertEquals(10000.0f, loanSchedule.get(1).get("totalDueForPeriod"));
         assertEquals(10000.0f, loanSchedule.get(1).get("totalOutstandingForPeriod"));
         targetDate = LocalDate.of(2011, 4, 5);
-        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+        final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge1AddedDate,
                         String.valueOf(PENALTY_PORTION)));
@@ -217,7 +204,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(runOnDate, 0.0f, 0.0f, PENALTY_PORTION, loanID);
 
         targetDate = LocalDate.of(2011, 4, 6);
-        final String feeCharge1AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer fee1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), feeCharge1AddedDate, String.valueOf(FEE_PORTION)));
 
@@ -233,7 +220,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 (int) ((List) loanSchedule.get(2).get("dueDate")).get(1), (int) ((List) loanSchedule.get(2).get("dueDate")).get(2)));
 
         targetDate = LocalDate.of(2011, 4, 7);
-        final String penaltyCharge2AddedDate = dateFormatter.format(targetDate);
+        final String penaltyCharge2AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDateNext),
                         penaltyCharge2AddedDate, String.valueOf(NEXT_PENALTY_PORTION)));
@@ -250,7 +237,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 (int) ((List) loanSchedule.get(2).get("dueDate")).get(1), (int) ((List) loanSchedule.get(2).get("dueDate")).get(2)));
 
         targetDate = LocalDate.of(2011, 4, 8);
-        final String feeCharge2AddedDate = dateFormatter.format(targetDate);
+        final String feeCharge2AddedDate = DATE_FORMATTER.format(targetDate);
         Integer fee2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper
                 .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatNext), feeCharge2AddedDate, String.valueOf(NEXT_FEE_PORTION)));
 
@@ -309,7 +296,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         LocalDate targetDate = LocalDate.of(2011, 3, 4);
-        final String loanDisbursementDate = dateFormatter.format(targetDate);
+        final String loanDisbursementDate = DATE_FORMATTER.format(targetDate);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
         loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
@@ -326,14 +313,14 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         assertEquals(10000.0f, loanSchedule.get(1).get("totalOutstandingForPeriod"));
 
         targetDate = LocalDate.of(2011, 3, 10);
-        String repaymentDateStr = dateFormatter.format(targetDate);
+        String repaymentDateStr = DATE_FORMATTER.format(targetDate);
         loanTransactionHelper.makeRepayment(repaymentDateStr, 10000.0f, loanID);
 
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
         targetDate = LocalDate.of(2011, 4, 13);
-        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+        final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge1AddedDate,
                         String.valueOf(PENALTY_PORTION)));
@@ -353,7 +340,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 (int) ((List) loanSchedule.get(2).get("dueDate")).get(1), (int) ((List) loanSchedule.get(2).get("dueDate")).get(2)));
 
         targetDate = LocalDate.of(2011, 4, 14);
-        String runOnDateStr = dateFormatter.format(targetDate);
+        String runOnDateStr = DATE_FORMATTER.format(targetDate);
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOnDateStr);
 
         // Transaction date will be the due date of the instalment (in case of N+1 scenario)
@@ -379,7 +366,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 (int) ((List) loanSchedule.get(2).get("dueDate")).get(1), (int) ((List) loanSchedule.get(2).get("dueDate")).get(2)));
 
         targetDate = LocalDate.of(2011, 4, 14);
-        String penaltyCharge2AddedDate = dateFormatter.format(targetDate);
+        String penaltyCharge2AddedDate = DATE_FORMATTER.format(targetDate);
         Integer penalty2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate), penaltyCharge2AddedDate,
                         String.valueOf(PENALTY_PORTION)));
@@ -401,7 +388,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         targetDate = LocalDate.of(2011, 4, 15);
-        repaymentDateStr = dateFormatter.format(targetDate);
+        repaymentDateStr = DATE_FORMATTER.format(targetDate);
         loanTransactionHelper.makeRepayment(repaymentDateStr, PENALTY_PORTION, loanID);
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
@@ -443,6 +430,87 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
                 (int) ((List) loanSchedule.get(2).get("dueDate")).get(1), (int) ((List) loanSchedule.get(2).get("dueDate")).get(2)));
     }
 
+    @Test
+    public void addChargeAfterLoanMaturity() {
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("01 September 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            PostChargesResponse penaltyCharge = CHARGES_HELPER.createCharges(new ChargeRequest().penalty(true).amount(10.0)
+                    .chargeCalculationType(ChargeCalculationType.FLAT.getValue())
+                    .chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                    .currencyCode("USD").name(Utils.randomStringGenerator("PENALTY_" + Calendar.getInstance().getTimeInMillis(), 5))
+                    .chargeAppliesTo(1).locale("en").active(true));
+
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 1000L, 30, 30, 1,
+                    BigDecimal.ZERO, "01 September 2023", "01 September 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 September 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 September 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(1000)).locale("en"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 1000.0, 0.0, 1000.0, 0.0, null);
+            validateRepaymentPeriod(loanDetails, 1, 1000.0, 0.0, 1000.0, 0.0, 0.0);
+            validateLoanTransaction(loanDetails, 0, 1000.0, 0.0, 0.0, 1000.0);
+            assertTrue(loanDetails.getStatus().getActive());
+
+            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("01 October 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("01 October 2023").locale("en")
+                            .transactionAmount(1000.0));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 0.0, 1000.0, 0.0, 1000.0, null);
+            validateRepaymentPeriod(loanDetails, 1, 1000.0, 1000.0, 0.0, 0.0, 0.0);
+            validateLoanTransaction(loanDetails, 1, 1000.0, 1000.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+
+            BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
+                    .date("04 October 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+
+            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("04 October 2023").locale("en").transactionAmount(1000.0));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 0.0, 1000.0, 0.0, 1000.0, 1000.0);
+            validateRepaymentPeriod(loanDetails, 1, 1000.0, 1000.0, 0.0, 0.0, 0.0);
+            validateLoanTransaction(loanDetails, 2, 1000.0, 0.0, 1000.0, 0.0);
+            assertTrue(loanDetails.getStatus().getOverpaid());
+
+            loanTransactionHelper.reverseLoanTransaction(loanResponse.getLoanId(), repaymentTransaction.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("04 October 2023")
+                            .transactionAmount(0.0).locale("en"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 0.0, 1000.0, 0.0, 1000.0, null);
+            validateRepaymentPeriod(loanDetails, 1, 1000.0, 1000.0, 0.0, 0.0, 1000.0);
+            validateLoanTransaction(loanDetails, 2, 1000.0, 1000.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getClosedObligationsMet());
+
+            PostLoansLoanIdChargesResponse penaltyLoanChargeResult = loanTransactionHelper.addChargesForLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en")
+                            .amount(10.0).dueDate("04 October 2023"));
+
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            validateLoanSummaryBalances(loanDetails, 10.0, 1000.0, 0.0, 1000.0, null);
+            validateRepaymentPeriod(loanDetails, 1, 1000.0, 1000.0, 0.0, 0.0, 1000.0);
+            validateRepaymentPeriod(loanDetails, 2, 0.0, 0.0, 0.0, 10.0, 0.0, 10.0, 0.0, 0.0);
+            assertTrue(loanDetails.getStatus().getActive());
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
+    }
+
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String interestRate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(LP_PRINCIPAL.toString())
@@ -455,20 +523,6 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
-    private Integer createLoanProductWithPeriodicAccrualAccountingWithInterestRecalculationEnabled(final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("10000.0").withNumberOfRepayments("1")
-                .withinterestRatePerPeriod("1").withInterestRateFrequencyTypeAsYear().withInterestTypeAsDecliningBalance()
-                .withInterestCalculationPeriodTypeAsDays()
-                .withInterestRecalculationDetails(LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
-                        LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
-                        LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
-                .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", null, null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).withMoratorium("0", "0")
-                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withAccountingRulePeriodicAccrual(accounts).build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-    }
-
     private Integer createLoanProductWithPeriodicAccrualAccountingNoInterest(final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
@@ -479,4 +533,67 @@ public class LoanSpecificDueDateChargeAfterMaturityTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
+    private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
+            final Account... accounts) {
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+                .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
+                .withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths()
+                .withRepaymentStrategy(
+                        LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").build(null);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final Long principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate) {
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .transactionProcessingStrategyCode(
+                        LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
+                .locale("en").submittedOnDate(submittedOnDate).amortizationType(1).interestRatePerPeriod(interestRate)
+                .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery)
+                .repaymentFrequencyType(0).numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency)
+                .loanTermFrequencyType(0).principal(BigDecimal.valueOf(principal)).loanType("individual"));
+    }
+
+    private static void validateLoanTransaction(GetLoansLoanIdResponse loanDetails, int index, double transactionAmount,
+            double principalPortion, double overPaidPortion, double loanBalance) {
+        assertEquals(transactionAmount, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getAmount()));
+        assertEquals(principalPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getPrincipalPortion()));
+        assertEquals(overPaidPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOverpaymentPortion()));
+        assertEquals(loanBalance, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOutstandingLoanBalance()));
+    }
+
+    private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, int index, double principalDue, double principalPaid,
+            double principalOutstanding, double paidInAdvance, double paidLate) {
+        assertEquals(principalDue, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalDue()));
+        assertEquals(principalPaid, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalPaid()));
+        assertEquals(principalOutstanding,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalOutstanding()));
+        assertEquals(paidInAdvance,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getTotalPaidInAdvanceForPeriod()));
+        assertEquals(paidLate,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getTotalPaidLateForPeriod()));
+    }
+
+    private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, int index, double principalDue, double principalPaid,
+            double principalOutstanding, double penaltyDue, double penaltyPaid, double penaltyOutstanding, double paidInAdvance,
+            double paidLate) {
+        assertEquals(principalDue, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalDue()));
+        assertEquals(principalPaid, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalPaid()));
+        assertEquals(principalOutstanding,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalOutstanding()));
+        assertEquals(penaltyDue, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPenaltyChargesDue()));
+        assertEquals(penaltyPaid, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPenaltyChargesPaid()));
+        assertEquals(penaltyOutstanding,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPenaltyChargesOutstanding()));
+        assertEquals(paidInAdvance,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getTotalPaidInAdvanceForPeriod()));
+        assertEquals(paidLate,
+                Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getTotalPaidLateForPeriod()));
+    }
 }

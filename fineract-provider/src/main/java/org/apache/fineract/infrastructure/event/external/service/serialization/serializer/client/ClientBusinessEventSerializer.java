@@ -25,14 +25,14 @@ import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.client.ClientDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ClientBusinessEventSerializer extends AbstractBusinessEventSerializer {
+public class ClientBusinessEventSerializer implements BusinessEventSerializer {
 
     private final ClientReadPlatformService service;
     private final ClientDataMapper mapper;
@@ -43,7 +43,7 @@ public class ClientBusinessEventSerializer extends AbstractBusinessEventSerializ
     }
 
     @Override
-    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
+    public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         ClientBusinessEvent event = (ClientBusinessEvent) rawEvent;
         ClientData data = service.retrieveOne(event.get().getId());
         return mapper.map(data);

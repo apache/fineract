@@ -27,7 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
-import org.apache.fineract.client.models.GetAccountRulesResponse;
+import org.apache.fineract.client.models.AccountingRuleData;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostAccountingRulesResponse;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -63,12 +63,12 @@ public class AccountingRuleIntegrationTest {
         // given
         final Account accountToCredit = accountHelper.createIncomeAccount();
         final Account accountToDebit = accountHelper.createExpenseAccount();
-        final GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        final GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
 
         // when
         final PostAccountingRulesResponse accountingRule = accountRuleHelper.createAccountRule(headOffice.getId(), accountToCredit,
                 accountToDebit);
-        final ArrayList<GetAccountRulesResponse> accountingRules = accountRuleHelper.getAccountingRules();
+        final ArrayList<AccountingRuleData> accountingRules = accountRuleHelper.getAccountingRules();
 
         // then
         assertNotNull(accountingRule);

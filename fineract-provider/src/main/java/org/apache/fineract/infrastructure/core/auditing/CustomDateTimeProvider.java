@@ -18,18 +18,16 @@
  */
 package org.apache.fineract.infrastructure.core.auditing;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import jakarta.validation.constraints.NotNull;
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.auditing.DateTimeProvider;
 
 public enum CustomDateTimeProvider implements DateTimeProvider {
 
-    INSTANCE, TENANT;
+    INSTANCE, //
+    UTC; //
 
     /*
      * (non-Javadoc)
@@ -42,10 +40,10 @@ public enum CustomDateTimeProvider implements DateTimeProvider {
 
         switch (this) {
             case INSTANCE -> {
-                return Optional.of(LocalDateTime.now(ZoneId.systemDefault()));
+                return Optional.of(DateUtils.getLocalDateTimeOfSystem());
             }
-            case TENANT -> {
-                return Optional.of(OffsetDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+            case UTC -> {
+                return Optional.of(DateUtils.getAuditOffsetDateTime());
             }
         }
         throw new UnsupportedOperationException(this + " is not supported!");

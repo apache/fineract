@@ -20,14 +20,14 @@ package org.apache.fineract.infrastructure.hooks.domain;
 
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.nameParamName;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +42,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public final class HookTemplate extends AbstractPersistableCustom {
+public final class HookTemplate extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

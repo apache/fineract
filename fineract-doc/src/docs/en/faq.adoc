@@ -1,4 +1,4 @@
 [faq]
 = Frequently Asked Questions
 
-TBD
+See https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=91554327[Fineract FAQ wiki page].

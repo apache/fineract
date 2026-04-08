@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import jakarta.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import javax.ws.rs.core.StreamingOutput;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
@@ -34,18 +34,17 @@ public interface ReadReportingService {
 
     ReportData retrieveReport(Long id);
 
-    String getReportType(String reportName, boolean isSelfServiceUserReport, boolean isParameterType);
+    String getReportType(String reportName, boolean isParameterType);
 
     Collection<ReportParameterData> getAllowedParameters();
 
     // TODO Move the following x3 methods into the (new; FINERACT-1173) DatatableReportingProcessService?
 
-    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
+    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams);
 
-    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
+    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams);
 
-    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams,
-            boolean isSelfServiceUserReport);
+    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams);
 
     // TODO This is weird, could they not be using the retrieveGenericResultset() above after all?
     // needed for smsCampaign and emailCampaign jobs where securityContext is null

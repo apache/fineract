@@ -30,7 +30,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,18 +47,17 @@ import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignMustBeClosedToBeDeletedException;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignMustBeClosedToEditException;
+import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignNameAlreadyExistsException;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignNotFound;
 import org.apache.fineract.infrastructure.campaigns.sms.serialization.SmsCampaignValidator;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepository;
@@ -107,20 +105,35 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Transactional
     @Override
     public CommandProcessingResult create(JsonCommand command) {
+        try {
+            final AppUser currentUser = this.context.authenticatedUser();
+            this.smsCampaignValidator.validateCreate(command.json());
 
-        final AppUser currentUser = this.context.authenticatedUser();
-        this.smsCampaignValidator.validateCreate(command.json());
-        final Long runReportId = command.longValueOfParameterNamed(SmsCampaignValidator.runReportId);
-        Report report = this.reportRepository.findById(runReportId).orElseThrow(() -> new ReportNotFoundException(runReportId));
-        SmsCampaign smsCampaign = SmsCampaign.instance(currentUser, report, command);
-        if (smsCampaign.getRecurrenceStartDate() != null
-                && smsCampaign.getRecurrenceStartDate().isBefore(DateUtils.getLocalDateTimeOfTenant())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.campaign.recurrenceStartDate.in.the.past",
-                    "Recurrence start date cannot be the past date.", smsCampaign.getRecurrenceStartDate());
+            final String campaignName = command.stringValueOfParameterNamed(SmsCampaignValidator.campaignName);
+            if (this.smsCampaignRepository.existsByCampaignName(campaignName)) {
+                throw new SmsCampaignNameAlreadyExistsException(campaignName);
+            }
+
+            final Long runReportId = command.longValueOfParameterNamed(SmsCampaignValidator.runReportId);
+            Report report = this.reportRepository.findById(runReportId).orElseThrow(() -> new ReportNotFoundException(runReportId));
+            LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+            SmsCampaign smsCampaign = SmsCampaign.instance(currentUser, report, command);
+            LocalDateTime recurrenceStartDate = smsCampaign.getRecurrenceStartDate();
+            if (recurrenceStartDate != null && DateUtils.isBefore(recurrenceStartDate, tenantDateTime)) {
+                throw new GeneralPlatformDomainRuleException("error.msg.campaign.recurrenceStartDate.in.the.past",
+                        "Recurrence start date cannot be the past date.", recurrenceStartDate);
+            }
+            this.smsCampaignRepository.saveAndFlush(smsCampaign);
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(smsCampaign.getId()) //
+                    .build();
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            final Throwable throwable = dve.getMostSpecificCause();
+            handleDataIntegrityIssues(command, throwable);
+            return CommandProcessingResult.empty();
         }
-        this.smsCampaignRepository.saveAndFlush(smsCampaign);
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(smsCampaign.getId()).build();
     }
 
     @Transactional
@@ -137,6 +150,13 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 throw new SmsCampaignMustBeClosedToEditException(smsCampaign.getId());
             }
             final Map<String, Object> changes = smsCampaign.update(command);
+
+            if (changes.containsKey(SmsCampaignValidator.campaignName)) {
+                final String newName = (String) changes.get(SmsCampaignValidator.campaignName);
+                if (this.smsCampaignRepository.existsByCampaignNameAndIdNot(newName, resourceId)) {
+                    throw new SmsCampaignNameAlreadyExistsException(newName);
+                }
+            }
 
             if (changes.containsKey(SmsCampaignValidator.runReportId)) {
                 final Long newValue = command.longValueOfParameterNamed(SmsCampaignValidator.runReportId);
@@ -177,7 +197,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         smsCampaign.delete();
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
 
-        return new CommandProcessingResultBuilder().withEntityId(smsCampaign.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(smsCampaign.getId()) //
+                .build();
 
     }
 
@@ -380,17 +402,15 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         if (smsCampaign.isDirect()) {
             insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
         } else if (smsCampaign.isSchedule()) {
-
-            /**
-             * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
-             * next trigger date when activating
-             */
+            // if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
+            // next trigger date when activating
             LocalDateTime nextTriggerDate = null;
-            if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
-                nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getRecurrenceStartDate(),
-                        DateUtils.getLocalDateTimeOfTenant());
+            LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+            LocalDateTime recurrenceStartDate = smsCampaign.getRecurrenceStartDate();
+            if (DateUtils.isBefore(recurrenceStartDate, tenantDateTime)) {
+                nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), recurrenceStartDate, tenantDateTime);
             } else {
-                nextTriggerDate = smsCampaign.getRecurrenceStartDate();
+                nextTriggerDate = recurrenceStartDate;
             }
 
             smsCampaign.setNextTriggerDate(nextTriggerDate);
@@ -401,7 +421,10 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
          * if campaign is direct insert campaign message into sms outbound table else if its a schedule create a job
          * process for it
          */
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(smsCampaign.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(smsCampaign.getId()) //
+                .build();
     }
 
     @Transactional
@@ -477,20 +500,14 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         CampaignPreviewData campaignMessage = null;
         this.context.authenticatedUser();
         this.smsCampaignValidator.validatePreviewMessage(query.json());
-        // final String smsParams =
-        // this.fromJsonHelper.extractJsonObjectNamed("paramValue",
-        // query.parsedJson()).getAsString();
         final JsonElement smsParamsElement = this.fromJsonHelper.extractJsonObjectNamed(SmsCampaignValidator.paramValue,
                 query.parsedJson());
         String smsParams = smsParamsElement.toString();
         final String textMessageTemplate = this.fromJsonHelper.extractStringNamed("message", query.parsedJson());
 
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams,
-                    new TypeReference<HashMap<String, String>>() {});
-
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams,
-                    new TypeReference<HashMap<String, String>>() {});
+            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
+            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
 
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);
@@ -517,7 +534,6 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Transactional
     @Override
     public CommandProcessingResult reactivateSmsCampaign(final Long campaignId, JsonCommand command) {
-
         this.smsCampaignValidator.validateActivation(command.json());
 
         final AppUser currentUser = this.context.authenticatedUser();
@@ -532,44 +548,31 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         if (smsCampaign.isDirect()) {
             insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
         } else if (smsCampaign.isSchedule()) {
-
-            /**
-             * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
-             * next trigger date when activating
-             */
+            // if recurrence start date is in the past, calculate next trigger date, otherwise use recurrence start date
+            // as next trigger date when activating
             LocalDateTime nextTriggerDate = null;
-            if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
-                nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getRecurrenceStartDate(),
-                        DateUtils.getLocalDateTimeOfTenant());
+            LocalDateTime tenantDateTime = DateUtils.getLocalDateTimeOfTenant();
+            LocalDateTime recurrenceStartDate = smsCampaign.getRecurrenceStartDate();
+            if (DateUtils.isBefore(recurrenceStartDate, tenantDateTime)) {
+                nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), recurrenceStartDate, tenantDateTime);
             } else {
-                nextTriggerDate = smsCampaign.getRecurrenceStartDate();
+                nextTriggerDate = recurrenceStartDate;
             }
-            // to get time of tenant
-            final LocalDateTime getTime = smsCampaign.getRecurrenceStartDateTime();
-
             smsCampaign.setNextTriggerDate(nextTriggerDate);
         }
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
 
-        return new CommandProcessingResultBuilder().withEntityId(smsCampaign.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(smsCampaign.getId()) //
+                .build();
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause) {
-
-        throw new PlatformDataIntegrityException("error.msg.sms.campaign.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource: " + realCause.getMessage());
-    }
-
-    private LocalDateTime tenantDateTime() {
-        LocalDateTime today = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
-        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-
-        if (tenant != null) {
-            final ZoneId zone = ZoneId.of(tenant.getTimezoneId());
-            if (zone != null) {
-                today = LocalDateTime.now(zone);
-            }
+        if (realCause.getMessage().contains("campaign_name_UNIQUE")) {
+            final String name = command.stringValueOfParameterNamed(SmsCampaignValidator.campaignName);
+            throw new SmsCampaignNameAlreadyExistsException(name);
         }
-        return today;
+        throw ErrorHandler.getMappable(realCause, "error.msg.sms.campaign.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

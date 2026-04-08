@@ -47,7 +47,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "Head Office")
             public String decoratedName;
             @Schema(example = "1")
-            public Integer externalId;
+            public String externalId;
             @Schema(example = "[2009, 1, 1]")
             public LocalDate openingDate;
             @Schema(example = ".")
@@ -538,7 +538,7 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         @Schema(example = "20")
-        public Integer resourceId;
+        public Long resourceId;
         public PutUpdateStandingInstructionChanges changes;
     }
 

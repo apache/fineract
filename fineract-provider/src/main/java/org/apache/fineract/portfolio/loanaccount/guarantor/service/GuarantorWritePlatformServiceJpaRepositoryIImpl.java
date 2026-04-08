@@ -29,15 +29,16 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
@@ -70,6 +71,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
+    private final GroupRepositoryWrapper groupRepositoryWrapper;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final GuarantorRepository guarantorRepository;
     private final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -81,11 +83,13 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     @Autowired
     public GuarantorWritePlatformServiceJpaRepositoryIImpl(final LoanRepositoryWrapper loanRepositoryWrapper,
             final GuarantorRepository guarantorRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final StaffRepositoryWrapper staffRepositoryWrapper, final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final StaffRepositoryWrapper staffRepositoryWrapper, final GroupRepositoryWrapper groupRepositoryWrapper,
+            final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
             final AccountAssociationsRepository accountAssociationsRepository, final GuarantorDomainService guarantorDomainService) {
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
+        this.groupRepositoryWrapper = groupRepositoryWrapper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.guarantorRepository = guarantorRepository;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
@@ -123,7 +127,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                         GuarantorFundStatusType.ACTIVE.getValue(), guarantorCommand.getAmount());
                 guarantorFundingDetails.add(fundingDetails);
                 if (loan.isDisbursed()
-                        || (loan.isApproved() && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled()))) {
+                        || (loan.isApproved() && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFunds()))) {
                     this.guarantorDomainService.assignGuarantor(fundingDetails, DateUtils.getBusinessLocalDate());
                     loan.updateGuaranteeAmount(fundingDetails.getAmount());
                 }
@@ -147,7 +151,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                         /** Get the right guarantor based on guarantorType **/
                         String defaultUserMessage = null;
                         if (guarantorTypeId.equals(GuarantorType.STAFF.getValue())) {
-                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).displayName();
+                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                        } else if (guarantorTypeId.equals(GuarantorType.GROUP.getValue())) {
+                            defaultUserMessage = this.groupRepositoryWrapper.findOneWithNotFoundDetection(entityId).getName();
                         } else {
                             defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         }
@@ -176,8 +182,12 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 this.accountAssociationsRepository.saveAndFlush(accountAssociations);
             }
             this.guarantorRepository.saveAndFlush(guarantor);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantor.getOfficeId())
-                    .withEntityId(guarantor.getId()).withLoanId(loan.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(guarantor.getOfficeId()) //
+                    .withEntityId(guarantor.getId()) //
+                    .withLoanId(loan.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleGuarantorDataIntegrityIssues(throwable, dve);
@@ -187,12 +197,12 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan,
             final SavingsAccount savingsAccount) {
-        if (loan.getSubmittedOnDate().isBefore(savingsAccount.getActivationLocalDate())) {
+        if (DateUtils.isBefore(loan.getSubmittedOnDate(), savingsAccount.getActivationDate())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
-                    "Guarantor saving account activation date [" + savingsAccount.getActivationLocalDate()
+                    "Guarantor saving account activation date [" + savingsAccount.getActivationDate()
                             + "] is on or before the loan submitted on date [" + loan.getSubmittedOnDate() + "]",
-                    savingsAccount.getActivationLocalDate(), loan.getSubmittedOnDate());
+                    savingsAccount.getActivationDate(), loan.getSubmittedOnDate());
         }
     }
 
@@ -225,12 +235,19 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             final Integer guarantorTypeId = guarantorCommand.getGuarantorTypeId();
             final GuarantorType guarantorType = GuarantorType.fromInt(guarantorTypeId);
-            if (guarantorType.isCustomer() || guarantorType.isStaff()) {
+            if (guarantorType.isCustomer() || guarantorType.isStaff() || guarantorType.isGroup()) {
                 final Long entityId = guarantorCommand.getEntityId();
                 for (final Guarantor guarantor : existGuarantorList) {
                     if (guarantor.getEntityId().equals(entityId) && guarantor.getGurantorType().equals(guarantorTypeId)
                             && !guarantorForUpdate.getId().equals(guarantor.getId())) {
-                        String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                        String defaultUserMessage = null;
+                        if (guarantorTypeId.equals(GuarantorType.STAFF.getValue())) {
+                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                        } else if (guarantorTypeId.equals(GuarantorType.GROUP.getValue())) {
+                            defaultUserMessage = this.groupRepositoryWrapper.findOneWithNotFoundDetection(entityId).getName();
+                        } else {
+                            defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                        }
                         defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
                         final String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
                         throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
@@ -247,8 +264,13 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 this.guarantorRepository.saveAndFlush(guarantorForUpdate);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantorForUpdate.getOfficeId())
-                    .withEntityId(guarantorForUpdate.getId()).withOfficeId(guarantorForUpdate.getLoanId()).with(changesOnly).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(guarantorForUpdate.getOfficeId()) //
+                    .withEntityId(guarantorForUpdate.getId()) //
+                    .withOfficeId(guarantorForUpdate.getLoanId()) //
+                    .with(changesOnly) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleGuarantorDataIntegrityIssues(throwable, dve);
@@ -294,8 +316,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                     dataValidationErrors);
         }
         this.guarantorRepository.saveAndFlush(guarantorForDelete);
-        CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder()
-                .withEntityId(guarantorForDelete.getId()).withLoanId(guarantorForDelete.getLoanId())
+        CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder() //
+                .withEntityId(guarantorForDelete.getId()) //
+                .withLoanId(guarantorForDelete.getLoanId()) //
                 .withOfficeId(guarantorForDelete.getOfficeId());
         if (guarantorFundingId != null) {
             commandProcessingResultBuilder.withSubEntityId(guarantorFundingId);
@@ -336,6 +359,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
         } else if (guarantor.isExistingEmployee()) {
             this.staffRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
+        } else if (guarantor.isExistingGroup()) {
+            // check group exists
+            this.groupRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
         }
     }
 
@@ -351,7 +377,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     private void handleGuarantorDataIntegrityIssues(final Throwable realCause, final NonTransientDataAccessException dve) {
         LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.guarantor.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.guarantor.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Guarantor: " + realCause.getMessage());
     }
 }

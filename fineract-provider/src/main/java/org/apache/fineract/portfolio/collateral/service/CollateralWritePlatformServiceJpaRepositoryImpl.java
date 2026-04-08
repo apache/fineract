@@ -19,12 +19,14 @@
 package org.apache.fineract.portfolio.collateral.service;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateral.api.CollateralApiConstants;
 import org.apache.fineract.portfolio.collateral.api.CollateralApiConstants.CollateralJSONinputParams;
@@ -41,37 +43,20 @@ import org.apache.fineract.portfolio.collateral.exception.CollateralNotFoundExce
 import org.apache.fineract.portfolio.collateral.serialization.CollateralCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class CollateralWritePlatformServiceJpaRepositoryImpl implements CollateralWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CollateralWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanCollateralRepository collateralRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final CollateralCommandFromApiJsonDeserializer collateralCommandFromApiJsonDeserializer;
-
-    @Autowired
-    public CollateralWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final LoanCollateralRepository collateralRepository,
-            final CodeValueRepositoryWrapper codeValueRepository,
-            final CollateralCommandFromApiJsonDeserializer collateralCommandFromApiJsonDeserializer) {
-        this.context = context;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.collateralRepository = collateralRepository;
-        this.codeValueRepository = codeValueRepository;
-        this.collateralCommandFromApiJsonDeserializer = collateralCommandFromApiJsonDeserializer;
-    }
 
     @Transactional
     @Override
@@ -99,7 +84,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withLoanId(loan.getId())//
+                    .withLoanId(loan.getId()) //
                     .withEntityId(collateral.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -147,13 +132,13 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withLoanId(command.getLoanId())//
+                    .withLoanId(command.getLoanId()) //
                     .withEntityId(collateralId) //
                     .with(changes) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleCollateralDataIntegrityViolation(dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.resourceResult(-1L);
         }
     }
 
@@ -175,12 +160,16 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
         }
 
         this.collateralRepository.delete(collateral);
-        return new CommandProcessingResultBuilder().withCommandId(commandId).withLoanId(loanId).withEntityId(collateralId).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(commandId) //
+                .withLoanId(loanId) //
+                .withEntityId(collateralId) //
+                .build();
     }
 
     private void handleCollateralDataIntegrityViolation(final NonTransientDataAccessException dve) {
-        LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.collateral.unknown.data.integrity.issue",
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.collateral.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 }

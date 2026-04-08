@@ -29,8 +29,7 @@ public interface EntityDatatableChecksReadService {
 
     EntityDataTableChecksTemplateData retrieveTemplate();
 
-    List<DatatableData> retrieveTemplates(Long status, String entity, Long productId);
+    List<DatatableData> retrieveTemplates(Integer status, String entity, Long productId);
 
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Long status, String entity, Long productLoanId);
-
+    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
 }

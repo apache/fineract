@@ -146,6 +146,14 @@
                 "null",
                 "boolean"
             ]
+        },
+        {
+            "default": null,
+            "name": "disallowInterestCalculationOnPastDue",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

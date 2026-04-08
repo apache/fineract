@@ -1,0 +1,34 @@
+= Logging Guidelines
+
+== Library
+We use http://www.slf4j.org[SLF4J] as our logging API.
+
+* **Never use System.out/err**: Always use `LOG.info()` or `LOG.error()`.
+* **Use Placeholders**: Use parameterized logging instead of string concatenation.
++
+[source,java]
+----
+// GOOD
+LOG.error("Could not... details: {}", something, exception);
+
+// BAD
+LOG.error("Could not... details: " + something, exception);
+----
+
+== Log Levels
+
+* **`LOG.error()`**: Use for unexpected conditions that need operator attention.
+    * Includes technical problems (database unreachable) and bugs.
+    * Does NOT include validation errors (which should be user responses).
+    * _Note_: SLF4J has no `FATAL` level; use `ERROR`.
+
+* **`LOG.warn()`**: Use sparingly. Decide if it's an error or not.
+
+* **`LOG.info()`**: Use for one-time actions (e.g., startup).
+    * Do NOT use for regular application usage info (use Metrics instead).
+    * Can be used freely in tests.
+
+* **`LOG.debug()`**: Use for investigation data.
+    * Not shown in default configuration but can be enabled for troubleshooting.
+
+* **`LOG.trace()`**: Not used in Fineract.

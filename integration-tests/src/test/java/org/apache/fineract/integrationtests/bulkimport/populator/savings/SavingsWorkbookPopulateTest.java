@@ -25,9 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -59,8 +59,8 @@ public class SavingsWorkbookPopulateTest {
     public void testSavingsWorkbookPopulate() throws IOException {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         // in order to populate helper sheets
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets

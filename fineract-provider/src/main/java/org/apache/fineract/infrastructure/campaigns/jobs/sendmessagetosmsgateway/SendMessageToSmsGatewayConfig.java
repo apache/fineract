@@ -19,45 +19,54 @@
 package org.apache.fineract.infrastructure.campaigns.jobs.sendmessagetosmsgateway;
 
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
+import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.gcm.service.NotificationSenderService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class SendMessageToSmsGatewayConfig {
 
     @Autowired
-    private JobBuilderFactory jobs;
+    private JobRepository jobRepository;
     @Autowired
-    private StepBuilderFactory steps;
+    private PlatformTransactionManager transactionManager;
     @Autowired
     private SmsMessageRepository smsMessageRepository;
     @Autowired
     private NotificationSenderService notificationSenderService;
     @Autowired
     private SmsConfigUtils smsConfigUtils;
+    @Autowired
+    @Qualifier(TaskExecutorConstant.DEFAULT_TASK_EXECUTOR_BEAN_NAME)
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Bean
     protected Step sendMessageToSmsGatewayStep() {
-        return steps.get(JobName.SEND_MESSAGES_TO_SMS_GATEWAY.name()).tasklet(sendMessageToSmsGatewayTasklet()).build();
+        return new StepBuilder(JobName.SEND_MESSAGES_TO_SMS_GATEWAY.name(), jobRepository)
+                .tasklet(sendMessageToSmsGatewayTasklet(), transactionManager).build();
     }
 
     @Bean
     public Job sendMessageToSmsGatewayJob() {
-        return jobs.get(JobName.SEND_MESSAGES_TO_SMS_GATEWAY.name()).start(sendMessageToSmsGatewayStep())
+        return new JobBuilder(JobName.SEND_MESSAGES_TO_SMS_GATEWAY.name(), jobRepository).start(sendMessageToSmsGatewayStep())
                 .incrementer(new RunIdIncrementer()).build();
     }
 
     @Bean
     public SendMessageToSmsGatewayTasklet sendMessageToSmsGatewayTasklet() {
-        return new SendMessageToSmsGatewayTasklet(smsMessageRepository, notificationSenderService, smsConfigUtils);
+        return new SendMessageToSmsGatewayTasklet(smsMessageRepository, notificationSenderService, smsConfigUtils, taskExecutor);
     }
 }

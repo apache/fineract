@@ -40,6 +40,7 @@ import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -47,12 +48,14 @@ import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Entity Datatable Checks Integration Test for checking Creation, Deletion and Retrieval of Entity-Datatable Check
  */
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class EntityDatatableChecksIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksIntegrationTest.class);
@@ -152,7 +155,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, clientID, "clientId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, clientID, "clientId");
         assertEquals(clientID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -212,7 +215,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, groupId, "groupId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, groupId, "groupId");
         assertEquals(groupId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -287,7 +290,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, savingsId, "savingsId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, savingsId, "savingsId");
         assertEquals(savingsId, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -369,7 +372,7 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
 
         // deleting datatable entries
-        Integer appTableId = this.datatableHelper.deleteDatatableEntries(registeredTableName, loanID, "loanId");
+        Integer appTableId = (Integer) this.datatableHelper.deleteDatatableEntries(registeredTableName, loanID, "loanId");
         assertEquals(loanID, appTableId, "ERROR IN DELETING THE DATATABLE ENTRIES");
 
         // deleting the datatable
@@ -542,7 +545,7 @@ public class EntityDatatableChecksIntegrationTest {
         HashMap<String, Object> datatableMap = new HashMap<>();
         HashMap<String, Object> dataMap = new HashMap<>();
         dataMap.put("locale", "en");
-        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Spouse Name", Utils.randomStringGenerator("Spouse_name", 4));
         dataMap.put("Number of Dependents", 5);
         dataMap.put("Time of Visit", "01 December 2016 04:03");
         dataMap.put("dateFormat", DATE_TIME_FORMAT);
@@ -558,11 +561,13 @@ public class EntityDatatableChecksIntegrationTest {
         // creating datatable for client entity person subentity
         HashMap<String, Object> columnMap = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-        final String datatableNamePerson = Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase().toLowerCase();
-        final String datatableNameEntity = Utils.randomNameGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase().toLowerCase();
+        final String datatableNamePerson = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_person_", 5).toLowerCase()
+                .toLowerCase();
+        final String datatableNameEntity = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_entity_", 5).toLowerCase()
+                .toLowerCase();
 
         String itsAString = "itsastring";
-        DatatableHelper.addDatatableColumns(datatableColumnsList, itsAString, "String", true, 10, null);
+        DatatableHelper.addDatatableColumn(datatableColumnsList, itsAString, "String", true, 10, null);
 
         // Person Subtype
         columnMap.put("datatableName", datatableNamePerson);

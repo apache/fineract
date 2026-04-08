@@ -33,4 +33,9 @@ public abstract class ShareAccountBusinessEvent extends AbstractBusinessEvent<Sh
     public String getCategory() {
         return CATEGORY;
     }
+
+    @Override
+    public Long getAggregateRootId() {
+        return get().getId();
+    }
 }

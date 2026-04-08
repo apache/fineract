@@ -46,6 +46,7 @@
         </insert>
     </changeSet>
     <changeSet author="fineract" id="delinquency_tags_job-2">
+        <validCheckSum>9:408a769cb662027704a2c48170494480</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Loan Delinquency Classification"/>
             <column name="display_name" value="Loan Delinquency Classification"/>

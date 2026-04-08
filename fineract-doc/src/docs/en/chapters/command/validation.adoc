@@ -1,0 +1,12 @@
+= Validation
+
+TBD
+
+Jakarta Validation...
+
+.Validation Messages
+[source,properties]
+----
+include::{rootdir}/fineract-validation/src/main/resources/ValidationMessages.properties[]
+----
+

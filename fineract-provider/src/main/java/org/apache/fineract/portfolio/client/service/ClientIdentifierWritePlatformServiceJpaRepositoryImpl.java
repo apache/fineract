@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import jakarta.persistence.PersistenceException;
 import java.util.Map;
-import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundExcep
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.command.ClientIdentifierCommand;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -164,7 +164,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.resourceResult(-1L);
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
@@ -199,7 +199,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.clientIdentifier.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.clientIdentifier.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 

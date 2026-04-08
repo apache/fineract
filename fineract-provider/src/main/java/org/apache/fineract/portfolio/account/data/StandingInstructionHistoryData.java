@@ -18,14 +18,23 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 
+@Getter
 @SuppressWarnings("unused")
-public class StandingInstructionHistoryData {
+@RequiredArgsConstructor
+public class StandingInstructionHistoryData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long standingInstructionId;
     private final String name;
@@ -41,25 +50,5 @@ public class StandingInstructionHistoryData {
     private final String status;
     private final LocalDate executionTime;
     private final String errorLog;
-
-    public StandingInstructionHistoryData(final Long standingInstructionId, final String name, final OfficeData fromOffice,
-            final ClientData fromClient, final EnumOptionData fromAccountType, final PortfolioAccountData fromAccount,
-            final EnumOptionData toAccountType, final PortfolioAccountData toAccount, final OfficeData toOffice, final ClientData toClient,
-            final BigDecimal amount, final String status, final LocalDate executionTime, final String errorLog) {
-        this.standingInstructionId = standingInstructionId;
-        this.name = name;
-        this.fromOffice = fromOffice;
-        this.fromClient = fromClient;
-        this.fromAccountType = fromAccountType;
-        this.toAccountType = toAccountType;
-        this.fromAccount = fromAccount;
-        this.toAccount = toAccount;
-        this.toOffice = toOffice;
-        this.toClient = toClient;
-        this.amount = amount;
-        this.errorLog = errorLog;
-        this.status = status;
-        this.executionTime = executionTime;
-    }
 
 }

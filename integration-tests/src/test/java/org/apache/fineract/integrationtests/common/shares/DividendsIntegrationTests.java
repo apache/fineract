@@ -58,7 +58,7 @@ public class DividendsIntegrationTests {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateDividends() {
-        DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
         final Integer productId = createShareProduct();
         ArrayList<Integer> shareAccounts = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -109,12 +109,12 @@ public class DividendsIntegrationTests {
         Calendar cal = Calendar.getInstance();
         cal.set(startdateList.get(0), startdateList.get(1) - 1, startdateList.get(2));
         Date startDate = cal.getTime();
-        Assertions.assertEquals("01 Jan 2015", simple.format(startDate));
+        Assertions.assertEquals("01 January 2015", simple.format(startDate));
         List<Integer> enddateList = (List<Integer>) dividend.get("dividendPeriodEndDate");
         cal = Calendar.getInstance();
         cal.set(enddateList.get(0), enddateList.get(1) - 1, enddateList.get(2));
         Date endDate = cal.getTime();
-        Assertions.assertEquals("01 Apr 2016", simple.format(endDate));
+        Assertions.assertEquals("01 April 2016", simple.format(endDate));
 
         Map<String, Object> dividenddetails = ShareDividendsTransactionHelper.retrieveDividendDetails(productId, dividendId, requestSpec,
                 responseSpec);
@@ -151,12 +151,12 @@ public class DividendsIntegrationTests {
         cal = Calendar.getInstance();
         cal.set(startdateList.get(0), startdateList.get(1) - 1, startdateList.get(2));
         startDate = cal.getTime();
-        Assertions.assertEquals("01 Jan 2015", simple.format(startDate));
+        Assertions.assertEquals("01 January 2015", simple.format(startDate));
         enddateList = (List<Integer>) dividend.get("dividendPeriodEndDate");
         cal = Calendar.getInstance();
         cal.set(enddateList.get(0), enddateList.get(1) - 1, enddateList.get(2));
         endDate = cal.getTime();
-        Assertions.assertEquals("01 Apr 2016", simple.format(endDate));
+        Assertions.assertEquals("01 April 2016", simple.format(endDate));
 
         dividenddetails = ShareDividendsTransactionHelper.retrieveDividendDetails(productId, dividendId, requestSpec, responseSpec);
         Assertions.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));

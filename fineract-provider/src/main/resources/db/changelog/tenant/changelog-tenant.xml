@@ -91,7 +91,7 @@
     <include file="parts/0069_add_unique_constraint_for_reversal_external_id_of_loan_transactions.xml" relativeToChangelogFile="true"/>
     <include file="parts/0070_add_event_configuration_for_delinquency_range_change_event.xml" relativeToChangelogFile="true"/>
     <include file="parts/0071_add_external_id_support_for_loan_transaction.xml" relativeToChangelogFile="true"/>
-    <include file="parts/0072_add_result_and status_to_command_source.xml" relativeToChangelogFile="true" />
+    <include file="parts/0072_add_result_and_status_to_command_source.xml" relativeToChangelogFile="true" />
     <include file="parts/0073_add_result_status_code_to_command_source.xml" relativeToChangelogFile="true" />
     <include file="parts/0074_add_last_cob_business_date_column_to_loan.xml" relativeToChangelogFile="true"/>
     <include file="parts/0075_add_processed_commands_purge_job.xml" relativeToChangelogFile="true" />
@@ -99,4 +99,148 @@
     <include file="parts/0077_add_overpaid_date_for_loan.xml" relativeToChangelogFile="true" />
     <include file="parts/0078_add_configuration_cob_bulk_event.xml" relativeToChangelogFile="true" />
     <include file="parts/0079_add_charge_off_details_to_loan.xml" relativeToChangelogFile="true" />
+    <include file="parts/0080_add_external_event_configuration_for_stayed_locked_loans_business_event.xml" relativeToChangelogFile="true" />
+    <include file="parts/0081_add_configuration_event_producer_batch_size.xml" relativeToChangelogFile="true" />
+    <include file="parts/0082_add_external_event_default_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0083_add_loan_transaction_enum_values.xml" relativeToChangelogFile="true" />
+    <include file="parts/0084_add_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0085_add_aggregate_root_id_external_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0086_add_cob_business_date_to_loan_account_locks.xml" relativeToChangelogFile="true" />
+    <include file="parts/0087_update_dashboard_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0088_drop_m_loan_transaction_version_column.xml" relativeToChangelogFile="true" />
+    <include file="parts/0089_add_update_loan_arrears_aging_business_step.xml" relativeToChangelogFile="true" />
+    <include file="parts/0090_add_report_export_s3_folder_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0091_modify_parameter_value_type_in_job_parameters_table.xml" relativeToChangelogFile="true" />
+    <include file="parts/0092_add_periodic_accrual_entries_business_step.xml" relativeToChangelogFile="true" />
+    <include file="parts/0093_update_general_accounting_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0094_add_external_event_default_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0095_add_delinquency_and_arrears_display_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0096_modify_created_and_sent_at_date_external_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0097_update_accounting_summary_table_reports.xml" relativeToChangelogFile="true" />
+    <include file="parts/0098_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/0099_add_accrual_transaction_external_event_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0100_new_repayment_strategy.xml" relativeToChangelogFile="true" />
+    <include file="parts/0101_update_transaction_summary_table_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/0102_add_external_event_for_loan_reschedule.xml" relativeToChangelogFile="true" />
+    <include file="parts/0103_modify_parameter_json_column_custom_job_parameters.xml" relativeToChangelogFile="true" />
+    <include file="parts/0104_loan_product_add_repayment_overdue_days_config.xml" relativeToChangelogFile="true" />
+    <include file="parts/0105_add_indices_loan_table.xml" relativeToChangelogFile="true" />
+    <include file="parts/0106_new_repayment_strategy.xml" relativeToChangelogFile="true" />
+    <include file="parts/0107_add_configuration_charges_accrual_date.xml" relativeToChangelogFile="true" />
+    <include file="parts/0108_precondition_check_cob_loan_account_lock.xml" relativeToChangelogFile="true" />
+    <include file="parts/0109_spring_batch_5_upgrade.xml" relativeToChangelogFile="true" />
+    <include file="parts/0110_trial_balance_summary_with_asset_owner.xml" relativeToChangelogFile="true" />
+    <include file="parts/0111_transaction_summary_with_asset_owner.xml" relativeToChangelogFile="true" />
+    <include file="parts/0112_transaction_summary_with_asset_owner_change_report_sql.xml" relativeToChangelogFile="true" />
+    <include file="parts/0113_transaction_summary_with_asset_owner_report_sql_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0114_create_cob_indices.xml" relativeToChangelogFile="true" />
+    <include file="parts/0115_create_index_from_loan_transaction_id.xml" relativeToChangelogFile="true" />
+    <include file="parts/0116_add_configuration_asset_externalization_of_non_active_loans.xml" relativeToChangelogFile="true" />
+    <include file="parts/0117_set_datetime_precision.xml" relativeToChangelogFile="true" />
+    <include file="parts/0118_add_submitted_on_date_to_savings_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0119_add_loan_product_down_payment_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0120_transaction_summary_with_asset_owner_report_typo_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0121_transaction_summary_with_asset_owner_report_typo_fix_2.xml" relativeToChangelogFile="true" />
+    <include file="parts/0122_add_batch_job_execution_params_index.xml" relativeToChangelogFile="true" />
+    <include file="parts/0123_add_is_down_payment_to_repayment_schedule.xml" relativeToChangelogFile="true" />
+    <include file="parts/0124_transaction_summary_with_asset_owner_report_typo_fix_3.xml" relativeToChangelogFile="true" />
+    <include file="parts/0125_transaction_summary_with_asset_owner_report_chargeoff_reason.xml" relativeToChangelogFile="true" />
+    <include file="parts/0126_add_loan_product_installment_level_delinquency.xml" relativeToChangelogFile="true" />
+    <include file="parts/0127_client_name_length.xml" relativeToChangelogFile="true" />
+    <include file="parts/0128_savings_audit.xml" relativeToChangelogFile="true" />
+    <include file="parts/0129_transaction_summary_with_asset_owner_report_overpaid_amount.xml" relativeToChangelogFile="true" />
+    <include file="parts/0130_add_create_delinquency_action_permission.xml" relativeToChangelogFile="true" />
+    <include file="parts/0131_add_configuration_maker_checker.xml" relativeToChangelogFile="true" />
+    <include file="parts/0132_add_configuration_loan_next_repayment_date_calculation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0133_transaction_summary_with_asset_owner_report_recovery_repayments_chargeoff_reason.xml" relativeToChangelogFile="true" />
+    <include file="parts/0134_transaction_summary_with_asset_owner_report_down_payment_amount_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0135_add_external_event_for_loan_reaging.xml" relativeToChangelogFile="true" />
+    <include file="parts/0136_loan_reaging_parameters.xml" relativeToChangelogFile="true" />
+    <include file="parts/0137_add_external_event_for_loan_reamortization.xml" relativeToChangelogFile="true" />
+    <include file="parts/0138_add_external_event_for_loan_reaging_reamortization_2.xml" relativeToChangelogFile="true" />
+    <include file="parts/0139_add_disburse_without_auto_payment_command.xml" relativeToChangelogFile="true" />
+    <include file="parts/0140_trial_balance_with_asset_transfer_update.xml" relativeToChangelogFile="true" />
+    <include file="parts/0141_add_interest_payment_waiver_transaction_type.xml" relativeToChangelogFile="true" />
+    <include file="parts/0142_add_accrual_activity_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0143_add_accrual_activity_posting_job.xml" relativeToChangelogFile="true" />
+    <include file="parts/0144_transaction_summary_with_asset_owner_report_unc_allocation_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0145_job_short_name.xml" relativeToChangelogFile="true" />
+    <include file="parts/0147_enable_payment_hub_integration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0148_transaction_summary_with_asset_owner_report_performance_improvement.xml" relativeToChangelogFile="true" />
+    <include file="parts/0149_update_global_configuration_names.xml" relativeToChangelogFile="true" />
+    <include file="parts/0150_transaction_summary_with_asset_owner_report_interest_waiver_interest_refund_added.xml" relativeToChangelogFile="true" />
+    <include file="parts/0151_interest_refund_business_events.xml" relativeToChangelogFile="true" />
+    <include file="parts/0152_update_password_validation_policy.xml" relativeToChangelogFile="true" />
+    <include file="parts/0153_add_charge_off_reason_id_to_acc_product_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0154_add_interest_refund_to_r_enum_value.xml" relativeToChangelogFile="true" />
+    <include file="parts/0155_add_configuration_enable_immediate_charge_accrual_post_maturity.xml" relativeToChangelogFile="true" />
+    <include file="parts/0156_add_disallow_interest_calc_on_past_due_field.xml" relativeToChangelogFile="true" />
+    <include file="parts/0157_create_index_m_loan_transaction_relation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0158_create_acc_gl_journal_entry_annual_summary.xml" relativeToChangelogFile="true" />
+    <include file="parts/0159_trial_balance_summary_with_asset_owner_year_end_summary.xml" relativeToChangelogFile="true" />
+    <include file="parts/0160_add_acc_product_mapping_product_id_index.xml" relativeToChangelogFile="true" />
+    <include file="parts/0161_add_loan_external_id_to_commands.xml" relativeToChangelogFile="true" />
+    <include file="parts/0162_add_additional_audit_fields_to_term_variations.xml" relativeToChangelogFile="true" />
+    <include file="parts/0163_transaction_summary_with_asset_owner_report_accrual_adj_merged_with_accrual.xml" relativeToChangelogFile="true" />
+    <include file="parts/0164_transaction_summary_with_asset_owner_report_accrual_adj_report_separately_and_exclude_accrual_activity.xml" relativeToChangelogFile="true" />
+    <include file="parts/0165_add_credited_interest_to_instalment.xml" relativeToChangelogFile="true" />
+    <include file="parts/0166_transaction_summary_with_asset_owner_report_charge_adjustment_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0167_create_m_calendar_instance_index.xml" relativeToChangelogFile="true" />
+    <include file="parts/0168_transaction_summary_with_asset_owner_report_add_active_intermediate_filtering.xml" relativeToChangelogFile="true" />
+    <include file="parts/0169_add_missing_permissions.xml" relativeToChangelogFile="true" />
+    <include file="parts/0170_days_in_year_custom_strategy.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0171_loan_capitalized_income.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0172_create_loan_capitalized_income_balance.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0173_user_change_pwd.xml" relativeToChangelogFile="true" />
+    <include file="parts/0174_loan_product_add_capitalized_income_type.xml" relativeToChangelogFile="true" />
+    <include file="parts/0175_add_fk_acc_product_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0176_add_capitalized_income_amortization_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0177_acc_journal_entry_index.xml" relativeToChangelogFile="true" />
+    <include file="parts/0178_add_principal_from_capitalized_income_to_loan_summary.xml" relativeToChangelogFile="true" />
+    <include file="parts/0179_add_capitalized_income_adjustment_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0180_add_version_field_to_loan_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0181_add_capitalized_income_amortization_adjustment_transaction.xml" relativeToChangelogFile="true" />
+    <include file="parts/0182_transaction_summary_with_asset_owner_report_fix_charge_reason_and_add_buyback_intermediate.xml" relativeToChangelogFile="true" />
+    <include file="parts/0183_add_LoanCapitalizedIncomeTransactionCreatedBusinessEvent.xml" relativeToChangelogFile="true" />
+    <include file="parts/0184_add_document_event_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0185_loan_buy_down_fee.xml" relativeToChangelogFile="true" />
+    <include file="parts/0186_add_buy_down_fee_to_loan_product.xml" relativeToChangelogFile="true" />
+    <include file="parts/0187_add_Loan_modified_and_withdrawn_event_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0188_create_loan_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0189_add_loan_buydown_fee_event.xml" relativeToChangelogFile="true" />
+    <include file="parts/0190_buy_down_fee_amortization.xml" relativeToChangelogFile="true" />
+    <include file="parts/0191_add_LoanApprovedAmountChangedBusinessEvent.xml" relativeToChangelogFile="true" />
+    <include file="parts/0192_create_loan_approved_amount_history.xml" relativeToChangelogFile="true" />
+    <include file="parts/0193_add_column_ip.xml" relativeToChangelogFile="true" />
+    <include file="parts/0194_fix_missing_permission.xml" relativeToChangelogFile="true" />
+    <include file="parts/0195_create_loan_amortization_allocation_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0196_add_deleted_and_closed_to_buy_down_fee_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0197_add_deleted_and_closed_to_capitalized_income_balance.xml" relativeToChangelogFile="true" />
+    <include file="parts/0198_add_classification_id_to_acc_product_mapping.xml" relativeToChangelogFile="true" />
+    <include file="parts/0199_write_off_reason_mapping_loan.xml" relativeToChangelogFile="true" />
+    <include file="parts/0200_add_journal_entry_aggregation_tables.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0201_add_journal_entry_aggregation_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0202_trial_balance_summary_with_asset_owner_journal_entry_aggregation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0203_transaction_summary_with_asset_owner_report_with_capitalized_income.xml" relativeToChangelogFile="true" />
+    <include file="parts/0204_transaction_summary_with_asset_owner_and_from_asset_owner_id_for_buybacks.xml" relativeToChangelogFile="true" />
+    <include file="parts/0205_add_read_familymembers_permission.xml" relativeToChangelogFile="true" />
+    <include file="parts/0206_transaction_summary_with_asset_owner_classification_name_bug_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0207_add_allow_full_term_for_tranche.xml" relativeToChangelogFile="true" />
+    <include file="parts/0208_trial_balance_summary_with_asset_owner_journal_entry_aggregation_fix.xml" relativeToChangelogFile="true" />
+    <include file="parts/0209_transaction_summary_with_asset_owner_and_from_asset_owner_id_for_asset_sales.xml" relativeToChangelogFile="true" />
+    <include file="parts/0210_add_configuration_password_reuse_check_history_count.xml" relativeToChangelogFile="true" />
+    <include file="parts/0211_trial_balance_summary_fix_external_owners_and_aggregation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0212_add_force_password_reset_config.xml" relativeToChangelogFile="true" />
+    <include file="parts/0213_transaction_summary_adding_originators.xml" relativeToChangelogFile="true" />
+    <include file="parts/0214_trial_balance_summary_adding_originators.xml" relativeToChangelogFile="true" />
+    <include file="parts/0215_transaction_summary_reports_add_buydown_fee_types.xml" relativeToChangelogFile="true" />
+    <include file="parts/0216_add_unique_constraint_sms_campaign_name.xml" relativeToChangelogFile="true" />
+    <include file="parts/0217_force_withdrawal_configs.xml" relativeToChangelogFile="true" />
+    <include file="parts/0218_standardize_character_set_and_collation.xml" relativeToChangelogFile="true" />
+    <include file="parts/0219_remove_self_service_feature.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0220_add_login_retry_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0221_transaction_summary_reports_fix_after_originator_details.xml" relativeToChangelogFile="true" />
+    <include file="parts/0222_transaction_summary_reports_fix_after_originator_details.xml" relativeToChangelogFile="true" />
+    <include file="parts/0223_trial_balance_summary_rename_originators_column.xml" relativeToChangelogFile="true" />
+    <include file="parts/0224_add_allow_cash_and_non_cash_accrual_config.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

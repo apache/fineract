@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -40,6 +41,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.validation.constraints.DateFormatValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -211,6 +213,12 @@ public final class ClientDataValidator {
                     .integerGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateFormatParamName, element)) {
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.dateFormatParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateFormatParamName).value(dateFormat).notBlank()
+                    .validDateTimeFormatPattern();
+        }
+
         final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).notNull().inMinMaxRange(1, 2);
 
@@ -224,10 +232,12 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter("isStaff").value(isStaffFlag).notNull();
         }
 
-        if (this.configurationReadPlatformService.retrieveGlobalConfiguration("Enable-Address").isEnabled()) {
+        if (this.configurationReadPlatformService.retrieveGlobalConfiguration(GlobalConfigurationConstants.ENABLE_ADDRESS).isEnabled()) {
             final JsonArray address = this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.address, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.address).value(address).notNull().jsonArrayNotEmpty();
+            baseDataValidator.reset().parameter(ClientApiConstants.address).value(address).ignoreIfNull().jsonArrayNotEmpty();
         }
+
+        validateDateFormatWhenPresent(element, dataValidationErrors);
 
         List<ApiParameterError> dataValidationErrorsForClientNonPerson = getDataValidationErrorsForCreateOnClientNonPerson(
                 element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
@@ -264,8 +274,8 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
             final Integer constitution = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName,
                     element);
-            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitution).ignoreIfNull()
-                    .integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitution).integerGreaterThanZero()
+                    .notBlank();
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
@@ -318,7 +328,7 @@ public final class ClientDataValidator {
 
     private void fullnameCannotBeBlank(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
         final String fullnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam).notBlank().notExceedingLengthOf(100);
+        baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam).notBlank().notExceedingLengthOf(160);
     }
 
     private boolean isIndividualNamePartParameterPassed(final JsonElement element) {
@@ -500,6 +510,12 @@ public final class ClientDataValidator {
                     .validateDateBefore(DateUtils.getBusinessLocalDate()).validateDateBefore(submittedDate);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateFormatParamName, element)) {
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.dateFormatParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateFormatParamName).value(dateFormat).notBlank()
+                    .validDateTimeFormatPattern();
+        }
+
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName,
@@ -511,6 +527,8 @@ public final class ClientDataValidator {
             final Boolean isStaffFlag = this.fromApiJsonHelper.extractBooleanNamed("isStaff", element);
             baseDataValidator.reset().parameter("isStaff").value(isStaffFlag).notNull();
         }
+
+        validateDateFormatWhenPresent(element, dataValidationErrors);
 
         Map<String, Object> parameterUpdateStatusDetails = getParameterUpdateStatusAndDataValidationErrorsForUpdateOnClientNonPerson(
                 element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
@@ -560,8 +578,8 @@ public final class ClientDataValidator {
             atLeastOneParameterPassedForUpdate = true;
             final Integer constitutionId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName,
                     element);
-            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitutionId).ignoreIfNull()
-                    .integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitutionId).integerGreaterThanZero()
+                    .notBlank();
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
@@ -601,6 +619,21 @@ public final class ClientDataValidator {
         baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(activationDate).notNull();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateDateFormatWhenPresent(final JsonElement element, final List<ApiParameterError> dataValidationErrors) {
+        if (!this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateFormatParamName, element)) {
+            return;
+        }
+        final String dateFormat = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.dateFormatParamName, element);
+        if (StringUtils.isBlank(dateFormat)) {
+            return;
+        }
+        if (!DateFormatValidator.isValidPattern(dateFormat)) {
+            final String message = "Invalid dateFormat: `" + dateFormat + "`. Use a valid Java date/time pattern (e.g. dd MMMM yyyy).";
+            dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.invalid.dateFormat.format", message,
+                    ClientApiConstants.dateFormatParamName));
+        }
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

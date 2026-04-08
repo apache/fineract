@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.cob.loan;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.domain.LockingService;
 
 public class InlineCOBLoanItemWriter extends AbstractLoanItemWriter {
 
-    public InlineCOBLoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
+    public InlineCOBLoanItemWriter(LockingService<LoanAccountLock> loanLockingService) {
+        super(loanLockingService);
     }
 
     @Override

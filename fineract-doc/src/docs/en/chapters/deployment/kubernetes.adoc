@@ -1,3 +1,11 @@
 = Kubernetes
 
-TBD
+In a scaled Kubernetes environment where multiple Fineract instances are deployed, doing the database migrations properly is essential.
+
+Fineract provides a way to run only the Liquibase migrations instead of starting up the whole application server so that you can easily do the migrations before actually upgrading a Fineract instance.
+
+The `FINERACT_LIQUIBASE_ENABLED` flag controls whether Liquibase is enabled or not. For regular read/write/batch manager/batch worker instances this should be disabled.
+
+There's a special Spring profile that should be enabled for running Liquibase only. In can be done via `SPRING_PROFILES_ACTIVE` environment variable. The profile name is `liquibase-only`. At the end of the migration process, the application will exit.
+
+For the instance running the Liquibase migrations, the profile should be activated.

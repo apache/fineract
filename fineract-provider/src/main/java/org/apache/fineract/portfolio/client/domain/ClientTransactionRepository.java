@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface ClientTransactionRepository extends JpaRepository<ClientTransaction, Long>, JpaSpecificationExecutor<ClientTransaction> {
+
+    ClientTransaction findByExternalId(ExternalId externalId);
 
 }

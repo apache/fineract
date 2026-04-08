@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "small business")
         public String clientName;
         public Set<GetSavingsProductOptions> productOptions;
@@ -181,7 +182,7 @@ final class SavingsAccountsApiResourceSwagger {
 
                 public GetSavingsCurrency currency;
                 @Schema(example = "0")
-                public Integer accountBalance;
+                public BigDecimal accountBalance;
             }
 
             @Schema(example = "1")
@@ -189,15 +190,15 @@ final class SavingsAccountsApiResourceSwagger {
             @Schema(example = "000000001")
             public String accountNo;
             @Schema(example = "1")
-            public Integer clientId;
+            public Long clientId;
             @Schema(example = "small business")
             public String clientName;
             @Schema(example = "1")
-            public Integer savingsProductId;
+            public Long savingsProductId;
             @Schema(example = "Passbook Savings")
             public String savingsProductName;
             @Schema(example = "0")
-            public Integer fieldOfficerId;
+            public Long fieldOfficerId;
             public GetSavingsStatus status;
             public GetSavingsTimeline timeline;
             public GetSavingsCurrency currency;
@@ -221,15 +222,17 @@ final class SavingsAccountsApiResourceSwagger {
         private PostSavingsAccountsRequest() {}
 
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer productId;
+        public Long productId;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "01 March 2011")
         public String submittedOnDate;
+        @Schema(example = "123")
+        public String externalId;
     }
 
     @Schema(description = "PostSavingsAccountsResponse")
@@ -238,13 +241,13 @@ final class SavingsAccountsApiResourceSwagger {
         private PostSavingsAccountsResponse() {}
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetSavingsAccountsAccountIdResponse")
@@ -258,25 +261,25 @@ final class SavingsAccountsApiResourceSwagger {
 
             public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
             @Schema(example = "0")
-            public Integer accountBalance;
+            public BigDecimal accountBalance;
             @Schema(example = "0")
-            public Integer availableBalance;
+            public BigDecimal availableBalance;
         }
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "000000001")
         public String accountNo;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "small business")
         public String clientName;
         @Schema(example = "1")
-        public Integer savingsProductId;
+        public Long savingsProductId;
         @Schema(example = "Passbook Savings")
         public String savingsProductName;
         @Schema(example = "0")
-        public Integer fieldOfficerId;
+        public Long fieldOfficerId;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsStatus status;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsTimeline timeline;
         public GetSavingsAccountsResponse.GetSavingsPageItems.GetSavingsCurrency currency;
@@ -316,13 +319,13 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer savingsId;
+        public Long savingsId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutSavingsAccountsChanges changes;
     }
 
@@ -339,6 +342,10 @@ final class SavingsAccountsApiResourceSwagger {
         public String approvedOnDate;
         @Schema(example = "05 September 2014")
         public String activatedOnDate;
+        @Schema(example = "05 September 2014")
+        public String closedOnDate;
+        @Schema(example = "false")
+        public Boolean withdrawBalance;
     }
 
     @Schema(description = "PostSavingsAccountsAccountIdResponse")
@@ -352,11 +359,11 @@ final class SavingsAccountsApiResourceSwagger {
         }
 
         @Schema(example = "2")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "8")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "8")
-        public Integer resourceId;
+        public Long resourceId;
         public PostSavingsAccountsAccountIdChanges changes;
     }
 
@@ -366,10 +373,10 @@ final class SavingsAccountsApiResourceSwagger {
         private DeleteSavingsAccountsAccountIdResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

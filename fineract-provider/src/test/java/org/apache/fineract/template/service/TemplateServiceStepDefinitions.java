@@ -34,10 +34,12 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class TemplateServiceStepDefinitions implements En {
 
-    private TemplateMergeService tms = new TemplateMergeService();
+    @Autowired
+    private TemplateMergeService tms;
 
     private String template;
 

@@ -21,32 +21,21 @@ package org.apache.fineract.useradministration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PermissionData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class PermissionReadPlatformServiceImpl implements PermissionReadPlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PermissionReadPlatformServiceImpl.class);
-
+    private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final PlatformSecurityContext context;
-
-    @Autowired
-    public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     @Override
     public Collection<PermissionData> retrieveAllPermissions() {
@@ -55,7 +44,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.permissionSchema();
-        LOG.debug("retrieveAllPermissions: {}", sql);
+        log.debug("retrieveAllPermissions: {}", sql);
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
@@ -66,7 +55,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.makerCheckerablePermissionSchema();
-        LOG.debug("retrieveAllMakerCheckerablePermissions: {}", sql);
+        log.debug("retrieveAllMakerCheckerablePermissions: {}", sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
@@ -76,7 +65,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.rolePermissionSchema();
-        LOG.debug("retrieveAllRolePermissions: {}", sql);
+        log.debug("retrieveAllRolePermissions: {}", sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { roleId });
     }

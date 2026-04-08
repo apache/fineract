@@ -19,12 +19,12 @@
 
 package org.apache.fineract.infrastructure.creditbureau.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class CreditBureauToken extends AbstractPersistableCustom {
+public class CreditBureauToken extends AbstractPersistableCustom<Long> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauToken.class);
 

@@ -18,15 +18,17 @@
  */
 package org.apache.fineract.integrationtests;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Response;
@@ -37,13 +39,14 @@ import retrofit2.Response;
  * @author Danish Jamal
  *
  */
+@ExtendWith({ SavingsTestLifecycleExtension.class })
 public class SavingsAccountsTest extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsTest.class);
     private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy");
-    private final String formattedDate = simpleDateFormat.format(new Date());
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
+    private final String formattedDate = dateFormatter.format(Utils.getLocalDateOfTenant());
     private int savingId = 1;
 
     @Test
@@ -51,17 +54,17 @@ public class SavingsAccountsTest extends IntegrationTest {
     void submitSavingsAccountsApplication() {
         LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
         PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
-        request.setClientId(1);
-        request.setProductId(1);
+        request.setClientId(1L);
+        request.setProductId(1L);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);
         request.submittedOnDate(formattedDate);
 
-        Response<PostSavingsAccountsResponse> response = okR(fineract().savingsAccounts.submitApplication2(request));
+        Response<PostSavingsAccountsResponse> response = okR(fineractClient().savingsAccounts.submitSavingsApplication(request));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
-        savingId = response.body().getSavingsId();
+        savingId = Math.toIntExact(response.body().getSavingsId());
     }
 
     @Test
@@ -73,7 +76,7 @@ public class SavingsAccountsTest extends IntegrationTest {
         request.setLocale(locale);
         request.setApprovedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineract().savingsAccounts.handleCommands6((long) savingId, request, "approve"));
+                fineractClient().savingsAccounts.handleCommandsSavingsAccount((long) savingId, request, "approve"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -88,7 +91,7 @@ public class SavingsAccountsTest extends IntegrationTest {
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
-                fineract().savingsAccounts.handleCommands6((long) savingId, request, "activate"));
+                fineractClient().savingsAccounts.handleCommandsSavingsAccount((long) savingId, request, "activate"));
 
         assertThat(response.isSuccessful()).isTrue();
         assertThat(response.body()).isNotNull();

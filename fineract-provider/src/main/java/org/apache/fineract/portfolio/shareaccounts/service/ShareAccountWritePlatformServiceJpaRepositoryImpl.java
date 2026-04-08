@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
+import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -36,13 +37,13 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccou
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareAccountApproveBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.share.ShareAccountCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
@@ -53,12 +54,10 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransactio
 import org.apache.fineract.portfolio.shareaccounts.serialization.ShareAccountDataSerializer;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@RequiredArgsConstructor
 public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareAccountWritePlatformService {
 
     private final ShareAccountDataSerializer accountDataSerializer;
@@ -76,22 +75,6 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     private final NoteRepository noteRepository;
 
     private final BusinessEventNotifierService businessEventNotifierService;
-
-    @Autowired
-    public ShareAccountWritePlatformServiceJpaRepositoryImpl(final ShareAccountDataSerializer accountDataSerializer,
-            final ShareAccountRepositoryWrapper shareAccountRepository, final ShareProductRepositoryWrapper shareProductRepository,
-            final AccountNumberGenerator accountNumberGenerator, final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final NoteRepository noteRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
-        this.accountDataSerializer = accountDataSerializer;
-        this.shareAccountRepository = shareAccountRepository;
-        this.shareProductRepository = shareProductRepository;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.noteRepository = noteRepository;
-        this.businessEventNotifierService = businessEventNotifierService;
-    }
 
     @Override
     public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) {
@@ -128,7 +111,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
     private Map<String, Object> populateJournalEntries(final ShareAccount account, final Set<ShareAccountTransaction> transactions) {
         final Map<String, Object> accountingBridgeData = new HashMap<>();
-        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType() == 2 ? Boolean.TRUE : Boolean.FALSE;
+        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType() == 2;
         accountingBridgeData.put("cashBasedAccountingEnabled", cashBasedAccounting);
         accountingBridgeData.put("accrualBasedAccountingEnabled", Boolean.FALSE);
         accountingBridgeData.put("shareAccountId", account.getId());
@@ -517,7 +500,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        throw new PlatformDataIntegrityException("error.msg.shareaccount.unknown.data.integrity.issue",
+        throw ErrorHandler.getMappable(dve, "error.msg.shareaccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 }

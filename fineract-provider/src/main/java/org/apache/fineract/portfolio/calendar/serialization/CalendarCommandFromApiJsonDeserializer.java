@@ -81,7 +81,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                 element);
         final Integer typeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CalendarSupportedParameters.TYPE_ID.getValue(),
                 element);
-        final boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CalendarSupportedParameters.REPEATING.getValue(), element);
+        final Boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CalendarSupportedParameters.REPEATING.getValue(), element);
         final Integer remindById = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CalendarSupportedParameters.REMIND_BY_ID.getValue(),
                 element);
         final Integer firstReminder = this.fromApiJsonHelper
@@ -153,11 +153,10 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                 .inMinMaxRange(CalendarEntityType.getMinValue(), CalendarEntityType.getMaxValue());
 
         if (this.fromApiJsonHelper.parameterExists(CalendarSupportedParameters.REPEATING.getValue(), element)) {
-            // FIXME - Throws NullPointerException when boolean value is null
-            final boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CalendarSupportedParameters.REPEATING.getValue(), element);
+            final Boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CalendarSupportedParameters.REPEATING.getValue(), element);
             baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue()).value(repeating).notNull();
 
-            if (repeating) {
+            if (Boolean.TRUE.equals(repeating)) {
                 final Integer frequency = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(CalendarSupportedParameters.FREQUENCY.getValue(), element);
                 baseDataValidator.reset().parameter(CalendarSupportedParameters.FREQUENCY.getValue()).value(frequency).notBlank()
@@ -295,11 +294,10 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                     .inMinMaxRange(CalendarEntityType.getMinValue(), CalendarEntityType.getMaxValue());
         }
         if (this.fromApiJsonHelper.parameterExists(CalendarSupportedParameters.REPEATING.getValue(), element)) {
-            // FIXME - Throws NullPointerException when boolean value is null
-            final boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CalendarSupportedParameters.REPEATING.getValue(), element);
+            final Boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CalendarSupportedParameters.REPEATING.getValue(), element);
             baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue()).value(repeating).notNull();
 
-            if (repeating) {
+            if (Boolean.TRUE.equals(repeating)) {
                 final Integer frequency = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(CalendarSupportedParameters.FREQUENCY.getValue(), element);
                 baseDataValidator.reset().parameter(CalendarSupportedParameters.FREQUENCY.getValue()).value(frequency).notBlank()

@@ -27,8 +27,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
-import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationRepositoryWrapper;
 import org.apache.fineract.infrastructure.gcm.domain.Message;
 import org.apache.fineract.infrastructure.gcm.domain.Message.Priority;
 import org.apache.fineract.infrastructure.gcm.domain.Notification;
@@ -44,7 +42,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationSenderService {
 
-    private final DeviceRegistrationRepositoryWrapper deviceRegistrationRepositoryWrapper;
     private final SmsMessageRepository smsMessageRepository;
     private final ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService;
 
@@ -74,12 +71,8 @@ public class NotificationSenderService {
 
     public void sendNotification(Long clientId, List<SmsMessage> smsList) {
 
-        DeviceRegistration deviceRegistration = deviceRegistrationRepositoryWrapper.findDeviceRegistrationByClientId(clientId);
         NotificationConfigurationData notificationConfigurationData = propertiesReadPlatformService.getNotificationConfiguration();
         String registrationId = null;
-        if (deviceRegistration != null) {
-            registrationId = deviceRegistration.getRegistrationId();
-        }
         for (SmsMessage smsMessage : smsList) {
             try {
                 Notification notification = new Notification.Builder(GcmConstants.defaultIcon).title(GcmConstants.title)

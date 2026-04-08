@@ -21,8 +21,9 @@ package org.apache.fineract.infrastructure.core.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.annotation.PostConstruct;
 import java.util.Properties;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class CompatibilityConfig {
     ApplicationContext context;
 
     @PostConstruct
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void init() {
         Environment environment = context.getEnvironment();
 

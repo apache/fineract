@@ -22,9 +22,9 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -60,8 +60,8 @@ public class ClientEntityWorkbookPopulatorTest {
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         // in order to populate helper sheets
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);

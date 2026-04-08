@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.interestratechart.service;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public final class InterestIncentivesEnumerations {
     public static List<EnumOptionData> attributeName(final InterestIncentiveAttributeName[] attributeNames) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final InterestIncentiveAttributeName attributeName : attributeNames) {
-            if (!attributeName.isInvalid()) {
+            if (attributeName != InterestIncentiveAttributeName.INVALID) {
                 optionDatas.add(attributeName(attributeName));
             }
         }
@@ -100,7 +101,7 @@ public final class InterestIncentivesEnumerations {
     public static List<EnumOptionData> entityType(final InterestIncentiveEntityType[] entityTypes) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final InterestIncentiveEntityType entityType : entityTypes) {
-            if (!entityType.isInvalid()) {
+            if (entityType != InterestIncentiveEntityType.INVALID) {
                 optionDatas.add(entityType(entityType));
             }
         }
@@ -134,7 +135,7 @@ public final class InterestIncentivesEnumerations {
     public static List<EnumOptionData> incentiveType(final InterestIncentiveType[] incentiveTypes) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final InterestIncentiveType incentiveType : incentiveTypes) {
-            if (!incentiveType.isInvalid()) {
+            if (incentiveType != InterestIncentiveType.INVALID) {
                 optionDatas.add(incentiveType(incentiveType));
             }
         }

@@ -39,10 +39,12 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * Group Loan Integration Test for checking Loan Application Repayment Schedule.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class GroupLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
@@ -98,7 +101,7 @@ public class GroupLoanIntegrationTest {
         LOG.info("LoanId : {} ", loanId);
 
         List<Map<String, Object>> approvalFormData = new ArrayList<>();
-        approvalFormData.add(approvalFormData(loanId, "22 September 2011"));
+        approvalFormData.add(approvalFormData(loanId, "20 September 2011"));
 
         HashMap loanStatusHashMap = this.loanTransactionHelper.approveGlimAccount(this.requestSpec, this.responseSpec, approvalFormData,
                 glimId);

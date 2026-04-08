@@ -1,0 +1,31 @@
+{
+    "name": "LoanInstallmentDelinquencyBucketDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "delinquencyRange",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.DelinquencyRangeDataV1"
+            ]
+        },
+        {
+            "name": "amount",
+            "doc": "Contains installments  total, fee, interest, principal and penalty amount summaries",
+            "type": "org.apache.fineract.avro.loan.v1.LoanAmountDataV1"
+        },
+        {
+            "name": "charges",
+            "type": {
+                "type": "array",
+                "items": "org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1"
+            }
+        },
+        {
+            "name": "currency",
+            "type": "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+        }
+    ]
+}

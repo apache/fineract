@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.accounting.provisioning.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Accessors(chain = true)
 @Entity
 @Table(name = "m_loanproduct_provisioning_entry")
-public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
+public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "history_id", referencedColumnName = "id", nullable = false)

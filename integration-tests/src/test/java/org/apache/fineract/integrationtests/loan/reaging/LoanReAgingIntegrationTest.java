@@ -1,0 +1,1289 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.integrationtests.loan.reaging;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.restassured.path.json.JsonPath;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
+import org.junit.jupiter.api.Test;
+
+public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
+
+    @Test
+    public void test_LoanReAgeTransaction_Works() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, true, "01 January 2023"), //
+                    installment(312.5, false, "01 February 2023"), //
+                    installment(312.5, false, "01 March 2023"), //
+                    installment(312.5, false, "01 April 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
+            createdLoanId.set(loanId);
+        });
+
+        runAt("11 April 2023", () -> {
+
+            long loanId = createdLoanId.get();
+
+            // create charge
+            double chargeAmount = 10.0;
+            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            Long chargeId = chargeResult.getResourceId();
+
+            // add charge after maturity
+            PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "11 April 2023", chargeAmount);
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, true, "01 January 2023"), //
+                    installment(312.5, false, "01 February 2023"), //
+                    installment(312.5, false, "01 March 2023"), //
+                    installment(312.5, false, "01 April 2023"), //
+                    installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
+        });
+
+        runAt("12 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // create re-age transaction
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4, null);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    transaction(937.5, "Re-age", "12 April 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, true, "01 January 2023"), //
+                    installment(0, true, "01 February 2023"), //
+                    installment(0, true, "01 March 2023"), //
+                    installment(0, true, "01 April 2023"), //
+                    installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023"), //
+                    installment(234.38, false, "12 April 2023"), //
+                    installment(234.38, false, "12 May 2023"), //
+                    installment(234.38, false, "12 June 2023"), //
+                    installment(234.36, false, "12 July 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
+        });
+
+        runAt("13 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // create re-age transaction
+            undoReAgeLoan(loanId);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    reversedTransaction(937.5, "Re-age", "12 April 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, true, "01 January 2023"), //
+                    installment(312.5, false, "01 February 2023"), //
+                    installment(312.5, false, "01 March 2023"), //
+                    installment(312.5, false, "01 April 2023"), //
+                    installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
+        });
+        String repaymentExternalId = UUID.randomUUID().toString();
+        runAt("13 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("13 April 2023").locale("en").transactionAmount(100.0).externalId(repaymentExternalId));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    reversedTransaction(937.5, "Re-age", "12 April 2023"), //
+                    transaction(100.0, "Repayment", "13 April 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 0.0, true, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 212.5, false, "01 February 2023"), //
+                    installment(312.5, 0, 0, 0, 312.5, false, "01 March 2023"), //
+                    installment(312.5, 0, 0, 0, 312.5, false, "01 April 2023"), //
+                    installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023") //
+            );
+
+            // create re-age transaction
+            reAgeLoan(loanId, RepaymentFrequencyType.DAYS_STRING, 30, "13 April 2023", 3, null);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    reversedTransaction(937.5, "Re-age", "12 April 2023"), //
+                    transaction(100.0, "Repayment", "13 April 2023"), //
+                    transaction(837.5, "Re-age", "13 April 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 0.0, true, "01 January 2023"), //
+                    installment(100.0, 0, 0, 0, 0.0, true, "01 February 2023"), //
+                    installment(0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023"), //
+                    installment(279.17, 0, 0, 0, 279.17, false, "13 April 2023"), //
+                    installment(279.17, 0, 0, 0, 279.17, false, "13 May 2023"), //
+                    installment(279.16, 0, 0, 0, 279.16, false, "12 June 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 6, 12), LocalDate.of(2023, 6, 12));
+        });
+
+        runAt("14 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(100.0), "14 April 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    reversedTransaction(937.5, "Re-age", "12 April 2023"), //
+                    transaction(100.0, "Repayment", "13 April 2023"), //
+                    transaction(837.5, "Re-age", "13 April 2023"), //
+                    transaction(100.0, "Disbursement", "14 April 2023"), //
+                    transaction(25.0, "Down Payment", "14 April 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 0.0, true, "01 January 2023"), //
+                    installment(100.0, 0, 0, 0, 0.0, true, "01 February 2023"), //
+                    installment(0, 0, 0, 0, 0.0, true, "01 March 2023"), //
+                    installment(0, 0, 0, 0, 0.0, true, "01 April 2023"), //
+                    installment(0.0, 0.0, 10.0, 0.0, true, "11 April 2023"), //
+                    installment(279.17, 0, 0, 0, 264.17, false, "13 April 2023"), //
+                    installment(100, null, "14 April 2023"), //
+                    installment(25.0, 0, 0, 0, 25.0, false, "14 April 2023"), //
+                    installment(316.67, 0, 0, 0, 316.67, false, "13 May 2023"), //
+                    installment(316.66, 0, 0, 0, 316.66, false, "12 June 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 6, 12), LocalDate.of(2023, 6, 12));
+        });
+    }
+
+    @Test
+    public void test_LoanReAgeTransaction_WithChargeback_Works() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, true, "01 January 2023"), //
+                    installment(312.5, false, "01 February 2023"), //
+                    installment(312.5, false, "01 March 2023"), //
+                    installment(312.5, false, "01 April 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
+            createdLoanId.set(loanId);
+        });
+
+        String repaymentExternalId = UUID.randomUUID().toString();
+        runAt("01 February 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("01 February 2023").locale("en").transactionAmount(100.0).externalId(repaymentExternalId));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    transaction(100.0, "Repayment", "01 February 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 0.0, true, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 212.5, false, "01 February 2023"), //
+                    installment(312.5, 0, 0, 0, 312.5, false, "01 March 2023"), //
+                    installment(312.5, 0, 0, 0, 312.5, false, "01 April 2023") //
+            );
+        });
+
+        runAt("10 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // disburse Loan
+            loanTransactionHelper.chargebackLoanTransaction(loanId, repaymentExternalId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    transaction(100.0, "Repayment", "01 February 2023"), //
+                    transaction(100.0, "Chargeback", "10 April 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 0.0, true, "01 January 2023", 937.5), //
+                    installment(312.5, 0, 0, 0, 212.5, false, "01 February 2023", 625.0), //
+                    installment(312.5, 0, 0, 0, 312.5, false, "01 March 2023", 312.5), //
+                    installment(312.5, 0, 0, 0, 312.5, false, "01 April 2023", 0.0), //
+                    installment(100.0, 0.0, 0.0, 0.0, 100.0, false, "10 April 2023", 0.0) //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
+        });
+
+        runAt("12 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // create re-age transaction
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4, null);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(1250.0, "Disbursement", "01 January 2023"), //
+                    transaction(312.5, "Down Payment", "01 January 2023"), //
+                    transaction(100.0, "Repayment", "01 February 2023"), //
+                    transaction(100.0, "Chargeback", "10 April 2023"), //
+                    transaction(937.5, "Re-age", "12 April 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(1250, null, "01 January 2023"), //
+                    installment(312.5, 0, 0, 0, 0.0, true, "01 January 2023", 937.5), //
+                    installment(100.0, 0, 0, 0, 0.0, true, "01 February 2023", 837.5), //
+                    installment(0.0, 0, 0, 0, 0.0, true, "01 March 2023", 837.5), //
+                    installment(0.0, 0, 0, 0, 0.0, true, "01 April 2023", 837.5), //
+                    installment(0.0, 0.0, 0.0, 0.0, 0.0, true, "10 April 2023", 937.5), //
+                    installment(234.38, 0.0, 0.0, 0.0, 234.38, false, "12 April 2023", 703.12), //
+                    installment(234.38, 0.0, 0.0, 0.0, 234.38, false, "12 May 2023", 468.74), //
+                    installment(234.38, 0.0, 0.0, 0.0, 234.38, false, "12 June 2023", 234.36), //
+                    installment(234.36, 0.0, 0.0, 0.0, 234.36, false, "12 July 2023", 0.0) //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
+        });
+    }
+
+    @Test
+    public void test_LoanReAgeReverseReplay_Works() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 15;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments * repaymentEvery)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.DAYS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(500.0), "01 January 2023");
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023") //
+            );
+
+            // verify schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, false, "16 January 2023"), //
+                    installment(125.0, false, "31 January 2023"), //
+                    installment(125.0, false, "15 February 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 15));
+            createdLoanId.set(loanId);
+        });
+
+        runAt("27 February 2023", () -> {
+
+            long loanId = createdLoanId.get();
+
+            // create re-age transaction
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "01 March 2023", 6, null);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(375.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(0.0, true, "16 January 2023"), //
+                    installment(0.0, true, "31 January 2023"), //
+                    installment(0.0, true, "15 February 2023"), //
+                    installment(62.5, false, "01 March 2023"), //
+                    installment(62.5, false, "01 April 2023"), //
+                    installment(62.5, false, "01 May 2023"), //
+                    installment(62.5, false, "01 June 2023"), //
+                    installment(62.5, false, "01 July 2023"), //
+                    installment(62.5, false, "01 August 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("01 February 2023").locale("en").transactionAmount(125.0));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    transaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(0.0, true, "31 January 2023"), //
+                    installment(0.0, true, "15 February 2023"), //
+                    installment(41.67, false, "01 March 2023"), //
+                    installment(41.67, false, "01 April 2023"), //
+                    installment(41.67, false, "01 May 2023"), //
+                    installment(41.67, false, "01 June 2023"), //
+                    installment(41.67, false, "01 July 2023"), //
+                    installment(41.65, false, "01 August 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+        });
+        runAt("28 February 2023", () -> {
+
+            long loanId = createdLoanId.get();
+            PostLoansLoanIdTransactionsResponse repaymentResponse = loanTransactionHelper.makeLoanRepayment(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("02 February 2023").locale("en")
+                            .transactionAmount(200.0));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    transaction(200.0, "Repayment", "02 February 2023"), //
+                    transaction(50.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(125.0, true, "31 January 2023"), //
+                    installment(75.00, true, "15 February 2023"), //
+                    installment(8.33, false, "01 March 2023"), //
+                    installment(8.33, false, "01 April 2023"), //
+                    installment(8.33, false, "01 May 2023"), //
+                    installment(8.33, false, "01 June 2023"), //
+                    installment(8.33, false, "01 July 2023"), //
+                    installment(8.35, false, "01 August 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+
+            verifyLoanStatus(loanId, LoanStatus.ACTIVE);
+
+            loanTransactionHelper.reverseLoanTransaction(loanId, repaymentResponse.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("28 February 2023")
+                            .transactionAmount(0.0).locale("en"));
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    reversedTransaction(200.0, "Repayment", "02 February 2023"), //
+                    transaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(0.0, true, "31 January 2023"), //
+                    installment(0.0, true, "15 February 2023"), //
+                    installment(41.67, false, "01 March 2023"), //
+                    installment(41.67, false, "01 April 2023"), //
+                    installment(41.67, false, "01 May 2023"), //
+                    installment(41.67, false, "01 June 2023"), //
+                    installment(41.67, false, "01 July 2023"), //
+                    installment(41.65, false, "01 August 2023") //
+            );
+
+            verifyLoanStatus(loanId, LoanStatus.ACTIVE);
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
+        });
+
+        runAt("01 March 2023", () -> {
+
+            long loanId = createdLoanId.get();
+            // create re-age transaction
+            undoReAgeLoan(loanId);
+
+            // verify transactions
+            verifyTransactions(loanId, //
+                    transaction(500.0, "Disbursement", "01 January 2023"), //
+                    transaction(125.0, "Down Payment", "01 January 2023"), //
+                    transaction(125.0, "Repayment", "01 February 2023"), //
+                    reversedTransaction(200.0, "Repayment", "02 February 2023"), //
+                    reversedTransaction(250.0, "Re-age", "27 February 2023") //
+            );
+
+            verifyRepaymentSchedule(loanId, //
+                    installment(500.0, null, "01 January 2023"), //
+                    installment(125.0, true, "01 January 2023"), //
+                    installment(125.0, true, "16 January 2023"), //
+                    installment(125.0, false, "31 January 2023"), //
+                    installment(125.0, false, "15 February 2023") //
+            );
+            checkMaturityDates(loanId, LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 15));
+        });
+
+        runAt("02 March 2023", () -> {
+
+            long loanId = createdLoanId.get();
+            // create re-age transaction
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanTransactionHelper.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest()));
+            assertEquals(404, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.transaction.not.found"));
+        });
+    }
+
+    @Test
+    public void test_LoanReAgeTransactionWithInterestHandling() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+            createdLoanId.set(loanId);
+        });
+
+        runAt("12 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // create re-age transaction with Equal Amortization
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name());
+
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
+        });
+    }
+
+    @Test
+    public void testReAgeTemplate_WithMixOfPastAndFutureInstallments() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(repaymentEvery).installmentAmountInMultiplesOf(null)
+                    .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))
+                    .enableAutoRepaymentForDownPayment(true).repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue());
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                    .repaymentEvery(repaymentEvery).loanTermFrequency(numberOfRepayments)
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS).loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+            createdLoanId.set(loanId);
+        });
+
+        runAt("15 February 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            HashMap<String, Object> templateData = getReAgeTemplate(loanId);
+
+            assertNotNull(templateData, "ReAge template should not be null");
+
+            Integer numberOfPastInstallments = (Integer) templateData.get("numberOfPastInstallments");
+            Integer numberOfFutureInstallments = (Integer) templateData.get("numberOfFutureInstallments");
+            LocalDate nextInstallmentDueDate = parseDate(templateData.get("nextInstallmentDueDate"));
+            LocalDate calculatedStartDate = parseDate(templateData.get("calculatedStartDate"));
+
+            assertEquals(2, numberOfPastInstallments, "Should have 2 past installments (Jan 1 downpayment and Feb 1)");
+            assertEquals(2, numberOfFutureInstallments, "Should have 2 future installments (Mar 1 and Apr 1)");
+            assertNotNull(nextInstallmentDueDate, "nextInstallmentDueDate should not be null");
+            assertEquals(LocalDate.of(2023, 3, 1), nextInstallmentDueDate, "Next installment due date should be March 1");
+            assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
+            assertEquals(LocalDate.of(2023, 3, 15), calculatedStartDate, "Calculated start date should be business date + 1 month");
+        });
+    }
+
+    @Test
+    public void testReAgeTemplate_NewlyDisbursedLoan_AllFutureInstallments() {
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(repaymentEvery).installmentAmountInMultiplesOf(null)
+                    .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))
+                    .enableAutoRepaymentForDownPayment(true).repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue());
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                    .repaymentEvery(repaymentEvery).loanTermFrequency(numberOfRepayments)
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS).loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+
+            HashMap<String, Object> templateData = getReAgeTemplate(loanId);
+
+            assertNotNull(templateData, "ReAge template should not be null");
+
+            Integer numberOfPastInstallments = (Integer) templateData.get("numberOfPastInstallments");
+            Integer numberOfFutureInstallments = (Integer) templateData.get("numberOfFutureInstallments");
+            LocalDate nextInstallmentDueDate = parseDate(templateData.get("nextInstallmentDueDate"));
+            LocalDate calculatedStartDate = parseDate(templateData.get("calculatedStartDate"));
+
+            assertEquals(1, numberOfPastInstallments, "Should have 1 past installment (downpayment on same day counts as past)");
+            assertEquals(3, numberOfFutureInstallments, "Should have 3 future installments");
+            assertNotNull(nextInstallmentDueDate, "nextInstallmentDueDate should not be null");
+            assertEquals(LocalDate.of(2023, 2, 1), nextInstallmentDueDate, "Next installment due date should be February 1");
+            assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
+            assertEquals(LocalDate.of(2023, 2, 1), calculatedStartDate, "Calculated start date should be business date + 1 month");
+        });
+    }
+
+    @Test
+    public void testReAgeTemplate_InstallmentDueOnBusinessDate_CountsAsPast() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(repaymentEvery).installmentAmountInMultiplesOf(null)
+                    .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))
+                    .enableAutoRepaymentForDownPayment(true).repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue());
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                    .repaymentEvery(repaymentEvery).loanTermFrequency(numberOfRepayments)
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS).loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+            createdLoanId.set(loanId);
+        });
+
+        runAt("01 March 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            HashMap<String, Object> templateData = getReAgeTemplate(loanId);
+
+            assertNotNull(templateData, "ReAge template should not be null");
+
+            Integer numberOfPastInstallments = (Integer) templateData.get("numberOfPastInstallments");
+            Integer numberOfFutureInstallments = (Integer) templateData.get("numberOfFutureInstallments");
+            LocalDate nextInstallmentDueDate = parseDate(templateData.get("nextInstallmentDueDate"));
+            LocalDate calculatedStartDate = parseDate(templateData.get("calculatedStartDate"));
+
+            assertEquals(3, numberOfPastInstallments,
+                    "Should have 3 past installments (downpayment Jan 1, Feb 1, and Mar 1 - due on business date counts as past)");
+            assertEquals(1, numberOfFutureInstallments, "Should have 1 future installment (Apr 1)");
+            assertNotNull(nextInstallmentDueDate, "nextInstallmentDueDate should not be null");
+            assertEquals(LocalDate.of(2023, 4, 1), nextInstallmentDueDate, "Next installment due date should be April 1");
+            assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
+            assertEquals(LocalDate.of(2023, 4, 1), calculatedStartDate, "Calculated start date should be business date + 1 month");
+        });
+    }
+
+    @Test
+    public void testReAgeTemplate_AllInstallmentsPast_NoFutureInstallments() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(repaymentEvery).installmentAmountInMultiplesOf(null)
+                    .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))
+                    .enableAutoRepaymentForDownPayment(true).repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue());
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                    .repaymentEvery(repaymentEvery).loanTermFrequency(numberOfRepayments)
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS).loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+            createdLoanId.set(loanId);
+        });
+
+        runAt("15 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            HashMap<String, Object> templateData = getReAgeTemplate(loanId);
+
+            assertNotNull(templateData, "ReAge template should not be null");
+
+            Integer numberOfPastInstallments = (Integer) templateData.get("numberOfPastInstallments");
+            Integer numberOfFutureInstallments = (Integer) templateData.get("numberOfFutureInstallments");
+            LocalDate nextInstallmentDueDate = parseDate(templateData.get("nextInstallmentDueDate"));
+            LocalDate calculatedStartDate = parseDate(templateData.get("calculatedStartDate"));
+
+            assertEquals(4, numberOfPastInstallments, "Should have 4 past installments (all installments are past due)");
+            assertEquals(0, numberOfFutureInstallments, "Should have 0 future installments");
+            assertNull(nextInstallmentDueDate, "nextInstallmentDueDate should be null when no future installments");
+            assertNotNull(calculatedStartDate, "calculatedStartDate should still be computed");
+            assertEquals(LocalDate.of(2023, 5, 15), calculatedStartDate, "Calculated start date should be business date + 1 month");
+        });
+    }
+
+    @Test
+    public void testReAgeTemplate_BiMonthlyLoan_CalculatedStartDateUsesOneMonthNotRepayEvery() {
+        runAt("01 January 2023", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 2;
+            int repaymentEvery = 2;
+
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .numberOfRepayments(numberOfRepayments).repaymentEvery(repaymentEvery).installmentAmountInMultiplesOf(null)
+                    .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))
+                    .enableAutoRepaymentForDownPayment(true).repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue());
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                    .repaymentEvery(repaymentEvery).loanTermFrequency(numberOfRepayments * repaymentEvery)
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS).loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
+
+            HashMap<String, Object> templateData = getReAgeTemplate(loanId);
+
+            assertNotNull(templateData, "ReAge template should not be null");
+
+            LocalDate calculatedStartDate = parseDate(templateData.get("calculatedStartDate"));
+
+            assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
+            assertEquals(LocalDate.of(2023, 2, 1), calculatedStartDate,
+                    "Calculated start date should be business date + 1 month (not + 2 months based on repayEvery)");
+        });
+    }
+
+    @Test
+    public void test_LoanReAgeTransactionWithTransactionAmount() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("01 January 2023", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 3;
+            int repaymentEvery = 1;
+
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .installmentAmountInMultiplesOf(null) //
+                    .enableDownPayment(true) //
+                    .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25)) //
+                    .enableAutoRepaymentForDownPayment(true) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1250.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "01 January 2023"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(1250.0), "01 January 2023");
+            createdLoanId.set(loanId);
+        });
+
+        runAt("12 April 2023", () -> {
+            long loanId = createdLoanId.get();
+
+            // try re-age transaction with transaction amount in Zero
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4,
+                            LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name(), 0.0));
+            assertEquals(400, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("validation.msg.loan.reAge.transactionAmount.not.greater.than.zero"));
+
+            // try re-age transaction with transaction amount lower than outstanding
+            exception = assertThrows(CallFailedRuntimeException.class, () -> reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1,
+                    "12 April 2023", 4, LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name(), 900.0));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.reage.amount.not.match.with.calculated.reage.amount"));
+
+            // try re-age transaction with transaction amount higher than outstanding
+            exception = assertThrows(CallFailedRuntimeException.class, () -> reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1,
+                    "12 April 2023", 4, LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name(), 5000.0));
+            assertEquals(403, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("error.msg.loan.reage.amount.not.match.with.calculated.reage.amount"));
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4,
+                    LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name(), 937.5);
+
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
+        });
+    }
+
+    @Test
+    public void test_LoanReAge_RepeatedReAgeDoesNotCreateDuplicatePeriods() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("28 January 2026", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            // Create interest-bearing progressive loan product
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "28 January 2026", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "28 January 2026"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "28 January 2026");
+
+            createdLoanId.set(loanId);
+
+            // First re-age
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        // Second re-age on next day
+        runAt("29 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        // Third re-age on next day
+        runAt("30 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        // Fourth re-age on next day
+        runAt("31 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+
+            // Verify: should have 8 periods total (1 disbursement + 1 stub + 6 re-aged installments)
+            // NOT 12+ periods with spurious stubs from each intermediate reAge
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+
+            assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
+
+            // Verify due dates are correct
+            assertEquals(LocalDate.of(2026, 1, 28), periods.get(0).getDueDate()); // disbursement
+            assertEquals(LocalDate.of(2026, 1, 31), periods.get(1).getDueDate()); // stub
+            assertEquals(LocalDate.of(2026, 2, 28), periods.get(2).getDueDate()); // 1st re-aged
+            assertEquals(LocalDate.of(2026, 3, 28), periods.get(3).getDueDate()); // 2nd re-aged
+            assertEquals(LocalDate.of(2026, 4, 28), periods.get(4).getDueDate()); // 3rd re-aged
+            assertEquals(LocalDate.of(2026, 5, 28), periods.get(5).getDueDate()); // 4th re-aged
+            assertEquals(LocalDate.of(2026, 6, 28), periods.get(6).getDueDate()); // 5th re-aged
+            assertEquals(LocalDate.of(2026, 7, 28), periods.get(7).getDueDate()); // 6th re-aged
+
+            checkMaturityDates(loanId, LocalDate.of(2026, 7, 28), LocalDate.of(2026, 7, 28));
+        });
+    }
+
+    @Test
+    public void test_LoanReAge_RepeatedReAge_COBAccrualDoesNotFail() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("28 January 2026", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "28 January 2026", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "28 January 2026"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "28 January 2026");
+
+            createdLoanId.set(loanId);
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("29 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("30 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("31 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("01 February 2026", () -> {
+            long loanId = createdLoanId.get();
+
+            // Execute inline COB - this should not fail with NoSuchElementException
+            executeInlineCOB(loanId);
+
+            // Verify loan schedule still has 8 periods (1 disbursement + 1 stub + 6 re-aged)
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+
+            assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
+
+            // Verify loan is still active (COB did not crash)
+            assertEquals(LoanStatus.ACTIVE.getValue(), loanDetails.getStatus().getId().intValue());
+        });
+    }
+
+    @Test
+    public void test_LoanReAge_RepeatedReAge_PreviewShowsCorrectPeriods() {
+        AtomicLong createdLoanId = new AtomicLong();
+
+        runAt("28 January 2026", () -> {
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+            int numberOfRepayments = 6;
+            int repaymentEvery = 1;
+
+            PostLoanProductsRequest product = create4IProgressive() //
+                    .numberOfRepayments(numberOfRepayments) //
+                    .repaymentEvery(repaymentEvery) //
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L); //
+
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            double amount = 1000.0;
+
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "28 January 2026", amount, numberOfRepayments)//
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                    .repaymentEvery(repaymentEvery)//
+                    .loanTermFrequency(numberOfRepayments)//
+                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
+                    .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
+                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
+
+            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+
+            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+                    approveLoanRequest(amount, "28 January 2026"));
+
+            Long loanId = approvedLoanResult.getLoanId();
+
+            disburseLoan(loanId, BigDecimal.valueOf(amount), "28 January 2026");
+
+            createdLoanId.set(loanId);
+
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("29 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("30 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+        });
+
+        runAt("31 January 2026", () -> {
+            long loanId = createdLoanId.get();
+            reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "28 February 2026", 6, null);
+
+            // Verify actual schedule has 8 periods
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
+
+            assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
+        });
+
+        runAt("01 February 2026", () -> {
+            long loanId = createdLoanId.get();
+
+            // Call preview API via REST
+            String previewUrl = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/reage-preview" //
+                    + "?frequencyType=MONTHS&frequencyNumber=1&startDate=28+February+2026&numberOfInstallments=6" //
+                    + "&dateFormat=dd+MMMM+yyyy&locale=en&" + Utils.TENANT_IDENTIFIER;
+
+            String jsonResponse = Utils.performServerGet(requestSpec, responseSpec, previewUrl);
+
+            // Parse the periods array from the JSON response
+            List<HashMap<String, Object>> previewPeriods = JsonPath.from(jsonResponse).getList("periods");
+
+            assertNotNull(previewPeriods, "Preview response should contain periods");
+            assertEquals(8, previewPeriods.size(),
+                    "Preview should have 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + previewPeriods.size());
+        });
+    }
+
+    private HashMap<String, Object> getReAgeTemplate(Long loanId) {
+        final String GET_REAGE_TEMPLATE_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=reAge&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_REAGE_TEMPLATE_URL, "");
+    }
+
+    @SuppressWarnings("unchecked")
+    private LocalDate parseDate(Object dateObj) {
+        if (dateObj == null) {
+            return null;
+        }
+        List<Integer> dateArray = (List<Integer>) dateObj;
+        return LocalDate.of(dateArray.get(0), dateArray.get(1), dateArray.get(2));
+    }
+
+}

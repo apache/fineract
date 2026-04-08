@@ -37,13 +37,13 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -56,15 +56,14 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.TransactionBeforePivotDateNotAllowed;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SavingsAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -72,18 +71,8 @@ public class SavingsAccountTransactionDataValidator {
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
                     transactionAmountParamName, lienAllowedParamName, SavingsApiConstants.reasonForBlockParamName));
     private final ConfigurationDomainService configurationDomainService;
-    private final SavingsAccountAssembler savingAccountAssembler;
-
-    @Autowired
-    public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationDomainService configurationDomainService, final SavingsAccountAssembler savingAccountAssembler) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.configurationDomainService = configurationDomainService;
-        this.savingAccountAssembler = savingAccountAssembler;
-    }
 
     public void validateTransactionWithPivotDate(final LocalDate transactionDate, final SavingsAccount savingsAccount) {
-
         final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
         final boolean isRelaxingDaysConfigOn = this.configurationDomainService.isRelaxingDaysConfigForPivotDateEnabled();
 
@@ -94,14 +83,13 @@ public class SavingsAccountTransactionDataValidator {
             if (isRelaxingDaysConfigOn) {
                 pivotDate = pivotDate.minusDays(this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate());
             }
-            if (pivotDate.isAfter(transactionDate)) {
+            if (DateUtils.isAfter(pivotDate, transactionDate)) {
                 throw new TransactionBeforePivotDateNotAllowed(transactionDate, pivotDate);
             }
         }
     }
 
     public void validate(final JsonCommand command) {
-
         final String json = command.json();
 
         if (StringUtils.isBlank(json)) {
@@ -296,7 +284,7 @@ public class SavingsAccountTransactionDataValidator {
         }
 
         // compare two dates now
-        if (lastTransactionDate != null && transactionDate.isBefore(lastTransactionDate)) {
+        if (DateUtils.isBefore(transactionDate, lastTransactionDate)) {
             baseDataValidator.parameter(SavingsApiConstants.dateParamName).value(lastTransactionDate).failWithCode(
                     "validation.msg.date.can.not.be.before.last.transaction.date", "Amount can be put on hold only after last transaction");
         }
@@ -304,8 +292,7 @@ public class SavingsAccountTransactionDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction,
-            final AppUser createdUser) {
+    public SavingsAccountTransaction validateReleaseAmountAndAssembleForm(final SavingsAccountTransaction holdTransaction) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -326,10 +313,8 @@ public class SavingsAccountTransactionDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        LocalDateTime createdDate = DateUtils.getLocalDateTimeOfSystem();
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-        SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate, createdDate,
-                createdUser);
+        SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate);
         return transaction;
     }
 

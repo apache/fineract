@@ -51,7 +51,7 @@ import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -70,10 +70,8 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-@Service
 @RequiredArgsConstructor
 public class CenterReadPlatformServiceImpl implements CenterReadPlatformService {
 
@@ -81,7 +79,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final ColumnValidator columnValidator;
@@ -190,7 +188,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     + " g.hierarchy as hierarchy,   c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,"
                     + " ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,"
                     + "c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence,c.meeting_time as meetingTime,"
-                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_amount,0)) + (COALESCE(lrs.interest_amount,0) ELSE 0 END)) as installmentDue,"
+                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_amount,0) + COALESCE(lrs.interest_amount,0) ELSE 0 END) as installmentDue,"
                     + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totalCollected,"
                     + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate <= ? THEN COALESCE(lrs.principal_amount,0) + COALESCE(lrs.interest_amount,0) ELSE 0 END)"
                     + "- sum(CASE WHEN l.loan_status_id=300 and lrs.duedate <= ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totaldue, "
@@ -319,16 +317,16 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final SQLBuilder extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), searchParameters);
         extraCriteria.addNonNullCriteria("o.hierarchy like ", hierarchySearchString);
         sqlBuilder.append(' ').append(extraCriteria.getSQLTemplate());
-        if (searchParameters.isOrderByRequested()) {
+        if (searchParameters.hasOrderBy()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
                     searchParameters.getSortOrder());
 
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -354,15 +352,15 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         extraCriteria.addNonNullCriteria("o.hierarchy like ", hierarchySearchString);
         sqlBuilder.append(' ').append(extraCriteria.getSQLTemplate());
         if (searchParameters != null) {
-            if (searchParameters.isOrderByRequested()) {
+            if (searchParameters.hasOrderBy()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
                         searchParameters.getSortOrder());
             }
 
-            if (searchParameters.isLimited()) {
+            if (searchParameters.hasLimit()) {
                 sqlBuilder.append(" ");
-                if (searchParameters.isOffset()) {
+                if (searchParameters.hasOffset()) {
                     sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
                 } else {
                     sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -497,8 +495,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray;
         if (staffId != null) {
-            sql += " and g.staff_id=? ";
-            sql += "and lrs.duedate<=? and l.loan_type_enum=3";
+            sql += " and g.staff_id = ? ";
+            sql += " and lrs.duedate <= ? "; // and l.loan_type_enum = 3 ";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
                     meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, officeId, staffId, meetingDate);
@@ -512,7 +510,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if (isSkipRepaymentOnFirstMonthEnabled) {
-            numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            numberOfDays = this.configurationDomainService.retreivePeriodInNumberOfDaysForSkipMeetingDate().intValue();
         }
         for (CenterData centerData : centerDataArray) {
             if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(meetingDate, isSkipRepaymentOnFirstMonthEnabled,

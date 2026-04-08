@@ -31,6 +31,7 @@ public class GuarantorTestBuilder {
     @SuppressWarnings("unused")
     private static final String GUARANTOR_TYPE_STAFF = "2";
     private static final String GUARANTOR_TYPE_EXTERNAL = "3";
+    private static final String GUARANTOR_TYPE_GROUP = "4";
 
     private String guarantorTypeId = "1";
     private String entityId = null;
@@ -47,15 +48,15 @@ public class GuarantorTestBuilder {
         map.put("guarantorTypeId", guarantorTypeId);
         map.put("locale", "en");
         if (GUARANTOR_TYPE_EXTERNAL.equals(guarantorTypeId)) {
-            map.put("firstname", Utils.randomNameGenerator("guarantor_FirstName_", 5));
-            map.put("lastname", Utils.randomNameGenerator("guarantor_LastName_", 4));
+            map.put("firstname", Utils.randomStringGenerator("guarantor_FirstName_", 5));
+            map.put("lastname", Utils.randomStringGenerator("guarantor_LastName_", 4));
             map.put("addressLine1", addressLine1);
             map.put("addressLine2", addressLine2);
             map.put("city", city);
             map.put("state", state);
             map.put("zip", zip);
 
-        } else if (GUARANTOR_TYPE_CUSTOMER.equals(guarantorTypeId)) {
+        } else if (GUARANTOR_TYPE_CUSTOMER.equals(guarantorTypeId) || GUARANTOR_TYPE_GROUP.equals(guarantorTypeId)) {
             map.put("entityId", entityId);
             map.put("amount", guaranteeAmount);
             map.put("savingsId", savingsId);
@@ -78,6 +79,15 @@ public class GuarantorTestBuilder {
         this.savingsId = null;
         this.guaranteeAmount = null;
         this.guarantorTypeId = GUARANTOR_TYPE_CUSTOMER;
+        return this;
+    }
+
+    public GuarantorTestBuilder existingGroupWithGuaranteeAmount(final String entityId, final String savingsId,
+            final String guaranteeAmount) {
+        this.entityId = entityId;
+        this.savingsId = savingsId;
+        this.guaranteeAmount = guaranteeAmount;
+        this.guarantorTypeId = GUARANTOR_TYPE_GROUP;
         return this;
     }
 

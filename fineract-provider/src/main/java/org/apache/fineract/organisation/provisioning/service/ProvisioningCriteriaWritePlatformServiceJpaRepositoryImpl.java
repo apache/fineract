@@ -21,11 +21,13 @@ package org.apache.fineract.organisation.provisioning.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import jakarta.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
@@ -33,6 +35,7 @@ import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesRe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.provisioning.constants.ProvisioningCriteriaConstants;
@@ -44,17 +47,12 @@ import org.apache.fineract.organisation.provisioning.exception.ProvisioningCrite
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaNotFoundException;
 import org.apache.fineract.organisation.provisioning.serialization.ProvisioningCriteriaDefinitionJsonDeserializer;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implements ProvisioningCriteriaWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final ProvisioningCriteriaAssembler provisioningCriteriaAssembler;
@@ -63,28 +61,15 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
     private final GLAccountRepository glAccountRepository;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
 
-    @Autowired
-    public ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl(
-            final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer,
-            final ProvisioningCriteriaAssembler provisioningCriteriaAssembler,
-            final ProvisioningCriteriaRepository provisioningCriteriaRepository, final FromJsonHelper fromApiJsonHelper,
-            final GLAccountRepository glAccountRepository,
-            final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService) {
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.provisioningCriteriaAssembler = provisioningCriteriaAssembler;
-        this.provisioningCriteriaRepository = provisioningCriteriaRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.glAccountRepository = glAccountRepository;
-        this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService;
-    }
-
     @Override
     public CommandProcessingResult createProvisioningCriteria(JsonCommand command) {
         try {
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             ProvisioningCriteria provisioningCriteria = provisioningCriteriaAssembler.fromParsedJson(command.parsedJson());
             this.provisioningCriteriaRepository.saveAndFlush(provisioningCriteria);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId())
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(provisioningCriteria.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -103,7 +88,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new ProvisioningCriteriaCannotBeDeletedException(criteriaId);
         }
         this.provisioningCriteriaRepository.deleteById(criteriaId);
-        return new CommandProcessingResultBuilder().withEntityId(criteriaId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(criteriaId) //
+                .build();
     }
 
     @Override
@@ -120,7 +107,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                 updateProvisioningCriteriaDefinitions(provisioningCriteria, command);
                 provisioningCriteriaRepository.saveAndFlush(provisioningCriteria);
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId())
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(provisioningCriteria.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -175,8 +164,8 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.product.id(s).already.associated.existing.criteria",
                     "The selected products already associated with another Provisioning Criteria");
         }
-        LOG.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

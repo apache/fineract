@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.useradministration.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_password_validation_policy")
-public class PasswordValidationPolicy extends AbstractPersistableCustom {
+public class PasswordValidationPolicy extends AbstractPersistableCustom<Long> {
 
     @Column(name = "regex", nullable = false)
     private String regex;
