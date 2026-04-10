@@ -183,6 +183,14 @@ public class GlobalConfigurationHelper {
         rescheduleRepaymentsOnHolidaysDefault.put("trapDoor", false);
         defaults.add(rescheduleRepaymentsOnHolidaysDefault);
 
+        HashMap<String, Object> splitLargeLastInstallmentOnLoanRescheduleDefault = new HashMap<>();
+        splitLargeLastInstallmentOnLoanRescheduleDefault.put("name",
+                GlobalConfigurationConstants.SPLIT_LARGE_LAST_INSTALLMENT_ON_LOAN_RESCHEDULE);
+        splitLargeLastInstallmentOnLoanRescheduleDefault.put("value", 0L);
+        splitLargeLastInstallmentOnLoanRescheduleDefault.put("enabled", false);
+        splitLargeLastInstallmentOnLoanRescheduleDefault.put("trapDoor", false);
+        defaults.add(splitLargeLastInstallmentOnLoanRescheduleDefault);
+
         HashMap<String, Object> allowTransactionsOnHolidayDefault = new HashMap<>();
         allowTransactionsOnHolidayDefault.put("name", GlobalConfigurationConstants.ALLOW_TRANSACTIONS_ON_HOLIDAY);
         allowTransactionsOnHolidayDefault.put("value", 0L);

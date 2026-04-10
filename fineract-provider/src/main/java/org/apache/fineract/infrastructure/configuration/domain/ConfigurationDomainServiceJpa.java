@@ -105,6 +105,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public boolean isSplitLargeLastInstallmentOnLoanRescheduleEnabled() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(
+                GlobalConfigurationConstants.SPLIT_LARGE_LAST_INSTALLMENT_ON_LOAN_RESCHEDULE);
+        return property.isEnabled();
+    }
+
+    @Override
     public boolean allowTransactionsOnHolidayEnabled() {
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(
                 GlobalConfigurationConstants.ALLOW_TRANSACTIONS_ON_HOLIDAY);

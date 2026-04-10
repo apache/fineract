@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -47,6 +49,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalance
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRescheduledDueAdjustScheduleBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -98,8 +101,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanRescheduleRequestWritePlatformService {
 
     private static final DefaultScheduledDateGenerator DEFAULT_SCHEDULED_DATE_GENERATOR = new DefaultScheduledDateGenerator();
+    private static final int MAX_AUTO_SPLIT_ADDITIONAL_TERMS = 120;
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    private final ConfigurationDomainService configurationDomainService;
     private final PlatformSecurityContext platformSecurityContext;
     @Qualifier("loanRescheduleRequestDataValidator")
     private final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator;
@@ -486,12 +491,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     loanTermVariationsRepository.save(previousLoanTermVariations);
                 }
             }
-            BigDecimal annualNominalInterestRate = null;
-            List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
-            loanTermVariationsMapper.constructLoanTermVariations(scheduleGeneratorDTO.getFloatingRateDTO(), annualNominalInterestRate,
-                    loanTermVariations, loan);
-            loanApplicationTerms.getLoanTermVariations().setExceptionData(loanTermVariations);
-
             /*
              * for (LoanTermVariationsData loanTermVariation :
              * loanApplicationTerms.getLoanTermVariations().getDueDateVariation( )) { if
@@ -507,10 +506,28 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final MathContext mathContext = MoneyHelper.getMathContext();
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.loanRepaymentScheduleTransactionProcessorFactory
                     .determineProcessor(loan.transactionProcessingStrategy());
-            final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
-                    loanApplicationTerms.getInterestMethod());
-            final LoanScheduleDTO loanScheduleDTO = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms,
-                    loan, loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
+            LoanScheduleDTO loanScheduleDTO = generateRescheduledLoanSchedule(scheduleGeneratorDTO, loan, rescheduleFromDate, mathContext,
+                    loanRepaymentScheduleTransactionProcessor);
+            if (configurationDomainService.isSplitLargeLastInstallmentOnLoanRescheduleEnabled()) {
+                int autoAddedTerms = 0;
+                while (isLastInstallmentAmountTooLarge(loanScheduleDTO, loan.getCurrency(), rescheduleFromDate)
+                        && autoAddedTerms < MAX_AUTO_SPLIT_ADDITIONAL_TERMS) {
+                    final LocalDate extendFromDate = getLastRescheduledInstallmentDueDate(loanScheduleDTO, rescheduleFromDate);
+                    if (extendFromDate == null) {
+                        log.warn("Unable to determine extension due date for loan reschedule request {}", loanRescheduleRequestId);
+                        break;
+                    }
+                    addAutoExtendRepaymentPeriodVariation(loanRescheduleRequest, loan, extendFromDate);
+                    autoAddedTerms++;
+                    hasInterestRateChange = true;
+                    loanScheduleDTO = generateRescheduledLoanSchedule(scheduleGeneratorDTO, loan, rescheduleFromDate, mathContext,
+                            loanRepaymentScheduleTransactionProcessor);
+                }
+                if (autoAddedTerms == MAX_AUTO_SPLIT_ADDITIONAL_TERMS) {
+                    log.warn("Reached auto-split safeguard limit ({}) for loan reschedule request {}", MAX_AUTO_SPLIT_ADDITIONAL_TERMS,
+                            loanRescheduleRequestId);
+                }
+            }
 
             // Either the installments got recalculated or the model
             if (loanScheduleDTO.getInstallments() != null) {
@@ -562,6 +579,84 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // return an empty command processing result object
             return CommandProcessingResult.empty();
         }
+    }
+
+    private LoanScheduleDTO generateRescheduledLoanSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO, final Loan loan,
+            final LocalDate rescheduleFromDate, final MathContext mathContext,
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
+        final LoanApplicationTerms loanApplicationTerms = loanTermVariationsMapper.constructLoanApplicationTerms(scheduleGeneratorDTO,
+                loan);
+        final BigDecimal annualNominalInterestRate = null;
+        final List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
+        loanTermVariationsMapper.constructLoanTermVariations(scheduleGeneratorDTO.getFloatingRateDTO(), annualNominalInterestRate,
+                loanTermVariations, loan);
+        loanApplicationTerms.getLoanTermVariations().setExceptionData(loanTermVariations);
+
+        final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
+                loanApplicationTerms.getInterestMethod());
+        return loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms, loan,
+                loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
+    }
+
+    private void addAutoExtendRepaymentPeriodVariation(final LoanRescheduleRequest loanRescheduleRequest, final Loan loan,
+            final LocalDate termApplicableFromDate) {
+        final LoanTermVariations loanTermVariation = new LoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(),
+                termApplicableFromDate, BigDecimal.ONE, null, false, loan, loan.getStatus().getValue(), true, null);
+        loan.getLoanTermVariations().add(loanTermVariation);
+        loanRescheduleRequest.getLoanRescheduleRequestToTermVariationMappings()
+                .add(LoanRescheduleRequestToTermVariationMapping.createNew(loanRescheduleRequest, loanTermVariation));
+    }
+
+    private LocalDate getLastRescheduledInstallmentDueDate(final LoanScheduleDTO loanScheduleDTO, final LocalDate rescheduleFromDate) {
+        final List<LoanRepaymentScheduleInstallment> installments = loanScheduleDTO.getInstallments();
+        if (installments == null || installments.isEmpty()) {
+            return null;
+        }
+        LocalDate lastDueDate = null;
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (installment.isDownPayment() || DateUtils.isBefore(installment.getDueDate(), rescheduleFromDate)) {
+                continue;
+            }
+            lastDueDate = installment.getDueDate();
+        }
+        return lastDueDate;
+    }
+
+    private boolean isLastInstallmentAmountTooLarge(final LoanScheduleDTO loanScheduleDTO, final MonetaryCurrency currency,
+            final LocalDate rescheduleFromDate) {
+        final List<LoanRepaymentScheduleInstallment> installments = loanScheduleDTO.getInstallments();
+        if (installments == null || installments.size() < 2) {
+            return false;
+        }
+
+        final List<LoanRepaymentScheduleInstallment> rescheduledInstallments = new ArrayList<>();
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (installment.isDownPayment() || DateUtils.isBefore(installment.getDueDate(), rescheduleFromDate)) {
+                continue;
+            }
+            rescheduledInstallments.add(installment);
+        }
+
+        if (rescheduledInstallments.size() < 2) {
+            return false;
+        }
+
+        final LoanRepaymentScheduleInstallment lastInstallment = rescheduledInstallments.get(rescheduledInstallments.size() - 1);
+        BigDecimal maxPriorDueAmount = BigDecimal.ZERO;
+        for (int i = 0; i < rescheduledInstallments.size() - 1; i++) {
+            final BigDecimal dueAmount = rescheduledInstallments.get(i).getDue(currency).getAmount();
+            if (dueAmount.compareTo(maxPriorDueAmount) > 0) {
+                maxPriorDueAmount = dueAmount;
+            }
+        }
+
+        final BigDecimal lastInstallmentDueAmount = lastInstallment.getDue(currency).getAmount();
+        // Treat "too large" as a material increase, not rounding noise.
+        final BigDecimal minimumAbsoluteDifference = BigDecimal.ONE.setScale(currency.getDigitsAfterDecimal(), RoundingMode.UNNECESSARY);
+        final BigDecimal minimumRelativeDifference = maxPriorDueAmount.multiply(new BigDecimal("0.01"))
+                .setScale(currency.getDigitsAfterDecimal(), RoundingMode.HALF_UP);
+        final BigDecimal minimumMaterialDifference = minimumAbsoluteDifference.max(minimumRelativeDifference);
+        return lastInstallmentDueAmount.subtract(maxPriorDueAmount).compareTo(minimumMaterialDifference) > 0;
     }
 
     private Loan saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {

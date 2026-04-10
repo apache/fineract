@@ -28,6 +28,8 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +68,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
     private final String dateString = "4 September 2014";
+    private static final LocalDate SPLIT_E2E_RESCHEDULE_FROM_DATE = LocalDate.of(2015, 1, 4);
 
     @BeforeEach
     public void initialize() {
@@ -288,12 +291,19 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
                 new PutGlobalConfigurationsRequest().enabled(true));
     }
 
+    private void enableSplitLargeLastInstallmentOnLoanRescheduleConfig() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.SPLIT_LARGE_LAST_INSTALLMENT_ON_LOAN_RESCHEDULE,
+                new PutGlobalConfigurationsRequest().enabled(true));
+    }
+
     /**
      * disables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void disableConfig() {
         globalConfigurationHelper.updateGlobalConfiguration(
                 GlobalConfigurationConstants.IS_INTEREST_TO_BE_RECOVERED_FIRST_WHEN_GREATER_THAN_EMI,
+                new PutGlobalConfigurationsRequest().enabled(false));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.SPLIT_LARGE_LAST_INSTALLMENT_ON_LOAN_RESCHEDULE,
                 new PutGlobalConfigurationsRequest().enabled(false));
     }
 
@@ -430,6 +440,32 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         this.createAndApproveLoanRescheduleRequestForRecoverInterestFirstAndFixedEMI();
     }
 
+    @Test
+    public void testSplitLargeLastInstallmentOnLoanRescheduleE2e() {
+        this.createRequiredEntities();
+        this.disableSplitLargeLastInstallmentOnLoanRescheduleConfig();
+        RepaymentScheduleSnapshot withoutSplit = this
+                .createAndApproveLoanRescheduleRequestForRecoverInterestFirstAndFixedEMIAndGetScheduleSnapshot();
+
+        this.createRequiredEntities();
+        this.enableSplitLargeLastInstallmentOnLoanRescheduleConfig();
+        RepaymentScheduleSnapshot withSplit = this
+                .createAndApproveLoanRescheduleRequestForRecoverInterestFirstAndFixedEMIAndGetScheduleSnapshot();
+        LOG.info("WITHOUT split config schedule snapshot: {}", withoutSplit);
+        LOG.info("WITH split config schedule snapshot: {}", withSplit);
+
+        assertTrue(isLastInstallmentOversized(withoutSplit.getLastInstallmentDue(), withoutSplit.getMaxDueBeforeLast()),
+                "EXPECTED baseline scenario to contain oversized last installment");
+        assertTrue(withSplit.getInstallmentCount() > withoutSplit.getInstallmentCount(),
+                "EXPECTED split config to extend repayment schedule with additional period(s)");
+        assertTrue(withSplit.getLastInstallmentDue().compareTo(withoutSplit.getLastInstallmentDue()) < 0,
+                "EXPECTED split config to reduce last installment due amount");
+        assertTrue(!isLastInstallmentOversized(withSplit.getLastInstallmentDue(), withSplit.getMaxDueBeforeLast()),
+                "EXPECTED LAST INSTALLMENT to be within material difference when split config is enabled");
+        assertTrue(withSplit.getLastOutstandingForPeriod().compareTo(withoutSplit.getLastOutstandingForPeriod()) < 0,
+                "EXPECTED split config to reduce the final period outstanding balance");
+    }
+
     /**
      * create new loan reschedule request with combination of date change, recover interest first and fixed emi
      **/
@@ -473,6 +509,145 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
+    }
+
+    private RepaymentScheduleSnapshot createAndApproveLoanRescheduleRequestForRecoverInterestFirstAndFixedEMIAndGetScheduleSnapshot() {
+        LOG.info(
+                "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
+
+        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 October 2015")
+                .updateRecalculateInterest(true).build(this.loanId.toString());
+
+        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+
+        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
+        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("approved"));
+        return getRepaymentScheduleSnapshot();
+    }
+
+    private RepaymentScheduleSnapshot getRepaymentScheduleSnapshot() {
+        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+                "repaymentSchedule");
+        final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
+
+        List<BigDecimal> dueAmounts = new ArrayList<>();
+        List<BigDecimal> outstandingBalances = new ArrayList<>();
+        for (Object periodObject : periods) {
+            HashMap period = (HashMap) periodObject;
+            if (Boolean.TRUE.equals(period.get("downPaymentPeriod"))) {
+                continue;
+            }
+            LocalDate dueDate = parseDueDate(period.get("dueDate"));
+            if (dueDate != null && dueDate.isBefore(SPLIT_E2E_RESCHEDULE_FROM_DATE)) {
+                continue;
+            }
+            BigDecimal dueAmount = parseCurrencyAmount(period.get("totalDueForPeriod"));
+            if (dueAmount != null) {
+                dueAmounts.add(dueAmount);
+                BigDecimal outstandingForPeriod = parseCurrencyAmount(period.get("totalOutstandingForPeriod"));
+                if (outstandingForPeriod == null) {
+                    outstandingForPeriod = parseCurrencyAmount(period.get("principalLoanBalanceOutstanding"));
+                }
+                if (outstandingForPeriod != null) {
+                    outstandingBalances.add(outstandingForPeriod);
+                }
+            }
+        }
+
+        assertTrue(dueAmounts.size() >= 2, "EXPECTED at least two repayment periods with due amounts");
+        assertTrue(!outstandingBalances.isEmpty(), "EXPECTED repayment schedule to contain balance information");
+
+        BigDecimal lastInstallmentDue = dueAmounts.get(dueAmounts.size() - 1);
+        BigDecimal maxDueBeforeLast = BigDecimal.ZERO;
+        for (int i = 0; i < dueAmounts.size() - 1; i++) {
+            BigDecimal due = dueAmounts.get(i);
+            if (due.compareTo(maxDueBeforeLast) > 0) {
+                maxDueBeforeLast = due;
+            }
+        }
+
+        BigDecimal lastOutstandingForPeriod = outstandingBalances.get(outstandingBalances.size() - 1);
+        return new RepaymentScheduleSnapshot(dueAmounts, lastInstallmentDue, maxDueBeforeLast, lastOutstandingForPeriod);
+    }
+
+    private BigDecimal parseCurrencyAmount(Object value) {
+        if (value == null) {
+            return null;
+        }
+        return new BigDecimal(value.toString()).setScale(getCurrencyScale(), RoundingMode.HALF_UP);
+    }
+
+    private LocalDate parseDueDate(Object value) {
+        if (!(value instanceof List<?> dateParts) || dateParts.size() < 3) {
+            return null;
+        }
+        return LocalDate.of(parseDatePart(dateParts.get(0)), parseDatePart(dateParts.get(1)), parseDatePart(dateParts.get(2)));
+    }
+
+    private int parseDatePart(Object value) {
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        return Integer.parseInt(value.toString());
+    }
+
+    private void disableSplitLargeLastInstallmentOnLoanRescheduleConfig() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.SPLIT_LARGE_LAST_INSTALLMENT_ON_LOAN_RESCHEDULE,
+                new PutGlobalConfigurationsRequest().enabled(false));
+    }
+
+    private boolean isLastInstallmentOversized(BigDecimal lastInstallmentDue, BigDecimal maxDueBeforeLast) {
+        BigDecimal minimumAbsoluteDifference = BigDecimal.ONE.setScale(getCurrencyScale(), RoundingMode.UNNECESSARY);
+        BigDecimal minimumRelativeDifference = maxDueBeforeLast.multiply(new BigDecimal("0.01")).setScale(getCurrencyScale(),
+                RoundingMode.HALF_UP);
+        BigDecimal minimumMaterialDifference = minimumAbsoluteDifference.max(minimumRelativeDifference);
+        return lastInstallmentDue.subtract(maxDueBeforeLast).compareTo(minimumMaterialDifference) > 0;
+    }
+
+    private int getCurrencyScale() {
+        return new BigDecimal(loanPrincipalAmount).scale();
+    }
+
+    private static final class RepaymentScheduleSnapshot {
+
+        private final List<BigDecimal> dueAmounts;
+        private final BigDecimal lastInstallmentDue;
+        private final BigDecimal maxDueBeforeLast;
+        private final BigDecimal lastOutstandingForPeriod;
+
+        private RepaymentScheduleSnapshot(List<BigDecimal> dueAmounts, BigDecimal lastInstallmentDue, BigDecimal maxDueBeforeLast,
+                BigDecimal lastOutstandingForPeriod) {
+            this.dueAmounts = dueAmounts;
+            this.lastInstallmentDue = lastInstallmentDue;
+            this.maxDueBeforeLast = maxDueBeforeLast;
+            this.lastOutstandingForPeriod = lastOutstandingForPeriod;
+        }
+
+        private int getInstallmentCount() {
+            return dueAmounts.size();
+        }
+
+        private BigDecimal getLastInstallmentDue() {
+            return lastInstallmentDue;
+        }
+
+        private BigDecimal getMaxDueBeforeLast() {
+            return maxDueBeforeLast;
+        }
+
+        private BigDecimal getLastOutstandingForPeriod() {
+            return lastOutstandingForPeriod;
+        }
+
+        @Override
+        public String toString() {
+            return "installments=" + getInstallmentCount() + ", lastDue=" + lastInstallmentDue + ", maxDueBeforeLast=" + maxDueBeforeLast
+                    + ", lastOutstanding=" + lastOutstandingForPeriod + ", dueAmounts=" + dueAmounts;
+        }
     }
 
     @Test

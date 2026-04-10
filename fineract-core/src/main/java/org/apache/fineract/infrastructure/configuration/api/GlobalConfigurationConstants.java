@@ -24,6 +24,7 @@ public final class GlobalConfigurationConstants {
     public static final String AMAZON_S3 = "amazon-s3";
     public static final String RESCHEDULE_FUTURE_REPAYMENTS = "reschedule-future-repayments";
     public static final String RESCHEDULE_REPAYMENTS_ON_HOLIDAYS = "reschedule-repayments-on-holidays";
+    public static final String SPLIT_LARGE_LAST_INSTALLMENT_ON_LOAN_RESCHEDULE = "split-large-last-installment-on-loan-reschedule";
     public static final String ALLOW_TRANSACTIONS_ON_HOLIDAY = "allow-transactions-on-holiday";
     public static final String ALLOW_TRANSACTIONS_ON_NON_WORKING_DAY = "allow-transactions-on-non-workingday";
     public static final String CONSTRAINT_APPROACH_FOR_DATATABLES = "constraint-approach-for-datatables";

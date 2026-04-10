@@ -60,6 +60,7 @@ import org.springframework.stereotype.Component;
         + "reschedule-future-repayments - defaults to false - if true reschedules repayemnts which falls on a non-working day to configured repayment rescheduling rule\n"
         + "allow-transactions-on-non-workingday - defaults to false - if true allows transactions on non-working days\n"
         + "reschedule-repayments-on-holidays - defaults to false - if true reschedules repayemnts which falls on a non-working day to defined reschedule date\n"
+        + "split-large-last-installment-on-loan-reschedule - defaults to false - if true adds extra repayment term(s) during loan reschedule to avoid an oversized final installment\n"
         + "allow-transactions-on-holiday - defaults to false - if true allows transactions on holidays\n"
         + "savings-interest-posting-current-period-end - Set it at the database level before any savings interest is posted. When set as false(default), interest will be posted on the first date of next period. If set as true, interest will be posted on last date of current period. There is no difference in the interest amount posted.\n"
         + "financial-year-beginning-month - Set it at the database level before any savings interest is posted. Allowed values 1 - 12 (January - December). Interest posting periods are evaluated based on this configuration.\n"
