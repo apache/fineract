@@ -445,6 +445,35 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
         });
     }
 
+    @Test
+    public void repaymentTemplateReturnsNextUnpaidInstallmentAmount() {
+        runAt("15 February 2023", () -> {
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId,
+                    BigDecimal.valueOf(500.0), 45, 15, 3, BigDecimal.ZERO, "01 January 2023", "01 January 2023");
+
+            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 January 2023").locale("en"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
+
+            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 January 2023").locale("en").transactionAmount(125.0));
+
+            final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper
+                    .retrieveTransactionTemplate(loanResponse.getLoanId(), "repayment", DATETIME_PATTERN, "16 January 2023", LOCALE);
+
+            assertNotNull(transactionTemplate);
+            assertEquals(125.0, transactionTemplate.getAmount());
+            assertEquals(125.0, transactionTemplate.getPrincipalPortion());
+            assertEquals(0.0, transactionTemplate.getInterestPortion());
+            assertEquals(0.0, transactionTemplate.getFeeChargesPortion());
+            assertEquals(0.0, transactionTemplate.getPenaltyChargesPortion());
+        });
+    }
+
     // UC5: Refund past due
     // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
     // 1. Disburse the loan

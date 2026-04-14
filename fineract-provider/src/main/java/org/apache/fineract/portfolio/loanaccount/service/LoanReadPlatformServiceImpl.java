@@ -2125,11 +2125,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
         public String schema() {
             // TODO: investigate whether it can be refactored to be more efficient
-            return " GREATEST(loan_transaction.transaction_date, ls.dueDate) as transactionDate,"
-                    + " coalesce(ls.principal_amount, 0) - coalesce(ls.principal_writtenoff_derived, 0) - coalesce(ls.principal_completed_derived, 0) as principalDue,"
-                    + " coalesce(ls.interest_amount, 0) - coalesce(ls.interest_completed_derived, 0) - coalesce(ls.interest_waived_derived, 0) - coalesce(ls.interest_writtenoff_derived, 0) as interestDue,"
-                    + " coalesce(ls.fee_charges_amount, 0) - coalesce(ls.fee_charges_completed_derived, 0) - coalesce(ls.fee_charges_writtenoff_derived, 0) - coalesce(ls.fee_charges_waived_derived, 0) as feeDue,"
-                    + " coalesce(ls.penalty_charges_amount, 0) - coalesce(ls.penalty_charges_completed_derived, 0) - coalesce(ls.penalty_charges_writtenoff_derived, 0) - coalesce(ls.penalty_charges_waived_derived, 0) as penaltyDue,"
+            final String principalDueExpression = "coalesce(ls.principal_amount, 0) - coalesce(ls.principal_writtenoff_derived, 0) "
+                    + "- coalesce(ls.principal_completed_derived, 0)";
+            final String interestDueExpression = "coalesce(ls.interest_amount, 0) - coalesce(ls.interest_completed_derived, 0) "
+                    + "- coalesce(ls.interest_waived_derived, 0) - coalesce(ls.interest_writtenoff_derived, 0)";
+            final String feeDueExpression = "coalesce(ls.fee_charges_amount, 0) - coalesce(ls.fee_charges_completed_derived, 0) "
+                    + "- coalesce(ls.fee_charges_writtenoff_derived, 0) - coalesce(ls.fee_charges_waived_derived, 0)";
+            final String penaltyDueExpression = "coalesce(ls.penalty_charges_amount, 0) "
+                    + "- coalesce(ls.penalty_charges_completed_derived, 0) - coalesce(ls.penalty_charges_writtenoff_derived, 0) "
+                    + "- coalesce(ls.penalty_charges_waived_derived, 0)";
+            final String totalDueExpression = principalDueExpression + " + " + interestDueExpression + " + " + feeDueExpression + " + "
+                    + penaltyDueExpression;
+
+            return " GREATEST(loan_transaction.transaction_date, ls.dueDate) as transactionDate," + " " + principalDueExpression
+                    + " as principalDue," + " " + interestDueExpression + " as interestDue," + " " + feeDueExpression + " as feeDue,"
+                    + " " + penaltyDueExpression + " as penaltyDue,"
                     + " l.currency_code as currencyCode," + " l.currency_digits as currencyDigits,"
                     + " l.currency_multiplesof as inMultiplesOf," + " l.net_disbursal_amount as netDisbursalAmount," + " rc."
                     + sqlGenerator.escape("name") + " as currencyName," + " rc.display_symbol as currencyDisplaySymbol,"
@@ -2137,8 +2147,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     + sqlGenerator.escape("code") + " = l.currency_code" + " JOIN m_loan_repayment_schedule ls ON ls.loan_id = l.id"
                     + " LEFT JOIN (" + " select tr.loan_id, max(tr.transaction_date) as transaction_date" + " from m_loan_transaction tr"
                     + " where tr.transaction_type_enum in (?,?)" + " AND tr.is_reversed = false" + " group by tr.loan_id"
-                    + " ) loan_transaction ON loan_transaction.loan_id = l.id" + " WHERE l.id = ?" + " ORDER BY ls.installment"
-                    + " LIMIT 1";
+                    + " ) loan_transaction ON loan_transaction.loan_id = l.id" + " WHERE l.id = ?" + " ORDER BY CASE WHEN ("
+                    + totalDueExpression + ") > 0 THEN 0 ELSE 1 END, ls.installment" + " LIMIT 1";
         }
 
         @Override
