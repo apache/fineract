@@ -48,25 +48,29 @@ class ApiParameterHelperTest {
 
     @Test
     void givenMissingOrBlankCommandId_whenExtractingCommandId_thenReturnsNull() {
-        MultivaluedMap<String, String> params = queryParams();
-        Assertions.assertNull(ApiParameterHelper.commandId(params));
-
-        params = queryParams(COMMAND_ID, BLANK_SPACES);
-        Assertions.assertNull(ApiParameterHelper.commandId(params));
+        Assertions.assertNull(ApiParameterHelper.commandId(queryParams()));
+        Assertions.assertNull(ApiParameterHelper.commandId(queryParams(COMMAND_ID, BLANK_SPACES)));
     }
 
     @Test
     void givenValidCommandId_whenExtractingCommandId_thenReturnsLongValue() {
-        MultivaluedMap<String, String> params = queryParams(COMMAND_ID, "42");
-
-        Assertions.assertEquals(42L, ApiParameterHelper.commandId(params));
+        Assertions.assertEquals(42L, ApiParameterHelper.commandId(queryParams(COMMAND_ID, "42")));
     }
 
     @Test
-    void givenNonNumericCommandId_whenExtractingCommandId_thenThrowsNumberFormatException() {
-        MultivaluedMap<String, String> params = queryParams(COMMAND_ID, "abc");
+    void givenInvalidCommandId_whenExtractingCommandId_thenThrowsNumberFormatException() {
+        Assertions.assertThrows(NumberFormatException.class,
+                () -> ApiParameterHelper.commandId(queryParams(COMMAND_ID, "abc")));
+    }
 
-        Assertions.assertThrows(NumberFormatException.class, () -> ApiParameterHelper.commandId(params));
+    @Test
+    void givenValidFields_whenExtractingFields_thenReturnsCorrectSet() {
+        Set<String> fields = ApiParameterHelper.extractFieldsForResponseIfProvided(queryParams(FIELDS, "id,name,description"));
+
+        Assertions.assertEquals(3, fields.size());
+        Assertions.assertTrue(fields.contains("id"));
+        Assertions.assertTrue(fields.contains("name"));
+        Assertions.assertTrue(fields.contains("description"));
     }
 
     @Test
@@ -77,23 +81,21 @@ class ApiParameterHelperTest {
 
     @Test
     void givenCommaSeparatedFields_whenExtractingFields_thenReturnsTrimmedDistinctSet() {
-        MultivaluedMap<String, String> params = queryParams(FIELDS, "id, name, id");
-
-        Assertions.assertEquals(Set.of("id", "name"), ApiParameterHelper.extractFieldsForResponseIfProvided(params));
+        Assertions.assertEquals(Set.of("id", "name"),
+                ApiParameterHelper.extractFieldsForResponseIfProvided(queryParams(FIELDS, "id, name, id")));
     }
 
     @Test
     void givenMissingOrBlankAssociations_whenExtractingAssociations_thenReturnsEmptySet() {
         Assertions.assertTrue(ApiParameterHelper.extractAssociationsForResponseIfProvided(queryParams()).isEmpty());
-        Assertions
-                .assertTrue(ApiParameterHelper.extractAssociationsForResponseIfProvided(queryParams(ASSOCIATIONS, BLANK_SPACES)).isEmpty());
+        Assertions.assertTrue(
+                ApiParameterHelper.extractAssociationsForResponseIfProvided(queryParams(ASSOCIATIONS, BLANK_SPACES)).isEmpty());
     }
 
     @Test
     void givenCommaSeparatedAssociations_whenExtractingAssociations_thenReturnsTrimmedSet() {
-        MultivaluedMap<String, String> params = queryParams(ASSOCIATIONS, CHARGES + ", " + REPAYMENTS);
-
-        Assertions.assertEquals(Set.of(CHARGES, REPAYMENTS), ApiParameterHelper.extractAssociationsForResponseIfProvided(params));
+        Assertions.assertEquals(Set.of(CHARGES, REPAYMENTS),
+                ApiParameterHelper.extractAssociationsForResponseIfProvided(queryParams(ASSOCIATIONS, CHARGES + ", " + REPAYMENTS)));
     }
 
     @Test
@@ -117,9 +119,8 @@ class ApiParameterHelperTest {
     @Test
     void givenExcludeQueryParam_whenExcludingAssociations_thenRemovesRequestedValues() {
         Set<String> fields = new HashSet<>(Set.of(CHARGES, REPAYMENTS, GUARANTORS));
-        MultivaluedMap<String, String> params = queryParams(EXCLUDE, REPAYMENTS);
 
-        ApiParameterHelper.excludeAssociationsForResponseIfProvided(params, fields);
+        ApiParameterHelper.excludeAssociationsForResponseIfProvided(queryParams(EXCLUDE, REPAYMENTS), fields);
 
         Assertions.assertEquals(Set.of(CHARGES, GUARANTORS), fields);
     }
@@ -147,16 +148,14 @@ class ApiParameterHelperTest {
 
     @Test
     void givenBlankLocale_whenExtractingLocale_thenThrowsValidationException() {
-        MultivaluedMap<String, String> params = queryParams(LOCALE, " ");
-
-        Assertions.assertThrows(PlatformApiDataValidationException.class, () -> ApiParameterHelper.extractLocale(params));
+        Assertions.assertThrows(PlatformApiDataValidationException.class,
+                () -> ApiParameterHelper.extractLocale(queryParams(LOCALE, " ")));
     }
 
     @Test
     void givenInvalidLocale_whenExtractingLocale_thenThrowsValidationException() {
-        MultivaluedMap<String, String> params = queryParams(LOCALE, "zz_US");
-
-        Assertions.assertThrows(PlatformApiDataValidationException.class, () -> ApiParameterHelper.extractLocale(params));
+        Assertions.assertThrows(PlatformApiDataValidationException.class,
+                () -> ApiParameterHelper.extractLocale(queryParams(LOCALE, "zz_US")));
     }
 
     @Test
@@ -200,9 +199,8 @@ class ApiParameterHelperTest {
         Assertions.assertFalse(ApiParameterHelper.genericResultSetPassed(queryParams()));
     }
 
-    // Tiny helper so each test can declare params inline and stay readable.
-    private static MultivaluedMap<String, String> queryParams(String... keyValuePairs) {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
+    private static MultivaluedMap<String, String> queryParams(final String... keyValuePairs) {
+        final MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
         for (int i = 0; i < keyValuePairs.length; i += 2) {
             params.add(keyValuePairs[i], keyValuePairs[i + 1]);
         }
