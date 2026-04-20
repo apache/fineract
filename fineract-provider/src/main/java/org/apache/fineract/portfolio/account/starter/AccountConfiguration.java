@@ -26,8 +26,6 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
-import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
 import org.apache.fineract.portfolio.account.domain.AccountTransferAssembler;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
@@ -85,18 +83,17 @@ public class AccountConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AccountTransfersWritePlatformService.class)
-    public AccountTransfersWritePlatformService accountTransfersWritePlatformService(
-            AccountTransfersDataValidator accountTransfersDataValidator, AccountTransferAssembler accountTransferAssembler,
+    public AccountTransfersWritePlatformService accountTransfersWritePlatformService(AccountTransferAssembler accountTransferAssembler,
             AccountTransferRepository accountTransferRepository, SavingsAccountAssembler savingsAccountAssembler,
             SavingsAccountDomainService savingsAccountDomainService, LoanAssembler loanAccountAssembler,
             LoanAccountDomainService loanAccountDomainService, SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             AccountTransferDetailRepository accountTransferDetailRepository, LoanReadPlatformService loanReadPlatformService,
             GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory,
             FineractProperties fineractProperties, LoanAdjustmentService loanAdjustmentService) {
-        return new AccountTransfersWritePlatformServiceImpl(accountTransfersDataValidator, accountTransferAssembler,
-                accountTransferRepository, savingsAccountAssembler, savingsAccountDomainService, loanAccountAssembler,
-                loanAccountDomainService, savingsAccountWritePlatformService, accountTransferDetailRepository, loanReadPlatformService,
-                gsimRepository, configurationDomainService, externalIdFactory, fineractProperties, loanAdjustmentService);
+        return new AccountTransfersWritePlatformServiceImpl(accountTransferAssembler, accountTransferRepository, savingsAccountAssembler,
+                savingsAccountDomainService, loanAccountAssembler, loanAccountDomainService, savingsAccountWritePlatformService,
+                accountTransferDetailRepository, loanReadPlatformService, gsimRepository, configurationDomainService, externalIdFactory,
+                fineractProperties, loanAdjustmentService);
     }
 
     @Bean
@@ -127,9 +124,9 @@ public class AccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(StandingInstructionWritePlatformService.class)
     public StandingInstructionWritePlatformService standingInstructionWritePlatformService(
-            StandingInstructionDataValidator standingInstructionDataValidator, StandingInstructionAssembler standingInstructionAssembler,
-            AccountTransferDetailRepository accountTransferDetailRepository, StandingInstructionRepository standingInstructionRepository) {
-        return new StandingInstructionWritePlatformServiceImpl(standingInstructionDataValidator, standingInstructionAssembler,
-                accountTransferDetailRepository, standingInstructionRepository);
+            StandingInstructionAssembler standingInstructionAssembler, AccountTransferDetailRepository accountTransferDetailRepository,
+            StandingInstructionRepository standingInstructionRepository) {
+        return new StandingInstructionWritePlatformServiceImpl(standingInstructionAssembler, accountTransferDetailRepository,
+                standingInstructionRepository);
     }
 }

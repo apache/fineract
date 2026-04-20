@@ -5231,10 +5231,7 @@ public class LoanStepDef extends AbstractStepDef {
             final String amount) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.getLoanId();
-
-        // Get current business date to ensure we're not creating backdated transactions
-        String currentBusinessDate = businessDateHelper.getBusinessDate();
-        log.debug("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
+        eventStore.reset();
 
         final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
@@ -5248,6 +5245,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
         log.debug("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.getResourceId());
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
     @And("Admin adds capitalized income adjustment of capitalized income transaction made on {string} with {string} payment type to the loan on {string} with {string} EUR transaction amount")
@@ -5255,10 +5253,7 @@ public class LoanStepDef extends AbstractStepDef {
             final String transactionDate, final String amount) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.getLoanId();
-
-        // Get current business date to ensure we're not creating backdated transactions
-        String currentBusinessDate = businessDateHelper.getBusinessDate();
-        log.debug("Current business date: {}, Transaction date: {}", currentBusinessDate, transactionDate);
+        eventStore.reset();
 
         final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
@@ -5280,6 +5275,7 @@ public class LoanStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
         assert adjustmentResponse != null;
         log.debug("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.getResourceId());
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
     @Then("Loan's available disbursement amount is {string}")
@@ -5302,6 +5298,7 @@ public class LoanStepDef extends AbstractStepDef {
             final String transactionDate, final String amount, final String capitalizedIncomeTrnsDate) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.getLoanId();
+        eventStore.reset();
 
         final GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
@@ -5316,6 +5313,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         testContext().set(TestContextKey.LOAN_CAPITALIZED_INCOME_ADJUSTMENT_RESPONSE, adjustmentResponse);
         log.debug("Capitalized Income Adjustment created: Transaction ID {}", adjustmentResponse.getResourceId());
+        eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
     @And("Admin adds invalid capitalized income adjustment with {string} payment type to the loan on {string} with {string} EUR transaction amount")

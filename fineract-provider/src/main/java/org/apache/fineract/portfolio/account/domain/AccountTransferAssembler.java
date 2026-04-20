@@ -18,13 +18,8 @@
  */
 package org.apache.fineract.portfolio.account.domain;
 
-import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
-import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
-import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDescriptionParamName;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -42,58 +37,6 @@ public class AccountTransferAssembler {
     @Autowired
     public AccountTransferAssembler(final AccountTransferDetailAssembler accountTransferDetailAssembler) {
         this.accountTransferDetailAssembler = accountTransferDetailAssembler;
-    }
-
-    public AccountTransferDetails assembleSavingsToSavingsTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
-            final SavingsAccount toSavingsAccount, final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit) {
-
-        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler.assembleSavingsToSavingsTransfer(command,
-                fromSavingsAccount, toSavingsAccount);
-
-        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
-        final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), transactionAmount);
-
-        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
-        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(accountTransferDetails,
-                withdrawal, deposit, transactionDate, transactionMonetaryAmount, description);
-        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-        return accountTransferDetails;
-    }
-
-    public AccountTransferDetails assembleSavingsToLoanTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
-            final Loan toLoanAccount, final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction) {
-
-        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler.assembleSavingsToLoanTransfer(command,
-                fromSavingsAccount, toLoanAccount);
-        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
-        final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), transactionAmount);
-
-        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
-
-        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToLoanTransfer(accountTransferDetails,
-                withdrawal, loanRepaymentTransaction, transactionDate, transactionMonetaryAmount, description);
-        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-        return accountTransferDetails;
-    }
-
-    public AccountTransferDetails assembleLoanToSavingsTransfer(final JsonCommand command, final Loan fromLoanAccount,
-            final SavingsAccount toSavingsAccount, final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction) {
-
-        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler.assembleLoanToSavingsTransfer(command,
-                fromLoanAccount, toSavingsAccount);
-
-        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
-        final Money transactionMonetaryAmount = Money.of(toSavingsAccount.getCurrency(), transactionAmount);
-
-        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
-
-        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
-                deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description);
-        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-        return accountTransferDetails;
     }
 
     public AccountTransferDetails assembleSavingsToLoanTransfer(final AccountTransferDTO accountTransferDTO,
@@ -140,6 +83,42 @@ public class AccountTransferAssembler {
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
                 deposit, loanRefundTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
                 accountTransferDTO.getDescription());
+        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
+        return accountTransferDetails;
+    }
+
+    public AccountTransferDetails assembleSavingsToSavingsTransfer(final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final String description, final SavingsAccount fromSavingsAccount, final SavingsAccount toSavingsAccount,
+            final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit) {
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleSavingsToSavingsTransfer(fromSavingsAccount, toSavingsAccount, null);
+        final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), transactionAmount);
+        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(accountTransferDetails,
+                withdrawal, deposit, transactionDate, transactionMonetaryAmount, description);
+        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
+        return accountTransferDetails;
+    }
+
+    public AccountTransferDetails assembleSavingsToLoanTransfer(final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final String description, final SavingsAccount fromSavingsAccount, final Loan toLoanAccount,
+            final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction) {
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleSavingsToLoanTransfer(fromSavingsAccount, toLoanAccount, null);
+        final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), transactionAmount);
+        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToLoanTransfer(accountTransferDetails,
+                withdrawal, loanRepaymentTransaction, transactionDate, transactionMonetaryAmount, description);
+        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
+        return accountTransferDetails;
+    }
+
+    public AccountTransferDetails assembleLoanToSavingsTransfer(final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final String description, final Loan fromLoanAccount, final SavingsAccount toSavingsAccount,
+            final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction) {
+        final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler
+                .assembleLoanToSavingsTransfer(fromLoanAccount, toSavingsAccount, null);
+        final Money transactionMonetaryAmount = Money.of(toSavingsAccount.getCurrency(), transactionAmount);
+        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
+                deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description);
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }

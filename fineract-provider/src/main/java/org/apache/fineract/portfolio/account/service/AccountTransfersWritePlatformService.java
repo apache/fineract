@@ -22,12 +22,14 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
+import org.apache.fineract.portfolio.account.data.AccountTransferCreateRequest;
+import org.apache.fineract.portfolio.account.data.AccountTransferCreateResponse;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 
 public interface AccountTransfersWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+    AccountTransferCreateResponse create(AccountTransferCreateRequest request);
 
     void reverseTransfersWithFromAccountType(Long accountNumber, PortfolioAccountType accountTypeId);
 
@@ -35,7 +37,7 @@ public interface AccountTransfersWritePlatformService {
 
     void reverseAllTransactions(Long accountId, PortfolioAccountType accountTypeId);
 
-    CommandProcessingResult refundByTransfer(JsonCommand command);
+    AccountTransferCreateResponse refundByTransfer(AccountTransferCreateRequest request);
 
     void reverseTransfersWithFromAccountTransactions(Collection<Long> fromTransactionIds, PortfolioAccountType accountTypeId);
 

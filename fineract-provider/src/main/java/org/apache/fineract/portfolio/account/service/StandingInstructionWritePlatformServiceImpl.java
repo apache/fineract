@@ -18,23 +18,26 @@
  */
 package org.apache.fineract.portfolio.account.service;
 
-import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromAccountTypeParamName;
-import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromClientIdParamName;
-import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.statusParamName;
 
+import java.time.LocalDate;
+import java.time.MonthDay;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
-import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
-import org.apache.fineract.portfolio.account.data.StandingInstructionDataValidator;
+import org.apache.fineract.portfolio.account.data.StandingInstructionCreateRequest;
+import org.apache.fineract.portfolio.account.data.StandingInstructionCreateResponse;
+import org.apache.fineract.portfolio.account.data.StandingInstructionDeleteRequest;
+import org.apache.fineract.portfolio.account.data.StandingInstructionUpdateRequest;
+import org.apache.fineract.portfolio.account.data.StandingInstructionUpdateResponse;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetailRepository;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
@@ -51,57 +54,78 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StandingInstructionWritePlatformServiceImpl implements StandingInstructionWritePlatformService {
 
-    private final StandingInstructionDataValidator standingInstructionDataValidator;
     private final StandingInstructionAssembler standingInstructionAssembler;
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final StandingInstructionRepository standingInstructionRepository;
 
     @Transactional
     @Override
-    public CommandProcessingResult create(final JsonCommand command) {
-
-        this.standingInstructionDataValidator.validateForCreate(command);
-
-        final Integer fromAccountTypeId = command.integerValueSansLocaleOfParameterNamed(fromAccountTypeParamName);
-        final PortfolioAccountType fromAccountType = PortfolioAccountType.fromInt(fromAccountTypeId);
-
-        final Integer toAccountTypeId = command.integerValueSansLocaleOfParameterNamed(toAccountTypeParamName);
-        final PortfolioAccountType toAccountType = PortfolioAccountType.fromInt(toAccountTypeId);
-
-        final Long fromClientId = command.longValueOfParameterNamed(fromClientIdParamName);
+    public StandingInstructionCreateResponse create(final StandingInstructionCreateRequest request) {
+        final PortfolioAccountType fromAccountType = PortfolioAccountType.fromInt(request.getFromAccountType());
+        final PortfolioAccountType toAccountType = PortfolioAccountType.fromInt(request.getToAccountType());
 
         Long standingInstructionId = null;
         try {
             if (isSavingsToSavingsAccountTransfer(fromAccountType, toAccountType)) {
                 final AccountTransferDetails standingInstruction = this.standingInstructionAssembler
-                        .assembleSavingsToSavingsTransfer(command);
+                        .assembleSavingsToSavingsTransfer(request);
                 this.accountTransferDetailRepository.saveAndFlush(standingInstruction);
                 standingInstructionId = standingInstruction.accountTransferStandingInstruction().getId();
             } else if (isSavingsToLoanAccountTransfer(fromAccountType, toAccountType)) {
-                final AccountTransferDetails standingInstruction = this.standingInstructionAssembler.assembleSavingsToLoanTransfer(command);
+                final AccountTransferDetails standingInstruction = this.standingInstructionAssembler.assembleSavingsToLoanTransfer(request);
                 this.accountTransferDetailRepository.saveAndFlush(standingInstruction);
                 standingInstructionId = standingInstruction.accountTransferStandingInstruction().getId();
             } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
-
-                final AccountTransferDetails standingInstruction = this.standingInstructionAssembler.assembleLoanToSavingsTransfer(command);
+                final AccountTransferDetails standingInstruction = this.standingInstructionAssembler.assembleLoanToSavingsTransfer(request);
                 this.accountTransferDetailRepository.saveAndFlush(standingInstruction);
                 standingInstructionId = standingInstruction.accountTransferStandingInstruction().getId();
-
             }
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
-            handleDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
+            handleDataIntegrityIssues(request.getName(), throwable, dve);
+            return StandingInstructionCreateResponse.builder().build();
         }
-        final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //
-                .withEntityId(standingInstructionId) //
-                .withClientId(fromClientId);
-        return builder.build();
+
+        return StandingInstructionCreateResponse.builder().resourceId(standingInstructionId).clientId(request.getFromClientId()).build();
     }
 
-    private void handleDataIntegrityIssues(final JsonCommand command, Throwable realCause, final NonTransientDataAccessException dve) {
+    @Override
+    public StandingInstructionUpdateResponse update(final StandingInstructionUpdateRequest request) {
+        final AccountTransferStandingInstruction standingInstruction = this.standingInstructionRepository.findById(request.getId())
+                .orElseThrow(() -> new StandingInstructionNotFoundException(request.getId()));
+
+        final Locale locale = parseLocale(request.getLocale());
+        final DateTimeFormatter dateFmt = parseDateFormat(request.getDateFormat(), locale);
+
+        final LocalDate validFrom = StringUtils.isBlank(request.getValidFrom()) ? null : LocalDate.parse(request.getValidFrom(), dateFmt);
+        final LocalDate validTill = StringUtils.isBlank(request.getValidTill()) ? null : LocalDate.parse(request.getValidTill(), dateFmt);
+
+        MonthDay recurrenceOnMonthDay = null;
+        if (!StringUtils.isBlank(request.getRecurrenceOnMonthDay())) {
+            final DateTimeFormatter monthDayFmt = parseMonthDayFormat(request.getMonthDayFormat(), locale);
+            recurrenceOnMonthDay = MonthDay.parse(request.getRecurrenceOnMonthDay(), monthDayFmt);
+        }
+
+        final Map<String, Object> actualChanges = standingInstruction.update(validFrom, validTill, request.getAmount(), request.getStatus(),
+                request.getPriority(), request.getInstructionType(), request.getRecurrenceType(), request.getRecurrenceFrequency(),
+                request.getRecurrenceInterval(), recurrenceOnMonthDay);
+
+        return StandingInstructionUpdateResponse.builder().resourceId(request.getId()).changes(actualChanges).build();
+    }
+
+    @Override
+    public StandingInstructionUpdateResponse delete(final StandingInstructionDeleteRequest request) {
+        final AccountTransferStandingInstruction standingInstruction = this.standingInstructionRepository.findById(request.getId())
+                .orElseThrow();
+        standingInstruction.delete();
+
+        final Map<String, Object> actualChanges = new HashMap<>();
+        actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
+        return StandingInstructionUpdateResponse.builder().resourceId(request.getId()).changes(actualChanges).build();
+    }
+
+    private void handleDataIntegrityIssues(final String name, final Throwable realCause, final NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("name")) {
-            final String name = command.stringValueOfParameterNamed(StandingInstructionApiConstants.nameParamName);
             throw new PlatformDataIntegrityException("error.msg.standinginstruction.duplicate.name",
                     "Standinginstruction with name `" + name + "` already exists", "name", name);
         }
@@ -123,31 +147,17 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         return PortfolioAccountType.SAVINGS.equals(fromAccountType) && PortfolioAccountType.SAVINGS.equals(toAccountType);
     }
 
-    @Override
-    public CommandProcessingResult update(final Long id, final JsonCommand command) {
-        this.standingInstructionDataValidator.validateForUpdate(command);
-        AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id)
-                .orElseThrow(() -> new StandingInstructionNotFoundException(id));
-        final Map<String, Object> actualChanges = standingInstructionsForUpdate.update(command);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(id) //
-                .with(actualChanges) //
-                .build();
+    private static Locale parseLocale(final String localeStr) {
+        return StringUtils.isBlank(localeStr) ? Locale.getDefault() : JsonParserHelper.localeFromString(localeStr);
     }
 
-    @Override
-    public CommandProcessingResult delete(final Long id) {
-        AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id).orElseThrow();
-        // update the "deleted" and "name" properties of the standing
-        // instruction
-        standingInstructionsForUpdate.delete();
+    private static DateTimeFormatter parseDateFormat(final String dateFormat, final Locale locale) {
+        return StringUtils.isBlank(dateFormat) ? DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)
+                : DateTimeFormatter.ofPattern(dateFormat).withLocale(locale);
+    }
 
-        final Map<String, Object> actualChanges = new HashMap<>();
-        actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(id) //
-                .with(actualChanges) //
-                .build();
+    private static DateTimeFormatter parseMonthDayFormat(final String monthDayFormat, final Locale locale) {
+        return StringUtils.isBlank(monthDayFormat) ? DateTimeFormatter.ofPattern("--MM-dd").withLocale(locale)
+                : DateTimeFormatter.ofPattern(monthDayFormat).withLocale(locale);
     }
 }

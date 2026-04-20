@@ -16,20 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.service;
+package org.apache.fineract.portfolio.account.command;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.account.data.StandingInstructionCreateRequest;
-import org.apache.fineract.portfolio.account.data.StandingInstructionCreateResponse;
-import org.apache.fineract.portfolio.account.data.StandingInstructionDeleteRequest;
-import org.apache.fineract.portfolio.account.data.StandingInstructionUpdateRequest;
-import org.apache.fineract.portfolio.account.data.StandingInstructionUpdateResponse;
 
-public interface StandingInstructionWritePlatformService {
-
-    StandingInstructionCreateResponse create(StandingInstructionCreateRequest request);
-
-    StandingInstructionUpdateResponse update(StandingInstructionUpdateRequest request);
-
-    StandingInstructionUpdateResponse delete(StandingInstructionDeleteRequest request);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class StandingInstructionCreateCommand extends Command<StandingInstructionCreateRequest> {}

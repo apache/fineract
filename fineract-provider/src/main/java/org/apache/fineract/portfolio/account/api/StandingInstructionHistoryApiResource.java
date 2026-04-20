@@ -74,7 +74,6 @@ public class StandingInstructionHistoryApiResource {
             @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String rawDateFormat,
             @QueryParam("fromDate") @Parameter(description = "fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") @Parameter(description = "toDate") final DateParam toDateParam) {
-
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 
         final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
@@ -93,8 +92,8 @@ public class StandingInstructionHistoryApiResource {
             endDateRange = toDateParam.getDate("toDate", dateFormat, locale);
         }
 
-        StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName, clientId,
-                fromAccount, fromAccountType, startDateRange, endDateRange);
+        final StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName,
+                clientId, fromAccount, fromAccountType, startDateRange, endDateRange);
 
         return standingInstructionHistoryReadPlatformService.retrieveAll(standingInstructionDTO);
     }

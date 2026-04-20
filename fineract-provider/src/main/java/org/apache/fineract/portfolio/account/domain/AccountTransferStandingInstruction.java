@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -144,9 +143,10 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         }
     }
 
-    public Map<String, Object> update(JsonCommand command) {
+    public Map<String, Object> update(final LocalDate validFrom, final LocalDate validTill, final BigDecimal amount, final Integer status,
+            final Integer priority, final Integer instructionType, final Integer recurrenceType, final Integer recurrenceFrequency,
+            final Integer recurrenceInterval, final MonthDay recurrenceOnMonthDay) {
         final Map<String, Object> actualChanges = new HashMap<>();
-
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
@@ -154,74 +154,52 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         if (StandingInstructionStatus.fromInt(this.status).isDeleted()) {
             baseDataValidator.reset().parameter(statusParamName).failWithCode("can.not.modify.once.deleted");
         }
-
-        if (command.isChangeInDateParameterNamed(validFromParamName, this.validFrom)) {
-            this.validFrom = command.localDateValueOfParameterNamed(validFromParamName);
-            actualChanges.put(validFromParamName, this.validFrom);
+        if (validFrom != null && !validFrom.equals(this.validFrom)) {
+            this.validFrom = validFrom;
+            actualChanges.put(validFromParamName, validFrom);
         }
-
-        if (command.isChangeInDateParameterNamed(validTillParamName, this.validTill)) {
-            this.validTill = command.localDateValueOfParameterNamed(validTillParamName);
-            actualChanges.put(validTillParamName, this.validTill);
+        if (validTill != null && !validTill.equals(this.validTill)) {
+            this.validTill = validTill;
+            actualChanges.put(validTillParamName, validTill);
         }
-
-        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
-            actualChanges.put(amountParamName, newValue);
-            this.amount = newValue;
+        if (amount != null && amount.compareTo(this.amount) != 0) {
+            this.amount = amount;
+            actualChanges.put(amountParamName, amount);
         }
-
-        if (command.isChangeInIntegerParameterNamed(statusParamName, this.status)) {
-            final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
-            actualChanges.put(statusParamName, newValue);
-            this.status = newValue;
+        if (status != null && !status.equals(this.status)) {
+            this.status = status;
+            actualChanges.put(statusParamName, status);
         }
-
-        if (command.isChangeInIntegerParameterNamed(priorityParamName, this.priority)) {
-            final Integer newValue = command.integerValueOfParameterNamed(priorityParamName);
-            actualChanges.put(priorityParamName, newValue);
-            this.priority = newValue;
+        if (priority != null && !priority.equals(this.priority)) {
+            this.priority = priority;
+            actualChanges.put(priorityParamName, priority);
         }
-
-        if (command.isChangeInIntegerParameterNamed(instructionTypeParamName, this.instructionType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(instructionTypeParamName);
-            actualChanges.put(instructionTypeParamName, newValue);
-            this.instructionType = newValue;
+        if (instructionType != null && !instructionType.equals(this.instructionType)) {
+            this.instructionType = instructionType;
+            actualChanges.put(instructionTypeParamName, instructionType);
         }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceTypeParamName, this.recurrenceType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceTypeParamName);
-            actualChanges.put(recurrenceTypeParamName, newValue);
-            this.recurrenceType = newValue;
+        if (recurrenceType != null && !recurrenceType.equals(this.recurrenceType)) {
+            this.recurrenceType = recurrenceType;
+            actualChanges.put(recurrenceTypeParamName, recurrenceType);
         }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceFrequencyParamName, this.recurrenceFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceFrequencyParamName);
-            actualChanges.put(recurrenceFrequencyParamName, newValue);
-            this.recurrenceFrequency = newValue;
+        if (recurrenceFrequency != null && !recurrenceFrequency.equals(this.recurrenceFrequency)) {
+            this.recurrenceFrequency = recurrenceFrequency;
+            actualChanges.put(recurrenceFrequencyParamName, recurrenceFrequency);
         }
-
-        if (command.hasParameter(recurrenceOnMonthDayParamName)) {
-            final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
-            final String actualValueEntered = command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
-            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
-                actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
+        if (recurrenceInterval != null && !recurrenceInterval.equals(this.recurrenceInterval)) {
+            this.recurrenceInterval = recurrenceInterval;
+            actualChanges.put(recurrenceIntervalParamName, recurrenceInterval);
+        }
+        if (recurrenceOnMonthDay != null) {
+            final Integer dayOfMonthValue = recurrenceOnMonthDay.getDayOfMonth();
+            final Integer monthOfYear = recurrenceOnMonthDay.getMonthValue();
+            if (!dayOfMonthValue.equals(this.recurrenceOnDay) || !monthOfYear.equals(this.recurrenceOnMonth)) {
                 this.recurrenceOnDay = dayOfMonthValue;
-            }
-
-            final Integer monthOfYear = monthDay.getMonthValue();
-            if (!this.recurrenceOnMonth.equals(monthOfYear)) {
-                actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnMonth = monthOfYear;
+                actualChanges.put(recurrenceOnMonthDayParamName, recurrenceOnMonthDay.toString());
             }
         }
 
-        if (command.isChangeInIntegerParameterNamed(recurrenceIntervalParamName, this.recurrenceInterval)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceIntervalParamName);
-            actualChanges.put(recurrenceIntervalParamName, newValue);
-            this.recurrenceInterval = newValue;
-        }
         validateDependencies(baseDataValidator);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);

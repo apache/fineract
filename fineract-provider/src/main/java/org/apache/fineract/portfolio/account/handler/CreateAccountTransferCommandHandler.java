@@ -18,11 +18,23 @@
  */
 package org.apache.fineract.portfolio.account.handler;
 
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromAccountIdParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromAccountTypeParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountIdParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDescriptionParamName;
+
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.portfolio.account.data.AccountTransferCreateRequest;
+import org.apache.fineract.portfolio.account.data.AccountTransferCreateResponse;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +49,19 @@ public class CreateAccountTransferCommandHandler implements NewCommandSourceHand
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
+        final Locale locale = command.extractLocale();
+        final AccountTransferCreateRequest request = AccountTransferCreateRequest.builder()
+                .fromAccountType(command.integerValueSansLocaleOfParameterNamed(fromAccountTypeParamName))
+                .fromAccountId(command.longValueOfParameterNamed(fromAccountIdParamName))
+                .toAccountType(command.integerValueSansLocaleOfParameterNamed(toAccountTypeParamName))
+                .toAccountId(command.longValueOfParameterNamed(toAccountIdParamName))
+                .transferDate(command.stringValueOfParameterNamed(transferDateParamName))
+                .transferAmount(command.bigDecimalValueOfParameterNamed(transferAmountParamName))
+                .transferDescription(command.stringValueOfParameterNamed(transferDescriptionParamName)).dateFormat(command.dateFormat())
+                .locale(locale != null ? locale.toLanguageTag() : null).build();
 
-        return this.writePlatformService.create(command);
+        final AccountTransferCreateResponse response = this.writePlatformService.create(request);
+
+        return new CommandProcessingResultBuilder().withEntityId(response.getResourceId()).withSavingsId(response.getSavingsId()).build();
     }
 }

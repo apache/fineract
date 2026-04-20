@@ -39,6 +39,7 @@ tasks.register('buildJavaSdk', org.openapitools.generator.gradle.plugin.tasks.Ge
     verbose = false
     validateSpec = false
     skipValidateSpec = true
+    skipOperationExample = true
     inputSpec = file(swaggerFile)
     outputDir = file("$buildDir/generated/temp-java")
     templateDir = file("$projectDir/src/main/resources/templates/java")

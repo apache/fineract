@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -35,14 +36,18 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.account.command.AccountTransferCreateCommand;
+import org.apache.fineract.portfolio.account.command.AccountTransferRefundByTransferCommand;
+import org.apache.fineract.portfolio.account.data.AccountTransferCreateRequest;
+import org.apache.fineract.portfolio.account.data.AccountTransferCreateResponse;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.account.data.request.AccountTransSearchParam;
 import org.apache.fineract.portfolio.account.data.request.AccountTransferRequest;
@@ -56,9 +61,9 @@ import org.springframework.stereotype.Component;
 public class AccountTransfersApiResource {
 
     private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<AccountTransferData> toApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Path("template")
@@ -70,7 +75,6 @@ public class AccountTransfersApiResource {
             + "accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersTemplateResponse.class)))
     public AccountTransferData template(@BeanParam AccountTransSearchParam accountTransSearchParam) {
-
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
 
         return accountTransfersReadPlatformService.retrieveTemplate(accountTransSearchParam.getFromAccountId(),
@@ -86,11 +90,10 @@ public class AccountTransfersApiResource {
     @Operation(summary = "Create new Transfer", operationId = "createAccountTransfer", description = "Ability to create new transfer of monetary funds from one account to another.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersResponse.class)))
-    public CommandProcessingResult create(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createAccountTransfer()
-                .withJson(toApiJsonSerializer.serialize(accountTransferRequest)).build();
-
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public AccountTransferCreateResponse create(@Parameter(hidden = true) @Valid AccountTransferCreateRequest request) {
+        final var command = new AccountTransferCreateCommand();
+        command.setPayload(request);
+        return (AccountTransferCreateResponse) dispatcher.dispatch(command).get();
     }
 
     @GET
@@ -104,9 +107,7 @@ public class AccountTransfersApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
             @QueryParam("accountDetailId") @Parameter(description = "accountDetailId") final Long accountDetailId) {
-
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
-
         final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
                 .orderBy(orderBy).sortOrder(sortOrder).build();
 
@@ -121,6 +122,7 @@ public class AccountTransfersApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersResponse.GetAccountTransfersPageItems.class)))
     public AccountTransferData retrieveOne(@PathParam("transferId") @Parameter(description = "transferId") final Long transferId) {
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
+
         return accountTransfersReadPlatformService.retrieveOne(transferId);
     }
 
@@ -133,6 +135,7 @@ public class AccountTransfersApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersTemplateRefundByTransferResponse.class)))
     public AccountTransferData templateRefundByTransfer(@BeanParam AccountTransSearchParam accountTransSearchParam) {
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
+
         return accountTransfersReadPlatformService.retrieveRefundByTransferTemplate(accountTransSearchParam.getFromAccountId(),
                 accountTransSearchParam.getFromClientId(), accountTransSearchParam.getFromAccountId(),
                 accountTransSearchParam.getFromAccountType(), accountTransSearchParam.getToOfficeId(),
@@ -147,10 +150,11 @@ public class AccountTransfersApiResource {
     @Operation(summary = "Refund of an Active Loan by Transfer", operationId = "refundByTransfer", description = "Ability to refund an active loan by transferring to a savings account.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersRefundByTransferResponse.class)))
-    public CommandProcessingResult templateRefundByTransferPost(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().refundByTransfer()
-                .withJson(toApiJsonSerializer.serialize(accountTransferRequest)).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public AccountTransferCreateResponse templateRefundByTransferPost(@Parameter(hidden = true) AccountTransferCreateRequest request) {
+        final var command = new AccountTransferRefundByTransferCommand();
+        command.setPayload(request);
+
+        return (AccountTransferCreateResponse) dispatcher.dispatch(command).get();
     }
 
     @POST

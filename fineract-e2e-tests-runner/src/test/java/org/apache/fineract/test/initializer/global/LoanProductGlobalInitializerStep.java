@@ -5394,6 +5394,29 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         } catch (Exception e) {
             log.warn("Error checking if loan product '{}' exists", productName, e);
         }
-        return null;
+
+        log.debug("Creating new loan product: {}", productName);
+        try {
+            PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(loanProductRequest, Map.of()));
+            log.debug("Successfully created loan product '{}' with ID: {}", productName, response.getResourceId());
+            return response;
+        } catch (Exception e) {
+            // concurrent thread may have created the product between our check and create
+            try {
+                List<GetLoanProductsResponse> existingProducts = fineractClient.loanProducts().retrieveAllLoanProducts(Map.of());
+                GetLoanProductsResponse existingProduct = existingProducts.stream().filter(p -> productName.equals(p.getName())).findFirst()
+                        .orElse(null);
+                if (existingProduct != null) {
+                    log.warn("Loan product '{}' was created concurrently, returning existing ID: {}", productName, existingProduct.getId());
+                    PostLoanProductsResponse response = new PostLoanProductsResponse();
+                    response.setResourceId(existingProduct.getId());
+                    return response;
+                }
+            } catch (Exception lookupException) {
+                log.error("FAILED to look up loan product '{}' after creation failure", productName, lookupException);
+            }
+            log.error("FAILED to create loan product '{}'", productName, e);
+            throw e;
+        }
     }
 }

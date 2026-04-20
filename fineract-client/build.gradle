@@ -62,6 +62,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     verbose = false
     validateSpec = false
     skipValidateSpec = true
+    skipOperationExample = true
     inputSpec = file(swaggerFile)
     outputDir = file("$buildDir/generated/temp-java")
     templateDir = file("$projectDir/src/main/resources/templates/java")
@@ -88,6 +89,7 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     verbose = false
     validateSpec = false
     skipValidateSpec = true
+    skipOperationExample = true
     inputSpec = file(swaggerFile)
     outputDir = file("$buildDir/generated/typescript")
     apiPackage = 'apache-fineract-client/services'
@@ -125,6 +127,7 @@ task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.Generate
     verbose = false
     validateSpec = false
     skipValidateSpec = true
+    skipOperationExample = true
     inputSpec = file(swaggerFile)
     outputDir = file("$buildDir/generated/asciidoc")
     apiPackage = 'org.apache.fineract.client.services'
