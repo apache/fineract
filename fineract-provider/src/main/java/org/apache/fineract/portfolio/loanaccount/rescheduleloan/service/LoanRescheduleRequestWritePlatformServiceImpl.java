@@ -50,6 +50,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
@@ -78,6 +79,7 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRe
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanaccount.service.ReprocessLoanTransactionsService;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
@@ -112,6 +114,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanAccrualsProcessingService loanAccrualsProcessingService;
     private final LoanChargeService loanChargeService;
+    private final LoanChargeWritePlatformService loanChargeWritePlatformService;
     private final ReprocessLoanTransactionsService reprocessLoanTransactionsService;
     private final LoanTermVariationsMapper loanTermVariationsMapper;
     private final LoanScheduleComponent loanSchedule;
@@ -420,6 +423,19 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final MathContext mathContext = MoneyHelper.getMathContext();
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.loanRepaymentScheduleTransactionProcessorFactory
                     .determineProcessor(loan.transactionProcessingStrategy());
+
+            final Boolean waiveOverdueCharges = jsonCommand
+                    .booleanObjectValueOfParameterNamed(RescheduleLoansApiConstants.waiveOverdueChargesParamName);
+
+            if (Boolean.TRUE.equals(waiveOverdueCharges)) {
+                for (final LoanCharge loanCharge : loan.getCharges()) {
+                    if (loanCharge.isActive() && loanCharge.isOverdueInstallmentCharge()
+                            && loanCharge.getAmountOutstanding(loan.getCurrency()).isGreaterThanZero()) {
+                        this.loanChargeWritePlatformService.waiveLoanCharge(loan.getId(), loanCharge.getId(), jsonCommand);
+                    }
+                }
+            }
+
             final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getLoanScheduleType(),
                     loanApplicationTerms.getInterestMethod());
             final LoanScheduleDTO loanScheduleDTO = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms,

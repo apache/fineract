@@ -564,4 +564,63 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
         Long loanId = loanTransactionHelper.applyLoan(loanRequest).getLoanId();
         return loanId;
     }
+
+    @Test
+    public void testApproveLoanRescheduleRequestWithWaiveOverdueCharges() {
+        approveLoanRescheduleRequestWithOverdueCharges(true);
+    }
+
+    @Test
+    public void testApproveLoanRescheduleRequestWithoutWaiveOverdueCharges() {
+        approveLoanRescheduleRequestWithOverdueCharges(false);
+    }
+
+    private void approveLoanRescheduleRequestWithOverdueCharges(final boolean waiveOverdueCharges) {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+
+        runAt("01 January 2025", () -> {
+            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long productId = createLoanProductPeriodicWithInterest();
+            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), productId.intValue(),
+                    BigDecimal.valueOf(1000.0), 4, 1, 4, BigDecimal.valueOf(2.0), "01 January 2025", "01 January 2025");
+            final Long loanId = loanResponse.getLoanId();
+            loanIdRef.set(loanId);
+
+            loanTransactionHelper.approveLoan("01 January 2025", loanId.intValue());
+            loanTransactionHelper.disburseLoan("01 January 2025", loanId.intValue(), "1000", null);
+        });
+
+        runAt("15 February 2025", () -> {
+            final Long loanId = loanIdRef.get();
+            final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanOverdueFeeJSON());
+            loanTransactionHelper.addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeId.longValue())
+                    .dueDate("01 February 2025").amount(Double.valueOf("10.0")).dateFormat(DATETIME_PATTERN).locale("en"));
+
+            final PostCreateRescheduleLoansResponse rescheduleResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanId).rescheduleFromDate("01 March 2025")
+                            .rescheduleReasonId(1L).submittedOnDate("15 February 2025").locale("en").dateFormat(DATETIME_PATTERN));
+            final Long rescheduleRequestId = rescheduleResponse.getResourceId();
+
+            final PostUpdateRescheduleLoansRequest approveRequest = new PostUpdateRescheduleLoansRequest()
+                    .approvedOnDate("15 February 2025").locale("en").dateFormat(DATETIME_PATTERN).waiveOverdueCharges(waiveOverdueCharges);
+
+            if (waiveOverdueCharges) {
+                loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleRequestId, approveRequest);
+
+                final GetLoanRescheduleRequestResponse getRescheduleResponse = loanRescheduleRequestHelper
+                        .readLoanRescheduleRequest(rescheduleRequestId, null);
+                assertTrue(getRescheduleResponse.getStatus().getApproved());
+
+                final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+                boolean chargeWaived = loanDetails.getCharges().stream()
+                        .filter(c -> c.getIsPenalty() && c.getAmountOutstanding().compareTo(BigDecimal.ZERO) == 0 && c.getWaived())
+                        .findAny().isPresent();
+                assertTrue(chargeWaived);
+            } else {
+                CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                        () -> loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleRequestId, approveRequest));
+                assertTrue(exception.getMessage().contains("not.allowed.due.to.overdue.charges"));
+            }
+        });
+    }
 }

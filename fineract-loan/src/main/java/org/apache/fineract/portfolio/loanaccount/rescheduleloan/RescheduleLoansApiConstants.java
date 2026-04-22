@@ -66,9 +66,10 @@ public final class RescheduleLoansApiConstants {
 
     // approve action request parameters
     public static final String approvedOnDateParam = "approvedOnDate";
+    public static final String waiveOverdueChargesParamName = "waiveOverdueCharges";
 
-    public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName, approvedOnDateParam)));
+    public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName, approvedOnDateParam, waiveOverdueChargesParamName)));
 
     public static final Set<String> commandParams = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList(allCommandParamName, approveCommandParamName, pendingCommandParamName, rejectCommandParamName)));

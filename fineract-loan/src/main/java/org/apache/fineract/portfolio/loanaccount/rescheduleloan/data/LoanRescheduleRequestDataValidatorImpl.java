@@ -69,7 +69,7 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
                     RescheduleLoansApiConstants.rejectedOnDateParam));
     public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-                    RescheduleLoansApiConstants.approvedOnDateParam));
+                    RescheduleLoansApiConstants.approvedOnDateParam, RescheduleLoansApiConstants.waiveOverdueChargesParamName));
     private final FromJsonHelper fromJsonHelper;
     @Qualifier("progressiveLoanRescheduleRequestDataValidatorImpl")
     private final LoanRescheduleRequestDataValidator progressiveLoanRescheduleRequestDataValidatorDelegate;
@@ -227,11 +227,21 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
 
     public static void validateForOverdueCharges(final DataValidatorBuilder dataValidatorBuilder, final Loan loan,
             final LoanRepaymentScheduleInstallment installment) {
+        validateForOverdueCharges(dataValidatorBuilder, loan, installment, false);
+    }
+
+    public static void validateForOverdueCharges(final DataValidatorBuilder dataValidatorBuilder, final Loan loan,
+            final LoanRepaymentScheduleInstallment installment, final boolean waiveOverdueCharges) {
+        if (waiveOverdueCharges) {
+            return;
+        }
         if (installment != null) {
             LocalDate rescheduleFromDate = installment.getFromDate();
             Collection<LoanCharge> charges = loan.getLoanCharges();
             for (LoanCharge loanCharge : charges) {
-                if (loanCharge.isOverdueInstallmentCharge() && DateUtils.isAfter(loanCharge.getDueLocalDate(), rescheduleFromDate)) {
+                if (loanCharge.isActive() && loanCharge.isOverdueInstallmentCharge()
+                        && DateUtils.isAfter(loanCharge.getDueLocalDate(), rescheduleFromDate)
+                        && loanCharge.getAmountOutstanding(loan.getCurrency()).isGreaterThanZero()) {
                     dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode("not.allowed.due.to.overdue.charges");
                     break;
                 }
@@ -278,7 +288,7 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
 
             LoanRepaymentScheduleInstallment installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
             validateReschedulingInstallment(dataValidatorBuilder, installment);
-            validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+            validateForOverdueCharges(dataValidatorBuilder, loan, installment, false);
 
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -321,15 +331,18 @@ public class LoanRescheduleRequestDataValidatorImpl implements LoanRescheduleReq
             validateApprovalDate(fromJsonHelper, loanRescheduleRequest, jsonElement, dataValidatorBuilder);
             validateRescheduleRequestStatus(loanRescheduleRequest, dataValidatorBuilder);
 
+            final Boolean waiveOverdueCharges = fromJsonHelper.extractBooleanNamed(RescheduleLoansApiConstants.waiveOverdueChargesParamName,
+                    jsonElement);
+            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.waiveOverdueChargesParamName).value(waiveOverdueCharges)
+                    .ignoreIfNull().validateForBooleanValue();
+
             LocalDate rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
             final Loan loan = loanRescheduleRequest.getLoan();
-            LoanRepaymentScheduleInstallment installment;
-
             validateLoanIsActive(loan, dataValidatorBuilder);
-            installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
+            LoanRepaymentScheduleInstallment installment = loan.fetchLoanRepaymentScheduleInstallmentByDueDate(rescheduleFromDate);
 
             validateReschedulingInstallment(dataValidatorBuilder, installment);
-            validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+            validateForOverdueCharges(dataValidatorBuilder, loan, installment, Boolean.TRUE.equals(waiveOverdueCharges));
 
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException(dataValidationErrors);

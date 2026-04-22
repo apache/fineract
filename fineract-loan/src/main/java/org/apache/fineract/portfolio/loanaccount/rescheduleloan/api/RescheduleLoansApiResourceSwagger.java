@@ -213,6 +213,8 @@ final class RescheduleLoansApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
+        @Schema(example = "true")
+        public Boolean waiveOverdueCharges;
     }
 
     @Schema(description = "PostCreateRescheduleLoansResponse ")
