@@ -30,6 +30,10 @@ public class InstanceModeHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static void changeMode(RequestSpecification requestSpec, ResponseSpecification responseSpec, boolean readEnabled,
             boolean writeEnabled, boolean batchWorkerEnabled, boolean batchManagerEnabled) {
         ChangeInstanceModeRequest request = new ChangeInstanceModeRequest().readEnabled(readEnabled).writeEnabled(writeEnabled)

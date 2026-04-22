@@ -23,16 +23,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "m_product_loan_variable_installment_config")
-public class LoanProductVariableInstallmentConfig extends AbstractPersistableCustom {
+public class LoanProductVariableInstallmentConfig extends AbstractPersistableCustom<Long> {
 
+    @Setter
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -42,45 +47,4 @@ public class LoanProductVariableInstallmentConfig extends AbstractPersistableCus
 
     @Column(name = "maximum_gap")
     private Integer maximumGap;
-
-    protected LoanProductVariableInstallmentConfig() {
-
-    }
-
-    public LoanProductVariableInstallmentConfig(final LoanProduct loanProduct, final Integer minimumGap, final Integer maximumGap) {
-        this.loanProduct = loanProduct;
-        this.minimumGap = minimumGap;
-        this.maximumGap = maximumGap;
-    }
-
-    public void setLoanProduct(final LoanProduct loanProduct) {
-        this.loanProduct = loanProduct;
-    }
-
-    public Map<? extends String, ?> update(JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
-
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.minimumGapBetweenInstallments, this.minimumGap)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.minimumGapBetweenInstallments);
-            actualChanges.put(LoanProductConstants.minimumGapBetweenInstallments, newValue);
-            this.minimumGap = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.maximumGapBetweenInstallments, this.maximumGap)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.maximumGapBetweenInstallments);
-            actualChanges.put(LoanProductConstants.maximumGapBetweenInstallments, newValue);
-            this.maximumGap = newValue;
-        }
-
-        return actualChanges;
-    }
-
-    public Integer getMinimumGap() {
-        return this.minimumGap;
-    }
-
-    public Integer getMaximumGap() {
-        return this.maximumGap;
-    }
-
 }

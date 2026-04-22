@@ -28,10 +28,10 @@ Feature: SQL Builder
 
     Examples:
       | criteria1  | argument1             | criteria2  | argument2             | criteria3 | argument3 | criteria4 | argument4 | template                                         | expected                                                                                           |
-      |            |                       |            |                       |           |           |           |           |                                                  | SQLBuilder{}                                                                                                   |
-      | name =     | Michael               | hobby LIKE | Mifos/Apache Fineract | age <     | 123       |           |           | WHERE  name = ?  AND  hobby LIKE ?  AND  age < ? | SQLBuilder{WHERE  name = ['Michael']  AND  hobby LIKE ['Mifos/Apache Fineract']  AND  age < [123]} |
-      | ref =      | NULL                  |            |                       |           |           |           |           | WHERE  ref = ?                                   | SQLBuilder{WHERE  ref = [null]}                                                                    |
-      | hobby LIKE | Mifos/Apache Fineract | hobby like | Mifos/Apache Fineract |           |           |           |           | WHERE  hobby LIKE ?  AND  hobby like ?           |                                                                                                    |
+      |            |                       |            |                       |           |           |           |           |                                                  | SQLBuilder{}                                                                                       |
+      | name =     | Michael               | hobby LIKE | Mifos/Apache Fineract | age <     | 123       |           |           | WHERE  name = ? AND hobby LIKE ? AND age < ?     | SQLBuilder{WHERE name = ['Michael'] AND hobby LIKE ['Mifos/Apache Fineract'] AND age < [123]}      |
+      | ref =      | NULL                  |            |                       |           |           |           |           | WHERE  ref = ?                                   | SQLBuilder{WHERE ref = [null]}                                                                     |
+      | hobby LIKE | Mifos/Apache Fineract | hobby like | Mifos/Apache Fineract |           |           |           |           | WHERE  hobby LIKE ? AND hobby like ?             |                                                                                                    |
 
   @sqlbuilder
   Scenario Outline: Verify that SQL builder detects illegal criteria

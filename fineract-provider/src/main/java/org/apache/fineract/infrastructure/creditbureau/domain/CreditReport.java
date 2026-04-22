@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class CreditReport extends AbstractPersistableCustom {
+public class CreditReport extends AbstractPersistableCustom<Long> {
 
     @Column(name = "credit_bureau_id")
     private Long creditBureauId;

@@ -42,4 +42,10 @@
             <column name="is_mismatched_job" valueBoolean="true"/>
         </insert>
     </changeSet>
+    <changeSet author="acme" id="2">
+        <update tableName="job">
+            <column name="short_name" value="ACM_NOOP"/>
+            <where>name='Acme Noop Job'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

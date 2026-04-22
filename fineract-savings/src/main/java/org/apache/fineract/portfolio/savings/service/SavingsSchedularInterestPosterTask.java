@@ -25,6 +25,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 
 /**
@@ -40,10 +41,14 @@ public class SavingsSchedularInterestPosterTask implements Callable<Void> {
     private FineractContext context;
 
     @Override
-    public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
-        ThreadLocalContextUtil.init(context);
-        interestPoster.postInterest();
-        return null;
+    public Void call() throws JobExecutionException {
+        try {
+            ThreadLocalContextUtil.init(context);
+            interestPoster.postInterest();
+            return null;
+        } finally {
+            ThreadLocalContextUtil.reset();
+        }
     }
 
     public void setSavingAccounts(Collection<SavingsAccountData> savingAccounts) {

@@ -32,37 +32,30 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTest {
+public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -93,7 +86,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
@@ -245,7 +239,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }
@@ -264,7 +259,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
@@ -421,7 +417,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }
@@ -438,7 +435,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
@@ -613,7 +611,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }
@@ -631,7 +630,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
@@ -809,14 +809,15 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
 
     }
 
     private void verifyDisbursementPeriod(GetLoansLoanIdRepaymentPeriod period, LocalDate disbursementDate, double disbursedAmount) {
         assertEquals(disbursementDate, period.getDueDate());
-        assertEquals(disbursedAmount, period.getPrincipalLoanBalanceOutstanding());
+        assertEquals(disbursedAmount, Utils.getDoubleValue(period.getPrincipalLoanBalanceOutstanding()));
     }
 
     private void verifyPeriodDetails(GetLoansLoanIdRepaymentPeriod period, Integer periodNumber, double periodAmount,
@@ -825,14 +826,14 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
         assertEquals(periodNumber, period.getPeriod());
         assertEquals(periodFromDate, period.getFromDate());
         assertEquals(periodDueDate, period.getDueDate());
-        assertEquals(periodAmount, period.getTotalInstallmentAmountForPeriod());
-        assertEquals(periodAmountPaid, period.getTotalPaidForPeriod());
-        assertEquals(principalPaid, period.getPrincipalPaid());
-        assertEquals(outstandingAmount, period.getTotalOutstandingForPeriod());
-        assertEquals(feeDue, period.getFeeChargesDue());
-        assertEquals(feePaid, period.getFeeChargesPaid());
-        assertEquals(penaltyDue, period.getPenaltyChargesDue());
-        assertEquals(penaltyPaid, period.getPenaltyChargesPaid());
+        assertEquals(periodAmount, Utils.getDoubleValue(period.getTotalInstallmentAmountForPeriod()));
+        assertEquals(periodAmountPaid, Utils.getDoubleValue(period.getTotalPaidForPeriod()));
+        assertEquals(principalPaid, Utils.getDoubleValue(period.getPrincipalPaid()));
+        assertEquals(outstandingAmount, Utils.getDoubleValue(period.getTotalOutstandingForPeriod()));
+        assertEquals(feeDue, Utils.getDoubleValue(period.getFeeChargesDue()));
+        assertEquals(feePaid, Utils.getDoubleValue(period.getFeeChargesPaid()));
+        assertEquals(penaltyDue, Utils.getDoubleValue(period.getPenaltyChargesDue()));
+        assertEquals(penaltyPaid, Utils.getDoubleValue(period.getPenaltyChargesPaid()));
         assertEquals(isComplete, period.getComplete());
     }
 
@@ -841,7 +842,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("2")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("2").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("03 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
                 .withExternalId(externalId).withRepaymentStrategy(repaymentStartegy)
@@ -879,31 +880,6 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                 .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE).build(null);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         return loanTransactionHelper.getLoanProduct(loanProductId);
-    }
-
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
     }
 
     private void checkDownPaymentTransaction(final LocalDate transactionDate, final Float principalPortion, final Float interestPortion,

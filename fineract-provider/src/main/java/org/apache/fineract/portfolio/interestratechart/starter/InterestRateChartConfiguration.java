@@ -16,32 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.interestratechart.starter;
 
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDataValidator;
-import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabDataValidator;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartRepositoryWrapper;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlabRepository;
 import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveAssembler;
-import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadPlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestIncentivesDropdownReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestIncentivesDropdownReadServiceImpl;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadPlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadServiceImpl;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadServiceImpl;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabAssembler;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabReadPlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabReadPlatformServiceImpl;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabWritePlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartWritePlatformService;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartWritePlatformServiceJpaRepositoryImpl;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabsReadService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabsReadServiceImpl;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabsWriteService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabsWriteServiceImpl;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartWriteService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartWriteServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,40 +54,10 @@ public class InterestRateChartConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(InterestIncentiveDropdownReadPlatformService.class)
-    public InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService(
-
-    ) {
-        return new InterestIncentivesDropdownReadPlatformServiceImpl(
-
-        );
-    }
-
-    @Bean
     @ConditionalOnMissingBean(InterestRateChartAssembler.class)
     public InterestRateChartAssembler interestRateChartAssembler(FromJsonHelper fromApiJsonHelper,
             InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper, InterestRateChartSlabAssembler chartSlabAssembler) {
         return new InterestRateChartAssembler(fromApiJsonHelper, interestRateChartRepositoryWrapper, chartSlabAssembler);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(InterestRateChartDropdownReadPlatformService.class)
-    public InterestRateChartDropdownReadPlatformService interestRateChartDropdownReadPlatformService(
-
-    ) {
-        return new InterestRateChartDropdownReadPlatformServiceImpl(
-
-        );
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(InterestRateChartReadPlatformService.class)
-    public InterestRateChartReadPlatformService interestRateChartReadPlatformService(PlatformSecurityContext context,
-            JdbcTemplate jdbcTemplate, InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
-            InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
-            CodeValueReadPlatformService codeValueReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
-        return new InterestRateChartReadPlatformServiceImpl(context, jdbcTemplate, chartDropdownReadPlatformService,
-                interestIncentiveDropdownReadPlatformService, codeValueReadPlatformService, sqlGenerator);
     }
 
     @Bean
@@ -101,44 +68,70 @@ public class InterestRateChartConfiguration {
     }
 
     @Bean
-    public InterestRateChartSlabReadPlatformServiceImpl.InterestRateChartSlabExtractor interestRateChartSlabExtractor(
+    @ConditionalOnMissingBean(InterestIncentiveDropdownReadService.class)
+    public InterestIncentiveDropdownReadService interestIncentiveDropdownReadService(
+
+    ) {
+        return new InterestIncentivesDropdownReadServiceImpl(
+
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(InterestRateChartDropdownReadService.class)
+    public InterestRateChartDropdownReadService interestRateChartDropdownReadService(
+
+    ) {
+        return new InterestRateChartDropdownReadServiceImpl(
+
+        );
+    }
+
+    @Bean
+    public InterestRateChartReadServiceImpl.InterestRateChartExtractor interestRateChartExtractor(
             DatabaseSpecificSQLGenerator sqlGenerator) {
-        return new InterestRateChartSlabReadPlatformServiceImpl.InterestRateChartSlabExtractor(sqlGenerator);
+        return new InterestRateChartReadServiceImpl.InterestRateChartExtractor(sqlGenerator);
     }
 
     @Bean
-    @ConditionalOnMissingBean(InterestRateChartSlabReadPlatformService.class)
-    public InterestRateChartSlabReadPlatformService interestRateChartSlabReadPlatformService(
-
-            PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
-            InterestRateChartSlabReadPlatformServiceImpl.InterestRateChartSlabExtractor chartSlabExtractor,
-            InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
-            InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
+    @ConditionalOnMissingBean(InterestRateChartReadService.class)
+    public InterestRateChartReadService interestRateChartReadService(JdbcTemplate jdbcTemplate,
+            InterestRateChartReadServiceImpl.InterestRateChartExtractor chartExtractor,
+            InterestRateChartDropdownReadService chartDropdownReadPlatformService,
+            InterestIncentiveDropdownReadService interestIncentiveDropdownReadService,
             CodeValueReadPlatformService codeValueReadPlatformService) {
-        return new InterestRateChartSlabReadPlatformServiceImpl(context, jdbcTemplate, chartSlabExtractor, chartDropdownReadPlatformService,
-                interestIncentiveDropdownReadPlatformService, codeValueReadPlatformService);
+        return new InterestRateChartReadServiceImpl(jdbcTemplate, chartExtractor, chartDropdownReadPlatformService,
+                interestIncentiveDropdownReadService, codeValueReadPlatformService);
     }
 
     @Bean
-    @ConditionalOnMissingBean(InterestRateChartSlabWritePlatformService.class)
-    public InterestRateChartSlabWritePlatformService interestRateChartSlabWritePlatformService(
-
-            PlatformSecurityContext context, InterestRateChartSlabDataValidator interestRateChartSlabDataValidator,
-            InterestRateChartAssembler interestRateChartAssembler, InterestRateChartSlabAssembler interestRateChartSlabAssembler,
-            InterestRateChartRepositoryWrapper interestRateChartRepository, InterestRateChartSlabRepository chartSlabRepository,
-            SavingsProductRepository savingsProductRepository) {
-        return new InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl(context, interestRateChartSlabDataValidator,
-                interestRateChartAssembler, interestRateChartSlabAssembler, interestRateChartRepository, chartSlabRepository,
-                savingsProductRepository);
+    public InterestRateChartSlabsReadServiceImpl.InterestRateChartSlabExtractor interestRateChartSlabExtractor(
+            DatabaseSpecificSQLGenerator sqlGenerator) {
+        return new InterestRateChartSlabsReadServiceImpl.InterestRateChartSlabExtractor(sqlGenerator);
     }
 
     @Bean
-    @ConditionalOnMissingBean(InterestRateChartWritePlatformService.class)
-    public InterestRateChartWritePlatformService interestRateChartWritePlatformService(PlatformSecurityContext context,
-            InterestRateChartDataValidator interestRateChartDataValidator, InterestRateChartAssembler interestRateChartAssembler,
-            InterestRateChartRepositoryWrapper interestRateChartRepository) {
-        return new InterestRateChartWritePlatformServiceJpaRepositoryImpl(context, interestRateChartDataValidator,
-                interestRateChartAssembler, interestRateChartRepository);
+    @ConditionalOnMissingBean(InterestRateChartSlabsReadService.class)
+    public InterestRateChartSlabsReadService interestRateChartSlabReadService(JdbcTemplate jdbcTemplate,
+            InterestRateChartSlabsReadServiceImpl.InterestRateChartSlabExtractor chartSlabExtractor,
+            InterestRateChartDropdownReadService chartDropdownReadPlatformService,
+            InterestIncentiveDropdownReadService interestIncentiveDropdownReadService,
+            CodeValueReadPlatformService codeValueReadPlatformService) {
+        return new InterestRateChartSlabsReadServiceImpl(jdbcTemplate, chartSlabExtractor, chartDropdownReadPlatformService,
+                interestIncentiveDropdownReadService, codeValueReadPlatformService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(InterestRateChartSlabsWriteService.class)
+    public InterestRateChartSlabsWriteService interestRateChartSlabWriteService(
+            InterestRateChartRepositoryWrapper interestRateChartRepository, InterestRateChartSlabRepository chartSlabRepository) {
+        return new InterestRateChartSlabsWriteServiceImpl(interestRateChartRepository, chartSlabRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(InterestRateChartWriteService.class)
+    public InterestRateChartWriteService interestRateChartWriteService(InterestRateChartRepositoryWrapper interestRateChartRepository) {
+        return new InterestRateChartWriteServiceImpl(interestRateChartRepository);
     }
 
 }

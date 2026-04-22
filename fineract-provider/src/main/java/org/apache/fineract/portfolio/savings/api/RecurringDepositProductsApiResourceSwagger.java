@@ -87,10 +87,6 @@ final class RecurringDepositProductsApiResourceSwagger {
         public Integer interestCalculationDaysInYearType;
         @Schema(example = "1")
         public Integer accountingRule;
-        @Schema(example = "1")
-        public Integer recurringDepositFrequency;
-        @Schema(example = "2")
-        public Integer recurringDepositFrequencyTypeId;
         @Schema(example = "true")
         public Boolean preClosurePenalApplicable;
         @Schema(example = "1.75")
@@ -120,7 +116,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         private PostRecurringDepositProductsResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutRecurringDepositProductsRequest")
@@ -154,7 +150,7 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutRecurringDepositProductsChanges changes;
     }
 
@@ -343,88 +339,30 @@ final class RecurringDepositProductsApiResourceSwagger {
             public String description;
         }
 
+        static final class GetRecurringDepositProductsGlAccount {
+
+            private GetRecurringDepositProductsGlAccount() {}
+
+            @Schema(example = "12")
+            public Long id;
+            @Schema(example = "savings control")
+            public String name;
+            @Schema(example = "2000001")
+            public String glCode;
+        }
+
         static final class GetRecurringDepositProductsProductIdAccountingMappings {
 
             private GetRecurringDepositProductsProductIdAccountingMappings() {}
 
-            static final class GetRecurringDepositProductsProductIdSavingsReferenceAccount {
-
-                private GetRecurringDepositProductsProductIdSavingsReferenceAccount() {}
-
-                @Schema(example = "12")
-                public Long id;
-                @Schema(example = "savings ref")
-                public String name;
-                @Schema(example = "20")
-                public String glCode;
-            }
-
-            static final class GetRecurringDepositProductsProductIdIncomeFromFeeAccount {
-
-                private GetRecurringDepositProductsProductIdIncomeFromFeeAccount() {}
-
-                @Schema(example = "16")
-                public Long id;
-                @Schema(example = "income from savings fee")
-                public String name;
-                @Schema(example = "24")
-                public String glCode;
-            }
-
-            static final class GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount {
-
-                private GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount() {}
-
-                @Schema(example = "17")
-                public Long id;
-                @Schema(example = "income from sav penalties")
-                public String name;
-                @Schema(example = "25")
-                public String glCode;
-            }
-
-            static final class GetRecurringDepositProductsProductIdInterestOnSavingsAccount {
-
-                private GetRecurringDepositProductsProductIdInterestOnSavingsAccount() {}
-
-                @Schema(example = "15")
-                public Long id;
-                @Schema(example = "interest on savings")
-                public String name;
-                @Schema(example = "23")
-                public String glCode;
-            }
-
-            static final class GetRecurringDepositProductsProductIdSavingsControlAccount {
-
-                private GetRecurringDepositProductsProductIdSavingsControlAccount() {}
-
-                @Schema(example = "13")
-                public Long id;
-                @Schema(example = "savings ref tool kit")
-                public String name;
-                @Schema(example = "21")
-                public String glCode;
-            }
-
-            static final class GetRecurringDepositProductsProductIdTransfersInSuspenseAccount {
-
-                private GetRecurringDepositProductsProductIdTransfersInSuspenseAccount() {}
-
-                @Schema(example = "14")
-                public Long id;
-                @Schema(example = "saving transfers")
-                public String name;
-                @Schema(example = "22")
-                public String glCode;
-            }
-
-            public GetRecurringDepositProductsProductIdSavingsReferenceAccount savingsReferenceAccount;
-            public GetRecurringDepositProductsProductIdIncomeFromFeeAccount incomeFromFeeAccount;
-            public GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount incomeFromPenaltyAccount;
-            public GetRecurringDepositProductsProductIdInterestOnSavingsAccount interestOnSavingsAccount;
-            public GetRecurringDepositProductsProductIdSavingsControlAccount savingsControlAccount;
-            public GetRecurringDepositProductsProductIdTransfersInSuspenseAccount transfersInSuspenseAccount;
+            public GetRecurringDepositProductsGlAccount incomeFromFeeAccount;
+            public GetRecurringDepositProductsGlAccount incomeFromPenaltyAccount;
+            public GetRecurringDepositProductsGlAccount interestOnSavingsAccount;
+            public GetRecurringDepositProductsGlAccount savingsControlAccount;
+            public GetRecurringDepositProductsGlAccount transfersInSuspenseAccount;
+            public GetRecurringDepositProductsGlAccount feeReceivableAccount;
+            public GetRecurringDepositProductsGlAccount penaltyReceivableAccount;
+            public GetRecurringDepositProductsGlAccount interestPayableAccount;
         }
 
         static final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings {
@@ -480,7 +418,7 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             public GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge charge;
-            public GetRecurringDepositProductsProductIdAccountingMappings.GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount incomeAccount;
+            public GetRecurringDepositProductsGlAccount incomeAccount;
         }
 
         static final class GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType {
@@ -604,6 +542,6 @@ final class RecurringDepositProductsApiResourceSwagger {
         private DeleteRecurringDepositProductsProductIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 }

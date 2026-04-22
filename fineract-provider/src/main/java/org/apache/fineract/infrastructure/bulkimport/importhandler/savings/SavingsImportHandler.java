@@ -349,7 +349,7 @@ public class SavingsImportHandler implements ImportHandler {
             final String dateFormat) {
         if (activationDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+            gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, activationDates.get(i).getLocale()));
             String payload = gsonBuilder.create().toJson(activationDates.get(i));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                     .savingsAccountActivation(savingsId)//
@@ -364,7 +364,7 @@ public class SavingsImportHandler implements ImportHandler {
             final String dateFormat) {
         if (approvalDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-            gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+            gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, approvalDates.get(i).getLocale()));
             String payload = gsonBuilder.create().toJson(approvalDates.get(i));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                     .approveSavingsAccountApplication(savingsId)//
@@ -377,7 +377,7 @@ public class SavingsImportHandler implements ImportHandler {
 
     private CommandProcessingResult importSavings(final List<SavingsAccountData> savings, final int i, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, savings.get(i).getLocale()));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
         JsonObject savingsJsonob = gsonBuilder.create().toJsonTree(savings.get(i)).getAsJsonObject();
         savingsJsonob.remove("isDormancyTrackingActive");

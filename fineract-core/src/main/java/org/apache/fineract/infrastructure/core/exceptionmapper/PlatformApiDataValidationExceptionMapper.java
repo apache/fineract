@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ public class PlatformApiDataValidationExceptionMapper
 
     @Override
     public Response toResponse(final PlatformApiDataValidationException exception) {
-        log.warn("Exception: {}, Message: {}, Errors: {}", exception.getClass().getName(), exception.getMessage(), exception.getErrors());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         final ApiGlobalErrorResponse dataValidationErrorResponse = ApiGlobalErrorResponse
                 .badClientRequest(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getErrors());
 

@@ -130,22 +130,21 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         this.loanTransactionHelper.disburseLoanWithRepaymentReschedule(disbursementDate, loanID, adjustRepaymentDate);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
-        ArrayList<HashMap> loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec,
+        ArrayList<HashMap> loanRepaymentSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec,
                 loanID);
-        HashMap firstInstallement = loanRepaymnetSchedule.get(1);
-        Map<String, Object> expectedvalues = new HashMap<>(3);
+        HashMap firstInstallment = loanRepaymentSchedule.get(1);
+        Map<String, Object> expectedValues = new HashMap<>(3);
         Calendar date = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         date.set(2015, Calendar.MARCH, 16);
-        expectedvalues.put("dueDate", getDateAsArray(date, 0));
-        expectedvalues.put("principalDue", "834.71");
-        expectedvalues.put("interestDue", "49.32");
-        expectedvalues.put("feeChargesDue", "0");
-        expectedvalues.put("penaltyChargesDue", "0");
-        expectedvalues.put("totalDueForPeriod", "884.03");
+        expectedValues.put("dueDate", getDateAsArray(date, 0));
+        expectedValues.put("principalDue", "834.71");
+        expectedValues.put("interestDue", "49.32");
+        expectedValues.put("feeChargesDue", "0");
+        expectedValues.put("penaltyChargesDue", "0");
+        expectedValues.put("totalDueForPeriod", "884.03");
 
         // VALIDATE REPAYMENT SCHEDULE
-        verifyLoanRepaymentSchedule(firstInstallement, expectedvalues);
-
+        verifyLoanRepaymentSchedule(firstInstallment, expectedValues);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {

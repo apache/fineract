@@ -54,7 +54,6 @@ public class LikelihoodApiResource {
 
     @GET
     @Path("{ppiName}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@PathParam("ppiName") final String ppiName) {
 
@@ -67,7 +66,6 @@ public class LikelihoodApiResource {
 
     @GET
     @Path("{ppiName}/{likelihoodId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieve(@PathParam("likelihoodId") final Long likelihoodId, @PathParam("ppiName") final String ppiName) {
 

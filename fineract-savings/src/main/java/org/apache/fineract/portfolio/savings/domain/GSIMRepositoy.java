@@ -31,4 +31,7 @@ public interface GSIMRepositoy
     GroupSavingsIndividualMonitoring findOneByIsAcceptingChildAndApplicationId(boolean acceptingChild, BigDecimal applicationId);
 
     GroupSavingsIndividualMonitoring findOneByAccountNumber(String accountNumber);
+
+    GroupSavingsIndividualMonitoring findOneByIsAcceptingChildAndApplicationIdAndGroupId(boolean acceptingChild, BigDecimal applicationId,
+            Long groupId);
 }

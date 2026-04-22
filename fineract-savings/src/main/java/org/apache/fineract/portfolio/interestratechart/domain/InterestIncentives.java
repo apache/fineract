@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_interest_incentives")
-public class InterestIncentives extends AbstractPersistableCustom {
+public class InterestIncentives extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "interest_rate_slab_id", nullable = false)

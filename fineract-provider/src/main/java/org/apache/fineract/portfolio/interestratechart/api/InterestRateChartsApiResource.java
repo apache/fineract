@@ -16,24 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.interestratechart.api;
 
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.chartSlabs;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.endDateParamName;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.isPrimaryGroupingByAmountParamName;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
-
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -44,152 +34,107 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
+import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartCreateCommand;
+import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartDeleteCommand;
+import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartUpdateCommand;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartCreateRequest;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartCreateResponse;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDeleteRequest;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDeleteResponse;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartUpdateRequest;
+import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartUpdateResponse;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadService;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/interestratecharts")
 @Component
+@Produces({ MediaType.APPLICATION_JSON })
 @Tag(name = "Interest Rate Chart", description = "This defines an interest rate scheme that can be associated to a term deposit product. This will have a slab (band or range) of deposit periods and the associated interest rates applicable along with incentives for each band.")
 @RequiredArgsConstructor
 public class InterestRateChartsApiResource {
 
-    private final InterestRateChartReadPlatformService chartReadPlatformService;
-    private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<InterestRateChartData> toApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private static final Set<String> INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName, idParamName, nameParamName,
-            descriptionParamName, fromDateParamName, endDateParamName, chartSlabs, isPrimaryGroupingByAmountParamName));
+    private final InterestRateChartReadService chartReadPlatformService;
+
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Chart Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for creating a chart. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "interestratecharts/template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsTemplateResponse.class))) })
-    public String template(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME);
-
-        InterestRateChartData chartData = this.chartReadPlatformService.template();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, chartData, INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
+    @Operation(summary = "Retrieve Chart Details Template", operationId = "retrieveTemplateInterestRateChart", description = """
+            This is a convenience resource. It can be useful when building maintenance user interface screens for creating a chart. The template data returned consists of any or all of: Field Defaults Allowed Value Lists
+            Example Request: interestratecharts/template
+            """)
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsTemplateResponse.class)))
+    public InterestRateChartData template() {
+        return chartReadPlatformService.template();
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve all Charts", description = "Retrieve list of charts associated with a term deposit product(FD or RD).\n"
-            + "Example Requests:\n" + "\n" + "interestratecharts?productId=1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class)))) })
-    public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("productId") @Parameter(description = "productId") final Long productId) {
+    @Operation(summary = "Retrieve all Charts", operationId = "retrieveAllInterestRateCharts", description = """
+            Retrieve list of charts associated with a term deposit product(FD or RD).
+            Example Requests: interestratecharts?productId=1
+            """)
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class))))
+    public Collection<InterestRateChartData> retrieveAll(@QueryParam("productId") final Long productId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME);
-
-        Collection<InterestRateChartData> chartDatas = this.chartReadPlatformService.retrieveAllWithSlabs(productId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, chartDatas, INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
+        return chartReadPlatformService.retrieveAllWithSlabs(productId);
     }
 
     @GET
     @Path("{chartId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Chart", description = "It retrieves the Interest Rate Chart\n" + "Example Requests:\n" + "\n"
-            + "interestratecharts/1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class))) })
-    public String retrieveOne(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
-            @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME);
-
-        InterestRateChartData chartData = null;
-        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (!associationParameters.isEmpty() && associationParameters.contains(InterestRateChartApiConstants.chartSlabs)) {
-            chartData = this.chartReadPlatformService.retrieveOneWithSlabs(chartId);
+    @Operation(summary = "Retrieve a Chart", operationId = "retrieveOneInterestRateChart", description = "It retrieves the Interest Rate Chart\n"
+            + "Example Requests:\n" + "\n" + "interestratecharts/1")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class)))
+    public InterestRateChartData retrieveOne(@PathParam("chartId") final Long chartId,
+            @QueryParam("associations") final String associations) {
+        InterestRateChartData chartData;
+        if (associations != null && associations.contains(InterestRateChartApiConstants.chartSlabs)) {
+            chartData = chartReadPlatformService.retrieveOneWithSlabs(chartId);
         } else {
-            chartData = this.chartReadPlatformService.retrieveOne(chartId);
+            chartData = chartReadPlatformService.retrieveOne(chartId);
         }
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        if (settings.isTemplate()) {
-            chartData = this.chartReadPlatformService.retrieveWithTemplate(chartData);
-        }
-
-        return this.toApiJsonSerializer.serialize(settings, chartData, INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
+        return chartData;
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Chart", description = "Creates a new chart which can be attached to a term deposit products (FD or RD).")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.PostInterestRateChartsRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.PostInterestRateChartsResponse.class))) })
-    public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    @Operation(summary = "Create a Chart", operationId = "createInterestRateChart", description = "Creates a new chart which can be attached to a term deposit products (FD or RD).")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartCreateResponse.class)))
+    public InterestRateChartCreateResponse create(final InterestRateChartCreateRequest request) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createInterestRateChart().withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+        final var command = new InterestRateChartCreateCommand();
+        command.setPayload(request);
+        final Supplier<InterestRateChartCreateResponse> responseSupplier = dispatcher.dispatch(command);
+        return responseSupplier.get();
     }
 
     @PUT
     @Path("{chartId}")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Chart", description = "It updates the chart")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.PutInterestRateChartsChartIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.PutInterestRateChartsChartIdResponse.class))) })
-    public String update(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateInterestRateChart(chartId).withJson(apiRequestBodyAsJson)
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+    @Operation(summary = "Update a Chart", operationId = "updateInterestRateChart", description = "It updates the chart")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartUpdateResponse.class)))
+    public InterestRateChartUpdateResponse update(@PathParam("chartId") final Long chartId, final InterestRateChartUpdateRequest request) {
+        request.setId(chartId);
+        final var command = new InterestRateChartUpdateCommand();
+        command.setPayload(request);
+        final Supplier<InterestRateChartUpdateResponse> responseSupplier = dispatcher.dispatch(command);
+        return responseSupplier.get();
     }
 
     @DELETE
     @Path("{chartId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Chart", description = "It deletes the chart")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartsApiResourceSwagger.DeleteInterestRateChartsChartIdResponse.class))) })
-    public String delete(@PathParam("chartId") @Parameter(description = "chartId") final Long chartId) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInterestRateChart(chartId).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+    @Operation(summary = "Delete a Chart", operationId = "deleteInterestRateChart", description = "It deletes the chart")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartDeleteResponse.class)))
+    public InterestRateChartDeleteResponse delete(@PathParam("chartId") final Long chartId) {
+        final var command = new InterestRateChartDeleteCommand();
+        command.setPayload(InterestRateChartDeleteRequest.builder().chartId(chartId).build());
+        final Supplier<InterestRateChartDeleteResponse> responseSupplier = dispatcher.dispatch(command);
+        return responseSupplier.get();
     }
 }

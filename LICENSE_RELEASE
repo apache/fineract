@@ -208,17 +208,18 @@
 ======================================
 
 All the source code for the Apache Fineract project is released under the
-license above. Additionally, the Apache Fineract source and binary
-distribution includes a number of third-party files that are required in
-order to the software to function. Unless noted below, these jars
-and resource files are also released under the ASF license above.
+license above. Additionally, the Apache Fineract source and binary distribution
+includes a number of third-party files that are required in order to the
+software to function. Unless noted below, these jars and resource files are
+also released under the Apache License, Version 2.0.
 
 ==================================================
 *The exceptions for binary release are as follows:
 ==================================================
 
-This product bundles third party jars and resource files that are 
-released under other licenses than the ASF license. You can find
-details of all third party licenses in the directory "licenses". 
+This product bundles third party jars and resource files that are released
+under licenses other than the Apache License, Version 2.0 following the ASF 3rd
+party license policy. You can find details of all third party licenses in the
+"licenses" directory (if the "generateLicenseReport" Gradle task has been run).
 
 ******************************************

@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -64,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Path("/v1/creditBureauIntegration")
 @Component
+@Tag(name = "Credit Bureau Integration", description = "")
 @RequiredArgsConstructor
 public class CreditBureauIntegrationApiResource {
 
@@ -131,7 +133,6 @@ public class CreditBureauIntegrationApiResource {
     // fetch saved creditReports(NRC) from DB by creditBureauId, to select for downloading and deleting the reports
     @GET
     @Path("creditReport/{creditBureauId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getSavedCreditReport(@PathParam("creditBureauId") @Parameter(description = "creditBureauId") final Long creditBureauId,
             @Context final UriInfo uriInfo) {

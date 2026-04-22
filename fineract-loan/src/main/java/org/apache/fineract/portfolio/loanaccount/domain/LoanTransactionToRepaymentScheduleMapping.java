@@ -25,18 +25,24 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_loan_transaction_repayment_schedule_mapping")
-public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom {
+@Getter
+public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom<Long> {
 
+    @Setter
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_transaction_id", nullable = false)
     private LoanTransaction loanTransaction;
 
+    @Setter
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
@@ -77,40 +83,32 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
             final Money feeChargesPortion, final Money penaltyChargesPortion) {
         return new LoanTransactionToRepaymentScheduleMapping(loanTransaction, installment, defaultToNullIfZero(principalPortion),
                 defaultToNullIfZero(interestPortion), defaultToNullIfZero(feeChargesPortion), defaultToNullIfZero(penaltyChargesPortion),
-                defaultToNullIfZero(principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion)));
+                defaultToNullIfZero(MathUtil.plus(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)));
     }
 
     private static BigDecimal defaultToNullIfZero(final Money value) {
-        BigDecimal result = value.getAmount();
-        if (value.isZero()) {
-            result = null;
-        }
-        return result;
-    }
-
-    private BigDecimal defaultToZeroIfNull(final BigDecimal value) {
-        BigDecimal result = value;
-        if (value == null) {
-            result = BigDecimal.ZERO;
-        }
-        return result;
+        return (value == null || value.isZero()) ? null : value.getAmount();
     }
 
     public LoanRepaymentScheduleInstallment getLoanRepaymentScheduleInstallment() {
         return this.installment;
     }
 
-    public void updateComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
-        final MonetaryCurrency currency = principal.getCurrency();
-        this.principalPortion = defaultToNullIfZero(getPrincipalPortion(currency).plus(principal));
-        this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).plus(interest));
+    public void updateComponents(Money principal, Money interest, Money feeCharges, Money penaltyCharges) {
+        updateComponents(MathUtil.toBigDecimal(principal), MathUtil.toBigDecimal(interest), MathUtil.toBigDecimal(feeCharges),
+                MathUtil.toBigDecimal(penaltyCharges));
+    }
+
+    void updateComponents(final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+            final BigDecimal penaltyCharges) {
+        this.principalPortion = MathUtil.zeroToNull(MathUtil.add(getPrincipalPortion(), principal));
+        this.interestPortion = MathUtil.zeroToNull(MathUtil.add(getInterestPortion(), interest));
         updateChargesComponents(feeCharges, penaltyCharges);
         updateAmount();
     }
 
     private void updateAmount() {
-        this.amount = defaultToZeroIfNull(getPrincipalPortion()).add(defaultToZeroIfNull(getInterestPortion()))
-                .add(defaultToZeroIfNull(getFeeChargesPortion())).add(defaultToZeroIfNull(getPenaltyChargesPortion()));
+        this.amount = MathUtil.add(getPrincipalPortion(), getInterestPortion(), getFeeChargesPortion(), getPenaltyChargesPortion());
     }
 
     public void setComponents(final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
@@ -122,10 +120,9 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
         updateAmount();
     }
 
-    private void updateChargesComponents(final Money feeCharges, final Money penaltyCharges) {
-        final MonetaryCurrency currency = feeCharges.getCurrency();
-        this.feeChargesPortion = defaultToNullIfZero(getFeeChargesPortion(currency).plus(feeCharges));
-        this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges));
+    private void updateChargesComponents(final BigDecimal feeCharges, final BigDecimal penaltyCharges) {
+        this.feeChargesPortion = MathUtil.zeroToNull(MathUtil.add(getFeeChargesPortion(), feeCharges));
+        this.penaltyChargesPortion = MathUtil.zeroToNull(MathUtil.add(getPenaltyChargesPortion(), penaltyCharges));
     }
 
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
@@ -144,27 +141,8 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
         return Money.of(currency, this.penaltyChargesPortion);
     }
 
-    public LoanTransaction getLoanTransaction() {
-        return loanTransaction;
+    public boolean isZeroAmount() {
+        return this.amount == null || this.amount.compareTo(BigDecimal.ZERO) == 0;
     }
 
-    public BigDecimal getPrincipalPortion() {
-        return this.principalPortion;
-    }
-
-    public BigDecimal getInterestPortion() {
-        return this.interestPortion;
-    }
-
-    public BigDecimal getFeeChargesPortion() {
-        return this.feeChargesPortion;
-    }
-
-    public BigDecimal getPenaltyChargesPortion() {
-        return this.penaltyChargesPortion;
-    }
-
-    public void setLoanTransaction(LoanTransaction loanTransaction) {
-        this.loanTransaction = loanTransaction;
-    }
 }

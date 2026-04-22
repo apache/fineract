@@ -18,15 +18,16 @@
  */
 package org.apache.fineract.infrastructure.core.auditing;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.auditing.DateTimeProvider;
 
 public enum CustomDateTimeProvider implements DateTimeProvider {
 
-    INSTANCE, UTC;
+    INSTANCE, //
+    UTC; //
 
     /*
      * (non-Javadoc)

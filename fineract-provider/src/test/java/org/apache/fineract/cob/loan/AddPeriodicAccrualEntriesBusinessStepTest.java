@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -40,8 +41,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
-import org.junit.Assert;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class AddPeriodicAccrualEntriesBusinessStepTest {
 
     @Mock
-    private LoanAccrualPlatformService loanAccrualPlatformService;
+    private LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     private AddPeriodicAccrualEntriesBusinessStep underTest;
 
@@ -64,7 +64,7 @@ public class AddPeriodicAccrualEntriesBusinessStepTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
-        underTest = new AddPeriodicAccrualEntriesBusinessStep(loanAccrualPlatformService);
+        underTest = new AddPeriodicAccrualEntriesBusinessStep(loanAccrualsProcessingService);
     }
 
     @AfterEach
@@ -79,7 +79,7 @@ public class AddPeriodicAccrualEntriesBusinessStepTest {
         // when
         final Loan processedLoan = underTest.execute(loanForProcessing);
         // then
-        verify(loanAccrualPlatformService, times(1)).addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));
+        verify(loanAccrualsProcessingService, times(1)).addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));
         assertEquals(processedLoan, loanForProcessing);
     }
 
@@ -89,13 +89,13 @@ public class AddPeriodicAccrualEntriesBusinessStepTest {
         final Long loanId = RandomUtils.nextLong();
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(loanId);
-        doThrow(new MultiException(Collections.singletonList(new RuntimeException()))).when(loanAccrualPlatformService)
+        doThrow(new MultiException(Collections.singletonList(new RuntimeException()))).when(loanAccrualsProcessingService)
                 .addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));
         // when
-        final BusinessStepException businessStepException = Assert.assertThrows(BusinessStepException.class,
+        final BusinessStepException businessStepException = assertThrows(BusinessStepException.class,
                 () -> underTest.execute(loanForProcessing));
         // then
-        verify(loanAccrualPlatformService, times(1)).addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));
+        verify(loanAccrualsProcessingService, times(1)).addPeriodicAccruals(any(LocalDate.class), eq(loanForProcessing));
         assertEquals(String.format("Fail to process period accrual for loan id [%s]", loanId), businessStepException.getMessage());
     }
 

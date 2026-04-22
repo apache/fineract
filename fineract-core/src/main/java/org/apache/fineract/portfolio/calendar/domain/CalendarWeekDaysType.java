@@ -20,13 +20,20 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import org.springframework.util.StringUtils;
 
+@Getter
 public enum CalendarWeekDaysType {
 
-    INVALID(0, "calendarWeekDaysType.invalid"), MO(1, "calendarWeekDaysType.monday"), TU(2, "calendarWeekDaysType.tuesday"), WE(3,
-            "calendarWeekDaysType.wednesday"), TH(4, "calendarWeekDaysType.thursday"), FR(5,
-                    "calendarWeekDaysType.friday"), SA(6, "calendarWeekDaysType.saturday"), SU(7, "calendarWeekDaysType.sunday");
+    INVALID(0, "calendarWeekDaysType.invalid"), //
+    MO(1, "calendarWeekDaysType.monday"), //
+    TU(2, "calendarWeekDaysType.tuesday"), //
+    WE(3, "calendarWeekDaysType.wednesday"), //
+    TH(4, "calendarWeekDaysType.thursday"), //
+    FR(5, "calendarWeekDaysType.friday"), //
+    SA(6, "calendarWeekDaysType.saturday"), //
+    SU(7, "calendarWeekDaysType.sunday"); //
 
     private final Integer value;
     private final String code;
@@ -36,16 +43,10 @@ public enum CalendarWeekDaysType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     private static final Map<Integer, CalendarWeekDaysType> intToEnumMap = new HashMap<>();
+    @Getter
     private static int minValue = CalendarWeekDaysType.MO.value;
+    @Getter
     private static int maxValue = CalendarWeekDaysType.SU.value;
 
     static {
@@ -55,25 +56,12 @@ public enum CalendarWeekDaysType {
     }
 
     public static CalendarWeekDaysType fromInt(final int i) {
-        final CalendarWeekDaysType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
-    }
-
-    public static int getMinValue() {
-        return minValue;
-    }
-
-    public static int getMaxValue() {
-        return maxValue;
+        return intToEnumMap.get(i);
     }
 
     @Override
     public String toString() {
-        return name().toString();
-    }
-
-    public boolean isInvalid() {
-        return this.value.equals(CalendarWeekDaysType.INVALID.value);
+        return name();
     }
 
     public static CalendarWeekDaysType fromString(final String weekDayString) {

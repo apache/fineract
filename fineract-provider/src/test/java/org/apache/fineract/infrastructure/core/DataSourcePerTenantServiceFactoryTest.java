@@ -29,9 +29,11 @@ import static org.mockito.Mockito.verify;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -87,6 +89,7 @@ public class DataSourcePerTenantServiceFactoryTest {
     public static final String MASTER_MASTER_PASSWORD = "fineract";
 
     public static final String MASTER_ENCRYPTION = "AES/CBC/PKCS5Padding";
+    public static final FineractPlatformTenant TENANT = new FineractPlatformTenant(1L, "", "", "", null);
 
     @Mock
     private FineractProperties fineractProperties;
@@ -111,6 +114,9 @@ public class DataSourcePerTenantServiceFactoryTest {
 
     @Mock
     private DatabasePasswordEncryptor databasePasswordEncryptor;
+
+    @Mock
+    private Optional<MeterRegistry> meterRegistry;
 
     @InjectMocks
     private DataSourcePerTenantServiceFactory underTest;
@@ -183,7 +189,7 @@ public class DataSourcePerTenantServiceFactoryTest {
         given(fineractProperties.getMode()).willReturn(modeProperties);
 
         // when
-        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, defaultTenant.getConnection());
 
         // then
         assertNotNull(dataSource);
@@ -215,7 +221,7 @@ public class DataSourcePerTenantServiceFactoryTest {
         config.setMinPoolSize(minPoolSize);
 
         // when
-        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, defaultTenant.getConnection());
 
         // then
         assertNotNull(dataSource);
@@ -247,7 +253,7 @@ public class DataSourcePerTenantServiceFactoryTest {
         config.setMaxPoolSize(maxPoolSize);
 
         // when
-        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, defaultTenant.getConnection());
 
         // then
         assertNotNull(dataSource);
@@ -281,7 +287,7 @@ public class DataSourcePerTenantServiceFactoryTest {
         config.setMaxPoolSize(maxPoolSize);
 
         // when
-        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, defaultTenant.getConnection());
 
         // then
         assertNotNull(dataSource);
@@ -307,7 +313,7 @@ public class DataSourcePerTenantServiceFactoryTest {
         given(fineractProperties.getMode()).willReturn(modeProperties);
 
         // when
-        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, defaultTenant.getConnection());
 
         // then
         assertNotNull(dataSource);
@@ -333,7 +339,7 @@ public class DataSourcePerTenantServiceFactoryTest {
         given(fineractProperties.getMode()).willReturn(modeProperties);
 
         // when
-        DataSource dataSource = underTest.createNewDataSourceFor(defaultTenant.getConnection());
+        DataSource dataSource = underTest.createNewDataSourceFor(TENANT, defaultTenant.getConnection());
 
         // then
         assertNotNull(dataSource);

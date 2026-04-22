@@ -25,7 +25,7 @@ public abstract class JournalEntryBusinessEvent extends AbstractBusinessEvent<Jo
 
     private static final String CATEGORY = "Accounting";
 
-    public JournalEntryBusinessEvent(JournalEntry value) {
+    protected JournalEntryBusinessEvent(JournalEntry value) {
         super(value);
     }
 

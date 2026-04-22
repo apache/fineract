@@ -47,7 +47,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class SmsMessage extends AbstractPersistableCustom {
+public class SmsMessage extends AbstractPersistableCustom<Long> {
 
     @Column(name = "external_id")
     private String externalId;

@@ -18,16 +18,21 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import lombok.Getter;
+
 /**
- * Enum representation of {@link SavingsAccount} sub-status states.
+ * Enum representation of SavingsAccount sub-status states.
  */
+@Getter
 public enum SavingsAccountSubStatusEnum {
 
     NONE(0, "SavingsAccountSubStatusEnum.none"), //
     INACTIVE(100, "SavingsAccountSubStatusEnum.inactive"), //
-    DORMANT(200, "SavingsAccountSubStatusEnum.dormant"), ESCHEAT(300, "SavingsAccountSubStatusEnum.escheat"), BLOCK(400,
-            "SavingsAccountSubStatusEnum.block"), BLOCK_CREDIT(500,
-                    "SavingsAccountSubStatusEnum.blockCredit"), BLOCK_DEBIT(600, "SavingsAccountSubStatusEnum.blockDebit");
+    DORMANT(200, "SavingsAccountSubStatusEnum.dormant"), //
+    ESCHEAT(300, "SavingsAccountSubStatusEnum.escheat"), //
+    BLOCK(400, "SavingsAccountSubStatusEnum.block"), //
+    BLOCK_CREDIT(500, "SavingsAccountSubStatusEnum.blockCredit"), //
+    BLOCK_DEBIT(600, "SavingsAccountSubStatusEnum.blockDebit"); //
 
     private final Integer value;
     private final String code;
@@ -36,26 +41,15 @@ public enum SavingsAccountSubStatusEnum {
 
         SavingsAccountSubStatusEnum enumeration = SavingsAccountSubStatusEnum.NONE;
         if (null != type) {
-            switch (type) {
-                case 100:
-                    enumeration = SavingsAccountSubStatusEnum.INACTIVE;
-                break;
-                case 200:
-                    enumeration = SavingsAccountSubStatusEnum.DORMANT;
-                break;
-                case 300:
-                    enumeration = SavingsAccountSubStatusEnum.ESCHEAT;
-                break;
-                case 400:
-                    enumeration = SavingsAccountSubStatusEnum.BLOCK;
-                break;
-                case 500:
-                    enumeration = SavingsAccountSubStatusEnum.BLOCK_CREDIT;
-                break;
-                case 600:
-                    enumeration = SavingsAccountSubStatusEnum.BLOCK_DEBIT;
-                break;
-            }
+            enumeration = switch (type) {
+                case 100 -> SavingsAccountSubStatusEnum.INACTIVE;
+                case 200 -> SavingsAccountSubStatusEnum.DORMANT;
+                case 300 -> SavingsAccountSubStatusEnum.ESCHEAT;
+                case 400 -> SavingsAccountSubStatusEnum.BLOCK;
+                case 500 -> SavingsAccountSubStatusEnum.BLOCK_CREDIT;
+                case 600 -> SavingsAccountSubStatusEnum.BLOCK_DEBIT;
+                default -> enumeration;
+            };
         }
         return enumeration;
     }
@@ -67,14 +61,6 @@ public enum SavingsAccountSubStatusEnum {
 
     public boolean hasStateOf(final SavingsAccountSubStatusEnum state) {
         return this.value.equals(state.getValue());
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
     }
 
     public boolean isSubStatusInactive() {

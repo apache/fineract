@@ -24,6 +24,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -31,8 +32,9 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_fund", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "fund_name_org"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "fund_externalid_org") })
-public class Fund extends AbstractPersistableCustom {
+public class Fund extends AbstractPersistableCustom<Long> {
 
+    @Getter
     @Column(name = "name")
     private String name;
 

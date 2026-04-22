@@ -39,7 +39,7 @@ public class HttpMessageNotReadableErrorController implements ExceptionMapper<Ht
     public Response toResponse(HttpMessageNotReadableException exception) {
         final String globalisationMessageCode = "error.msg.invalid.json.data";
         final String defaultUserMessage = "The referenced JSON data is invalid, validate date format as yyyy-MM-dd or other cases like String instead of Number";
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
 
         final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 

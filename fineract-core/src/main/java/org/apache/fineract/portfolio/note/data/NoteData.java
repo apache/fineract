@@ -18,50 +18,37 @@
  */
 package org.apache.fineract.portfolio.note.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-/**
- * Immutable data object represent note or case information about a client, loan or loan transaction.
- */
-@Getter
-public class NoteData {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NoteData implements Serializable {
 
-    private final Long id;
-    private final Long clientId;
-    private final Long groupId;
-    private final Long loanId;
-    private final Long loanTransactionId;
-    private final Long depositAccountId;
-    private final Long savingAccountId;
-    private final EnumOptionData noteType;
-    private final String note;
-    private final Long createdById;
-    private final String createdByUsername;
-    private final OffsetDateTime createdOn;
-    private final Long updatedById;
-    private final String updatedByUsername;
-    private final OffsetDateTime updatedOn;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public NoteData(final Long id, final Long clientId, final Long groupId, final Long loanId, final Long transactionId,
-            final Long depositAccountId, final Long savingAccountId, final EnumOptionData noteType, final String note,
-            final OffsetDateTime createdDate, final Long createdById, final String createdByUsername, final OffsetDateTime lastModifiedDate,
-            final Long lastModifiedById, final String updatedByUsername) {
-        this.id = id;
-        this.clientId = clientId;
-        this.groupId = groupId;
-        this.loanId = loanId;
-        this.loanTransactionId = transactionId;
-        this.depositAccountId = depositAccountId;
-        this.savingAccountId = savingAccountId;
-        this.noteType = noteType;
-        this.note = note;
-        this.createdOn = createdDate;
-        this.createdById = createdById;
-        this.createdByUsername = createdByUsername;
-        this.updatedOn = lastModifiedDate;
-        this.updatedById = lastModifiedById;
-        this.updatedByUsername = updatedByUsername;
-    }
+    private Long id;
+    private Long clientId;
+    private Long groupId;
+    private Long loanId;
+    private Long loanTransactionId;
+    private Long depositAccountId;
+    private Long savingAccountId;
+    private EnumOptionData noteType;
+    private String note;
+    private Long createdById;
+    private String createdByUsername;
+    private OffsetDateTime createdOn;
+    private Long updatedById;
+    private String updatedByUsername;
+    private OffsetDateTime updatedOn;
 }

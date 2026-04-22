@@ -24,7 +24,7 @@ public enum SavingsWithdrawalFeesType {
 
     INVALID(0, "savingsWithdrawalFeesType.invalid"), //
     FLAT(1, "savingsWithdrawalFeesType.flat"), //
-    PERCENT_OF_AMOUNT(2, "savingsWithdrawalFeesType.percent.of.amount");
+    PERCENT_OF_AMOUNT(2, "savingsWithdrawalFeesType.percent.of.amount"); //
 
     private final Integer value;
     private final String code;

@@ -34,9 +34,9 @@ import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -57,6 +57,7 @@ import org.apache.fineract.portfolio.group.service.GroupRolesWritePlatformServic
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -71,7 +72,7 @@ public class GroupConfiguration {
     @ConditionalOnMissingBean(CenterReadPlatformService.class)
     public CenterReadPlatformService centerReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
             ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            StaffReadPlatformService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
+            StaffReadService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
             ConfigurationDomainService configurationDomainService, ColumnValidator columnValidator, PaginationHelper paginationHelper,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationParametersDataValidator paginationParametersDataValidator) {
         return new CenterReadPlatformServiceImpl(jdbcTemplate, context, clientReadPlatformService, officeReadPlatformService,
@@ -90,14 +91,14 @@ public class GroupConfiguration {
             ConfigurationDomainService configurationDomainService, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, AccountNumberGenerator accountNumberGenerator,
             EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            BusinessEventNotifierService businessEventNotifierService
+            BusinessEventNotifierService businessEventNotifierService, LoanOfficerService loanOfficerService
 
     ) {
         return new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, clientRepositoryWrapper,
                 officeRepositoryWrapper, staffRepository, noteRepository, groupLevelRepository, fromApiJsonDeserializer,
                 loanRepositoryWrapper, codeValueRepository, commandProcessingService, calendarInstanceRepository,
                 configurationDomainService, savingsAccountRepositoryWrapper, accountNumberFormatRepository, accountNumberGenerator,
-                entityDatatableChecksWritePlatformService, businessEventNotifierService
+                entityDatatableChecksWritePlatformService, businessEventNotifierService, loanOfficerService
 
         );
     }
@@ -111,13 +112,14 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(GroupReadPlatformService.class)
     public GroupReadPlatformService groupReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
+            OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
             CenterReadPlatformService centerReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
             PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator) {
+            PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator,
+            ClientReadPlatformService clientReadPlatformService) {
         return new GroupReadPlatformServiceImpl(jdbcTemplate, context, officeReadPlatformService, staffReadPlatformService,
                 centerReadPlatformService, codeValueReadPlatformService, paginationHelper, sqlGenerator, paginationParametersDataValidator,
-                columnValidator);
+                columnValidator, clientReadPlatformService);
     }
 
     @Bean

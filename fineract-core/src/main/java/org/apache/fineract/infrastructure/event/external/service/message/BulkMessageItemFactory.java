@@ -38,7 +38,7 @@ public class BulkMessageItemFactory {
     private final ByteBufferConverter byteBufferConverter;
     private final DataEnricherProcessor dataEnricherProcessor;
 
-    public BulkMessageItemV1 createBulkMessageItem(int id, BusinessEvent<?> event) throws IOException {
+    public BulkMessageItemV1 createBulkMessageItem(long id, BusinessEvent<?> event) throws IOException {
         BusinessEventSerializer eventSerializer = serializerFactory.create(event);
         ByteBufferSerializable avroDto = dataEnricherProcessor.enrich(eventSerializer.toAvroDTO(event));
         ByteBuffer buffer = avroDto.toByteBuffer();

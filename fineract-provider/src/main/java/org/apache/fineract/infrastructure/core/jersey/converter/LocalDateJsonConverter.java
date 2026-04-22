@@ -24,9 +24,8 @@ import com.fasterxml.jackson.core.JsonToken;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import org.springframework.stereotype.Component;
 
-@Component
+// This is registered in the JacksonLocalDateBeanSerializerModifier
 public class LocalDateJsonConverter implements JsonConverter<LocalDate> {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;

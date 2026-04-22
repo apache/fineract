@@ -19,14 +19,15 @@
 package org.apache.fineract.gradle.service
 
 import org.apache.fineract.gradle.FineractPluginExtension
-import org.eclipse.jgit.annotations.NonNull
-import org.eclipse.jgit.annotations.Nullable
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.CanceledException
-import org.eclipse.jgit.lib.CommitBuilder
-import org.eclipse.jgit.lib.GpgSigner
+import org.eclipse.jgit.api.errors.UnsupportedSigningFormatException
+import org.eclipse.jgit.gpg.bc.internal.BouncyCastleGpgSigner
+import org.eclipse.jgit.lib.GpgConfig
+import org.eclipse.jgit.lib.GpgSignature
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.lib.Signers
 import org.eclipse.jgit.lib.StoredConfig
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.transport.CredentialsProvider
@@ -41,14 +42,15 @@ class GitService {
     private boolean dryRun
 
     GitService(FineractPluginExtension.FineractPluginConfigGit config, FineractPluginExtension.FineractPluginConfigGpg gpgConfig) {
-        GpgSigner.setDefault(new GpgSigner() {
+        Signers.set(GpgConfig.GpgFormat.OPENPGP, new BouncyCastleGpgSigner() {
+
             @Override
-            void sign(@NonNull CommitBuilder commit, @Nullable String gpgSigningKey, @NonNull PersonIdent committer, CredentialsProvider credentialsProvider) throws CanceledException {
+            GpgSignature sign(Repository repository, GpgConfig internalConfig, byte[] data, PersonIdent committer, String signingKey, CredentialsProvider credentialsProvider) throws CanceledException, IOException, UnsupportedSigningFormatException {
                 log.warn("------------------------ KEY: ${gpgSigningKey} IDENT: ${committer}")
             }
 
             @Override
-            boolean canLocateSigningKey(@Nullable String gpgSigningKey, @NonNull PersonIdent committer, CredentialsProvider credentialsProvider) throws CanceledException {
+            boolean canLocateSigningKey(Repository repository, GpgConfig internalConfig, PersonIdent committer, String signingKey, CredentialsProvider credentialsProvider) throws CanceledException {
                 log.warn("------------------------ KEY: ${gpgSigningKey} IDENT: ${committer}")
                 return false
             }

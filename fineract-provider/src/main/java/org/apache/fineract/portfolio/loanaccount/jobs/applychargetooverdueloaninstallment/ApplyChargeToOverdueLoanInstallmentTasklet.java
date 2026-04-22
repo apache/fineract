@@ -68,7 +68,9 @@ public class ApplyChargeToOverdueLoanInstallmentTasklet implements Tasklet {
             List<Throwable> exceptions = new ArrayList<>();
             for (Map.Entry<Long, Collection<OverdueLoanScheduleData>> entry : overdueScheduleData.entrySet()) {
                 try {
-                    loanChargeWritePlatformService.applyOverdueChargesForLoan(entry.getKey(), entry.getValue());
+                    if (!entry.getValue().isEmpty()) {
+                        loanChargeWritePlatformService.applyOverdueChargesForLoan(entry.getKey(), entry.getValue());
+                    }
 
                 } catch (final PlatformApiDataValidationException e) {
                     final List<ApiParameterError> errors = e.getErrors();

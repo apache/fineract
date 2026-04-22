@@ -63,7 +63,6 @@ public class ScorecardApiResource {
 
     @GET
     @Path("{surveyId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @Operation(summary = "List all Scorecard entries", description = "List all Scorecard entries for a survey.")
@@ -93,7 +92,6 @@ public class ScorecardApiResource {
 
     @GET
     @Path("{surveyId}/clients/{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     public List<ScorecardData> findBySurveyAndClient(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId,
@@ -107,7 +105,6 @@ public class ScorecardApiResource {
 
     @GET
     @Path("clients/{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {

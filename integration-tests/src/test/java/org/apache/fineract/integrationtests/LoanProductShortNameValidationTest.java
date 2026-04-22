@@ -19,55 +19,37 @@
 
 package org.apache.fineract.integrationtests;
 
-import static io.restassured.http.ContentType.JSON;
-import static org.apache.fineract.integrationtests.common.Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey;
 import static org.apache.fineract.integrationtests.common.Utils.uniqueRandomStringGenerator;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanProductShortNameValidationTest {
-
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-        requestSpec = new RequestSpecBuilder().setContentType(JSON)
-                .addHeader("Authorization", "Basic " + loginIntoServerAndGetBase64EncodedAuthenticationKey()).build();
-    }
 
     @Test
     public void createLoanProductsWithSameShortName() {
         String shortName = uniqueRandomStringGenerator("", 4);
-        createLoanProduct(shortName, successResponseSpec());
-        createLoanProduct(shortName, validationFailedResponseSpec());
+        PostLoanProductsRequest request = buildMinimalLoanProductRequest(shortName);
+
+        // First creation should succeed
+        Calls.ok(FineractClientHelper.getFineractClient().loanProducts.createLoanProduct(request));
+
+        // Second creation with same short name should fail with 403
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> Calls.ok(FineractClientHelper.getFineractClient().loanProducts.createLoanProduct(request)));
+        assertEquals(403, exception.getResponse().code());
     }
 
-    private ResponseSpecification successResponseSpec() {
-        return new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
-
-    private ResponseSpecification validationFailedResponseSpec() {
-        return new ResponseSpecBuilder().expectBody("userMessageGlobalisationCode", equalTo("error.msg.product.loan.duplicate.short.name"))
-                .expectStatusCode(403).build();
-    }
-
-    private void createLoanProduct(String shortName, ResponseSpecification responseSpec) {
-        LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("10000").withRepaymentAfterEvery("1")
-                .withShortName(shortName).withRepaymentTypeAsMonth().withInterestRateFrequencyTypeAsMonths().build(null);
-
-        loanTransactionHelper.getLoanProductId(loanProductJSON);
+    private PostLoanProductsRequest buildMinimalLoanProductRequest(String shortName) {
+        return new PostLoanProductsRequest().name(uniqueRandomStringGenerator("LoanProduct_", 4)).shortName(shortName).principal(10000.0)
+                .numberOfRepayments(5).repaymentEvery(1).repaymentFrequencyType(2L).interestRatePerPeriod(2.0).interestRateFrequencyType(2)
+                .amortizationType(1).interestType(0).transactionProcessingStrategyCode("mifos-standard-strategy").currencyCode("USD")
+                .digitsAfterDecimal(2).inMultiplesOf(0).locale("en").dateFormat("dd MMMM yyyy").interestCalculationPeriodType(1)
+                .daysInYearType(1).daysInMonthType(1).isInterestRecalculationEnabled(false).accountingRule(1);
     }
 }

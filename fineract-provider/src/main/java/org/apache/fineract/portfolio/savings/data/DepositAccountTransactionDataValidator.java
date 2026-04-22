@@ -61,10 +61,13 @@ public class DepositAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
-    private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
-                    transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-                    routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
+            transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
+            routingCodeParamName, receiptNumberParamName, bankNumberParamName, DepositsApiConstants.amountParamName,
+            DepositsApiConstants.accountIdParamName, DepositsApiConstants.dateParamName, DepositsApiConstants.submittedOnDateParamName,
+            DepositsApiConstants.lienTransaction, DepositsApiConstants.isManualTransaction, DepositsApiConstants.chargesPaidByData,
+            DepositsApiConstants.accountNoParamName, DepositsApiConstants.noteParamName));
 
     private static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
@@ -219,12 +222,13 @@ public class DepositAccountTransactionDataValidator {
 
         if (onAccountClosureId != null) {
             final DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
-            if (accountOnClosureType.isTransferToSavings()) {
+            if (accountOnClosureType == DepositAccountOnClosureType.TRANSFER_TO_SAVINGS) {
                 final Long toSavingsAccountId = this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName, element);
                 baseDataValidator.reset().parameter(toSavingsAccountIdParamName).value(toSavingsAccountId)
                         .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName,
                                 DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());
-            } else if (accountOnClosureType.isReinvest() && isPreMatureClose) {
+            } else if ((accountOnClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
+                    || accountOnClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) && isPreMatureClose) {
                 baseDataValidator.reset().parameter(onAccountClosureIdParamName).value(onAccountClosureId)
                         .failWithCode("reinvest.not.allowed", "Re-Invest is not supported for account pre mature close");
             }

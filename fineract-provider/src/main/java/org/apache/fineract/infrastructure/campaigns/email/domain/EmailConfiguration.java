@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class EmailConfiguration extends AbstractPersistableCustom {
+public class EmailConfiguration extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false)
     private String name;

@@ -266,7 +266,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             scheduledJobDetails.setNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.setErrorLog(stackTrace);
-            log.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
+            log.warn("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.setCurrentlyRunning(false);
     }
@@ -349,7 +349,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
 
-        jobDetailFactoryBean.setArguments(job, scheduledJobDetail, jobParameterDTOSet);
+        jobDetailFactoryBean.setArguments(job, scheduledJobDetail, jobParameterDTOSet, tenant.getTenantIdentifier());
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
     }

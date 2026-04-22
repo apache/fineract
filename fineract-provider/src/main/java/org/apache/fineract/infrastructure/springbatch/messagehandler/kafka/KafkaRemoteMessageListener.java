@@ -50,6 +50,8 @@ public class KafkaRemoteMessageListener {
             stepExecutionRequestHandler.handle(stepExecutionRequest);
         } catch (Exception e) {
             log.error("Exception while processing Kafka message", e);
+        } finally {
+            inputInterceptor.afterHandleMessage();
         }
         acknowledgment.acknowledge();
         log.debug("Message was acknowledged {}", acknowledgment);

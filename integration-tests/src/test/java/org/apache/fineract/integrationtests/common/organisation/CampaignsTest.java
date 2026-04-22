@@ -30,6 +30,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +43,6 @@ import org.mockserver.model.MediaType;
 
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = { 9191 })
-
 public class CampaignsTest {
 
     private RequestSpecification requestSpec;
@@ -93,145 +93,155 @@ public class CampaignsTest {
 
     @Test
     public void testSupportedActionsForCampaignWithTriggerTypeAsDirect() {
-        // creating new campaign
-        Integer campaignId = this.campaignsHelper.createCampaign(NON_TRIGGERED_REPORT_NAME, DIRECT_TRIGGER_TYPE);
-        this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
+        BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
+            // creating new campaign
+            Integer campaignId = this.campaignsHelper.createCampaign(NON_TRIGGERED_REPORT_NAME, DIRECT_TRIGGER_TYPE);
+            this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
 
-        // updating campaign
-        Integer updatedCampaignId = this.campaignsHelper.updateCampaign(this.requestSpec, this.responseSpec, campaignId,
-                NON_TRIGGERED_REPORT_NAME, DIRECT_TRIGGER_TYPE);
-        assertEquals(campaignId, updatedCampaignId);
+            // updating campaign
+            Integer updatedCampaignId = this.campaignsHelper.updateCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    NON_TRIGGERED_REPORT_NAME, DIRECT_TRIGGER_TYPE);
+            assertEquals(campaignId, updatedCampaignId);
 
-        // activating campaign
-        Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                ACTIVATE_COMMAND);
-        assertEquals(activatedCampaignId, campaignId);
+            // activating campaign
+            Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    ACTIVATE_COMMAND);
+            assertEquals(activatedCampaignId, campaignId);
 
-        // closing campaign
-        Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign
+            Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // reactivating campaign
-        Integer reactivateCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                REACTIVATE_COMMAND);
-        assertEquals(reactivateCampaignId, campaignId);
+            // reactivating campaign
+            Integer reactivateCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    REACTIVATE_COMMAND);
+            assertEquals(reactivateCampaignId, campaignId);
 
-        // closing campaign again for deletion
-        closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId, CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign again for deletion
+            closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // deleting campaign
-        Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
-        assertEquals(deletedCampaignId, campaignId);
+            // deleting campaign
+            Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
+            assertEquals(deletedCampaignId, campaignId);
+        });
     }
 
     @Test
     public void testSupportedActionsForCampaignWithTriggerTypeAsScheduled() {
-        // creating new campaign
-        Integer campaignId = this.campaignsHelper.createCampaign(NON_TRIGGERED_REPORT_NAME, SCHEDULED_TRIGGER_TYPE);
-        this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
+        BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
+            // creating new campaign
+            Integer campaignId = this.campaignsHelper.createCampaign(NON_TRIGGERED_REPORT_NAME, SCHEDULED_TRIGGER_TYPE);
+            this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
 
-        // updating campaign
-        Integer updatedCampaignId = this.campaignsHelper.updateCampaign(this.requestSpec, this.responseSpec, campaignId,
-                NON_TRIGGERED_REPORT_NAME, SCHEDULED_TRIGGER_TYPE);
-        assertEquals(campaignId, updatedCampaignId);
+            // updating campaign
+            Integer updatedCampaignId = this.campaignsHelper.updateCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    NON_TRIGGERED_REPORT_NAME, SCHEDULED_TRIGGER_TYPE);
+            assertEquals(campaignId, updatedCampaignId);
 
-        // activating campaign
-        Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                ACTIVATE_COMMAND);
-        assertEquals(activatedCampaignId, campaignId);
+            // activating campaign
+            Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    ACTIVATE_COMMAND);
+            assertEquals(activatedCampaignId, campaignId);
 
-        // closing campaign
-        Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign
+            Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // reactivating campaign
-        Integer reactivateCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                REACTIVATE_COMMAND);
-        assertEquals(reactivateCampaignId, campaignId);
+            // reactivating campaign
+            Integer reactivateCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    REACTIVATE_COMMAND);
+            assertEquals(reactivateCampaignId, campaignId);
 
-        // closing campaign again for deletion
-        closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId, CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign again for deletion
+            closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // deleting campaign
-        Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
-        assertEquals(deletedCampaignId, campaignId);
+            // deleting campaign
+            Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
+            assertEquals(deletedCampaignId, campaignId);
+        });
     }
 
     @Test
     public void testSupportedActionsForCampaignWithTriggerTypeAsTriggered() {
-        // creating new campaign
-        Integer campaignId = this.campaignsHelper.createCampaign(TRIGGERED_REPORT_NAME, TRIGGERED_TRIGGER_TYPE);
-        this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
+        BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
+            // creating new campaign
+            Integer campaignId = this.campaignsHelper.createCampaign(TRIGGERED_REPORT_NAME, TRIGGERED_TRIGGER_TYPE);
+            this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
 
-        // updating campaign
-        Integer updatedCampaignId = this.campaignsHelper.updateCampaign(this.requestSpec, this.responseSpec, campaignId,
-                TRIGGERED_REPORT_NAME, TRIGGERED_TRIGGER_TYPE);
-        assertEquals(campaignId, updatedCampaignId);
+            // updating campaign
+            Integer updatedCampaignId = this.campaignsHelper.updateCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    TRIGGERED_REPORT_NAME, TRIGGERED_TRIGGER_TYPE);
+            assertEquals(campaignId, updatedCampaignId);
 
-        // activating campaign
-        Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                ACTIVATE_COMMAND);
-        assertEquals(activatedCampaignId, campaignId);
+            // activating campaign
+            Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    ACTIVATE_COMMAND);
+            assertEquals(activatedCampaignId, campaignId);
 
-        // closing campaign
-        Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign
+            Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // reactivating campaign
-        Integer reactivateCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                REACTIVATE_COMMAND);
-        assertEquals(reactivateCampaignId, campaignId);
+            // reactivating campaign
+            Integer reactivateCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    REACTIVATE_COMMAND);
+            assertEquals(reactivateCampaignId, campaignId);
 
-        // closing campaign again for deletion
-        closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId, CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign again for deletion
+            closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // deleting campaign
-        Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
-        assertEquals(deletedCampaignId, campaignId);
+            // deleting campaign
+            Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
+            assertEquals(deletedCampaignId, campaignId);
+        });
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testSupportedActionsForCampaignWithError() {
-        final ResponseSpecification responseSpecWithError = new ResponseSpecBuilder().expectStatusCode(400).build();
-        CampaignsHelper campaignsHelperWithError = new CampaignsHelper(this.requestSpec, responseSpecWithError);
-        // creating new campaign
-        Integer campaignId = this.campaignsHelper.createCampaign(NON_TRIGGERED_REPORT_NAME, DIRECT_TRIGGER_TYPE);
-        this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
+        BusinessDateHelper.runAt(DateTimeFormatter.ofPattern(DATE_FORMAT).format(Utils.getLocalDateOfTenant()), () -> {
+            final ResponseSpecification responseSpecWithError = new ResponseSpecBuilder().expectStatusCode(400).build();
+            CampaignsHelper campaignsHelperWithError = new CampaignsHelper(this.requestSpec, responseSpecWithError);
+            // creating new campaign
+            Integer campaignId = this.campaignsHelper.createCampaign(NON_TRIGGERED_REPORT_NAME, DIRECT_TRIGGER_TYPE);
+            this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
 
-        // activating campaign with failure
-        ArrayList<HashMap<String, Object>> campaignDateValidationData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
-                .performActionsOnCampaignWithFailure(campaignId, ACTIVATE_COMMAND,
-                        Utils.getLocalDateOfTenant().plusDays(1).format(DateTimeFormatter.ofPattern(DATE_FORMAT)),
-                        CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.campaign.activationDate.in.the.future",
-                campaignDateValidationData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+            // activating campaign with failure
+            ArrayList<HashMap<String, Object>> campaignDateValidationData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
+                    .performActionsOnCampaignWithFailure(campaignId, ACTIVATE_COMMAND,
+                            Utils.getLocalDateOfTenant().plusDays(1).format(DateTimeFormatter.ofPattern(DATE_FORMAT)),
+                            CommonConstants.RESPONSE_ERROR);
+            assertEquals("error.msg.campaign.activationDate.in.the.future",
+                    campaignDateValidationData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        // activating campaign
-        Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                ACTIVATE_COMMAND);
-        assertEquals(activatedCampaignId, campaignId);
+            // activating campaign
+            Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    ACTIVATE_COMMAND);
+            assertEquals(activatedCampaignId, campaignId);
 
-        // activating campaign with failure
-        ArrayList<HashMap<String, Object>> campaignErrorData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
-                .performActionsOnCampaignWithFailure(activatedCampaignId, ACTIVATE_COMMAND,
-                        Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(DATE_FORMAT)), CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.campaign.already.active", campaignErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+            // activating campaign with failure
+            ArrayList<HashMap<String, Object>> campaignErrorData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
+                    .performActionsOnCampaignWithFailure(activatedCampaignId, ACTIVATE_COMMAND,
+                            Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(DATE_FORMAT)), CommonConstants.RESPONSE_ERROR);
+            assertEquals("error.msg.campaign.already.active", campaignErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        // closing campaign again for deletion
-        Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
-                CLOSE_COMMAND);
-        assertEquals(closedCampaignId, campaignId);
+            // closing campaign again for deletion
+            Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
+                    CLOSE_COMMAND);
+            assertEquals(closedCampaignId, campaignId);
 
-        // deleting campaign
-        Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
-        assertEquals(deletedCampaignId, campaignId);
-
+            // deleting campaign
+            Integer deletedCampaignId = this.campaignsHelper.deleteCampaign(this.requestSpec, this.responseSpec, campaignId);
+            assertEquals(deletedCampaignId, campaignId);
+        });
     }
 }

@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 @Entity
 @Table(name = "m_account_transfer_transaction")
 @Getter
-public class AccountTransferTransaction extends AbstractPersistableCustom {
+public class AccountTransferTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "account_transfer_details_id", nullable = true)

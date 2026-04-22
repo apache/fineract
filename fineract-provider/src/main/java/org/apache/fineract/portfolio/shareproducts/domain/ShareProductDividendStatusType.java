@@ -20,8 +20,9 @@ package org.apache.fineract.portfolio.shareproducts.domain;
 
 public enum ShareProductDividendStatusType {
 
-    INVALID(0, "shareAccountDividendStatusType.invalid"), INITIATED(100, "shareAccountDividendStatusType.initiated"), APPROVED(300,
-            "shareAccountDividendStatusType.approved");
+    INVALID(0, "shareAccountDividendStatusType.invalid"), //
+    INITIATED(100, "shareAccountDividendStatusType.initiated"), //
+    APPROVED(300, "shareAccountDividendStatusType.approved"); //
 
     private final Integer value;
     private final String code;

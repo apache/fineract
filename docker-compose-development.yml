@@ -27,8 +27,6 @@ x-logging: &default-logging
       - regex:
           expression: '^(?P<date>\d{4}-\d{2}-\d{2}) (?P<time>\d{2}:\d{2}:\d{2}.\d{3}) (?P<message>(?s:.*))$$'
 
-version: "3.8"
-
 services:
   loki:
     extends:
@@ -88,3 +86,7 @@ services:
       # - ./config/docker/env/cloudwatch.env
       - ./config/docker/env/debug.env
     logging: *default-logging
+    networks:
+     default:
+       aliases:
+         - fineract-server

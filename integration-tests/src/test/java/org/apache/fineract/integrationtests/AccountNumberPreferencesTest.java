@@ -25,6 +25,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -311,7 +312,7 @@ public class AccountNumberPreferencesTest {
 
     private void createAndValidateCenter(Boolean isAccountPreferenceSetUp) {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
 
         String name = "CenterCreation" + new Timestamp(new java.util.Date().getTime());
         this.centerId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);

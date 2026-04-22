@@ -21,7 +21,8 @@ package org.apache.fineract.portfolio.rate.domain;
 
 public enum RateAppliesTo {
 
-    INVALID(0, "rateAppliesTo.invalid"), LOAN(1, "rateAppliesTo.loan");
+    INVALID(0, "rateAppliesTo.invalid"), //
+    LOAN(1, "rateAppliesTo.loan"); //
 
     private final Integer value;
     private final String code;

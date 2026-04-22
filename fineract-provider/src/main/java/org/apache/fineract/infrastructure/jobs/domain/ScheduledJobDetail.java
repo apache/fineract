@@ -23,6 +23,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,12 +37,12 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants;
 
 @Entity
-@Table(name = "job")
+@Table(name = "job", uniqueConstraints = { @UniqueConstraint(columnNames = { "short_name" }, name = "job_short_name_key") })
 @Getter
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ScheduledJobDetail extends AbstractPersistableCustom {
+public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name")
     private String jobName;
@@ -96,6 +97,9 @@ public class ScheduledJobDetail extends AbstractPersistableCustom {
 
     @Column(name = "is_misfired")
     private boolean triggerMisfired;
+
+    @Column(name = "short_name", nullable = false)
+    private String shortName;
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);

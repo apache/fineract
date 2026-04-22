@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
@@ -40,7 +41,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 @Entity
 @Table(name = "acc_product_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "product_type",
         "financial_account_type", "payment_type" }, name = "financial_action") })
-public class ProductToGLAccountMapping extends AbstractPersistableCustom {
+public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "gl_account_id")
@@ -63,11 +64,28 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom {
     @Column(name = "financial_account_type", nullable = true)
     private int financialAccountType;
 
+    @ManyToOne
+    @JoinColumn(name = "charge_off_reason_id", nullable = true)
+    private CodeValue chargeOffReason;
+
+    @ManyToOne
+    @JoinColumn(name = "write_off_reason_id", nullable = true)
+    private CodeValue writeOffReason;
+
+    @ManyToOne
+    @JoinColumn(name = "capitalized_income_classification_id", nullable = true)
+    private CodeValue capitalizedIncomeClassification;
+
+    @ManyToOne
+    @JoinColumn(name = "buydown_fee_classification_id", nullable = true)
+    private CodeValue buydownFeeClassification;
+
     public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType) {
+            final int financialAccountType, final CodeValue chargeOffReason, final CodeValue capitalizedIncomeClassification,
+            final CodeValue buydownFeeClassification) {
 
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
-                .setFinancialAccountType(financialAccountType);
+                .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReason)
+                .setCapitalizedIncomeClassification(capitalizedIncomeClassification).setBuydownFeeClassification(buydownFeeClassification);
     }
-
 }

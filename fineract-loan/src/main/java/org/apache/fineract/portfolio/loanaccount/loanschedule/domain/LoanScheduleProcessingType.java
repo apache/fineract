@@ -28,7 +28,9 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @RequiredArgsConstructor
 public enum LoanScheduleProcessingType {
 
-    HORIZONTAL("Horizontal"), VERTICAL("Vertical");
+    HORIZONTAL("Horizontal"), //
+    VERTICAL("Vertical"), //
+    ;
 
     private final String humanReadableName;
 
@@ -38,5 +40,13 @@ public enum LoanScheduleProcessingType {
 
     public EnumOptionData asEnumOptionData() {
         return new EnumOptionData((long) this.ordinal(), this.name(), this.humanReadableName);
+    }
+
+    public boolean isHorizontal() {
+        return this == HORIZONTAL;
+    }
+
+    public boolean isVertical() {
+        return this == VERTICAL;
     }
 }

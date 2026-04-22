@@ -119,7 +119,9 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
             handleDataIntegrityIssues(null, throwable, dve);
             return CommandProcessingResult.empty();
         }
-        return new CommandProcessingResultBuilder().withEntityId(resourceId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(resourceId) //
+                .build();
     }
 
     /*

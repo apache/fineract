@@ -37,7 +37,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
@@ -94,23 +93,6 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
                 headers.put(header, values);
             });
             converter.write(t, genericType, MediaType.APPLICATION_JSON, new SimpleHttpOutputMessage(entityStream, headers));
-        }
-    }
-
-    @RequiredArgsConstructor
-    private static final class SimpleHttpOutputMessage implements HttpOutputMessage {
-
-        private final OutputStream outputStream;
-        private final HttpHeaders headers;
-
-        @Override
-        public OutputStream getBody() throws IOException {
-            return outputStream;
-        }
-
-        @Override
-        public HttpHeaders getHeaders() {
-            return headers;
         }
     }
 }

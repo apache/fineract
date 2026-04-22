@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -28,22 +30,42 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.LoanTermVariationsData;
+import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +73,7 @@ import org.slf4j.LoggerFactory;
  * Test the creation, approval and rejection of a loan reschedule request
  **/
 @SuppressWarnings({ "rawtypes" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanRescheduleRequestTest {
+public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
     private ResponseSpecification responseSpec;
@@ -235,6 +256,91 @@ public class LoanRescheduleRequestTest {
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
 
+    @Test
+    public void testInterestRateChangeForProgressiveLoan() {
+        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+
+        Integer commonLoanProductId = createLoanProduct("500", "15", "4", true, "25", true, LoanScheduleType.PROGRESSIVE,
+                LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+        AtomicReference<PostCreateRescheduleLoansResponse> rescheduleResponse = new AtomicReference<>();
+        AtomicReference<PostLoansResponse> loanResponse = new AtomicReference<>();
+        // Do not allow interest rate change on not active loan
+        // Do not allow interest rate change twice on the same day
+        runAt("15 February 2023", () -> {
+
+            loanResponse.set(applyForLoanApplication(client.getClientId(), commonLoanProductId, BigDecimal.valueOf(500.0), 45, 15, 3,
+                    BigDecimal.TEN, "01 January 2023", "01 January 2023"));
+
+            loanTransactionHelper.approveLoan(loanResponse.get().getLoanId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)
+                            .approvedOnDate("01 January 2023").locale("en"));
+
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> loanRescheduleRequestHelper
+                            .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                                    .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
+            assertEquals(400, exception.getResponse().code());
+            assertTrue(exception.getMessage().contains("loan.is.not.active"));
+
+            loanTransactionHelper.disburseLoan(loanResponse.get().getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("15 February 2023").dateFormat(DATETIME_PATTERN)
+                            .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
+
+            rescheduleResponse.set(loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                    .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
+
+            loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                    .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
+                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023"));
+        });
+        // Do not allow approve an interest rate change if the reschedule from date is not in the future
+        // Do not allow create interest rate change if a previous interest rate change got already approved for that
+        // date
+        runAt("16 February 2023", () -> {
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                            .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023").newInterestRate(BigDecimal.ONE)
+                            .rescheduleReasonId(1L).rescheduleFromDate("17 February 2023"));
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("17 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            PostCreateRescheduleLoansResponse secondRescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                            .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023").newInterestRate(BigDecimal.TEN)
+                            .rescheduleReasonId(1L).rescheduleFromDate("17 February 2023"));
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.get().getLoanId());
+            assertEquals(loanDetails.getSummary().getInterestCharged().stripTrailingZeros(), BigDecimal.valueOf(1.53).stripTrailingZeros());
+
+            loanRescheduleRequestHelper.approveLoanRescheduleRequest(secondRescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().approvedOnDate("17 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
+            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.get().getLoanId());
+            assertEquals(loanDetails.getSummary().getInterestCharged().stripTrailingZeros(), BigDecimal.valueOf(4.22).stripTrailingZeros());
+        });
+
+        // Allow new interest rate change if the previous got rejected
+        runAt("17 February 2023", () -> {
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
+                            .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("18 February 2023").newInterestRate(BigDecimal.ONE)
+                            .rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
+
+            loanRescheduleRequestHelper.rejectLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+                    new PostUpdateRescheduleLoansRequest().rejectedOnDate("18 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
+
+            loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+                    .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("18 February 2023")
+                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
+
+        });
+    }
+
     /**
      * create new loan reschedule request
      **/
@@ -254,5 +360,262 @@ public class LoanRescheduleRequestTest {
     @Test
     public void testCreateLoanRescheduleChangeEMIRequest() {
         this.createLoanRescheduleChangeEMIRequest();
+    }
+
+    @Test
+    public void givenProgressiveLoanWithPaidInstallmentWhenInterestRateChangedThenDueAmountUpdated() {
+        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Integer commonLoanProductId = createProgressiveLoanProduct();
+
+        AtomicReference<PostLoansResponse> loanResponse = new AtomicReference<>();
+        runAt("2 February 2024", () -> {
+            loanResponse
+                    .set(applyForLoanWithRecalculation(client.getClientId(), commonLoanProductId, "01 January 2024", "01 January 2024"));
+
+            approveAndDisburseLoan(loanResponse.get().getLoanId(), "01 January 2024", BigDecimal.valueOf(100));
+            makeRepayments(loanResponse.get().getLoanId().intValue());
+
+            GetLoansLoanIdResponse savedLoanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec,
+                    loanResponse.get().getLoanId().intValue());
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = rescheduleLoanWithNewInterestRate(loanResponse.get().getLoanId(),
+                    "2 February 2024", BigDecimal.ONE, "3 February 2024");
+
+            approveLoanReschedule(rescheduleLoansResponse.getResourceId(), "2 February 2024");
+
+            GetLoansLoanIdResponse actualLoanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec,
+                    loanResponse.get().getLoanId().intValue());
+
+            verifyRepaymentSchedule(savedLoanResponse, actualLoanResponse, 7, 3);
+        });
+    }
+
+    @Test
+    public void testLoanTermVariationDeserializesProperly() {
+        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Long commonLoanProductId = createLoanProductPeriodicWithInterest();
+
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("01 March 2024", () -> {
+            Long loanId = applyForLoanApplicationWithInterest(client.getClientId(), commonLoanProductId, BigDecimal.valueOf(4000),
+                    "1 March 2023", "1 March 2024");
+            loanIdRef.set(loanId);
+            loanTransactionHelper.approveLoan("1 March 2024", loanId.intValue());
+
+            loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "400", null);
+
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(DATETIME_PATTERN)
+                            .locale("en").submittedOnDate("1 March 2024").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
+                            .rescheduleFromDate("1 April 2024"));
+
+            GetLoanRescheduleRequestResponse getLoanRescheduleRequestResponse = Assertions.assertDoesNotThrow(
+                    () -> loanRescheduleRequestHelper.readLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(), null));
+            Assertions.assertNotNull(getLoanRescheduleRequestResponse);
+        });
+    }
+
+    @Test
+    public void testCreateLoanRescheduleChangeEMIWithExtraTermsUsesFutureScheduleForEndDate() {
+        PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Long commonLoanProductId = createLoanProductPeriodicWithInterest();
+
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        runAt("01 March 2024", () -> {
+            Long loanId = applyForLoanApplicationWithInterest(client.getClientId(), commonLoanProductId, BigDecimal.valueOf(4000),
+                    "1 March 2024", "1 March 2024");
+            loanIdRef.set(loanId);
+            loanTransactionHelper.approveLoan("1 March 2024", loanId.intValue());
+            loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "4000", null);
+
+            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                    .updateExtraTerms("2").updateEMI("500").updateEmiChangeEndDate("01 September 2024")
+                    .updateRescheduleFromDate("01 April 2024").updateSubmittedOnDate("01 March 2024").build(loanId.toString());
+
+            Integer rescheduleRequestId = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Assertions.assertNotNull(rescheduleRequestId);
+
+            GetLoanRescheduleRequestResponse createResponse = loanRescheduleRequestHelper
+                    .readLoanRescheduleRequest(rescheduleRequestId.longValue(), null);
+            Assertions.assertNotNull(createResponse);
+            Assertions.assertNotNull(createResponse.getLoanTermVariationsData());
+
+            Set<LocalDate> emiTermVariationDates = createResponse.getLoanTermVariationsData().stream()
+                    .filter(variation -> variation.getTermType() != null && variation.getTermType().getId() != null
+                            && variation.getTermType().getId() == 1L)
+                    .map(LoanTermVariationsData::getTermVariationApplicableFrom).collect(Collectors.toCollection(TreeSet::new));
+
+            Set<LocalDate> expectedEMIVariationDates = Set.of(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1),
+                    LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1));
+            assertEquals(expectedEMIVariationDates, emiTermVariationDates,
+                    "EMI term variations should include installment dates created by extra terms");
+
+            approveLoanReschedule(rescheduleRequestId.longValue(), "01 March 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanIdRef.get().intValue());
+
+            Set<LocalDate> repaymentDueDates = loanDetails.getRepaymentSchedule().getPeriods().stream()
+                    .filter(period -> period.getPeriod() != null && period.getPeriod() > 0).map(period -> period.getDueDate())
+                    .collect(Collectors.toCollection(TreeSet::new));
+
+            assertTrue(repaymentDueDates.containsAll(expectedEMIVariationDates),
+                    "Repayment schedule should include all projected installment dates up to the EMI end date");
+            assertEquals(LocalDate.of(2024, 9, 1), ((TreeSet<LocalDate>) repaymentDueDates).last(),
+                    "Repayment schedule should end on the EMI change end date when extra terms are applied");
+        });
+    }
+
+    private Integer createProgressiveLoanProduct() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+        final String loanProductJSON = new LoanProductTestBuilder().withNumberOfRepayments(numberOfRepayments)
+                .withinterestRatePerPeriod("7").withMaxTrancheCount("10").withMinPrincipal("1").withPrincipal("100")
+                .withInterestRateFrequencyTypeAsYear()
+                .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .withInterestTypeAsDecliningBalance().addAdvancedPaymentAllocation(defaultAllocation)
+                .withInterestRecalculationDetails("0", "4", "1").withRecalculationRestFrequencyType("2")
+                .withInterestCalculationPeriodTypeAsDays().withMultiDisburse().withDisallowExpectedDisbursements()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
+                .build(null);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private PostLoansResponse applyForLoanWithRecalculation(Long clientId, Integer loanProductId, String expectedDisbursementDate,
+            String submittedOnDate) {
+        return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .locale("en").submittedOnDate(submittedOnDate).amortizationType(1).interestRatePerPeriod(BigDecimal.valueOf(7))
+                .interestCalculationPeriodType(0).interestType(0).repaymentFrequencyType(2).repaymentEvery(1).numberOfRepayments(6)
+                .loanTermFrequency(6).loanTermFrequencyType(2).principal(BigDecimal.valueOf(100)).loanType("individual"));
+    }
+
+    private void approveAndDisburseLoan(Long loanId, String date, BigDecimal amount) {
+        loanTransactionHelper.approveLoan(loanId, createLoanApprovalRequest(date, amount));
+        loanTransactionHelper.disburseLoan(loanId, createDisbursementRequest(date, amount));
+    }
+
+    private PostLoansLoanIdRequest createLoanApprovalRequest(String date, BigDecimal amount) {
+        return new PostLoansLoanIdRequest().approvedLoanAmount(amount).dateFormat(DATETIME_PATTERN).approvedOnDate(date).locale("en");
+    }
+
+    private PostLoansLoanIdRequest createDisbursementRequest(String date, BigDecimal amount) {
+        return new PostLoansLoanIdRequest().actualDisbursementDate(date).dateFormat(DATETIME_PATTERN).transactionAmount(amount)
+                .locale("en");
+    }
+
+    private void makeRepayments(int loanId) {
+        loanTransactionHelper.makeRepayment("01 February 2024", 17.01f, loanId);
+        loanTransactionHelper.makeRepayment("02 February 2024", 17.01f, loanId);
+    }
+
+    private PostCreateRescheduleLoansResponse rescheduleLoanWithNewInterestRate(Long loanId, String submittedOnDate,
+            BigDecimal newInterestRate, String rescheduleFromDate) {
+        return loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanId)
+                .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate(submittedOnDate).newInterestRate(newInterestRate)
+                .rescheduleReasonId(1L).rescheduleFromDate(rescheduleFromDate));
+    }
+
+    private void approveLoanReschedule(Long rescheduleId, String approvedOnDate) {
+        loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleId,
+                new PostUpdateRescheduleLoansRequest().approvedOnDate(approvedOnDate).locale("en").dateFormat(DATETIME_PATTERN));
+    }
+
+    private PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
+            String loanScheduleProcessingType) {
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .transactionProcessingStrategyCode(transactionProcessorCode).locale("en").submittedOnDate(submittedOnDate)
+                .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
+                .repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery).repaymentFrequencyType(0)
+                .numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency).loanTermFrequencyType(0).principal(principal)
+                .loanType("individual").loanScheduleProcessingType(loanScheduleProcessingType)
+                .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
+    }
+
+    private PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate) {
+        return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
+                interestRate, expectedDisbursementDate, submittedOnDate, LoanScheduleProcessingType.HORIZONTAL);
+    }
+
+    private PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
+            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+            final String expectedDisbursementDate, final String submittedOnDate, LoanScheduleProcessingType loanScheduleProcessingType) {
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
+                interestRate, expectedDisbursementDate, submittedOnDate,
+                AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY, loanScheduleProcessingType.name());
+    }
+
+    private Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
+            boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
+            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+                .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
+                .withEnableDownPayment(downPaymentEnabled, downPaymentPercentage, autoPayForDownPayment).withinterestRatePerPeriod("0")
+                .withInterestRateFrequencyTypeAsMonths()
+                .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .addAdvancedPaymentAllocation(defaultAllocation).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withDisallowExpectedDisbursements(true)
+                .withLoanScheduleType(loanScheduleType).withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30")
+                .withDaysInYear("365").withMoratorium("0", "0").build(null);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private Long createLoanProductPeriodicWithInterest() {
+        String name = Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6);
+        String shortName = Utils.uniqueRandomStringGenerator("", 4);
+        Long resourceId = loanTransactionHelper.createLoanProduct(new PostLoanProductsRequest() //
+                .name(name) //
+                .shortName(shortName) //
+                .multiDisburseLoan(true) //
+                .maxTrancheCount(2) //
+                .interestType(InterestType.DECLINING_BALANCE) //
+                .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY) //
+                .disallowExpectedDisbursements(true) //
+                .description("Test loan description") //
+                .currencyCode("USD") //
+                .digitsAfterDecimal(2) //
+                .daysInYearType(DaysInYearType.ACTUAL) //
+                .daysInMonthType(DaysInYearType.ACTUAL) //
+                .interestRecalculationCompoundingMethod(0) //
+                .recalculationRestFrequencyType(1) //
+                .rescheduleStrategyMethod(1) //
+                .recalculationRestFrequencyInterval(0) //
+                .isInterestRecalculationEnabled(false) //
+                .interestRateFrequencyType(2) //
+                .locale("en_GB") //
+                .numberOfRepayments(4) //
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()) //
+                .interestRatePerPeriod(2.0) //
+                .repaymentEvery(1) //
+                .minPrincipal(100.0) //
+                .principal(1000.0) //
+                .maxPrincipal(10000000.0) //
+                .amortizationType(AmortizationType.EQUAL_INSTALLMENTS) //
+                .dateFormat(DATETIME_PATTERN) //
+                .transactionProcessingStrategyCode(DEFAULT_STRATEGY) //
+                .accountingRule(1)) //
+                .getResourceId();
+        return resourceId;
+    }
+
+    private Long applyForLoanApplicationWithInterest(final Long clientId, final Long loanProductId, BigDecimal principal,
+            String submittedOnDate, String expectedDisburmentDate) {
+        final PostLoansRequest loanRequest = new PostLoansRequest() //
+                .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
+                .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(0)
+                .interestCalculationPeriodType(0).dateFormat("dd MMMM yyyy").transactionProcessingStrategyCode(DEFAULT_STRATEGY)
+                .loanType("individual").submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisburmentDate).clientId(clientId)
+                .productId(loanProductId);
+        Long loanId = loanTransactionHelper.applyLoan(loanRequest).getLoanId();
+        return loanId;
     }
 }

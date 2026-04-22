@@ -26,7 +26,8 @@ import java.util.Set;
  ***/
 public enum FinancialActivityAccountsJsonInputParams {
 
-    FINANCIAL_ACTIVITY_ID("financialActivityId"), GL_ACCOUNT_ID("glAccountId");
+    FINANCIAL_ACTIVITY_ID("financialActivityId"), //
+    GL_ACCOUNT_ID("glAccountId"); //
 
     private final String value;
 
@@ -48,7 +49,7 @@ public enum FinancialActivityAccountsJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public String getValue() {

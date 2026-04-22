@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 
 @Entity
 @Table(name = "glim_accounts", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_number" }, name = "FK_glim_id") })
-public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCustom {
+public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)

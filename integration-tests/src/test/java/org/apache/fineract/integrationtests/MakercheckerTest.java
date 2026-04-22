@@ -30,21 +30,26 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutPermissionsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.commands.MakercheckersHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings({ "unused" })
 public class MakercheckerTest {
@@ -58,6 +63,7 @@ public class MakercheckerTest {
     private SavingsAccountHelper savingsAccountHelper;
     private static final String START_DATE_STRING = "03 June 2023";
     private static final String TRANSACTION_DATE_STRING = "05 June 2023";
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -70,6 +76,7 @@ public class MakercheckerTest {
         this.auditHelper = new AuditHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -82,22 +89,11 @@ public class MakercheckerTest {
 
     @Test
     public void testMakerCheckerOn() {
-        GlobalConfigurationPropertyData mcConfig = GlobalConfigurationHelper.getGlobalConfigurationByName(requestSpec, responseSpec,
-                "maker-checker");
-        Long mcConfigId = mcConfig.getId();
-        boolean mcConfigUpdate = false;
-        if (!Boolean.TRUE.equals(mcConfig.getEnabled())) {
-            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, mcConfigId, true);
-            mcConfigUpdate = true;
-        }
-        GlobalConfigurationPropertyData sameMcConfig = GlobalConfigurationHelper.getGlobalConfigurationByName(requestSpec, responseSpec,
-                "enable-same-maker-checker");
-        Long sameMcConfigId = mcConfig.getId();
-        boolean sameMcConfigUpdate = false;
-        if (Boolean.TRUE.equals(sameMcConfig.getEnabled())) {
-            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, sameMcConfigId, false);
-            sameMcConfigUpdate = true;
-        }
+
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(false));
 
         try {
             // client permission - maker-checker disabled
@@ -114,11 +110,11 @@ public class MakercheckerTest {
             // create maker user
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
             final Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "P4ssw0rd", "resourceId");
+                    "A1b2c3d4e5f$", "resourceId");
 
             // create client - maker-checker disabled
             RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "P4ssw0rd"));
+                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
             Integer clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
             assertNotNull(clientId);
             ClientHelper.verifyClientCreatedOnServer(requestSpec, this.responseSpec, clientId);
@@ -163,9 +159,9 @@ public class MakercheckerTest {
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
             final Integer checkerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker,
-                    "P4ssw0rd", "resourceId");
+                    "A1b2c3d4e5f$", "resourceId");
             RequestSpecification checkerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
-                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(checker, "P4ssw0rd"));
+                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(checker, "A1b2c3d4e5f$"));
 
             // check by another checker user should succeed
             HashMap<?, ?> response = MakercheckersHelper.approveMakerCheckerEntry(checkerRequestSpec, responseSpec, clientCommandId);
@@ -190,14 +186,87 @@ public class MakercheckerTest {
                     CommonConstants.RESPONSE_RESOURCE_ID);
             assertNotNull(withdrawalId);
         } finally {
-            if (mcConfigUpdate) {
-                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, mcConfigId, false);
-            }
-            if (sameMcConfigUpdate) {
-                GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, sameMcConfigId, true);
-            }
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("WITHDRAWAL_SAVINGSACCOUNT",
                     false);
+            rolesHelper.updatePermissions(putPermissionsRequest);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "m_client", "m_group", "m_center", "m_loan", "m_office", "m_savings_account" })
+    public void testRejectDatatableCreationCleansUpOrphanedTable(String apptableName) {
+
+        // enable maker-checker globally
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(false));
+
+        try {
+            // enable maker-checker for datatable creation
+            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", true);
+            rolesHelper.updatePermissions(putPermissionsRequest);
+
+            // create role with permissions for maker and checker
+            Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+            Map<String, Boolean> permissionMap = Map.of("CREATE_DATATABLE", true, "CREATE_DATATABLE_CHECKER", true);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+
+            // create maker user
+            Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            String maker = Utils.uniqueRandomStringGenerator("user", 8);
+            Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
+                    "A1b2c3d4e5f$", "resourceId");
+
+            // create checker user
+            String checker = Utils.uniqueRandomStringGenerator("user", 8);
+            UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker, "A1b2c3d4e5f$", "resourceId");
+
+            RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
+                    .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "A1b2c3d4e5f$"));
+
+            // maker creates datatable with maker-checker enabled, this creates the physical table but queues for
+            // approval
+            DatatableHelper makerDatatableHelper = new DatatableHelper(makerRequestSpec, this.responseSpec);
+            String datatableJson = DatatableHelper.getTestDatatableAsJSON(apptableName, false);
+            String datatableName = com.google.gson.JsonParser.parseString(datatableJson).getAsJsonObject().get("datatableName")
+                    .getAsString();
+            makerDatatableHelper.createDatatable(datatableJson, "");
+
+            // find the pending command
+            List<Map<String, Object>> auditDetails = makercheckersHelper
+                    .getMakerCheckerList(Map.of("actionName", "CREATE", "entityName", "DATATABLE", "makerId", makerUserId.toString()));
+            assertEquals(1, auditDetails.size(), "Error: Expected only one pending CREATE DATATABLE command");
+            Long commandId = ((Double) auditDetails.get(0).get("id")).longValue();
+
+            // checker rejects the command which should drop the orphaned table
+            MakercheckersHelper.rejectMakerCheckerEntry(FineractClientHelper.createNewFineractClient(checker, "A1b2c3d4e5f$"), commandId);
+
+            // verify the datatable no longer exists by trying to create it again
+            // verify without maker checker, so transaction rollback in postgres doesn't break the test
+            putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
+            rolesHelper.updatePermissions(putPermissionsRequest);
+
+            DatatableHelper adminDatatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+            String recreatedName = adminDatatableHelper.createDatatable(datatableJson, "resourceIdentifier");
+            assertEquals(datatableName, recreatedName, "Error: Was not able to recreate datatable after rejection cleanup");
+
+            // cleanup after test
+            adminDatatableHelper.deleteDatatable(datatableName);
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_SAME_MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+
+            PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_DATATABLE", false);
             rolesHelper.updatePermissions(putPermissionsRequest);
         }
     }

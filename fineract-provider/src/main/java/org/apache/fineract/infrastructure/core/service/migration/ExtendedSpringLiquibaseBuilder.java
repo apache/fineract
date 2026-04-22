@@ -22,19 +22,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.google.common.base.Joiner;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.core.io.ResourceLoader;
 
 public class ExtendedSpringLiquibaseBuilder {
 
-    private final Set<String> contexts = new HashSet<>();
+    private final List<String> contexts = new ArrayList<>();
     private final Map<String, String> changeLogParameters = new HashMap<>();
     private final boolean clearCheckSums;
     private final String liquibaseSchema;
@@ -42,14 +42,14 @@ public class ExtendedSpringLiquibaseBuilder {
     private final String databaseChangeLogTable;
     private final String databaseChangeLogLockTable;
     private final boolean shouldRun;
-    private final String labelFilter;
+    private final List<String> labelFilter = new ArrayList<>();
     private final File rollbackFile;
     private final boolean testRollbackOnUpdate;
     private final String tag;
-    private String changeLog;
+    private final String changeLog;
     private ResourceLoader resourceLoader;
-    private String defaultSchema;
-    private boolean dropFirst;
+    private final String defaultSchema;
+    private final boolean dropFirst;
     private DataSource dataSource;
 
     public ExtendedSpringLiquibaseBuilder(LiquibaseProperties liquibaseProperties) {
@@ -59,8 +59,8 @@ public class ExtendedSpringLiquibaseBuilder {
             this.changeLogParameters.putAll(liquibaseProperties.getParameters());
         }
         this.changeLog = liquibaseProperties.getChangeLog();
-        if (isNotBlank(liquibaseProperties.getContexts())) {
-            this.contexts.add(liquibaseProperties.getContexts());
+        if (liquibaseProperties.getContexts() != null) {
+            this.contexts.addAll(liquibaseProperties.getContexts());
         }
         this.clearCheckSums = liquibaseProperties.isClearChecksums();
         this.liquibaseSchema = liquibaseProperties.getLiquibaseSchema();
@@ -68,7 +68,9 @@ public class ExtendedSpringLiquibaseBuilder {
         this.databaseChangeLogTable = liquibaseProperties.getDatabaseChangeLogTable();
         this.databaseChangeLogLockTable = liquibaseProperties.getDatabaseChangeLogLockTable();
         this.shouldRun = liquibaseProperties.isEnabled();
-        this.labelFilter = liquibaseProperties.getLabelFilter();
+        if (liquibaseProperties.getContexts() != null) {
+            this.contexts.addAll(liquibaseProperties.getLabelFilter());
+        }
         this.rollbackFile = liquibaseProperties.getRollbackFile();
         this.testRollbackOnUpdate = liquibaseProperties.isTestRollbackOnUpdate();
         this.tag = liquibaseProperties.getTag();
@@ -116,7 +118,7 @@ public class ExtendedSpringLiquibaseBuilder {
         result.setDatabaseChangeLogTable(databaseChangeLogTable);
         result.setDatabaseChangeLogLockTable(databaseChangeLogLockTable);
         result.setShouldRun(shouldRun);
-        result.setLabelFilter(labelFilter);
+        result.setLabelFilter(Joiner.on(",").join(labelFilter));
         result.setRollbackFile(rollbackFile);
         result.setTestRollbackOnUpdate(testRollbackOnUpdate);
         result.setTag(tag);

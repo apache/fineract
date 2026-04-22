@@ -19,17 +19,24 @@
 package org.apache.fineract.infrastructure.event.business.domain.loan;
 
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
 public class LoanStatusChangedBusinessEvent extends LoanBusinessEvent {
 
     private static final String TYPE = "LoanStatusChangedBusinessEvent";
+    private final LoanStatus oldStatus;
 
-    public LoanStatusChangedBusinessEvent(Loan value) {
+    public LoanStatusChangedBusinessEvent(Loan value, LoanStatus oldStatus) {
         super(value);
+        this.oldStatus = oldStatus;
     }
 
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    public LoanStatus getOldStatus() {
+        return oldStatus;
     }
 }

@@ -61,6 +61,27 @@ public class JsonParserHelper {
         return element.getAsJsonObject().has(parameterName);
     }
 
+    /**
+     * Check Parameter has a non-blank value
+     */
+    public boolean parameterHasValue(final String parameterName, final JsonElement element) {
+        if (element == null || !element.isJsonObject()) {
+            return false;
+        }
+
+        var valueObject = element.getAsJsonObject().get(parameterName);
+        if (valueObject == null || valueObject.isJsonNull()) {
+            return false;
+        }
+        if (valueObject instanceof JsonArray) {
+            return !valueObject.getAsJsonArray().isEmpty();
+        }
+        if (valueObject instanceof JsonObject) {
+            return !valueObject.getAsJsonObject().isEmpty();
+        }
+        return valueObject.isJsonPrimitive() && !valueObject.getAsJsonPrimitive().getAsString().isBlank();
+    }
+
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> requestParamatersDetected) {
         Boolean value = null;
         if (element.isJsonObject()) {
@@ -621,7 +642,7 @@ public class JsonParserHelper {
                 // http://bugs.sun.com/view_bug.do?bug_id=4510618
                 final char groupingSeparator = symbols.getGroupingSeparator();
                 if (groupingSeparator == '\u00a0') {
-                    source = source.replaceAll(" ", Character.toString('\u00a0'));
+                    source = source.replace(" ", Character.toString('\u00a0'));
                 }
 
                 final Number parsedNumber = df.parse(source);
@@ -706,9 +727,8 @@ public class JsonParserHelper {
                 // http://bugs.sun.com/view_bug.do?bug_id=4510618
                 final char groupingSeparator = symbols.getGroupingSeparator();
                 if (groupingSeparator == '\u00a0') {
-                    source = source.replaceAll(" ", Character.toString('\u00a0'));
+                    source = source.replace(" ", Character.toString('\u00a0'));
                 }
-
                 final NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
                 if (parsedNumber instanceof BigDecimal) {
@@ -798,7 +818,7 @@ public class JsonParserHelper {
                     dataValidationErrors);
         }
 
-        return new Locale(languageCode.toLowerCase(), courntryCode.toUpperCase(), variantCode);
+        return Locale.of(languageCode.toLowerCase(), courntryCode.toUpperCase(), variantCode);
     }
 
     private Locale extractLocaleValue(final JsonObject object) {

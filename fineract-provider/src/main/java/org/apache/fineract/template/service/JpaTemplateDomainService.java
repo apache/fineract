@@ -65,7 +65,9 @@ public class JpaTemplateDomainService implements TemplateDomainService {
         final Template template = Template.fromJson(command);
 
         this.templateRepository.saveAndFlush(template);
-        return new CommandProcessingResultBuilder().withEntityId(template.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(template.getId()) //
+                .build();
     }
 
     @Transactional
@@ -105,7 +107,10 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
         this.templateRepository.saveAndFlush(template);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(template.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(template.getId()) //
+                .build();
     }
 
     @Transactional
@@ -115,7 +120,9 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
         this.templateRepository.delete(template);
 
-        return new CommandProcessingResultBuilder().withEntityId(templateId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(templateId) //
+                .build();
     }
 
     @Transactional

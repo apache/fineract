@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
@@ -58,12 +59,12 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.exception.InvalidOfficeException;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
@@ -82,6 +83,7 @@ import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransition
 import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.service.LoanOfficerService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -115,6 +117,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final AccountNumberGenerator accountNumberGenerator;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanOfficerService loanOfficerService;
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
         try {
@@ -184,29 +187,30 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
             }
 
-            // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
+
+            // Account Number generation
+            if (StringUtils.isBlank(accountNo)) {
+                generateAccountNumber(newGroup);
+            }
 
             /*
              * Generate hierarchy for a new center/group and all the child groups if they exist
              */
             newGroup.generateHierarchy();
 
-            /* Generate account number if required */
-            generateAccountNumberIfRequired(newGroup);
-
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
 
             if (newGroup.isGroup()) {
                 if (command.parameterExists(GroupingTypesApiConstants.datatables)) {
-                    this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                    this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(),
                             EntityTables.GROUP.getName(), newGroup.getId(), null,
                             command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
                 }
 
                 this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
-                        StatusEnum.CREATE.getCode(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
+                        StatusEnum.CREATE.getValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
             }
 
             return new CommandProcessingResultBuilder() //
@@ -214,7 +218,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withOfficeId(groupOffice.getId()) //
                     .withGroupId(newGroup.getId()) //
                     .withEntityId(newGroup.getId()) //
-                    .setRollbackTransaction(rollbackTransaction)//
+                    .setRollbackTransaction(rollbackTransaction) //
                     .build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -227,20 +231,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
-    private void generateAccountNumberIfRequired(Group newGroup) {
-        if (newGroup.isAccountNumberRequiresAutoGeneration()) {
-            EntityAccountType entityAccountType = null;
-            AccountNumberFormat accountNumberFormat = null;
-            if (newGroup.isCenter()) {
-                entityAccountType = EntityAccountType.CENTER;
-                accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
-                newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-            } else {
-                entityAccountType = EntityAccountType.GROUP;
-                accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
-                newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
-            }
-
+    private void generateAccountNumber(Group newGroup) {
+        EntityAccountType entityAccountType = null;
+        AccountNumberFormat accountNumberFormat = null;
+        if (newGroup.isCenter()) {
+            entityAccountType = EntityAccountType.CENTER;
+            accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
+            newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
+        } else {
+            entityAccountType = EntityAccountType.GROUP;
+            accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
+            newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
         }
     }
 
@@ -322,7 +323,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         if (!isGroupClientCountValid) {
             throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients);
         }
-        entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(), StatusEnum.ACTIVATE.getCode(),
+        entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(), StatusEnum.ACTIVATE.getValue(),
                 EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
     }
 
@@ -517,7 +518,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     if (this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForClient(client.getId())) {
                         for (final Loan loan : this.loanRepositoryWrapper.findLoanByClientId(client.getId())) {
                             if (loan.isDisbursed() && !loan.isClosed()) {
-                                loan.reassignLoanOfficer(staff, loanOfficerReassignmentDate);
+                                loanOfficerService.reassignLoanOfficer(loan, staff, loanOfficerReassignmentDate);
                             }
                         }
                     }
@@ -594,7 +595,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
-        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getCode(),
+        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getValue(),
                 EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
 
         group.close(currentUser, closureReason, closureDate);
@@ -669,7 +670,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(center, closureDate);
 
-        entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(), StatusEnum.ACTIVATE.getCode(),
+        entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(), StatusEnum.ACTIVATE.getValue(),
                 EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
 
         center.close(currentUser, closureReason, closureDate);

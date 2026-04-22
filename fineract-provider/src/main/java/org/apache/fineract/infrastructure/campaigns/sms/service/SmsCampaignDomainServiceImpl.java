@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsRuntimeException;
 import org.apache.fineract.infrastructure.campaigns.sms.serialization.SmsCampaignValidator;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientActivateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientRejectBusinessEvent;
@@ -102,7 +104,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void notifyRejectedLoanOwner(Loan loan) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Loan Rejected");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign campaign : smsCampaigns) {
                 if (campaign.isActive()) {
                     SmsCampaignDomainServiceImpl.this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(loan,
@@ -114,7 +116,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void notifyAcceptedLoanOwner(Loan loan) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Loan Approved");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign campaign : smsCampaigns) {
                 this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(loan, campaign);
             }
@@ -123,7 +125,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void notifyClientActivated(final Client client) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Client Activated");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign campaign : smsCampaigns) {
                 this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(client, campaign);
             }
@@ -133,7 +135,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void notifyClientRejected(final Client client) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Client Rejected");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign campaign : smsCampaigns) {
                 this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(client, campaign);
             }
@@ -143,7 +145,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void notifySavingsAccountActivated(final SavingsAccount savingsAccount) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Savings Activated");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign campaign : smsCampaigns) {
                 this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(savingsAccount, campaign);
             }
@@ -153,7 +155,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void notifySavingsAccountRejected(final SavingsAccount savingsAccount) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Savings Rejected");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign campaign : smsCampaigns) {
                 this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(savingsAccount, campaign);
             }
@@ -163,7 +165,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private void sendSmsForLoanRepayment(LoanTransaction loanTransaction) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Loan Repayment");
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign smsCampaign : smsCampaigns) {
                 try {
                     Loan loan = loanTransaction.getLoan();
@@ -234,7 +236,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private void sendSmsForSavingsTransaction(final SavingsAccountTransaction savingsTransaction, boolean isDeposit) {
         String campaignName = isDeposit ? "Savings Deposit" : "Savings Withdrawal";
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns(campaignName);
-        if (smsCampaigns.size() > 0) {
+        if (!smsCampaigns.isEmpty()) {
             for (SmsCampaign smsCampaign : smsCampaigns) {
                 try {
                     final SavingsAccount savingsAccount = savingsTransaction.getSavingsAccount();
@@ -291,9 +293,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     }
 
     private List<SmsCampaign> retrieveSmsCampaigns(String paramValue) {
-        List<SmsCampaign> smsCampaigns = smsCampaignRepository.findActiveSmsCampaigns("%" + paramValue + "%",
-                SmsCampaignTriggerType.TRIGGERED.getValue());
-        return smsCampaigns;
+        return smsCampaignRepository.findActiveSmsCampaigns("%" + paramValue + "%", SmsCampaignTriggerType.TRIGGERED.getValue());
     }
 
     private HashMap<String, Object> processRepaymentDataForSms(final LoanTransaction loanTransaction, Client groupClient) {
@@ -330,9 +330,10 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             smsParams.put("loanOfficerId", -1);
         }
 
+        OffsetDateTime creationDate = loanTransaction.getCreatedDate().orElse(DateUtils.getAuditOffsetDateTime());
         smsParams.put("repaymentAmount", loanTransaction.getAmount(loan.getCurrency()));
-        smsParams.put("RepaymentDate", loanTransaction.getCreatedDateTime().toLocalDate().format(dateFormatter));
-        smsParams.put("RepaymentTime", loanTransaction.getCreatedDateTime().toLocalTime().format(timeFormatter));
+        smsParams.put("RepaymentDate", creationDate.toLocalDate().format(dateFormatter));
+        smsParams.put("RepaymentTime", creationDate.toLocalTime().format(timeFormatter));
 
         if (loanTransaction.getPaymentDetail() != null) {
             smsParams.put("receiptNumber", loanTransaction.getPaymentDetail().getReceiptNumber());

@@ -86,7 +86,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     }
 
     @Override
-    public CodeData retriveCode(final String codeName) {
+    public CodeData retrieveCode(final String codeName) {
         try {
             this.context.authenticatedUser();
 

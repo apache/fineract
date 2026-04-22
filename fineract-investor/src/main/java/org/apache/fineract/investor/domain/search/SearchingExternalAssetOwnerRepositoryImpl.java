@@ -19,6 +19,7 @@
 package org.apache.fineract.investor.domain.search;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -46,7 +47,9 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class SearchingExternalAssetOwnerRepositoryImpl implements SearchingExternalAssetOwnerRepository {
 
-    private final EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final CriteriaQueryFactory criteriaQueryFactory;
 
     @Override
@@ -94,10 +97,11 @@ public class SearchingExternalAssetOwnerRepositoryImpl implements SearchingExter
         query.orderBy(orders);
 
         query.select(cb.construct(SearchedExternalAssetOwner.class, root.get("id"), root.get("loanId"), root.get("externalLoanId"),
-                owner.get("externalId"), root.get("externalId"), root.get("status"), root.get("subStatus"), root.get("purchasePriceRatio"),
-                root.get("settlementDate"), root.get("effectiveDateFrom"), root.get("effectiveDateTo"), details.get("id"),
-                details.get("totalOutstanding"), details.get("totalPrincipalOutstanding"), details.get("totalInterestOutstanding"),
-                details.get("totalFeeChargesOutstanding"), details.get("totalPenaltyChargesOutstanding"), details.get("totalOverpaid")));
+                owner.get("externalId"), root.get("externalId"), root.get("externalGroupId"), root.get("status"), root.get("subStatus"),
+                root.get("purchasePriceRatio"), root.get("settlementDate"), root.get("effectiveDateFrom"), root.get("effectiveDateTo"),
+                details.get("id"), details.get("totalOutstanding"), details.get("totalPrincipalOutstanding"),
+                details.get("totalInterestOutstanding"), details.get("totalFeeChargesOutstanding"),
+                details.get("totalPenaltyChargesOutstanding"), details.get("totalOverpaid")));
 
         TypedQuery<SearchedExternalAssetOwner> queryToExecute = entityManager.createQuery(query);
         return criteriaQueryFactory.readPage(queryToExecute, ExternalAssetOwnerTransfer.class, pageable, spec);

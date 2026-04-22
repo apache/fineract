@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Make end_date nullable (RESCHEDULE action does not require it) -->
+    <changeSet author="fineract" id="wcl-0016-1">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="m_wc_loan_delinquency_action" columnName="end_date"/>
+        </preConditions>
+        <dropNotNullConstraint tableName="m_wc_loan_delinquency_action" columnName="end_date" columnDataType="DATE"/>
+    </changeSet>
+
+    <!-- Add columns for RESCHEDULE action -->
+    <changeSet author="fineract" id="wcl-0016-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_wc_loan_delinquency_action" columnName="minimum_payment"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_delinquency_action">
+            <column name="minimum_payment" type="DECIMAL(19,6)"/>
+            <column name="minimum_payment_type" type="VARCHAR(50)"/>
+            <column name="frequency" type="INT"/>
+            <column name="frequency_type" type="VARCHAR(50)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add version column for optimistic locking on delinquency range schedule -->
+    <changeSet author="fineract" id="wcl-0016-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_wc_loan_delinquency_range_schedule" columnName="version"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_delinquency_range_schedule">
+            <column name="version" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

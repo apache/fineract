@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Table(name = "m_external_asset_owner_transfer_journal_entry_mapping")
 @NoArgsConstructor
 @Entity
-public class ExternalAssetOwnerTransferJournalEntryMapping extends AbstractAuditableWithUTCDateTimeCustom {
+public class ExternalAssetOwnerTransferJournalEntryMapping extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "journal_entry_id", nullable = false)

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+// TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanProduct classes
 import java.util.Arrays;
 import java.util.List;
 import lombok.Getter;
@@ -29,7 +30,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 @RequiredArgsConstructor
 public enum CreditAllocationTransactionType {
 
-    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback");
+    CHARGEBACK(LoanTransactionType.CHARGEBACK, "Chargeback"); //
 
     private final LoanTransactionType loanTransactionType;
     private final String humanReadableName;

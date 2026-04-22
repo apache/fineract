@@ -18,18 +18,20 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import org.apache.commons.lang3.StringUtils;
+import lombok.Getter;
+import org.apache.commons.lang3.Strings;
 
 /**
- * An enumeration of different transactions that can occur on a {@link SavingsAccount}.
+ * An enumeration of different transactions that can occur on a SavingsAccount.
  */
+@Getter
 public enum DepositAccountType {
 
     INVALID(0, "depositAccountType.invalid"), //
     SAVINGS_DEPOSIT(100, "depositAccountType.savingsDeposit"), //
     FIXED_DEPOSIT(200, "depositAccountType.fixedDeposit"), //
     RECURRING_DEPOSIT(300, "depositAccountType.recurringDeposit"), //
-    CURRENT_DEPOSIT(400, "depositAccountType.currentDeposit");
+    CURRENT_DEPOSIT(400, "depositAccountType.currentDeposit"); //
 
     private final Integer value;
     private final String code;
@@ -40,73 +42,31 @@ public enum DepositAccountType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     public static DepositAccountType fromInt(final Integer v) {
         if (v == null) {
             return INVALID;
         }
 
-        switch (v) {
-            case 100:
-                return SAVINGS_DEPOSIT;
-            case 200:
-                return FIXED_DEPOSIT;
-            case 300:
-                return RECURRING_DEPOSIT;
-            case 400:
-                return CURRENT_DEPOSIT;
-            default:
-                return INVALID;
-        }
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isSavingsDeposit() {
-        return this.equals(SAVINGS_DEPOSIT);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isFixedDeposit() {
-        return this.equals(FIXED_DEPOSIT);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isRecurringDeposit() {
-        return this.equals(RECURRING_DEPOSIT);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isCurrentDeposit() {
-        return this.equals(CURRENT_DEPOSIT);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return this.equals(INVALID);
+        return switch (v) {
+            case 100 -> SAVINGS_DEPOSIT;
+            case 200 -> FIXED_DEPOSIT;
+            case 300 -> RECURRING_DEPOSIT;
+            case 400 -> CURRENT_DEPOSIT;
+            default -> INVALID;
+        };
     }
 
     @Override
     public String toString() {
-        return StringUtils.replace(code, "_", SPACE);
+        return Strings.CS.replace(code, "_", SPACE);
     }
 
     public String resourceName() {
-        switch (this) {
-            case FIXED_DEPOSIT:
-                return DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
-            case RECURRING_DEPOSIT:
-                return DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
-            case SAVINGS_DEPOSIT:
-                return DepositsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-            default:
-                return "INVALID";
-        }
+        return switch (this) {
+            case FIXED_DEPOSIT -> DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
+            case RECURRING_DEPOSIT -> DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
+            case SAVINGS_DEPOSIT -> DepositsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+            default -> "INVALID";
+        };
     }
 }

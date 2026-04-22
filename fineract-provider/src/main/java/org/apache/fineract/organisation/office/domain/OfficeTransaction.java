@@ -34,7 +34,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_office_transaction")
-public class OfficeTransaction extends AbstractPersistableCustom {
+public class OfficeTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_office_id")

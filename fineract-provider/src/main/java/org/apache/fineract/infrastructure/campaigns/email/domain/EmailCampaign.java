@@ -53,7 +53,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class EmailCampaign extends AbstractPersistableCustom {
+public class EmailCampaign extends AbstractPersistableCustom<Long> {
 
     @Column(name = "campaign_name", nullable = false)
     private String campaignName;

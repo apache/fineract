@@ -48,18 +48,17 @@ public class SmsConfigUtils {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add(SmsCampaignConstants.FINERACT_PLATFORM_TENANT_ID, tenant.getTenantIdentifier());
-        headers.add(SmsCampaignConstants.FINERACT_TENANT_APP_KEY, messageGatewayConfigurationData.getTenantAppKey());
+        headers.add(SmsCampaignConstants.FINERACT_TENANT_APP_KEY, messageGatewayConfigurationData.tenantAppKey());
         StringBuilder pathBuilder = new StringBuilder();
-        String endPoint = messageGatewayConfigurationData.getEndPoint() == null || messageGatewayConfigurationData.getEndPoint().equals("/")
-                ? ""
-                : messageGatewayConfigurationData.getEndPoint();
-        pathBuilder = messageGatewayConfigurationData.getEndPoint() == null || messageGatewayConfigurationData.getEndPoint().equals("/")
+        String endPoint = messageGatewayConfigurationData.endPoint() == null || messageGatewayConfigurationData.endPoint().equals("/") ? ""
+                : messageGatewayConfigurationData.endPoint();
+        pathBuilder = messageGatewayConfigurationData.endPoint() == null || messageGatewayConfigurationData.endPoint().equals("/")
                 ? pathBuilder.append("{apiEndPoint}")
                 : pathBuilder.append("{endPoint}/{apiEndPoint}");
         // pathBuilder.append("{endPoint}/{apiEndPoint}") ;
-        UriBuilder builder = UriBuilder.fromPath(pathBuilder.toString()).host(messageGatewayConfigurationData.getHostName()).scheme("http")
-                .port(messageGatewayConfigurationData.getPortNumber());
-        URI uri = messageGatewayConfigurationData.getEndPoint() == null || messageGatewayConfigurationData.getEndPoint().equals("/")
+        UriBuilder builder = UriBuilder.fromPath(pathBuilder.toString()).host(messageGatewayConfigurationData.hostName()).scheme("http")
+                .port(messageGatewayConfigurationData.portNumber());
+        URI uri = messageGatewayConfigurationData.endPoint() == null || messageGatewayConfigurationData.endPoint().equals("/")
                 ? builder.build(apiEndPoint)
                 : builder.build(endPoint, apiEndPoint);
         HttpEntity<?> entity = null;

@@ -23,13 +23,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AccountNumberFormatRepositoryWrapper {
+public class AccountNumberFormatRepositoryWrapper implements AccountNumberFormatLookup {
 
     private final AccountNumberFormatRepository repository;
 
     @Autowired
     public AccountNumberFormatRepositoryWrapper(final AccountNumberFormatRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public AccountNumberFormat findByAccountType(final EntityAccountType entityAccountType) {
+        return this.repository.findOneByAccountTypeEnum(entityAccountType.getValue());
     }
 
     public AccountNumberFormat findOneWithNotFoundDetection(final Long id) {
@@ -46,9 +51,5 @@ public class AccountNumberFormatRepositoryWrapper {
 
     public void delete(final AccountNumberFormat accountNumberFormat) {
         this.repository.delete(accountNumberFormat);
-    }
-
-    public AccountNumberFormat findByAccountType(final EntityAccountType entityAccountType) {
-        return this.repository.findOneByAccountTypeEnum(entityAccountType.getValue());
     }
 }

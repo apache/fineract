@@ -19,6 +19,7 @@
 package org.apache.fineract.interoperation.starter;
 
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -28,14 +29,14 @@ import org.apache.fineract.interoperation.service.InteropService;
 import org.apache.fineract.interoperation.service.InteropServiceImpl;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSummaryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,14 +50,15 @@ public class InteroperationConfiguration {
     public InteropService interopService(PlatformSecurityContext securityContext, InteropDataValidator interopDataValidator,
             SavingsAccountRepository savingsAccountRepository, SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
-            PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository, LoanRepository loanRepository,
-            SavingsHelper savingsHelper, SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, JdbcTemplate jdbcTemplate,
-            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository,
+            LoanRepositoryWrapper loanRepositoryWrapper, SavingsHelper savingsHelper,
+            SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+            SavingsAccountDomainService savingsAccountService, ConfigurationDomainService configurationDomainService,
+            JdbcTemplate jdbcTemplate, PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new InteropServiceImpl(securityContext, interopDataValidator, savingsAccountRepository, savingsAccountTransactionRepository,
-                applicationCurrencyRepository, noteRepository, paymentTypeRepository, identifierRepository, loanRepository, savingsHelper,
-                savingsAccountTransactionSummaryWrapper, savingsAccountService, jdbcTemplate, commandsSourceWritePlatformService,
-                toApiJsonSerializer, sqlGenerator);
+                applicationCurrencyRepository, noteRepository, paymentTypeRepository, identifierRepository, loanRepositoryWrapper,
+                savingsHelper, savingsAccountTransactionSummaryWrapper, savingsAccountService, configurationDomainService, jdbcTemplate,
+                commandsSourceWritePlatformService, toApiJsonSerializer, sqlGenerator);
     }
 }

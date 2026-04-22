@@ -22,6 +22,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter')
     testImplementation(project(':fineract-core'))
     testImplementation(project(':fineract-loan'))
+    testImplementation(project(':fineract-savings'))
     testImplementation(project(':fineract-provider'))
     testImplementation('org.springframework.boot:spring-boot-starter-jdbc')
     testImplementation('org.springframework.boot:spring-boot-starter-data-jpa')

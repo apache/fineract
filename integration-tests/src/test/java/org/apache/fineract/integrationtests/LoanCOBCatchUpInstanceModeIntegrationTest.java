@@ -27,10 +27,11 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanCOBCatchUpHelper;
@@ -44,7 +45,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @Order(1)
 @ExtendWith(InstanceModeSupportExtension.class)
-public class LoanCOBCatchUpInstanceModeIntegrationTest {
+public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrationTest {
 
     private LoanCOBCatchUpHelper loanCOBCatchUpHelper;
     private ResponseSpecification responseSpec;
@@ -62,7 +63,8 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest {
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         originalSchedulerStatus = schedulerJobHelper.getSchedulerStatus();
         final LocalDate todaysDate = Utils.getLocalDateOfTenant();
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                new PutGlobalConfigurationsRequest().enabled(true));
         BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
     }
 
@@ -122,7 +124,8 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest {
 
     @AfterEach
     public void tearDown() throws InterruptedException {
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                new PutGlobalConfigurationsRequest().enabled(false));
         schedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
     }
 

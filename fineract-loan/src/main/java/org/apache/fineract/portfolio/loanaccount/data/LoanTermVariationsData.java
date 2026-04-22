@@ -24,6 +24,7 @@ import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 
 @Getter
 public class LoanTermVariationsData implements Comparable<LoanTermVariationsData> {
@@ -40,6 +41,16 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
             final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = id;
         this.termType = termType;
+        this.termVariationApplicableFrom = termVariationApplicableFrom;
+        this.decimalValue = decimalValue;
+        this.dateValue = dateValue;
+        this.isSpecificToInstallment = isSpecificToInstallment;
+    }
+
+    public LoanTermVariationsData(final Long id, final Integer termType, final LocalDate termVariationApplicableFrom,
+            final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
+        this.id = id;
+        this.termType = LoanEnumerations.loanVariationType(LoanTermVariationType.fromInt(termType));
         this.termVariationApplicableFrom = termVariationApplicableFrom;
         this.decimalValue = decimalValue;
         this.dateValue = dateValue;

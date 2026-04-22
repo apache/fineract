@@ -21,7 +21,7 @@ package org.apache.fineract.accounting.accrual.starter;
 import org.apache.fineract.accounting.accrual.serialization.AccrualAccountingDataValidator;
 import org.apache.fineract.accounting.accrual.service.AccrualAccountingWritePlatformService;
 import org.apache.fineract.accounting.accrual.service.AccrualAccountingWritePlatformServiceImpl;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +32,7 @@ public class AccountingAccrualConfiguration {
     @Bean
     @ConditionalOnMissingBean(AccrualAccountingWritePlatformService.class)
     public AccrualAccountingWritePlatformService accrualAccountingWritePlatformService(
-            LoanAccrualPlatformService loanAccrualPlatformService, AccrualAccountingDataValidator accountingDataValidator) {
-        return new AccrualAccountingWritePlatformServiceImpl(loanAccrualPlatformService, accountingDataValidator);
+            LoanAccrualsProcessingService loanAccrualsProcessingService, AccrualAccountingDataValidator accountingDataValidator) {
+        return new AccrualAccountingWritePlatformServiceImpl(loanAccrualsProcessingService, accountingDataValidator);
     }
 }

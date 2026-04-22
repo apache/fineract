@@ -78,7 +78,10 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
                 .orElseThrow(() -> new PostDatedCheckNotFoundException(command.entityId()));
         Map<String, Object> changes = postDatedChecks.updatePostDatedChecks(command);
         this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId()).with(changes)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.entityId()) //
+                .with(changes) //
                 .build();
     }
 
@@ -129,8 +132,11 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
             }
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(Integer.toUnsignedLong(installmentId))
-                .withLoanId(postDatedChecks.getLoan().getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(Integer.toUnsignedLong(installmentId)) //
+                .withLoanId(postDatedChecks.getLoan().getId()) //
+                .build();
     }
 
     private void validateForBounce(JsonCommand command) {
@@ -222,7 +228,10 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
     @Override
     public CommandProcessingResult deletePostDatedChecks(final JsonCommand command) {
         this.postDatedChecksRepository.deleteById(command.entityId());
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withLoanId(command.getLoanId())
-                .withEntityId(command.entityId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withLoanId(command.getLoanId()) //
+                .withEntityId(command.entityId()) //
+                .build();
     }
 }

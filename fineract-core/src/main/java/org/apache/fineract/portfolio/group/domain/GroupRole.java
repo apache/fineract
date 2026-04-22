@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 
 @Entity
 @Table(name = "m_group_roles")
-public class GroupRole extends AbstractPersistableCustom {
+public class GroupRole extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")

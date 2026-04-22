@@ -88,7 +88,7 @@ public class SmsMessageAssembler {
         if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.staffIdParamName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.staffIdParamName, element);
             staff = this.staffRepository.findOneWithNotFoundDetection(staffId);
-            mobileNo = staff.mobileNo();
+            mobileNo = staff.getMobileNo();
         }
 
         final String message = this.fromApiJsonHelper.extractStringNamed(SmsApiConstants.messageParamName, element);

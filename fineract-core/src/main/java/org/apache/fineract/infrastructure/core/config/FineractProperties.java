@@ -19,6 +19,10 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -39,12 +43,17 @@ public class FineractProperties {
     private String idempotencyKeyHeaderName;
 
     private Boolean insecureHttpClient;
+    private long clientConnectTimeout;
+    private long clientReadTimeout;
+    private long clientWriteTimeout;
 
     private FineractTenantProperties tenant;
 
     private FineractModeProperties mode;
 
     private FineractCorrelationProperties correlation;
+
+    private FineractIpTrackingProperties ipTracking;
 
     private FineractPartitionedJob partitionedJob;
 
@@ -75,6 +84,12 @@ public class FineractProperties {
     private FineractSamplingProperties sampling;
 
     private FineractModulesProperties module;
+
+    private FineractSqlValidationProperties sqlValidation;
+
+    private FineractCache cache;
+
+    private RetryProperties retry;
 
     @Getter
     @Setter
@@ -145,6 +160,13 @@ public class FineractProperties {
 
     @Getter
     @Setter
+    public static class FineractIpTrackingProperties {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
     public static class FineractPartitionedJob {
 
         // TODO should be used without wrapper class
@@ -162,6 +184,7 @@ public class FineractProperties {
         private Integer threadPoolMaxPoolSize;
         private Integer threadPoolQueueCapacity;
         private Integer retryLimit;
+        private Integer pollInterval;
 
     }
 
@@ -276,6 +299,9 @@ public class FineractProperties {
 
         private int defaultTaskExecutorCorePoolSize;
         private int defaultTaskExecutorMaxPoolSize;
+        private int tenantUpgradeTaskExecutorCorePoolSize;
+        private int tenantUpgradeTaskExecutorMaxPoolSize;
+        private int tenantUpgradeTaskExecutorQueueCapacity;
     }
 
     @Getter
@@ -284,6 +310,10 @@ public class FineractProperties {
 
         private boolean enabled;
         private FineractExternalEventsProducerProperties producer;
+        private int partitionSize;
+        private int threadPoolCorePoolSize;
+        private int threadPoolMaxPoolSize;
+        private int threadPoolQueueCapacity;
     }
 
     @Getter
@@ -334,6 +364,7 @@ public class FineractProperties {
         private List<String> regexWhitelist;
         private boolean mimeWhitelistEnabled;
         private List<String> mimeWhitelist;
+        private Integer defaultBufferSize;
         private FineractContentFilesystemProperties filesystem;
         private FineractContentS3Properties s3;
     }
@@ -354,6 +385,9 @@ public class FineractProperties {
         private String bucketName;
         private String accessKey;
         private String secretKey;
+        private String region;
+        private String endpoint;
+        private Boolean pathStyleAddressingEnabled;
     }
 
     @Getter
@@ -384,6 +418,16 @@ public class FineractProperties {
 
         private int stuckRetryThreshold;
         private boolean loanCobEnabled;
+        private FineractJournalEntryAggregationProperties journalEntryAggregation;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractJournalEntryAggregationProperties {
+
+        private Integer excludeRecentNDays;
+        private boolean enabled;
+        private Integer chunkSize;
     }
 
     @Getter
@@ -448,6 +492,7 @@ public class FineractProperties {
     public static class FineractLoanProperties {
 
         private FineractTransactionProcessorProperties transactionProcessor;
+        private String statusChangeHistoryStatuses;
     }
 
     @Getter
@@ -473,32 +518,64 @@ public class FineractProperties {
 
         private FineractSecurityBasicAuth basicauth;
         private FineractSecurityTwoFactorAuth twoFactor;
-        private FineractSecurityOAuth oauth;
+        private FineractSecurityHsts hsts;
+        private FineractSecurityOAuth2Properties oauth2;
+        private CorsProperties cors;
 
         public void set2fa(FineractSecurityTwoFactorAuth twoFactor) {
             this.twoFactor = twoFactor;
         }
-    }
 
-    @Getter
-    @Setter
-    public static class FineractSecurityBasicAuth {
+        @Getter
+        @Setter
+        public static class FineractSecurityOAuth2Properties {
 
-        private boolean enabled;
-    }
+            private boolean enabled;
+            private ClientProperties client;
 
-    @Getter
-    @Setter
-    public static class FineractSecurityTwoFactorAuth {
+            @Getter
+            @Setter
+            public static class ClientProperties implements Serializable {
 
-        private boolean enabled;
-    }
+                @Serial
+                private static final long serialVersionUID = 1L;
+                private Map<String, Registration> registrations = new HashMap<>();
 
-    @Getter
-    @Setter
-    public static class FineractSecurityOAuth {
+                @Getter
+                @Setter
+                public static final class Registration implements Serializable {
 
-        private boolean enabled;
+                    @Serial
+                    private static final long serialVersionUID = 1L;
+                    private String clientId;
+                    private List<String> scopes = new ArrayList<>();
+                    private List<String> authorizationGrantTypes = new ArrayList<>();
+                    private List<String> redirectUris = new ArrayList<>();
+                    private boolean requireAuthorizationConsent = true;
+                }
+            }
+        }
+
+        @Getter
+        @Setter
+        public static class FineractSecurityBasicAuth {
+
+            private boolean enabled;
+        }
+
+        @Getter
+        @Setter
+        public static class FineractSecurityTwoFactorAuth {
+
+            private boolean enabled;
+        }
+
+        @Getter
+        @Setter
+        public static class FineractSecurityHsts {
+
+            private boolean enabled;
+        }
     }
 
     @Getter
@@ -523,11 +600,106 @@ public class FineractProperties {
     public static class FineractModulesProperties {
 
         private FineractInvestorModuleProperties investor;
+        private FineractLoanOriginationModuleProperties loanOrigination;
     }
 
     @Getter
     @Setter
     public static class FineractInvestorModuleProperties extends AbstractFineractModuleProperties {
 
+    }
+
+    @Getter
+    @Setter
+    public static class FineractLoanOriginationModuleProperties extends AbstractFineractModuleProperties {
+
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSqlValidationProperties {
+
+        private List<FineractSqlValidationPatternProperties> patterns;
+        private List<FineractSqlValidationProfileProperties> profiles;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSqlValidationProfileProperties {
+
+        private String name;
+        private String description;
+        private List<FineractSqlValidationPatternReferenceProperties> patternRefs;
+        private Boolean enabled = true;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSqlValidationPatternReferenceProperties {
+
+        private String name;
+        private Integer order;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractSqlValidationPatternProperties {
+
+        private String name;
+        private String pattern;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractCache {
+
+        private FineractCacheDetails defaultTemplate;
+        private Map<String, FineractCacheDetails> customTemplates = new HashMap<>();
+    }
+
+    @Getter
+    @Setter
+    public static class FineractCacheDetails {
+
+        private Duration ttl;
+        private Integer maximumEntries;
+    }
+
+    @Setter
+    @Getter
+    public static class RetryProperties {
+
+        private InstancesProperties instances;
+
+        @Setter
+        @Getter
+        public static class InstancesProperties {
+
+            private ExecuteCommandProperties executeCommand;
+
+            @Getter
+            @Setter
+            public static class ExecuteCommandProperties {
+
+                private Class<? extends Throwable>[] retryExceptions;
+                private Integer maxAttempts;
+                private Boolean enableExponentialBackoff;
+                private Double exponentialBackoffMultiplier;
+                private Duration waitDuration;
+
+            }
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class CorsProperties {
+
+        private boolean enabled;
+        private List<String> allowedOriginPatterns;
+        private List<String> allowedMethods;
+        private List<String> allowedHeaders;
+        private List<String> exposedHeaders;
+        private boolean allowCredentials;
     }
 }

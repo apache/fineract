@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.codes.service;
 
 import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 /**
@@ -40,9 +41,13 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
  */
 public interface CodeValueReadPlatformService {
 
-    Collection<CodeValueData> retrieveCodeValuesByCode(String code);
+    List<CodeValueData> retrieveCodeValuesByCode(String code);
 
     Collection<CodeValueData> retrieveAllCodeValues(Long codeId);
 
     CodeValueData retrieveCodeValue(Long codeValueId);
+
+    List<CodeValueData> retrieveAllCodeValues(String codeName);
+
+    CodeValueData retrieveCodeValue(String codeName, Long codeValueId);
 }

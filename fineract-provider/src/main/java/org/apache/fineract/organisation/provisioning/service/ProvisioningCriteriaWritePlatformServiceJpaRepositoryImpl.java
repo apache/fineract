@@ -67,7 +67,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             ProvisioningCriteria provisioningCriteria = provisioningCriteriaAssembler.fromParsedJson(command.parsedJson());
             this.provisioningCriteriaRepository.saveAndFlush(provisioningCriteria);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId())
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(provisioningCriteria.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -86,7 +88,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new ProvisioningCriteriaCannotBeDeletedException(criteriaId);
         }
         this.provisioningCriteriaRepository.deleteById(criteriaId);
-        return new CommandProcessingResultBuilder().withEntityId(criteriaId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(criteriaId) //
+                .build();
     }
 
     @Override
@@ -103,7 +107,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                 updateProvisioningCriteriaDefinitions(provisioningCriteria, command);
                 provisioningCriteriaRepository.saveAndFlush(provisioningCriteria);
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId())
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(provisioningCriteria.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);

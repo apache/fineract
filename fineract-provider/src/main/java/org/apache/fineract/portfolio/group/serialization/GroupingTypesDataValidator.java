@@ -341,7 +341,6 @@ public final class GroupingTypesDataValidator {
 
     public void validateForUpdateGroup(final JsonCommand command, final Long groupId) {
         final String json = command.json();
-
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }

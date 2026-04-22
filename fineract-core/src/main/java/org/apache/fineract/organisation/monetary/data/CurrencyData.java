@@ -18,24 +18,29 @@
  */
 package org.apache.fineract.organisation.monetary.data;
 
+import java.io.Serial;
 import java.io.Serializable;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Immutable data object representing currency.
- */
-@Getter
-@EqualsAndHashCode
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CurrencyData implements Serializable {
 
-    private final String code;
-    private final String name;
-    private final int decimalPlaces;
-    private final Integer inMultiplesOf;
-    private final String displaySymbol;
-    private final String nameCode;
-    private final String displayLabel;
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private String code;
+    private String name;
+    private int decimalPlaces;
+    private Integer inMultiplesOf;
+    private String displaySymbol;
+    private String nameCode;
+    private String displayLabel;
 
     public static CurrencyData blank() {
         return new CurrencyData("", "", 0, 0, "", "");
@@ -87,4 +92,5 @@ public class CurrencyData implements Serializable {
 
         return builder.toString();
     }
+
 }

@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_calendar_history")
-public class CalendarHistory extends AbstractPersistableCustom {
+public class CalendarHistory extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "calendar_id", referencedColumnName = "id", nullable = false)

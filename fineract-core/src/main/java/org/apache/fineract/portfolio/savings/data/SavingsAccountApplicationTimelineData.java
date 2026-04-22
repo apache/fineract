@@ -22,12 +22,14 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 /**
  * Immutable data object represent the important time-line events of a savings account application.
  */
 @Getter
 @RequiredArgsConstructor
+@JsonLocalDateArrayFormat
 public class SavingsAccountApplicationTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;

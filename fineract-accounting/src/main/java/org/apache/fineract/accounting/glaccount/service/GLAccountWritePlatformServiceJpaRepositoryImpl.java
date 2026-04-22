@@ -37,6 +37,7 @@ import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundExcep
 import org.apache.fineract.accounting.glaccount.exception.InvalidParentGLAccountHeadException;
 import org.apache.fineract.accounting.glaccount.serialization.GLAccountCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -58,9 +59,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccountWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GLAccountWritePlatformServiceJpaRepositoryImpl.class);
+    private static final String GL_ACCOUNT = "glAccount";
 
     private final GLAccountRepository glAccountRepository;
     private final JournalEntryRepository glJournalEntryRepository;
+    private final ProductToGLAccountMappingRepository productToGLAccountMappingRepository;
     private final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final JdbcTemplate jdbcTemplate;
@@ -96,7 +99,10 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 
             this.glAccountRepository.saveAndFlush(glAccount);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(glAccount.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleGLAccountDataIntegrityIssues(command, throwable, dve);
@@ -144,13 +150,11 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             /**
              * a detail account cannot be changed to a header account if transactions are already logged against it
              **/
-            if (changesOnly.containsKey(GLAccountJsonInputParams.USAGE.getValue())) {
-                if (glAccount.isHeaderAccount()) {
-                    final boolean journalEntriesForAccountExist = this.glJournalEntryRepository
-                            .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("glAccountId"), glAccountId));
-                    if (journalEntriesForAccountExist) {
-                        throw new GLAccountInvalidUpdateException(GlAccountInvalidUpdateReason.TRANSANCTIONS_LOGGED, glAccountId);
-                    }
+            if (changesOnly.containsKey(GLAccountJsonInputParams.USAGE.getValue()) && glAccount.isHeaderAccount()) {
+                final boolean journalEntriesForAccountExist = this.glJournalEntryRepository
+                        .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(GL_ACCOUNT).get("id"), glAccountId));
+                if (journalEntriesForAccountExist) {
+                    throw new GLAccountInvalidUpdateException(GlAccountInvalidUpdateReason.TRANSANCTIONS_LOGGED, glAccountId);
                 }
             }
 
@@ -158,7 +162,10 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 this.glAccountRepository.saveAndFlush(glAccount);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).with(changesOnly)
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(glAccount.getId()) //
+                    .with(changesOnly) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -186,19 +193,27 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 .orElseThrow(() -> new GLAccountNotFoundException(glAccountId));
 
         // validate this isn't a header account that has children
-        if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) {
+        if (glAccount.isHeaderAccount() && !glAccount.getChildren().isEmpty()) {
             throw new GLAccountInvalidDeleteException(GlAccountInvalidDeleteReason.HAS_CHILDREN, glAccountId);
         }
 
         // does this account have transactions logged against it
         final boolean journalEntriesForAccountExist = this.glJournalEntryRepository
-                .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("glAccountId"), glAccountId));
+                .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(GL_ACCOUNT).get("id"), glAccountId));
         if (journalEntriesForAccountExist) {
-            throw new GLAccountInvalidDeleteException(GlAccountInvalidDeleteReason.TRANSANCTIONS_LOGGED, glAccountId);
+            throw new GLAccountInvalidDeleteException(GlAccountInvalidDeleteReason.TRANSACTIONS_LOGGED, glAccountId);
+        }
+        // does this account mapped to product
+        final boolean accountMappingForAccountExists = this.productToGLAccountMappingRepository
+                .exists((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(GL_ACCOUNT).get("id"), glAccountId));
+        if (accountMappingForAccountExists) {
+            throw new GLAccountInvalidDeleteException(GlAccountInvalidDeleteReason.PRODUCT_MAPPING, glAccountId);
         }
         this.glAccountRepository.delete(glAccount);
 
-        return new CommandProcessingResultBuilder().withEntityId(glAccountId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(glAccountId) //
+                .build();
     }
 
     /**

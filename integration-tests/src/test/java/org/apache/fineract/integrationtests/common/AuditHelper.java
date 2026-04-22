@@ -49,11 +49,19 @@ public class AuditHelper {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public AuditHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List getAuditDetails(final Integer resourceId, final String actionName, final String entityName) {
         final String AUDIT_URL = AUDIT_BASE_URL + "&entityName=" + entityName + "&resourceId=" + resourceId + "&actionName=" + actionName
                 + "&orderBy=id&sortBy=DSC";
@@ -61,12 +69,20 @@ public class AuditHelper {
         return responseAudits;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public List getAuditDetails(final int limit) {
         final String AUDIT_URL = AUDIT_BASE_URL + "&paged=true&limit=" + Integer.toString(limit);
         LinkedHashMap responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
         return (List) responseAudits.get("pageItems");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public LinkedHashMap getAuditSearchTemplate() {
         return Utils.performServerGet(requestSpec, responseSpec, AUDITSEARCH_BASE_URL, "$");
     }
@@ -75,6 +91,10 @@ public class AuditHelper {
      * Some audit actions can only be done once Eg: Creation of a client with id 123, hence we verify number of audits
      * For such operations is "equal" to 1 always
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyOneAuditOnly(List<HashMap<String, Object>> auditsToCheck, Integer id, String actionName, String entityType) {
         LOG.info("------------------------------CHECK IF AUDIT CREATED------------------------------------\n");
         assertEquals(1, auditsToCheck.size(), "More than one audit created");
@@ -85,6 +105,10 @@ public class AuditHelper {
         assertEquals(expected, actual, "Error in creating audit!");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyMultipleAuditsOnserver(List<HashMap<String, Object>> auditsRecievedInitial,
             List<HashMap<String, Object>> auditsRecieved, Integer id, String actionName, String entityType) {
         LOG.info("------------------------------CHECK IF AUDIT CREATED------------------------------------\n");
@@ -102,10 +126,18 @@ public class AuditHelper {
         assertEquals(expected, actual, "Error in creating audit!");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyLimitParameterfor(final int limit) {
         assertEquals(limit, getAuditDetails(limit).size(), "Incorrect number of audits recieved for limit: " + Integer.toString(limit));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyOrderBysupported(final String orderByValue) {
         final String AUDIT_URL = AUDIT_BASE_URL + "&paged=true&orderBy=" + orderByValue;
         Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");

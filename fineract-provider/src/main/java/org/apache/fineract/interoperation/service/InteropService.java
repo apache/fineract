@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.interoperation.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.interoperation.data.InteropAccountData;
@@ -30,58 +29,59 @@ import org.apache.fineract.interoperation.data.InteropTransactionRequestResponse
 import org.apache.fineract.interoperation.data.InteropTransactionsData;
 import org.apache.fineract.interoperation.data.InteropTransferResponseData;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.springframework.lang.NonNull;
 
 public interface InteropService {
 
-    @NotNull
-    InteropIdentifiersResponseData getAccountIdentifiers(@NotNull String accountId);
+    @NonNull
+    InteropIdentifiersResponseData getAccountIdentifiers(@NonNull String accountId);
 
-    @NotNull
-    InteropAccountData getAccountDetails(@NotNull String accountId);
+    @NonNull
+    InteropAccountData getAccountDetails(@NonNull String accountId);
 
-    @NotNull
-    InteropTransactionsData getAccountTransactions(@NotNull String accountId, boolean debit, boolean credit, LocalDateTime transactionsFrom,
+    @NonNull
+    InteropTransactionsData getAccountTransactions(@NonNull String accountId, boolean debit, boolean credit, LocalDateTime transactionsFrom,
             LocalDateTime transactionsTo);
 
-    @NotNull
-    InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
+    @NonNull
+    InteropIdentifierAccountResponseData getAccountByIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
             String subIdOrType);
 
-    @NotNull
-    InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-            String subIdOrType, @NotNull JsonCommand command);
+    @NonNull
+    InteropIdentifierAccountResponseData registerAccountIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
+            String subIdOrType, @NonNull JsonCommand command);
 
-    @NotNull
-    InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
+    @NonNull
+    InteropIdentifierAccountResponseData deleteAccountIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
             String subIdOrType);
 
-    InteropTransactionRequestResponseData getTransactionRequest(@NotNull String transactionCode, @NotNull String requestCode);
+    InteropTransactionRequestResponseData getTransactionRequest(@NonNull String transactionCode, @NonNull String requestCode);
 
-    @NotNull
-    InteropTransactionRequestResponseData createTransactionRequest(@NotNull JsonCommand command);
+    @NonNull
+    InteropTransactionRequestResponseData createTransactionRequest(@NonNull JsonCommand command);
 
-    InteropQuoteResponseData getQuote(@NotNull String transactionCode, @NotNull String quoteCode);
+    InteropQuoteResponseData getQuote(@NonNull String transactionCode, @NonNull String quoteCode);
 
-    @NotNull
-    InteropQuoteResponseData createQuote(@NotNull JsonCommand command);
+    @NonNull
+    InteropQuoteResponseData createQuote(@NonNull JsonCommand command);
 
-    InteropTransferResponseData getTransfer(@NotNull String transactionCode, @NotNull String transferCode);
+    InteropTransferResponseData getTransfer(@NonNull String transactionCode, @NonNull String transferCode);
 
-    @NotNull
-    InteropTransferResponseData prepareTransfer(@NotNull JsonCommand command);
+    @NonNull
+    InteropTransferResponseData prepareTransfer(@NonNull JsonCommand command);
 
-    @NotNull
-    InteropTransferResponseData commitTransfer(@NotNull JsonCommand command);
+    @NonNull
+    InteropTransferResponseData commitTransfer(@NonNull JsonCommand command);
 
-    @NotNull
-    InteropTransferResponseData releaseTransfer(@NotNull JsonCommand command);
+    @NonNull
+    InteropTransferResponseData releaseTransfer(@NonNull JsonCommand command);
 
-    @NotNull
-    InteropKycResponseData getKyc(@NotNull String accountId);
+    @NonNull
+    InteropKycResponseData getKyc(@NonNull String accountId);
 
-    @NotNull
-    String disburseLoan(@NotNull String accountId, String apiRequestBodyAsJson);
+    @NonNull
+    String disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson);
 
-    @NotNull
-    String loanRepayment(@NotNull String accountId, String apiRequestBodyAsJson);
+    @NonNull
+    String loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson);
 }

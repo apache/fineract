@@ -50,7 +50,7 @@ import org.apache.fineract.portfolio.common.domain.NthDayType;
 
 @Entity
 @Table(name = "m_calendar")
-public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
+public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;
@@ -359,7 +359,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
             this.secondReminder = newValue;
         }
 
-        final String timeFormat = command.stringValueOfParameterNamed(CalendarSupportedParameters.Time_Format.getValue());
+        final String timeFormat = command.stringValueOfParameterNamed(CalendarSupportedParameters.TIME_FORMAT.getValue());
         final String time = CalendarSupportedParameters.MEETING_TIME.getValue();
         if (command.isChangeInTimeParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue(), this.meetingtime, timeFormat)) {
             final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());
@@ -518,7 +518,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
         final StringBuilder recurrenceBuilder = new StringBuilder(200);
 
         recurrenceBuilder.append("FREQ=");
-        recurrenceBuilder.append(frequencyType.toString().toUpperCase());
+        recurrenceBuilder.append(frequencyType.toString().toUpperCase(java.util.Locale.ROOT));
         if (interval > 1) {
             recurrenceBuilder.append(";INTERVAL=");
             recurrenceBuilder.append(interval);
@@ -526,9 +526,9 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
         if (frequencyType.isWeekly()) {
             if (repeatsOnDay != null) {
                 final CalendarWeekDaysType weekDays = CalendarWeekDaysType.fromInt(repeatsOnDay);
-                if (!weekDays.isInvalid()) {
+                if (weekDays != CalendarWeekDaysType.INVALID) {
                     recurrenceBuilder.append(";BYDAY=");
-                    recurrenceBuilder.append(weekDays.toString().toUpperCase());
+                    recurrenceBuilder.append(weekDays.toString().toUpperCase(java.util.Locale.ROOT));
                 }
             }
         }
@@ -541,14 +541,14 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
             } else if (repeatsOnNthDayOfMonth != null && repeatsOnDay != null
                     && !repeatsOnDay.equals(CalendarWeekDaysType.INVALID.getValue())) {
                 final NthDayType nthDay = NthDayType.fromInt(repeatsOnNthDayOfMonth);
-                if (!nthDay.isInvalid()) {
+                if (nthDay != NthDayType.INVALID) {
                     recurrenceBuilder.append(";BYSETPOS=");
                     recurrenceBuilder.append(nthDay.getValue());
                 }
                 final CalendarWeekDaysType weekday = CalendarWeekDaysType.fromInt(repeatsOnDay);
-                if (!weekday.isInvalid()) {
+                if (weekday != CalendarWeekDaysType.INVALID) {
                     recurrenceBuilder.append(";BYDAY=");
-                    recurrenceBuilder.append(weekday.toString().toUpperCase());
+                    recurrenceBuilder.append(weekday.toString().toUpperCase(java.util.Locale.ROOT));
                 }
             }
         }
@@ -558,14 +558,14 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
     public boolean isValidRecurringDate(final LocalDate compareDate, Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
 
         if (isBetweenStartAndEndDate(compareDate)) {
-            return CalendarUtils.isValidRedurringDate(getRecurrence(), getStartDateLocalDate(), compareDate, isSkipRepaymentOnFirstMonth,
+            return CalendarUtils.isValidRecurringDate(getRecurrence(), getStartDateLocalDate(), compareDate, isSkipRepaymentOnFirstMonth,
                     numberOfDays);
         }
 
         // validate with history details.
         for (CalendarHistory history : history()) {
             if (history.isBetweenStartAndEndDate(compareDate)) {
-                return CalendarUtils.isValidRedurringDate(history.getRecurrence(), history.getStartDate(), compareDate,
+                return CalendarUtils.isValidRecurringDate(history.getRecurrence(), history.getStartDate(), compareDate,
                         isSkipRepaymentOnFirstMonth, numberOfDays);
             }
         }

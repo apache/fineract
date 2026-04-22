@@ -19,11 +19,16 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
 public interface ConfigurationDomainService {
 
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
+
+    List<String> getAllowedLoanStatusesForExternalAssetTransfer();
+
+    List<String> getAllowedLoanStatusesOfDelayedSettlementForExternalAssetTransfer();
 
     boolean isSameMakerCheckerEnabled();
 
@@ -81,7 +86,7 @@ public interface ConfigurationDomainService {
 
     boolean isPrincipalCompoundingDisabledForOverdueLoans();
 
-    Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
+    Long retreivePeriodInNumberOfDaysForSkipMeetingDate();
 
     boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
 
@@ -143,4 +148,23 @@ public interface ConfigurationDomainService {
 
     String getNextPaymentDateConfigForLoan();
 
+    boolean isImmediateChargeAccrualPostMaturityEnabled();
+
+    String getAssetOwnerTransferOustandingInterestStrategy();
+
+    boolean isForceWithdrawalOnSavingsAccountEnabled();
+
+    Long retrieveForceWithdrawalOnSavingsAccountLimit();
+
+    Integer getPasswordReuseRestrictionCount();
+
+    boolean isForcePasswordResetOnFirstLoginEnabled();
+
+    boolean isMaxLoginRetriesEnabled();
+
+    Integer retrieveMaxLoginRetries();
+
+    boolean isAllowCashAndNonCashAccrual();
+
+    boolean isBlockTransactionsOnClosedOverpaidLoansEnabled();
 }

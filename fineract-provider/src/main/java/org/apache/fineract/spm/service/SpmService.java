@@ -44,7 +44,7 @@ public class SpmService {
     public List<Survey> fetchValidSurveys() {
         this.securityContext.authenticatedUser();
 
-        return this.surveyRepository.fetchActiveSurveys(DateUtils.getLocalDateTimeOfSystem());
+        return this.surveyRepository.fetchActiveSurveys(DateUtils.getLocalDateOfTenant());
     }
 
     public List<Survey> fetchAllSurveys() {
@@ -61,7 +61,7 @@ public class SpmService {
     public Survey createSurvey(final Survey survey) {
         this.securityContext.authenticatedUser();
         this.surveyValidator.validate(survey);
-        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), DateUtils.getLocalDateTimeOfSystem());
+        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), DateUtils.getLocalDateOfTenant());
 
         if (previousSurvey != null) {
             this.deactivateSurvey(previousSurvey.getId());

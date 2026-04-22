@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.fund.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -55,7 +55,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 
     @Override
     @Cacheable(value = "funds", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
-    public Collection<FundData> retrieveAllFunds() {
+    public List<FundData> retrieveAllFunds() {
 
         this.context.authenticatedUser();
 

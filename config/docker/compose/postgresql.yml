@@ -20,7 +20,7 @@ version: "3.8"
 
 services:
   postgresql:
-    image: postgres:16.1
+    image: postgres:18.3
     volumes:
       - ${PWD}/config/docker/postgresql/docker-entrypoint-initdb.d/01-init.sh:/docker-entrypoint-initdb.d/01-init.sh:Z,ro
     restart: always

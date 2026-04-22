@@ -32,4 +32,7 @@ public interface ProvisioningEntriesApiConstants {
 
     String ENTRIES_PARAM = "entries";
 
+    String CREATE_JOURNAL_ENTRY = "createjournalentry";
+    String RECREATE_PROVISION_IN_ENTRY = "recreateprovisioningentry";
+
 }

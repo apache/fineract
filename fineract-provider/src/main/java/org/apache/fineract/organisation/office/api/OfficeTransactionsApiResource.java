@@ -63,7 +63,6 @@ public class OfficeTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOfficeTransactions(@Context final UriInfo uriInfo) {
 
@@ -77,7 +76,6 @@ public class OfficeTransactionsApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
 
@@ -103,7 +101,6 @@ public class OfficeTransactionsApiResource {
 
     @DELETE
     @Path("{transactionId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String delete(@PathParam("transactionId") final Long transactionId) {
 

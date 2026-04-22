@@ -20,7 +20,7 @@ package org.apache.fineract.organisation.provisioning.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
@@ -34,7 +34,7 @@ public class ProvisioningCategoryReadPlatformServiceImpl implements Provisioning
     private final ProvisioningCategoryRowMapper provisionCategoryRowMapper = new ProvisioningCategoryRowMapper();
 
     @Override
-    public Collection<ProvisioningCategoryData> retrieveAllProvisionCategories() {
+    public List<ProvisioningCategoryData> retrieveAllProvisionCategories() {
         // User is already authenticated by API. So we no need to check again
         // here
         final String sql = "select " + this.provisionCategoryRowMapper.schema() + " from m_provision_category pc order by pc.id";

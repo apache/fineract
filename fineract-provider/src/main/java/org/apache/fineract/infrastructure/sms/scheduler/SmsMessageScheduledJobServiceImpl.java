@@ -22,7 +22,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -90,36 +89,44 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             if (!smsDataMap.isEmpty()) {
                 List<SmsMessage> toSaveMessages = new ArrayList<>();
                 List<SmsMessage> toSendNotificationMessages = new ArrayList<>();
+
                 for (Map.Entry<SmsCampaign, Collection<SmsMessage>> entry : smsDataMap.entrySet()) {
-                    Iterator<SmsMessage> smsMessageIterator = entry.getValue().iterator();
-                    Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas = new ArrayList<>();
-                    while (smsMessageIterator.hasNext()) {
-                        SmsMessage smsMessage = smsMessageIterator.next();
+                    for (SmsMessage smsMessage : entry.getValue()) {
                         if (smsMessage.isNotification()) {
                             smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
                             toSendNotificationMessages.add(smsMessage);
                         } else {
-                            SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(
-                                    smsMessage.getId(), null, null, null, smsMessage.getMobileNo(), smsMessage.getMessage(),
-                                    entry.getKey().getProviderId());
-                            apiQueueResourceDatas.add(apiQueueResourceData);
                             smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
                             toSaveMessages.add(smsMessage);
                         }
                     }
-                    if (toSaveMessages.size() > 0) {
-                        this.smsMessageRepository.saveAll(toSaveMessages);
-                        this.smsMessageRepository.flush();
-                        this.taskExecutor.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
-                    }
-                    if (!toSendNotificationMessages.isEmpty()) {
-                        this.notificationSenderService.sendNotification(toSendNotificationMessages);
-                    }
+                }
+                if (!toSaveMessages.isEmpty()) {
+                    this.smsMessageRepository.saveAll(toSaveMessages);
+                    this.smsMessageRepository.flush();
 
+                    for (Map.Entry<SmsCampaign, Collection<SmsMessage>> entry : smsDataMap.entrySet()) {
+                        Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas = new ArrayList<>();
+                        for (SmsMessage smsMessage : entry.getValue()) {
+                            if (!smsMessage.isNotification()) {
+                                SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(
+                                        smsMessage.getId(), null, null, null, smsMessage.getMobileNo(), smsMessage.getMessage(),
+                                        entry.getKey().getProviderId());
+                                apiQueueResourceDatas.add(apiQueueResourceData);
+                            }
+                        }
+                        if (!apiQueueResourceDatas.isEmpty()) {
+                            this.taskExecutor.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
+                        }
+                    }
+                }
+
+                if (!toSendNotificationMessages.isEmpty()) {
+                    this.notificationSenderService.sendNotification(toSendNotificationMessages);
                 }
             }
         } catch (Exception e) {
-            log.error("Error occured.", e);
+            log.error("Error occurred.", e);
         }
     }
 
@@ -155,8 +162,12 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
         @Override
         public void run() {
-            ThreadLocalContextUtil.init(context);
-            connectAndSendToIntermediateServer(apiQueueResourceDatas);
+            try {
+                ThreadLocalContextUtil.init(context);
+                connectAndSendToIntermediateServer(apiQueueResourceDatas);
+            } finally {
+                ThreadLocalContextUtil.reset();
+            }
         }
 
         @Override

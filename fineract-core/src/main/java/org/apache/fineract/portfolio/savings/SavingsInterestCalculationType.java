@@ -45,7 +45,7 @@ public enum SavingsInterestCalculationType {
 
     INVALID(0, "savingsInterestCalculationType.invalid"), //
     DAILY_BALANCE(1, "savingsInterestCalculationType.dailybalance"), //
-    AVERAGE_DAILY_BALANCE(2, "savingsInterestCalculationType.averagedailybalance");
+    AVERAGE_DAILY_BALANCE(2, "savingsInterestCalculationType.averagedailybalance"); //
 
     private final Integer value;
     private final String code;

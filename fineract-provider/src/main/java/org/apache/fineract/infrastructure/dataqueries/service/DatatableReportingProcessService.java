@@ -24,38 +24,42 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
-import org.apache.fineract.infrastructure.core.service.StreamUtil;
-import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 import org.apache.fineract.infrastructure.dataqueries.service.export.DatatableReportExportService;
 import org.apache.fineract.infrastructure.dataqueries.service.export.ResponseHolder;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
-import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
+import org.apache.fineract.infrastructure.report.service.AbstractReportingProcessService;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
+import org.apache.fineract.util.StreamUtil;
 import org.springframework.stereotype.Service;
 
 @Service
 @ReportService(type = { "Table", "Chart", "SMS" })
-@RequiredArgsConstructor
 @Slf4j
-public class DatatableReportingProcessService implements ReportingProcessService {
+public class DatatableReportingProcessService extends AbstractReportingProcessService {
 
     private final List<DatatableReportExportService> exportServices;
 
+    public DatatableReportingProcessService(List<DatatableReportExportService> exportServices, SqlValidator sqlValidator) {
+        super(sqlValidator);
+
+        this.exportServices = exportServices;
+    }
+
     @Override
     public Response processRequest(String reportName, MultivaluedMap<String, String> queryParams) {
-        boolean isSelfServiceUserReport = Boolean.parseBoolean(
-                queryParams.getOrDefault(RunreportsApiResource.IS_SELF_SERVICE_USER_REPORT_PARAMETER, List.of("false")).get(0));
 
         DatatableExportTargetParameter exportMode = DatatableExportTargetParameter.resolverExportTarget(queryParams);
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
         final Map<String, String> reportParams = getReportParams(queryParams);
         ResponseHolder response = findReportExportService(exportMode) //
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported export target: " + exportMode)) //
-                .export(reportName, queryParams, reportParams, isSelfServiceUserReport, parameterTypeValue);
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.report.export.mode.unavailable",
+                        "Export mode %s unavailable".formatted(exportMode.name()))) //
+                .export(reportName, queryParams, reportParams, parameterTypeValue);
         Response.ResponseBuilder builder = Response.status(response.status().getStatusCode());
         if (StringUtils.isNotBlank(response.contentType())) {
             builder = builder.type(response.contentType());

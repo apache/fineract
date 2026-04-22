@@ -21,8 +21,10 @@ package org.apache.fineract.portfolio.tax.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
+@Getter
 public class TaxComponentHistoryData implements Serializable {
 
     @SuppressWarnings("unused")
@@ -39,26 +41,7 @@ public class TaxComponentHistoryData implements Serializable {
     }
 
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        return DateUtils.isAfter(target, startDate()) && (endDate == null || !DateUtils.isAfter(target, endDate()));
+        return DateUtils.isAfter(target, getStartDate()) && (endDate == null || !DateUtils.isAfter(target, getEndDate()));
     }
 
-    public LocalDate startDate() {
-        LocalDate startDate = null;
-        if (this.startDate != null) {
-            startDate = this.startDate;
-        }
-        return startDate;
-    }
-
-    public LocalDate endDate() {
-        LocalDate endDate = null;
-        if (this.endDate != null) {
-            endDate = this.endDate;
-        }
-        return endDate;
-    }
-
-    public BigDecimal getPercentage() {
-        return this.percentage;
-    }
 }

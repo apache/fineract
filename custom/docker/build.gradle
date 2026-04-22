@@ -24,7 +24,7 @@ apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencie
 
 jib {
     from {
-        image = 'azul/zulu-openjdk-alpine:17'
+        image = 'azul/zulu-openjdk-alpine:21'
         platforms {
             platform {
                 architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"
@@ -76,7 +76,7 @@ jib {
         }
         // NOTE: other custom dependencies
         implementation 'org.mariadb.jdbc:mariadb-java-client'
-        implementation 'mysql:mysql-connector-java:8.0.33'
+        implementation 'com.mysql:mysql-connector-j'
         implementation 'org.postgresql:postgresql'
         annotationProcessor('org.springframework.boot:spring-boot-autoconfigure-processor')
         annotationProcessor('org.springframework.boot:spring-boot-configuration-processor')

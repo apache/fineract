@@ -52,7 +52,9 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             final ProvisioningCategory provisioningCategory = ProvisioningCategory.fromJson(command);
             this.provisioningCategoryRepository.saveAndFlush(provisioningCategory);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCategory.getId())
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(provisioningCategory.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -75,7 +77,9 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
                     "This provisioning category cannot be deleted, it is already used in loan product");
         }
         this.provisioningCategoryRepository.delete(provisioningCategory);
-        return new CommandProcessingResultBuilder().withEntityId(provisioningCategory.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(provisioningCategory.getId()) //
+                .build();
     }
 
     @Override
@@ -88,7 +92,11 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             if (!changes.isEmpty()) {
                 this.provisioningCategoryRepository.saveAndFlush(provisioningCategoryForUpdate);
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(categoryId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(categoryId) //
+                    .with(changes) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();

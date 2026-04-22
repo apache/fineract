@@ -48,18 +48,18 @@ import org.springframework.data.domain.Persistable;
 @Getter
 @Setter
 @NoArgsConstructor
-public abstract class AbstractPersistableCustom implements Persistable<Long>, Serializable {
+public abstract class AbstractPersistableCustom<T extends Serializable> implements Persistable<T>, Serializable {
 
     private static final long serialVersionUID = 9181640245194392646L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter(onMethod = @__(@Override))
-    private Long id;
+    @Getter
+    private T id;
 
     @Transient
     @Setter(value = AccessLevel.NONE)
-    @Getter(onMethod = @__(@Override))
+    @Getter
     private boolean isNew = true;
 
     @PrePersist

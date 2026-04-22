@@ -24,9 +24,11 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
 @Getter
 @RequiredArgsConstructor
+@JsonLocalDateArrayFormat
 public class ShareAccountTransactionData implements Serializable {
 
     private final Long id;

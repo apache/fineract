@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.glaccount.domain;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -28,4 +30,33 @@ public interface TrialBalanceRepository extends JpaRepository<TrialBalance, Long
 
     @Query(value = "select * from m_trial_balance where office_id=:officeId and account_id=:accountId and closing_balance is null order by created_date, entry_date", nativeQuery = true)
     List<TrialBalance> findNewByOfficeAndAccount(@Param("officeId") Long officeId, @Param("accountId") Long accountId);
+
+    @Query("SELECT MAX(tb.transactionDate) FROM TrialBalance tb")
+    LocalDate findMaxCreatedDate();
+
+    @Query("""
+                    SELECT tb.closingBalance
+                    FROM TrialBalance tb
+                    WHERE tb.officeId = :officeId
+                      AND tb.glAccountId = :accountId
+                      AND tb.closingBalance IS NOT NULL
+                    ORDER BY tb.transactionDate DESC, tb.entryDate DESC
+            """)
+    List<BigDecimal> findLastClosingBalance(Long officeId, Long accountId);
+
+    @Query("""
+                SELECT DISTINCT tb.officeId
+                FROM TrialBalance tb
+                WHERE tb.closingBalance IS NULL
+            """)
+    List<Long> findDistinctOfficeIdsWithNullClosingBalance();
+
+    @Query("""
+                SELECT DISTINCT tb.glAccountId
+                FROM TrialBalance tb
+                WHERE tb.officeId = :officeId
+                  AND tb.closingBalance IS NULL
+            """)
+    List<Long> findDistinctAccountIdsWithNullClosingBalanceByOfficeId(Long officeId);
+
 }

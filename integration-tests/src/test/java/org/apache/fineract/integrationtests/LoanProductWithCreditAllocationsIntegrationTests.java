@@ -182,7 +182,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests {
     public void testCreditAllocationIsNotAllowedWhenPaymentStrategyIsNotAdvancedPaymentStrategy() {
         // given
         String loanProductJSON = baseLoanProduct().withRepaymentStrategy("mifos-standard-strategy")
-                .addCreditAllocations(createChargebackAllocation()).build();
+                .withLoanScheduleType(LoanScheduleType.CUMULATIVE).addCreditAllocations(createChargebackAllocation()).build();
         ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
         LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(REQUEST_SPEC, errorResponse);
 

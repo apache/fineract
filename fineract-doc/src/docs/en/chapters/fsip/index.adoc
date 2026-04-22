@@ -1,0 +1,5 @@
+= FSIP: Fineract Significant Improvement Proposal
+
+NOTE: See https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Significant+Improvement+Proposals[here] for the current list of FSIPs.
+
+TBD

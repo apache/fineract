@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.event.external.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateResponse;
 
 public interface ExternalEventConfigurationWritePlatformService {
 
-    CommandProcessingResult updateConfigurations(JsonCommand command);
+    ExternalEventConfigurationUpdateResponse updateConfigurations(ExternalEventConfigurationUpdateRequest request);
 }

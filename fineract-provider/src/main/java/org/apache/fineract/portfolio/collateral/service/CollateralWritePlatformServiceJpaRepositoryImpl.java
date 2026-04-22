@@ -84,7 +84,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withLoanId(loan.getId())//
+                    .withLoanId(loan.getId()) //
                     .withEntityId(collateral.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -132,7 +132,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withLoanId(command.getLoanId())//
+                    .withLoanId(command.getLoanId()) //
                     .withEntityId(collateralId) //
                     .with(changes) //
                     .build();
@@ -160,7 +160,11 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
         }
 
         this.collateralRepository.delete(collateral);
-        return new CommandProcessingResultBuilder().withCommandId(commandId).withLoanId(loanId).withEntityId(collateralId).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(commandId) //
+                .withLoanId(loanId) //
+                .withEntityId(collateralId) //
+                .build();
     }
 
     private void handleCollateralDataIntegrityViolation(final NonTransientDataAccessException dve) {

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.investor.service;
 
+import java.util.List;
 import org.apache.fineract.accounting.journalentry.JournalEntryMapper;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.investor.data.ExternalTransferData;
@@ -37,15 +38,19 @@ public interface ExternalAssetOwnersTransferMapper {
     @Mapping(target = "loan.loanId", source = "loanId")
     @Mapping(target = "loan.externalId", source = "externalLoanId")
     @Mapping(target = "transferExternalId", source = "externalId")
+    @Mapping(target = "transferExternalGroupId", source = "externalGroupId")
     @Mapping(target = "effectiveFrom", source = "effectiveDateFrom")
     @Mapping(target = "effectiveTo", source = "effectiveDateTo")
     @Mapping(target = "purchasePriceRatio", source = "purchasePriceRatio")
     @Mapping(target = "settlementDate", source = "settlementDate")
     @Mapping(target = "status", source = "status")
+    @Mapping(target = "previousOwner", source = "previousOwner")
     @Mapping(target = "details", source = "externalAssetOwnerTransferDetails")
     ExternalTransferData mapTransfer(ExternalAssetOwnerTransfer source);
 
     ExternalTransferOwnerData mapOwner(ExternalAssetOwner source);
+
+    List<ExternalTransferOwnerData> mapOwners(List<ExternalAssetOwner> source);
 
     @Mapping(target = "detailsId", source = "id")
     ExternalTransferDataDetails mapDetails(ExternalAssetOwnerTransferDetails details);

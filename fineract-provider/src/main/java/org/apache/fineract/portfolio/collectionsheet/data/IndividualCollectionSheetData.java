@@ -18,14 +18,23 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Immutable data object for collection sheet.
  */
-public final class IndividualCollectionSheetData {
+@Getter
+@RequiredArgsConstructor
+public final class IndividualCollectionSheetData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")
     private final LocalDate dueDate;
@@ -34,17 +43,5 @@ public final class IndividualCollectionSheetData {
 
     @SuppressWarnings("unused")
     private final Collection<PaymentTypeData> paymentTypeOptions;
-
-    public static IndividualCollectionSheetData instance(final LocalDate date, final Collection<IndividualClientData> clients,
-            final Collection<PaymentTypeData> paymentTypeOptions) {
-        return new IndividualCollectionSheetData(date, clients, paymentTypeOptions);
-    }
-
-    private IndividualCollectionSheetData(final LocalDate dueDate, final Collection<IndividualClientData> clients,
-            final Collection<PaymentTypeData> paymentTypeOptions) {
-        this.dueDate = dueDate;
-        this.clients = clients;
-        this.paymentTypeOptions = paymentTypeOptions;
-    }
 
 }

@@ -56,7 +56,12 @@ public enum JobName {
     LOAN_DELINQUENCY_CLASSIFICATION("Loan Delinquency Classification"), //
     SEND_ASYNCHRONOUS_EVENTS("Send Asynchronous Events"), //
     PURGE_EXTERNAL_EVENTS("Purge External Events"), //
-    PURGE_PROCESSED_COMMANDS("Purge Processed Commands");
+    PURGE_PROCESSED_COMMANDS("Purge Processed Commands"), //
+    ACCRUAL_ACTIVITY_POSTING("Accrual Activity Posting"), //
+    ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_SAVINGS_WITH_INCOME_POSTED_AS_TRANSACTIONS("Add Accrual Transactions For Savings"), //
+    JOURNAL_ENTRY_AGGREGATION("Journal Entry Aggregation"), //
+    WORKING_CAPITAL_LOAN_COB_JOB("Working Capital Loan COB"), //
+    ; //
 
     private final String name;
 

@@ -65,6 +65,10 @@ public class ShareProductHelper {
     private List<Map<String, String>> marketPrices = null;
     private Account[] accountList = null;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", this.productName);
@@ -143,6 +147,10 @@ public class ShareProductHelper {
     }
 
     @SuppressWarnings("unchecked")
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyShareProduct(Map<String, Object> shareProductData) {
         String productName = (String) shareProductData.get("name");
         Assertions.assertEquals(this.productName, productName);
@@ -210,6 +218,10 @@ public class ShareProductHelper {
 
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {

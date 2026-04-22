@@ -29,13 +29,15 @@ import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanAmountDataV1;
 import org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1;
 import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CurrencyDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanChargeDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanDelinquencyRangeDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventWithCustomDataSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
@@ -51,7 +53,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class LoanDelinquencyRangeChangeBusinessEventSerializer implements BusinessEventSerializer {
+public class LoanDelinquencyRangeChangeBusinessEventSerializer
+        extends AbstractBusinessEventWithCustomDataSerializer<LoanDelinquencyRangeChangeBusinessEvent> {
 
     private final LoanReadPlatformService service;
 
@@ -66,6 +69,7 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer implements Busine
     private final CurrencyDataMapper currencyMapper;
     private final AvroDateTimeMapper dataTimeMapper;
     private final LoanInstallmentLevelDelinquencyEventProducer installmentLevelDelinquencyEventProducer;
+    private final List<ExternalEventCustomDataSerializer<LoanDelinquencyRangeChangeBusinessEvent>> externalEventCustomDataSerializers;
 
     @Override
     public <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
@@ -110,13 +114,14 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer implements Busine
                 .setAmount(amount)//
                 .setCurrency(currencyMapper.map(data.getCurrency()))//
                 .setDelinquentDate(delinquentDate)//
-                .setInstallmentDelinquencyBuckets(installmentsDelinquencyData).build();
+                .setInstallmentDelinquencyBuckets(installmentsDelinquencyData)//
+                .setCustomData(collectCustomData(event)).build();
     }
 
     private BigDecimal calculateDataSummary(Loan loan, BiFunction<Loan, LoanRepaymentScheduleInstallment, BigDecimal> mapper) {
-        return loan.getRepaymentScheduleInstallments().stream().map(installment -> mapper.apply(loan, installment)).reduce(BigDecimal.ZERO,
-                BigDecimal::add);
-
+        return loan.getRepaymentScheduleInstallments().stream()
+                .filter(installment -> DateUtils.isBeforeBusinessDate(installment.getDueDate()))
+                .map(installment -> mapper.apply(loan, installment)).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
@@ -127,5 +132,10 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer implements Busine
     @Override
     public Class<? extends GenericContainer> getSupportedSchema() {
         return LoanAccountDelinquencyRangeDataV1.class;
+    }
+
+    @Override
+    protected List<ExternalEventCustomDataSerializer<LoanDelinquencyRangeChangeBusinessEvent>> getExternalEventCustomDataSerializers() {
+        return externalEventCustomDataSerializers;
     }
 }

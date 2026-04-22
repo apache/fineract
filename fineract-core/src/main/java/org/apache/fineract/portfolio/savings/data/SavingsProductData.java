@@ -23,6 +23,8 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
@@ -38,24 +40,40 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
  */
 public final class SavingsProductData implements Serializable {
 
+    @Getter
     private final Long id;
+    @Getter
     private final String name;
     private final String shortName;
     private final String description;
+    @Getter
     private final CurrencyData currency;
+    @Getter
     private final BigDecimal nominalAnnualInterestRate;
+    @Getter
     private final EnumOptionData interestCompoundingPeriodType;
+    @Getter
     private final EnumOptionData interestPostingPeriodType;
+    @Getter
     private final EnumOptionData interestCalculationType;
+    @Getter
     private final EnumOptionData interestCalculationDaysInYearType;
+    @Getter
     private final BigDecimal minRequiredOpeningBalance;
+    @Getter
     private final Integer lockinPeriodFrequency;
+    @Getter
     private final EnumOptionData lockinPeriodFrequencyType;
+    @Getter
     private final boolean withdrawalFeeForTransfers;
+    @Getter
     private final boolean allowOverdraft;
+    @Getter
     private final BigDecimal overdraftLimit;
+    @Getter
     private final BigDecimal minRequiredBalance;
     private final boolean enforceMinRequiredBalance;
+    @Getter
     private final BigDecimal maxAllowedLienLimit;
     private final boolean lienAllowed;
     private final BigDecimal minBalanceForInterestCalculation;
@@ -63,6 +81,8 @@ public final class SavingsProductData implements Serializable {
     private final BigDecimal minOverdraftForInterestCalculation;
     private final boolean withHoldTax;
     private final TaxGroupData taxGroup;
+    @Setter
+    @Getter
     private String depositAccountType = null;
     private final String accountMappingForPayment;
 
@@ -171,10 +191,6 @@ public final class SavingsProductData implements Serializable {
     /**
      * Returns a {@link SavingsProductData} that contains and exist {@link SavingsProductData} data with further
      * template data for dropdowns.
-     *
-     * @param taxGroupOptions
-     *            TODO
-     * @param accountMapping
      */
     public static SavingsProductData withTemplate(final SavingsProductData existingProduct, final Collection<CurrencyData> currencyOptions,
             final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
@@ -220,7 +236,6 @@ public final class SavingsProductData implements Serializable {
         final Map<String, List<GLAccountData>> accountingMappingOptions = null;
         final Collection<ChargeData> chargeOptions = null;
         final Collection<ChargeData> penaltyOptions = null;
-        final String accountMappingForPayment = null;
 
         return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
                 existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
@@ -505,88 +520,15 @@ public final class SavingsProductData implements Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof SavingsProductData)) {
+        if (!(obj instanceof SavingsProductData productData)) {
             return false;
         }
-        final SavingsProductData productData = (SavingsProductData) obj;
         return productData.id.compareTo(this.id) == 0;
     }
 
     @Override
     public int hashCode() {
         return this.id.hashCode();
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getDepositAccountType() {
-        return depositAccountType;
-    }
-
-    public void setDepositAccountType(String depositAccountType) {
-        this.depositAccountType = depositAccountType;
-    }
-
-    public BigDecimal getNominalAnnualInterestRate() {
-        return nominalAnnualInterestRate;
-    }
-
-    public CurrencyData getCurrency() {
-        return currency;
-    }
-
-    public Integer getLockinPeriodFrequency() {
-        return lockinPeriodFrequency;
-    }
-
-    public EnumOptionData getLockinPeriodFrequencyType() {
-        return lockinPeriodFrequencyType;
-    }
-
-    public BigDecimal getOverdraftLimit() {
-        return overdraftLimit;
-    }
-
-    public BigDecimal getMinRequiredOpeningBalance() {
-        return minRequiredOpeningBalance;
-    }
-
-    public EnumOptionData getInterestCompoundingPeriodType() {
-        return interestCompoundingPeriodType;
-    }
-
-    public EnumOptionData getInterestPostingPeriodType() {
-        return interestPostingPeriodType;
-    }
-
-    public EnumOptionData getInterestCalculationType() {
-        return interestCalculationType;
-    }
-
-    public EnumOptionData getInterestCalculationDaysInYearType() {
-        return interestCalculationDaysInYearType;
-    }
-
-    public boolean isAllowOverdraft() {
-        return allowOverdraft;
-    }
-
-    public BigDecimal getMinRequiredBalance() {
-        return minRequiredBalance;
-    }
-
-    public BigDecimal getMaxAllowedLienLimit() {
-        return maxAllowedLienLimit;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public boolean isWithdrawalFeeForTransfers() {
-        return withdrawalFeeForTransfers;
     }
 
     public boolean isCashBasedAccountingEnabled() {

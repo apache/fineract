@@ -24,6 +24,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.notification.data.NotificationData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Profile;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,10 +36,15 @@ public class SpringNotificationEventListener implements ApplicationListener<Noti
     private final NotificationEventListener notificationEventListener;
 
     @Override
-    public void onApplicationEvent(NotificationEvent event) {
+    public void onApplicationEvent(@NonNull final NotificationEvent event) {
         log.debug("Processing Spring notification event {}", event);
-        ThreadLocalContextUtil.init(event.getContext());
-        NotificationData notificationData = event.getNotificationData();
-        notificationEventListener.receive(notificationData);
+        try {
+            ThreadLocalContextUtil.init(event.getContext());
+            final NotificationData notificationData = event.getNotificationData();
+            notificationEventListener.receive(notificationData);
+        } finally {
+            ThreadLocalContextUtil.reset();
+        }
     }
+
 }

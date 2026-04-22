@@ -18,19 +18,17 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.support.instancemode.ConfigureInstanceMode;
 import org.apache.fineract.integrationtests.support.instancemode.InstanceModeSupportExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,25 +38,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(InstanceModeSupportExtension.class)
 public class InstanceModeIntegrationTest {
 
-    private ResponseSpecification responseSpec200;
-    private ResponseSpecification responseSpec405;
-    private RequestSpecification requestSpec;
-    private SchedulerJobHelper schedulerJobHelper;
-    private int jobId;
+    private Long jobId;
 
     @BeforeEach
     public void setup() throws InterruptedException {
-        Utils.initializeRESTAssured();
-
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec200 = new ResponseSpecBuilder().expectStatusCode(200).build();
-        responseSpec405 = new ResponseSpecBuilder().expectStatusCode(405).build();
-
-        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-        String jobName = "Apply Annual Fee For Savings";
-        jobId = schedulerJobHelper.getSchedulerJobIdByName(jobName);
+        // Apply Annual Fee For Savings
+        jobId = Calls.ok(FineractClientHelper.getFineractClient().jobs.retrieveByShortName("SA_AANF")).getJobId();
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
@@ -66,7 +51,7 @@ public class InstanceModeIntegrationTest {
     public void testGetHeadOfficeWorks_WhenInstanceModeIsReadOnly() {
         // given
         // when
-        GetOfficesResponse result = OfficeHelper.getHeadOffice(requestSpec, responseSpec200);
+        GetOfficesResponse result = OfficeHelper.getHeadOffice();
         // then
         assertNotNull(result);
     }
@@ -76,7 +61,7 @@ public class InstanceModeIntegrationTest {
     public void testGetHeadOfficeWorks_WhenInstanceModeIsWriteOnly() {
         // given
         // when
-        GetOfficesResponse result = OfficeHelper.getHeadOffice(requestSpec, responseSpec200);
+        GetOfficesResponse result = OfficeHelper.getHeadOffice();
         // then
         assertNotNull(result);
     }
@@ -86,8 +71,9 @@ public class InstanceModeIntegrationTest {
     public void testGetHeadOfficeDoesntWork_WhenInstanceModeIsBatchOnly() {
         // given
         // when
-        OfficeHelper.getHeadOffice(requestSpec, responseSpec405);
-        // then no exception is thrown
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> OfficeHelper.getHeadOffice());
+        // then
+        assertEquals(405, exception.getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
@@ -95,9 +81,8 @@ public class InstanceModeIntegrationTest {
     public void testCreateClientDoesntWork_WhenReadOnly() {
         // given
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
-        // when
-        ClientHelper.createClient(requestSpec, responseSpec405, request);
-        // then no exception thrown
+        // when/then
+        assertThrows(RuntimeException.class, () -> ClientHelper.createClient(request));
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
@@ -106,7 +91,7 @@ public class InstanceModeIntegrationTest {
         // given
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
         // when
-        Integer result = ClientHelper.createClient(requestSpec, responseSpec200, request);
+        var result = ClientHelper.createClient(request);
         // then
         assertNotNull(result);
     }
@@ -116,35 +101,29 @@ public class InstanceModeIntegrationTest {
     public void testCreateClientDoesntWork_WhenBatchOnly() {
         // given
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
-        // when
-        ClientHelper.createClient(requestSpec, responseSpec405, request);
-        // then no exception thrown
+        // when/then
+        assertThrows(RuntimeException.class, () -> ClientHelper.createClient(request));
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenReadOnly() {
-        // given
-        // when
-        schedulerJobHelper.runSchedulerJob(jobId, responseSpec405);
-        // then no exception thrown
+        // when/then
+        assertThrows(RuntimeException.class, () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob")));
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenWriteOnly() {
-        // given
-        // when
-        schedulerJobHelper.runSchedulerJob(jobId, responseSpec405);
-        // then no exception thrown
+        // when/then
+        assertThrows(RuntimeException.class, () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob")));
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = true, batchManagerEnabled = true)
     @Test
     public void testRunSchedulerJobWorks_WhenBatchOnly() {
-        // given
         // when
-        schedulerJobHelper.runSchedulerJob(jobId);
+        Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob"));
         // then no exception thrown
     }
 }

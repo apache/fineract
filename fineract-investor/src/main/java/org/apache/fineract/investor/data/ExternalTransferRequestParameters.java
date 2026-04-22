@@ -25,6 +25,7 @@ public final class ExternalTransferRequestParameters {
     public static final String SETTLEMENT_DATE = "settlementDate";
     public static final String OWNER_EXTERNAL_ID = "ownerExternalId";
     public static final String TRANSFER_EXTERNAL_ID = "transferExternalId";
+    public static final String TRANSFER_EXTERNAL_GROUP_ID = "transferExternalGroupId";
     public static final String PURCHASE_PRICE_RATIO = "purchasePriceRatio";
     public static final String DATEFORMAT = "dateFormat";
     public static final String LOCALE = "locale";

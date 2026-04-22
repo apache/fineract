@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.common.error.ErrorResponse;
 import org.apache.fineract.integrationtests.common.savings.SavingsTransactionData;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -57,6 +59,8 @@ public final class BatchHelper {
     private static final String BATCH_API_WITHOUT_ENCLOSING_URL_EXT = BATCH_API_URL + "&enclosingTransaction=false";
     private static final SecureRandom secureRandom = new SecureRandom();
 
+    private static final Gson GSON = new JSON().getGson();
+
     private BatchHelper() {
 
     }
@@ -67,6 +71,10 @@ public final class BatchHelper {
      * @param batchRequests
      * @return JSON String of BatchRequest
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String toJsonString(final List<BatchRequest> batchRequests) {
         return new Gson().toJson(batchRequests);
     }
@@ -77,6 +85,10 @@ public final class BatchHelper {
      * @param
      * @return Map
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Map generateMapFromJsonString(final String jsonString) {
         return new Gson().fromJson(jsonString, Map.class);
     }
@@ -87,6 +99,10 @@ public final class BatchHelper {
      * @param json
      * @return {@code List<BatchResponse>}
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static List<BatchResponse> fromJsonString(final String json) {
         return new Gson().fromJson(json, new TypeToken<List<BatchResponse>>() {}.getType());
     }
@@ -100,12 +116,28 @@ public final class BatchHelper {
      * @param jsonifiedBatchRequests
      * @return a list of BatchResponse
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<BatchResponse> postBatchRequestsWithoutEnclosingTransaction(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_WITHOUT_ENCLOSING_URL_EXT,
                 jsonifiedBatchRequests, null);
         LOG.info("BatchHelper Response {}", response);
         return BatchHelper.fromJsonString(response);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public static ErrorResponse postBatchRequestsWithoutEnclosingTransactionError(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
+        final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_WITHOUT_ENCLOSING_URL_EXT,
+                jsonifiedBatchRequests, null);
+        LOG.info("BatchHelper Response {}", response);
+        return GSON.fromJson(response, ErrorResponse.class);
     }
 
     /**
@@ -117,6 +149,10 @@ public final class BatchHelper {
      * @param jsonifiedBatchRequests
      * @return a list of BatchResponse
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<BatchResponse> postBatchRequestsWithEnclosingTransaction(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_URL_EXT, jsonifiedBatchRequests, null);
@@ -129,6 +165,10 @@ public final class BatchHelper {
      * @param
      * @return {@code List<BatchResponse>}
      */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<BatchResponse> postWithSingleRequest(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final BatchRequest br) {
 
@@ -162,15 +202,15 @@ public final class BatchHelper {
         br.setMethod("POST");
 
         final String extId;
-        if (externalId.equals("")) {
-            extId = "ext" + String.valueOf((10000 * secureRandom.nextDouble())) + String.valueOf((10000 * secureRandom.nextDouble()));
+        if (externalId.isEmpty()) {
+            extId = UUID.randomUUID().toString();
         } else {
             extId = externalId;
         }
 
-        final String body = "{ \"officeId\": 1, \"legalFormId\":1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": "
-                + extId + ",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\","
-                + "\"active\": false, \"submittedOnDate\": \"04 March 2009\"}";
+        final String body = "{ \"officeId\": 1, \"legalFormId\":1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": \""
+                + extId
+                + "\",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\",\"active\": false, \"submittedOnDate\": \"04 March 2009\"}";
 
         br.setBody(body);
 
@@ -429,7 +469,7 @@ public final class BatchHelper {
         final String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(dateFormat));
 
         final String body = String.format(
-                "{\"chargeId\": \"%d\", \"locale\": \"en\", \"amount\": \"11.15\", " + "\"dateFormat\": \"%s\", \"dueDate\": \"%s\"}",
+                "{\"chargeId\": \"%d\", \"locale\": \"en\", \"amount\": \"100.0\", " + "\"dateFormat\": \"%s\", \"dueDate\": \"%s\"}",
                 chargeId, dateFormat, dateString);
         br.setBody(body);
 
@@ -668,7 +708,7 @@ public final class BatchHelper {
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
-                + "\"note\": \"Loan approval note\"}");
+                + "\"note\": \"Loan approval note\", \"expectedDisbursementDate\": \"" + dateString + "\"}");
 
         return br;
     }
@@ -744,7 +784,7 @@ public final class BatchHelper {
      *            the action to transistion
      * @return BatchRequest the batch request
      */
-    public static BatchRequest transistionLoanStateByExternalId(final Long requestId, final Long reference, final LocalDate date,
+    public static BatchRequest transitionLoanStateByExternalId(final Long requestId, final Long reference, final LocalDate date,
             final String command) {
         final BatchRequest br = new BatchRequest();
 
@@ -757,7 +797,7 @@ public final class BatchHelper {
             br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"" + dateString + "\"}");
         } else if ("approve".equals(command)) {
             br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
-                    + "\"note\": \"Loan approval note\"}");
+                    + "\"note\": \"Loan approval note\", \"expectedDisbursementDate\": \"" + dateString + "\"}");
         }
 
         return br;
@@ -906,6 +946,23 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID for payment
+     * waiver transaction.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param amount
+     *            the amount
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest interestPaymentWaiverRequest(final Long requestId, final Long reference, final String amount) {
+        return createTransactionRequest(requestId, reference, "interestPaymentWaiver", amount, LocalDate.now(Utils.getZoneIdOfTenant()));
+    }
+
+    /**
      * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID for merchant
      * issued refund transaction.
      *
@@ -937,6 +994,24 @@ public final class BatchHelper {
      */
     public static BatchRequest payoutRefundRequest(final Long requestId, final Long reference, final String amount) {
         return createTransactionRequest(requestId, reference, "payoutRefund", amount, LocalDate.now(Utils.getZoneIdOfTenant()));
+    }
+
+    public static BatchRequest chargeOffRequest(final Long requestId, final Long referenceId) {
+        return chargeOffRequest(requestId, referenceId, LocalDate.now(Utils.getZoneIdOfTenant()));
+    }
+
+    public static BatchRequest chargeOffRequest(final Long requestId, final Long referenceId, LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(referenceId);
+        br.setRelativeUrl(String.format("v1/loans/$.loanId/transactions?command=%s", "charge-off"));
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\", \"note\":null}",
+                dateString));
+
+        return br;
     }
 
     /**

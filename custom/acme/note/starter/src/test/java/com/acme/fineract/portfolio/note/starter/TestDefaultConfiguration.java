@@ -21,7 +21,6 @@ package com.acme.fineract.portfolio.note.starter;
 import static org.mockito.Mockito.mock;
 
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -29,62 +28,59 @@ import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
-import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @EnableConfigurationProperties({ FineractProperties.class })
-public class TestDefaultConfiguration {
+@ComponentScan("org.apache.fineract.portfolio.note.service")
+class TestDefaultConfiguration {
     // NOTE: unfortunately an abastract base class that contains all these mock functions won't work
 
     @Bean
-    public FromJsonHelper fromJsonHelper() {
-        return mock(FromJsonHelper.class);
-    }
-
-    @Bean
-    public RoutingDataSourceServiceFactory routingDataSourceServiceFactory() {
+    RoutingDataSourceServiceFactory routingDataSourceServiceFactory() {
         return mock(RoutingDataSourceServiceFactory.class);
     }
 
     @Bean
-    public RoutingDataSource routingDataSource() {
+    RoutingDataSource routingDataSource() {
         return mock(RoutingDataSource.class);
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate() {
+    JdbcTemplate jdbcTemplate() {
         return mock(JdbcTemplate.class);
     }
 
     @Bean
-    public NoteRepository noteRepository() {
+    NoteRepository noteRepository() {
         return mock(NoteRepository.class);
     }
 
     @Bean
-    public ClientRepositoryWrapper clientRepository() {
+    ClientRepositoryWrapper clientRepository() {
         return mock(ClientRepositoryWrapper.class);
     }
 
     @Bean
-    public GroupRepository groupRepository() {
+    GroupRepository groupRepository() {
         return mock(GroupRepository.class);
     }
 
     @Bean
-    public LoanRepositoryWrapper loanRepository() {
+    LoanRepositoryWrapper loanRepository() {
         return mock(LoanRepositoryWrapper.class);
     }
 
     @Bean
-    public LoanTransactionRepository loanTransactionRepository() {
+    LoanTransactionRepository loanTransactionRepository() {
         return mock(LoanTransactionRepository.class);
     }
 
     @Bean
-    public NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer(FromJsonHelper fromJsonHelper) {
-        return new NoteCommandFromApiJsonDeserializer(fromJsonHelper);
+    SavingsAccountRepository savingsAccountRepository() {
+        return mock(SavingsAccountRepository.class);
     }
 }

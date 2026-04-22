@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.interestratechart.incentive.IncentiveDTO;
 
 @Entity
 @Table(name = "m_savings_account_interest_rate_chart")
-public class DepositAccountInterestRateChart extends AbstractPersistableCustom {
+public class DepositAccountInterestRateChart extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartFields chartFields;

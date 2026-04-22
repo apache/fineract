@@ -52,7 +52,7 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -72,7 +72,7 @@ public class RecurringDepositAccountTransactionsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
                     DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName, DepositsApiConstants.amountParamName,
@@ -85,9 +85,8 @@ public class RecurringDepositAccountTransactionsApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Recurring Deposit Account Transaction Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Recurring Deposit Account Transaction Template", operationId = "retrieveTemplateRecurringDepositAccountTransaction", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Requests:\n" + "\n"
             + "recurringdepositaccounts/1/transactions/template?command=deposit\n" + "\n"
             + "recurringdepositaccounts/1/transactions/template?command=withdrawal")
@@ -129,9 +128,8 @@ public class RecurringDepositAccountTransactionsApiResource {
 
     @GET
     @Path("{transactionId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Recurring Deposit Account Transaction", description = "Retrieves Recurring Deposit Account Transaction\n\n"
+    @Operation(summary = "Retrieve Recurring Deposit Account Transaction", operationId = "retrieveOneRecurringDepositAccountTransaction", description = "Retrieves Recurring Deposit Account Transaction\n\n"
             + "Example Requests:\n" + "\n" + "recurringdepositaccounts/1/transactions/1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountTransactionsApiResourceSwagger.GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse.class))) })
@@ -155,7 +153,7 @@ public class RecurringDepositAccountTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Deposit Transaction | Withdrawal Transaction", description = "Deposit Transaction:\n\n"
+    @Operation(summary = "Deposit Transaction | Withdrawal Transaction", operationId = "transactionRecurringDepositAccountTransaction", description = "Deposit Transaction:\n\n"
             + "Used for a deposit transaction\n\n" + "Withdrawal Transaction:\n\n" + "Used for a Withdrawal Transaction\n\n"
             + "Showing request/response for Deposit Transaction")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountTransactionsApiResourceSwagger.PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest.class)))

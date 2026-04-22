@@ -20,7 +20,9 @@ package org.apache.fineract.infrastructure.cache.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
+@Getter
 public enum CacheType {
 
     INVALID(0, "cacheType.invalid"), //
@@ -54,15 +56,7 @@ public enum CacheType {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
+        return name().replace("_", " ");
     }
 
     public boolean isNoCache() {

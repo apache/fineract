@@ -33,15 +33,11 @@ public enum InterestIncentiveType {
         if (v == null) {
             return INVALID;
         }
-
-        switch (v) {
-            case 2:
-                return FIXED;
-            case 3:
-                return INCENTIVE;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 2 -> FIXED;
+            case 3 -> INCENTIVE;
+            default -> INVALID;
+        };
     }
 
     InterestIncentiveType(final Integer value, final String code) {
@@ -51,7 +47,7 @@ public enum InterestIncentiveType {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public Integer getValue() {
@@ -62,23 +58,7 @@ public enum InterestIncentiveType {
         return this.code;
     }
 
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isIncentive() {
-        return INCENTIVE.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isFixed() {
-        return FIXED.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return INVALID.equals(this);
-    }
-
-    // TODO: do we really need this?!?
-    public static Object[] integerValues() {
-        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
+    public static Integer[] integerValues() {
+        return Arrays.stream(values()).filter(v -> v != INVALID).map(v -> v.value).toArray(Integer[]::new);
     }
 }

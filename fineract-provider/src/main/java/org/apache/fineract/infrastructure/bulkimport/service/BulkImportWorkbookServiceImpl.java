@@ -18,18 +18,17 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.service;
 
-import jakarta.ws.rs.core.Response;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
@@ -37,51 +36,38 @@ import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
+import org.apache.fineract.infrastructure.bulkimport.mapping.ImportDocumentMapper;
+import org.apache.fineract.infrastructure.contentstore.util.ContentPipe;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
-import org.apache.fineract.infrastructure.documentmanagement.domain.DocumentRepository;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateRequest;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
-import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookServiceImpl.class);
     private final ApplicationContext applicationContext;
     private final PlatformSecurityContext securityContext;
-    private final DocumentWritePlatformService documentWritePlatformService;
-    private final DocumentRepository documentRepository;
     private final ImportDocumentRepository importDocumentRepository;
+    private final DocumentWritePlatformService writePlatformService;
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public BulkImportWorkbookServiceImpl(final ApplicationContext applicationContext, final PlatformSecurityContext securityContext,
-            final DocumentWritePlatformService documentWritePlatformService, final DocumentRepository documentRepository,
-            final ImportDocumentRepository importDocumentRepository, final JdbcTemplate jdbcTemplate) {
-        this.applicationContext = applicationContext;
-        this.securityContext = securityContext;
-        this.documentWritePlatformService = documentWritePlatformService;
-        this.documentRepository = documentRepository;
-        this.importDocumentRepository = importDocumentRepository;
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final ContentPipe pipe;
+    private final ImportDocumentMapper mapper;
 
     @Override
     public Long importWorkbook(String entity, InputStream inputStream, FormDataContentDisposition fileDetail, final String locale,
@@ -169,35 +155,49 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
 
                 }
-                return publishEvent(primaryColumn, fileDetail, bis, entityType, workbook, locale, dateFormat);
+                return publishEvent(primaryColumn, fileDetail, fileType, entityType, workbook, locale, dateFormat);
             }
             throw new GeneralPlatformDomainRuleException("error.msg.null", "One or more of the given parameters not found");
         } catch (IOException e) {
-            LOG.error("Problem occurred in importWorkbook function", e);
+            log.error("Problem occurred in importWorkbook function", e);
             throw new GeneralPlatformDomainRuleException("error.msg.io.exception",
                     "IO exception occured with " + fileDetail.getFileName() + " " + e.getMessage(), e);
 
         }
     }
 
-    private Long publishEvent(final Integer primaryColumn, final FormDataContentDisposition fileDetail,
-            final InputStream clonedInputStreamWorkbook, final GlobalEntityType entityType, final Workbook workbook, final String locale,
-            final String dateFormat) {
+    private DocumentCreateResponse createDocument(final Workbook workbook, final FormDataContentDisposition fileDetail,
+            final String fileType) {
+        final var pipedInputStream = pipe.pipe(output -> {
+            workbook.write(output);
+        });
 
-        final String fileName = fileDetail.getFileName();
+        // TODO: does it really make sense to use the current user's ID?
+        // TODO: wouldn't it be better to use "entityType.name()" as entity name?
+        return writePlatformService
+                .createDocument(DocumentCreateRequest.builder().entityId(this.securityContext.authenticatedUser().getId())
+                        .entityType("IMPORT").name(fileDetail.getFileName()).description(fileDetail.getFileName())
+                        .fileName(fileDetail.getFileName()).size(fileDetail.getSize()).type(fileType).stream(pipedInputStream).build());
+    }
 
-        final Long documentId = this.documentWritePlatformService.createInternalDocument(
-                DocumentWritePlatformServiceJpaRepositoryImpl.DocumentManagementEntity.IMPORT.name(),
-                this.securityContext.authenticatedUser().getId(), null, clonedInputStreamWorkbook,
-                URLConnection.guessContentTypeFromName(fileName), fileName, null, fileName);
-        final Document document = this.documentRepository.findById(documentId).orElse(null);
+    private Long publishEvent(final Integer primaryColumn, final FormDataContentDisposition fileDetail, final String fileType,
+            final GlobalEntityType entityType, final Workbook workbook, final String locale, final String dateFormat) {
 
-        final ImportDocument importDocument = ImportDocument.instance(document, DateUtils.getLocalDateTimeOfTenant(), entityType.getValue(),
-                this.securityContext.authenticatedUser(), ImportHandlerUtils.getNumberOfRows(workbook.getSheetAt(0), primaryColumn));
-        this.importDocumentRepository.saveAndFlush(importDocument);
-        BulkImportEvent event = BulkImportEvent.instance(this, workbook, importDocument.getId(), locale, dateFormat,
-                ThreadLocalContextUtil.getContext());
+        final var importDocument = ImportDocument.instance(null, DateUtils.getLocalDateTimeOfTenant(), entityType.getValue(),
+                securityContext.authenticatedUser(), ImportHandlerUtils.getNumberOfRows(workbook.getSheetAt(0), primaryColumn));
+
+        final var response = createDocument(workbook, fileDetail, fileType);
+
+        importDocument.setDocumentId(response.getResourceId());
+
+        // TODO: should we mark as "not yet processed by import handler"?
+        importDocumentRepository.saveAndFlush(importDocument);
+
+        final var event = new BulkImportEvent(this, workbook, fileDetail.getFileName(), fileType, importDocument, locale, dateFormat,
+                ThreadLocalContextUtil.getContext(), this.securityContext.authenticatedUser().getId());
+
         applicationContext.publishEvent(event);
+
         return importDocument.getId();
     }
 
@@ -208,18 +208,24 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportMapper rm = new ImportMapper();
         final String sql = "select " + rm.schema() + " order by i.id desc";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { type.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, type.getValue());
+    }
+
+    @Override
+    public ImportData getImport(Long id) {
+        return importDocumentRepository.findById(id).map(mapper::map).orElse(null);
     }
 
     private static final class ImportMapper implements RowMapper<ImportData> {
 
+        private static final String IMPORT_SCHEMA = """
+                i.id as id, i.document_id as documentId, d.name as name, i.import_time as importTime, i.end_time as endTime,
+                i.completed as completed, i.total_records as totalRecords, i.success_count as successCount,
+                i.failure_count as failureCount, i.createdby_id as createdBy
+                from m_import_document i inner join m_document d on i.document_id=d.id where i.entity_type= ?\s""";
+
         public String schema() {
-            final StringBuilder sql = new StringBuilder();
-            sql.append("i.id as id, i.document_id as documentId, d.name as name, i.import_time as importTime, i.end_time as endTime, ")
-                    .append("i.completed as completed, i.total_records as totalRecords, i.success_count as successCount, ")
-                    .append("i.failure_count as failureCount, i.createdby_id as createdBy ")
-                    .append("from m_import_document i inner join m_document d on i.document_id=d.id ").append("where i.entity_type= ? ");
-            return sql.toString();
+            return IMPORT_SCHEMA;
         }
 
         @Override
@@ -238,51 +244,6 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
 
             return ImportData.instance(id, documentId, importTime, endTime, completed, name, createdBy, totalRecords, successCount,
                     failureCount);
-        }
-    }
-
-    @Override
-    public DocumentData getOutputTemplateLocation(String importDocumentId) {
-        this.securityContext.authenticatedUser();
-        final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
-        final String sql = "select " + importTemplateLocationMapper.schema();
-
-        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Integer.parseInt(importDocumentId) }); // NOSONAR
-    }
-
-    @Override
-    public Response getOutputTemplate(String importDocumentId) {
-        this.securityContext.authenticatedUser();
-        final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
-        final String sql = "select " + importTemplateLocationMapper.schema();
-        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId }); // NOSONAR
-        return buildResponse(documentData);
-    }
-
-    private Response buildResponse(DocumentData documentData) {
-        String fileName = "Output" + documentData.fileName();
-        String fileLocation = documentData.fileLocation();
-        File file = new File(fileLocation);
-        final Response.ResponseBuilder response = Response.ok(file);
-        response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-        response.header("Content-Type", "application/vnd.ms-excel");
-        return response.build();
-    }
-
-    private static final class ImportTemplateLocationMapper implements RowMapper<DocumentData> {
-
-        public String schema() {
-            final StringBuilder sql = new StringBuilder();
-            sql.append("d.location,d.file_name ").append("from m_import_document i inner join m_document d on i.document_id=d.id ")
-                    .append("where i.id= ? ");
-            return sql.toString();
-        }
-
-        @Override
-        public DocumentData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-            final String location = rs.getString("location");
-            final String fileName = rs.getString("file_name");
-            return new DocumentData(null, null, null, null, fileName, null, null, null, location, null);
         }
     }
 }

@@ -15,4 +15,10 @@ include::properties-tomcat.adoc[leveloffset=+1]
 
 include::properties-kafka.adoc[leveloffset=+1]
 
+include::properties-metrics.adoc[leveloffset=+1]
+
+include::properties-cloud-aws.adoc[leveloffset=+1]
+
+include::properties-resilience4j.adoc[leveloffset=+1]
+
 // include::properties-cache.adoc[leveloffset=+1]

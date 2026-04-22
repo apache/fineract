@@ -1,0 +1,12 @@
+{
+    "name": "SavingsAccountsStayedLockedDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
+    "type": "record",
+    "fields": [{
+        "name": "savingsAccounts",
+        "type": {
+            "type": "array",
+            "items": "org.apache.fineract.avro.savings.v1.SavingsAccountStayedLockedDataV1"
+        }
+    }]
+}

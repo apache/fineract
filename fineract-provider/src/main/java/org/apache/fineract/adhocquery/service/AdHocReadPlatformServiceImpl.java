@@ -21,7 +21,7 @@ package org.apache.fineract.adhocquery.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
@@ -39,14 +39,14 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     private final AdHocMapper adHocRowMapper;
 
     @Override
-    public Collection<AdHocData> retrieveAllAdHocQuery() {
+    public List<AdHocData> retrieveAllAdHocQuery() {
         final String sql = "select " + this.adHocRowMapper.schema() + " order by r.id";
 
         return this.jdbcTemplate.query(sql, this.adHocRowMapper); // NOSONAR
     }
 
     @Override
-    public Collection<AdHocData> retrieveAllActiveAdHocQuery() {
+    public List<AdHocData> retrieveAllActiveAdHocQuery() {
         final String sql = "select " + adHocRowMapper.schema() + " where r." + sqlGenerator.escape("is_active") + " = true order by r.id";
 
         return jdbcTemplate.query(sql, adHocRowMapper); // NOSONAR

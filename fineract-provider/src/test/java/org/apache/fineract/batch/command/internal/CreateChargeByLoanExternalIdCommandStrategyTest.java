@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 /**
  * Test class for {@link CreateChargeByLoanExternalIdCommandStrategy}.
  */
-public class CreateChargeByLoanExternalIdCommandStrategyTest {
+class CreateChargeByLoanExternalIdCommandStrategyTest {
 
     /**
      * Command arguments provider.
@@ -50,7 +50,7 @@ public class CreateChargeByLoanExternalIdCommandStrategyTest {
      * @return command argument
      */
     private static Stream<Arguments> provideCommandParameters() {
-        return Stream.of(Arguments.of(null, 0), Arguments.of("adjustment", 1));
+        return Stream.of(Arguments.of((Object) null), Arguments.of("adjustment"));
     }
 
     /**
@@ -58,12 +58,10 @@ public class CreateChargeByLoanExternalIdCommandStrategyTest {
      *
      * @param command
      *            the command to pass
-     * @param noOfArguments
-     *            the number of arguments
      */
     @ParameterizedTest
     @MethodSource("provideCommandParameters")
-    public void testExecuteSuccessScenario(final String command, final int noOfArguments) {
+    void testExecuteSuccessScenario(final String command) {
         final TestContext testContext = new TestContext();
         final String loanExternalId = UUID.randomUUID().toString();
         final BatchRequest batchRequest = getBatchRequest(loanExternalId, command);
@@ -98,10 +96,10 @@ public class CreateChargeByLoanExternalIdCommandStrategyTest {
         if (StringUtils.isNotBlank(command)) {
             relativeUrl = relativeUrl + String.format("?command=%s", command);
         }
-        br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setRequestId(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.POST);
-        br.setReference(Long.valueOf(RandomStringUtils.randomNumeric(5)));
+        br.setReference(Long.valueOf(RandomStringUtils.secure().nextNumeric(5)));
         br.setBody("{}");
 
         return br;

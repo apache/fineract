@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.investor.service;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.JournalEntryMapper;
@@ -26,8 +27,10 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.investor.data.ExternalOwnerJournalEntryData;
 import org.apache.fineract.investor.data.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.investor.data.ExternalTransferData;
+import org.apache.fineract.investor.data.ExternalTransferOwnerData;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerJournalEntryMappingRepository;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMapping;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferJournalEntryMappingRepository;
@@ -52,6 +55,7 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
     private final ExternalAssetOwnerJournalEntryMappingRepository externalAssetOwnerJournalEntryMappingRepository;
     private final ExternalAssetOwnersTransferMapper mapper;
     private final JournalEntryMapper journalEntryMapper;
+    private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
 
     @Override
     public Page<ExternalTransferData> retrieveTransferData(Long loanId, String externalLoanId, String externalTransferId, Integer offset,
@@ -140,6 +144,11 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
             limit = 100;
         }
         return PageRequest.of(offset, limit, Sort.by("id"));
+    }
+
+    @Override
+    public List<ExternalTransferOwnerData> retrieveAllExternalOwners() {
+        return mapper.mapOwners(externalAssetOwnerRepository.findAll());
     }
 
 }

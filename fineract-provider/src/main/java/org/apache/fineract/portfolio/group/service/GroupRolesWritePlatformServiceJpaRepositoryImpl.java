@@ -72,8 +72,11 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
             }
             final GroupRole groupRole = GroupRole.createGroupRole(group, client, role);
             this.groupRoleRepository.saveAndFlush(groupRole);
-            return new CommandProcessingResultBuilder().withClientId(client.getId()).withGroupId(group.getId())
-                    .withEntityId(groupRole.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withClientId(client.getId()) //
+                    .withGroupId(group.getId()) //
+                    .withEntityId(groupRole.getId()) //
+                    .build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -135,7 +138,10 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
             }
 
             this.groupRoleRepository.saveAndFlush(groupRole);
-            return new CommandProcessingResultBuilder().with(actualChanges).withGroupId(group.getId()).withEntityId(groupRole.getId())
+            return new CommandProcessingResultBuilder() //
+                    .with(actualChanges) //
+                    .withGroupId(group.getId()) //
+                    .withEntityId(groupRole.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -150,7 +156,9 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
         this.context.authenticatedUser();
         final GroupRole groupRole = this.groupRoleRepository.findOneWithNotFoundDetection(ruleId);
         this.groupRoleRepository.delete(groupRole);
-        return new CommandProcessingResultBuilder().withEntityId(groupRole.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(groupRole.getId()) //
+                .build();
     }
 
 }

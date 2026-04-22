@@ -25,5 +25,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class MessageId {
 
-    private final int id;
+    private final long id;
 }

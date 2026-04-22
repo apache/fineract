@@ -1,4 +1,4 @@
-= Introducing Advanced payment allocation - WIP*
+= Introducing Advanced payment allocation
 
 Since the first repayment strategy got introduced, many followed, but there was one thing common in them:
 
@@ -15,8 +15,6 @@ By introducing the "Advanced payment allocation" the idea was to have a repaymen
 [cols="1,1"]
 |===
 
-|*WIP
-| Work in progress
 
 |*Advanced payment allocation
 | Ability to configure allocation rules dynamically for transactions
@@ -36,7 +34,7 @@ By introducing the "Advanced payment allocation" the idea was to have a repaymen
 ** Payout refund
 ** Merchant refund
 ** Charge adjustments
-** Down payment (WIP)
+** etc.
 
 * Can be configured for Loan products
 ** Payment allocation rule changes on the loan product will affect only the newly created Loan accounts.

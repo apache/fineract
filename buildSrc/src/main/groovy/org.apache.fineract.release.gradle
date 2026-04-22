@@ -176,8 +176,8 @@ fineract {
             description: 'Sign the distribution artifacts',
             gpg: [
                 files: [
-                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-src.tar.gz",
-                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-binary.tar.gz"
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-src-${project.version}.tar.gz",
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-bin-${project.version}.tar.gz"
                 ]
             ]
         ],
@@ -196,36 +196,10 @@ fineract {
         step10: [
             order: 10,
             description: 'Start voting on the dev mailing list',
-            email: [
-                from: "${findProperty('fineract.config.email')}",
-                name: "${findProperty('fineract.config.name')}",
-                to: "${findProperty('fineract.config.email')}",
-                // to: 'dev@fineract.apache.org',
-                mime: 'text/plain',
-                subjectTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step10.vote.subject.ftl"
-                ],
-                messageTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step10.vote.message.ftl"
-                ]
-            ]
         ],
         step11: [
             order: 11,
             description: 'Conclude the vote and announce results',
-            email: [
-                from: "${findProperty('fineract.config.email')}",
-                name: "${findProperty('fineract.config.name')}",
-                to: "${findProperty('fineract.config.email')}",
-                // to: 'dev@fineract.apache.org',
-                mime: 'text/plain',
-                subjectTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step11.vote.subject.ftl"
-                ],
-                messageTemplate: [
-                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step11.vote.message.ftl"
-                ]
-            ]
         ],
         step12: [
             order: 12,

@@ -26,13 +26,15 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 
+@Getter
 @Entity
 @Table(name = "m_loan_disbursement_detail")
-public class LoanDisbursementDetails extends AbstractPersistableCustom {
+public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
@@ -107,10 +109,6 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         return this.actualDisbursementDate;
     }
 
-    public BigDecimal principal() {
-        return this.principal;
-    }
-
     public void updatePrincipal(BigDecimal principal) {
         this.principal = principal;
     }
@@ -122,8 +120,8 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
     public DisbursementData toData() {
         LocalDate expectedDisburseDate = expectedDisbursementDateAsLocalDate();
         BigDecimal waivedChargeAmount = null;
-        return new DisbursementData(getId(), expectedDisburseDate, this.actualDisbursementDate, this.principal, this.netDisbursalAmount,
-                null, null, waivedChargeAmount);
+        return new DisbursementData(getId(), loan.getId(), expectedDisburseDate, this.actualDisbursementDate, this.principal,
+                this.netDisbursalAmount, null, null, waivedChargeAmount);
     }
 
     public void updateActualDisbursementDate(LocalDate actualDisbursementDate) {

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.batch.command.internal;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,6 +34,7 @@ import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
 import org.apache.fineract.infrastructure.dataqueries.api.DatatablesApiResource;
 import org.apache.http.HttpStatus;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -91,7 +91,7 @@ public class GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategyTest {
         verify(testContext.dataTableApiResource).getDatatableManyEntry(eq(datatableName), eq(loanId), eq(datatableId), eq(null),
                 eq(genericResultSet), testContext.uriInfoCaptor.capture());
         MutableUriInfo mutableUriInfo = testContext.uriInfoCaptor.getValue();
-        assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(numberOfQueryParams);
+        Assertions.assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(numberOfQueryParams);
         if (numberOfQueryParams > 0) {
             List<String> param = mutableUriInfo.getAdditionalQueryParameters().get("genericResultSet");
             assertEquals(param.get(0), "true");

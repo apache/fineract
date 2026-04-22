@@ -47,22 +47,22 @@ public class CommandStrategyProvider {
     /**
      * Regex pattern for specifying any number of query params or not specific any query param
      */
-    private static final String OPTIONAL_QUERY_PARAM_REGEX = "(\\?(\\w+(?:\\=[\\w,]+|&)+)+)?";
+    private static final String OPTIONAL_QUERY_PARAM_REGEX = "(\\?([\\w-]+=[^&]+)(?:&[\\w-]+=[^&]+)*)?";
 
     /**
      * Regex pattern for specifying query params
      */
-    private static final String MANDATORY_QUERY_PARAM_REGEX = "(\\?(\\w+(?:\\=[\\w\\-,]+|&)+)+)";
+    private static final String MANDATORY_QUERY_PARAM_REGEX = "(\\?([\\w-]+=[^&]+)(?:&[\\w-]+=[^&]+)*)";
 
     /**
      * Regex pattern for specifying any query param that has key = 'command' or not specific anything.
      */
-    private static final String OPTIONAL_COMMAND_PARAM_REGEX = "(\\?command=[\\w]+)?";
+    private static final String OPTIONAL_COMMAND_PARAM_REGEX = "(\\?command=[\\w\\-]+)?";
 
     /**
      * Regex pattern for specifying a mandatory query param that has key = 'command'.
      */
-    private static final String MANDATORY_COMMAND_PARAM_REGEX = "\\?command=[\\w]+";
+    private static final String MANDATORY_COMMAND_PARAM_REGEX = "\\?command=[\\w\\-]+";
 
     /**
      * Regex pattern for specifying a UUID param.
@@ -149,6 +149,11 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions\\/" + NUMBER_REGEX + OPTIONAL_COMMAND_PARAM_REGEX)
                 .method(POST).build(), "savingsAccountAdjustTransactionCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/charges").method(POST).build(),
+                "createSavingsAccountChargeCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/charges\\/" + NUMBER_REGEX + MANDATORY_COMMAND_PARAM_REGEX)
+                .method(POST).build(), "paySavingsAccountChargeCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/charges").method(POST).build(),
                 "createChargeCommandStrategy");
         commandStrategies.put(
@@ -188,6 +193,8 @@ public class CommandStrategyProvider {
                 "approveLoanCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\?command=disburse").method(POST).build(),
                 "disburseLoanCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\?command=disburseToSavings").method(POST).build(),
+                "disburseToSavingsCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + MANDATORY_COMMAND_PARAM_REGEX)
                 .method(POST).build(), "loanStateTransistionsByExternalIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/rescheduleloans").method(POST).build(),
@@ -201,6 +208,13 @@ public class CommandStrategyProvider {
                 CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/transactions\\/external-id\\/"
                         + UUID_PARAM_REGEX + OPTIONAL_QUERY_PARAM_REGEX).method(GET).build(),
                 "getLoanTransactionByExternalIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/transactions\\/reage-preview" + OPTIONAL_QUERY_PARAM_REGEX)
+                        .method(GET).build(),
+                "getReagePreviewByLoanIdCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/transactions\\/reage-preview" + OPTIONAL_QUERY_PARAM_REGEX)
+                .method(GET).build(), "getReagePreviewByLoanExternalIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/" + NUMBER_REGEX)
                 .method(POST).build(), "createDatatableEntryCommandStrategy");
         commandStrategies.put(CommandContext
@@ -227,6 +241,24 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext
                 .resource("v1\\/datatables\\/" + ALPHANUMBERIC_WITH_UNDERSCORE_REGEX + "\\/query" + MANDATORY_QUERY_PARAM_REGEX).method(GET)
                 .build(), "getDatatableEntryByQueryCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/interest-pauses").method(GET).build(),
+                "getLoanInterestPausesByLoanIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/interest-pauses").method(POST).build(),
+                "createLoanInterestPauseByLoanIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/loans\\/" + NUMBER_REGEX + "\\/interest-pauses\\/" + NUMBER_REGEX).method(PUT).build(),
+                "updateLoanInterestPauseByLoanIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses").method(GET).build(),
+                "getLoanInterestPausesByExternalIdCommandStrategy");
+        commandStrategies.put(
+                CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses").method(POST).build(),
+                "createLoanInterestPauseByExternalIdCommandStrategy");
+        commandStrategies.put(CommandContext
+                .resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses\\/" + NUMBER_REGEX).method(PUT).build(),
+                "updateLoanInterestPauseByExternalIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("v1\\/accounttransfers").method(POST).build(),
+                "createAccountTransferCommandStrategy");
     }
 
 }

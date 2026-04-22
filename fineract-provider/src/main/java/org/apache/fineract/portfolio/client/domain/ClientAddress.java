@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.address.domain.Address;
 
 @Entity
 @Table(name = "m_client_address")
-public class ClientAddress extends AbstractPersistableCustom {
+public class ClientAddress extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     private Client client;

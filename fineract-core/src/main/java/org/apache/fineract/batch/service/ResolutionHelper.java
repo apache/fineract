@@ -22,8 +22,11 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +136,7 @@ public class ResolutionHelper {
             // parameter
             for (Map.Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
                 final String key = element.getKey();
-                final JsonElement value = resolveDependentVariables(element, responseCtx);
+                final JsonElement value = resolveDependentVariables(element.getValue(), requestBody, responseCtx);
                 jsonResultBody.add(key, value);
             }
             // Set the body after dependency resolution
@@ -162,52 +165,55 @@ public class ResolutionHelper {
         return request;
     }
 
-    private JsonElement resolveDependentVariables(final Map.Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
+    private JsonElement resolveDependentVariables(final JsonElement jsonElement, final String requestBody, final ReadContext responseCtx) {
         JsonElement value;
-        final JsonElement element = entryElement.getValue();
-        if (element.isJsonObject()) {
-            final JsonObject jsObject = element.getAsJsonObject();
-            value = processJsonObject(jsObject, responseCtx);
-        } else if (element.isJsonArray()) {
-            final JsonArray jsElementArray = element.getAsJsonArray();
-            value = processJsonArray(jsElementArray, responseCtx);
-        } else if (element.isJsonNull()) {
+        if (jsonElement.isJsonObject()) {
+            final JsonObject jsObject = jsonElement.getAsJsonObject();
+            value = processJsonObject(jsObject, requestBody, responseCtx);
+        } else if (jsonElement.isJsonArray()) {
+            final JsonArray jsElementArray = jsonElement.getAsJsonArray();
+            value = processJsonArray(jsElementArray, requestBody, responseCtx);
+        } else if (jsonElement.isJsonNull()) {
             // No further processing of null values
-            value = element;
+            value = jsonElement;
         } else {
-            value = resolveDependentVariable(element, responseCtx);
+            value = processJsonPrimitive(jsonElement, requestBody, responseCtx);
         }
         return value;
     }
 
-    private JsonElement processJsonObject(final JsonObject jsObject, final ReadContext responseCtx) {
+    private JsonElement processJsonObject(final JsonObject jsObject, final String requestBody, final ReadContext responseCtx) {
         JsonObject valueObj = new JsonObject();
         for (Map.Entry<String, JsonElement> element : jsObject.entrySet()) {
-            final String key = element.getKey();
-            final JsonElement value = resolveDependentVariable(element.getValue(), responseCtx);
-            valueObj.add(key, value);
+            valueObj.add(element.getKey(), resolveDependentVariables(element.getValue(), requestBody, responseCtx));
         }
         return valueObj;
     }
 
-    private JsonArray processJsonArray(final JsonArray elementArray, final ReadContext responseCtx) {
+    private JsonArray processJsonArray(final JsonArray elementArray, final String requestBody, final ReadContext responseCtx) {
         JsonArray valueArr = new JsonArray();
         for (JsonElement element : elementArray) {
-            if (element.isJsonObject()) {
-                final JsonObject jsObject = element.getAsJsonObject();
-                valueArr.add(processJsonObject(jsObject, responseCtx));
-            }
+            valueArr.add(resolveDependentVariables(element, requestBody, responseCtx));
         }
         return valueArr;
     }
 
-    private JsonElement resolveDependentVariable(final JsonElement element, final ReadContext responseCtx) {
+    private JsonElement processJsonPrimitive(final JsonElement element, final String requestBody, final ReadContext responseCtx) {
         JsonElement value = element;
-        String paramVal = element.getAsString();
-        if (paramVal.contains("$.")) {
-            // Get the value of the parameter from parent response
-            final String resParamValue = responseCtx.read(paramVal).toString();
-            value = this.fromJsonHelper.parse(resParamValue);
+        if (element instanceof JsonPrimitive) {
+            String paramVal = element.getAsString();
+            if (paramVal.contains("$[ARRAYDATE]")) {
+                String resolvableParamVal = paramVal.replace("$[ARRAYDATE]", "$");
+                final String resParamValue = responseCtx.read(resolvableParamVal).toString();
+                JsonArray date = (JsonArray) this.fromJsonHelper.parse(resParamValue);
+                String dateFormat = JsonPath.read(requestBody, "$.dateFormat");
+                return new JsonPrimitive(DateTimeFormatter.ofPattern(dateFormat)
+                        .format(LocalDate.of(date.get(0).getAsInt(), date.get(1).getAsInt(), date.get(2).getAsInt())));
+            } else if (paramVal.contains("$.")) {
+                // Get the value of the parameter from parent response
+                final String resParamValue = responseCtx.read(paramVal).toString();
+                value = this.fromJsonHelper.parse(resParamValue);
+            }
         }
         return value;
     }

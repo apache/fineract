@@ -39,7 +39,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Accessors(chain = true)
 @Entity
 @Table(name = "m_business_date", uniqueConstraints = { @UniqueConstraint(name = "uq_business_date_type", columnNames = { "type" }) })
-public class BusinessDate extends AbstractAuditableWithUTCDateTimeCustom {
+public class BusinessDate extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")

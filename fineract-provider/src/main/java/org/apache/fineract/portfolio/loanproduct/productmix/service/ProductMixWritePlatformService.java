@@ -18,15 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanproduct.productmix.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixCreateRequest;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixCreateResponse;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixDeleteRequest;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixDeleteResponse;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixUpdateRequest;
+import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixUpdateResponse;
 
 public interface ProductMixWritePlatformService {
 
-    CommandProcessingResult createProductMix(Long productId, JsonCommand command);
+    ProductMixCreateResponse createProductMix(ProductMixCreateRequest request);
 
-    CommandProcessingResult updateProductMix(Long productId, JsonCommand command);
+    ProductMixUpdateResponse updateProductMix(ProductMixUpdateRequest request);
 
-    CommandProcessingResult deleteProductMix(Long productId);
-
+    ProductMixDeleteResponse deleteProductMix(ProductMixDeleteRequest request);
 }

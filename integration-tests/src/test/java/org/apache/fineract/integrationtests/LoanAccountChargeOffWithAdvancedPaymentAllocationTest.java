@@ -28,33 +28,31 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
-import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeToGLAccountMapper;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
-import org.apache.fineract.client.models.GetLoanFeeToIncomeAccountMappings;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoanTransactionRelation;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.LoanProductChargeData;
+import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -67,19 +65,15 @@ import org.apache.fineract.integrationtests.common.funds.FundsHelper;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseLoanIntegrationTest {
 
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
@@ -154,64 +148,66 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
     // Charge-off accounting and balances
     @Test
     public void loanChargeOffWithAdvancedPaymentStrategyTest() {
-        String loanExternalIdStr = UUID.randomUUID().toString();
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+        runAt("10 September 2022", () -> {
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingAndAdvancedPaymentAllocationStrategy();
+            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
-        // apply charges
-        Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+            // apply charges
+            Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-        LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
+            final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
 
-        // apply penalty
-        Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+            // apply penalty
+            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
 
-        final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
+            final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
-        // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(10.0));
+            // make Repayment
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
+                            .transactionAmount(10.0));
 
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
-        assertTrue(loanDetails.getStatus().getActive());
+            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            assertTrue(loanDetails.getStatus().getActive());
 
-        // set loan as chargeoff
-        String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
-        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
-        String transactionExternalId = UUID.randomUUID().toString();
-        PostLoansLoanIdTransactionsResponse chargeOffTransaction = this.loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("10 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+            // set loan as chargeoff
+            String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
+                    + Utils.randomStringGenerator("is", 5);
+            Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+            String transactionExternalId = UUID.randomUUID().toString();
+            PostLoansLoanIdTransactionsResponse chargeOffTransaction = this.loanTransactionHelper.chargeOffLoan((long) loanId,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("10 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                            .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
 
-        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
-        assertTrue(loanDetails.getStatus().getActive());
-        assertTrue(loanDetails.getChargedOff());
+            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            assertTrue(loanDetails.getStatus().getActive());
+            assertTrue(loanDetails.getChargedOff());
 
-        // verify amounts for charge-off transaction
-        verifyTransaction(LocalDate.of(2022, 9, 10), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
-        // verify journal entries
-        GetJournalEntriesTransactionIdResponse journalEntriesForChargeOff = journalEntryHelper
-                .getJournalEntries("L" + chargeOffTransaction.getResourceId().toString());
+            // verify amounts for charge-off transaction
+            verifyTransaction(LocalDate.of(2022, 9, 10), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
+            // verify journal entries
+            GetJournalEntriesTransactionIdResponse journalEntriesForChargeOff = journalEntryHelper
+                    .getJournalEntries("L" + chargeOffTransaction.getResourceId().toString());
 
-        assertNotNull(journalEntriesForChargeOff);
+            assertNotNull(journalEntriesForChargeOff);
 
-        List<JournalEntryTransactionItem> journalEntries = journalEntriesForChargeOff.getPageItems();
-        assertEquals(4, journalEntries.size());
-        verifyJournalEntry(journalEntries.get(3), 1000.0, LocalDate.of(2022, 9, 10), loansReceivable, "CREDIT");
-        verifyJournalEntry(journalEntries.get(2), 10.0, LocalDate.of(2022, 9, 10), interestFeeReceivable, "CREDIT");
-        verifyJournalEntry(journalEntries.get(1), 1000.0, LocalDate.of(2022, 9, 10), creditLossBadDebt, "DEBIT");
-        verifyJournalEntry(journalEntries.get(0), 10.0, LocalDate.of(2022, 9, 10), feeChargeOff, "DEBIT");
-
+            List<JournalEntryTransactionItem> journalEntries = journalEntriesForChargeOff.getPageItems();
+            assertEquals(4, journalEntries.size());
+            verifyJournalEntry(journalEntries.get(3), 1000.0, LocalDate.of(2022, 9, 10), loansReceivable, "CREDIT");
+            verifyJournalEntry(journalEntries.get(2), 10.0, LocalDate.of(2022, 9, 10), interestFeeReceivable, "CREDIT");
+            verifyJournalEntry(journalEntries.get(1), 1000.0, LocalDate.of(2022, 9, 10), creditLossBadDebt, "DEBIT");
+            verifyJournalEntry(journalEntries.get(0), 10.0, LocalDate.of(2022, 9, 10), feeChargeOff, "DEBIT");
+        });
     }
 
     // Reverse Replay of Charge-Off
@@ -546,6 +542,59 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
 
     }
 
+    @Test
+    public void testProgressiveChargeOffWithEarlyRepaymentZeroInterest() {
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().chargeOffBehaviour("ZERO_INTEREST"));
+
+        runAt("01 January 2024", () -> {
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "01 January 2024",
+                    1000.0, 7.0, 6, null);
+
+            loanIdRef.set(loanId);
+
+            disburseLoan(loanId, BigDecimal.valueOf(1000), "01 January 2024");
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 164.26, 0, 0, 5.83);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 165.21, 0, 0, 4.88);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 166.18, 0, 0, 3.91);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 167.15, 0, 0, 2.94);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 168.12, 0, 0, 1.97);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 169.08, 0, 0, 0.99);
+
+            verifyTransactions(loanId, transaction(1000.0d, "Disbursement", "01 January 2024"));
+            executeInlineCOB(loanId);
+        });
+        runAt("10 February 2024", () -> {
+            Long loanId = loanIdRef.get();
+
+            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("15 January 2024").locale("en").transactionAmount(170.09));
+
+            loanTransactionHelper.chargeOffLoan(loanId,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("31 January 2024").locale("en").dateFormat("dd MMMM yyyy"));
+
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 164.95, 167.46, -2.51, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.14,
+                    2.63, 2.51, 170.09, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 5, "01 June 2024", 170.09, 0, 0, 0.0);
+            validateFullyUnpaidRepaymentPeriod(loanDetails, 6, "01 July 2024", 154.69, 0, 0, 0.0);
+
+            verifyTransactions(loanId, //
+                    transaction(1000.0d, "Disbursement", "01 January 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(170.09d, "Repayment", "15 January 2024", 832.54, 167.46, 2.63, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(5.14d, "Accrual", "31 January 2024", 0.0, 0.0, 5.14, 0.0, 0.0, 0.0, 0.0, false), //
+                    transaction(835.05d, "Charge-off", "31 January 2024", 0.0, 832.54, 2.51, 0.0, 0.0, 0.0, 0.0, false) //
+            );
+        });
+    }
+
     private void verifyJournalEntry(JournalEntryTransactionItem journalEntryTransactionItem, Double amount, LocalDate entryDate,
             Account account, String type) {
         assertEquals(amount, journalEntryTransactionItem.getAmount());
@@ -611,17 +660,17 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
         List<Integer> principalVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
-        List<ChargeData> charges = new ArrayList<>();
-        List<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
+        List<LoanProductChargeData> charges = new ArrayList<>();
+        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = false;
-        Integer position = 1;
+        Long position = 1L;
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(new PostPaymentTypesRequest()
-                .name(paymentTypeName).description(description).isCashPayment(isCashPayment).position(position));
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest().name(paymentTypeName)
+                .description(description).isCashPayment(isCashPayment).position(position));
         Long paymentTypeIdOne = paymentTypesResponse.getResourceId();
         Assertions.assertNotNull(paymentTypeIdOne);
 
@@ -639,7 +688,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
         Assertions.assertNotNull(fundID);
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
 
         String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
@@ -701,7 +750,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
                         .repaymentEvery(true)//
                         .graceOnPrincipalAndInterestPayment(true)//
                         .graceOnArrearsAgeing(true))//
-                .allowPartialPeriodInterestCalcualtion(true)//
+                .allowPartialPeriodInterestCalculation(true)//
                 .maxTrancheCount(10)//
                 .outstandingLoanBalance(10000.0)//
                 .charges(charges)//
@@ -750,30 +799,5 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
         }
 
         return Long.valueOf(fundId);
-    }
-
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
     }
 }

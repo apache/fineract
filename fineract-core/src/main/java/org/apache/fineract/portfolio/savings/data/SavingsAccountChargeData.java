@@ -25,6 +25,7 @@ import java.time.MonthDay;
 import java.util.Collection;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -33,6 +34,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
  * Immutable data object for Savings Account charge data.
  */
 @Getter
+@JsonLocalDateArrayFormat
 public class SavingsAccountChargeData implements Serializable {
 
     private final Long id;

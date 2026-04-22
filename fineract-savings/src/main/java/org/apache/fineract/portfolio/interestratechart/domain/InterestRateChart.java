@@ -58,7 +58,7 @@ import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 
 @Entity
 @Table(name = "m_interest_rate_chart")
-public class InterestRateChart extends AbstractPersistableCustom {
+public class InterestRateChart extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartFields chartFields;
@@ -137,17 +137,21 @@ public class InterestRateChart extends AbstractPersistableCustom {
                 if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
                         && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
                     if (iSlabs.slabFields().isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping",
-                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
-                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
-                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
-                                nextSlabs.slabFields().getAmountRangeTo());
+                        // Use DataValidatorBuilder with resource/parameter context for clean error codes
+                        DataValidatorBuilder v = new DataValidatorBuilder(baseDataValidator.getDataValidationErrors())
+                                .resource("savings.interestRateChart").parameter("slabs");
+                        v.failWithCode("overlap", iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(),
+                                nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields().toPeriod(),
+                                iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(),
+                                nextSlabs.slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
                     } else if (iSlabs.slabFields().isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap",
-                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
-                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
-                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
-                                nextSlabs.slabFields().getAmountRangeTo());
+                        // Use DataValidatorBuilder with resource/parameter context for clean error codes
+                        DataValidatorBuilder v = new DataValidatorBuilder(baseDataValidator.getDataValidationErrors())
+                                .resource("savings.interestRateChart").parameter("slabs");
+                        v.failWithCode("gap", iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(),
+                                nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields().toPeriod(),
+                                iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(),
+                                nextSlabs.slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
                     }
                     if (isPrimaryGroupingByAmount) {
                         if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {
@@ -173,9 +177,6 @@ public class InterestRateChart extends AbstractPersistableCustom {
 
                     }
                 }
-            } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
-                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect", iSlabs.slabFields().toPeriod(),
-                        iSlabs.slabFields().getAmountRangeTo());
             }
         }
     }

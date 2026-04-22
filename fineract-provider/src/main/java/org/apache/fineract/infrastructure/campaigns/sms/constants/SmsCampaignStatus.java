@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.constants;
 
+import lombok.Getter;
+
+@Getter
 public enum SmsCampaignStatus {
 
     INVALID(-1, "smsCampaignStatus.invalid"), //
@@ -34,38 +37,11 @@ public enum SmsCampaignStatus {
     }
 
     public static SmsCampaignStatus fromInt(final Integer statusValue) {
-        switch (statusValue) {
-            case 100:
-                return PENDING;
-            case 300:
-                return ACTIVE;
-            case 600:
-                return CLOSED;
-            default:
-                return INVALID;
-        }
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isActive() {
-        return this.equals(ACTIVE);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isPending() {
-        return this.equals(PENDING);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isClosed() {
-        return this.equals(CLOSED);
+        return switch (statusValue) {
+            case 100 -> PENDING;
+            case 300 -> ACTIVE;
+            case 600 -> CLOSED;
+            default -> INVALID;
+        };
     }
 }

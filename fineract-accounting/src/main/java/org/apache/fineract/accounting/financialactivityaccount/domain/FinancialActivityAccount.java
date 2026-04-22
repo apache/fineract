@@ -36,7 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-public class FinancialActivityAccount extends AbstractPersistableCustom {
+public class FinancialActivityAccount extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "gl_account_id")

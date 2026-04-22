@@ -28,7 +28,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 @RequiredArgsConstructor
 public enum LoanScheduleType {
 
-    CUMULATIVE("Cumulative"), PROGRESSIVE("Progressive");
+    CUMULATIVE("Cumulative"), //
+    PROGRESSIVE("Progressive"); //
 
     private final String humanReadableName;
 

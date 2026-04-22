@@ -26,11 +26,25 @@ import java.util.Set;
  ***/
 public enum JournalEntryJsonInputParams {
 
-    OFFICE_ID("officeId"), TRANSACTION_DATE("transactionDate"), COMMENTS("comments"), CREDITS("credits"), DEBITS("debits"), LOCALE(
-            "locale"), DATE_FORMAT("dateFormat"), REFERENCE_NUMBER("referenceNumber"), USE_ACCOUNTING_RULE(
-                    "useAccountingRule"), ACCOUNTING_RULE("accountingRule"), AMOUNT("amount"), CURRENCY_CODE(
-                            "currencyCode"), PAYMENT_TYPE_ID("paymentTypeId"), ACCOUNT_NUMBER("accountNumber"), CHECK_NUMBER(
-                                    "checkNumber"), ROUTING_CODE("routingCode"), RECEIPT_NUMBER("receiptNumber"), BANK_NUMBER("bankNumber");
+    OFFICE_ID("officeId"), //
+    TRANSACTION_DATE("transactionDate"), //
+    COMMENTS("comments"), //
+    CREDITS("credits"), //
+    DEBITS("debits"), //
+    LOCALE("locale"), //
+    DATE_FORMAT("dateFormat"), //
+    REFERENCE_NUMBER("referenceNumber"), //
+    USE_ACCOUNTING_RULE("useAccountingRule"), //
+    ACCOUNTING_RULE("accountingRule"), //
+    AMOUNT("amount"), //
+    CURRENCY_CODE("currencyCode"), //
+    PAYMENT_TYPE_ID("paymentTypeId"), //
+    ACCOUNT_NUMBER("accountNumber"), //
+    CHECK_NUMBER("checkNumber"), //
+    ROUTING_CODE("routingCode"), //
+    RECEIPT_NUMBER("receiptNumber"), //
+    BANK_NUMBER("bankNumber"), //
+    EXTERNAL_ASSET_OWNER("externalAssetOwner"); //
 
     private final String value;
 
@@ -52,7 +66,7 @@ public enum JournalEntryJsonInputParams {
 
     @Override
     public String toString() {
-        return name().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public String getValue() {

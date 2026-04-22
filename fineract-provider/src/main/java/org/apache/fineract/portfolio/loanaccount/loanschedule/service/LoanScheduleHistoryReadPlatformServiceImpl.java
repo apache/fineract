@@ -22,12 +22,12 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -59,12 +59,11 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Integer fetchCurrentVersionNumber(Long loanId) {
         final String sql = "select MAX(lrs.version) from m_loan_repayment_schedule_history lrs where lrs.loan_id = ?";
-        Integer max = this.jdbcTemplate.queryForObject(sql, new Object[] { loanId }, Integer.class);
-        return ObjectUtils.defaultIfNull(max, 0);
+        Integer max = this.jdbcTemplate.queryForObject(sql, Integer.class, loanId);
+        return Objects.requireNonNullElse(max, 0);
     }
 
     @Override
@@ -181,7 +180,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
                 Integer daysInPeriod = 0;
                 if (fromDate != null) {
-                    daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
+                    daysInPeriod = DateUtils.getExactDifferenceInDays(fromDate, dueDate);
                     loanTermInDays = loanTermInDays + daysInPeriod;
                 }
 
@@ -190,9 +189,6 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
                 final BigDecimal interestExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestDue");
                 totalInterestCharged = totalInterestCharged.plus(interestExpectedDue);
-
-                final BigDecimal totalInstallmentAmount = totalPrincipalExpected.zero().plus(principalDue).plus(interestExpectedDue)
-                        .getAmount();
 
                 final BigDecimal feeChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesDue");
                 totalFeeChargesCharged = totalFeeChargesCharged.plus(feeChargesExpectedDue);
@@ -218,7 +214,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentOnlyPeriod(period, fromDate, dueDate,
                         principalDue, outstandingPrincipalBalanceOfLoan, interestExpectedDue, feeChargesExpectedDue,
-                        penaltyChargesExpectedDue, totalDueForPeriod, totalInstallmentAmount);
+                        penaltyChargesExpectedDue);
 
                 periods.add(periodData);
             }

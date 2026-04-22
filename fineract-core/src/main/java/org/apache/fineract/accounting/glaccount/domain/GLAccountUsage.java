@@ -20,10 +20,12 @@ package org.apache.fineract.accounting.glaccount.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum GLAccountUsage {
 
-    DETAIL(1, "accountUsage.detail"), HEADER(2, "accountUsage.header");
+    DETAIL(1, "accountUsage.detail"), //
+    HEADER(2, "accountUsage.header"); //
 
     private final Integer value;
     private final String code;
@@ -78,6 +80,10 @@ public enum GLAccountUsage {
     @Override
     public String toString() {
         return name().toString();
+    }
+
+    public EnumOptionData toEnumOptionData() {
+        return new EnumOptionData((long) value, code, code);
     }
 
 }

@@ -13,6 +13,14 @@
         },
         {
             "default": null,
+            "name": "availableDisbursementAmountWithOverApplied",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "pastDueDays",
             "type": [
                 "null",
@@ -21,10 +29,26 @@
         },
         {
             "default": null,
+            "name": "pastDueDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "nextPaymentDueDate",
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "nextPaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
             ]
         },
         {
@@ -103,6 +127,38 @@
                     "type": "array",
                     "items": "org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1"
                 }
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentPrincipal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentInterest",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentFee",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentPenalty",
+            "type": [
+                "null",
+                "bigdecimal"
             ]
         }
     ]

@@ -41,13 +41,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.fineract.client.models.PostPaymentTypesRequest;
-import org.apache.fineract.client.models.PostPaymentTypesResponse;
+import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.bulkimport.importhandler.LocalContentStorageUtil;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -93,11 +93,11 @@ public class LoanImportHandlerTest {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         // in order to populate helper sheets
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
-        OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
+        GetOfficesResponse office = officeHelper.retrieveOffice(outcome_office_creation.longValue());
         Assertions.assertNotNull(office, "Could not retrieve created office");
 
         String firstName = Utils.randomStringGenerator("Client_FirstName_", 5);
@@ -167,8 +167,8 @@ public class LoanImportHandlerTest {
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
 
-        PostPaymentTypesResponse paymentTypesResponse = paymentTypeHelper.createPaymentType(
-                new PostPaymentTypesRequest().name(paymentTypeName).description(paymentTypeDescription).isCashPayment(true).position(1));
+        var paymentTypesResponse = paymentTypeHelper.createPaymentType(
+                new PaymentTypeCreateRequest().name(paymentTypeName).description(paymentTypeDescription).isCashPayment(true).position(1L));
         Long outcome_payment_creation = paymentTypesResponse.getResourceId();
 
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
@@ -246,7 +246,7 @@ public class LoanImportHandlerTest {
         Thread.sleep(10000);
 
         // check status column of output excel
-        String location = loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
+        String location = LocalContentStorageUtil.path(loanTransactionHelper.getOutputTemplateLocation(importDocumentId));
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputworkbook = new HSSFWorkbook(fileInputStream);
         Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);

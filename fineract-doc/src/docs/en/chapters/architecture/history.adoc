@@ -11,7 +11,7 @@ Fineract was an idea born out of a wish to create and deploy technology that all
 
 == Timeline
 
-* 2006: Project intiated by Grameen Foundation
+* 2006: Project initiated by Grameen Foundation
 * Late 2011: Grameen Foundation handed over full responsibility to open source community.
 * 2012: Mifos X platform started. Previous members of project come together under the name of Community for Open Source Microfinance (COSM / OpenMF)
 * 2013: COSM / OpenMF officially rebranded to Mifos Initiative and receive US 501c3 status.

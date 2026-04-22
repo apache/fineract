@@ -1,0 +1,24 @@
+= Coding Conventions
+
+== How We Code
+
+We recommend that you configure your favourite Java IDE to match the project conventions.
+
+=== Eclipse IDE
+For Eclipse, you can go to `Window > Java > Code Style` and import:
+* `config/fineractdev-formatter.xml` under the formatter section.
+* `config/fineractdev-cleanup.xml` under the cleanup section.
+
+=== IntelliJ IDEA
+For IntelliJ, the project settings for code style should be automatically imported from the Gradle configuration.
+
+== Formatting
+
+We use Spotless to enforce code formatting. You can run the following command to automatically fix formatting violations:
+
+[source,bash]
+----
+./gradlew spotlessApply
+----
+
+This ensures consistent code style across the entire codebase.

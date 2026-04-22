@@ -126,10 +126,10 @@ public class TwoFactorAuthenticationTest {
 
     @Test
     public void testTwofactorLogin() throws IOException, MessagingException {
-        assertEquals(greenMail.getReceivedMessages().length, 0);
+        assertEquals(0, greenMail.getReceivedMessages().length);
         performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-        assertEquals(greenMail.getReceivedMessages().length, 1);
+        assertEquals(1, greenMail.getReceivedMessages().length);
 
         Pattern p = Pattern.compile("token is (.+).");
         Matcher m = p.matcher((CharSequence) greenMail.getReceivedMessages()[0].getContent());
@@ -161,10 +161,10 @@ public class TwoFactorAuthenticationTest {
 
     @Test
     public void testTfaConfigSettings() throws IOException, MessagingException {
-        assertEquals(greenMail.getReceivedMessages().length, 0);
+        assertEquals(0, greenMail.getReceivedMessages().length);
         performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-        assertEquals(greenMail.getReceivedMessages().length, 1);
+        assertEquals(1, greenMail.getReceivedMessages().length);
 
         Pattern p = Pattern.compile("token is (.+).");
         Matcher m = p.matcher((CharSequence) greenMail.getReceivedMessages()[0].getContent());
@@ -202,7 +202,7 @@ public class TwoFactorAuthenticationTest {
         // Login again
         performServerPost(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/twofactor?deliveryMethod=email&extendedToken=false&" + TENANT_IDENTIFIER, "", "");
-        assertEquals(greenMail.getReceivedMessages().length, 2);
+        assertEquals(2, greenMail.getReceivedMessages().length);
 
         Matcher m2 = p.matcher((CharSequence) greenMail.getReceivedMessages()[1].getContent());
 

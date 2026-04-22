@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.security.utils;
 import java.sql.SQLException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
+@Deprecated
 public class SQLInjectionException extends PlatformApiDataValidationException {
 
     public SQLInjectionException() {

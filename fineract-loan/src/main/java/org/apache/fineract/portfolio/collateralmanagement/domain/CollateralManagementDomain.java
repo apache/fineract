@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.collateralmanagement.api.CollateralManageme
 
 @Entity
 @Table(name = "m_collateral_management")
-public class CollateralManagementDomain extends AbstractPersistableCustom {
+public class CollateralManagementDomain extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", length = 20, columnDefinition = " ")
     private String name;

@@ -30,12 +30,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Embeddable
+@Getter
+@Setter
 public class InterestRateChartFields {
 
     @Column(name = "name", length = 100, unique = false, nullable = false)
@@ -123,14 +127,6 @@ public class InterestRateChartFields {
         return compare != null && DateUtils.isAfter(getFromDate(), compare);
     }
 
-    public LocalDate getFromDate() {
-        return this.fromDate;
-    }
-
-    public LocalDate getEndDate() {
-        return this.endDate;
-    }
-
     public boolean isOverlapping(InterestRateChartFields that) {
         final LocalDate thisFromDate = this.getFromDate();
         LocalDate thisEndDate = this.getEndDate();
@@ -142,20 +138,14 @@ public class InterestRateChartFields {
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
         final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
 
-        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) {
-            return true;
-        }
-        return false;// no overlapping
+        return thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval);// no
+                                                                                                            // overlapping
     }
 
     public boolean isApplicableChartFor(final LocalDate target) {
         final LocalDate endDate = this.endDate == null ? DateUtils.getBusinessLocalDate() : this.getEndDate();
         final LocalDateInterval interval = LocalDateInterval.create(getFromDate(), endDate);
         return interval.contains(target);
-    }
-
-    public boolean isPrimaryGroupingByAmount() {
-        return this.isPrimaryGroupingByAmount;
     }
 
 }

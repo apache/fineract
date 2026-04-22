@@ -23,9 +23,7 @@ import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactio
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.config.FineractDataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
@@ -66,24 +64,26 @@ public class ScheduledJobRunnerConfig {
     }
 
     @Bean
-    public JobRepository jobRepository(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager)
+    public JobRepository jobRepository(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager,
+            Jackson2ExecutionContextStringSerializer executionContextSerializer, DataFieldMaxValueIncrementerFactory incrementerFactory)
             throws Exception {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
         factory.setDataSource(routingDataSource);
         factory.setTransactionManager(transactionManager);
         factory.setIsolationLevelForCreate("ISOLATION_READ_COMMITTED");
-        factory.setSerializer(executionContextSerializer());
-        factory.setIncrementerFactory(incrementerFactory(routingDataSource));
+        factory.setSerializer(executionContextSerializer);
+        factory.setIncrementerFactory(incrementerFactory);
         factory.afterPropertiesSet();
         return factory.getObject();
     }
 
     @Bean
-    public JobExplorer jobExplorer(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager) throws Exception {
+    public JobExplorer jobExplorer(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager,
+            Jackson2ExecutionContextStringSerializer executionContextSerializer) throws Exception {
         JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
         jobExplorerFactoryBean.setDataSource(routingDataSource);
         jobExplorerFactoryBean.setTransactionManager(transactionManager);
-        jobExplorerFactoryBean.setSerializer(executionContextSerializer());
+        jobExplorerFactoryBean.setSerializer(executionContextSerializer);
         jobExplorerFactoryBean.afterPropertiesSet();
         return jobExplorerFactoryBean.getObject();
     }
@@ -94,12 +94,5 @@ public class ScheduledJobRunnerConfig {
         launcher.setJobRepository(jobRepository);
         launcher.afterPropertiesSet();
         return launcher;
-    }
-
-    @Bean
-    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
-        final JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
-        postProcessor.setJobRegistry(jobRegistry);
-        return postProcessor;
     }
 }

@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
 @Table(name = "m_client_non_person")
-public class ClientNonPerson extends AbstractPersistableCustom {
+public class ClientNonPerson extends AbstractPersistableCustom<Long> {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false, unique = true)

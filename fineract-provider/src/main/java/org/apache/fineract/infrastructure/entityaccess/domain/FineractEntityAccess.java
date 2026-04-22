@@ -40,7 +40,7 @@ import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConst
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class FineractEntityAccess extends AbstractPersistableCustom {
+public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
 
     @Column(name = "entity_type", length = 50)
     private String entityType;

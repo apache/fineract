@@ -55,7 +55,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -67,7 +67,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -89,7 +89,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "30 April 2023"), //
@@ -119,7 +119,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -132,7 +132,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -154,7 +154,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "30 April 2023"), //
@@ -186,7 +186,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -198,7 +198,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -220,7 +220,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "30 April 2023"), //
@@ -251,7 +251,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -264,7 +264,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "15 April 2023"), //
@@ -286,13 +286,48 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
 
             // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(0, null, "01 March 2023"), //
+                    installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
                     installment(250.0, false, "31 March 2023"), //
                     installment(250.0, false, "30 April 2023"), //
                     installment(250.0, 0.0, 50.0, 300.0, false, "15 May 2023")//
             );
 
+        });
+    }
+
+    @Test
+    public void incorrectValueAfterCharge() {
+        runAt("20 December 2024", () -> {
+            // Create Client
+            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            // Create Loan Product
+            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                    .minPrincipal(100.0);
+            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            Long loanProductId = loanProductResponse.getResourceId();
+
+            // Apply and Approve Loan
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "20 December 2024", 800.0, 4, req -> {
+                req.setRepaymentEvery(30);
+                req.setLoanTermFrequency(120);
+                req.setTransactionProcessingStrategyCode("advanced-payment-allocation-strategy");
+            });
+
+            // Disburse Loan
+            disburseLoan(loanId, BigDecimal.valueOf(800.00), "20 December 2024");
+
+            // add charge with a huge amount
+            addCharge(loanId, false, 123456789012.12, "23 December 2024");
+
+            // verify repayment schedule
+            verifyRepaymentSchedule(loanId, //
+                    installment(800.0, null, "20 December 2024"), //
+                    installment(200.0, 0.0, 123456789212.12, false, "19 January 2025"), //
+                    installment(200.0, 0.0, 200.0, false, "18 February 2025"), //
+                    installment(200.0, 0.0, 200.0, false, "20 March 2025"), //
+                    installment(200.0, 0.0, 200.0, false, "19 April 2025")//
+            );
         });
     }
 

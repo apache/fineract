@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.service.database;
 
-import jakarta.validation.constraints.NotNull;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
@@ -42,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.springframework.data.domain.Persistable;
+import org.springframework.lang.NonNull;
 
 public enum JavaType {
 
@@ -205,7 +205,7 @@ public enum JavaType {
         };
     }
 
-    @NotNull
+    @NonNull
     public JavaType getObjectType() {
         if (!isPrimitive()) {
             return this;
@@ -227,7 +227,7 @@ public enum JavaType {
     /**
      * @return the field metadata type for the given class. First class objects are not recognized in this method.
      */
-    @NotNull
+    @NonNull
     public static JavaType forType(Class<?> type) {
         if (type == null) {
             return OBJECT;

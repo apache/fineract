@@ -90,10 +90,10 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
             List<HashMap<String, Object>> runReportObject = emailCampaignWritePlatformService
                     .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
             if (runReportObject != null) {
+                EmailCampaign emailCampaign = emailCampaignRepository.findById(campaignId).orElse(null);
                 for (HashMap<String, Object> entry : runReportObject) {
                     String message = compileEmailTemplate(messageTemplate, campaignName, entry);
                     Integer clientId = (Integer) entry.get("id");
-                    EmailCampaign emailCampaign = emailCampaignRepository.findById(campaignId).orElse(null);
                     Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId.longValue());
                     String emailAddress = client.emailAddress();
 

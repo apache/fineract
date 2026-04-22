@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -55,12 +55,12 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     public GuarantorReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ClientReadPlatformService clientReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper) {
+            final StaffReadService staffReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.clientReadPlatformService = clientReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
@@ -130,9 +130,9 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                 .append(" left JOIN m_code_value cv on g.client_reln_cv_id = cv.id")//
                 .append(" left JOIN m_guarantor_funding_details gfd on g.id = gfd.guarantor_id")//
                 .append(" left JOIN m_portfolio_account_associations aa on gfd.account_associations_id = aa.id and aa.is_active = true and aa.association_type_enum = ?")//
-                .append(" left JOIN m_savings_account sa on sa.id = aa.linked_savings_account_id ")//
                 .append(" left join m_guarantor_transaction gt on gt.guarantor_fund_detail_id = gfd.id") //
-                .append(" left join m_deposit_account_on_hold_transaction oht on oht.id = gt.deposit_on_hold_transaction_id");
+                .append(" left join m_deposit_account_on_hold_transaction oht on oht.id = gt.deposit_on_hold_transaction_id")//
+                .append(" left JOIN m_savings_account sa on sa.id = COALESCE(aa.linked_savings_account_id, oht.savings_account_id)");
 
         public String schema() {
             return this.sqlBuilder.toString();

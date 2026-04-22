@@ -185,7 +185,7 @@ public class ClientApiConstants {
     public static final String clientEntityName = "clients";
 
     public static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
+            Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts", "workingCapitalLoanAccounts"));
 
     /**
      * These parameters will match the class level parameters of ClientData. Where possible, we try to get response
@@ -197,7 +197,7 @@ public class ClientApiConstants {
             officeNameParamName, transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName,
             imagePresentParamName, staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName,
             staffOptionsParamName, dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName,
-            legalFormParamName, clientNonPersonDetailsParamName, isStaffParamName));
+            legalFormParamName, clientNonPersonDetailsParamName, isStaffParamName, legalFormParamName));
 
     protected static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,

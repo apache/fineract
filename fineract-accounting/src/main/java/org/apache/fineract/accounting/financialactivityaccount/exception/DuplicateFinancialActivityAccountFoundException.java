@@ -25,14 +25,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class DuplicateFinancialActivityAccountFoundException extends AbstractPlatformDomainRuleException {
 
-    private static final String errorCode = "error.msg.financialActivityAccount.exists";
+    private static final String ERROR_CODE = "error.msg.financialActivityAccount.exists";
 
     public DuplicateFinancialActivityAccountFoundException(final Integer financialActivityType) {
-        super(errorCode, "Mapping for activity already exists " + financialActivityType, financialActivityType);
+        super(ERROR_CODE, "Mapping for activity already exists " + financialActivityType, financialActivityType);
     }
 
     public static String getErrorcode() {
-        return errorCode;
+        return ERROR_CODE;
     }
 
 }

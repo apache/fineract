@@ -23,32 +23,25 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.core.component.FetcherRule;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.AddressData;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AddressReadPlatformServiceImpl implements AddressReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService readService;
-
-    @Autowired
-    public AddressReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final CodeValueReadPlatformService readService) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.readService = readService;
-    }
 
     private static final class AddFieldsMapper implements RowMapper<AddressData> {
 
@@ -178,7 +171,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
-    public Collection<AddressData> retrieveAddressFields(final long clientid) {
+    public List<AddressData> retrieveAddressFields(final long clientid) {
         this.context.authenticatedUser();
 
         final AddFieldsMapper rm = new AddFieldsMapper();
@@ -188,7 +181,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
-    public Collection<AddressData> retrieveAllClientAddress(final long clientid) {
+    public List<AddressData> retrieveAllClientAddress(final long clientid) {
         this.context.authenticatedUser();
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=?";
@@ -196,7 +189,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
-    public Collection<AddressData> retrieveAddressbyType(final long clientid, final long typeid) {
+    public List<AddressData> retrieveAddressbyType(final long clientid, final long typeid) {
         this.context.authenticatedUser();
 
         final AddMapper rm = new AddMapper();
@@ -206,7 +199,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
-    public Collection<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid, final String status) {
+    public List<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid, final String status) {
         this.context.authenticatedUser();
         boolean temp = Boolean.parseBoolean(status);
 
@@ -217,7 +210,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
-    public Collection<AddressData> retrieveAddressbyStatus(final long clientid, final String status) {
+    public List<AddressData> retrieveAddressbyStatus(final long clientid, final String status) {
         this.context.authenticatedUser();
         boolean temp = Boolean.parseBoolean(status);
 
@@ -228,13 +221,28 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     }
 
     @Override
+    public List<AddressData> retrieveBySearchParam(ClientAddressSearchParam params) {
+        return getFilterRules().stream().filter(rule -> rule.matches(params)).map(r -> r.execute(params)).findFirst()
+                .orElse(retrieveAddressbyStatus(params.getClientId(), params.getStatus()));
+    }
+
+    @Override
     public AddressData retrieveTemplate() {
-        final List<CodeValueData> countryoptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("COUNTRY"));
+        final List<CodeValueData> countryoptions = this.readService.retrieveCodeValuesByCode("COUNTRY");
 
-        final List<CodeValueData> StateOptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("STATE"));
+        final List<CodeValueData> StateOptions = this.readService.retrieveCodeValuesByCode("STATE");
 
-        final List<CodeValueData> addressTypeOptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("ADDRESS_TYPE"));
+        final List<CodeValueData> addressTypeOptions = this.readService.retrieveCodeValuesByCode("ADDRESS_TYPE");
 
         return AddressData.template(countryoptions, StateOptions, addressTypeOptions);
+    }
+
+    private List<FetcherRule<ClientAddressSearchParam, List<AddressData>>> getFilterRules() {
+        return List.of(
+                new FetcherRule<>(p -> p.getAddressTypeId() == 0 && p.getStatus() == null, p -> retrieveAllClientAddress(p.getClientId())),
+                new FetcherRule<>(p -> p.getAddressTypeId() != 0 && p.getStatus() == null,
+                        p -> retrieveAddressbyType(p.getClientId(), p.getAddressTypeId())),
+                new FetcherRule<>(p -> p.getAddressTypeId() != 0 && p.getStatus() != null,
+                        p -> retrieveAddressbyTypeAndStatus(p.getClientId(), p.getAddressTypeId(), p.getStatus())));
     }
 }

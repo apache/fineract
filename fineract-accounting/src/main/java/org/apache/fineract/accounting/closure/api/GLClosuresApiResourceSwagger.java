@@ -21,22 +21,20 @@ package org.apache.fineract.accounting.closure.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
+/**
+ * Swagger response and request schemas for GL Closures.
+ */
 final class GLClosuresApiResourceSwagger {
 
     private GLClosuresApiResourceSwagger() {
         // don't allow to instantiate; use only for live API documentation
     }
 
-    /**
-     * TODO: describe where this belongs: {@link GLClosuresApiResource } {@link GLClosuresApiResource}
-     */
-    // Check !!
-
     @Schema(description = "GetGLClosureResponse")
     public static final class GetGlClosureResponse {
 
         private GetGlClosureResponse() {
-            // dont allow to initiatiate
+            // dont allow to instantiation
         }
 
         @Schema(example = "7")
@@ -45,13 +43,13 @@ final class GLClosuresApiResourceSwagger {
         public Long officeId;
         @Schema(example = "Head Office")
         public String officeName;
-        @Schema(example = "2013,1,2")
+        @Schema(example = "2013-01-02")
         public LocalDate closingDate;
         @Schema(example = "false")
         public boolean deleted;
-        @Schema(example = "2013,1,3")
+        @Schema(example = "2013-1-3")
         public LocalDate createdDate;
-        @Schema(example = "2013,1,3")
+        @Schema(example = "2013-1-3")
         public LocalDate lastUpdatedDate;
         @Schema(example = "1")
         public Long createdByUserId;
@@ -66,7 +64,7 @@ final class GLClosuresApiResourceSwagger {
 
     }
 
-    @Schema(description = "PostGLCLosuresRequest")
+    @Schema(description = "PostGLClosuresRequest")
     public static final class PostGlClosuresRequest {
 
         private PostGlClosuresRequest() {
@@ -77,7 +75,7 @@ final class GLClosuresApiResourceSwagger {
         public Long officeId;
         @Schema(example = "06 December 2012")
         public LocalDate closingDate;
-        @Schema(example = "The accountants are heading for a carribean vacation")
+        @Schema(example = "The accountants are heading for a Caribbean vacation")
         public String comments;
         @Schema(example = "en")
         public String locale;

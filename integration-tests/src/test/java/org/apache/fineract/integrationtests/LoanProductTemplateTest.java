@@ -93,9 +93,13 @@ public class LoanProductTemplateTest {
                 loanProductsTemplateResponse.getAdvancedPaymentAllocationFutureInstallmentAllocationRules().get(1).getCode());
         assertEquals("Last installment",
                 loanProductsTemplateResponse.getAdvancedPaymentAllocationFutureInstallmentAllocationRules().get(1).getValue());
-        assertEquals("REAMORTIZATION",
+        assertEquals("NEXT_LAST_INSTALLMENT",
                 loanProductsTemplateResponse.getAdvancedPaymentAllocationFutureInstallmentAllocationRules().get(2).getCode());
-        assertEquals("Reamortization",
+        assertEquals("Next/Last installment",
                 loanProductsTemplateResponse.getAdvancedPaymentAllocationFutureInstallmentAllocationRules().get(2).getValue());
+        assertEquals("REAMORTIZATION",
+                loanProductsTemplateResponse.getAdvancedPaymentAllocationFutureInstallmentAllocationRules().get(3).getCode());
+        assertEquals("Reamortization",
+                loanProductsTemplateResponse.getAdvancedPaymentAllocationFutureInstallmentAllocationRules().get(3).getValue());
     }
 }

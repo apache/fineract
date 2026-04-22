@@ -27,7 +27,6 @@ import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionTyp
 import static org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction.releaseAmount;
 
 import jakarta.persistence.PersistenceException;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,6 +44,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -89,7 +89,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.exception.DifferentCurrenciesException;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -99,7 +99,6 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
@@ -107,11 +106,13 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSum
 import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,12 +129,13 @@ public class InteropServiceImpl implements InteropService {
     private final NoteRepository noteRepository;
     private final PaymentTypeRepository paymentTypeRepository;
     private final InteropIdentifierRepository identifierRepository;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     private final SavingsHelper savingsHelper;
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
 
     private final SavingsAccountDomainService savingsAccountService;
+    private final ConfigurationDomainService configurationDomainService;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -191,17 +193,17 @@ public class InteropServiceImpl implements InteropService {
         }
     }
 
-    @NotNull
+    @NonNull
     @Override
     @Transactional
-    public InteropAccountData getAccountDetails(@NotNull String accountId) {
+    public InteropAccountData getAccountDetails(@NonNull String accountId) {
         return InteropAccountData.build(validateAndGetSavingAccount(accountId));
     }
 
-    @NotNull
+    @NonNull
     @Override
     @Transactional
-    public InteropTransactionsData getAccountTransactions(@NotNull String accountId, boolean debit, boolean credit,
+    public InteropTransactionsData getAccountTransactions(@NonNull String accountId, boolean debit, boolean credit,
             java.time.LocalDateTime transactionsFrom, java.time.LocalDateTime transactionsTo) {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
 
@@ -242,18 +244,18 @@ public class InteropServiceImpl implements InteropService {
         return interopTransactionsData;
     }
 
-    @NotNull
+    @NonNull
     @Override
     @Transactional
-    public InteropIdentifiersResponseData getAccountIdentifiers(@NotNull String accountId) {
+    public InteropIdentifiersResponseData getAccountIdentifiers(@NonNull String accountId) {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
         return InteropIdentifiersResponseData.build(savingsAccount);
     }
 
-    @NotNull
+    @NonNull
     @Transactional
     @Override
-    public InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
+    public InteropIdentifierAccountResponseData getAccountByIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
             String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null) {
@@ -263,11 +265,11 @@ public class InteropServiceImpl implements InteropService {
         return InteropIdentifierAccountResponseData.build(identifier.getId(), identifier.getAccount().getExternalId().getValue());
     }
 
-    @NotNull
+    @NonNull
     @Transactional
     @Override
-    public InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-            String subIdOrType, @NotNull JsonCommand command) {
+    public InteropIdentifierAccountResponseData registerAccountIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
+            String subIdOrType, @NonNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
@@ -291,10 +293,10 @@ public class InteropServiceImpl implements InteropService {
         }
     }
 
-    @NotNull
+    @NonNull
     @Transactional
     @Override
-    public InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
+    public InteropIdentifierAccountResponseData deleteAccountIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
             String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null) {
@@ -310,15 +312,15 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public InteropTransactionRequestResponseData getTransactionRequest(@NotNull String transactionCode, @NotNull String requestCode) {
+    public InteropTransactionRequestResponseData getTransactionRequest(@NonNull String transactionCode, @NonNull String requestCode) {
         // always REJECTED until request info is stored
         return InteropTransactionRequestResponseData.build(transactionCode, InteropActionState.REJECTED, requestCode);
     }
 
     @Override
-    @NotNull
+    @NonNull
     @Transactional
-    public InteropTransactionRequestResponseData createTransactionRequest(@NotNull JsonCommand command) {
+    public InteropTransactionRequestResponseData createTransactionRequest(@NonNull JsonCommand command) {
         // only when Payee request transaction from Payer, so here role must be
         // always Payer
         InteropTransactionRequestData request = dataValidator.validateAndParseCreateRequest(command);
@@ -331,14 +333,14 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public InteropQuoteResponseData getQuote(@NotNull String transactionCode, @NotNull String quoteCode) {
+    public InteropQuoteResponseData getQuote(@NonNull String transactionCode, @NonNull String quoteCode) {
         return null;
     }
 
     @Override
-    @NotNull
+    @NonNull
     @Transactional
-    public InteropQuoteResponseData createQuote(@NotNull JsonCommand command) {
+    public InteropQuoteResponseData createQuote(@NonNull JsonCommand command) {
         InteropQuoteRequestData request = dataValidator.validateAndParseCreateQuote(command);
 
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
@@ -361,14 +363,14 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public InteropTransferResponseData getTransfer(@NotNull String transactionCode, @NotNull String transferCode) {
+    public InteropTransferResponseData getTransfer(@NonNull String transactionCode, @NonNull String transferCode) {
         return null;
     }
 
     @Override
-    @NotNull
+    @NonNull
     @Transactional
-    public InteropTransferResponseData prepareTransfer(@NotNull JsonCommand command) {
+    public InteropTransferResponseData prepareTransfer(@NonNull JsonCommand command) {
         InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
         String transferCode = request.getTransferCode();
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
@@ -409,9 +411,9 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    @NotNull
+    @NonNull
     @Transactional
-    public InteropTransferResponseData commitTransfer(@NotNull JsonCommand command) {
+    public InteropTransferResponseData commitTransfer(@NonNull JsonCommand command) {
         InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
         boolean isDebit = request.getTransactionRole().getTransactionType().isDebit();
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
@@ -474,7 +476,7 @@ public class InteropServiceImpl implements InteropService {
 
     @Override
     @Transactional
-    public @NotNull InteropTransferResponseData releaseTransfer(@NotNull JsonCommand command) {
+    public @NonNull InteropTransferResponseData releaseTransfer(@NonNull JsonCommand command) {
         InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
 
@@ -504,7 +506,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public @NotNull InteropKycResponseData getKyc(@NotNull @NotNull String accountId) {
+    public @NonNull InteropKycResponseData getKyc(@NonNull String accountId) {
 
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
         Long clientId = savingsAccount.getClient().getId();
@@ -522,7 +524,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public @NotNull String disburseLoan(@NotNull String accountId, String apiRequestBodyAsJson) {
+    public @NonNull String disburseLoan(@NonNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
 
@@ -535,7 +537,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
-    public @NotNull String loanRepayment(@NotNull String accountId, String apiRequestBodyAsJson) {
+    public @NonNull String loanRepayment(@NonNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
 
@@ -556,17 +558,17 @@ public class InteropServiceImpl implements InteropService {
     }
 
     private Loan validateAndGetLoan(String accountId) {
-        Loan loan = loanRepository.findNonClosedLoanByAccountNumber(accountId);
+        Loan loan = loanRepositoryWrapper.findNonClosedLoanByAccountNumber(accountId);
         if (loan == null) {
             throw new LoanNotFoundException(accountId);
         }
         return loan;
     }
 
-    private SavingsAccount validateAndGetSavingAccount(@NotNull InteropRequestData request) {
+    private SavingsAccount validateAndGetSavingAccount(@NonNull InteropRequestData request) {
         // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
-        savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper);
+        savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper, configurationDomainService);
 
         ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
         if (!savingsAccount.getCurrency().getCode().equals(requestCurrency.getCode())) {
@@ -583,7 +585,7 @@ public class InteropServiceImpl implements InteropService {
         return savingsAccount;
     }
 
-    private BigDecimal calculateTotalTransferAmount(@NotNull InteropTransferRequestData request, @NotNull SavingsAccount savingsAccount) {
+    private BigDecimal calculateTotalTransferAmount(@NonNull InteropTransferRequestData request, @NonNull SavingsAccount savingsAccount) {
         BigDecimal total = request.getAmount().getAmount();
         MoneyData requestFee = request.getFspFee();
         if (requestFee != null) {
@@ -604,7 +606,7 @@ public class InteropServiceImpl implements InteropService {
         return total;
     }
 
-    private DateTimeFormatter getDateTimeFormatter(@NotNull JsonCommand command) {
+    private DateTimeFormatter getDateTimeFormatter(@NonNull JsonCommand command) {
         Locale locale = command.extractLocale();
         if (locale == null) {
             locale = DEFAULT_LOCALE;
@@ -637,7 +639,7 @@ public class InteropServiceImpl implements InteropService {
         }).findFirst().orElse(null);
     }
 
-    public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
+    public InteropIdentifier findIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue, String subIdOrType) {
         return identifierRepository.findOneByTypeAndValueAndSubType(idType, idValue, subIdOrType);
     }
 
@@ -657,7 +659,7 @@ public class InteropServiceImpl implements InteropService {
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
-    @NotNull
+    @NonNull
     String getRoutingCode() {
         return DEFAULT_ROUTING_CODE;
     }

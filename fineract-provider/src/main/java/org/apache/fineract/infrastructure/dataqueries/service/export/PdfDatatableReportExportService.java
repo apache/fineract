@@ -35,9 +35,8 @@ public class PdfDatatableReportExportService implements DatatableReportExportSer
 
     @Override
     public ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
-        final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams,
-                isSelfServiceUserReport);
+            String parameterTypeValue) {
+        final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams);
 
         final File file = new File(pdfFileName);
 

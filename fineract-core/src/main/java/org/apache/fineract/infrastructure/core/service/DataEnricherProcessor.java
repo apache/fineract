@@ -27,11 +27,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataEnricherProcessor {
 
-    private final List<DataEnricher<?>> enhancers;
+    private final List<DataEnricher> enhancers;
 
     @Autowired
-    public DataEnricherProcessor(Optional<List<DataEnricher<?>>> enhancers) {
-        this.enhancers = enhancers.orElse(new ArrayList<>());
+    public DataEnricherProcessor(Optional<List<DataEnricher>> enhancers) {
+        this.enhancers = enhancers.orElse(new ArrayList<DataEnricher>());
     }
 
     public <T> T enrich(T source) {

@@ -171,7 +171,7 @@ public class StandingInstructionDataValidator {
         baseDataValidator.reset().parameter(StandingInstructionApiConstants.nameParamName).value(name).notNull();
 
         final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, element);
-        if (toAccountType != null && PortfolioAccountType.fromInt(toAccountType).isSavingsAccount()) {
+        if (toAccountType != null && PortfolioAccountType.SAVINGS.equals(PortfolioAccountType.fromInt(toAccountType))) {
             baseDataValidator.reset().parameter(StandingInstructionApiConstants.instructionTypeParamName).value(standingInstructionType)
                     .notNull().inMinMaxRange(1, 1);
             baseDataValidator.reset().parameter(StandingInstructionApiConstants.recurrenceTypeParamName).value(recurrenceType).notNull()
@@ -188,11 +188,11 @@ public class StandingInstructionDataValidator {
         if (fromAccountType != null && toAccountType != null) {
             PortfolioAccountType fromPortfolioAccountType = PortfolioAccountType.fromInt(fromAccountType);
             PortfolioAccountType toPortfolioAccountType = PortfolioAccountType.fromInt(toAccountType);
-            if (accountTransferType.isAccountTransfer()
-                    && (fromPortfolioAccountType.isLoanAccount() || toPortfolioAccountType.isLoanAccount())) {
+            if (accountTransferType.isAccountTransfer() && (PortfolioAccountType.LOAN.equals(fromPortfolioAccountType)
+                    || PortfolioAccountType.LOAN.equals(toPortfolioAccountType))) {
                 errorCode = "not.account.transfer";
-            } else if (accountTransferType.isLoanRepayment()
-                    && (fromPortfolioAccountType.isLoanAccount() || toPortfolioAccountType.isSavingsAccount())) {
+            } else if (accountTransferType.isLoanRepayment() && (PortfolioAccountType.LOAN.equals(fromPortfolioAccountType)
+                    || PortfolioAccountType.SAVINGS.equals(toPortfolioAccountType))) {
                 errorCode = "not.loan.repayment";
             }
             if (errorCode != null) {

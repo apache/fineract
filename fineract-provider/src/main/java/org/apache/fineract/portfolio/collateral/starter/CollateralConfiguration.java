@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.collateral.starter;
 
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -40,8 +41,8 @@ public class CollateralConfiguration {
     @Bean
     @ConditionalOnMissingBean(CollateralAssembler.class)
     public CollateralAssembler collateralAssembler(FromJsonHelper fromApiJsonHelper, CodeValueRepositoryWrapper codeValueRepository,
-            LoanCollateralRepository loanCollateralRepository) {
-        return new CollateralAssembler(fromApiJsonHelper, codeValueRepository, loanCollateralRepository);
+            CodeValueRepository codeValueRepositoryDirect, LoanCollateralRepository loanCollateralRepository) {
+        return new CollateralAssembler(fromApiJsonHelper, codeValueRepository, codeValueRepositoryDirect, loanCollateralRepository);
     }
 
     @Bean

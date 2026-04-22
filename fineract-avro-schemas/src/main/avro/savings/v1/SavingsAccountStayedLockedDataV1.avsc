@@ -1,0 +1,27 @@
+{
+    "name": "SavingsAccountStayedLockedDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": "long"
+        },
+        {
+            "default": null,
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "accountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

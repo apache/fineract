@@ -23,11 +23,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 
 @Entity
 @Table(name = "m_currency")
-public class ApplicationCurrency extends AbstractPersistableCustom {
+public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code", nullable = false, length = 3)
     private String code;
@@ -97,10 +96,6 @@ public class ApplicationCurrency extends AbstractPersistableCustom {
 
     public CurrencyData toData() {
         return new CurrencyData(this.code, this.name, this.decimalPlaces, this.inMultiplesOf, this.displaySymbol, this.nameCode);
-    }
-
-    public CurrencyData toData(final int digitsAfterDecimalSupported, final Integer inMultiplesOf) {
-        return new CurrencyData(this.code, this.name, digitsAfterDecimalSupported, inMultiplesOf, this.displaySymbol, this.nameCode);
     }
 
     public OrganisationCurrency toOrganisationCurrency() {

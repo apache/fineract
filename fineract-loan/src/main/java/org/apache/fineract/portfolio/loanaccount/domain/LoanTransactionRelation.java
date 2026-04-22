@@ -27,17 +27,19 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 
 @Getter
 @Entity
 @Table(name = "m_loan_transaction_relation")
-public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "from_loan_transaction_id", nullable = false)
     private LoanTransaction fromTransaction;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "to_loan_transaction_id")
     private LoanTransaction toTransaction;
@@ -62,7 +64,9 @@ public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCus
 
     public static LoanTransactionRelation linkToTransaction(@NotNull LoanTransaction fromTransaction,
             @NotNull LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relation) {
-        return new LoanTransactionRelation(fromTransaction, toTransaction, null, relation);
+        LoanTransactionRelation loanTransactionRelation = new LoanTransactionRelation(fromTransaction, toTransaction, null, relation);
+        fromTransaction.getLoanTransactionRelations().add(loanTransactionRelation);
+        return loanTransactionRelation;
     }
 
     public static LoanTransactionRelation linkToCharge(@NotNull LoanTransaction fromTransaction, @NotNull LoanCharge loanCharge,

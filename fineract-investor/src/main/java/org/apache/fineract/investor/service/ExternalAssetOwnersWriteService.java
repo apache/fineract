@@ -23,10 +23,13 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface ExternalAssetOwnersWriteService {
 
+    CommandProcessingResult intermediarySaleLoanByLoanId(JsonCommand jsonCommand);
+
     CommandProcessingResult saleLoanByLoanId(JsonCommand command);
 
     CommandProcessingResult buybackLoanByLoanId(JsonCommand command);
 
     CommandProcessingResult cancelTransactionById(JsonCommand command);
 
+    CommandProcessingResult createExternalAssetOwner(JsonCommand command);
 }

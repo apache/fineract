@@ -47,6 +47,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     private final GlobalConfigurationRepositoryWrapper repository;
     private final GlobalConfigurationDataValidator globalConfigurationDataValidator;
     private final ConfigurationDomainService configurationDomainService;
+    private final GlobalConfigurationPropertyUpdateService globalConfigurationPropertyUpdateService;
 
     @Transactional
     @Override
@@ -56,14 +57,18 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 
             final GlobalConfigurationProperty configItemForUpdate = this.repository.findOneWithNotFoundDetection(configId);
 
-            final Map<String, Object> changes = configItemForUpdate.update(command);
+            final Map<String, Object> changes = globalConfigurationPropertyUpdateService.update(configItemForUpdate, command);
 
             if (!changes.isEmpty()) {
                 this.configurationDomainService.removeGlobalConfigurationPropertyDataFromCache(configItemForUpdate.getName());
                 this.repository.save(configItemForUpdate);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(configId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(configId) //
+                    .with(changes) //
+                    .build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();

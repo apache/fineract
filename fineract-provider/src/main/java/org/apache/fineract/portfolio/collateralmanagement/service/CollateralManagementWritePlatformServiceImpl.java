@@ -57,7 +57,10 @@ public class CollateralManagementWritePlatformServiceImpl implements CollateralM
 
         final CollateralManagementDomain collateral = CollateralManagementDomain.createNew(jsonCommand, applicationCurrency);
         this.collateralManagementRepositoryWrapper.create(collateral);
-        return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(collateral.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(jsonCommand.commandId()) //
+                .withEntityId(collateral.getId()) //
+                .build();
     }
 
     private void validateForCreation(JsonCommand jsonCommand) {
@@ -134,8 +137,11 @@ public class CollateralManagementWritePlatformServiceImpl implements CollateralM
         }
         final Map<String, Object> changes = collateral.update(jsonCommand, applicationCurrency);
         this.collateralManagementRepositoryWrapper.update(collateral);
-        return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(jsonCommand.entityId())
-                .with(changes).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(jsonCommand.commandId()) //
+                .withEntityId(jsonCommand.entityId()) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
@@ -145,7 +151,9 @@ public class CollateralManagementWritePlatformServiceImpl implements CollateralM
                 .getCollateral(collateralId);
         validateForDeletion(collateralManagementDomain, collateralId);
         this.collateralManagementRepositoryWrapper.delete(collateralId);
-        return new CommandProcessingResultBuilder().withEntityId(collateralId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(collateralId) //
+                .build();
     }
 
     private void validateForDeletion(final CollateralManagementDomain collateralManagementDomain, final Long collateralId) {

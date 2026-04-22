@@ -25,7 +25,8 @@ import java.util.Arrays;
  */
 public enum PreClosurePenalInterestOnType {
 
-    INVALID(0, "preClosurePenalInterestOnType.invalid"), WHOLE_TERM(1, "preClosurePenalInterestOnType.wholeTerm"), //
+    INVALID(0, "preClosurePenalInterestOnType.invalid"), //
+    WHOLE_TERM(1, "preClosurePenalInterestOnType.wholeTerm"), //
     TILL_PREMATURE_WITHDRAWAL(2, "preClosurePenalInterestOnType.tillPrematureWithdrawal"); //
 
     private final Integer value;
@@ -62,20 +63,5 @@ public enum PreClosurePenalInterestOnType {
     // TODO: do we really need this?!?
     public static Object[] integerValues() {
         return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return this.equals(INVALID);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isWholeTerm() {
-        return this.equals(WHOLE_TERM);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isTillPrematureWithdrawal() {
-        return this.equals(TILL_PREMATURE_WITHDRAWAL);
     }
 }

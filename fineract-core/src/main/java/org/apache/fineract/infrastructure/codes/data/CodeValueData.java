@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.codes.data;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -28,6 +30,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 @Accessors(chain = true)
 public class CodeValueData implements Serializable {
 
@@ -35,19 +39,11 @@ public class CodeValueData implements Serializable {
     private String name;
     private Integer position;
     private String description;
-    private boolean active;
-    private boolean mandatory;
+    private Boolean active;
+    private Boolean mandatory;
 
-    public static CodeValueData instance(final Long id, final String name, final Integer position, final boolean isActive,
-            final boolean mandatory) {
-        String description = null;
-        return new CodeValueData().setId(id).setName(name).setPosition(position).setDescription(description).setActive(isActive)
-                .setMandatory(mandatory);
-    }
-
-    public static CodeValueData instance(final Long id, final String name, final String description, final boolean isActive,
-            final boolean mandatory) {
-        Integer position = null;
+    public static CodeValueData instance(final Long id, final String name, final String description, final Integer position,
+            final boolean isActive, final boolean mandatory) {
         return new CodeValueData().setId(id).setName(name).setPosition(position).setDescription(description).setActive(isActive)
                 .setMandatory(mandatory);
     }
@@ -63,10 +59,10 @@ public class CodeValueData implements Serializable {
     public static CodeValueData instance(final Long id, final String name) {
         String description = null;
         Integer position = null;
-        boolean isActive = false;
-        boolean mandatory = false;
+        Boolean active = null;
+        Boolean mandatory = null;
 
-        return new CodeValueData().setId(id).setName(name).setPosition(position).setDescription(description).setActive(isActive)
+        return new CodeValueData().setId(id).setName(name).setPosition(position).setDescription(description).setActive(active)
                 .setMandatory(mandatory);
     }
 

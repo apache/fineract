@@ -98,7 +98,7 @@ The best practice is to deploy 1 master batch instance and multiple worker batch
                                   |                |
                                   +----------------+
 ----
-These soultions can be mixed with each other, based on the load of the Fineract deployment.
+These solutions can be mixed with each other, based on the load of the Fineract deployment.
 
 == Configuring instance type via environment variables
 
@@ -140,7 +140,7 @@ The distinction whether something is a write API can be decided based on the HTT
 === Batch job APIs are allowed only for batch instances
 
 A Fineract instance is ONLY able to serve batch API calls when it’s configured as a batch instance. In read or write instance mode, it won’t serve batch API calls.
-If the batch APIs won't be served and and a proper HTTP status code will be returned.
+If the batch APIs won't be served and a proper HTTP status code will be returned.
 If it’s a batch instance, the batch APIs will be served.
 
 == Batch jobs

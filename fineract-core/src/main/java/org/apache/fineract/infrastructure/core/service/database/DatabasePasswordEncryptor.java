@@ -40,13 +40,14 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
     public static void main(String[] args) {
         if (args.length < 2) {
             System.out.println(
-                    "Usage: java -cp fineract-provider.jar java -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor org.springframework.boot.loader.PropertiesLauncher <masterPassword> <plainPassword>");
+                    "Usage: java -cp fineract-provider.jar -Dloader.main=org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor org.springframework.boot.loader.launch.PropertiesLauncher <masterPassword> <plainPassword>");
             System.exit(1);
         }
         String masterPassword = args[0];
         String plainPassword = args[1];
         String encryptedPassword = EncryptionUtil.encryptToBase64(DEFAULT_ENCRYPTION, masterPassword, plainPassword);
         System.out.println(MessageFormat.format("The encrypted password: {0}", encryptedPassword));
+        System.out.println(MessageFormat.format("The master password hash is: {0}", getPasswordHash(masterPassword)));
     }
 
     @Override
@@ -74,6 +75,10 @@ public class DatabasePasswordEncryptor implements PasswordEncryptor {
                 .map(FineractProperties::getTenant) //
                 .map(FineractProperties.FineractTenantProperties::getMasterPassword) //
                 .orElse(fineractProperties.getDatabase().getDefaultMasterPassword());
+        return getPasswordHash(masterPassword);
+    }
+
+    private static String getPasswordHash(String masterPassword) {
         return BCrypt.hashpw(masterPassword.getBytes(StandardCharsets.UTF_8), BCrypt.gensalt());
     }
 

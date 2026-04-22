@@ -45,10 +45,10 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.apache.fineract.organisation.staff.data.BulkTransferLoanOfficerData;
-import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollectionData;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
+import org.apache.fineract.portfolio.loanaccount.data.BulkTransferLoanOfficerData;
+import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
 import org.apache.fineract.portfolio.loanaccount.service.BulkLoansReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -70,7 +70,7 @@ public class BulkLoansApiResource {
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 
     private final PlatformSecurityContext context;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final BulkLoansReadPlatformService bulkLoansReadPlatformService;
     private final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> toApiJsonSerializer;
@@ -79,7 +79,6 @@ public class BulkLoansApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String loanReassignmentTemplate(@QueryParam(OFFICE_ID) final Long officeId,
             @QueryParam(FROM_LOAN_OFFICER_ID) final Long loanOfficerId, @Context final UriInfo uriInfo) {

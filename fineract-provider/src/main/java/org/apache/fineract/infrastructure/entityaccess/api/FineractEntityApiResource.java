@@ -46,7 +46,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.springframework.stereotype.Component;
 
 @Path("/v1/entitytoentitymapping")
-@Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Tag(name = "Fineract Entity", description = "")
@@ -61,7 +60,6 @@ public class FineractEntityApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
@@ -74,7 +72,6 @@ public class FineractEntityApiResource {
 
     @GET
     @Path("/{mapId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("mapId") final Long mapId, @Context final UriInfo uriInfo) {
 
@@ -88,7 +85,6 @@ public class FineractEntityApiResource {
 
     @GET
     @Path("/{mapId}/{fromId}/{toId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getEntityToEntityMappings(@PathParam("mapId") final Long mapId, @PathParam("fromId") final Long fromId,
             @PathParam("toId") final Long toId, @Context final UriInfo uriInfo) {
@@ -138,7 +134,6 @@ public class FineractEntityApiResource {
 
     @DELETE
     @Path("{mapId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String delete(@PathParam("mapId") final Long mapId) {
 

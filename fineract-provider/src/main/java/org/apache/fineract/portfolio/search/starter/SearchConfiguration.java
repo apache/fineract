@@ -19,11 +19,11 @@
 package org.apache.fineract.portfolio.search.starter;
 
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.apache.fineract.portfolio.search.service.SearchReadPlatformService;
-import org.apache.fineract.portfolio.search.service.SearchReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.search.service.SearchReadService;
+import org.apache.fineract.portfolio.search.service.SearchReadServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +33,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 public class SearchConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(SearchReadPlatformService.class)
-    public SearchReadPlatformService searchReadPlatformService(NamedParameterJdbcTemplate namedParameterJdbcTemplate,
-            PlatformSecurityContext context, LoanProductReadPlatformService loanProductReadPlatformService,
-            OfficeReadPlatformService officeReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
-        return new SearchReadPlatformServiceImpl(namedParameterJdbcTemplate, context, loanProductReadPlatformService,
-                officeReadPlatformService, sqlGenerator);
+    @ConditionalOnMissingBean(SearchReadService.class)
+    public SearchReadService searchReadService(NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            LoanProductReadPlatformService loanProductReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
+            DatabaseSpecificSQLGenerator sqlGenerator, SqlValidator sqlValidator) {
+        return new SearchReadServiceImpl(namedParameterJdbcTemplate, loanProductReadPlatformService, officeReadPlatformService,
+                sqlGenerator, sqlValidator);
     }
 }

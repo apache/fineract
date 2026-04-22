@@ -25,8 +25,12 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsP
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsProviderTokenIdName;
 
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 
+@Getter
+@Setter
 public class SmsProviderData {
 
     private String url;
@@ -59,53 +63,5 @@ public class SmsProviderData {
                 this.phoneNo = conf.getFieldValue();
             }
         }
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNo;
-    }
-
-    public String getSmsProvider() {
-        return smsProvider;
-    }
-
-    public String getSmsProviderAccountId() {
-        return smsProviderAccountId;
-    }
-
-    public String getSmsProviderTokenId() {
-        return smsProviderToken;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getMifosToken() {
-        return mifosToken;
-    }
-
-    public void setMifosToken(String mifosToken) {
-        this.mifosToken = mifosToken;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
     }
 }

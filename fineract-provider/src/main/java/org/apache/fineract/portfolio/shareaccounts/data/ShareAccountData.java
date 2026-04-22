@@ -83,6 +83,7 @@ public class ShareAccountData implements Serializable, AccountData {
 
     // import fields
     private Integer requestedShares;
+
     private LocalDate submittedDate;
     private Integer minimumActivePeriodFrequencyType;
     private Integer lockinPeriodFrequency;

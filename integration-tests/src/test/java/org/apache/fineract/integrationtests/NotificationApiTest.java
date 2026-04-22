@@ -59,13 +59,13 @@ public class NotificationApiTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
-        String password = Utils.randomStringGenerator("aA1", 10); // prefix is to conform with the password rules
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(username)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                .roles(List.of(SUPER_USER_ROLE_ID)).officeId(headOffice.getId());
+        String password = Utils.randomStringGenerator("A1b2c3d4e5f$", 1); // prefix is to conform with the password
+                                                                          // rules
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(username).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).roles(List.of(SUPER_USER_ROLE_ID)).officeId(headOffice.getId());
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Assertions.assertNotNull(userCreationResponse.getResourceId());

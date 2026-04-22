@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.api;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
@@ -35,7 +36,7 @@ public class ExternalIdAdapter implements JsonSerializer<ExternalId> {
     @SuppressWarnings("unused")
     public JsonElement serialize(ExternalId src, Type typeOfSrc, JsonSerializationContext context) {
         if (src == null || src.isEmpty()) {
-            return null;
+            return JsonNull.INSTANCE;
         }
         return new JsonPrimitive(src.getValue());
     }

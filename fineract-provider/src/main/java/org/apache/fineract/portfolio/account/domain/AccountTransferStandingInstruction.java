@@ -54,7 +54,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 @Entity
 @Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name" }, name = "name") })
-public class AccountTransferStandingInstruction extends AbstractPersistableCustom {
+public class AccountTransferStandingInstruction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "account_transfer_details_id", nullable = true)

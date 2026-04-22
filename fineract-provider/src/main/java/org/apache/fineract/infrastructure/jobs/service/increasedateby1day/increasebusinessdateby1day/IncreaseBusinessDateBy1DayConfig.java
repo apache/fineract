@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.infrastructure.jobs.service.increasedateby1day.increasebusinessdateby1day;
 
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.infrastructure.jobs.service.increasedateby1day.IncreaseDateBy1DayService;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -35,29 +33,17 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class IncreaseBusinessDateBy1DayConfig {
 
-    @Autowired
-    private JobRepository jobRepository;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-    @Autowired
-    private IncreaseDateBy1DayService increaseDateBy1DayService;
-    @Autowired
-    private ConfigurationDomainService configurationDomainService;
-
     @Bean
-    protected Step increaseBusinessDateBy1DayStep() {
-        return new StepBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository)
-                .tasklet(increaseBusinessDateBy1DayTasklet(), transactionManager).build();
+    public IncreaseBusinessDateBy1DayTasklet increaseBusinessDateBy1DayTasklet(
+            BusinessDateWritePlatformService businessDateWritePlatformService, ConfigurationDomainService configurationDomainService) {
+        return new IncreaseBusinessDateBy1DayTasklet(businessDateWritePlatformService, configurationDomainService);
     }
 
     @Bean
-    public Job increaseBusinessDateBy1DayJob() {
-        return new JobBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).start(increaseBusinessDateBy1DayStep())
+    public Job increaseBusinessDateBy1DayJob(PlatformTransactionManager transactionManager, JobRepository jobRepository,
+            IncreaseBusinessDateBy1DayTasklet tasklet) {
+        return new JobBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).start(
+                new StepBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).tasklet(tasklet, transactionManager).build())
                 .incrementer(new RunIdIncrementer()).build();
-    }
-
-    @Bean
-    public IncreaseBusinessDateBy1DayTasklet increaseBusinessDateBy1DayTasklet() {
-        return new IncreaseBusinessDateBy1DayTasklet(increaseDateBy1DayService, configurationDomainService);
     }
 }

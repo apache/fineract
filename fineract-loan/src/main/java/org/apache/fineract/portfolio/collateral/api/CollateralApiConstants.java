@@ -35,8 +35,11 @@ public final class CollateralApiConstants {
      ***/
     public enum CollateralJSONinputParams {
 
-        LOAN_ID("loanId"), COLLATERAL_ID("collateralId"), COLLATERAL_TYPE_ID("collateralTypeId"), VALUE("value"), DESCRIPTION(
-                "description");
+        LOAN_ID("loanId"), //
+        COLLATERAL_ID("collateralId"), //
+        COLLATERAL_TYPE_ID("collateralTypeId"), //
+        VALUE("value"), //
+        DESCRIPTION("description"); //
 
         private final String value;
 
@@ -50,7 +53,7 @@ public final class CollateralApiConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replace("_", " ");
         }
 
         public String getValue() {

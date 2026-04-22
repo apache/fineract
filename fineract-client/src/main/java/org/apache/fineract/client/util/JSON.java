@@ -37,11 +37,11 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Objects;
+import lombok.Getter;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import org.apache.fineract.client.models.ExternalId;
 import org.apache.fineract.client.util.adapter.ExternalIdAdapter;
-import org.jetbrains.annotations.NotNull;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -51,6 +51,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 // The original JSON class is deleted during the build (see FINERACT-1231).
 public class JSON {
 
+    @Getter
     private final Gson gson;
     private final DateTypeAdapter dateTypeAdapter = new DateTypeAdapter();
     private final SqlDateTypeAdapter sqlDateTypeAdapter = new SqlDateTypeAdapter();
@@ -64,10 +65,6 @@ public class JSON {
                 .registerTypeAdapter(OffsetDateTime.class, offsetDateTimeTypeAdapter)
                 .registerTypeAdapter(LocalDate.class, localDateTypeAdapter).registerTypeAdapter(ExternalId.class, externalIdAdapter)
                 .create();
-    }
-
-    public Gson getGson() {
-        return gson;
     }
 
     /**
@@ -88,17 +85,16 @@ public class JSON {
 
         @Override
         public OffsetDateTime read(JsonReader in) throws IOException {
-            switch (in.peek()) {
-                case NULL:
-                    in.nextNull();
-                    return null;
-                default:
-                    String date = in.nextString();
-                    if (date.endsWith("+0000")) {
-                        date = date.substring(0, date.length() - 5) + "Z";
-                    }
-                    return OffsetDateTime.parse(date, formatter);
+            JsonToken token = in.peek();
+            if (token == JsonToken.NULL) {
+                in.nextNull();
+                return null;
             }
+            String date = in.nextString();
+            if (date.endsWith("+0000")) {
+                date = date.substring(0, date.length() - 5) + "Z";
+            }
+            return OffsetDateTime.parse(date, formatter);
         }
     }
 
@@ -123,27 +119,32 @@ public class JSON {
 
         @Override
         public LocalDate read(JsonReader in) throws IOException {
-            switch (in.peek()) {
-                case NULL:
-                    in.nextNull();
-                    return null;
-                case STRING:
-                    String dateString = in.nextString();
-                    if (dateString != null && dateString.length() != 0) {
-                        return LocalDate.parse(dateString);
-                    }
-                    return null;
-                case BEGIN_ARRAY:
-                    in.beginArray();
-                    int year = in.nextInt();
-                    int month = in.nextInt();
-                    int day = in.nextInt();
-                    in.endArray();
-                    return LocalDate.of(year, month, day);
-                default:
-                    throw new JsonParseException(
-                            "Fineract's API normally always sends LocalDate as e.g. [2009,1,1].. or does it not?! (FINERACT-1220)");
+            JsonToken token = in.peek();
+
+            if (token == JsonToken.NULL) {
+                in.nextNull();
+                return null;
             }
+
+            if (token == JsonToken.STRING) {
+                String dateString = in.nextString();
+                if (dateString != null && !dateString.isEmpty()) {
+                    return LocalDate.parse(dateString);
+                }
+                return null;
+            }
+
+            if (token == JsonToken.BEGIN_ARRAY) {
+                in.beginArray();
+                int year = in.nextInt();
+                int month = in.nextInt();
+                int day = in.nextInt();
+                in.endArray();
+                return LocalDate.of(year, month, day);
+            }
+
+            throw new JsonParseException(
+                    "Fineract's API normally always sends LocalDate as e.g. [2009,1,1].. or does it not?! (FINERACT-1220)");
         }
     }
 
@@ -172,20 +173,19 @@ public class JSON {
 
         @Override
         public java.sql.Date read(JsonReader in) throws IOException {
-            switch (in.peek()) {
-                case NULL:
-                    in.nextNull();
-                    return null;
-                default:
-                    String date = in.nextString();
-                    try {
-                        if (dateFormat != null) {
-                            return new java.sql.Date(dateFormat.parse(date).getTime());
-                        }
-                        return new java.sql.Date(ISO8601Utils.parse(date, new ParsePosition(0)).getTime());
-                    } catch (ParseException e) {
-                        throw new JsonParseException(e);
-                    }
+            JsonToken token = in.peek();
+            if (token == JsonToken.NULL) {
+                in.nextNull();
+                return null;
+            }
+            String date = in.nextString();
+            try {
+                if (dateFormat != null) {
+                    return new java.sql.Date(dateFormat.parse(date).getTime());
+                }
+                return new java.sql.Date(ISO8601Utils.parse(date, new ParsePosition(0)).getTime());
+            } catch (ParseException e) {
+                throw new JsonParseException(e);
             }
         }
     }
@@ -226,7 +226,6 @@ public class JSON {
             }
         }
 
-        @NotNull
         private Date parseDate(String date) {
             try {
                 if (null != dateFormat) {

@@ -76,7 +76,10 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
             changes.put("permissions", changedPermissions);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .with(changes) //
+                .build();
     }
 
     private Permission findPermissionInCollectionByCode(final Collection<Permission> allPermissions, final String permissionCode) {

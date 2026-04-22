@@ -27,6 +27,7 @@ import java.util.Map;
  * <li>RESCHEDULE_NEXT_REPAYMENTS</li>
  * <li>REDUCE_NUMBER_OF_INSTALLMENTS</li>
  * <li>REDUCE_EMI_AMOUNT</li>
+ * <li>ADJUST_LAST_UNPAID_PERIOD</li>
  * </ul>
  */
 
@@ -35,7 +36,9 @@ public enum LoanRescheduleStrategyMethod {
     INVALID(0, "loanRescheduleStrategyMethod.invalid"), //
     RESCHEDULE_NEXT_REPAYMENTS(1, "loanRescheduleStrategyMethod.reschedule.next.repayments"), //
     REDUCE_NUMBER_OF_INSTALLMENTS(2, "loanRescheduleStrategyMethod.reduce.number.of.installments"), //
-    REDUCE_EMI_AMOUNT(3, "loanRescheduleStrategyMethod.reduce.emi.amount");
+    REDUCE_EMI_AMOUNT(3, "loanRescheduleStrategyMethod.reduce.emi.amount"), //
+    ADJUST_LAST_UNPAID_PERIOD(4, "loanRescheduleStrategyMethod.adjust.last.unpaid.period"), //
+    ;
 
     private final Integer value;
     private final String code;

@@ -60,10 +60,10 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientNonPerson;
@@ -288,7 +288,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     savingsProductId, savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm.getValue(),
                     isStaff);
 
+            // Account Number generation
             this.clientRepository.saveAndFlush(newClient);
+            if (StringUtils.isBlank(accountNo)) {
+                AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
+                newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
+                this.clientRepository.saveAndFlush(newClient);
+            }
+
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
@@ -296,13 +303,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
                 rollbackTransaction = this.commandProcessingService.validateRollbackCommand(commandWrapper, currentUser);
             }
-
             this.clientRepository.saveAndFlush(newClient);
-            if (newClient.isAccountNumberRequiresAutoGeneration()) {
-                AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
-                newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
-                this.clientRepository.saveAndFlush(newClient);
-            }
 
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
@@ -324,14 +325,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (command.parameterExists(ClientApiConstants.datatables)) {
-                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
-                        EntityTables.CLIENT.getName(), newClient.getId(), null,
-                        command.arrayOfParameterNamed(ClientApiConstants.datatables));
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(), EntityTables.CLIENT.getName(),
+                        newClient.getId(), null, command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
             legalForm = LegalForm.fromInt(newClient.getLegalForm());
             entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
-                    StatusEnum.CREATE.getCode(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
+                    StatusEnum.CREATE.getValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
             businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
             if (newClient.isActive()) {
                 businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
@@ -344,9 +344,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(newClient.getId()) //
                     .withGroupId(groupId) //
                     .withEntityId(newClient.getId()) //
-                    .withSavingsId(result.getSavingsId())//
-                    .setRollbackTransaction(rollbackTransaction)//
-                    .setRollbackTransaction(result.isRollbackTransaction())//
+                    .withSavingsId(result.getSavingsId()) //
+                    .setRollbackTransaction(rollbackTransaction) //
+                    .setRollbackTransaction(result.isRollbackTransaction()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -564,7 +564,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
-
                 final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
                 CodeValue gender = null;
                 if (newValue != null) {
@@ -583,15 +582,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                             .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
                 }
                 clientForUpdate.updateSavingsProduct(savingsProductId);
-            }
-
-            if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
-                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
-                CodeValue newCodeVal = null;
-                if (newValue != null) {
-                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, newValue);
-                }
-                clientForUpdate.updateGender(newCodeVal);
             }
 
             if (changes.containsKey(ClientApiConstants.clientTypeIdParamName)) {
@@ -729,8 +719,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withEntityExternalId(client.getExternalId()) //
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
-                    .withSavingsId(result.getSavingsId())//
-                    .setRollbackTransaction(result.isRollbackTransaction())//
+                    .withSavingsId(result.getSavingsId()) //
+                    .setRollbackTransaction(result.isRollbackTransaction()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
@@ -856,7 +846,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         closureDate, client.getActivationDate());
             }
             final LegalForm legalForm = LegalForm.fromInt(client.getLegalForm());
-            entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.CLOSE.getCode(),
+            entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.CLOSE.getValue(),
                     EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
 
             final List<Loan> clientLoans = this.loanRepositoryWrapper.findLoanByClientId(clientId);
@@ -955,7 +945,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     private void runEntityDatatableCheck(final Long clientId, final Integer legalFormId) {
         final LegalForm legalForm = LegalForm.fromInt(legalFormId);
-        entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.ACTIVATE.getCode(),
+        entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.ACTIVATE.getValue(),
                 EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
     }
 
@@ -1102,4 +1092,5 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .withEntityExternalId(client.getExternalId()) //
                 .build();
     }
+
 }

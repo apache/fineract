@@ -46,7 +46,10 @@ public class LoanCollateralManagementWritePlatformServiceImpl implements LoanCol
         clientCollateralManagement.updateQuantity(clientQuantity.add(loanQuantity));
         this.clientCollateralManagementRepositoryWrapper.saveAndFlush(clientCollateralManagement);
         this.loanCollateralManagementRepository.deleteById(id);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(id).withLoanId(command.getLoanId())
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(id) //
+                .withLoanId(command.getLoanId()) //
                 .build();
     }
 }

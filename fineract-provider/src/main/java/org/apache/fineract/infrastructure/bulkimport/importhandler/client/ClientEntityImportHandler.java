@@ -63,7 +63,7 @@ public class ClientEntityImportHandler implements ImportHandler {
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
 
         List<ClientData> clients = readExcelFile(workbook, locale, dateFormat);
-        return importEntity(workbook, clients, dateFormat);
+        return importEntity(workbook, clients, dateFormat, locale);
     }
 
     private List<ClientData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
@@ -89,9 +89,9 @@ public class ClientEntityImportHandler implements ImportHandler {
             officeId = null;
         }
         String staffName = ImportHandlerUtils.readAsString(ClientEntityConstants.STAFF_NAME_COL, row);
-        Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
-        if (staffId == 0L) {
-            staffId = null;
+        Long staffId = null;
+        if (staffName != null) {
+            staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
         }
         LocalDate incorportionDate = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_DATE_COL, row);
         LocalDate incorporationTill = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL, row);
@@ -195,7 +195,7 @@ public class ClientEntityImportHandler implements ImportHandler {
                 locale, dateFormat);
     }
 
-    private Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<ClientData> clients, final String dateFormat, final String locale) {
         Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
 
         int successCount = 0;
@@ -203,7 +203,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         String errorMessage;
 
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, locale));
 
         for (ClientData client : clients) {
             try {

@@ -20,10 +20,14 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
+@Getter
 public enum CalendarRemindBy {
 
-    SMS(1, "calendarRemindBy.sms"), EMAIL(2, "calendarRemindBy.email"), SYSTEMALERT(3, "calendarRemindBy.systemalert");
+    SMS(1, "calendarRemindBy.sms"), //
+    EMAIL(2, "calendarRemindBy.email"), //
+    SYSTEMALERT(3, "calendarRemindBy.systemalert"); //
 
     private final Integer value;
     private final String code;
@@ -33,16 +37,10 @@ public enum CalendarRemindBy {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     private static final Map<Integer, CalendarRemindBy> intToEnumMap = new HashMap<>();
+    @Getter
     private static int minValue;
+    @Getter
     private static int maxValue;
 
     static {
@@ -63,20 +61,11 @@ public enum CalendarRemindBy {
     }
 
     public static CalendarRemindBy fromInt(final int i) {
-        final CalendarRemindBy remindBy = intToEnumMap.get(Integer.valueOf(i));
-        return remindBy;
-    }
-
-    public static int getMinValue() {
-        return minValue;
-    }
-
-    public static int getMaxValue() {
-        return maxValue;
+        return intToEnumMap.get(i);
     }
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 }

@@ -18,11 +18,21 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.api;
 
+import lombok.Getter;
+
+@Getter
 public enum CollateralManagementJsonInputParams {
 
-    NAME("name"), QUALITY("quality"), BASE_PRICE("basePrice"), UNIT_TYPE("unitType"), PCT_TO_BASE("pctToBase"), CURRENCY(
-            "currency"), COLLATERAL_PRODUCT_READ_PERMISSION("COLLATERAL_PRODUCT"), CLIENT_COLLATERAL_PRODUCT_READ_PERMISSION(
-                    "CLIENT_COLLATERAL_PRODUCT"), QUANTITY("quantity"), TOTAL_COLLATERAL_VALUE("totalCollateralValue");
+    NAME("name"), //
+    QUALITY("quality"), //
+    BASE_PRICE("basePrice"), //
+    UNIT_TYPE("unitType"), //
+    PCT_TO_BASE("pctToBase"), //
+    CURRENCY("currency"), //
+    COLLATERAL_PRODUCT_READ_PERMISSION("COLLATERAL_PRODUCT"), //
+    CLIENT_COLLATERAL_PRODUCT_READ_PERMISSION("CLIENT_COLLATERAL_PRODUCT"), //
+    QUANTITY("quantity"), //
+    TOTAL_COLLATERAL_VALUE("totalCollateralValue"); //
 
     private final String value;
 
@@ -32,11 +42,7 @@ public enum CollateralManagementJsonInputParams {
 
     @Override
     public String toString() {
-        return name().replaceAll("_", " ");
-    }
-
-    public String getValue() {
-        return this.value;
+        return name().replace("_", " ");
     }
 
 }

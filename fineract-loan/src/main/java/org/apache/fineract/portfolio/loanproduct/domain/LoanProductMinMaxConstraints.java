@@ -23,11 +23,19 @@ import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 
 /**
  * LoanProductMinMaxConstraints encapsulates all the Min and Max details of a {@link LoanProduct}.
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class LoanProductMinMaxConstraints {
 
@@ -48,29 +56,6 @@ public class LoanProductMinMaxConstraints {
 
     @Column(name = "max_number_of_repayments")
     private Integer maxNumberOfRepayments;
-
-    public static LoanProductMinMaxConstraints createFrom(final BigDecimal minPrincipal, final BigDecimal maxPrincipal,
-            final BigDecimal minNominalInterestRatePerPeriod, final BigDecimal maxNominalInterestRatePerPeriod,
-            final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments) {
-
-        return new LoanProductMinMaxConstraints(minPrincipal, maxPrincipal, minNominalInterestRatePerPeriod,
-                maxNominalInterestRatePerPeriod, minNumberOfRepayments, maxNumberOfRepayments);
-    }
-
-    protected LoanProductMinMaxConstraints() {
-        //
-    }
-
-    public LoanProductMinMaxConstraints(final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
-            final BigDecimal defaultMinNominalInterestRatePerPeriod, final BigDecimal defaultMaxNominalInterestRatePerPeriod,
-            final Integer defaultMinNumberOfRepayments, final Integer defaultMaxNumberOfRepayments) {
-        this.minPrincipal = defaultMinPrincipal;
-        this.maxPrincipal = defaultMaxPrincipal;
-        this.minNominalInterestRatePerPeriod = defaultMinNominalInterestRatePerPeriod;
-        this.maxNominalInterestRatePerPeriod = defaultMaxNominalInterestRatePerPeriod;
-        this.minNumberOfRepayments = defaultMinNumberOfRepayments;
-        this.maxNumberOfRepayments = defaultMaxNumberOfRepayments;
-    }
 
     public Map<String, Object> update(final JsonCommand command) {
 
@@ -131,14 +116,6 @@ public class LoanProductMinMaxConstraints {
         return actualChanges;
     }
 
-    public BigDecimal getMinPrincipal() {
-        return this.minPrincipal;
-    }
-
-    public BigDecimal getMaxPrincipal() {
-        return this.maxPrincipal;
-    }
-
     public BigDecimal getMinNominalInterestRatePerPeriod() {
         return this.minNominalInterestRatePerPeriod == null ? null
                 : BigDecimal.valueOf(Double.parseDouble(this.minNominalInterestRatePerPeriod.stripTrailingZeros().toString()));
@@ -149,24 +126,8 @@ public class LoanProductMinMaxConstraints {
                 : BigDecimal.valueOf(Double.parseDouble(this.maxNominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
 
-    public Integer getMinNumberOfRepayments() {
-        return this.minNumberOfRepayments;
-    }
-
-    public Integer getMaxNumberOfRepayments() {
-        return this.maxNumberOfRepayments;
-    }
-
     public void updateForFloatingInterestRates() {
         this.minNominalInterestRatePerPeriod = null;
         this.maxNominalInterestRatePerPeriod = null;
-    }
-
-    public void setMinNominalInterestRatePerPeriod(BigDecimal minNominalInterestRatePerPeriod) {
-        this.minNominalInterestRatePerPeriod = minNominalInterestRatePerPeriod;
-    }
-
-    public void setMaxNominalInterestRatePerPeriod(BigDecimal maxNominalInterestRatePerPeriod) {
-        this.maxNominalInterestRatePerPeriod = maxNominalInterestRatePerPeriod;
     }
 }

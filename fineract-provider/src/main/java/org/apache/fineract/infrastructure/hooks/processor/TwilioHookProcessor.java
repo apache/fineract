@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.hooks.processor;
 
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_SEND;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SMS;
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.apiKeyName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,8 +82,8 @@ public class TwilioHookProcessor implements HookProcessor {
         if (apiKey != null && !apiKey.equals("")) {
             JsonObject json;
             if (hook.getUgdTemplate() != null) {
-                entityName = "sms";
-                actionName = "send";
+                entityName = ENTITY_SMS;
+                actionName = ACTION_SEND;
                 json = processUgdTemplate(payload, hook);
                 if (json == null) {
                     return;

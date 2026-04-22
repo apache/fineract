@@ -2,25 +2,122 @@
 
 == Description
 
-Following are the typical things we need to verify before voting on a release candidate. And the release manager should verify them too before calling out a vote.
+Following are the typical things we need to verify before voting on a release candidate. And the release manager should verify them too before calling out a vote. Some of these checks are duplicated by https://release-test.apache.org[the ATR (ASF Trusted Releases) tool], and will need to continue to be duplicated until we get more comfortable with that tool.
 
-Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev/fineract
+Make sure release artifacts are hosted at both https://release-test.apache.org/compose/fineract/{revnumber} AND https://dist.apache.org/repos/dist/dev/fineract
 
-* Release candidates should be in format apache-fineract-{revnumber}-binary.tar.gz
-* Verify signatures and hashes. You may have to import the public key of the release manager to verify the signatures. (`gpg --recv-key <key id>`)
-* Git tag matches the released bits (diff -rf)
-* Can compile successfully from source
+* Release candidate files should match filenames mentioned earlier, and will be moved without renaming if/when the release vote passes.
+* Verify signatures and hashes. You may have to import the public key of the release manager to verify the signatures. (`gpg --import KEYS` or `gpg --recv-key <key id>`)
+* Git tag matches the released bits (`diff -rf`)
+* Can compile docs and code successfully from source
 * Verify DISCLAIMER, NOTICE and LICENSE (year etc)
-* All files have correct headers (Rat check should be clean - gradlew rat)
+* All files have correct headers (Rat check should be clean - `./gradlew rat`)
 * No jar files in the source artifacts
-* Integration tests should work
+* All tests pass both in CI and locally
+* All ATR checks pass
+
+=== Artifact verification
+
+[source,bash,subs="attributes+"]
+----
+# source tarball signature and checksum verification steps
+# we'll check the source tarball first
+src=apache-fineract-src-{revnumber}.tar.gz
+
+# upon success: prints "Good signature" and returns successful exit code
+# upon failure: prints "BAD signature" and returns error exit code
+gpg --verify $src.asc
+
+# upon success: prints nothing and returns successful exit code
+# upon failure: prints checksum differences and returns error exit code
+gpg --print-md SHA512 $src | diff - $src.sha512
+
+# binary tarball signature and checksum verification steps and outputs are similar
+bin=apache-fineract-bin-{revnumber}.tar.gz
+gpg --verify $bin.asc
+gpg --print-md SHA512 $bin | diff - $bin.sha512
+----
+
+Look for `Good signature` in the `gpg` output:
+
+[source,text,subs="attributes+"]
+----
+$ gpg --verify $bin.asc
+gpg: assuming signed data in 'apache-fineract-bin-{revnumber}.tar.gz'
+gpg: Signature made Sat 11 Oct 2025 05:46:42 PM PDT
+gpg:                using EDDSA key 250775BDB5FE7D53E4AF95C00E895A1A7A090CFC
+gpg: Good signature from "Adam Monsen <haircut@gmail.com>" [unknown]
+----
+
+That's the most important part.
+
+You may see this warning:
+
+[source,text]
+----
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+----
+
+You may choose to ignore it. To squelch this warning, you must extend your https://en.wikipedia.org/wiki/Web_of_trust[web of trust], by, for example, https://en.wikipedia.org/wiki/Key_signing_party[signing the release manager's key].
+
+Now it's time to build and run the release candidate.
+
+=== Build from source
+
+[source,bash,subs="attributes+"]
+----
+tar -xzf $src
+cd apache-fineract-src-{revnumber}
+./gradlew build -x test -x doc
+cd ..
+----
+
+=== Run from binary
+
+Before running Fineract you must first start a <<Database support,supported relational database server>> and ensure the `fineract_default` and `fineract_tenants` databases exist. Detailed steps for database preparation are left as an exercise for the reader. You can find ideas on how to prepare your database in the `build-mariadb.yml`, `build-mysql.yml`, and `build-postgresql.yml` files in source control, and in <<Database Setup>>.
+
+Finally, start your Fineract server:
+
+[source,bash,subs="attributes+"]
+----
+tar -xvzf apache-fineract-bin-{revnumber}.tar.gz
+cd apache-fineract-bin-{revnumber}
+export FINERACT_SERVER_SSL_ENABLED=false
+export FINERACT_SERVER_PORT=8080
+export BACKEND_PROTOCOL=http
+export BACKEND_PORT=$FINERACT_SERVER_PORT
+# assumes reachable, healthy mariadb with default username, password, and port
+java -jar fineract-provider-{revnumber}.jar
+----
+
+Alternatively, you can run it in Tomcat:
+
+[source,bash,subs="attributes+"]
+----
+cat << 'EndOfRcenv' >> rcenv
+FINERACT_SERVER_SSL_ENABLED=false
+FINERACT_SERVER_PORT=8080
+BACKEND_PROTOCOL=http
+BACKEND_PORT=$FINERACT_SERVER_PORT
+EndOfRcenv
+# assumes reachable, healthy mariadb with default username, password, and port
+docker run --rm -it -v "$(pwd):/usr/local/tomcat/webapps" \
+  --net=host --env-file=rcenv tomcat:jre21
+----
+
+Confirm the following:
+
+. http://localhost:8080/fineract-provider/actuator/health works
+. http://localhost:8080/fineract-provider/actuator/info displays the expected information
+. API calls work against http://localhost:8080/fineract-provider/api/v1
 
 == Gradle Task
 
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep9 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep9 -Pfineract.release.version={revnumber}
 ----
 
 CAUTION: This task is not yet automated!

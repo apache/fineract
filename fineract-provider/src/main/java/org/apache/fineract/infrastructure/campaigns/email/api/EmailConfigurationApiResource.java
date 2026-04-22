@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -41,7 +42,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.springframework.stereotype.Component;
 
 @Path("/v1/email/configuration")
-@Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @RequiredArgsConstructor
@@ -55,6 +55,7 @@ public class EmailConfigurationApiResource {
     private final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService;
 
     @GET
+    @Operation(summary = "List all email configurations", operationId = "retrieveAllEmailConfigurations")
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -66,6 +67,8 @@ public class EmailConfigurationApiResource {
     }
 
     @PUT
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update email configuration", operationId = "updateEmailConfiguration")
     public String updateConfiguration(@Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateEmailConfiguration().withJson(apiRequestBodyAsJson).build();

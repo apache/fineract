@@ -29,6 +29,7 @@ import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.codes.exception.CodeNotFoundException;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -47,6 +48,9 @@ import org.mockito.MockitoAnnotations;
 
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class CommandSourceServiceTest {
+
+    @Mock
+    private ConfigurationDomainService configurationDomainService;
 
     @Mock
     private CommandSourceRepository commandSourceRepository;

@@ -33,6 +33,14 @@
         },
         {
             "default": null,
+            "name": "transferExternalGroupId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "submittedDate",
             "type": [
                 "null",
@@ -42,6 +50,14 @@
         {
             "default": null,
             "name": "assetOwnerExternalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "previousOwnerExternalId",
             "type": [
                 "null",
                 "string"
@@ -152,6 +168,17 @@
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "customData",
+            "type": [
+                "null",
+                {
+                    "values": "bytes",
+                    "type": "map"
+                }
             ]
         }
     ]

@@ -71,7 +71,6 @@ public class PermissionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Application Permissions", description = "ARGUMENTS\n"
             + "makerCheckerableoptional, Values are true, false. Default is false.\n"

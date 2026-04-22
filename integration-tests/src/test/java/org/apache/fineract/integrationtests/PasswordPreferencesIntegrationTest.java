@@ -30,6 +30,7 @@ import java.util.List;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.PasswordPreferencesHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ public class PasswordPreferencesIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ResponseSpecification generalResponseSpec;
+    private int originalPasswordPolicyId;
 
     @BeforeEach
     public void setUp() {
@@ -50,7 +52,12 @@ public class PasswordPreferencesIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
+        originalPasswordPolicyId = PasswordPreferencesHelper.getActivePasswordPreference(requestSpec, responseSpec);
+    }
 
+    @AfterEach
+    void tearDown() {
+        PasswordPreferencesHelper.updatePasswordPreferences(requestSpec, responseSpec, Integer.toString(originalPasswordPolicyId));
     }
 
     @Test

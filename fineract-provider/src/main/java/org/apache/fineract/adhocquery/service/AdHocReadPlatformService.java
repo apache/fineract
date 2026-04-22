@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.adhocquery.service;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.adhocquery.data.AdHocData;
 
 public interface AdHocReadPlatformService {
 
-    Collection<AdHocData> retrieveAllAdHocQuery();
+    List<AdHocData> retrieveAllAdHocQuery();
 
-    Collection<AdHocData> retrieveAllActiveAdHocQuery();
+    List<AdHocData> retrieveAllActiveAdHocQuery();
 
     AdHocData retrieveOne(Long adHocId);
 

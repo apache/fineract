@@ -51,12 +51,17 @@ public class MultiException extends Exception {
     private final List<Throwable> throwables;
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
-    public MultiException(List<Throwable> problems) {
-        super("MultiException with " + problems.size() + " contained causes (details available)");
+    public MultiException(String message, List<Throwable> problems) {
+        super(message);
         if (problems.isEmpty()) {
             throw new IllegalArgumentException("List of Throwables must not be empty");
         }
         this.throwables = new ArrayList<>(problems);
+    }
+
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
+    public MultiException(List<Throwable> problems) {
+        this("MultiException with " + problems.size() + " contained causes (details available)", problems);
     }
 
     public List<Throwable> getCauses() {

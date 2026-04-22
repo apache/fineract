@@ -45,10 +45,9 @@ public class S3DatatableReportExportServiceImpl implements DatatableReportExport
 
     @Override
     public ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            boolean isSelfServiceUserReport, String parameterTypeValue) {
+            String parameterTypeValue) {
         try {
-            StreamingOutput output = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams,
-                    isSelfServiceUserReport);
+            StreamingOutput output = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams);
             try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
                 output.write(byteArrayOutputStream);
                 String folder = configurationDomainService.retrieveReportExportS3FolderName();

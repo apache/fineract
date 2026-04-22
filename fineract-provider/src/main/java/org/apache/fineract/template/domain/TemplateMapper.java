@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_templatemappers")
-public class TemplateMapper extends AbstractPersistableCustom {
+public class TemplateMapper extends AbstractPersistableCustom<Long> {
 
     @Column(name = "mapperorder")
     private int mapperorder;

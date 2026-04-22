@@ -60,6 +60,11 @@ public class PropertyServiceImpl implements PropertyService {
         return getProperty(jobName, FineractProperties.PartitionedJobProperty::getThreadPoolQueueCapacity);
     }
 
+    @Override
+    public Integer getPollInterval(String jobName) {
+        return getProperty(jobName, FineractProperties.PartitionedJobProperty::getPollInterval);
+    }
+
     private Integer getProperty(String jobName, Function<? super FineractProperties.PartitionedJobProperty, Integer> function) {
         List<FineractProperties.PartitionedJobProperty> jobProperties = fineractProperties.getPartitionedJob()
                 .getPartitionedJobProperties();

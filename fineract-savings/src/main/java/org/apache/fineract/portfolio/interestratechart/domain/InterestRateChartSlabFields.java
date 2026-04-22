@@ -35,11 +35,16 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 
 @Embeddable
+@Getter
+@Setter
 public class InterestRateChartSlabFields {
 
     @Column(name = "description", nullable = true)
@@ -56,14 +61,6 @@ public class InterestRateChartSlabFields {
 
     @Column(name = "amount_range_from", scale = 6, precision = 19)
     private BigDecimal amountRangeFrom;
-
-    public BigDecimal getAmountRangeFrom() {
-        return this.amountRangeFrom;
-    }
-
-    public BigDecimal getAmountRangeTo() {
-        return this.amountRangeTo;
-    }
 
     @Column(name = "amount_range_to", scale = 6, precision = 19)
     private BigDecimal amountRangeTo;
@@ -89,7 +86,8 @@ public class InterestRateChartSlabFields {
             final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
             final BigDecimal annualInterestRate, final String currencyCode) {
         this.description = description;
-        this.periodType = (periodFrequencyType == null || periodFrequencyType.isInvalid()) ? null : periodFrequencyType.getValue();
+        this.periodType = (periodFrequencyType == null || periodFrequencyType == SavingsPeriodFrequencyType.INVALID) ? null
+                : periodFrequencyType.getValue();
         this.fromPeriod = fromPeriod;
         this.toPeriod = toPeriod;
         this.amountRangeFrom = amountRangeFrom;
@@ -246,11 +244,6 @@ public class InterestRateChartSlabFields {
                 && !(interestRateChartSlabFields.fromPeriod.equals(1) || interestRateChartSlabFields.fromPeriod.equals(0));
     }
 
-    public boolean isNotProperPriodEnd() {
-        return !(this.toPeriod == null && this.amountRangeTo == null);
-
-    }
-
     public boolean isRateChartOverlapping(final InterestRateChartSlabFields that, final boolean isPrimaryGroupingByAmount) {
         boolean isPeriodOverLapping = isPeriodOverlapping(that);
         boolean isAmountOverLapping = isAmountOverlapping(that);
@@ -335,16 +328,16 @@ public class InterestRateChartSlabFields {
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(periodType());
         switch (periodFrequencyType) {
             case DAYS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifferenceInDays(periodStartDate, periodEndDate);
             break;
             case WEEKS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.WEEKS);
             break;
             case MONTHS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.MONTHS);
             break;
             case YEARS:
-                actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
+                actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.YEARS);
             break;
             case INVALID:
                 actualDepositPeriod = 0;// default value

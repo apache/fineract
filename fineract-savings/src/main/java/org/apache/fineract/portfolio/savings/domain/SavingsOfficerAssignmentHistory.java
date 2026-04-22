@@ -35,7 +35,7 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
 @Table(name = "m_savings_officer_assignment_history")
-public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDateTimeCustom {
+public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -81,7 +81,7 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableWithUTCDat
     }
 
     public boolean isSameSavingsOfficer(final Staff staff) {
-        return this.savingsOfficer.identifiedBy(staff);
+        return this.savingsOfficer.getId().equals(staff.getId());
     }
 
     public LocalDate getStartDate() {

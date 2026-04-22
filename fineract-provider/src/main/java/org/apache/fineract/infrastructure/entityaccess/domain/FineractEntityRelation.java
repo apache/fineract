@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class FineractEntityRelation extends AbstractPersistableCustom {
+public class FineractEntityRelation extends AbstractPersistableCustom<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "relationId", orphanRemoval = true)
     private Set<FineractEntityToEntityMapping> fineractEntityToEntityMapping = new HashSet<>();

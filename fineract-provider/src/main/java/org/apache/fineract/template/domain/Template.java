@@ -41,7 +41,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_template", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
-public class Template extends AbstractPersistableCustom {
+public class Template extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;

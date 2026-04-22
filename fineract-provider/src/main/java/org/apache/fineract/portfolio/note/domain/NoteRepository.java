@@ -24,8 +24,11 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -52,4 +55,10 @@ public interface NoteRepository extends JpaRepository<Note, Long>, JpaSpecificat
     @Query("select note from Note note where note.savingsTransaction.id = :savingsTransactionId")
     List<Note> findBySavingsTransactionId(@Param("savingsTransactionId") Long savingsTransactionId);
 
+    Note findBySavingsTransactionAndId(SavingsAccountTransaction savingsTransaction, Long id);
+
+    Note findByShareAccountAndId(ShareAccount shareAccount, Long id);
+
+    @Modifying
+    void deleteAllBySavingsAccount(SavingsAccount savingsAccount);
 }

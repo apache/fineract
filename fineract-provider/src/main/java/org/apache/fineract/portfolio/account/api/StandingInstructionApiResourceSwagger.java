@@ -538,7 +538,7 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         @Schema(example = "20")
-        public Integer resourceId;
+        public Long resourceId;
         public PutUpdateStandingInstructionChanges changes;
     }
 

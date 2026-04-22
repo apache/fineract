@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 @Getter
 public class CommandProcessingResult implements Serializable {
 
-    private Long commandId;
+    private final Long commandId;
     private Long officeId;
     private final Long groupId;
     private final Long clientId;
@@ -49,12 +49,13 @@ public class CommandProcessingResult implements Serializable {
     private Boolean rollbackTransaction;
     private final ExternalId resourceExternalId;
     private final ExternalId subResourceExternalId;
+    private final ExternalId loanExternalId;
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
             final Map<String, Object> changes, final Long productId, final Long gsimId, final Long glimId,
             final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId) {
+            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -71,14 +72,15 @@ public class CommandProcessingResult implements Serializable {
         this.creditBureauReportData = creditBureauReportData;
         this.rollbackTransaction = rollbackTransaction;
         this.subResourceId = subResourceId;
-        this.resourceExternalId = resourceExternalId;
-        this.subResourceExternalId = subResourceExternalId;
+        this.resourceExternalId = setExternalIdOrNull(resourceExternalId);
+        this.subResourceExternalId = setExternalIdOrNull(subResourceExternalId);
+        this.loanExternalId = setExternalIdOrNull(loanExternalId);
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes,
             Long clientId) {
         this(commandId, officeId, null, clientId, null, null, resourceId == null ? null : resourceId.toString(), resourceId, null, changes,
-                null, null, null, null, null, null, ExternalId.empty(), ExternalId.empty());
+                null, null, null, null, null, null, ExternalId.empty(), ExternalId.empty(), ExternalId.empty());
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes) {
@@ -94,7 +96,7 @@ public class CommandProcessingResult implements Serializable {
                 commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, resourceId, commandResult.transactionId,
                 commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
                 commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.subResourceId,
-                commandResult.resourceExternalId, commandResult.subResourceExternalId);
+                commandResult.resourceExternalId, commandResult.subResourceExternalId, commandResult.loanExternalId);
     }
 
     public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult) {
@@ -105,10 +107,10 @@ public class CommandProcessingResult implements Serializable {
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final Long gsimId,
             final Long glimId, final Map<String, Object> creditBureauReportData, final String transactionId,
             final Map<String, Object> changes, final Long productId, final Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId) {
+            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
                 transactionId, changes, productId, gsimId, glimId, creditBureauReportData, rollbackTransaction, subResourceId,
-                resourceExternalId, subResourceExternalId);
+                resourceExternalId, subResourceExternalId, loanExternalId);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -158,5 +160,9 @@ public class CommandProcessingResult implements Serializable {
 
     public void setRollbackTransaction(Boolean rollbackTransaction) {
         this.rollbackTransaction = rollbackTransaction;
+    }
+
+    private ExternalId setExternalIdOrNull(ExternalId externalId) {
+        return externalId == null || externalId.isEmpty() ? null : externalId;
     }
 }

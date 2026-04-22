@@ -26,7 +26,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
@@ -57,9 +60,14 @@ public class ProvisioningCriteriaAssembler {
         if (fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM, jsonElement)) {
             JsonArray jsonloanProducts = this.fromApiJsonHelper.extractJsonArrayNamed(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM,
                     jsonElement);
+            List<Long> productIds = new ArrayList<>(jsonloanProducts.size());
             for (JsonElement element : jsonloanProducts) {
-                Long productId = this.fromApiJsonHelper.extractLongNamed("id", element.getAsJsonObject());
-                loanProducts.add(loanProductRepository.findById(productId).orElse(null));
+                productIds.add(this.fromApiJsonHelper.extractLongNamed("id", element.getAsJsonObject()));
+            }
+            Map<Long, LoanProduct> productMap = loanProductRepository.findAllById(productIds).stream()
+                    .collect(Collectors.toMap(LoanProduct::getId, Function.identity()));
+            for (Long productId : productIds) {
+                loanProducts.add(productMap.getOrDefault(productId, null));
             }
         } else {
             loanProducts = loanProductRepository.findAll();

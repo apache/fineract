@@ -96,7 +96,6 @@ public class RolesApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Roles", description = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n" + "roles?fields=name")
     @ApiResponses({
@@ -132,7 +131,6 @@ public class RolesApiResource {
 
     @GET
     @Path("{roleId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Role", description = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n" + "roles/1?fields=name")
     @ApiResponses({
@@ -207,7 +205,6 @@ public class RolesApiResource {
 
     @GET
     @Path("{roleId}/permissions")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Role's Permissions", description = "Example Requests:\n" + "\n" + "roles/1/permissions")
     @ApiResponses({
@@ -254,7 +251,6 @@ public class RolesApiResource {
      */
     @DELETE
     @Path("{roleId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Role", description = "Description : Delete the role in case role is not associated with any users.")
     @ApiResponses({

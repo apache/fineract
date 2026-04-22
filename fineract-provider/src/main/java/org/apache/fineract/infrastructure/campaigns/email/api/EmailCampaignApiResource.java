@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.campaigns.email.api;
 
 import com.google.gson.JsonElement;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -57,7 +58,6 @@ import org.springframework.stereotype.Component;
  * Templates.
  */
 @Path("/v1/email/campaign")
-@Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @RequiredArgsConstructor
@@ -83,6 +83,7 @@ public class EmailCampaignApiResource {
     @GET
     @Path("{resourceId}")
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve an email campaign", operationId = "retrieveOneEmailCampaign")
     public String retrieveOneCampaign(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -94,6 +95,7 @@ public class EmailCampaignApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List all email campaigns", operationId = "retrieveAllEmailCampaigns")
     public String retrieveAllCampaign(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -107,6 +109,7 @@ public class EmailCampaignApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create an email campaign", operationId = "createEmailCampaign")
     public String createCampaign(final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createEmailCampaign().withJson(apiRequestBodyAsJson).build();
@@ -120,6 +123,7 @@ public class EmailCampaignApiResource {
     @Path("{resourceId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update an email campaign", operationId = "updateEmailCampaign")
     public String updateCampaign(@PathParam("resourceId") final Long campaignId, final String apiRequestBodyAsJson,
             @Context final UriInfo uriInfo) {
 
@@ -135,6 +139,7 @@ public class EmailCampaignApiResource {
     @Path("{resourceId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Activate, close, or reactivate an email campaign", operationId = "handleCommandsEmailCampaign")
     public String activate(@PathParam("resourceId") final Long campaignId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
@@ -158,6 +163,7 @@ public class EmailCampaignApiResource {
     @Path("preview")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Preview email campaign message", operationId = "previewEmailCampaign")
     public String preview(final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -172,6 +178,7 @@ public class EmailCampaignApiResource {
 
     @GET()
     @Path("template")
+    @Operation(summary = "Retrieve email campaign template", operationId = "retrieveAllTemplatesEmailCampaign")
     public String template(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -183,6 +190,7 @@ public class EmailCampaignApiResource {
 
     @GET
     @Path("template/{resourceId}")
+    @Operation(summary = "Retrieve an email campaign template detail by ID", operationId = "retrieveOneTemplateEmailCampaign")
     public String retrieveOneTemplate(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -194,6 +202,7 @@ public class EmailCampaignApiResource {
 
     @DELETE
     @Path("{resourceId}")
+    @Operation(summary = "Delete an email campaign", operationId = "deleteEmailCampaign")
     public String delete(@PathParam("resourceId") final Long resourceId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteEmailCampaign(resourceId).build();

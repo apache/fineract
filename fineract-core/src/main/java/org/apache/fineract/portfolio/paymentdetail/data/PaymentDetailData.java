@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.paymentdetail.data;
 
 import java.io.Serializable;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor
+@Builder
 public class PaymentDetailData implements Serializable {
 
     private final Long id;

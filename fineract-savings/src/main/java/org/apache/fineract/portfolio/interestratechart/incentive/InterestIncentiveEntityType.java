@@ -33,15 +33,11 @@ public enum InterestIncentiveEntityType {
         if (v == null) {
             return INVALID;
         }
-
-        switch (v) {
-            case 2:
-                return CUSTOMER;
-            case 3:
-                return ACCOUNT;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 2 -> CUSTOMER;
+            case 3 -> ACCOUNT;
+            default -> INVALID;
+        };
     }
 
     InterestIncentiveEntityType(final Integer value, final String code) {
@@ -51,7 +47,7 @@ public enum InterestIncentiveEntityType {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public Integer getValue() {
@@ -62,16 +58,7 @@ public enum InterestIncentiveEntityType {
         return this.code;
     }
 
-    public boolean isCustomer() {
-        return CUSTOMER.equals(this);
-    }
-
-    public boolean isInvalid() {
-        return INVALID.equals(this);
-    }
-
-    // TODO: do we really need this?!?
-    public static Object[] integerValues() {
-        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
+    public static Integer[] integerValues() {
+        return Arrays.stream(values()).filter(v -> v != INVALID).map(v -> v.value).toArray(Integer[]::new);
     }
 }

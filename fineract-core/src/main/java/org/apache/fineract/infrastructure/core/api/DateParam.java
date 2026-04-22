@@ -28,6 +28,9 @@ import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
  */
 public class DateParam {
 
+    public static final String FROM_DATE_PARAM = "fromDate";
+    public static final String TO_DATE_PARAM = "toDate";
+
     private final String dateAsString;
 
     public DateParam(final String dateStr) {

@@ -20,7 +20,7 @@ package com.acme.fineract.loan.job;
 
 public enum AcmeJobName {
 
-    ACME_NOOP_JOB("Acme Noop Job");
+    ACME_NOOP_JOB("Acme Noop Job"); //
 
     private final String name;
 

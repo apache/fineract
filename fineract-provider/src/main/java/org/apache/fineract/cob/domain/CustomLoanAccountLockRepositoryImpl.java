@@ -19,15 +19,18 @@
 package org.apache.fineract.cob.domain;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLockRepository {
+public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLockRepository<LoanAccountLock> {
 
-    private final EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final DatabaseSpecificSQLGenerator databaseSpecificSQLGenerator;
 
     @Override
@@ -49,4 +52,5 @@ public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLoc
         entityManager.createNativeQuery(sql).executeUpdate();
         entityManager.flush();
     }
+
 }

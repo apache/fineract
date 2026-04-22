@@ -1,0 +1,24 @@
+= Checkstyle and Spotless
+
+The project enforces code conventions using **Checkstyle** and **Spotless**.
+
+== Configuration Files
+* **Checkstyle**: `config/checkstyle/checkstyle.xml`
+* **Spotless**: `config/fineractdev-formatter.xml`
+
+These tools run automatically during the Gradle build and will fail the build if violations are detected.
+
+== Fixing Violations
+To automatically fix most formatting issues (Spotless and some Checkstyle), run:
+
+[source,bash]
+----
+./gradlew spotlessApply
+----
+
+To check for Spotless violations only:
+
+[source,bash]
+----
+./gradlew spotlessCheck
+----

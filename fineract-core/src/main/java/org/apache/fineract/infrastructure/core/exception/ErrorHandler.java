@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.eclipse.persistence.exceptions.OptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.NestedRuntimeException;
@@ -65,7 +66,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public final class ErrorHandler {
 
-    private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder(true).create();
+    private static final Gson JSON_HELPER = GoogleGsonSerializerHelper.createGsonBuilder().create();
 
     private enum PessimisticLockingFailureCode {
 
@@ -115,6 +116,7 @@ public final class ErrorHandler {
     private final DefaultExceptionMapper defaultExceptionMapper;
 
     @NotNull
+    @SuppressWarnings("unchecked")
     public <T extends RuntimeException> ExceptionMapper<T> findMostSpecificExceptionHandler(T exception) {
         Class<?> clazz = exception.getClass();
         do {
@@ -122,23 +124,19 @@ public final class ErrorHandler {
             Set<String> fineractErrorMappers = createSet(ctx.getBeanNamesForType(FineractExceptionMapper.class));
             SetUtils.SetView<String> intersection = SetUtils.intersection(exceptionMappers, fineractErrorMappers);
             if (!intersection.isEmpty()) {
-                // noinspection unchecked
                 return (ExceptionMapper<T>) ctx.getBean(intersection.iterator().next());
             }
             if (!exceptionMappers.isEmpty()) {
-                // noinspection unchecked
                 return (ExceptionMapper<T>) ctx.getBean(exceptionMappers.iterator().next());
             }
             clazz = clazz.getSuperclass();
         } while (!clazz.equals(Exception.class));
-        // noinspection unchecked
         return (ExceptionMapper<T>) defaultExceptionMapper;
     }
 
     /**
      * Returns an object of ErrorInfo type containing the information regarding the raised error.
      *
-     * @param exception
      * @return ErrorInfo
      */
     public ErrorInfo handle(@NotNull RuntimeException exception) {
@@ -176,12 +174,18 @@ public final class ErrorHandler {
             msg = defaultMsg == null ? cause.getMessage() : defaultMsg;
             if (nre instanceof NonTransientDataAccessException) {
                 msgCode = msgCode == null ? codePfx + ".data.integrity.issue" : msgCode;
+                log.warn("Handled exception is", nre);
                 return new PlatformDataIntegrityException(msgCode, msg, param, args);
+            } else if (cause instanceof OptimisticLockException) {
+                return (RuntimeException) cause;
             }
         }
         if (t instanceof ValidationException) {
             msgCode = msgCode == null ? codePfx + ".validation.error" : msgCode;
             return new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError(msgCode, msg, param, defaultMsgArgs)));
+        }
+        if (t instanceof jakarta.persistence.OptimisticLockException) {
+            return (RuntimeException) t;
         }
         if (t instanceof PersistenceException) {
             msgCode = msgCode == null ? codePfx + ".persistence.error" : msgCode;
@@ -191,12 +195,12 @@ public final class ErrorHandler {
             msgCode = msgCode == null ? codePfx + ".authentication.error" : msgCode;
             return new PlatformDataIntegrityException(msgCode, msg, param, args);
         }
-        if (t instanceof RuntimeException re) {
-            return re;
-        }
         if (t instanceof ParseException) {
             msgCode = msgCode == null ? codePfx + ".parse.error" : msgCode;
             return new PlatformDataIntegrityException(msgCode, msg, param, args);
+        }
+        if (t instanceof RuntimeException re) {
+            return re;
         }
         return new RuntimeException(msg, t);
     }
@@ -207,5 +211,13 @@ public final class ErrorHandler {
         } else {
             return Set.of(array);
         }
+    }
+
+    public static Throwable findMostSpecificException(Exception exception) {
+        Throwable mostSpecificException = exception;
+        while (mostSpecificException.getCause() != null) {
+            mostSpecificException = mostSpecificException.getCause();
+        }
+        return mostSpecificException;
     }
 }

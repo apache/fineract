@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.investor.data;
 
-public enum ExternalTransferSubStatus {
-    BALANCE_ZERO, BALANCE_NEGATIVE, SAMEDAY_TRANSFERS, USER_REQUESTED, UNSOLD
+public enum ExternalTransferSubStatus { //
+    BALANCE_ZERO, //
+    BALANCE_NEGATIVE, //
+    SAMEDAY_TRANSFERS, //
+    USER_REQUESTED, //
+    UNSOLD //
 }

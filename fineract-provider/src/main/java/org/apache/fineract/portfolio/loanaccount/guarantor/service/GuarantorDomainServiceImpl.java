@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatfo
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.Guarantor;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingDetails;
@@ -87,6 +88,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final ConfigurationDomainService configurationDomainService;
     private final ExternalIdFactory externalIdFactory;
     private final LoanRepository loanRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @PostConstruct
     public void addListeners() {
@@ -107,7 +109,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     public void validateGuarantorBusinessRules(Loan loan) {
         LoanProduct loanProduct = loan.loanProduct();
         BigDecimal principal = loan.getPrincipal().getAmount();
-        if (loanProduct.isHoldGuaranteeFundsEnabled()) {
+        if (loanProduct.isHoldGuaranteeFunds()) {
             LoanProductGuaranteeDetails guaranteeData = loanProduct.getLoanProductGuaranteeDetails();
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             BigDecimal mandatoryAmount = principal.multiply(guaranteeData.getMandatoryGuarantee()).divide(BigDecimal.valueOf(100));
@@ -313,7 +315,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      *
      */
     private void holdGuarantorFunds(final Loan loan) {
-        if (loan.loanProduct().isHoldGuaranteeFundsEnabled()) {
+        if (loan.loanProduct().isHoldGuaranteeFunds()) {
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             List<GuarantorFundingDetails> guarantorFundingDetailList = new ArrayList<>();
             List<DepositAccountOnHoldTransaction> onHoldTransactions = new ArrayList<>();
@@ -388,7 +390,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         if (guarantor.isSelfGuarantee()) {
                             selfGuarantorList.add(guarantorFundingDetails);
                             selfGuarantee = selfGuarantee.add(guarantorFundingDetails.getAmountRemaining());
-                        } else if (guarantor.isExistingCustomer()) {
+                        } else if (guarantor.isExistingCustomer() || guarantor.isExistingGroup()) {
                             externalGuarantorList.add(guarantorFundingDetails);
                             guarantorGuarantee = guarantorGuarantee.add(guarantorFundingDetails.getAmountRemaining());
                         }
@@ -583,7 +585,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         @Override
         public void onBusinessEvent(LoanUndoDisbursalBusinessEvent event) {
             Loan loan = event.get();
-            List<Long> reversedTransactions = new ArrayList<>(loan.findExistingTransactionIds());
+            List<Long> reversedTransactions = new ArrayList<>(loanTransactionRepository.findTransactionIdsByLoan(loan));
             reverseTransaction(reversedTransactions);
         }
     }

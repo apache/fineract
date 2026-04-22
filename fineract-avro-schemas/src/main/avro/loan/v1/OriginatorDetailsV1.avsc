@@ -1,0 +1,62 @@
+{
+    "name": "OriginatorDetailsV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "doc": "Loan originator details for revenue sharing and reporting",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "doc": "Internal originator ID",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "externalId",
+            "doc": "Unique external identifier (Revenue Share ID)",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "name",
+            "doc": "Originator name",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "status",
+            "doc": "Originator status: ACTIVE, PENDING, or INACTIVE",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "originatorType",
+            "doc": "Code value for originator type (MERCHANT, BROKER, AFFILIATE, PLATFORM)",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "channelType",
+            "doc": "Code value for channel type (ONLINE, IN_STORE, API, AGGREGATOR)",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        }
+    ]
+}

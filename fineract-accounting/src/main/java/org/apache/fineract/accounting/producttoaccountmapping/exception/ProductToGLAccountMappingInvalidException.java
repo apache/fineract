@@ -29,7 +29,7 @@ public class ProductToGLAccountMappingInvalidException extends AbstractPlatformD
             final String actualAccountCategory, final String expectedAccountCategory) {
         super("error.msg." + paramName + ".invalid.account.type",
                 "Passed in GLAccount " + paramName + " with Id " + accountId + "maps to the account " + accountName + " of type "
-                        + actualAccountCategory + ", the expected account type was one among" + expectedAccountCategory,
+                        + actualAccountCategory + ", the expected account type was one among " + expectedAccountCategory,
                 paramName, accountId, accountName, actualAccountCategory, expectedAccountCategory);
     }
 }

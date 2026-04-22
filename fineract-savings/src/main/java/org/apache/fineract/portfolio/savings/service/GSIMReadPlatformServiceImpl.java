@@ -73,8 +73,11 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
             final BigDecimal parentBalance = rs.getBigDecimal("parentBalance");
             final BigDecimal childBalance = rs.getBigDecimal("childBalance");
             final String savingsStatus = SavingsAccountStatusType.fromInt((int) rs.getLong("savingsStatus")).toString();
-            return GroupSavingsIndividualMonitoringAccountData.getInstance2(gsimId, groupId, clientId, accountNumber, childAccountId,
-                    childAccountNumber, parentBalance, childBalance, childAccountsCount, savingsStatus);
+
+            return GroupSavingsIndividualMonitoringAccountData.builder().gsimId(gsimId).groupId(groupId).clientId(clientId)
+                    .accountNumber(accountNumber).childAccountId(childAccountId).childAccountNumber(childAccountNumber)
+                    .childDeposit(parentBalance).parentDeposit(childBalance).childAccountsCount(childAccountsCount)
+                    .savingsStatus(savingsStatus).build();
         }
     }
 
@@ -99,8 +102,8 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
             final String loanStatus = LoanStatus.fromInt((int) rs.getLong("savingsStatus")).toString();
 
-            return GroupSavingsIndividualMonitoringAccountData.getInstance1(glimId, groupId, accountNumber, parentDeposit, loanStatus);
-
+            return GroupSavingsIndividualMonitoringAccountData.builder().gsimId(glimId).groupId(groupId).accountNumber(accountNumber)
+                    .parentDeposit(parentDeposit).savingsStatus(loanStatus).build();
         }
     }
 

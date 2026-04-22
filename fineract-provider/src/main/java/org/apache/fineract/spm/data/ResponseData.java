@@ -18,6 +18,18 @@
  */
 package org.apache.fineract.spm.data;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+/**
+ * Model representing a survey response option for internal mapping
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class ResponseData {
 
     private Long id;
@@ -25,43 +37,4 @@ public class ResponseData {
     private Integer value;
     private Integer sequenceNo;
 
-    public ResponseData() {
-
-    }
-
-    public ResponseData(final Long id, final String text, final Integer value, final Integer sequenceNo) {
-
-        this.id = id;
-        this.text = text;
-        this.value = value;
-        this.sequenceNo = sequenceNo;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
-    public void setValue(Integer value) {
-        this.value = value;
-    }
-
-    public Integer getSequenceNo() {
-        return sequenceNo;
-    }
-
-    public void setSequenceNo(Integer sequenceNo) {
-        this.sequenceNo = sequenceNo;
-    }
 }

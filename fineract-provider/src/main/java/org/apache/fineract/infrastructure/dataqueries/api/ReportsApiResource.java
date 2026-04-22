@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -74,10 +73,9 @@ public class ReportsApiResource {
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Reports", description = "Lists all reports and their parameters.\n" + "\n" + "Example Request:\n" + "\n"
-            + "reports")
+    @Operation(summary = "List Reports", operationId = "retrieveAllReports", description = "Lists all reports and their parameters.\n"
+            + "\n" + "Example Request:\n" + "\n" + "reports")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class))))
     public String retrieveReportList(@Context final UriInfo uriInfo) {
 
@@ -91,12 +89,10 @@ public class ReportsApiResource {
 
     @GET
     @Path("{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Report\n", description = "Example Requests:\n" + "\n" + "reports/1\n" + "\n" + "\n"
-            + "reports/1?template=true")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class))) })
+    @Operation(summary = "Retrieve a Report\n", operationId = "retrieveOneReport", description = "Example Requests:\n" + "\n"
+            + "reports/1\n" + "\n" + "\n" + "reports/1?template=true")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class)))
     public String retrieveReport(@PathParam("id") @Parameter(description = "id") final Long id, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -114,12 +110,10 @@ public class ReportsApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Report Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Report Template", operationId = "retrieveTemplateReport", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "\n" + "Example Request : \n" + "\n" + "reports/template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsTemplateResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsTemplateResponse.class)))
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -135,10 +129,9 @@ public class ReportsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Report", description = "")
+    @Operation(summary = "Create a Report", operationId = "createReport", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostRepostRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostReportsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostReportsResponse.class)))
     public String createReport(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createReport().withJson(apiRequestBodyAsJson).build();
@@ -152,10 +145,9 @@ public class ReportsApiResource {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Report", description = "Only the useReport description can be updated for core reports.")
+    @Operation(summary = "Update a Report", operationId = "updateReport", description = "Only the useReport description can be updated for core reports.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PutReportRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PutReportResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PutReportResponse.class)))
     public String updateReport(@PathParam("id") @Parameter(description = "id") final Long id,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -168,11 +160,9 @@ public class ReportsApiResource {
 
     @DELETE
     @Path("{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Report", description = "Only non-core reports can be deleted.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.DeleteReportsResponse.class))) })
+    @Operation(summary = "Delete a Report", operationId = "deleteReport", description = "Only non-core reports can be deleted.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.DeleteReportsResponse.class)))
     public String deleteReport(@PathParam("id") @Parameter(description = "id") final Long id) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteReport(id).build();

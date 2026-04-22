@@ -32,7 +32,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_survey_scorecards")
-public class Scorecard extends AbstractPersistableCustom {
+public class Scorecard extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_id")

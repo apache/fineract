@@ -24,7 +24,7 @@ import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualsProcessingService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,13 +32,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AddPeriodicAccrualEntriesBusinessStep implements LoanCOBBusinessStep {
 
-    private final LoanAccrualPlatformService loanAccrualPlatformService;
+    private final LoanAccrualsProcessingService loanAccrualsProcessingService;
 
     @Override
     public Loan execute(Loan loan) {
         log.debug("start processing period accrual business step for loan with Id [{}]", loan.getId());
         try {
-            loanAccrualPlatformService.addPeriodicAccruals(DateUtils.getBusinessLocalDate(), loan);
+            loanAccrualsProcessingService.addPeriodicAccruals(DateUtils.getBusinessLocalDate(), loan);
         } catch (MultiException e) {
             throw new BusinessStepException(String.format("Fail to process period accrual for loan id [%s]", loan.getId()), e);
         }

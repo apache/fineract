@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -31,6 +32,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 @Jacksonized
 @Builder
 @Getter
+@EqualsAndHashCode
 public class FineractContext implements Serializable {
 
     private final String contextHolder;
@@ -38,4 +40,5 @@ public class FineractContext implements Serializable {
     private final String authTokenContext;
     private final HashMap<BusinessDateType, LocalDate> businessDateContext;
     private final ActionContext actionContext;
+
 }

@@ -135,7 +135,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(productId) //
-                    .withSubEntityId(dividendPayOutDetails.getId())//
+                    .withSubEntityId(dividendPayOutDetails.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);

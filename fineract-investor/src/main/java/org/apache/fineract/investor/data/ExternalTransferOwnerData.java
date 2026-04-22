@@ -24,4 +24,5 @@ import lombok.Data;
 public class ExternalTransferOwnerData {
 
     private final String externalId;
+    private Long id;
 }

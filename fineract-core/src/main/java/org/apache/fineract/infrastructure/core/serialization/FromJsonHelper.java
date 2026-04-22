@@ -39,7 +39,9 @@ import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -155,6 +157,13 @@ public class FromJsonHelper {
 
     public boolean parameterExists(final String parameterName, final JsonElement element) {
         return this.helperDelegator.parameterExists(parameterName, element);
+    }
+
+    /**
+     * Check Parameter has a non-blank value
+     */
+    public boolean parameterHasValue(final String parameterName, final JsonElement element) {
+        return this.helperDelegator.parameterHasValue(parameterName, element);
     }
 
     public String extractStringNamed(final String parameterName, final JsonElement element) {
@@ -306,4 +315,22 @@ public class FromJsonHelper {
         return this.gsonConverter;
     }
 
+    public <T extends Enum<T>> T enumValueOfParameterNamed(String parameterName, final JsonElement element, Class<T> enumType) {
+        String value = null;
+        try {
+            value = this.helperDelegator.extractStringNamed(parameterName, element, new HashSet<String>());
+            if (value != null) {
+                return Enum.valueOf(enumType, value);
+            } else {
+                return null;
+            }
+        } catch (IllegalArgumentException e) {
+            throw new PlatformApiDataValidationException(List.of(ApiParameterError.parameterError("validation.msg.enum.value.not.found",
+                    "Enum value not exists: ", enumType.getName(), value)), e);
+        }
+    }
+
+    public Integer extractIntegerNamed(String paramName, JsonObject element) {
+        return extractIntegerNamed(paramName, element, new HashSet<>());
+    }
 }

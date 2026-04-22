@@ -98,8 +98,11 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
 
             final AccountingRule accountingRule = assembleAccountingRuleAndTags(office, command);
             this.accountingRuleRepository.saveAndFlush(accountingRule);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
-                    .withEntityId(accountingRule.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(officeId) //
+                    .withEntityId(accountingRule.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleAccountingRuleIntegrityIssues(command, throwable, dve);
@@ -111,8 +114,8 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         // get the GL Accounts or tags to Debit and Credit
         final String[] debitTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
         final String[] creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
-        final Set<String> incomingDebitTags = debitTags == null ? new HashSet<String>() : new HashSet<>(Arrays.asList(debitTags));
-        final Set<String> incomingCreditTags = creditTags == null ? new HashSet<String>() : new HashSet<>(Arrays.asList(creditTags));
+        final Set<String> incomingDebitTags = debitTags == null ? new HashSet<>() : new HashSet<>(Arrays.asList(debitTags));
+        final Set<String> incomingCreditTags = creditTags == null ? new HashSet<>() : new HashSet<>(Arrays.asList(creditTags));
         final Long accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
         final Long accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
 
@@ -265,8 +268,11 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                 this.accountingRuleRepository.saveAndFlush(accountingRule);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(accountingRule.getId())
-                    .with(changesOnly).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(accountingRule.getId()) //
+                    .with(changesOnly) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleAccountingRuleIntegrityIssues(command, throwable, dve);
@@ -319,7 +325,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     public CommandProcessingResult deleteAccountingRule(final Long accountingRuleId) {
         final AccountingRule accountingRule = this.accountingRuleRepositoryWrapper.findOneWithNotFoundDetection(accountingRuleId);
         this.accountingRuleRepository.delete(accountingRule);
-        return new CommandProcessingResultBuilder().withEntityId(accountingRule.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(accountingRule.getId()) //
+                .build();
     }
 
     private List<AccountingTagRule> saveDebitOrCreditTags(final Set<String> creditOrDebitTagArray, final JournalEntryType transactionType,

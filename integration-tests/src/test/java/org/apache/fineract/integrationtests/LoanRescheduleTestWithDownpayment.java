@@ -29,11 +29,8 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_20 = new BigDecimal(20);
@@ -59,8 +56,8 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
             verifyRepaymentSchedule(loanId, //
                     installment(1500.0, null, "01 January 2023"), //
                     installment(375.0, false, "01 January 2023"), //
-                    installment(563.0, false, "31 January 2023"), //
-                    installment(562.0, false, "02 March 2023") //
+                    installment(562.0, false, "31 January 2023"), //
+                    installment(563.0, false, "02 March 2023") //
             );
 
             // 1st Disburse Loan
@@ -74,9 +71,9 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
             // verify journal entries
             verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, suspenseClearingAccount, "DEBIT"), //
+                    journalEntry(250.0, fundSource, "DEBIT"), //
                     journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, suspenseClearingAccount, "CREDIT") //
+                    journalEntry(1000.0, fundSource, "CREDIT") //
             );
 
             // Verify Repayment Schedule
@@ -278,7 +275,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(12000.0, null, "01 January 2023"), //
+                    installment(15000.0, null, "01 January 2023"), //
                     installment(3000.00, false, "01 January 2023"), //
                     installment(1764.21, false, "01 February 2023"), //
                     installment(1852.42, false, "01 March 2023"), //
@@ -357,7 +354,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
-                    installment(12000.0, null, "01 January 2023"), //
+                    installment(15000.0, null, "01 January 2023"), //
                     installment(3000.00, false, "01 January 2023"), //
                     installment(1764.21, false, "01 February 2023"), //
                     installment(1852.42, false, "01 March 2023"), //

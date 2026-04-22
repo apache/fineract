@@ -20,10 +20,16 @@ package org.apache.fineract.infrastructure.core.domain;
 
 import java.io.Serializable;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 @Jacksonized
 @Builder
+@EqualsAndHashCode
+@RequiredArgsConstructor
+@Getter
 public class FineractPlatformTenant implements Serializable {
 
     private final Long id;
@@ -32,32 +38,4 @@ public class FineractPlatformTenant implements Serializable {
     private final String timezoneId;
     private final FineractPlatformTenantConnection connection;
 
-    public FineractPlatformTenant(final Long id, final String tenantIdentifier, final String name, final String timezoneId,
-            final FineractPlatformTenantConnection connection) {
-        this.id = id;
-        this.tenantIdentifier = tenantIdentifier;
-        this.name = name;
-        this.timezoneId = timezoneId;
-        this.connection = connection;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getTenantIdentifier() {
-        return this.tenantIdentifier;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getTimezoneId() {
-        return this.timezoneId;
-    }
-
-    public FineractPlatformTenantConnection getConnection() {
-        return connection;
-    }
 }

@@ -75,7 +75,6 @@ public class CreditBureauConfigurationApiResource {
     private final CreditBureauReadConfigurationService creditBureauConfiguration;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getCreditBureau(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -89,7 +88,6 @@ public class CreditBureauConfigurationApiResource {
 
     @GET
     @Path("/mappings")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getCreditBureauLoanProductMapping(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -105,7 +103,6 @@ public class CreditBureauConfigurationApiResource {
 
     @GET
     @Path("/organisationCreditBureau")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getOrganisationCreditBureau(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -120,7 +117,6 @@ public class CreditBureauConfigurationApiResource {
 
     @GET
     @Path("/config/{organisationCreditBureauId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getConfiguration(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId,
             @Context final UriInfo uriInfo) {
@@ -135,7 +131,6 @@ public class CreditBureauConfigurationApiResource {
 
     @GET
     @Path("/loanProduct")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String fetchLoanProducts(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -150,7 +145,6 @@ public class CreditBureauConfigurationApiResource {
 
     @GET
     @Path("/loanProduct/{loanProductId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String fetchMappingByLoanProductId(@Context final UriInfo uriInfo, @PathParam("loanProductId") final Long loanProductId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);

@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 @Entity
 @NoArgsConstructor
 @Table(name = "m_external_asset_owner")
-public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom {
+public class ExternalAssetOwner extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "external_id", nullable = false, length = 100, unique = true)
     private ExternalId externalId;

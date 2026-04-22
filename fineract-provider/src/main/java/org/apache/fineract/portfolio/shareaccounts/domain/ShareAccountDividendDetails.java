@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendPa
 
 @Entity
 @Table(name = "m_share_account_dividend_details")
-public class ShareAccountDividendDetails extends AbstractPersistableCustom {
+public class ShareAccountDividendDetails extends AbstractPersistableCustom<Long> {
 
     @Column(name = "account_id", nullable = false)
     private Long shareAccountId;

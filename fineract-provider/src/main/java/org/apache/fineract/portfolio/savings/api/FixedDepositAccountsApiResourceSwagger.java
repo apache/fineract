@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -254,6 +255,36 @@ final class FixedDepositAccountsApiResourceSwagger {
         @Schema(example = "6")
         public Integer depositPeriod;
         public GetFixedDepositAccountsDepositPeriodFrequency depositPeriodFrequency;
+    }
+
+    @Schema(description = "CalculateFixedDepositInterestRequest")
+    public static final class CalculateFixedDepositInterestRequest {
+
+        private CalculateFixedDepositInterestRequest() {}
+
+        @Schema(example = "10000")
+        public BigDecimal principalAmount;
+        @Schema(example = "5")
+        public BigDecimal annualInterestRate;
+        @Schema(example = "12")
+        public Long tenureInMonths;
+        @Schema(example = "3")
+        public Long interestPostingPeriodInMonths;
+        @Schema(example = "1")
+        public Long interestCompoundingPeriodInMonths;
+
+    }
+
+    @Schema(description = "CalculateFixedDepositInterestResponse")
+    public static final class CalculateFixedDepositInterestResponse {
+
+        private CalculateFixedDepositInterestResponse() {}
+
+        @Schema(example = "10511.61")
+        public BigDecimal maturityAmount;
+
+        @Schema(example = "Accuracy Warning")
+        public String warning;
     }
 
     @Schema(description = "PostFixedDepositAccountsRequest")

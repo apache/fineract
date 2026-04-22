@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -42,7 +43,7 @@ public class UnAuthenticatedUserExceptionMapper implements ExceptionMapper<UnAut
     @Override
     public Response toResponse(@SuppressWarnings("unused") final UnAuthenticatedUserException exception) {
         // Status code 401 really reads as: "Unauthenticated":
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).type(MediaType.APPLICATION_JSON)
                 .build();
     }

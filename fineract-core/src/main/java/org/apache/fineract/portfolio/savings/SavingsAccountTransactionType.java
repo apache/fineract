@@ -24,10 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.apache.fineract.portfolio.TransactionEntryType;
 
 /**
- * An enumeration of different transactions that can occur on a {@link SavingsAccount}.
+ * An enumeration of different transactions that can occur on a SavingsAccount.
  */
 public enum SavingsAccountTransactionType {
 
@@ -40,6 +41,7 @@ public enum SavingsAccountTransactionType {
     WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharge"), //
     PAY_CHARGE(7, "savingsAccountTransactionType.payCharge", TransactionEntryType.DEBIT), //
     DIVIDEND_PAYOUT(8, "savingsAccountTransactionType.dividendPayout", TransactionEntryType.CREDIT), //
+    ACCRUAL(10, "savingsAccountTransactionType.accrual"), //
     INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
@@ -55,7 +57,9 @@ public enum SavingsAccountTransactionType {
             .collect(Collectors.toMap(SavingsAccountTransactionType::getValue, v -> v));
 
     private final int value;
+    @Getter
     private final String code;
+    @Getter
     private final TransactionEntryType entryType;
 
     SavingsAccountTransactionType(final Integer value, final String code, TransactionEntryType entryType) {
@@ -76,14 +80,6 @@ public enum SavingsAccountTransactionType {
         return this.value;
     }
 
-    public String getCode() {
-        return this.code;
-    }
-
-    public TransactionEntryType getEntryType() {
-        return entryType;
-    }
-
     public boolean isCreditEntryType() {
         return entryType != null && entryType.isCredit();
     }
@@ -95,10 +91,6 @@ public enum SavingsAccountTransactionType {
     public static SavingsAccountTransactionType fromInt(final Integer value) {
         SavingsAccountTransactionType transactionType = BY_ID.get(value);
         return transactionType == null ? INVALID : transactionType;
-    }
-
-    public boolean isValid() {
-        return this != INVALID;
     }
 
     public boolean isDeposit() {
@@ -179,6 +171,10 @@ public enum SavingsAccountTransactionType {
 
     public boolean isAmountRelease() {
         return this == AMOUNT_RELEASE;
+    }
+
+    public boolean isAccrual() {
+        return this == ACCRUAL;
     }
 
     public boolean isCredit() {

@@ -19,9 +19,13 @@
 package org.apache.fineract.interoperation.data;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 
+@Getter
+@AllArgsConstructor
 public class InteropIdentifierData {
 
     @NotNull
@@ -32,26 +36,8 @@ public class InteropIdentifierData {
 
     private final String subIdOrType;
 
-    public InteropIdentifierData(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
-        this.idType = idType;
-        this.idValue = idValue;
-        this.subIdOrType = subIdOrType;
-    }
-
     protected InteropIdentifierData(@NotNull InteropIdentifierType idType, @NotNull String idValue) {
         this(idType, idValue, null);
-    }
-
-    public InteropIdentifierType getIdType() {
-        return idType;
-    }
-
-    public String getIdValue() {
-        return idValue;
-    }
-
-    public String getSubIdOrType() {
-        return subIdOrType;
     }
 
     public static InteropIdentifierData build(InteropIdentifier identifier) {

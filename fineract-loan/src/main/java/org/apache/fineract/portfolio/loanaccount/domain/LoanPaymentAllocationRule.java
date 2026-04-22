@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+// TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanTransaction classes
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -46,7 +47,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeLis
         @UniqueConstraint(columnNames = { "loan_id", "transaction_type" }, name = "uq_m_loan_payment_allocation_rule") })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -74,6 +73,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
@@ -92,7 +92,7 @@ import org.apache.fineract.portfolio.group.service.GroupRolesReadPlatformService
 import org.apache.fineract.portfolio.loanaccount.data.GLIMContainer;
 import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
-import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
+import org.apache.fineract.portfolio.meeting.service.MeetingReadService;
 import org.apache.fineract.portfolio.savings.data.GSIMContainer;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -124,23 +124,22 @@ public class GroupsApiResource {
     private final GroupRolesReadPlatformService groupRolesReadPlatformService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final MeetingReadPlatformService meetingReadPlatformService;
+    private final MeetingReadService meetingReadPlatformService;
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final GSIMReadPlatformService gsimReadPlatformService;
+    private final SqlValidator sqlValidator;
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Group Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n\n"
+    @Operation(summary = "Retrieve Group Template", operationId = "retrieveTemplateGroup", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n\n"
             + "\n\n" + "Field Defaults\n\n" + "Allowed Value Lists\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/template\n\n" + "\n\n"
             + "groups/template?officeId=2\n\n" + "\n\n" + "groups/template?centerId=1\n\n" + "\n\n"
             + "groups/template?centerId=1&staffInSelectedOfficeOnly=true")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsTemplateResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsTemplateResponse.class)))
     public String retrieveTemplate(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("center") @Parameter(description = "center") final boolean isCenterGroup,
@@ -157,8 +156,8 @@ public class GroupsApiResource {
                     GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
         }
 
-        final List<DatatableData> datatableTemplates = entityDatatableChecksReadService
-                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getName(), null);
+        final List<DatatableData> datatableTemplates = entityDatatableChecksReadService.retrieveTemplates(StatusEnum.CREATE.getValue(),
+                EntityTables.GROUP.getName(), null);
         if (centerId != null) {
             final GroupGeneralData centerGroupTemplate = centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
             centerGroupTemplate.setDatatables(datatableTemplates);
@@ -176,13 +175,11 @@ public class GroupsApiResource {
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Groups", description = "The default implementation of listing Groups returns 200 entries with support for pagination and sorting. Using the parameter limit with description -1 returns all entries.\n\n"
+    @Operation(summary = "List Groups", operationId = "retrieveAllGroups", description = "The default implementation of listing Groups returns 200 entries with support for pagination and sorting. Using the parameter limit with description -1 returns all entries.\n\n"
             + "Example Requests:\n\n" + "\n\n" + "groups\n\n" + "\n\n" + "groups?fields=name,officeName,joinedDate\n\n" + "\n\n"
             + "groups?offset=10&limit=50\n\n" + "\n\n" + "groups?orderBy=name&sortOrder=DESC")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsResponse.class)))
     public String retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("staffId") @Parameter(description = "staffId") final Long staffId,
@@ -197,11 +194,17 @@ public class GroupsApiResource {
             @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly) {
 
         context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
-        final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        sqlValidator.validate(externalId);
+        sqlValidator.validate(hierarchy);
+        final PaginationParameters parameters = PaginationParameters.builder().paged(Boolean.TRUE.equals(paged)).limit(limit).offset(offset)
+                .orderBy(orderBy).sortOrder(sortOrder).build();
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final SearchParameters searchParameters = SearchParameters.forGroups(officeId, staffId, externalId, name, hierarchy, offset, limit,
-                orderBy, sortOrder, orphansOnly);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).officeId(officeId).externalId(externalId)
+                .name(name).hierarchy(hierarchy).offset(offset).orderBy(orderBy).sortOrder(sortOrder).staffId(staffId)
+                .orphansOnly(orphansOnly).build();
         if (parameters.isPaged()) {
             final Page<GroupGeneralData> groups = groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
             return toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
@@ -213,12 +216,10 @@ public class GroupsApiResource {
 
     @GET
     @Path("{groupId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Group", description = "Retrieve group information.\n\n" + "Example Requests:\n\n" + "\n\n"
-            + "groups/1\n\n" + "\n\n" + "groups/1?associations=clientMembers")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdResponse.class))) })
+    @Operation(summary = "Retrieve a Group", operationId = "retrieveOneGroup", description = "Retrieve group information.\n\n"
+            + "Example Requests:\n\n" + "\n\n" + "groups/1\n\n" + "\n\n" + "groups/1?associations=clientMembers")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdResponse.class)))
     public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @QueryParam("roleId") @Parameter(description = "roleId") final Long roleId) {
@@ -316,12 +317,11 @@ public class GroupsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Group", description = "Creates a Group\n\n"
+    @Operation(summary = "Create a Group", operationId = "createGroup", description = "Creates a Group\n\n"
             + "Mandatory Fields: name, officeId, active, activationDate (if active=true)\n\n"
             + "Optional Fields: externalId, staffId, clientMembers")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsResponse.class)))
     public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -336,10 +336,10 @@ public class GroupsApiResource {
     @Path("{groupId}/command/unassign_staff")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Unassign a Staff", description = "Allows you to unassign the Staff.\n\n" + "Mandatory Fields: staffId")
+    @Operation(summary = "Unassign a Staff", operationId = "unassignLoanOfficerGroup", description = "Allows you to unassign the Staff.\n\n"
+            + "Mandatory Fields: staffId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class)))
     public String unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -356,10 +356,9 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Group", description = "Updates a Group")
+    @Operation(summary = "Update a Group", operationId = "updateGroup", description = "Updates a Group")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PutGroupsGroupIdResponse.class)))
     public String update(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -373,11 +372,9 @@ public class GroupsApiResource {
 
     @DELETE
     @Path("{groupId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Group", description = "A group can be deleted if it is in pending state and has no associations - clients, loans or savings")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.DeleteGroupsGroupIdResponse.class))) })
+    @Operation(summary = "Delete a Group", operationId = "deleteGroup", description = "A group can be deleted if it is in pending state and has no associations - clients, loans or savings")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.DeleteGroupsGroupIdResponse.class)))
     public String delete(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -391,7 +388,7 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Activate a Group | Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Unassign a Staff | Assign a Staff | Close a Group | Unassign a Role | Update a Role", description = "Activate a Group:\n\n"
+    @Operation(summary = "Activate a Group | Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Unassign a Staff | Assign a Staff | Close a Group | Unassign a Role | Update a Role", operationId = "handleCommandsGroup", description = "Activate a Group:\n\n"
             + "Groups can be created in a Pending state. This API exists to enable group activation.\n\n" + "\n\n"
             + "If the group happens to be already active this API will result in an error.\n\n" + "Mandatory Fields: activationDate\n\n"
             + "Associate Clients:\n\n" + "This API allows to associate existing clients to a group.\n\n" + "\n\n"
@@ -423,8 +420,7 @@ public class GroupsApiResource {
             + "Allows you to update the member Role.\n\n" + "Mandatory Fields: role\n\n"
             + "Showing request/response for Transfer Clients across groups")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdResponse.class)))
     public String activateOrGenerateCollectionSheet(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @QueryParam("roleId") @Parameter(description = "roleId") final Long roleId,
@@ -495,13 +491,11 @@ public class GroupsApiResource {
 
     @GET
     @Path("{groupId}/accounts")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Group accounts overview", description = "Retrieves details of all Loan and Savings accounts associated with this group.\n\n"
+    @Operation(summary = "Retrieve Group accounts overview", operationId = "retrieveAccountsGroup", description = "Retrieves details of all Loan and Savings accounts associated with this group.\n\n"
             + "\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/1/accounts\n\n" + "\n\n" + "\n\n"
             + "groups/1/accounts?fields=loanAccounts,savingsAccounts,memberLoanAccounts,\n\n" + "memberSavingsAccounts")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdAccountsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdAccountsResponse.class)))
     public String retrieveAccounts(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Context final UriInfo uriInfo) {
 
@@ -519,6 +513,7 @@ public class GroupsApiResource {
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
+    @Operation(summary = "Download Groups Bulk Template", operationId = "getBulkTemplateGroup")
     public Response getGroupsTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,
             @QueryParam("dateFormat") final String dateFormat) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.GROUPS.toString(), officeId, staffId, dateFormat);
@@ -527,6 +522,7 @@ public class GroupsApiResource {
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(summary = "Upload Groups Bulk Template", operationId = "postBulkTemplateGroup")
     @RequestBody(description = "Upload group template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String postGroupTemplate(@FormDataParam("file") InputStream uploadedInputStream,
@@ -539,8 +535,8 @@ public class GroupsApiResource {
 
     @GET
     @Path("{groupId}/glimaccounts")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve GLIM Accounts for Group", operationId = "retrieveGlimAccountsGroup")
     public String retrieveglimAccounts(@PathParam("groupId") final Long groupId,
             @QueryParam("parentLoanAccountNo") final String parentLoanAccountNo, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission("GROUP");
@@ -562,8 +558,8 @@ public class GroupsApiResource {
 
     @GET
     @Path("{groupId}/gsimaccounts")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve GSIM Accounts for Group", operationId = "retrieveGsimAccountsGroup")
     public String retrieveGsimAccounts(@PathParam("groupId") final Long groupId,
             @QueryParam("parentGSIMAccountNo") final String parentGSIMAccountNo, @QueryParam("parentGSIMId") final Long parentGSIMId,
             @Context final UriInfo uriInfo) {

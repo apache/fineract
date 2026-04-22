@@ -25,9 +25,10 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositProductReadPlatformService;
@@ -46,15 +47,16 @@ public class CommandsConfiguration {
     public AuditReadPlatformService auditReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
             FromJsonHelper fromApiJsonHelper, AppUserReadPlatformService appUserReadPlatformService,
             OfficeReadPlatformService officeReadPlatformService, ClientReadPlatformService clientReadPlatformService,
-            LoanProductReadPlatformService loanProductReadPlatformService, StaffReadPlatformService staffReadPlatformService,
+            LoanProductReadPlatformService loanProductReadPlatformService, StaffReadService staffReadPlatformService,
             PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
             PaginationParametersDataValidator paginationParametersDataValidator,
             SavingsProductReadPlatformService savingsProductReadPlatformService,
-            DepositProductReadPlatformService depositProductReadPlatformService, ColumnValidator columnValidator) {
+            DepositProductReadPlatformService depositProductReadPlatformService, ColumnValidator columnValidator,
+            SqlValidator sqlValidator) {
         return new AuditReadPlatformServiceImpl(jdbcTemplate, context, fromApiJsonHelper, appUserReadPlatformService,
                 officeReadPlatformService, clientReadPlatformService, loanProductReadPlatformService, staffReadPlatformService,
                 paginationHelper, sqlGenerator, paginationParametersDataValidator, savingsProductReadPlatformService,
-                depositProductReadPlatformService, columnValidator);
+                depositProductReadPlatformService, columnValidator, sqlValidator);
     }
 
 }

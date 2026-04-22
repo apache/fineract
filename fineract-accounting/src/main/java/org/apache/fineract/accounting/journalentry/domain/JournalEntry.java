@@ -27,6 +27,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -37,7 +38,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 @Entity
 @Getter
 @Table(name = "acc_gl_journal_entry")
-public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
+public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
@@ -54,6 +55,7 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "currency_code", length = 3, nullable = false)
     private String currencyCode;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reversal_id")
     private JournalEntry reversalJournalEntry;
@@ -73,6 +75,7 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "share_transaction_id")
     private Long shareTransactionId;
 
+    @Setter
     @Column(name = "reversed", nullable = false)
     private boolean reversed = false;
 
@@ -147,11 +150,8 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
         return JournalEntryType.DEBIT.getValue().equals(this.type);
     }
 
-    public void setReversalJournalEntry(final JournalEntry reversalJournalEntry) {
-        this.reversalJournalEntry = reversalJournalEntry;
+    public boolean isCreditEntry() {
+        return JournalEntryType.CREDIT.getValue().equals(this.type);
     }
 
-    public void setReversed(final boolean reversed) {
-        this.reversed = reversed;
-    }
 }

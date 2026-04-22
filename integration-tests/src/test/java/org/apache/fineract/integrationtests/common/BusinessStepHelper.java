@@ -20,13 +20,22 @@ package org.apache.fineract.integrationtests.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.fineract.client.models.BusinessStep;
-import org.apache.fineract.client.models.UpdateBusinessStepConfigRequest;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.models.BusinessStepRequest;
+import org.apache.fineract.client.models.JobBusinessStepConfigData;
+import org.apache.fineract.client.util.Calls;
 
-public class BusinessStepHelper extends IntegrationTest {
+public class BusinessStepHelper {
 
     public BusinessStepHelper() {}
+
+    public BusinessStepsSnapshot getConfigurationSnapshot(String jobName) {
+        JobBusinessStepConfigData businessConfig = Calls
+                .ok(FineractClientHelper.getFineractClient().businessStepConfiguration.retrieveAllConfiguredBusinessStep(jobName));
+        return new BusinessStepsSnapshot(jobName, businessConfig.getBusinessSteps());
+    }
 
     public void updateSteps(String jobName, String... steps) {
         long order = 0;
@@ -38,7 +47,20 @@ public class BusinessStepHelper extends IntegrationTest {
             businessStep.setOrder(order);
             stepList.add(businessStep);
         }
-        ok(fineract().businessStepConfiguration.updateJobBusinessStepConfig(jobName,
-                new UpdateBusinessStepConfigRequest().businessSteps(stepList)));
+        Calls.ok(FineractClientHelper.getFineractClient().businessStepConfiguration.updateJobBusinessStepConfig(jobName,
+                new BusinessStepRequest().businessSteps(stepList)));
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class BusinessStepsSnapshot {
+
+        private String jobName;
+        private List<BusinessStep> businessSteps;
+
+        public void restore() {
+            Calls.ok(FineractClientHelper.getFineractClient().businessStepConfiguration.updateJobBusinessStepConfig(jobName,
+                    new BusinessStepRequest().businessSteps(businessSteps)));
+        }
     }
 }

@@ -29,4 +29,4 @@ public class YourThingValidator {
 
 == Declarative
 
-[FINERACT-1229](https://issues.apache.org/jira/browse/FINERACT-1229) is an open issue about adopting Bean Validation for _declarative_ instead of _programmatic_ (as above) validation.  Contributions welcome!
+https://issues.apache.org/jira/browse/FINERACT-1229[FINERACT-1229] is an open issue about adopting Bean Validation for _declarative_ instead of _programmatic_ (as above) validation.  Contributions welcome!

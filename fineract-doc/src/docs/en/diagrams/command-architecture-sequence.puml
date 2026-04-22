@@ -1,0 +1,92 @@
+@startuml
+title Command Processing with Pre/Post/Error Processors - Sequence Diagram
+
+actor Client
+participant "Command Dispatcher" as Dispatcher
+participant "Command Processor" as Processor
+participant "Processor Registry" as Registry
+participant "Pre-Processor Chain" as PreChain
+participant "Command Router" as Router
+participant "Command Handler" as Handler
+participant "Business Service" as Service
+participant "Post-Processor Chain" as PostChain
+participant "Error-Processor Chain" as ErrorChain
+database "Database" as DB
+
+Client -> Dispatcher: dispatch(command)
+activate Dispatcher
+
+Dispatcher -> Processor: Execute(command, handlerType)
+activate Processor
+
+Processor -> Registry: GetPreProcessors()
+Registry --> Processor: Return pre-processor list
+Processor -> PreChain: Execute(command)
+activate PreChain
+
+loop For each registered pre-processor
+    PreChain -> PreChain: Execute pre-processor
+loop end
+
+PreChain --> Processor: Pre-processing complete
+deactivate PreChain
+
+Processor -> Router: GetHandler(commandType)
+activate Router
+Router --> Processor: Return handler instance
+deactivate Router
+
+Processor -> Handler: Execute(command)
+activate Handler
+
+Handler -> Service: Invoke business logic
+activate Service
+
+Service -> DB: Execute operation
+DB --> Service: Return result
+Service --> Handler: Return business result
+deactivate Service
+
+Handler --> Processor: Return execution result
+deactivate Handler
+
+alt Execution Successful
+    Processor -> Registry: GetPostProcessors()
+    Registry --> Processor: Return post-processor list
+    Processor -> PostChain: Execute(command, result)
+    activate PostChain
+
+    loop For each registered post-processor
+        PostChain -> PostChain: Execute post-processor
+        note right: Audit logging,\nEvent publishing,\nMetrics, etc.
+    end
+
+    PostChain --> Processor: Post-processing complete
+    deactivate PostChain
+
+    Processor --> Dispatcher: Return success result
+    deactivate Processor
+    Dispatcher --> Client: Return success response
+    deactivate Dispatcher
+
+else Execution Failed
+    Processor -> Registry: GetErrorProcessors()
+    Registry --> Processor: Return error processor list
+    Processor -> ErrorChain: HandleError(context, exception)
+    activate ErrorChain
+
+    loop For each registered error processor
+        ErrorChain -> ErrorChain: Execute error processor
+        note right: Error logging,\nCompensation actions,\nRetry scheduling,\nAlerting, etc.
+    end
+
+    ErrorChain --> Processor: Error handling complete
+    deactivate ErrorChain
+
+    Processor --> Dispatcher: Return error result
+    deactivate Processor
+    Dispatcher --> Client: Return error response
+    deactivate Dispatcher
+end
+
+@enduml

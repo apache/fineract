@@ -50,19 +50,16 @@ import org.springframework.stereotype.Service;
 @Service
 public final class GoogleGsonSerializerHelper {
 
-    public Gson createGsonBuilderForPartialResponseFiltering(final boolean prettyPrint, final Set<String> responseParameters) {
+    public Gson createGsonBuilderForPartialResponseFiltering(final Set<String> responseParameters) {
         final ExclusionStrategy strategy = new ParameterListInclusionStrategy(responseParameters);
 
         final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
         registerTypeAdapters(builder);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
         return builder.create();
     }
 
     public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(final Set<String> supportedParameters,
-            final boolean prettyPrint, final Set<String> responseParameters) {
+            final Set<String> responseParameters) {
 
         final Set<String> parameterNamesToSkip = new HashSet<>();
 
@@ -84,9 +81,6 @@ public final class GoogleGsonSerializerHelper {
 
         final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
         registerTypeAdapters(builder);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
         return builder.create();
     }
 
@@ -103,22 +97,15 @@ public final class GoogleGsonSerializerHelper {
     }
 
     public static GsonBuilder createGsonBuilder() {
-        return createGsonBuilder(false);
-    }
-
-    public static GsonBuilder createGsonBuilder(final boolean prettyPrint) {
         final GsonBuilder builder = new GsonBuilder();
         registerTypeAdapters(builder);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
         return builder;
     }
 
     public static void registerTypeAdapters(final GsonBuilder builder) {
         builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
         builder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
-        // NOTE: was missing, necessary for GSON serialization with JDK 17's restrictive module access
+        // NOTE: was missing, necessary for GSON serialization with JDK 21's restrictive module access
         builder.registerTypeAdapter(LocalTime.class, new LocalTimeAdapter());
         builder.registerTypeAdapter(ZonedDateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());

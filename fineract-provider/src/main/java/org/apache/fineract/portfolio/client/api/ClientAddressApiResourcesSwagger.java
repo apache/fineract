@@ -28,31 +28,6 @@ final class ClientAddressApiResourcesSwagger {
 
     private ClientAddressApiResourcesSwagger() {}
 
-    @Schema(description = "PostClientClientIdAddressesRequest")
-    public static final class PostClientClientIdAddressesRequest {
-
-        private PostClientClientIdAddressesRequest() {}
-
-        @Schema(example = "Ipca")
-        public String street;
-        @Schema(example = "Kandivali")
-        public String addressLine1;
-        @Schema(example = "plot47")
-        public String addressLine2;
-        @Schema(example = "charkop")
-        public String addressLine3;
-        @Schema(example = "Mumbai")
-        public String city;
-        @Schema(example = "800")
-        public Long stateProvinceId;
-        @Schema(example = "802")
-        public Long countryId;
-        @Schema(example = "400064")
-        public Long postalCode;
-        @Schema(example = "true")
-        public Boolean isActive;
-    }
-
     @Schema(description = "PostClientClientIdAddressesResponse")
     public static final class PostClientClientIdAddressesResponse {
 
@@ -60,62 +35,6 @@ final class ClientAddressApiResourcesSwagger {
 
         @Schema(example = "15")
         public Long resourceId;
-    }
-
-    @Schema(description = "GetClientClientIdAddressesResponse")
-    public static final class GetClientClientIdAddressesResponse {
-
-        private GetClientClientIdAddressesResponse() {}
-
-        @Schema(example = "111755")
-        public Long client_id;
-        @Schema(example = "PERMANENT ADDRESS")
-        public String addressType;
-        @Schema(example = "14")
-        public Long addressId;
-        @Schema(example = "804")
-        public Long addressTypeId;
-        @Schema(example = "false")
-        public Boolean isActive;
-        @Schema(example = "anki's home")
-        public String street;
-        @Schema(example = "test123")
-        public String addressLine1;
-        @Schema(example = "iuyt")
-        public String addressLine2;
-        @Schema(example = " ")
-        public String addressLine3;
-        @Schema(example = " ")
-        public String townVillage;
-        @Schema(example = "mumbai")
-        public String city;
-        @Schema(example = " ")
-        public String countyDistrict;
-        @Schema(example = "801")
-        public Long stateProvinceId;
-        @Schema(example = "UNITED STATES")
-        public String countryName;
-        @Schema(example = "GUJRAT")
-        public String stateName;
-        @Schema(example = "807")
-        public Long countryId;
-        @Schema(example = "400095")
-        public Long postalCode;
-        @Schema(example = " ")
-        public String createdBy;
-        @Schema(example = " ")
-        public String updatedBy;
-    }
-
-    @Schema(description = "PutClientClientIdAddressesRequest")
-    public static final class PutClientClientIdAddressesRequest {
-
-        private PutClientClientIdAddressesRequest() {}
-
-        @Schema(example = "67")
-        public Long addressId;
-        @Schema(example = "goldensource")
-        public String street;
     }
 
     @Schema(description = "PutClientClientIdAddressesResponse")

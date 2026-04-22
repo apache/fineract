@@ -82,7 +82,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(code.getId()) //
-                    .withSubEntityId(codeValue.getId())//
+                    .withSubEntityId(codeValue.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -160,7 +160,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(codeId) //
-                    .withSubEntityId(codeValueId)//
+                    .withSubEntityId(codeValueId) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);

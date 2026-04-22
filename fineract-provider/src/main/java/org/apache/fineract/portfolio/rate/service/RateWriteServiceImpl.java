@@ -69,7 +69,10 @@ public class RateWriteServiceImpl implements RateWriteService {
 
             this.rateRepository.saveAndFlush(rate);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(rate.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(rate.getId()) //
+                    .build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);

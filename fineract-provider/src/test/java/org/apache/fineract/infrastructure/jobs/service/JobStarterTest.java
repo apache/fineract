@@ -19,14 +19,19 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
@@ -34,6 +39,8 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameData;
 import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameService;
 import org.apache.fineract.infrastructure.jobs.service.jobparameterprovider.JobParameterProvider;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,6 +80,14 @@ public class JobStarterTest {
     private List<JobParameterProvider<?>> jobParameterProviders;
     @Mock
     private JobNameService jobNameService;
+
+    @Mock
+    private TenantDetailsService tenantDetailsService;
+    @Mock
+    private AppUserRepositoryWrapper userRepository;
+    @Mock
+    private BusinessDateReadPlatformService businessDateReadPlatformService;
+
     @Captor
     private ArgumentCaptor<Set<JobParameterDTO>> jobParameterDTOCaptor;
 
@@ -106,7 +121,7 @@ public class JobStarterTest {
         ScheduledJobDetail scheduledJobDetail = Mockito.mock(ScheduledJobDetail.class);
         when(jobExecution.getStatus()).thenReturn(BatchStatus.COMPLETED);
         setupMocks(jobExecution, job, scheduledJobDetail);
-        JobExecution result = underTest.run(job, scheduledJobDetail, Set.of());
+        JobExecution result = underTest.run(job, scheduledJobDetail, Set.of(), "default");
         Assertions.assertEquals(jobExecution, result);
     }
 
@@ -122,7 +137,7 @@ public class JobStarterTest {
             when(jobExecution.getStatus()).thenReturn(BatchStatus.FAILED);
             when(jobExecution.getExitStatus()).thenReturn(new ExitStatus(failedStatus.name(), "testException"));
             JobExecutionException exception = Assertions.assertThrows(JobExecutionException.class,
-                    () -> underTest.run(job, scheduledJobDetail, Set.of()));
+                    () -> underTest.run(job, scheduledJobDetail, Set.of(), "default"));
             Assertions.assertEquals(String.format("exitCode=%s;exitDescription=%s", failedStatus.name(), "testException"),
                     exception.getMessage());
         }
@@ -140,5 +155,11 @@ public class JobStarterTest {
         when(jobParameterProvider.canProvideParametersForJob("testJobName")).thenReturn(true);
         when(jobParameterProviders.stream()).thenReturn(Stream.of(jobParameterProvider));
         when(jobNameService.getJobByHumanReadableName(any(String.class))).thenReturn(new JobNameData("testEnumstyleName", "testHumanReadableName"));
+        when(tenantDetailsService.loadTenantById(anyString())).thenReturn(FineractPlatformTenant.builder().build());
+        AppUser appUser = Mockito.mock(AppUser.class);
+        when(appUser.getPassword()).thenReturn("");
+        when(appUser.getAuthorities()).thenReturn(List.of());
+        when(userRepository.fetchSystemUser()).thenReturn(appUser);
+        when(businessDateReadPlatformService.getBusinessDates()).thenReturn(new HashMap<>());
     }
 }

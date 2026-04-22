@@ -107,7 +107,10 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
             this.fineractEntityToEntityMappingRepository.saveAndFlush(newMap);
 
-            return new CommandProcessingResultBuilder().withEntityId(newMap.getId()).withCommandId(command.commandId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(newMap.getId()) //
+                    .withCommandId(command.commandId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -137,8 +140,10 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             if (!changes.isEmpty()) {
                 this.fineractEntityToEntityMappingRepository.saveAndFlush(mapForUpdate);
             }
-            return new CommandProcessingResultBuilder(). //
-                    withEntityId(mapForUpdate.getId()).withCommandId(command.commandId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(mapForUpdate.getId()) //
+                    .withCommandId(command.commandId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -158,8 +163,9 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
                 .findOneWithNotFoundDetection(mapId);
         this.fineractEntityToEntityMappingRepository.delete(deleteMap);
 
-        return new CommandProcessingResultBuilder(). //
-                withEntityId(deleteMap.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(deleteMap.getId()) //
+                .build();
 
     }
 

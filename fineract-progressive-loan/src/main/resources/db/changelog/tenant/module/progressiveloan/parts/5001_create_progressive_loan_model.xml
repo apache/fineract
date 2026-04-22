@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1744116182-1" author="fineract">
+        <createTable tableName="m_loan_progressive_model">
+            <column  autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_loan_progressive_model"/>
+            </column>
+            <column name="version" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="loan_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="json_model" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="business_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1744116182-2" author="fineract">
+        <addUniqueConstraint columnNames="loan_id" constraintName="uc_m_loan_progressive_model_loan"
+                             tableName="m_loan_progressive_model"/>
+    </changeSet>
+    <changeSet id="1744116182-3" author="fineract">
+        <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_progressive_model"
+                                 constraintName="FK_M_LOAN_PROGRESSIVE_MODEL_ON_LOAN" referencedColumnNames="id"
+                                 referencedTableName="m_loan"/>
+    </changeSet>
+    <changeSet author="fineract" id="1744116182-4-my" context="mysql">
+        <addColumn tableName="m_loan_progressive_model">
+            <column name="last_modified_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="1744116182
+    -4-pg" context="postgresql">
+        <addColumn tableName="m_loan_progressive_model">
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

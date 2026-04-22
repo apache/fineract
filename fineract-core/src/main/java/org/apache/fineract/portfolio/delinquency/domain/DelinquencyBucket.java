@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.delinquency.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -39,7 +41,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Entity
 @Table(name = "m_delinquency_bucket", uniqueConstraints = {
         @UniqueConstraint(name = "uq_delinquency_bucket_name", columnNames = { "name" }) })
-public class DelinquencyBucket extends AbstractAuditableWithUTCDateTimeCustom {
+public class DelinquencyBucket extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -47,6 +49,10 @@ public class DelinquencyBucket extends AbstractAuditableWithUTCDateTimeCustom {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "m_delinquency_bucket_mappings", joinColumns = @JoinColumn(name = "delinquency_bucket_id"), inverseJoinColumns = @JoinColumn(name = "delinquency_range_id"))
     private List<DelinquencyRange> ranges;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "bucket_type")
+    private DelinquencyBucketType bucketType;
 
     @Version
     private Long version;

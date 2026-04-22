@@ -37,11 +37,12 @@ public interface LoanRepaymentScheduleTransactionProcessor {
     boolean accept(String s);
 
     /**
-     * Provides support for processing the latest transaction (which should be latest transaction) against the loan
+     * Provides support for processing the latest transaction (which should be the latest transaction) against the loan
      * schedule.
+     *
+     * @return ChangedTransactionDetail
      */
-    void processLatestTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, MoneyHolder overpaymentHolder);
+    ChangedTransactionDetail processLatestTransaction(LoanTransaction loanTransaction, TransactionCtx ctx);
 
     /**
      * Provides support for passing all {@link LoanTransaction}'s so it will completely re-process the entire loan

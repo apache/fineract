@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-description = 'ACME Corp.: Fineract Note Service'
+description = 'ACME Fineract Note Service'
 
-group = 'com.acme.fineract.portfolio.note'
+group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-note-service'
+base {
+    archivesName = 'acme-fineract-note-service'
+}
 
 apply from: 'dependencies.gradle'

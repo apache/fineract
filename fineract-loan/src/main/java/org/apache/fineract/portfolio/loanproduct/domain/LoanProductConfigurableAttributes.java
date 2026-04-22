@@ -31,7 +31,7 @@ import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
 @Entity
 @Table(name = "m_product_loan_configurable_attributes")
-public class LoanProductConfigurableAttributes extends AbstractPersistableCustom implements Serializable {
+public class LoanProductConfigurableAttributes extends AbstractPersistableCustom<Long> implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)

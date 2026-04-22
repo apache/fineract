@@ -18,17 +18,15 @@
  */
 package org.apache.fineract.commands.data;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * Immutable data object for application user data.
  */
-@RequiredArgsConstructor
-@Getter
-public class ProcessingResultLookup {
+public record ProcessingResultLookup(Long id, String processingResult) implements Serializable {
 
-    private final Long id;
-    private final String processingResult;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
 }

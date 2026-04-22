@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.portfolio.meeting.api;
 
-import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_RESOURCE_NAME;
-
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -30,236 +29,201 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarEntityTypeNotSupportedException;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
-import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
-import org.apache.fineract.portfolio.meeting.MeetingApiConstants;
-import org.apache.fineract.portfolio.meeting.attendance.data.ClientAttendanceData;
-import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
-import org.apache.fineract.portfolio.meeting.attendance.service.ClientAttendanceReadPlatformService;
+import org.apache.fineract.portfolio.meeting.command.MeetingAttendanceUpdateCommand;
+import org.apache.fineract.portfolio.meeting.command.MeetingCreateCommand;
+import org.apache.fineract.portfolio.meeting.command.MeetingDeleteCommand;
+import org.apache.fineract.portfolio.meeting.command.MeetingUpdateCommand;
+import org.apache.fineract.portfolio.meeting.data.MeetingAttendanceUpdateRequest;
+import org.apache.fineract.portfolio.meeting.data.MeetingAttendanceUpdateResponse;
+import org.apache.fineract.portfolio.meeting.data.MeetingCreateRequest;
+import org.apache.fineract.portfolio.meeting.data.MeetingCreateResponse;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
+import org.apache.fineract.portfolio.meeting.data.MeetingDeleteRequest;
+import org.apache.fineract.portfolio.meeting.data.MeetingDeleteResponse;
+import org.apache.fineract.portfolio.meeting.data.MeetingUpdateRequest;
+import org.apache.fineract.portfolio.meeting.data.MeetingUpdateResponse;
 import org.apache.fineract.portfolio.meeting.exception.MeetingNotSupportedResourceException;
-import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
+import org.apache.fineract.portfolio.meeting.service.MeetingAttendanceDropdownReadService;
+import org.apache.fineract.portfolio.meeting.service.MeetingAttendanceReadService;
+import org.apache.fineract.portfolio.meeting.service.MeetingReadService;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/{entityType}/{entityId}/meetings")
+@Produces({ MediaType.APPLICATION_JSON })
 @Component
-@Tag(name = "Meetings", description = "")
+@Tag(name = "Meetings")
 @RequiredArgsConstructor
 public class MeetingsApiResource {
 
-    private final PlatformSecurityContext context;
-    private final MeetingReadPlatformService readPlatformService;
-    private final ClientAttendanceReadPlatformService attendanceReadPlatformService;
+    private final MeetingReadService meetingReadService;
+    private final MeetingAttendanceReadService meetingAttendanceReadService;
+    private final MeetingAttendanceDropdownReadService meetingAttendanceDropdownReadService;
     private final ClientReadPlatformService clientReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-    private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
-    private final DefaultToApiJsonSerializer<MeetingData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private static final Set<String> MEETING_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(MeetingApiConstants.idParamName, MeetingApiConstants.meetingDateParamName, MeetingApiConstants.clientsAttendance,
-                    MeetingApiConstants.clients, MeetingApiConstants.calendarData, MeetingApiConstants.attendanceTypeOptions));
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String template(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            @QueryParam("calendarId") final Long calendarId, @Context final UriInfo uriInfo) {
+    @Operation(summary = "Retrieve Meeting Template", operationId = "retrieveTemplateMeeting")
+    public MeetingData template(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
+            @QueryParam("calendarId") final Long calendarId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MEETING_RESOURCE_NAME);
-        final Integer entityTypeId = CalendarEntityType.valueOf(entityType.toUpperCase()).getValue();
-        Collection<ClientData> clients = null;
         CalendarData calendarData = null;
 
-        if (CalendarEntityType.isGroup(entityType)) {
-            clients = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(entityId);
-        } else if (CalendarEntityType.isCenter(entityType)) {
-            clients = this.clientReadPlatformService.retrieveActiveClientMembersOfCenter(entityId);
-        } else {
-            final String defaultUserMessage = "Meeting attendance is not supported for the resource " + entityType
-                    + ". The supported resources are [" + CalendarEntityType.GROUPS.name() + ", " + CalendarEntityType.CENTERS.name() + "]";
-            throw new MeetingNotSupportedResourceException(defaultUserMessage, CalendarEntityType.GROUPS.name(),
-                    CalendarEntityType.CENTERS.name());
-        }
-
         if (calendarId != null) {
-            calendarData = this.calendarReadPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
-            final boolean withHistory = true;
-            final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(calendarData, withHistory,
-                    DateUtils.getBusinessLocalDate());
-            final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService
-                    .generateNextTenRecurringDates(calendarData);
-            final LocalDate recentEligibleMeetingDate = null;
-            calendarData = CalendarData.withRecurringDates(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
+            calendarData = calendarReadPlatformService.retrieveCalendar(calendarId, entityId,
+                    CalendarEntityType.valueOf(entityType.toUpperCase()).getValue());
+
+            var recurringDates = calendarReadPlatformService.generateRecurringDates(calendarData, true, DateUtils.getBusinessLocalDate());
+            var nextTenRecurringDates = calendarReadPlatformService.generateNextTenRecurringDates(calendarData);
+
+            calendarData = CalendarData.withRecurringDates(calendarData, recurringDates, nextTenRecurringDates, null);
         }
 
-        final MeetingData meetingData = MeetingData.template(clients, calendarData,
-                this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
+        if (CalendarEntityType.isGroup(entityType)) {
+            return MeetingData.builder().clients(clientReadPlatformService.retrieveActiveClientMembersOfGroup(entityId))
+                    .calendarData(calendarData).attendanceTypeOptions(meetingAttendanceDropdownReadService.retrieveAttendanceTypeOptions())
+                    .build();
+        } else if (CalendarEntityType.isCenter(entityType)) {
+            return MeetingData.builder().clients(clientReadPlatformService.retrieveActiveClientMembersOfCenter(entityId))
+                    .calendarData(calendarData).attendanceTypeOptions(meetingAttendanceDropdownReadService.retrieveAttendanceTypeOptions())
+                    .build();
+        } else {
+            throw new MeetingNotSupportedResourceException(
+                    "Meeting attendance is not supported for the resource " + entityType + ". The supported resources are ["
+                            + CalendarEntityType.GROUPS.name() + ", " + CalendarEntityType.CENTERS.name() + "]",
+                    CalendarEntityType.GROUPS.name(), CalendarEntityType.CENTERS.name());
+        }
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, meetingData, MEETING_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveMeetings(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            @QueryParam("limit") final Integer limit, @Context final UriInfo uriInfo) {
+    @Operation(summary = "List Meetings", operationId = "retrieveAllMeetings")
+    public Collection<MeetingData> retrieveMeetings(@PathParam("entityType") final String entityType,
+            @PathParam("entityId") final Long entityId, @QueryParam("limit") final Integer limit) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MEETING_RESOURCE_NAME);
-
-        final Collection<MeetingData> meetingsData = this.readPlatformService.retrieveMeetingsByEntity(entityId,
-                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(), limit);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, meetingsData, MEETING_RESPONSE_DATA_PARAMETERS);
+        return meetingReadService.retrieveMeetingsByEntity(entityId, CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(),
+                limit);
     }
 
     @GET
     @Path("{meetingId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveMeeting(@PathParam("meetingId") final Long meetingId, @PathParam("entityType") final String entityType,
-            @PathParam("entityId") final Long entityId, @Context final UriInfo uriInfo) {
+    @Operation(summary = "Retrieve a Meeting", operationId = "retrieveOneMeeting")
+    public MeetingData retrieveMeeting(@PathParam("meetingId") final Long meetingId, @PathParam("entityType") final String entityType,
+            @PathParam("entityId") final Long entityId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MEETING_RESOURCE_NAME);
-        final Integer entityTypeId = CalendarEntityType.valueOf(entityType.toUpperCase()).getValue();
-        MeetingData meetingData = this.readPlatformService.retrieveMeeting(meetingId, entityId, entityTypeId);
-        final Collection<ClientAttendanceData> clientsAttendance = this.attendanceReadPlatformService
-                .retrieveClientAttendanceByMeetingId(meetingId);
-        meetingData = MeetingData.withClientsAttendanceAndAttendanceTypeOptions(meetingData, clientsAttendance,
-                this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, meetingData, MEETING_RESPONSE_DATA_PARAMETERS);
+        var meetingData = meetingReadService.retrieveMeeting(meetingId, entityId,
+                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue());
+        var clientsAttendance = meetingAttendanceReadService.retrieveClientAttendanceByMeetingId(meetingId);
+
+        return MeetingData.builder().id(meetingData.getId()).meetingDate(meetingData.getMeetingDate()).clients(meetingData.getClients())
+                .calendarData(meetingData.getCalendarData()).clientsAttendance(clientsAttendance)
+                .attendanceTypeOptions(meetingAttendanceDropdownReadService.retrieveAttendanceTypeOptions()).build();
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            final String apiRequestBodyAsJson) {
+    @Operation(summary = "Create a Meeting", operationId = "createMeeting")
+    public MeetingCreateResponse createMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
+            final MeetingCreateRequest request) {
 
-        final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
+        var calendarEntityType = CalendarEntityType.getEntityType(entityType);
+
         if (calendarEntityType == null) {
             throw new CalendarEntityTypeNotSupportedException(entityType);
         }
 
-        final CommandWrapper resourceDetails = getResourceDetails(calendarEntityType, entityId);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createMeeting(resourceDetails, entityType, entityId)
-                .withJson(apiRequestBodyAsJson).build();
+        request.setEntityId(entityId);
+        request.setEntityType(calendarEntityType);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final var command = new MeetingCreateCommand();
 
-        return this.toApiJsonSerializer.serialize(result);
+        command.setPayload(request);
 
-    }
+        final Supplier<MeetingCreateResponse> response = dispatcher.dispatch(command);
 
-    @POST
-    @Path("{meetingId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String performMeetingCommands(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            @PathParam("meetingId") final Long meetingId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
-
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-
-        CommandProcessingResult result = null;
-        if (is(commandParam, "saveOrUpdateAttendance")) {
-            final CommandWrapper commandRequest = builder.saveOrUpdateAttendance(meetingId, entityType, entityId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "saveOrUpdateAttendance" });
-        }
-
-        return this.toApiJsonSerializer.serialize(result);
-
+        return response.get();
     }
 
     @PUT
     @Path("{meetingId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            @PathParam("meetingId") final Long meetingId, final String jsonRequestBody) {
+    @Operation(summary = "Update a Meeting", operationId = "updateMeeting")
+    public MeetingUpdateResponse updateMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
+            @PathParam("meetingId") final Long meetingId, final MeetingUpdateRequest request) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateMeeting(entityType, entityId, meetingId)
-                .withJson(jsonRequestBody).build();
+        var calendarEntityType = CalendarEntityType.getEntityType(entityType);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        if (calendarEntityType == null) {
+            throw new CalendarEntityTypeNotSupportedException(entityType);
+        }
 
-        return this.toApiJsonSerializer.serialize(result);
+        request.setEntityId(entityId);
+        request.setEntityType(calendarEntityType);
+        request.setId(meetingId);
+
+        final var command = new MeetingUpdateCommand();
+
+        command.setPayload(request);
+
+        final Supplier<MeetingUpdateResponse> response = dispatcher.dispatch(command);
+
+        return response.get();
     }
 
     @DELETE
     @Path("{meetingId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
+    @Operation(summary = "Delete a Meeting", operationId = "deleteMeeting")
+    public MeetingDeleteResponse deleteMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
             @PathParam("meetingId") final Long meetingId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteMeeting(entityType, entityId, meetingId).build();
+        var request = MeetingDeleteRequest.builder().id(meetingId).entityId(entityId).entityType(entityType).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final var command = new MeetingDeleteCommand();
 
-        return this.toApiJsonSerializer.serialize(result);
+        command.setPayload(request);
+
+        final Supplier<MeetingDeleteResponse> response = dispatcher.dispatch(command);
+
+        return response.get();
     }
 
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
+    @POST
+    @Path("{meetingId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update Meeting Attendance", operationId = "updateMeetingAttendance")
+    public MeetingAttendanceUpdateResponse updateMeetingAttendance(@PathParam("entityType") final String entityType,
+            @PathParam("entityId") final Long entityId, @PathParam("meetingId") final Long meetingId,
+            @QueryParam("command") final String commandParam, final MeetingAttendanceUpdateRequest request) {
 
-    private CommandWrapper getResourceDetails(final CalendarEntityType type, final Long entityId) {
-        CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
-        switch (type) {
-            case CENTERS:
-                resourceDetails.withGroupId(entityId);
-            break;
-            case CLIENTS:
-                resourceDetails.withClientId(entityId);
-            break;
-            case GROUPS:
-                resourceDetails.withGroupId(entityId);
-            break;
-            case LOANS:
-                resourceDetails.withLoanId(entityId);
-            break;
-            case SAVINGS:
-                resourceDetails.withSavingsId(entityId);
-            break;
-            case INVALID:
-            break;
-            case LOAN_RECALCULATION_REST_DETAIL:
-            break;
-            default:
-            break;
+        final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
+
+        if (calendarEntityType == null) {
+            throw new CalendarEntityTypeNotSupportedException(entityType);
         }
-        return resourceDetails.build();
-    }
 
+        request.setEntityId(entityId);
+        request.setEntityType(calendarEntityType);
+        request.setId(meetingId);
+
+        final var command = new MeetingAttendanceUpdateCommand();
+
+        command.setPayload(request);
+
+        final Supplier<MeetingAttendanceUpdateResponse> response = dispatcher.dispatch(command);
+
+        return response.get();
+    }
 }

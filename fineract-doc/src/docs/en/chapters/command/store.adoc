@@ -1,0 +1,9 @@
+= Command Store
+
+TBD
+
+.Command Processing Architecture Level 2 - Store
+[plantuml, format=svg]
+----
+include::{diagramsdir}/command-architecture-level-2-store.puml[]
+----

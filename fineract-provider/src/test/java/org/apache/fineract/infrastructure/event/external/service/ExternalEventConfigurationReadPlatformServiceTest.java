@@ -27,8 +27,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationData;
-import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationItemData;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationItemResponse;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationResponse;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventConfigurationRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,16 +59,16 @@ public class ExternalEventConfigurationReadPlatformServiceTest {
         // given
         List<ExternalEventConfiguration> configurations = Arrays.asList(new ExternalEventConfiguration("aType", true),
                 new ExternalEventConfiguration("bType", false));
-        List<ExternalEventConfigurationItemData> configurationDataItems = Arrays
-                .asList(new ExternalEventConfigurationItemData("aType", true), new ExternalEventConfigurationItemData("bType", false));
+        List<ExternalEventConfigurationItemResponse> configurationDataItems = Arrays.asList(
+                new ExternalEventConfigurationItemResponse("aType", true), new ExternalEventConfigurationItemResponse("bType", false));
         when(repository.findAll()).thenReturn(configurations);
         when(mapper.map(Mockito.anyList())).thenReturn(configurationDataItems);
 
         // when
-        ExternalEventConfigurationData actualConfiguration = underTest.findAllExternalEventConfigurations();
+        ExternalEventConfigurationResponse actualConfiguration = underTest.findAllExternalEventConfigurations();
         // then
         assertThat(actualConfiguration.getExternalEventConfiguration(), hasSize(2));
-        assertThat(actualConfiguration.getExternalEventConfiguration().get(0), any(ExternalEventConfigurationItemData.class));
+        assertThat(actualConfiguration.getExternalEventConfiguration().get(0), any(ExternalEventConfigurationItemResponse.class));
         assertThat(actualConfiguration.getExternalEventConfiguration().get(0).getType(), equalTo("aType"));
         assertThat(actualConfiguration.getExternalEventConfiguration().get(0).isEnabled(), equalTo(true));
     }
@@ -79,7 +79,7 @@ public class ExternalEventConfigurationReadPlatformServiceTest {
         List<ExternalEventConfiguration> emptyConfiguration = new ArrayList<>();
         when(repository.findAll()).thenReturn(emptyConfiguration);
         // when
-        ExternalEventConfigurationData actualConfiguration = underTest.findAllExternalEventConfigurations();
+        ExternalEventConfigurationResponse actualConfiguration = underTest.findAllExternalEventConfigurations();
         // then
         assertThat(actualConfiguration.getExternalEventConfiguration(), hasSize(0));
 

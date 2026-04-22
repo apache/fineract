@@ -71,7 +71,10 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
 
         this.creditBureauConfigurationRepository.saveAndFlush(cb_config);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cb_config.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(cb_config.getId()) //
+                .build();
 
     }
 

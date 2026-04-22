@@ -38,7 +38,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class ScheduledJobRunHistory extends AbstractPersistableCustom {
+public class ScheduledJobRunHistory extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "job_id")

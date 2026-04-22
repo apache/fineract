@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 @Entity
 @Getter
 @Table(name = "m_payment_detail")
-public final class PaymentDetail extends AbstractPersistableCustom {
+public class PaymentDetail extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "payment_type_id", nullable = false)
@@ -57,9 +57,7 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     @Column(name = "bank_number", length = 50)
     private String bankNumber;
 
-    PaymentDetail() {
-
-    }
+    protected PaymentDetail() {}
 
     public static PaymentDetail generatePaymentDetail(final PaymentType paymentType, final JsonCommand command,
             final Map<String, Object> changes) {
@@ -85,9 +83,7 @@ public final class PaymentDetail extends AbstractPersistableCustom {
             changes.put(PaymentDetailConstants.bankNumberParamName, bankNumber);
         }
         changes.put("paymentTypeId", paymentType.getId());
-        final PaymentDetail paymentDetail = new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
-                bankNumber);
-        return paymentDetail;
+        return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
     }
 
     public static PaymentDetail instance(final PaymentType paymentType, final String accountNumber, final String checkNumber,
@@ -107,8 +103,7 @@ public final class PaymentDetail extends AbstractPersistableCustom {
 
     public PaymentDetailData toData() {
         final PaymentTypeData paymentTypeData = null; // this.paymentType.toData();
-        final PaymentDetailData paymentDetailData = new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber,
-                this.routingCode, this.receiptNumber, this.bankNumber);
-        return paymentDetailData;
+        return new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber, this.routingCode, this.receiptNumber,
+                this.bankNumber);
     }
 }

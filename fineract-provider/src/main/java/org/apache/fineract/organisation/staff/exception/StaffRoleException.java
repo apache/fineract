@@ -27,7 +27,9 @@ public class StaffRoleException extends AbstractPlatformResourceNotFoundExceptio
 
     public enum StaffRole {
 
-        LOAN_OFFICER, BRANCH_MANAGER, SAVINGS_OFFICER;
+        LOAN_OFFICER, //
+        BRANCH_MANAGER, //
+        SAVINGS_OFFICER; //
 
         @Override
         public String toString() {

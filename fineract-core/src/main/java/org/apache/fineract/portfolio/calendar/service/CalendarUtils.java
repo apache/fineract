@@ -208,8 +208,7 @@ public final class CalendarUtils {
 
     public static LocalDate adjustRecurringDate(final LocalDate recuringDate, final Integer numberOfDays) {
         if (recuringDate.getDayOfMonth() == 1) {
-            LocalDate adjustedRecurringDate = recuringDate.plusDays(numberOfDays);
-            return adjustedRecurringDate;
+            return recuringDate.plusDays(numberOfDays);
         }
         return recuringDate;
     }
@@ -221,9 +220,7 @@ public final class CalendarUtils {
             final RRule rrule = new RRule(recurringRule);
             rrule.validate();
 
-            final Recur recur = rrule.getRecur();
-
-            return recur;
+            return rrule.getRecur();
         } catch (final ParseException e) {
             // TODO Auto-generated catch block
             log.error("Problem occurred in getICalRecur function", e);
@@ -285,27 +282,28 @@ public final class CalendarUtils {
             NumberList nthDays = recur.getSetPosList();
             Integer nthDay = null;
             if (!nthDays.isEmpty()) {
-                nthDay = nthDays.get(0);
+                nthDay = nthDays.getFirst();
             }
             NumberList monthDays = recur.getMonthDayList();
             Integer monthDay = null;
             if (!monthDays.isEmpty()) {
-                monthDay = monthDays.get(0);
+                monthDay = monthDays.getFirst();
             }
             WeekDayList weekdays = recur.getDayList();
             WeekDay weekDay = null;
             if (!weekdays.isEmpty()) {
-                weekDay = weekdays.get(0);
+                weekDay = weekdays.getFirst();
             }
             if (nthDay != null && weekDay != null) {
                 NthDayType nthDayType = NthDayType.fromInt(nthDay);
                 NthDayNameEnum nthDayName = NthDayNameEnum.from(nthDayType.toString());
                 DayNameEnum weekdayType = DayNameEnum.from(weekDay.getDay().name());
                 if (recur.getInterval() == 1 || recur.getInterval() == -1) {
-                    humanReadable = "Monthly on " + nthDayName.getCode().toLowerCase() + " " + weekdayType.getCode().toLowerCase();
+                    humanReadable = "Monthly on " + nthDayName.getCode().toLowerCase(java.util.Locale.ROOT) + " "
+                            + weekdayType.getCode().toLowerCase(java.util.Locale.ROOT);
                 } else {
-                    humanReadable = "Every " + recur.getInterval() + " months on " + nthDayName.getCode().toLowerCase() + " "
-                            + weekdayType.getCode().toLowerCase();
+                    humanReadable = "Every " + recur.getInterval() + " months on " + nthDayName.getCode().toLowerCase(java.util.Locale.ROOT)
+                            + " " + weekdayType.getCode().toLowerCase(java.util.Locale.ROOT);
                 }
             } else if (monthDay != null) {
                 if (monthDay == -1) {
@@ -355,7 +353,7 @@ public final class CalendarUtils {
         return humanReadable;
     }
 
-    public static boolean isValidRedurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date) {
+    public static boolean isValidRecurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) {
             return false;
@@ -365,7 +363,7 @@ public final class CalendarUtils {
         return isValidRecurringDate(recur, seedDate, date, isSkipRepaymentonFirstDayOfMonth, numberOfDays);
     }
 
-    public static boolean isValidRedurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date,
+    public static boolean isValidRecurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date,
             boolean isSkipRepaymentonFirstDayOfMonth, final Integer numberOfDays) {
 
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
@@ -385,12 +383,18 @@ public final class CalendarUtils {
         final Collection<LocalDate> recurDate = getRecurringDates(recur, seedDate, startDate, date.plusDays(1), 1,
                 isSkipRepaymentonFirstDayOfMonth, numberOfDays);
 
-        return (recurDate == null || recurDate.isEmpty()) ? false : recurDate.contains(date);
+        return recurDate != null && !recurDate.isEmpty() && recurDate.contains(date);
     }
 
     public enum DayNameEnum {
 
-        MO(1, "Monday"), TU(2, "Tuesday"), WE(3, "Wednesday"), TH(4, "Thursday"), FR(5, "Friday"), SA(6, "Saturday"), SU(7, "Sunday");
+        MO(1, "Monday"), //
+        TU(2, "Tuesday"), //
+        WE(3, "Wednesday"), //
+        TH(4, "Thursday"), //
+        FR(5, "Friday"), //
+        SA(6, "Saturday"), //
+        SU(7, "Sunday"); //
 
         private final String code;
         private final Integer value;
@@ -420,7 +424,13 @@ public final class CalendarUtils {
 
     public enum NthDayNameEnum {
 
-        ONE(1, "First"), TWO(2, "Second"), THREE(3, "Third"), FOUR(4, "Fourth"), FIVE(5, "Fifth"), LAST(-1, "Last"), INVALID(0, "Invalid");
+        ONE(1, "First"), //
+        TWO(2, "Second"), //
+        THREE(3, "Third"), //
+        FOUR(4, "Fourth"), //
+        FIVE(5, "Fifth"), //
+        LAST(-1, "Last"), //
+        INVALID(0, "Invalid"); //
 
         private final String code;
         private final Integer value;
@@ -529,7 +539,7 @@ public final class CalendarUtils {
         }
         LocalDate startDate = disbursementDate;
         final LocalDate seedDate = calendar.getStartDateLocalDate();
-        if (isValidRedurringDate(calendar.getRecurrence(), seedDate, startDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)
+        if (isValidRecurringDate(calendar.getRecurrence(), seedDate, startDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)
                 && !frequency.equals(Recur.Frequency.DAILY.name())) {
             startDate = startDate.plusDays(1);
         }
@@ -573,10 +583,9 @@ public final class CalendarUtils {
         if (isValidRecurringDate(recur, seedDate, oldRepaymentDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)) {
             return oldRepaymentDate;
         }
-        LocalDate nextRepaymentDate = getNextRepaymentMeetingDate(recurringRule, seedDate, oldRepaymentDate, loanRepaymentInterval,
-                frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
 
-        return nextRepaymentDate;
+        return getNextRepaymentMeetingDate(recurringRule, seedDate, oldRepaymentDate, loanRepaymentInterval, frequency, workingDays,
+                isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
     }
 
     public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate repaymentDate,
@@ -689,10 +698,10 @@ public final class CalendarUtils {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < calendarTypeOptions.size() - 1; i++) {
-            sb.append(calendarTypeOptions.get(i).toString() + ",");
+            sb.append(calendarTypeOptions.get(i).toString()).append(",");
         }
 
-        sb.append(calendarTypeOptions.get(calendarTypeOptions.size() - 1).toString());
+        sb.append(calendarTypeOptions.getLast().toString());
 
         return sb.toString();
     }
@@ -728,10 +737,6 @@ public final class CalendarUtils {
             return null;
         }
         final LocalDate seedDate = calendar.getStartDateLocalDate();
-        /**
-         * if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) { date = date.plusDays(1); }
-         **/
-
         return getNextRecurringDate(recur, seedDate, startDate);
     }
 
@@ -752,7 +757,8 @@ public final class CalendarUtils {
             if (nthDayType == NthDayType.ONE || nthDayType == NthDayType.TWO || nthDayType == NthDayType.THREE
                     || nthDayType == NthDayType.FOUR) {
                 baseDataValidator.reset().parameter(repeatsOnDayParamName).value(repeatsOnDay).cantBeBlankWhenParameterProvidedIs(
-                        repeatsOnNthDayOfMonthParamName, NthDayNameEnum.from(nthDayType.toString()).getCode().toLowerCase());
+                        repeatsOnNthDayOfMonthParamName,
+                        NthDayNameEnum.from(nthDayType.toString()).getCode().toLowerCase(java.util.Locale.ROOT));
             }
         }
     }

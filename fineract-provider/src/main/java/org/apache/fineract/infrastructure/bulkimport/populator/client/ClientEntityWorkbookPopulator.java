@@ -29,6 +29,9 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
@@ -74,7 +77,34 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
         setOfficeDateLookupTable(clientSheet, officeSheetPopulator.getOffices(), ClientEntityConstants.RELATIONAL_OFFICE_NAME_COL,
                 ClientEntityConstants.RELATIONAL_OFFICE_OPENING_DATE_COL, dateFormat);
         setClientDataLookupTable(clientSheet);
+        setFormatStyle(workbook, clientSheet);
         setRules(clientSheet, dateFormat);
+    }
+
+    private void setFormatStyle(Workbook workbook, Sheet worksheet) {
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        CreationHelper createHelper = workbook.getCreationHelper();
+        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+
+        for (int rowIndex = 1; rowIndex < SpreadsheetVersion.EXCEL97.getMaxRows(); rowIndex++) {
+            Row row = worksheet.getRow(rowIndex);
+            if (row == null) {
+                row = worksheet.createRow(rowIndex);
+            }
+
+            setFormatActivationAndSubmittedDate(row, ClientEntityConstants.ACTIVATION_DATE_COL, dateCellStyle);
+            setFormatActivationAndSubmittedDate(row, ClientEntityConstants.SUBMITTED_ON_COL, dateCellStyle);
+            setFormatActivationAndSubmittedDate(row, ClientEntityConstants.INCOPORATION_VALID_TILL_COL, dateCellStyle);
+            setFormatActivationAndSubmittedDate(row, ClientEntityConstants.INCOPORATION_DATE_COL, dateCellStyle);
+        }
+    }
+
+    private void setFormatActivationAndSubmittedDate(Row row, int columnIndex, CellStyle cellStyle) {
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null) {
+            cell = row.createCell(columnIndex);
+        }
+        cell.setCellStyle(cellStyle);
     }
 
     private void setClientDataLookupTable(Sheet clientSheet) {
@@ -193,7 +223,7 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(ClientEntityConstants.CLIENT_CLASSIFICATION_COL, rowHeader, "Client Classification ");
         writeString(ClientEntityConstants.INCOPORATION_NUMBER_COL, rowHeader, "Incorporation Number");
         writeString(ClientEntityConstants.MAIN_BUSINESS_LINE, rowHeader, "Main Business Line");
-        writeString(ClientEntityConstants.CONSTITUTION_COL, rowHeader, "Constitution");
+        writeString(ClientEntityConstants.CONSTITUTION_COL, rowHeader, "Constitution*");
         writeString(ClientEntityConstants.REMARKS_COL, rowHeader, "Remarks");
         writeString(ClientEntityConstants.EXTERNAL_ID_COL, rowHeader, "External ID ");
         writeString(ClientEntityConstants.SUBMITTED_ON_COL, rowHeader, "Submitted On Date");
@@ -267,10 +297,9 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint staffNameConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$B1))");
         DataValidationConstraint submittedOnDateConstraint = validationHelper
-                .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=$O1", null, dateFormat);
-        DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($B1,$AJ$2:$AK" + (offices.size() + 1) + ",2,FALSE)", "=TODAY()",
-                dateFormat);
+                .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=TODAY()", null, dateFormat);
+        DataValidationConstraint activationDateConstraint = validationHelper
+                .createDateConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$O1", null, dateFormat);
         DataValidationConstraint activeConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
         DataValidationConstraint clientTypesConstraint = validationHelper.createFormulaListConstraint("ClientTypes");
         DataValidationConstraint constitutionConstraint = validationHelper.createFormulaListConstraint("Constitution");

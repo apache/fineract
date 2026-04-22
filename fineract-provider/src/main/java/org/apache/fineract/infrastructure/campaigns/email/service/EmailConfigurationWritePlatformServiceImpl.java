@@ -69,7 +69,8 @@ public class EmailConfigurationWritePlatformServiceImpl implements EmailConfigur
         }
 
         return new CommandProcessingResultBuilder() //
-                .with(changes).build();
+                .with(changes) //
+                .build();
 
     }
 

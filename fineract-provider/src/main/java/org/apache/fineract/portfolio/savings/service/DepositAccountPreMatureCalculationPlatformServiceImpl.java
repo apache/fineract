@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
@@ -51,7 +51,7 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     private final DepositAccountAssembler depositAccountAssembler;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
 
     @Transactional
     @Override
@@ -78,13 +78,13 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
         final LocalDate interestCalculatedToDate = preMaturityDate.minusDays(1);
         final boolean isPreMatureClosure = true;
 
-        if (depositAccountType.isFixedDeposit()) {
+        if (depositAccountType == DepositAccountType.FIXED_DEPOSIT) {
             final FixedDepositAccount fd = (FixedDepositAccount) account;
             accountData = FixedDepositAccountData.preClosureDetails(
                     account.getId(), fd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure,
                             isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth),
                     onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas);
-        } else if (depositAccountType.isRecurringDeposit()) {
+        } else if (depositAccountType == DepositAccountType.RECURRING_DEPOSIT) {
             final RecurringDepositAccount rd = (RecurringDepositAccount) account;
             accountData = RecurringDepositAccountData.preClosureDetails(
                     account.getId(), rd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure,

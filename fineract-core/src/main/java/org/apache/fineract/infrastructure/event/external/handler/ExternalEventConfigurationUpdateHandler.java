@@ -18,26 +18,35 @@
  */
 package org.apache.fineract.infrastructure.event.external.handler;
 
-import jakarta.validation.constraints.NotNull;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateRequest;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventConfigurationUpdateResponse;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventConfigurationWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@Service
-@CommandType(entity = "EXTERNAL_EVENT_CONFIGURATION", action = "UPDATE")
-public class ExternalEventConfigurationUpdateHandler implements NewCommandSourceHandler {
+public class ExternalEventConfigurationUpdateHandler
+        implements CommandHandler<ExternalEventConfigurationUpdateRequest, ExternalEventConfigurationUpdateResponse> {
 
     private final ExternalEventConfigurationWritePlatformService writePlatformService;
 
+    @Retry(name = "commandExternalEventConfigurationUpdate", fallbackMethod = "fallback")
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(@NotNull final JsonCommand command) {
-        return writePlatformService.updateConfigurations(command);
+    public ExternalEventConfigurationUpdateResponse handle(Command<ExternalEventConfigurationUpdateRequest> command) {
+        return writePlatformService.updateConfigurations(command.getPayload());
+    }
+
+    @Override
+    public ExternalEventConfigurationUpdateResponse fallback(Command<ExternalEventConfigurationUpdateRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
     }
 }

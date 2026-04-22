@@ -11,7 +11,7 @@ Taking into account example shown above for the *users* resource.
 * HTTPS API: retrieveAll method on *org.apache.fineract.useradministration.api.UsersApiResource* invoked
 * UsersApiResource.retrieveAll: Check user has permission to access this resources data.
 * UsersApiResource.retrieveAll: Use 'read service' to fetch all users data ('read services' execute simple SQL queries against Database using JDBC)
-* UsersApiResource.retrieveAll: Data returned to coverted into JSON response
+* UsersApiResource.retrieveAll: Data returned to converted into JSON response
 * Command: POST /users (Note: data passed in request body)
 * HTTPS API: create method on org.apache.fineract.useradministration.api.UsersApiResource invoked
 
@@ -21,7 +21,7 @@ Taking into account example shown above for the *users* resource.
 include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResource.java[lines=168..188]
 ----
 
-.Create a CommandWrapper object that represents this create user command and JSON request body. Pass off responsiblity for processing to PortfolioCommandSourceWritePlatformService.logCommandSource
+.Create a CommandWrapper object that represents this create user command and JSON request body. Pass off responsibility for processing to PortfolioCommandSourceWritePlatformService.logCommandSource
 [source,java]
 ----
 include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/service/PortfolioCommandSourceWritePlatformServiceImpl.java[lines=69..129]
@@ -36,7 +36,7 @@ include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/commands/serv
 NOTE: if a RollbackTransactionAsCommandIsNotApprovedByCheckerException occurs at this point. The original transaction will of been aborted and we only log an entry for the command in the audit table setting its status as 'Pending'.
 
 * Check that if maker-checker configuration enabled for this action. If yes and this is not a 'checker' approving the command - rollback at the end. We rollback at the end in order to test if the command will pass 'domain validation' which requires commit to database for full check.
-* findCommandHandler - Find the correct Hanlder to process this command.
+* findCommandHandler - Find the correct Handler to process this command.
 * Process command using handler (In transactional scope).
 * CommandSource object created/updated with all details for logging to 'm_portfolio_command_source' table.
 * In update scenario, we check to see if there where really any changes/updates. If so only JSON for changes is stored in audit log.

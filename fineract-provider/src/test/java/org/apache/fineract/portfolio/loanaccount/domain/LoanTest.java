@@ -177,13 +177,20 @@ public class LoanTest {
 
         final LoanTransaction loanTransaction = Mockito.mock(LoanTransaction.class);
         when(loanTransaction.isNotReversed()).thenReturn(Boolean.TRUE);
-        when(loanTransaction.isAccrualTransaction()).thenReturn(Boolean.FALSE);
+        when(loanTransaction.isAccrual()).thenReturn(Boolean.FALSE);
+        when(loanTransaction.isAccrualAdjustment()).thenReturn(Boolean.FALSE);
         final LoanTransaction loanTransaction2 = Mockito.mock(LoanTransaction.class);
         when(loanTransaction2.isNotReversed()).thenReturn(Boolean.TRUE);
-        when(loanTransaction2.isAccrualTransaction()).thenReturn(Boolean.FALSE);
+        when(loanTransaction2.isAccrual()).thenReturn(Boolean.FALSE);
+        when(loanTransaction2.isAccrualAdjustment()).thenReturn(Boolean.FALSE);
         final LoanTransaction loanTransaction3 = Mockito.mock(LoanTransaction.class);
         when(loanTransaction3.isNotReversed()).thenReturn(Boolean.TRUE);
-        when(loanTransaction3.isAccrualTransaction()).thenReturn(Boolean.TRUE);
+        when(loanTransaction3.isAccrual()).thenReturn(Boolean.TRUE);
+        when(loanTransaction3.isAccrualAdjustment()).thenReturn(Boolean.FALSE);
+        final LoanTransaction loanTransaction4 = Mockito.mock(LoanTransaction.class);
+        when(loanTransaction4.isNotReversed()).thenReturn(Boolean.TRUE);
+        when(loanTransaction4.isAccrual()).thenReturn(Boolean.FALSE);
+        when(loanTransaction4.isAccrualAdjustment()).thenReturn(Boolean.TRUE);
         ReflectionTestUtils.setField(loan, "loanTransactions", List.of(loanTransaction, loanTransaction2, loanTransaction3));
         final LoanTransaction userTransaction = loan.getLastUserTransaction();
         assertNotNull(userTransaction);
@@ -201,40 +208,40 @@ public class LoanTest {
 
         LoanTransaction lt1 = new LoanTransaction();
         ReflectionTestUtils.setField(lt1, "id", 1L);
-        ReflectionTestUtils.setField(lt1, "typeOf", LoanTransactionType.DISBURSEMENT.getValue());
+        ReflectionTestUtils.setField(lt1, "typeOf", LoanTransactionType.DISBURSEMENT);
         ReflectionTestUtils.setField(lt1, "dateOf", today);
         ReflectionTestUtils.setField(lt1, "createdDate", now);
         LoanTransaction lt2 = new LoanTransaction();
         ReflectionTestUtils.setField(lt2, "id", 2L);
-        ReflectionTestUtils.setField(lt2, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt2, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER);
         ReflectionTestUtils.setField(lt2, "dateOf", today);
         ReflectionTestUtils.setField(lt2, "createdDate", now);
         LoanTransaction lt3 = new LoanTransaction();
         ReflectionTestUtils.setField(lt3, "id", 3L);
-        ReflectionTestUtils.setField(lt3, "typeOf", LoanTransactionType.REPAYMENT.getValue());
+        ReflectionTestUtils.setField(lt3, "typeOf", LoanTransactionType.REPAYMENT);
         ReflectionTestUtils.setField(lt3, "dateOf", today);
         ReflectionTestUtils.setField(lt3, "createdDate", now);
         ReflectionTestUtils.setField(lt3, "reversed", true);
         LoanTransaction lt4 = new LoanTransaction();
         ReflectionTestUtils.setField(lt4, "id", 4L);
-        ReflectionTestUtils.setField(lt4, "typeOf", LoanTransactionType.WAIVE_INTEREST.getValue());
+        ReflectionTestUtils.setField(lt4, "typeOf", LoanTransactionType.WAIVE_INTEREST);
         ReflectionTestUtils.setField(lt4, "dateOf", today);
         ReflectionTestUtils.setField(lt4, "createdDate", now);
         LoanTransaction lt5 = new LoanTransaction();
         ReflectionTestUtils.setField(lt5, "id", 5L);
-        ReflectionTestUtils.setField(lt5, "typeOf", LoanTransactionType.INCOME_POSTING.getValue());
+        ReflectionTestUtils.setField(lt5, "typeOf", LoanTransactionType.INCOME_POSTING);
         ReflectionTestUtils.setField(lt5, "dateOf", today);
         ReflectionTestUtils.setField(lt5, "createdDate", now);
         LoanTransaction lt6 = new LoanTransaction();
-        ReflectionTestUtils.setField(lt6, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt6, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER);
         ReflectionTestUtils.setField(lt6, "dateOf", today.minusDays(2));
         LoanTransaction lt7 = new LoanTransaction();
         ReflectionTestUtils.setField(lt7, "id", 7L);
-        ReflectionTestUtils.setField(lt7, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt7, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER);
         ReflectionTestUtils.setField(lt7, "dateOf", today.minusDays(2));
         LoanTransaction lt8 = new LoanTransaction();
         ReflectionTestUtils.setField(lt8, "id", 8L);
-        ReflectionTestUtils.setField(lt8, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER.getValue());
+        ReflectionTestUtils.setField(lt8, "typeOf", LoanTransactionType.WITHDRAW_TRANSFER);
         ReflectionTestUtils.setField(lt8, "dateOf", today.minusDays(2));
         ReflectionTestUtils.setField(lt8, "createdDate", now.minusMinutes(2));
 
@@ -258,8 +265,23 @@ public class LoanTest {
      * @return the {@link LoanCharge}
      */
     private LoanCharge buildLoanCharge() {
-        return new LoanCharge(mock(Loan.class), mock(Charge.class), new BigDecimal(100), new BigDecimal(100),
-                ChargeTimeType.TRANCHE_DISBURSEMENT, ChargeCalculationType.FLAT, LocalDate.of(2022, 6, 27), ChargePaymentMode.REGULAR, 1,
-                new BigDecimal(100), ExternalId.generate());
+        final LoanCharge loanCharge = new LoanCharge();
+
+        loanCharge.setLoan(mock(Loan.class));
+        loanCharge.setCharge(mock(Charge.class));
+        loanCharge.setAmount(new BigDecimal(100));
+        loanCharge.setAmountOutstanding(new BigDecimal(100));
+        loanCharge.setChargeTime(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue());
+        loanCharge.setChargeCalculation(ChargeCalculationType.FLAT.getValue());
+        loanCharge.setDueDate(LocalDate.of(2022, 6, 27));
+        loanCharge.setChargePaymentMode(ChargePaymentMode.REGULAR.getValue());
+        loanCharge.setPercentage(null);
+        loanCharge.setAmountPercentageAppliedTo(null);
+        loanCharge.setAmountPaid(null);
+        loanCharge.setAmountWaived(null);
+        loanCharge.setAmountWrittenOff(null);
+        loanCharge.setExternalId(ExternalId.generate());
+
+        return loanCharge;
     }
 }

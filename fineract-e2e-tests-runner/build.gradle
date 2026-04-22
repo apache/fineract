@@ -1,0 +1,114 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+plugins {
+    id 'se.thinkcode.cucumber-runner' version '0.0.11'
+    id 'io.qameta.allure' version '3.0.2'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(project(':fineract-avro-schemas'))
+    testImplementation(project(':fineract-client'))
+    testImplementation(project(':fineract-client-feign'))
+    testImplementation(project(':fineract-e2e-tests-core').sourceSets.test.output)
+
+    testImplementation 'org.springframework:spring-context'
+    implementation 'org.springframework:spring-test'
+    testImplementation 'org.springframework:spring-jms'
+
+    testImplementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    testImplementation 'org.apache.httpcomponents:httpclient:4.5.14'
+    testImplementation 'org.apache.commons:commons-lang3:3.18.0'
+    testImplementation ('com.googlecode.json-simple:json-simple:1.1.1') {
+        exclude group: 'junit', module: 'junit'
+    }
+    testImplementation 'com.google.code.gson:gson:2.11.0'
+
+    testImplementation 'org.junit.platform:junit-platform-suite:1.11.4'
+    testImplementation 'org.junit.platform:junit-platform-console:1.11.4'
+    testImplementation 'io.cucumber:cucumber-java:7.20.1'
+    testImplementation 'io.cucumber:cucumber-junit:7.20.1'
+    testImplementation 'io.cucumber:cucumber-spring:7.20.1'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.20.1'
+
+    testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.29.1'
+
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.36'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+    testImplementation "ch.qos.logback:logback-core:1.5.19"
+    testImplementation "ch.qos.logback:logback-classic:1.5.19"
+
+    testImplementation 'org.apache.activemq:activemq-client:6.1.6'
+    testImplementation "org.apache.avro:avro:1.12.0"
+    testImplementation "org.awaitility:awaitility:4.2.2"
+    testImplementation 'io.github.classgraph:classgraph:4.8.179'
+
+    testImplementation 'org.apache.commons:commons-collections4:4.4'
+
+    testImplementation 'org.springframework:spring-jdbc'
+    testImplementation 'org.postgresql:postgresql'
+    testImplementation 'org.mariadb.jdbc:mariadb-java-client'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+}
+
+tasks.named('cucumber').get().finalizedBy 'allureReport'
+
+tasks.named('cucumber').get().dependsOn 'spotlessCheck'
+
+cucumber {
+    // Use -Pcucumber.features=... if passed, otherwise default
+    if (project.hasProperty("cucumber.features")) {
+        featurePath = project.getProperty("cucumber.features")
+    } else {
+        featurePath = "src/test/resources/features";
+    }
+
+    tags = 'not @Skip'
+    if (project.hasProperty("cucumber.tags")) {
+        tags = [project.getProperty("cucumber.tags")]
+    }
+
+    if (project.hasProperty("cucumber.name")) {
+        name = project.getProperty("cucumber.name")
+    }
+
+    plugin = ['pretty', 'io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm']
+}
+
+allure {
+    version = '2.17.3'
+}
+
+test {
+    useJUnitPlatform()
+}

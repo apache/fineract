@@ -29,7 +29,15 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
     /*** enum of reasons for invalid Journal Entry **/
     public enum GlJournalEntryInvalidReason {
 
-        FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, GL_ACCOUNT_DISABLED, GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, INVALID_DEBIT_OR_CREDIT_ACCOUNTS;
+        FUTURE_DATE, //
+        ACCOUNTING_CLOSED, //
+        NO_DEBITS_OR_CREDITS, //
+        DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT, //
+        DEBIT_CREDIT_SUM_MISMATCH, //
+        DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, //
+        GL_ACCOUNT_DISABLED, //
+        GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, //
+        INVALID_DEBIT_OR_CREDIT_ACCOUNTS; //
 
         public String errorMessage() {
             if (name().equalsIgnoreCase("FUTURE_DATE")) {

@@ -85,6 +85,10 @@ public class LoanApplicationTestBuilder {
     private String linkAccountId;
     private String inArrearsTolerance;
     private boolean createStandingInstructionAtDisbursement = false;
+    private boolean enableDownPayment = false;
+    private boolean enableAutoRepaymentForDownPayment = false;
+    private String disbursedAmountPercentageDownPayment;
+    private Boolean allowFullTermForTranche = null;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -207,6 +211,18 @@ public class LoanApplicationTestBuilder {
 
         if (createStandingInstructionAtDisbursement == true) {
             map.put("createStandingInstructionAtDisbursement", true);
+        }
+        if (enableDownPayment == true) {
+            map.put("enableDownPayment", enableDownPayment);
+        }
+        if (enableAutoRepaymentForDownPayment == true) {
+            map.put("enableAutoRepaymentForDownPayment", enableAutoRepaymentForDownPayment);
+        }
+        if (disbursedAmountPercentageDownPayment != null) {
+            map.put("disbursedAmountPercentageDownPayment", disbursedAmountPercentageDownPayment);
+        }
+        if (allowFullTermForTranche != null) {
+            map.put("allowFullTermForTranche", allowFullTermForTranche);
         }
         LOG.info("Loan Application request : {} ", map);
         return new Gson().toJson(map);
@@ -440,4 +456,25 @@ public class LoanApplicationTestBuilder {
         this.createStandingInstructionAtDisbursement = true;
         return this;
     }
+
+    public LoanApplicationTestBuilder withEnableDownPayment() {
+        this.enableDownPayment = true;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withEnableAutoRepaymentForDownPayment() {
+        this.enableAutoRepaymentForDownPayment = true;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withDisbursedAmountPercentageDownPayment(final String amount) {
+        this.disbursedAmountPercentageDownPayment = amount;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withAllowFullTermForTranche(final Boolean allowFullTermForTranche) {
+        this.allowFullTermForTranche = allowFullTermForTranche;
+        return this;
+    }
+
 }

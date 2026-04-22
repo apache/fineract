@@ -20,8 +20,11 @@ package org.apache.fineract.organisation.monetary.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
+@Getter
 @Embeddable
 public class MonetaryCurrency {
 
@@ -33,6 +36,9 @@ public class MonetaryCurrency {
 
     @Column(name = "currency_multiplesof")
     private Integer inMultiplesOf;
+
+    @Getter(AccessLevel.PRIVATE)
+    private transient CurrencyData currencyData;
 
     protected MonetaryCurrency() {
         this.code = null;
@@ -46,6 +52,13 @@ public class MonetaryCurrency {
         this.inMultiplesOf = inMultiplesOf;
     }
 
+    public MonetaryCurrency(final CurrencyData currencyData) {
+        this.currencyData = currencyData;
+        this.code = currencyData.getCode();
+        this.digitsAfterDecimal = currencyData.getDecimalPlaces();
+        this.inMultiplesOf = currencyData.getInMultiplesOf();
+    }
+
     public MonetaryCurrency copy() {
         return new MonetaryCurrency(this.code, this.digitsAfterDecimal, this.inMultiplesOf);
     }
@@ -56,19 +69,13 @@ public class MonetaryCurrency {
     }
 
     public static MonetaryCurrency fromCurrencyData(final CurrencyData currencyData) {
-        return new MonetaryCurrency(currencyData.getCode(), currencyData.getDecimalPlaces(), currencyData.getInMultiplesOf());
+        return new MonetaryCurrency(currencyData);
     }
 
-    public String getCode() {
-        return this.code;
+    public CurrencyData toData() {
+        if (currencyData == null) {
+            currencyData = new CurrencyData(code, digitsAfterDecimal, inMultiplesOf);
+        }
+        return currencyData;
     }
-
-    public int getDigitsAfterDecimal() {
-        return this.digitsAfterDecimal;
-    }
-
-    public Integer getCurrencyInMultiplesOf() {
-        return this.inMultiplesOf;
-    }
-
 }

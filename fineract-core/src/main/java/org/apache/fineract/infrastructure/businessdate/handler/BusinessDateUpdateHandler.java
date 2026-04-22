@@ -18,26 +18,39 @@
  */
 package org.apache.fineract.infrastructure.businessdate.handler;
 
-import jakarta.validation.constraints.NotNull;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.service.BusinessDateDTO;
+import org.apache.fineract.infrastructure.businessdate.mapper.BusinessDateMapper;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@Service
-@CommandType(entity = "BUSINESS_DATE", action = "UPDATE")
-public class BusinessDateUpdateHandler implements NewCommandSourceHandler {
+public class BusinessDateUpdateHandler implements CommandHandler<BusinessDateUpdateRequest, BusinessDateUpdateResponse> {
 
     private final BusinessDateWritePlatformService businessDateWritePlatformService;
+    private final BusinessDateMapper businessDateMapper;
 
+    @Retry(name = "commandBusinessDateUpdate", fallbackMethod = "fallback")
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(@NotNull final JsonCommand command) {
-        return businessDateWritePlatformService.updateBusinessDate(command);
+    public BusinessDateUpdateResponse handle(Command<BusinessDateUpdateRequest> command) {
+        BusinessDateDTO businessDateDto = businessDateMapper.mapUpdateRequest(command.getPayload());
+        businessDateDto = businessDateWritePlatformService.updateBusinessDate(businessDateDto);
+        return businessDateMapper.mapUpdateResponse(businessDateDto);
+    }
+
+    @Override
+    public BusinessDateUpdateResponse fallback(Command<BusinessDateUpdateRequest> command, Throwable t) {
+        // NOTE: fallback method needs to be in the same class
+        return CommandHandler.super.fallback(command, t);
     }
 }

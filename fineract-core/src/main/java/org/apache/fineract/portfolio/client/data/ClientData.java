@@ -269,7 +269,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.clientNonPersonConstitutionOptions = null;
         this.clientNonPersonMainBusinessLineOptions = null;
         this.clientLegalFormOptions = null;
-        this.clientNonPersonDetails = null;
+        this.clientNonPersonDetails = clientNonPersonDetails;
         this.isAddressEnabled = null;
         this.datatables = null;
         this.familyMemberOptions = null;

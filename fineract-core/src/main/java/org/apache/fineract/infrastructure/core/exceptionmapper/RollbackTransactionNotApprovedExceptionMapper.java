@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.exception.RollbackTransactionNotApprovedException;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ public class RollbackTransactionNotApprovedExceptionMapper
 
     @Override
     public Response toResponse(final RollbackTransactionNotApprovedException exception) {
-        log.warn("Exception: {}", exception.getClass().getName());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         return Response.ok().entity(new Gson().toJson(exception.getResult())).type(MediaType.APPLICATION_JSON).build();
     }
 

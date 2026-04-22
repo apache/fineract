@@ -63,9 +63,4 @@ public enum RecurringDepositType {
     public static Object[] integerValues() {
         return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
     }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return this.value.equals(RecurringDepositType.INVALID.value);
-    }
 }

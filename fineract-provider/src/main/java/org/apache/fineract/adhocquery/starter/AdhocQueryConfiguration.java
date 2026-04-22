@@ -26,6 +26,7 @@ import org.apache.fineract.adhocquery.service.AdHocWritePlatformService;
 import org.apache.fineract.adhocquery.service.AdHocWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,8 +52,8 @@ public class AdhocQueryConfiguration {
     @Bean
     @ConditionalOnMissingBean(AdHocWritePlatformService.class)
     public AdHocWritePlatformService adHocWritePlatformService(PlatformSecurityContext context, AdHocRepository adHocRepository,
-            AdHocDataValidator adHocCommandFromApiJsonDeserializer) {
-        return new AdHocWritePlatformServiceJpaRepositoryImpl(context, adHocRepository, adHocCommandFromApiJsonDeserializer) {
+            AdHocDataValidator adHocCommandFromApiJsonDeserializer, SqlValidator sqlValidator) {
+        return new AdHocWritePlatformServiceJpaRepositoryImpl(context, adHocRepository, adHocCommandFromApiJsonDeserializer, sqlValidator) {
 
         };
     }

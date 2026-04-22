@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 
 /**
@@ -58,20 +59,23 @@ public enum DaysInMonthType {
     public static DaysInMonthType fromInt(final Integer type) {
         DaysInMonthType repaymentFrequencyType = DaysInMonthType.INVALID;
         if (type != null) {
-            switch (type) {
-                case 1:
-                    repaymentFrequencyType = DaysInMonthType.ACTUAL;
-                break;
-                case 30:
-                    repaymentFrequencyType = DaysInMonthType.DAYS_30;
-                break;
-
-            }
+            repaymentFrequencyType = switch (type) {
+                case 1 -> DaysInMonthType.ACTUAL;
+                case 30 -> DaysInMonthType.DAYS_30;
+                default -> repaymentFrequencyType;
+            };
         }
         return repaymentFrequencyType;
     }
 
     public boolean isDaysInMonth_30() {
         return DaysInMonthType.DAYS_30.getValue().equals(this.value);
+    }
+
+    public Integer getNumberOfDays(final LocalDate referenceDate) {
+        if (referenceDate == null) {
+            return null;
+        }
+        return this == ACTUAL ? referenceDate.lengthOfMonth() : this.getValue();
     }
 }

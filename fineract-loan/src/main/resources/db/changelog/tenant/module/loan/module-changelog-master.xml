@@ -39,4 +39,22 @@
   <include relativeToChangelogFile="true" file="parts/1014_add_loan_account_custom_snapshot_event.xml"/>
   <include relativeToChangelogFile="true" file="parts/1015_remove_disable_schedule_extension_column.xml"/>
   <include relativeToChangelogFile="true" file="parts/1016_add_credit_allocation_rule.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1017_add_fee_and_penalty_adjustments_to_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1018_rename_credited_principal_back_to_credits_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1019_add_fixed_length.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1020_add_re_aged_flag_to_loan_installment.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1021_add_loan_status_change_history.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1022_add_interest_refund_support.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1023_add_charge_off_behaviour.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1024_accrual_adjustment_transaction_type.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1025_store_pre_closure_strategy_to_loan_level.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1026_add_interest_recognition_flag.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1027_add_capitalized_income_transaction_type.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1028_remove_suboptimal_indexes.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1029_add_installment_amount_in_multiples_of_to_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1030_add_loan_undo_contract_termination_event.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1031_loan_merchant_buy_down_fee.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1032_add_classification_to_loan_transaction.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1033_add_reage_reasons_for_loan.xml"/>
+  <include relativeToChangelogFile="true" file="parts/1034_loan_reamortization_parameters.xml"/>
 </databaseChangeLog>

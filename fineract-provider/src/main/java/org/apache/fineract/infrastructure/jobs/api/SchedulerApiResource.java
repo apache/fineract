@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -67,12 +66,10 @@ public class SchedulerApiResource {
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Scheduler Status", description = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n"
             + "scheduler")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class)))
     public String retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
@@ -86,8 +83,7 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Activate Scheduler Jobs | Suspend Scheduler Jobs", description = "Activates the scheduler job service. | Suspends the scheduler job service.")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "POST :  scheduler?command=start\n\n" + "\n"
-            + "POST : scheduler?command=stop") })
+    @ApiResponse(responseCode = "200", description = "POST :  scheduler?command=start\n\n" + "\n" + "POST : scheduler?command=stop")
     public Response changeSchedulerStatus(
             @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam) {
         // check the logged in user have permissions to update scheduler status

@@ -18,27 +18,19 @@
  */
 package org.apache.fineract.portfolio.paymenttype.domain;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.paymenttype.exception.PaymentTypeNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+// TODO: get rid of this, unnecessarily hides real repository; don't use this outside of payment domain!
+@Deprecated(forRemoval = true)
 public class PaymentTypeRepositoryWrapper {
 
     private final PaymentTypeRepository repository;
 
-    public List<PaymentType> findAll() {
-        return this.repository.findAllByOrderByPositionAsc();
-    }
-
-    public List<PaymentType> findAllWithCodeName() {
-        return this.repository.findAllByCodeNameIsNotNullOrderByPositionAsc();
-    }
-
     public PaymentType findOneWithNotFoundDetection(final Long id) {
         return this.repository.findById(id).orElseThrow(() -> new PaymentTypeNotFoundException(id));
     }
-
 }

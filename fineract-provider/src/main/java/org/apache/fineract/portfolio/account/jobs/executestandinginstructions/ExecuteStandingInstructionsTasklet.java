@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.StandingInstructionData;
 import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
@@ -66,38 +67,38 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         List<Throwable> errors = new ArrayList<>();
         for (StandingInstructionData data : instructionData) {
             boolean isDueForTransfer = false;
-            AccountTransferRecurrenceType recurrenceType = data.recurrenceType();
-            StandingInstructionType instructionType = data.instructionType();
+            AccountTransferRecurrenceType recurrenceType = data.getRecurrenceType();
+            StandingInstructionType instructionType = data.getInstructionType();
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             if (recurrenceType.isPeriodicRecurrence()) {
                 final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-                PeriodFrequencyType frequencyType = data.recurrenceFrequency();
-                LocalDate startDate = data.validFrom();
+                PeriodFrequencyType frequencyType = data.getRecurrenceFrequency();
+                LocalDate startDate = data.getValidFrom();
                 if (frequencyType.isMonthly()) {
-                    startDate = startDate.withDayOfMonth(data.recurrenceOnDay());
-                    if (DateUtils.isBefore(startDate, data.validFrom())) {
+                    startDate = startDate.withDayOfMonth(data.getRecurrenceOnDay());
+                    if (DateUtils.isBefore(startDate, data.getValidFrom())) {
                         startDate = startDate.plusMonths(1);
                     }
                 } else if (frequencyType.isYearly()) {
-                    startDate = startDate.withDayOfMonth(data.recurrenceOnDay()).withMonth(data.recurrenceOnMonth());
-                    if (DateUtils.isBefore(startDate, data.validFrom())) {
+                    startDate = startDate.withDayOfMonth(data.getRecurrenceOnDay()).withMonth(data.getRecurrenceOnMonth());
+                    if (DateUtils.isBefore(startDate, data.getValidFrom())) {
                         startDate = startDate.plusYears(1);
                     }
                 }
-                isDueForTransfer = scheduledDateGenerator.isDateFallsInSchedule(frequencyType, data.recurrenceInterval(), startDate,
+                isDueForTransfer = scheduledDateGenerator.isDateFallsInSchedule(frequencyType, data.getRecurrenceInterval(), startDate,
                         transactionDate);
 
             }
-            BigDecimal transactionAmount = data.amount();
-            if (data.toAccountType().isLoanAccount()
+            BigDecimal transactionAmount = data.getAmount();
+            if (PortfolioAccountType.LOAN.equals(data.getToAccountType())
                     && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
                 StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadPlatformService
-                        .retriveLoanDuesData(data.toAccount().getId());
-                if (data.instructionType().isDuesAmoutTransfer()) {
+                        .retriveLoanDuesData(data.getToAccount().getId());
+                if (data.getInstructionType().isDuesAmoutTransfer()) {
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = isDueForTransfer(standingInstructionDuesData);
                 }
             }
 
@@ -105,10 +106,10 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 final SavingsAccount fromSavingsAccount = null;
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
-                AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
-                        data.toAccountType(), data.fromAccount().getId(), data.toAccount().getId(),
-                        data.name() + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null,
-                        data.transferType().getValue(), null, null, ExternalId.empty(), null, null, fromSavingsAccount,
+                AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
+                        data.getFromAccountType(), data.getToAccountType(), data.getFromAccount().getId(), data.getToAccount().getId(),
+                        data.getName() + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null,
+                        data.getTransferType().getValue(), null, null, ExternalId.empty(), null, null, fromSavingsAccount,
                         isRegularTransaction, isExceptionForBalanceCheck);
                 final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
 
@@ -163,5 +164,10 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         updateQuery.append("'").append(errorLog).append("')");
         jdbcTemplate.update(updateQuery.toString());
         return transferCompleted;
+    }
+
+    public boolean isDueForTransfer(StandingInstructionDuesData standingInstructionDuesData) {
+        return standingInstructionDuesData.dueDate() != null
+                && !standingInstructionDuesData.dueDate().isAfter(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
     }
 }

@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -47,7 +46,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -57,7 +55,7 @@ import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -80,17 +78,13 @@ public class SavingsAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final SavingsAccountTransactionSearchService transactionsSearchService;
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a savings account transaction template", operationId = "retrieveTemplateSavingsAccountTransaction")
     public String retrieveTemplate(@PathParam("savingsId") final Long savingsId,
             // @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
@@ -111,8 +105,8 @@ public class SavingsAccountTransactionsApiResource {
 
     @GET
     @Path("{transactionId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve a savings account transaction", operationId = "retrieveOneSavingsAccountTransaction")
     public String retrieveOne(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
             @Context final UriInfo uriInfo) {
 
@@ -133,8 +127,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("search")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Search Savings Account Transactions")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.SavingsAccountTransactionsSearchResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.SavingsAccountTransactionsSearchResponse.class)))
     public String searchTransactions(@PathParam("savingsId") @Parameter(description = "savings account id") final Long savingsId,
             @QueryParam("fromDate") @Parameter(description = "minimum value date (inclusive)", example = "2023-08-08") final String fromDate,
             @QueryParam("toDate") @Parameter(description = "maximum value date (inclusive)", example = "2023-08-15") final String toDate,
@@ -165,49 +158,36 @@ public class SavingsAccountTransactionsApiResource {
     @Path("query")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Advanced search Savings Account Transactions")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    @Operation(summary = "Advanced search Savings Account Transactions", operationId = "advancedQuerySavingsAccountTransactions")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class)))
     public String advancedQuery(@PathParam("savingsId") @Parameter(description = "savingsId") final Long savingsId,
             PagedLocalRequest<AdvancedQueryRequest> queryRequest, @Context final UriInfo uriInfo) {
         final Page<JsonObject> result = transactionsSearchService.queryAdvanced(savingsId, queryRequest);
-        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create a savings account transaction", operationId = "createSavingsAccountTransaction")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsResponse.class)))
     public String transaction(@PathParam("savingsId") final Long savingsId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-        CommandProcessingResult result = null;
-        if (is(commandParam, "deposit")) {
-            final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "gsimDeposit")) {
-            final CommandWrapper commandRequest = builder.gsimSavingsAccountDeposit(savingsId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawal")) {
-            final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "postInterestAsOn")) {
-            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
-            final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
+        final CommandWrapper commandRequest = switch (StringUtils.trimToEmpty(commandParam)) {
+            case "deposit" -> builder.savingsAccountDeposit(savingsId).build();
+            case "gsimDeposit" -> builder.gsimSavingsAccountDeposit(savingsId).build();
+            case "withdrawal" -> builder.savingsAccountWithdrawal(savingsId).build();
+            case "force-withdrawal" -> builder.savingsAccountForceWithdrawal(savingsId).build();
+            case "postInterestAsOn" -> builder.savingsAccountInterestPosting(savingsId).build();
+            case SavingsApiConstants.COMMAND_HOLD_AMOUNT -> builder.holdAmount(savingsId).build();
+            default -> throw new UnrecognizedQueryParamException("command", commandParam, "deposit", "withdrawal", "force-withdrawal",
+                    SavingsApiConstants.COMMAND_HOLD_AMOUNT);
+        };
 
-        if (result == null) {
-            //
-            throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "deposit", "withdrawal", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
-        }
-
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -215,12 +195,11 @@ public class SavingsAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Undo/Reverse/Modify/Release Amount transaction API", description = "Undo/Reverse/Modify/Release Amount transaction API\n\n"
+    @Operation(summary = "Undo/Reverse/Modify/Release Amount transaction API", operationId = "adjustSavingsAccountTransaction", description = "Undo/Reverse/Modify/Release Amount transaction API\n\n"
             + "Example Requests:\n" + "\n" + "\n" + "savingsaccounts/{savingsId}/transactions/{transactionId}?command=reverse\n" + "\n"
             + "Accepted command = undo, reverse, modify, releaseAmount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountBulkReversalTransactionsRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountBulkReversalTransactionsRequest.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountBulkReversalTransactionsRequest.class))))
     public String adjustTransaction(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
             @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
 
@@ -231,28 +210,19 @@ public class SavingsAccountTransactionsApiResource {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
 
-        CommandProcessingResult result = null;
-        if (is(commandParam, SavingsApiConstants.COMMAND_UNDO_TRANSACTION)) {
-            final CommandWrapper commandRequest = builder.undoSavingsAccountTransaction(savingsId, transactionId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_REVERSE_TRANSACTION)) {
-            final CommandWrapper commandRequest = builder.reverseSavingsAccountTransaction(savingsId, transactionId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION)) {
-            final CommandWrapper commandRequest = builder.adjustSavingsAccountTransaction(savingsId, transactionId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, SavingsApiConstants.COMMAND_RELEASE_AMOUNT)) {
-            final CommandWrapper commandRequest = builder.releaseAmount(savingsId, transactionId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
+        final CommandWrapper commandRequest = switch (StringUtils.trimToEmpty(commandParam)) {
+            case SavingsApiConstants.COMMAND_UNDO_TRANSACTION -> builder.undoSavingsAccountTransaction(savingsId, transactionId).build();
+            case SavingsApiConstants.COMMAND_REVERSE_TRANSACTION ->
+                builder.reverseSavingsAccountTransaction(savingsId, transactionId).build();
+            case SavingsApiConstants.COMMAND_ADJUST_TRANSACTION ->
+                builder.adjustSavingsAccountTransaction(savingsId, transactionId).build();
+            case SavingsApiConstants.COMMAND_RELEASE_AMOUNT -> builder.releaseAmount(savingsId, transactionId).build();
+            default -> throw new UnrecognizedQueryParamException("command", commandParam, SavingsApiConstants.COMMAND_UNDO_TRANSACTION,
+                    SavingsApiConstants.COMMAND_ADJUST_TRANSACTION, SavingsApiConstants.COMMAND_RELEASE_AMOUNT,
+                    SavingsApiConstants.COMMAND_REVERSE_TRANSACTION);
+        };
 
-        if (result == null) {
-            //
-            throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { SavingsApiConstants.COMMAND_UNDO_TRANSACTION, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION,
-                            SavingsApiConstants.COMMAND_RELEASE_AMOUNT, SavingsApiConstants.COMMAND_REVERSE_TRANSACTION });
-        }
-
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
 }

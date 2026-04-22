@@ -35,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Entity
 @Table(name = "m_delinquency_range", uniqueConstraints = {
         @UniqueConstraint(name = "uq_delinquency_range_classification", columnNames = { "classification" }) })
-public class DelinquencyRange extends AbstractAuditableWithUTCDateTimeCustom {
+public class DelinquencyRange extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "classification", nullable = false)
     private String classification;

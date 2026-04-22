@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives
 
 @Entity
 @Table(name = "m_savings_interest_incentives")
-public class DepositAccountInterestIncentives extends AbstractPersistableCustom {
+public class DepositAccountInterestIncentives extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)

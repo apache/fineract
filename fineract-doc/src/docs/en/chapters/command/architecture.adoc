@@ -1,0 +1,22 @@
+= Architecture
+
+This chapter outlines the new Command Query Responsibility Segregation (CQRS) implementation introduced in Apache Fineract. This architecture aims to improve the separation of concerns, testability, and maintainability of the write-side (command) operations.
+
+NOTE: A proposal to cover the read-side (query) is in preparation.
+
+By shifting from our legacy type-less, synchronous command processing to an improved and extensible command-driven flow, we establish a robust pipeline for handling business operations, cross-cutting concerns (via hooks), and error handling (retries, fallbacks).
+
+== Core Components
+
+* command dispatcher: the entry point for all command operations
+* command hanlder: acts as the bridge between the incoming command and the specific business logic required to handle it
+* command hooks: interception points to execute cross-cutting logic without polluting the dispatcher or the handler; there are three types of hooks
+** before command hook
+** after command hook
+** error command hook
+
+.Command Processing Architecture Level 1 - Core
+[plantuml, format=svg]
+----
+include::{diagramsdir}/command-architecture-level-1.puml[]
+----

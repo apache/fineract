@@ -1,0 +1,43 @@
+= AWS Configuration Properties
+
+For further understanding of the configuration properties related to AWS, refer to https://docs.awspring.io/spring-cloud-aws/docs/current/reference/html/index.html[Spring Cloud AWS documentation].
+
+.AWS Configuration Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|spring.cloud.aws.endpoint
+|FINERACT_AWS_ENDPOINT
+|
+|The AWS service endpoint.
+
+|spring.cloud.aws.region.static
+|FINERACT_AWS_REGION_STATIC
+|us-east-1
+|The static region for AWS services.
+
+|spring.cloud.aws.credentials.access-key
+|FINERACT_AWS_CREDENTIALS_ACCESS_KEY
+|
+|The AWS access key.
+
+|spring.cloud.aws.credentials.secret-key
+|FINERACT_AWS_CREDENTIALS_SECRET_KEY
+|
+|The AWS secret key.
+
+|spring.cloud.aws.credentials.instance-profile
+|FINERACT_AWS_CREDENTIALS_INSTANCE_PROFILE
+|false
+|Whether to use the instance profile for credentials.
+
+|spring.cloud.aws.credentials.profile.name
+|FINERACT_AWS_CREDENTIALS_PROFILE_NAME
+|
+|The name of the AWS credentials profile.
+
+|spring.cloud.aws.credentials.profile.path
+|FINERACT_AWS_CREDENTIALS_PROFILE_PATH
+|
+|The path to the AWS credentials profile.
+|===

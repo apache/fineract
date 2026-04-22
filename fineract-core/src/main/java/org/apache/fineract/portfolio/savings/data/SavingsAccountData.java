@@ -29,9 +29,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -46,7 +48,9 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a savings account.
  */
+@Setter
 @Getter
+@JsonLocalDateArrayFormat
 public final class SavingsAccountData implements Serializable {
 
     private final Long id;
@@ -137,10 +141,18 @@ public final class SavingsAccountData implements Serializable {
     private transient List<SavingsAccountTransactionData> newSavingsAccountTransactionData = new ArrayList<>();
     private transient GroupGeneralData groupGeneralData;
     private transient Long officeId;
+    private transient Integer version;
     private transient Set<Long> existingTransactionIds = new HashSet<>();
     private transient Set<Long> existingReversedTransactionIds = new HashSet<>();
     private transient Long glAccountIdForSavingsControl;
     private transient Long glAccountIdForInterestOnSavings;
+
+    private Long glAccountIdForInterestPayable;
+    private Long glAccountIdForOverdraftPorfolio;
+    private Long glAccountIdForInterestReceivable;
+
+    private BigDecimal interestPosting;
+    private BigDecimal overdraftPosting;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
@@ -302,23 +314,23 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public Integer getInterestPostingPeriodTypeId() {
-        return this.interestPostingPeriodType.getId().intValue();
+        return this.interestPostingPeriodType != null ? this.interestPostingPeriodType.getId().intValue() : null;
     }
 
     public Integer getDepositTypeId() {
-        return this.depositType.getId().intValue();
+        return this.depositType != null ? this.depositType.getId().intValue() : null;
     }
 
     public Integer getInterestCompoundingPeriodTypeId() {
-        return this.interestCompoundingPeriodType.getId().intValue();
+        return this.interestCompoundingPeriodType != null ? this.interestCompoundingPeriodType.getId().intValue() : null;
     }
 
     public Integer getInterestCalculationTypeId() {
-        return this.interestCalculationType.getId().intValue();
+        return this.interestCalculationType != null ? this.interestCalculationType.getId().intValue() : null;
     }
 
     public Integer getInterestCalculationDaysInYearTypeId() {
-        return this.interestCalculationDaysInYearType.getId().intValue();
+        return this.interestCalculationDaysInYearType != null ? this.interestCalculationDaysInYearType.getId().intValue() : null;
     }
 
     public SavingsAccountTransactionData findLastTransaction(final LocalDate date) {
@@ -347,14 +359,14 @@ public final class SavingsAccountData implements Serializable {
 
     public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
-        if (this.timeline.getActivatedOnDate() != null) {
+        if (this.timeline != null && this.timeline.getActivatedOnDate() != null) {
             activationLocalDate = this.timeline.getActivatedOnDate();
         }
         return activationLocalDate;
     }
 
     public Integer getLockinPeriodFrequencyTypeId() {
-        return this.lockinPeriodFrequencyType.getId().intValue();
+        return this.lockinPeriodFrequencyType != null ? this.lockinPeriodFrequencyType.getId().intValue() : null;
     }
 
     public Collection<Long> findCurrentTransactionIdsWithPivotDateConfig() {
@@ -390,15 +402,15 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public List<SavingsAccountTransactionData> getSavingsAccountTransactionsWithPivotConfig() {
-        return this.transactions.stream().toList();
+        return this.transactions != null ? this.transactions.stream().toList() : null;
     }
 
     public Boolean isAccrualBasedAccountingEnabledOnSavingsProduct() {
-        return this.savingsProductData.isAccrualBasedAccountingEnabled();
+        return this.savingsProductData != null && this.savingsProductData.isAccrualBasedAccountingEnabled();
     }
 
     public Boolean isCashBasedAccountingEnabledOnSavingsProduct() {
-        return this.savingsProductData.isCashBasedAccountingEnabled();
+        return this.savingsProductData != null && this.savingsProductData.isCashBasedAccountingEnabled();
     }
 
     public static SavingsAccountData importInstanceGroup(Long groupId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
@@ -948,7 +960,7 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public Collection<SavingsAccountChargeData> charges() {
-        return (this.charges == null) ? new HashSet<SavingsAccountChargeData>() : this.charges;
+        return this.charges == null ? new HashSet<>() : this.charges;
     }
 
     public void setDatatables(final List<DatatableData> datatables) {
@@ -962,4 +974,5 @@ public final class SavingsAccountData implements Serializable {
     public boolean isIsDormancyTrackingActive() {
         return this.isDormancyTrackingActive;
     }
+
 }

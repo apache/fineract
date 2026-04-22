@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_deposit_product_term_and_preclosure")
-public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
+public class DepositProductTermAndPreClosure extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private DepositPreClosureDetail preClosureDetail;

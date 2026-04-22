@@ -24,17 +24,20 @@ public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleExc
 
     public enum PostInterestAsOnExceptionType {
 
-        FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, LAST_TRANSACTION_DATE;
+        FUTURE_DATE, //
+        VALID_DATE, //
+        ACTIVATION_DATE, //
+        LAST_TRANSACTION_DATE; //
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
-                return "Cannot Post Interest in future Dates";
+                return "Cannot post interest in future dates";
             } else if (name().toString().equalsIgnoreCase("VALID_DATE")) {
-                return "Please Pass a valid date";
+                return "Please pass a valid date";
             } else if (name().toString().equalsIgnoreCase("ACTIVATION_DATE")) {
-                return "Post Interest Date must be after the Activation date";
+                return "Post interest date must be after the activation date";
             } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) {
-                return "Cannot Post Interest before last transaction date";
+                return "Cannot post interest before last transaction date";
             }
             return name().toString();
         }

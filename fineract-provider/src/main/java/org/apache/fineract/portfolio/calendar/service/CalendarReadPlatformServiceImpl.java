@@ -249,7 +249,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if (isSkipRepaymentOnFirstMonthEnabled) {
-            numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            numberOfDays = this.configurationDomainService.retreivePeriodInNumberOfDaysForSkipMeetingDate().intValue();
         }
 
         final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, periodStartDate, periodEndDate,
@@ -328,7 +328,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if (isSkipRepaymentOnFirstMonthEnabled) {
-            numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            numberOfDays = configurationDomainService.retreivePeriodInNumberOfDaysForSkipMeetingDate().intValue();
         }
 
         if (lastMeetingDate != null && !calendarData.isBetweenStartAndEndDate(lastMeetingDate)
@@ -355,8 +355,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
-        final Collection<CalendarData> recuCalendarsData = new ArrayList<>();
+    public List<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
+        final List<CalendarData> recuCalendarsData = new ArrayList<>();
         final boolean withHistory = true;
         final LocalDate tillDate = null;
         for (final CalendarData calendarData : calendarsData) {

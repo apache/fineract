@@ -27,33 +27,46 @@ apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'se.thinkcode.cucumber-runner'
+apply plugin: 'com.docktape.swagger-brake'
+
+swaggerBrake {
+    newApi = findProperty('apiNew') ?:"${project.buildDir}/resources/main/static/fineract.json"
+    oldApi = findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json"
+    outputFormats = ['JSON']
+    outputFilePath = "${project.buildDir}/swagger-brake"
+    deprecatedApiDeletionAllowed = true
+    strictValidation = false
+}
+
+checkBreakingChanges.onlyIf {
+    def baseline = findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json"
+    def exists = file(baseline).exists()
+    if (!exists) {
+        logger.lifecycle("Skipping checkBreakingChanges: baseline file not found at ${baseline}")
+    }
+    def apiNew = findProperty('apiNew') ?: "${project.buildDir}/resources/main/static/fineract.json"
+    def existsApiNew = file(apiNew).exists()
+    if (!existsApiNew) {
+        logger.lifecycle("Skipping checkBreakingChanges: new api file not found at ${apiNew}")
+    }
+    exists && existsApiNew
+}
 
 check.dependsOn('cucumber')
 
-compileJava.doLast {
-    def mainSS = sourceSets.main
-    def source = mainSS.java.classesDirectory.get()
-    copy {
-        from file("src/main/resources/jpa/persistence.xml")
-        into "${source}/META-INF/"
-    }
-    javaexec {
-        description = 'Performs EclipseLink static weaving of entity classes'
-        def target = source
-        main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
-        args '-persistenceinfo', source, source, target
-        classpath sourceSets.main.runtimeClasspath
-    }
-    delete {
-        delete "${source}/META-INF/persistence.xml"
-    }
+// Static weaving is now configured in gradle/static-weaving.gradle
+// This ensures consistent configuration across all modules with JPA entities
+
+// Add dependency on avro schemas
+compileJava {
+    dependsOn ':fineract-avro-schemas:buildJavaSdk'
 }
 
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 import org.apache.tools.ant.filters.ReplaceTokens
 
-task prepareInputYaml {
+tasks.register('prepareInputYaml') {
     outputs.file("${buildDir}/tmp/swagger/fineract-input.yaml")
 
     doLast {
@@ -73,15 +86,21 @@ resolve {
     prettyPrint = false
     classpath = sourceSets.main.runtimeClasspath
     buildClasspath = classpath
-    outputDir = file("${buildDir}/classes/java/main/static")
+    outputDir = file("${buildDir}/resources/main/static")
     openApiFile = file("${buildDir}/tmp/swagger/fineract-input.yaml")
+    readerClass = 'org.apache.fineract.infrastructure.openapi.FineractOperationIdReader'
     sortOutput = true
-    dependsOn(prepareInputYaml)
+    dependsOn(prepareInputYaml, classes)
 }
 
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
     providedCompile
+    implementation
+    testImplementation
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
     compile() {
         exclude module: 'hibernate-entitymanager'
         exclude module: 'hibernate-validator'
@@ -98,6 +117,16 @@ configurations {
         exclude module: 'classworlds'
     }
     runtime
+}
+
+dependencies {
+    implementation project(':fineract-core')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.liquibase:liquibase-core'
 }
 
 apply from: 'dependencies.gradle'
@@ -124,10 +153,6 @@ eclipse {
     }
 }
 
-/* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
-sourceSets.test.output.resourcesDir = sourceSets.test.java.classesDirectory
-
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {
         test {
@@ -153,7 +178,7 @@ configurations {
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client'
     driver 'org.postgresql:postgresql'
-    driver 'mysql:mysql-connector-java:8.0.33'
+    driver 'com.mysql:mysql-connector-j'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -161,57 +186,57 @@ configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }
 
-task createDB {
-    description= "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
+tasks.register('createDB') {
+    description = "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
-        sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4" )
+        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
+        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     }
 }
 
-task dropDB {
-    description= "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
+tasks.register('dropDB') {
+    description = "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
-        sql.execute( 'DROP DATABASE '+"`$dbName`")
+        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
+        sql.execute('DROP DATABASE ' + "`$dbName`")
     }
 }
 
-task createPGDB {
-    description= "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+tasks.register('createPGDB') {
+    description = "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver' )
-        sql.execute( 'create database '+"$dbName" )
+        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
+        sql.execute('create database ' + "$dbName")
     }
 }
 
-task dropPGDB {
-    description= "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
+tasks.register('dropPGDB') {
+    description = "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver' )
-        sql.execute( 'DROP DATABASE '+ "$dbName")
+        def sql = Sql.newInstance('jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver')
+        sql.execute('DROP DATABASE ' + "$dbName")
     }
 }
 
-task createMySQLDB {
-    description= "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+tasks.register('createMySQLDB') {
+    description = "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
-        sql.execute( 'CREATE DATABASE '+"`$dbName` CHARACTER SET utf8mb4" )
+        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
+        sql.execute('CREATE DATABASE ' + "`$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     }
 }
 
-task dropMySQLDB {
-    description= "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
+tasks.register('dropMySQLDB') {
+    description = "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
-        sql.execute( 'DROP DATABASE '+"`$dbName`")
+        def sql = Sql.newInstance('jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver')
+        sql.execute('DROP DATABASE ' + "`$dbName`")
     }
 }
 
-task setBlankPassword {
+tasks.register('setBlankPassword') {
     doLast {
-        def sql = Sql.newInstance( 'jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver' )
+        def sql = Sql.newInstance('jdbc:mariadb://localhost:3306/', mysqlUser, mysqlPassword, 'org.mariadb.jdbc.Driver')
         sql.execute('USE `fineract_tenants`')
         sql.execute('UPDATE fineract_tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
     }
@@ -219,7 +244,7 @@ task setBlankPassword {
 
 bootRun {
     jvmArgs = [
-        "-Dspring.output.ansi.enabled=ALWAYS"
+            "-Dspring.output.ansi.enabled=ALWAYS"
     ]
 
     dependencies {
@@ -243,7 +268,7 @@ bootJar {
 
 jib {
     from {
-        image = 'azul/zulu-openjdk-alpine:17'
+        image = 'azul/zulu-openjdk-alpine:21'
         platforms {
             platform {
                 architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"
@@ -281,27 +306,14 @@ jib {
         implementation 'org.mariadb.jdbc:mariadb-java-client'
         implementation 'org.postgresql:postgresql'
     }
-
-    pluginExtensions {
-        pluginExtension {
-            implementation = 'com.google.cloud.tools.jib.gradle.extension.layerfilter.JibLayerFilterExtension'
-            configuration {
-                filters {
-                    filter {
-                        glob = '/app/resources/**'
-                    }
-                }
-            }
-        }
-    }
 }
 
-task migrateDatabase {
+tasks.register('migrateDatabase') {
     doFirst {
-        println 'Executing liquibase database migration to version '+"$dbVersion"
+        println 'Executing liquibase database migration to version ' + "$dbVersion"
 
-        def dbUrl='jdbc:'+"$dbType"+'://'+"$dbHost"+':'+"$dbPort"+'/'+"$dbName"
-        def changeLogFilePath='fineract-provider/src/main/resources/db/changelog/tenant/upgrades/0000_upgrade_to_'+"$dbVersion"+'.xml'
+        def dbUrl = 'jdbc:' + "$dbType" + '://' + "$dbHost" + ':' + "$dbPort" + '/' + "$dbName"
+        def changeLogFilePath = 'fineract-provider/src/main/resources/db/changelog/tenant/upgrades/0000_upgrade_to_' + "$dbVersion" + '.xml'
 
         liquibase {
             activities {
@@ -328,7 +340,8 @@ cucumber {
     ]
 }
 
-tasks.jibDockerBuild.dependsOn(bootJar)
+tasks.jib.dependsOn(bootJar, resolve)
+tasks.jibDockerBuild.dependsOn(bootJar, resolve)
 
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
@@ -351,3 +364,41 @@ rat.dependsOn prepareInputYaml
 spotbugsTest.dependsOn resolve
 compileTestJava.dependsOn ':fineract-client:processResources', ':fineract-avro-schemas:processResources'
 resolveMainClassName.dependsOn resolve
+
+javadoc {
+    dependsOn resolve
+}
+
+tasks.register('devRun', org.springframework.boot.gradle.tasks.run.BootRun) {
+    description = 'Runs the application quickly for development by skipping quality checks'
+    group = 'Application'
+
+    // Configure the build to skip quality checks
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.hasTask(devRun)) {
+            tasks.matching { task ->
+                task.name in ['checkstyle', 'checkstyleMain', 'checkstyleTest',
+                              'spotlessCheck', 'spotlessApply',
+                              'spotbugsMain', 'spotbugsTest',
+                              'javadoc', 'javadocJar',
+                              'modernizer',
+                              'testClasses']
+            }.configureEach {
+                enabled = false
+            }
+            // Also disable error prone compilation flags
+            tasks.withType(JavaCompile).configureEach {
+                options.errorprone.enabled = false
+            }
+        }
+    }
+
+    // Inherit all bootRun settings
+    classpath = bootRun.classpath
+    mainClass = bootRun.mainClass
+    jvmArgs = bootRun.jvmArgs
+
+    doFirst {
+        println "Running in development mode - quality checks are disabled"
+    }
+}

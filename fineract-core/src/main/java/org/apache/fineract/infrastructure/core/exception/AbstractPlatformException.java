@@ -66,6 +66,9 @@ public abstract class AbstractPlatformException extends RuntimeException {
     }
 
     private static Object[] filterThrowableCause(Object[] defaultUserMessageArgs) {
+        if (defaultUserMessageArgs == null) {
+            return NO_ARGS;
+        }
         List<Object> filteredDefaultUserMessageArgs = new ArrayList<>(defaultUserMessageArgs.length);
         for (Object defaultUserMessageArg : defaultUserMessageArgs) {
             if (!(defaultUserMessageArg instanceof Throwable)) {

@@ -20,7 +20,7 @@ fineract.config.username=aleks <4>
 fineract.config.password=******
 ----
 <1> Make sure you use the full GPG key name (you can list yours via `gpg --list-secret-keys --keyid-format=long`)
-<2> GnuPG has it's own kbx format to store the public key ring. At the moment we are only supporting this format
+<2> GnuPG has its own kbx format to store the public key ring. At the moment we are only supporting this format
 <3> Currently we only have instructions for GMail
 <4> Apache committer credentials
 

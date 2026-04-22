@@ -109,7 +109,10 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
 
             this.hookRepository.saveAndFlush(hook);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(hook.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(hook.getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleHookDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -194,7 +197,9 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
-        return new CommandProcessingResultBuilder().withEntityId(hookId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(hookId) //
+                .build();
     }
 
     private Hook retrieveHookBy(final Long hookId) {

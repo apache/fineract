@@ -31,31 +31,29 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
-import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
+import org.apache.fineract.client.models.DelinquencyRangeData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -63,14 +61,12 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class DelinquencyAndChargebackIntegrationTest {
+public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -93,7 +89,8 @@ public class DelinquencyAndChargebackIntegrationTest {
     @MethodSource("loanProductFactory")
     public void testLoanClassificationStepAsPartOfCOB(LoanProductTestBuilder loanProductTestBuilder) {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             final LocalDate todaysDate = Utils.getDateAsLocalDate("01 April 2012");
             LocalDate businessDate = todaysDate.minusMonths(3);
@@ -102,14 +99,13 @@ public class DelinquencyAndChargebackIntegrationTest {
 
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Delinquency Bucket
-            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    delinquencyBucketId);
+            final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+            final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    Math.toIntExact(delinquencyBucket.getId()), loanProductTestBuilder);
+                    delinquencyBucket.getId(), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
 
             // Older date to have more than one overdue installment
@@ -171,9 +167,8 @@ public class DelinquencyAndChargebackIntegrationTest {
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Run the Loan COB Job
-            final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -205,7 +200,8 @@ public class DelinquencyAndChargebackIntegrationTest {
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "950.00", 4, Double.valueOf("50.00"));
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
@@ -213,7 +209,8 @@ public class DelinquencyAndChargebackIntegrationTest {
     @MethodSource("loanProductFactory")
     public void testLoanClassificationStepAsPartOfCOBRepeated(LoanProductTestBuilder loanProductTestBuilder) {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
 
             List<LocalDate> expectedDates = new ArrayList();
 
@@ -223,14 +220,13 @@ public class DelinquencyAndChargebackIntegrationTest {
 
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Delinquency Bucket
-            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    delinquencyBucketId);
+            final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+            final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
             // Client and Loan account creation
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    Math.toIntExact(delinquencyBucket.getId()), loanProductTestBuilder);
+                    delinquencyBucket.getId(), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
 
             // Older date to have more than one overdue installment
@@ -294,9 +290,8 @@ public class DelinquencyAndChargebackIntegrationTest {
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Run the Loan COB Job
-            final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            // Run the Loan inline COB Job
+            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -319,7 +314,7 @@ public class DelinquencyAndChargebackIntegrationTest {
             loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
             assertNotNull(loanIdTransactionsResponse);
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-            assertEquals(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue(), getLoansLoanIdResponse.getStatus().getId());
+            assertEquals(Long.valueOf(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue()), getLoansLoanIdResponse.getStatus().getId());
             log.info("Loan id {} with status {}", loanId, getLoansLoanIdResponse.getStatus().getCode());
 
             // Evaluate Installments
@@ -336,12 +331,13 @@ public class DelinquencyAndChargebackIntegrationTest {
                 }
             }
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
+            final Long delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
         final HashMap<String, Object> loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
@@ -364,10 +360,10 @@ public class DelinquencyAndChargebackIntegrationTest {
         return loanId;
     }
 
-    private GetDelinquencyRangesResponse validateLoanAccount(GetLoansLoanIdResponse getLoansLoanIdResponse, final String adjustments,
+    private DelinquencyRangeData validateLoanAccount(GetLoansLoanIdResponse getLoansLoanIdResponse, final String adjustments,
             final String outstanding, Integer pastDueDays, Double delinquentAmount) {
         assertNotNull(getLoansLoanIdResponse);
-        final GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        final DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
 
         log.info("Loan Delinquency Range is null {}", (delinquencyRange == null));
         if (delinquencyRange != null) {
@@ -395,31 +391,6 @@ public class DelinquencyAndChargebackIntegrationTest {
 
         advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
         return advancedPaymentData;
-    }
-
-    private static AdvancedPaymentData createDefaultPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
     }
 
     private static Stream<Arguments> loanProductFactory() {

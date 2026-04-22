@@ -20,6 +20,8 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -31,6 +33,7 @@ import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
+import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -73,4 +76,22 @@ public class LoanProductExternalIdTest {
         assertNotNull(putLoanProductsProductIdResponse.getResourceId());
         assertEquals(loanProductId, putLoanProductsProductIdResponse.getResourceId().intValue());
     }
+
+    @Test
+    public void testLoanProductWithInvalidExternalId() {
+        String externalId = UUID.randomUUID().toString();
+        HashMap<String, Object> request = new LoanProductTestBuilder().withExternalId(externalId).build(null, null);
+        Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(request));
+        assertNotNull(loanProductId);
+
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductByExternalId(externalId);
+        assertNotNull(getLoanProductsProductIdResponse.getId());
+        assertEquals(loanProductId, getLoanProductsProductIdResponse.getId().intValue());
+
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> loanProductHelper.retrieveLoanProductByExternalId(externalId.substring(2)));
+        assertEquals(404, exception.getResponse().code());
+        assertTrue(exception.getMessage().contains("error.msg.loanproduct.id.invalid"));
+    }
+
 }

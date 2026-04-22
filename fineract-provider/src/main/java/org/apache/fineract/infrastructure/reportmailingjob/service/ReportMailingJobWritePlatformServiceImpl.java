@@ -89,7 +89,9 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             // save entity
             this.reportMailingJobRepository.saveAndFlush(reportMailingJob);
 
-            return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(jsonCommand.commandId()) //
+                    .withEntityId(reportMailingJob.getId()) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
@@ -180,8 +182,11 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                 this.reportMailingJobRepository.saveAndFlush(reportMailingJob);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
-                    .with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(jsonCommand.commandId()) //
+                    .withEntityId(reportMailingJob.getId()) //
+                    .with(changes) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(jsonCommand, throwable, dve);
@@ -204,7 +209,9 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
         // save the report mailing job entity
         this.reportMailingJobRepository.save(reportMailingJob);
 
-        return new CommandProcessingResultBuilder().withEntityId(reportMailingJobId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(reportMailingJobId) //
+                .build();
     }
 
     /**

@@ -18,9 +18,27 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.time.LocalDate;
+
 public interface LoanLifecycleStateMachine {
 
     LoanStatus dryTransition(LoanEvent loanEvent, Loan loan);
 
     void transition(LoanEvent loanEvent, Loan loan);
+
+    /**
+     * Determines the appropriate loan status based on the loan's current financial condition. This method is designed
+     * to be called at the end of processing to ensure accurate status transitions.
+     *
+     * For example, it can determine whether a loan that was OVERPAID should transition to: - CLOSED_OBLIGATIONS_MET (if
+     * overpayment amount is now zero) - ACTIVE (if there is still outstanding balance) - Remain as OVERPAID (if still
+     * overpaid)
+     *
+     * @param loan
+     *            The loan whose status should be evaluated
+     * @param transactionDate
+     *            The date of the transaction that may have affected the loan status
+     */
+    void determineAndTransition(Loan loan, LocalDate transactionDate);
+
 }

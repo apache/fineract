@@ -40,23 +40,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.common.error.ErrorResponse;
 import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -71,20 +72,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Test class for {@link org.apache.fineract.batch.command.CommandStrategyProvider}. This tests the response provided by
- * commandStrategy by injecting it with a {@code BatchRequest}.
- *
- * @author RishabhShukla
- * @see org.apache.fineract.integrationtests.common.BatchHelper
- * @see org.apache.fineract.batch.domain.BatchRequest
- */
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class BatchApiTest {
+public class BatchApiTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchApiTest.class);
 
@@ -119,12 +110,20 @@ public class BatchApiTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
+                new PutGlobalConfigurationsRequest().enabled(false));
+
     }
 
     @AfterEach
     public void postActions() {
-        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, false);
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
+                new PutGlobalConfigurationsRequest().enabled(false));
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
+                new PutGlobalConfigurationsRequest().enabled(true));
+
     }
 
     /**
@@ -420,7 +419,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Long applyLoanRequestId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(1000, 10_000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long createChargeRequestId = disburseLoanRequestId + 1;
@@ -481,7 +480,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Long applyLoanRequestId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(1000, 10_000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long createChargeRequestId = disburseLoanRequestId + 1;
@@ -579,10 +578,10 @@ public class BatchApiTest {
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
-        final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
+        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
-        final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
+        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
@@ -1197,8 +1196,8 @@ public class BatchApiTest {
     }
 
     /**
-     * Test for the successful create client, creat, approve and get loan. A '200' status code is expected on successful
-     * responses.
+     * Test for the successful create client, create, approve and get loan. A '200' status code is expected on
+     * successful responses.
      *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
@@ -1644,7 +1643,7 @@ public class BatchApiTest {
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final JsonObject repayment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
-                .get(2).getAsJsonObject();
+                .get(1).getAsJsonObject();
         final JsonArray dateArray = repayment.get("reversedOnDate").getAsJsonArray();
         final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
                 dateArray.get(2).getAsInt());
@@ -1678,7 +1677,7 @@ public class BatchApiTest {
         final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
 
         final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
-        final Long applyLoanRequestId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(1000, 10_000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long getLoanBeforeTxnRequestId = disburseLoanRequestId + 1;
@@ -1746,7 +1745,7 @@ public class BatchApiTest {
                 this.responseSpec, BatchHelper.toJsonString(reversalAndGetBatchRequest));
 
         final JsonObject repayment = jsonHelper.parse(reversalResponses.get(1).getBody()).getAsJsonObject().get("transactions")
-                .getAsJsonArray().get(2).getAsJsonObject();
+                .getAsJsonArray().get(1).getAsJsonObject();
 
         final JsonArray dateArray = repayment.get("reversedOnDate").getAsJsonArray();
         final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
@@ -1821,7 +1820,7 @@ public class BatchApiTest {
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final JsonObject repayment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
-                .get(2).getAsJsonObject();
+                .get(1).getAsJsonObject();
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(),
                 "Verify Status Code 200 for repayment chargeback");
@@ -1893,7 +1892,7 @@ public class BatchApiTest {
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final JsonObject goodWillCredit = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions")
-                .getAsJsonArray().get(2).getAsJsonObject();
+                .getAsJsonArray().get(1).getAsJsonObject();
         final JsonArray dateArray = goodWillCredit.get("reversedOnDate").getAsJsonArray();
         final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
                 dateArray.get(2).getAsInt());
@@ -1979,9 +1978,9 @@ public class BatchApiTest {
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
         final JsonObject merchantIssuedRefund = jsonHelper.parse(responses.get(7).getBody()).getAsJsonObject().get("transactions")
-                .getAsJsonArray().get(2).getAsJsonObject();
+                .getAsJsonArray().get(1).getAsJsonObject();
         final JsonObject payoutRefund = jsonHelper.parse(responses.get(7).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
-                .get(3).getAsJsonObject();
+                .get(2).getAsJsonObject();
         final JsonArray merchantIssuedDateArray = merchantIssuedRefund.get("reversedOnDate").getAsJsonArray();
         final LocalDate merchantIssuedDate = LocalDate.of(merchantIssuedDateArray.get(0).getAsInt(),
                 merchantIssuedDateArray.get(1).getAsInt(), merchantIssuedDateArray.get(2).getAsInt());
@@ -2282,7 +2281,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Long applyLoanRequestId = RandomUtils.nextLong(100, 1000);
+        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long updateLoanRequestId = disburseLoanRequestId + 1;
@@ -2339,7 +2338,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Long applyLoanRequestId = RandomUtils.nextLong(100, 1000);
+        final long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long updateLoanRequestId = disburseLoanRequestId + 1;
@@ -2354,10 +2353,10 @@ public class BatchApiTest {
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
-        final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
+        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
-        final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
+        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest updateLoanRequest = BatchHelper.modifyLoanByExternalIdRequest(updateLoanRequestId, approveLoanRequestId);
@@ -2406,7 +2405,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Long applyLoanRequestId = RandomUtils.nextLong(100, 1000);
+        final long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long getLoanRequestId = disburseLoanRequestId + 1;
@@ -2420,10 +2419,10 @@ public class BatchApiTest {
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
-        final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
+        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
-        final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
+        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
@@ -2461,10 +2460,11 @@ public class BatchApiTest {
 
         final String jsonifiedRepaymentRequest = BatchHelper.toJsonString(List.of(br));
 
-        final List<BatchResponse> repaymentResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec,
-                this.responseSpec, jsonifiedRepaymentRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_CONFLICT, repaymentResponse.get(0).getStatusCode(), "Verify Status Code 409 for Locked Loan");
+        // verify HTTP 409
+        ResponseSpecification conflictResponseSpec = new ResponseSpecBuilder().expectStatusCode(409).build();
+        ErrorResponse errorResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, conflictResponseSpec,
+                jsonifiedRepaymentRequest);
+        assertEquals(409, errorResponse.getHttpStatusCode());
     }
 
     /**
@@ -2487,7 +2487,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Long applyLoanRequestId = RandomUtils.nextLong(100, 1000);
+        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long getLoanRequestId = disburseLoanRequestId + 1;
@@ -2501,10 +2501,10 @@ public class BatchApiTest {
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
-        final BatchRequest approveLoanRequest = BatchHelper.transistionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
+        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
 
-        final BatchRequest disburseLoanRequest = BatchHelper.transistionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
+        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
                 LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
 
         final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
@@ -2542,10 +2542,11 @@ public class BatchApiTest {
 
         final String jsonifiedRepaymentRequest = BatchHelper.toJsonString(List.of(br));
 
-        final List<BatchResponse> repaymentResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec,
-                this.responseSpec, jsonifiedRepaymentRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_CONFLICT, repaymentResponse.get(0).getStatusCode(), "Verify Status Code 409 for Locked Loan");
+        // verify HTTP 409
+        ResponseSpecification conflictResponseSpec = new ResponseSpecBuilder().expectStatusCode(409).build();
+        ErrorResponse errorResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, conflictResponseSpec,
+                jsonifiedRepaymentRequest);
+        assertEquals(409, errorResponse.getHttpStatusCode());
     }
 
     @Test
@@ -2614,6 +2615,73 @@ public class BatchApiTest {
                 "Verify running balance after first withdrawal");
         assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount - withdrawalAmount,
                 transactionWithdrawal2.get("runningBalance"), "Verify running balance after second withdrawal");
+    }
+
+    @Test
+    public void shouldReturnOkStatusForBatchChargeOff() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+
+        // Create a ApplyLoan Request
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
+
+        // Create a approveLoan Request
+        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
+
+        // Create a disburseLoan Request
+        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
+
+        // Create a loanRepay Request
+        final BatchRequest br6 = BatchHelper.repayLoanRequest(4735L, 4734L, "500");
+
+        // Create a loanRepay Request
+        final BatchRequest br7 = BatchHelper.repayLoanRequest(4736L, 4734L, "500");
+
+        final BatchRequest br8 = BatchHelper.chargeOffRequest(4737L, 4736L);
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+        batchRequests.add(br3);
+        batchRequests.add(br4);
+        batchRequests.add(br5);
+        batchRequests.add(br6);
+        batchRequests.add(br7);
+        batchRequests.add(br8);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(7).getStatusCode(), "Verify Status Code 200 for ChargeOff");
     }
 
     /**

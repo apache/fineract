@@ -32,7 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
 import java.util.UUID;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -74,9 +74,8 @@ public class LoanLastRepaymentDetailsTest {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
         // Client and Loan account creation
 
@@ -100,7 +99,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 500);
+        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_1);
 
@@ -117,7 +116,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getClosedObligationsMet());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 500);
+        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_2);
 
@@ -129,9 +128,8 @@ public class LoanLastRepaymentDetailsTest {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
         // Client and Loan account creation
 
@@ -155,7 +153,7 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 500);
+        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_1);
 
@@ -171,14 +169,14 @@ public class LoanLastRepaymentDetailsTest {
         assertTrue(loanDetails.getStatus().getOverpaid());
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentAmount(), 600);
+        assertEquals(600.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
         assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_2);
 
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId) {
+            final Long delinquencyBucketId) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);

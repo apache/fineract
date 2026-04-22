@@ -60,8 +60,8 @@ public class ClientEntityWorkbookPopulatorTest {
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         // in order to populate helper sheets
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer outcome_office_creation = officeHelper.createOffice(java.time.LocalDate.of(2000, 5, 2)).getResourceId().intValue();
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);

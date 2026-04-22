@@ -28,7 +28,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -56,7 +55,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.springframework.stereotype.Component;
 
 @Path("/v1/hooks")
-@Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Tag(name = "Hooks", description = "Hooks are a mechanism to trigger custom code on the occurence of events. ")
@@ -71,8 +69,7 @@ public class HookApiResource {
 
     @GET
     @Operation(summary = "Retrieve Hooks", description = "Returns the list of hooks.\n" + "\n" + "Example Requests:\n" + "\n" + "hooks")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HookApiResourceSwagger.GetHookResponse.class)))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HookApiResourceSwagger.GetHookResponse.class))))
     public String retrieveHooks(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(HOOK_RESOURCE_NAME);
@@ -87,8 +84,7 @@ public class HookApiResource {
     @Path("{hookId}")
     @Operation(summary = "Retrieve a Hook", description = "Returns the details of a Hook.\n" + "\n" + "Example Requests:\n" + "\n"
             + "hooks/1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.GetHookResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.GetHookResponse.class)))
     public String retrieveHook(@PathParam("hookId") @Parameter(description = "hookId") final Long hookId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(HOOK_RESOURCE_NAME);
@@ -108,8 +104,7 @@ public class HookApiResource {
     @Path("template")
     @Operation(summary = "Retrieve Hooks Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "hooks/template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.GetHookTemplateResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.GetHookTemplateResponse.class)))
     public String template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(HOOK_RESOURCE_NAME);
@@ -121,6 +116,7 @@ public class HookApiResource {
     }
 
     @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Hook", description = "The following parameters can be passed for the creation of a hook :-\n" + "\n"
             + "name - string - Required. The name of the template that is being called. (See /hooks/template for the list of valid hook names.)\n"
             + "\n" + "isActive - boolean - Determines whether the hook is actually triggered.\n" + "\n"
@@ -128,8 +124,7 @@ public class HookApiResource {
             + "config - hash - Required. Key/value pairs to provide settings for this hook. These settings vary between the templates.\n"
             + "\n" + "templateId - Optional. The UGD template ID associated with the same entity (client or loan).")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.PostHookRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.PostHookResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.PostHookResponse.class)))
     public String createHook(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createHook().withJson(apiRequestBodyAsJson).build();
@@ -141,10 +136,10 @@ public class HookApiResource {
 
     @PUT
     @Path("{hookId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Hook", description = "Updates the details of a hook.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.PutHookRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.PutHookResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.PutHookResponse.class)))
     public String updateHook(@PathParam("hookId") @Parameter(description = "hookId") final Long hookId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -158,8 +153,7 @@ public class HookApiResource {
     @DELETE
     @Path("{hookId}")
     @Operation(summary = "Delete a Hook", description = "Deletes a hook.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.DeleteHookResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HookApiResourceSwagger.DeleteHookResponse.class)))
     public String deleteHook(@PathParam("hookId") @Parameter(description = "hookId") final Long hookId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteHook(hookId).build();

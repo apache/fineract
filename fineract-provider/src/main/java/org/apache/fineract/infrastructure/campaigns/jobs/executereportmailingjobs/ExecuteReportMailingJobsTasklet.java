@@ -84,7 +84,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
                 final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
                         .newInstance(reportMailingJob.getEmailAttachmentFileFormat());
 
-                if (emailAttachmentFileFormat != null && emailAttachmentFileFormat.isValid()) {
+                if (emailAttachmentFileFormat != null && emailAttachmentFileFormat != ReportMailingJobEmailAttachmentFileFormat.INVALID) {
                     final Report stretchyReport = reportMailingJob.getStretchyReport();
                     final String reportName = (stretchyReport != null) ? stretchyReport.getReportName() : null;
                     final StringBuilder errorLog = new StringBuilder();
@@ -102,7 +102,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
                                 ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption = ReportMailingJobStretchyReportParamDateOption
                                         .newInstance(value);
 
-                                if (reportMailingJobStretchyReportParamDateOption.isValid()) {
+                                if (reportMailingJobStretchyReportParamDateOption != ReportMailingJobStretchyReportParamDateOption.INVALID) {
                                     value = ReportMailingJobDateUtil.getDateAsString(reportMailingJobStretchyReportParamDateOption);
                                 }
                             }
@@ -124,8 +124,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
             final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final MultivaluedMap<String, String> reportParams,
             final String reportName, final StringBuilder errorLog) {
         try {
-            final boolean isSelfServiceUserReport = false;
-            final String reportType = readReportingService.getReportType(reportName, isSelfServiceUserReport, false);
+            final String reportType = readReportingService.getReportType(reportName, false);
             final ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
 
             if (reportingProcessService != null) {

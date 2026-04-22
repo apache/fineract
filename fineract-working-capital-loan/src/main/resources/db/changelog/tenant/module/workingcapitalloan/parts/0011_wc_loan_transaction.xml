@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Working Capital Loan Transaction: basic details only -->
+    <changeSet author="fineract" id="wcl-0008-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_wc_loan_transaction"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_wc_loan_transaction">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_wc_loan_transaction"/>
+            </column>
+            <column name="wc_loan_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="FK_m_wc_loan_transaction_loan" referencedTableName="m_wc_loan" referencedColumnNames="id"/>
+            </column>
+            <column name="payment_detail_id" type="BIGINT"/>
+            <!-- m_code_value.id is INT in core schema -->
+            <column name="classification_cv_id" type="INT"/>
+            <column name="external_id" type="VARCHAR(100)">
+                <constraints unique="true" uniqueConstraintName="wc_loan_transaction_external_id_UNIQUE"/>
+            </column>
+            <column name="transaction_type_id" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_on_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_amount" type="DECIMAL(19, 6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="SMALLINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-2-mysql" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <not>
+                <columnExists tableName="m_wc_loan_transaction" columnName="created_on_utc"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_transaction">
+            <column name="created_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-2-pg" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <not>
+                <columnExists tableName="m_wc_loan_transaction" columnName="created_on_utc"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_transaction">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-3">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_payment_detail"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="payment_detail_id"
+                                 constraintName="FK_m_wc_loan_transaction_payment_detail" referencedTableName="m_payment_detail" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-4">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <columnExists tableName="m_wc_loan_transaction" columnName="classification_cv_id"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_classification_cv"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="classification_cv_id"
+                                 constraintName="FK_m_wc_loan_transaction_classification_cv" referencedTableName="m_code_value" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-5">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_created_by"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="created_by"
+                                 constraintName="FK_m_wc_loan_transaction_created_by" referencedTableName="m_appuser" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="m_wc_loan_transaction" baseColumnNames="last_modified_by"
+                                 constraintName="FK_m_wc_loan_transaction_last_modified_by" referencedTableName="m_appuser" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-6">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <not>
+                <indexExists tableName="m_wc_loan_transaction" indexName="IND_m_wc_loan_transaction_wc_loan_id"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="m_wc_loan_transaction" indexName="IND_m_wc_loan_transaction_wc_loan_id">
+            <column name="wc_loan_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-6b">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <not>
+                <columnExists tableName="m_wc_loan_transaction" columnName="is_reversed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_transaction">
+            <column name="is_reversed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reversal_external_id" type="VARCHAR(100)"/>
+            <column name="reversed_on_date" type="date"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-6c">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction"/>
+            <columnExists tableName="m_wc_loan_transaction" columnName="reversal_external_id"/>
+        </preConditions>
+        <addUniqueConstraint tableName="m_wc_loan_transaction" columnNames="reversal_external_id"
+                             constraintName="wc_loan_transaction_reversal_external_id_UNIQUE"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-10">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_wc_loan_transaction_allocation"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_wc_loan_transaction_allocation">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_wc_loan_transaction_allocation"/>
+            </column>
+            <column name="wc_loan_transaction_id" type="BIGINT">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_m_wc_loan_transaction_allocation_transaction_id"
+                             foreignKeyName="FK_m_wc_loan_transaction_allocation_transaction" referencedTableName="m_wc_loan_transaction" referencedColumnNames="id"/>
+            </column>
+            <column name="principal_portion" type="DECIMAL(19, 6)"/>
+            <column name="fee_charges_portion" type="DECIMAL(19, 6)"/>
+            <column name="penalty_charges_portion" type="DECIMAL(19, 6)"/>
+            <column name="version" type="SMALLINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-11-mysql" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction_allocation"/>
+            <not>
+                <columnExists tableName="m_wc_loan_transaction_allocation" columnName="created_on_utc"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_transaction_allocation">
+            <column name="created_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-11-pg" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction_allocation"/>
+            <not>
+                <columnExists tableName="m_wc_loan_transaction_allocation" columnName="created_on_utc"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_transaction_allocation">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-12">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction_allocation"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_transaction_allocation_created_by"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="m_wc_loan_transaction_allocation" baseColumnNames="created_by"
+                                 constraintName="FK_m_wc_loan_transaction_allocation_created_by" referencedTableName="m_appuser" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="m_wc_loan_transaction_allocation" baseColumnNames="last_modified_by"
+                                 constraintName="FK_m_wc_loan_transaction_allocation_last_modified_by" referencedTableName="m_appuser" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0008-13">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_transaction_allocation"/>
+            <not>
+                <indexExists tableName="m_wc_loan_transaction_allocation" indexName="IND_m_wc_loan_transaction_allocation_transaction_id"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="m_wc_loan_transaction_allocation" indexName="IND_m_wc_loan_transaction_allocation_transaction_id">
+            <column name="wc_loan_transaction_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

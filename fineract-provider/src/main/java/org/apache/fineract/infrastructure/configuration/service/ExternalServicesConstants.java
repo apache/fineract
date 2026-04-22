@@ -54,7 +54,9 @@ public final class ExternalServicesConstants {
 
     public enum ExternalservicePropertiesJSONinputParams {
 
-        EXTERNAL_SERVICE_ID("external_service_id"), NAME("name"), VALUE("value");
+        EXTERNAL_SERVICE_ID("external_service_id"), //
+        NAME("name"), //
+        VALUE("value"); //
 
         private final String value;
 
@@ -86,8 +88,13 @@ public final class ExternalServicesConstants {
 
     public enum SMTPJSONinputParams {
 
-        USERNAME("username"), PASSWORD("password"), HOST("host"), PORT("port"), USETLS("useTLS"), FROM_EMAIL("fromEmail"), FROM_NAME(
-                "fromName");
+        USERNAME("username"), //
+        PASSWORD("password"), //
+        HOST("host"), //
+        PORT("port"), //
+        USETLS("useTLS"), //
+        FROM_EMAIL("fromEmail"), //
+        FROM_NAME("fromName"); //
 
         private final String value;
 
@@ -119,7 +126,10 @@ public final class ExternalServicesConstants {
 
     public enum SMSJSONinputParams {
 
-        HASTNAME("host_name"), PORT("port_number"), END_POINT("end_point"), TENANT_APP_KEY("tenant_app_key");
+        HASTNAME("host_name"), //
+        PORT("port_number"), //
+        END_POINT("end_point"), //
+        TENANT_APP_KEY("tenant_app_key"); //
 
         private final String value;
 
@@ -151,7 +161,9 @@ public final class ExternalServicesConstants {
 
     public enum S3JSONinputParams {
 
-        S3_ACCESS_KEY("s3_access_key"), S3_BUCKET_NAME("s3_bucket_name"), S3_SECRET_KEY("s3_secret_key");
+        S3_ACCESS_KEY("s3_access_key"), //
+        S3_BUCKET_NAME("s3_bucket_name"), //
+        S3_SECRET_KEY("s3_secret_key"); //
 
         private final String value;
 
@@ -183,7 +195,9 @@ public final class ExternalServicesConstants {
 
     public enum NotificationJSONinputParams {
 
-        SERVER_KEY("server_key"), GCM_END_POINT("gcm_end_point"), FCM_END_POINT("fcm_end_point");
+        SERVER_KEY("server_key"), //
+        GCM_END_POINT("gcm_end_point"), //
+        FCM_END_POINT("fcm_end_point"); //
 
         private final String value;
 

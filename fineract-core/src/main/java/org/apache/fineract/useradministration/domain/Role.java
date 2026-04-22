@@ -38,7 +38,7 @@ import org.apache.fineract.useradministration.data.RoleData;
 
 @Entity
 @Table(name = "m_role", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
-public class Role extends AbstractPersistableCustom implements Serializable {
+public class Role extends AbstractPersistableCustom<Long> implements Serializable {
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;

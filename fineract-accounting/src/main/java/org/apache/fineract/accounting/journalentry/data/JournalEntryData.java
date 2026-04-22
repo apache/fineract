@@ -94,6 +94,7 @@ public class JournalEntryData {
     private String routingCode;
     private String receiptNumber;
     private String bankNumber;
+    private String externalAssetOwner;
     private transient Long savingTransactionId;
 
     public JournalEntryData() {}
@@ -191,7 +192,7 @@ public class JournalEntryData {
             final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate submittedOnDate,
             final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber,
             final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance, final Boolean runningBalanceComputed,
-            final TransactionDetailData transactionDetailData, final CurrencyData currency) {
+            final TransactionDetailData transactionDetailData, final CurrencyData currency, final String externalAssetOwner) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -218,6 +219,7 @@ public class JournalEntryData {
         this.runningBalanceComputed = runningBalanceComputed;
         this.transactionDetails = transactionDetailData;
         this.currency = currency;
+        this.externalAssetOwner = externalAssetOwner;
     }
 
     public static JournalEntryData importInstance(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId,
@@ -259,10 +261,11 @@ public class JournalEntryData {
         final Boolean runningBalanceComputed = null;
         final TransactionDetailData transactionDetailData = null;
         final CurrencyData currency = null;
+        final String externalAssetOwner = null;
         return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glAccountCode, glAccountClassification,
                 transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
                 createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
-                runningBalanceComputed, transactionDetailData, currency);
+                runningBalanceComputed, transactionDetailData, currency, externalAssetOwner);
     }
 
     public Integer getRowIndex() {
@@ -274,7 +277,6 @@ public class JournalEntryData {
     }
 
     public void addDebits(CreditDebit debit) {
-
         this.debits.add(debit);
     }
 

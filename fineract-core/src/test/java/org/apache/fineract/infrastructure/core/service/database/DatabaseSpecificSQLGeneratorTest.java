@@ -25,7 +25,9 @@ import org.mockito.Mockito;
 public class DatabaseSpecificSQLGeneratorTest {
 
     private final DatabaseTypeResolver databaseTypeResolver = Mockito.mock(DatabaseTypeResolver.class);
-    private final DatabaseSpecificSQLGenerator databaseSpecificSQLGenerator = new DatabaseSpecificSQLGenerator(databaseTypeResolver);
+    private final RoutingDataSource dataSource = Mockito.mock(RoutingDataSource.class);
+    private final DatabaseSpecificSQLGenerator databaseSpecificSQLGenerator = new DatabaseSpecificSQLGenerator(databaseTypeResolver,
+            dataSource);
 
     @Test
     public void testCountQueryResultOnEmptyString() {

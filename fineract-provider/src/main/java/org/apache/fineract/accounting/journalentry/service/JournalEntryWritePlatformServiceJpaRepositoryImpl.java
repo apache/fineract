@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformSer
 import org.apache.fineract.accounting.journalentry.api.JournalEntryJsonInputParams;
 import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
 import org.apache.fineract.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
+import org.apache.fineract.accounting.journalentry.data.AdvancedMappingtDTO;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
@@ -55,26 +57,51 @@ import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalid
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException.GlJournalEntryInvalidReason;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryRuntimeException;
 import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
-import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntry;
 import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 import org.apache.fineract.accounting.rule.domain.AccountingRule;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
 import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundException;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.investor.domain.ExternalAssetOwner;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.exception.ExternalAssetOwnerNotFoundException;
+import org.apache.fineract.investor.service.AccountingService;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
+import org.apache.fineract.portfolio.PortfolioProductType;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO;
+import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.AmortizationType;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMapping;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMappingRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -104,6 +131,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final AccountingService accountingService;
+    private final ExternalAssetOwnerRepository externalAssetOwnerRepository;
+    private final LoanAmortizationAllocationMappingRepository loanAmortizationAllocationMappingRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Transactional
     @Override
@@ -130,6 +162,22 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final String transactionId = generateTransactionId(officeId);
             final String referenceNumber = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue());
 
+            ExternalAssetOwner externalAssetOwner = null;
+            final ExternalId externalId = ExternalIdFactory
+                    .produce(command.stringValueOfParameterNamed(JournalEntryJsonInputParams.EXTERNAL_ASSET_OWNER.getValue()));
+            if (!externalId.isEmpty()) {
+                if (!configurationReadPlatformService
+                        .retrieveGlobalConfiguration(GlobalConfigurationConstants.ASSET_EXTERNALIZATION_OF_NON_ACTIVE_LOANS).isEnabled()) {
+                    throw new JournalEntryRuntimeException("error.msg.glJournalEntry.asset.externalization.not.enabled",
+                            "GL Journal Entry with Asset Externalization not enabled");
+                }
+                final Optional<ExternalAssetOwner> optExternalAssetOwner = externalAssetOwnerRepository.findByExternalId(externalId);
+                if (!optExternalAssetOwner.isPresent()) {
+                    throw new ExternalAssetOwnerNotFoundException(externalId);
+                }
+                externalAssetOwner = optExternalAssetOwner.get();
+            }
+
             if (accountRuleId != null) {
 
                 final AccountingRule accountingRule = this.accountingRuleRepository.findById(accountRuleId)
@@ -146,13 +194,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     }
 
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber);
+                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber, externalAssetOwner);
                 } else {
                     final GLAccount creditAccountHead = accountingRule.getAccountToCredit();
                     validateGLAccountForTransaction(creditAccountHead);
                     validateDebitOrCreditArrayForExistingGLAccount(creditAccountHead, journalEntryCommand.getCredits());
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber);
+                            journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber, externalAssetOwner);
                 }
 
                 if (accountingRule.getAccountToDebit() == null) {
@@ -166,26 +214,29 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     }
 
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber);
+                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber, externalAssetOwner);
                 } else {
                     final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
                     validateGLAccountForTransaction(debitAccountHead);
                     validateDebitOrCreditArrayForExistingGLAccount(debitAccountHead, journalEntryCommand.getDebits());
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber);
+                            journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber, externalAssetOwner);
                 }
             } else {
 
                 saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                        journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber);
+                        journalEntryCommand.getDebits(), transactionId, JournalEntryType.DEBIT, referenceNumber, externalAssetOwner);
 
                 saveAllDebitOrCreditEntries(journalEntryCommand, office, paymentDetail, currencyCode, transactionDate,
-                        journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber);
+                        journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, referenceNumber, externalAssetOwner);
 
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
-                    .withTransactionId(transactionId).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(officeId) //
+                    .withTransactionId(transactionId) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             throw handleJournalEntryDataIntegrityIssues(throwable, dve);
@@ -295,7 +346,31 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             throw new JournalEntriesNotFoundException(command.getTransactionId());
         }
         final String reversalTransactionId = revertJournalEntry(journalEntries, reversalComment);
-        return new CommandProcessingResultBuilder().withTransactionId(reversalTransactionId).build();
+        return new CommandProcessingResultBuilder() //
+                .withTransactionId(reversalTransactionId) //
+                .build();
+    }
+
+    @Override
+    public void createJournalEntryForReversedLoanTransaction(final LocalDate transactionDate, final String loanTransactionId,
+            final Long officeId) {
+        final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(officeId);
+        this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
+        final String transactionId = AccountingProcessorHelper.LOAN_TRANSACTION_IDENTIFIER + loanTransactionId;
+        final List<JournalEntry> journalEntries = this.glJournalEntryRepository.findJournalEntries(transactionId,
+                PortfolioProductType.LOAN.getValue());
+        if (journalEntries == null || journalEntries.isEmpty()) {
+            return;
+        }
+        for (final JournalEntry journalEntry : journalEntries) {
+            final JournalEntry reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
+                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), transactionId, Boolean.FALSE, transactionDate,
+                    journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT, journalEntry.getAmount(),
+                    journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(),
+                    journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(),
+                    journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId());
+            helper.persistJournalEntry(reversalJournalEntry);
+        }
     }
 
     public String revertJournalEntry(final List<JournalEntry> journalEntries, String reversalComment) {
@@ -458,15 +533,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Transactional
     @Override
-    public void createJournalEntriesForLoan(final Map<String, Object> accountingBridgeData) {
-
-        final boolean cashBasedAccountingEnabled = (Boolean) accountingBridgeData.get("cashBasedAccountingEnabled");
-        final boolean upfrontAccrualBasedAccountingEnabled = (Boolean) accountingBridgeData.get("upfrontAccrualBasedAccountingEnabled");
-        final boolean periodicAccrualBasedAccountingEnabled = (Boolean) accountingBridgeData.get("periodicAccrualBasedAccountingEnabled");
+    public void createJournalEntriesForLoan(final AccountingBridgeDataDTO accountingBridgeData) {
+        final boolean cashBasedAccountingEnabled = accountingBridgeData.isCashBasedAccountingEnabled();
+        final boolean upfrontAccrualBasedAccountingEnabled = accountingBridgeData.isUpfrontAccrualBasedAccountingEnabled();
+        final boolean periodicAccrualBasedAccountingEnabled = accountingBridgeData.isPeriodicAccrualBasedAccountingEnabled();
 
         if (cashBasedAccountingEnabled || upfrontAccrualBasedAccountingEnabled || periodicAccrualBasedAccountingEnabled) {
-            final LoanDTO loanDTO = this.helper.populateLoanDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled,
-                    upfrontAccrualBasedAccountingEnabled, periodicAccrualBasedAccountingEnabled);
+            final LoanDTO loanDTO = this.helper.populateLoanDtoFromDTO(accountingBridgeData);
             final AccountingProcessorForLoan accountingProcessorForLoan = this.accountingProcessorForLoanFactory
                     .determineProcessor(loanDTO);
             accountingProcessorForLoan.createJournalEntriesForLoan(loanDTO);
@@ -577,8 +650,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final PaymentDetail paymentDetail,
             final String currencyCode, final LocalDate transactionDate,
             final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
-            final JournalEntryType type, final String referenceNumber) {
+            final JournalEntryType type, final String referenceNumber, final ExternalAssetOwner externalAssetOwner) {
         final boolean manualEntry = true;
+
+        /** Validate current code is appropriate **/
+        this.organisationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
+
         for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             final GLAccount glAccount = this.glAccountRepository.findById(singleDebitOrCreditEntryCommand.getGlAccountId())
                     .orElseThrow(() -> new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()));
@@ -590,13 +667,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 comments = singleDebitOrCreditEntryCommand.getComments();
             }
 
-            /** Validate current code is appropriate **/
-            this.organisationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
-
             final JournalEntry glJournalEntry = JournalEntry.createNew(office, paymentDetail, glAccount, currencyCode, transactionId,
                     manualEntry, transactionDate, type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, referenceNumber,
                     null, null, null, null);
             helper.persistJournalEntry(glJournalEntry);
+
+            accountingService.createMappingToOwner(externalAssetOwner, glJournalEntry);
         }
     }
 
@@ -665,8 +741,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             saveAllDebitOrCreditOpeningBalanceEntries(journalEntryCommand, office, currencyCode, transactionDate,
                     journalEntryCommand.getCredits(), transactionId, JournalEntryType.CREDIT, contraId);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
-                    .withTransactionId(transactionId).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(officeId) //
+                    .withTransactionId(transactionId) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             throw handleJournalEntryDataIntegrityIssues(throwable, dve);
@@ -736,6 +815,195 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     public void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData) {
         final ClientTransactionDTO clientTransactionDTO = this.helper.populateClientTransactionDtoFromMap(accountingBridgeData);
         accountingProcessorForClientTransactions.createJournalEntriesForClientTransaction(clientTransactionDTO);
+    }
+
+    @Transactional
+    @Override
+    public void createJournalEntriesForLoanTransaction(final LoanTransaction loanTransaction, final boolean isAccountTransfer,
+            final boolean isLoanToLoanTransfer) {
+        final Loan loan = loanTransaction.getLoan();
+
+        // Check if accounting is enabled for this loan
+        if (!loan.isCashBasedAccountingEnabledOnLoanProduct() && !loan.isUpfrontAccrualAccountingEnabledOnLoanProduct()
+                && !loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+            return; // No accounting enabled, skip journal entry creation
+        }
+
+        final AccountingBridgeDataDTO accountingBridgeData = createAccountingBridgeDataForSingleTransaction(loanTransaction,
+                isAccountTransfer);
+
+        if (isLoanToLoanTransfer) {
+            accountingBridgeData.getNewLoanTransactions().forEach(tx -> tx.setLoanToLoanTransfer(true));
+        }
+
+        this.createJournalEntriesForLoan(accountingBridgeData);
+    }
+
+    @Transactional
+    @Override
+    public void createJournalEntriesForExternalOwnerTransfer(final Loan loan, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer,
+            final ExternalAssetOwner previousOwner) {
+        final boolean isBuyback = externalAssetOwnerTransfer.getStatus().name().contains("BUYBACK");
+
+        if (isBuyback) {
+            this.accountingService.createJournalEntriesForBuybackAssetTransfer(loan, externalAssetOwnerTransfer);
+        } else {
+            this.accountingService.createJournalEntriesForSaleAssetTransfer(loan, externalAssetOwnerTransfer, previousOwner);
+        }
+    }
+
+    /**
+     * Create AccountingBridgeDataDTO for a single loan transaction This converts a single LoanTransaction to the format
+     * expected by existing journal entry logic
+     */
+    private AccountingBridgeDataDTO createAccountingBridgeDataForSingleTransaction(final LoanTransaction loanTransaction,
+            final boolean isAccountTransfer) {
+        final Loan loan = loanTransaction.getLoan();
+        final String currencyCode = loan.getCurrencyCode();
+
+        final AccountingBridgeLoanTransactionDTO transactionDTO = convertToAccountingBridgeTransaction(loanTransaction);
+
+        final List<AccountingBridgeLoanTransactionDTO> transactions = new ArrayList<>();
+        transactions.add(transactionDTO);
+
+        boolean wasChargedOffAtTransactionTime = loan.isChargedOff();
+        if (loan.isChargedOff() && loan.getChargedOffOnDate() != null) {
+            // If transaction date is before charge-off date, treat as non-charged-off
+            if (loanTransaction.getTransactionDate().isBefore(loan.getChargedOffOnDate())) {
+                wasChargedOffAtTransactionTime = false;
+            }
+        }
+
+        List<AdvancedMappingtDTO> buydownFeeAdvancedMappingData = null;
+        List<AdvancedMappingtDTO> capitalizedIncomeAdvancedMappingData = null;
+        if (loanTransaction.isBuyDownFeeAmortization()) {
+            buydownFeeAdvancedMappingData = getLoanTransactionClassificationId(loanTransaction);
+        } else if (loanTransaction.isCapitalizedIncomeAmortization()) {
+            capitalizedIncomeAdvancedMappingData = getLoanTransactionClassificationId(loanTransaction);
+        }
+        AdvancedMappingtDTO writeOffReasonAdvancedMappingData = null;
+        if (loan.isClosedWrittenOff() && loan.getWriteOffReason() != null) {
+            writeOffReasonAdvancedMappingData = new AdvancedMappingtDTO(loan.getWriteOffReason().getId(), BigDecimal.ZERO);
+        }
+
+        return new AccountingBridgeDataDTO(loan.getId(), loan.productId(), loan.getOfficeId(), currencyCode,
+                loan.getSummary().getTotalInterestCharged(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
+                loan.isUpfrontAccrualAccountingEnabledOnLoanProduct(), loan.isPeriodicAccrualAccountingEnabledOnLoanProduct(),
+                isAccountTransfer, wasChargedOffAtTransactionTime, loan.isFraud(), loan.fetchChargeOffReasonId(), loan.isClosedWrittenOff(),
+                transactions, loan.getLoanProductRelatedDetail().isMerchantBuyDownFee(), buydownFeeAdvancedMappingData,
+                capitalizedIncomeAdvancedMappingData, writeOffReasonAdvancedMappingData);
+    }
+
+    private List<AdvancedMappingtDTO> getLoanTransactionClassificationId(final LoanTransaction loanTransaction) {
+        final List<AdvancedMappingtDTO> advancedMappingData = new ArrayList<AdvancedMappingtDTO>();
+        if (loanTransaction.isCapitalizedIncomeAmortization() || loanTransaction.isBuyDownFeeAmortization()) {
+            final List<LoanAmortizationAllocationMapping> loanTransactionAllocations = loanAmortizationAllocationMappingRepository
+                    .fetchLoanTransactionAllocationByAmortizationLoanTransactionId(loanTransaction.getId(),
+                            loanTransaction.getLoan().getId());
+            loanTransactionAllocations.forEach(loanTransactionAllocation -> {
+                final CodeValue classification = loanTransactionRepository
+                        .fetchClassificationCodeValueByTransactionId(loanTransactionAllocation.getBaseLoanTransactionId());
+                final BigDecimal allocationAmount = loanTransactionAllocation.getAmortizationType().equals(AmortizationType.AM)
+                        ? loanTransactionAllocation.getAmount()
+                        : loanTransactionAllocation.getAmount().negate();
+                if (classification != null) {
+                    advancedMappingData.add(new AdvancedMappingtDTO(classification.getId(), allocationAmount));
+                } else {
+                    advancedMappingData.add(new AdvancedMappingtDTO(null, allocationAmount));
+                }
+            });
+        }
+        return advancedMappingData;
+    }
+
+    /**
+     * Convert LoanTransaction to AccountingBridgeLoanTransactionDTO
+     */
+    private AccountingBridgeLoanTransactionDTO convertToAccountingBridgeTransaction(LoanTransaction loanTransaction) {
+        final MonetaryCurrency currency = loanTransaction.getLoan().getCurrency();
+        final AccountingBridgeLoanTransactionDTO transactionDTO = new AccountingBridgeLoanTransactionDTO();
+
+        transactionDTO.setId(loanTransaction.getId());
+        transactionDTO.setOfficeId(loanTransaction.getOffice().getId());
+        transactionDTO.setType(LoanEnumerations.transactionType(loanTransaction.getTypeOf()));
+        transactionDTO.setReversed(loanTransaction.isReversed());
+        transactionDTO.setDate(loanTransaction.getTransactionDate());
+        transactionDTO.setCurrencyCode(currency.getCode());
+        transactionDTO.setAmount(loanTransaction.getAmount());
+        transactionDTO.setNetDisbursalAmount(loanTransaction.getLoan().getNetDisbursalAmount());
+
+        // Handle principalPortion for chargeback
+        if (transactionDTO.getType().isChargeback() && (loanTransaction.getLoan().getCreditAllocationRules() == null
+                || loanTransaction.getLoan().getCreditAllocationRules().isEmpty())) {
+            transactionDTO.setPrincipalPortion(loanTransaction.getAmount());
+        } else {
+            transactionDTO.setPrincipalPortion(loanTransaction.getPrincipalPortion());
+        }
+
+        transactionDTO.setInterestPortion(loanTransaction.getInterestPortion());
+        transactionDTO.setFeeChargesPortion(loanTransaction.getFeeChargesPortion());
+        transactionDTO.setPenaltyChargesPortion(loanTransaction.getPenaltyChargesPortion());
+        transactionDTO.setOverPaymentPortion(loanTransaction.getOverPaymentPortion());
+
+        // Handle ChargeRefund transactions
+        if (transactionDTO.getType().isChargeRefund()) {
+            transactionDTO.setChargeRefundChargeType(loanTransaction.getChargeRefundChargeType());
+        }
+
+        if (loanTransaction.getPaymentDetail() != null) {
+            transactionDTO.setPaymentTypeId(loanTransaction.getPaymentDetail().getPaymentType().getId());
+        }
+
+        // Populate loanChargesPaid from the transaction
+        if (!loanTransaction.getLoanChargesPaid().isEmpty()) {
+            List<LoanChargePaidByDTO> loanChargesPaidData = new ArrayList<>();
+            for (final LoanChargePaidBy chargePaidBy : loanTransaction.getLoanChargesPaid()) {
+                final LoanChargePaidByDTO loanChargePaidData = new LoanChargePaidByDTO();
+                loanChargePaidData.setChargeId(chargePaidBy.getLoanCharge().getCharge().getId());
+                loanChargePaidData.setIsPenalty(chargePaidBy.getLoanCharge().isPenaltyCharge());
+                loanChargePaidData.setLoanChargeId(chargePaidBy.getLoanCharge().getId());
+                loanChargePaidData.setAmount(chargePaidBy.getAmount());
+                loanChargePaidData.setInstallmentNumber(chargePaidBy.getInstallmentNumber());
+
+                loanChargesPaidData.add(loanChargePaidData);
+            }
+            transactionDTO.setLoanChargesPaid(loanChargesPaidData);
+        }
+
+        // Handle chargeback principalPaid/feePaid/penaltyPaid
+        if (transactionDTO.getType().isChargeback() && loanTransaction.getOverPaymentPortion() != null
+                && loanTransaction.getOverPaymentPortion().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal principalPaid = loanTransaction.getOverPaymentPortion();
+            BigDecimal feePaid = BigDecimal.ZERO;
+            BigDecimal penaltyPaid = BigDecimal.ZERO;
+            if (!loanTransaction.getLoanTransactionToRepaymentScheduleMappings().isEmpty()) {
+                principalPaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getPrincipalPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                feePaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getFeeChargesPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                penaltyPaid = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream()
+                        .map(mapping -> Optional.ofNullable(mapping.getPenaltyChargesPortion()).orElse(BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            }
+            transactionDTO.setPrincipalPaid(principalPaid);
+            transactionDTO.setFeePaid(feePaid);
+            transactionDTO.setPenaltyPaid(penaltyPaid);
+        }
+
+        // Populate loanChargeData for CHARGE_ADJUSTMENT transactions
+        LoanTransactionRelation loanTransactionRelation = loanTransaction.getLoanTransactionRelations().stream()
+                .filter(e -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(e.getRelationType())).findAny().orElse(null);
+        if (loanTransactionRelation != null) {
+            LoanCharge loanCharge = loanTransactionRelation.getToCharge();
+            transactionDTO.setLoanChargeData(loanCharge.toData());
+        }
+
+        // Set loanToLoanTransfer
+        transactionDTO.setLoanToLoanTransfer(false);
+
+        return transactionDTO;
     }
 
     private static class OfficeCurrencyKey {

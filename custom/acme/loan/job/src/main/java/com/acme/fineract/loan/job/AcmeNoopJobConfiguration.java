@@ -18,26 +18,24 @@
  */
 package com.acme.fineract.loan.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@RequiredArgsConstructor
 public class AcmeNoopJobConfiguration {
 
-    @Autowired
-    private JobRepository jobRepository;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-    @Autowired
-    private AcmeNoopJobTasklet tasklet;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final AcmeNoopJobTasklet tasklet;
 
     @Bean
     protected Step acmeNoopJobStep() {

@@ -24,11 +24,13 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
+@AllArgsConstructor
 @Getter
 public final class TaxComponentData implements Serializable {
 
@@ -47,25 +49,25 @@ public final class TaxComponentData implements Serializable {
     private final Collection<EnumOptionData> glAccountTypeOptions;
 
     public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
-            final EnumOptionData debitAccountType, final GLAccountData debitAcount, final EnumOptionData creditAccountType,
-            final GLAccountData creditAcount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
+            final EnumOptionData debitAccountType, final GLAccountData debitAccount, final EnumOptionData creditAccountType,
+            final GLAccountData creditAccount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate,
+        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
                 taxComponentHistories, glAccountOptions, glAccountTypeOptions);
     }
 
     public static TaxComponentData lookup(final Long id, final String name) {
         final BigDecimal percentage = null;
         final EnumOptionData debitAccountType = null;
-        final GLAccountData debitAcount = null;
+        final GLAccountData debitAccount = null;
         final EnumOptionData creditAccountType = null;
-        final GLAccountData creditAcount = null;
+        final GLAccountData creditAccount = null;
         final LocalDate startDate = null;
         final Collection<TaxComponentHistoryData> taxComponentHistories = null;
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate,
+        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
                 taxComponentHistories, glAccountOptions, glAccountTypeOptions);
     }
 
@@ -75,41 +77,24 @@ public final class TaxComponentData implements Serializable {
         final String name = null;
         final BigDecimal percentage = null;
         final EnumOptionData debitAccountType = null;
-        final GLAccountData debitAcount = null;
+        final GLAccountData debitAccount = null;
         final EnumOptionData creditAccountType = null;
-        final GLAccountData creditAcount = null;
+        final GLAccountData creditAccount = null;
         final LocalDate startDate = null;
         final Collection<TaxComponentHistoryData> taxComponentHistories = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate,
+        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
                 taxComponentHistories, glAccountOptions, glAccountTypeOptions);
     }
 
-    private TaxComponentData(final Long id, final String name, final BigDecimal percentage, final EnumOptionData debitAccountType,
-            final GLAccountData debitAcount, final EnumOptionData creditAccountType, final GLAccountData creditAcount,
-            final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories,
-            final Map<String, List<GLAccountData>> glAccountOptions, final Collection<EnumOptionData> glAccountTypeOptions) {
-        this.id = id;
-        this.percentage = percentage;
-        this.name = name;
-        this.debitAccountType = debitAccountType;
-        this.debitAccount = debitAcount;
-        this.creditAccountType = creditAccountType;
-        this.creditAccount = creditAcount;
-        this.startDate = startDate;
-        this.taxComponentHistories = taxComponentHistories;
-        this.glAccountOptions = glAccountOptions;
-        this.glAccountTypeOptions = glAccountTypeOptions;
-    }
-
-    private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAcount,
-            final GLAccountData creditAcount) {
+    private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
+            final GLAccountData creditAccount) {
         this.id = id;
         this.percentage = percentage;
         this.name = null;
         this.debitAccountType = null;
-        this.debitAccount = debitAcount;
+        this.debitAccount = debitAccount;
         this.creditAccountType = null;
-        this.creditAccount = creditAcount;
+        this.creditAccount = creditAccount;
         this.startDate = null;
         this.taxComponentHistories = null;
         this.glAccountOptions = null;
@@ -137,14 +122,7 @@ public final class TaxComponentData implements Serializable {
     }
 
     private boolean occursOnDayFrom(final LocalDate target) {
-        return DateUtils.isAfter(target, startDate());
+        return DateUtils.isAfter(target, getStartDate());
     }
 
-    public LocalDate startDate() {
-        LocalDate startDate = null;
-        if (this.startDate != null) {
-            startDate = this.startDate;
-        }
-        return startDate;
-    }
 }

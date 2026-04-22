@@ -28,13 +28,13 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 
 @Entity
 @Table(name = "m_loan_term_variations")
-public class LoanTermVariations extends AbstractPersistableCustom {
+public class LoanTermVariations extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
@@ -139,6 +139,10 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         return this.dateValue;
     }
 
+    public void setDateValue(LocalDate dateValue) {
+        this.dateValue = dateValue;
+    }
+
     public void setTermApplicableFrom(LocalDate termApplicableFrom) {
         this.termApplicableFrom = termApplicableFrom;
     }
@@ -166,5 +170,4 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     public void markAsInactive() {
         this.isActive = false;
     }
-
 }

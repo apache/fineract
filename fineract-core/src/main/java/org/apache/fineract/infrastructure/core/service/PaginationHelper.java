@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.core.service;
 
 import java.util.List;
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +62,6 @@ public class PaginationHelper {
         String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sql);
         Integer totalFilteredRecords = jdbcTemplate.queryForObject(sqlCountRows, Integer.class);
 
-        return new Page<>(items, ObjectUtils.defaultIfNull(totalFilteredRecords, 0));
+        return new Page<>(items, Objects.requireNonNullElse(totalFilteredRecords, 0));
     }
 }

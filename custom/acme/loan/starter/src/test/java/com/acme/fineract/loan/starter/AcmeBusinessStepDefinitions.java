@@ -51,7 +51,7 @@ public class AcmeBusinessStepDefinitions implements En {
                 });
 
         When("/^The user retrieves the step service with step class (.*) and name (.*)$/", (String stepClass, String stepName) -> {
-            contextRunner.run((ctx) -> {
+            contextRunner.run(ctx -> {
                 this.businessStepService = ctx.getBean(COBBusinessStepService.class);
 
                 this.businessStep = ctx.getBean((Class<COBBusinessStep<Loan>>) Class.forName(stepClass));
@@ -64,7 +64,6 @@ public class AcmeBusinessStepDefinitions implements En {
         Then("/^The step service should have a result$/", () -> {
             assertThat(this.businessStep).isNotNull();
             assertThat(this.result).isNotNull();
-            // log.warn(">>>>>>>>>>>>>>>>>> RESULT: {}", this.result);
         });
     }
 }

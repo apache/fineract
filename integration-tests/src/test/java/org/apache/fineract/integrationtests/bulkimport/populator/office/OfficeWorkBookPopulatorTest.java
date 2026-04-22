@@ -22,11 +22,14 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import jakarta.ws.rs.core.HttpHeaders;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,6 +38,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class OfficeWorkBookPopulatorTest {
+
+    private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -49,12 +54,18 @@ public class OfficeWorkBookPopulatorTest {
 
     @Test
     public void testOfficeWorkbookPopulate() throws IOException {
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Workbook workbook = officeHelper.getOfficeWorkBook("dd MMMM yyyy");
+        Workbook workbook = getOfficeWorkBook("dd MMMM yyyy");
         Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstRow = sheet.getRow(1);
         Assertions.assertNotNull("No parent offices found", firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());
         Assertions.assertEquals(1, firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_ID_COL).getNumericCellValue(), 0.0);
+    }
 
+    private Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
+        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec,
+                OFFICE_URL + "/downloadtemplate" + "?" + Utils.TENANT_IDENTIFIER + "&dateFormat=" + dateFormat);
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        return new HSSFWorkbook(inputStream);
     }
 }

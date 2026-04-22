@@ -70,7 +70,6 @@ public class LoanApplicationUndoLastTrancheTest {
 
     @Test
     public void loanApplicationUndoLastTranche() {
-
         final String proposedAmount = "5000";
         final String approvalAmount = "2000";
         final String approveDate = "01 March 2014";
@@ -139,8 +138,7 @@ public class LoanApplicationUndoLastTrancheTest {
 
     @Test
     public void loanApplicationUndoLastTrancheToClose() {
-        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
-        LocalDate transactionDate = LocalDate.of(todaysDate.getYear(), 1, 1);
+        LocalDate transactionDate = LocalDate.of(2014, 3, 1);
         String operationDate = Utils.dateFormatter.format(transactionDate);
         LOG.info("Operation date {}", transactionDate);
 

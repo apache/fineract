@@ -19,20 +19,20 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@AllArgsConstructor
 public class LoanCollateralManagementData {
 
-    private final Long clientCollateralId;
+    private Long clientCollateralId;
 
-    private final BigDecimal quantity;
+    private BigDecimal quantity;
 
-    private final BigDecimal total;
+    private BigDecimal total;
 
-    private final BigDecimal totalCollateral;
+    private BigDecimal totalCollateral;
 
-    private final Long id;
+    private Long id;
 }

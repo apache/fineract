@@ -26,10 +26,17 @@ import java.util.Set;
  ***/
 public enum AccountingRuleJsonInputParams {
 
-    ID("id"), OFFICE_ID("officeId"), ACCOUNT_TO_DEBIT("accountToDebit"), ACCOUNT_TO_CREDIT("accountToCredit"), NAME("name"), DESCRIPTION(
-            "description"), SYSTEM_DEFINED("systemDefined"), DEBIT_ACCOUNT_TAGS("debitTags"), CREDIT_ACCOUNT_TAGS(
-                    "creditTags"), ALLOW_MULTIPLE_CREDIT_ENTRIES(
-                            "allowMultipleCreditEntries"), ALLOW_MULTIPLE_DEBIT_ENTRIES("allowMultipleDebitEntries");
+    ID("id"), //
+    OFFICE_ID("officeId"), //
+    ACCOUNT_TO_DEBIT("accountToDebit"), //
+    ACCOUNT_TO_CREDIT("accountToCredit"), //
+    NAME("name"), //
+    DESCRIPTION("description"), //
+    SYSTEM_DEFINED("systemDefined"), //
+    DEBIT_ACCOUNT_TAGS("debitTags"), //
+    CREDIT_ACCOUNT_TAGS("creditTags"), //
+    ALLOW_MULTIPLE_CREDIT_ENTRIES("allowMultipleCreditEntries"), //
+    ALLOW_MULTIPLE_DEBIT_ENTRIES("allowMultipleDebitEntries"); //
 
     private final String value;
 
@@ -51,7 +58,7 @@ public enum AccountingRuleJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replace("_", " ");
+        return name().replace("_", " ");
     }
 
     public String getValue() {

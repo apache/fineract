@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Getter
 @Table(name = "m_loan_overdue_installment_charge")
-public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom {
+public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)

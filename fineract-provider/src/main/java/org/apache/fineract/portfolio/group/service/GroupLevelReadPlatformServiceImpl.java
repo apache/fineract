@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.group.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -35,7 +35,7 @@ public class GroupLevelReadPlatformServiceImpl implements GroupLevelReadPlatform
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Collection<GroupLevelData> retrieveAllLevels() {
+    public List<GroupLevelData> retrieveAllLevels() {
         this.context.authenticatedUser();
 
         final GroupLevelDataMapper rm = new GroupLevelDataMapper();

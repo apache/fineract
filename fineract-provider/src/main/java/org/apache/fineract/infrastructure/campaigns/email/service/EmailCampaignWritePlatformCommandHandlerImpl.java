@@ -127,7 +127,10 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         this.emailCampaignRepository.saveAndFlush(emailCampaign);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(emailCampaign.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(emailCampaign.getId()) //
+                .build();
     }
 
     @Transactional
@@ -154,7 +157,11 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             if (!changes.isEmpty()) {
                 this.emailCampaignRepository.saveAndFlush(emailCampaign);
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(resourceId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(resourceId) //
+                    .with(changes) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(command, throwable, dve);

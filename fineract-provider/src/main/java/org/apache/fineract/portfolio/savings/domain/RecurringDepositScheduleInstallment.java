@@ -37,7 +37,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_mandatory_savings_schedule")
-public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom {
+public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id")

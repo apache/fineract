@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service.jobparameterprovider;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -52,8 +53,8 @@ public class LoanCOBJobParameterProvider extends AbstractJobParameterProvider<Lo
     }
 
     @Override
-    public String getJobName() {
-        return JobName.LOAN_COB.name();
+    protected List<String> getJobNames() {
+        return List.of(JobName.LOAN_COB.name(), JobName.WORKING_CAPITAL_LOAN_COB_JOB.name());
     }
 
     private Set<JobParameterDTO> getJobParameterDTOListWithCorrectBusinessDate(Set<JobParameterDTO> jobParameterDTOset) {

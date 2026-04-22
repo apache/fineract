@@ -32,10 +32,18 @@ public class BasicPasswordEncodablePlatformUser implements PlatformUser {
 
     @Getter
     private Long id;
-    @Getter(onMethod = @__(@Override))
     private String username;
-    @Getter(onMethod = @__(@Override))
     private String password;
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
     @Override
     public Collection<GrantedAuthority> getAuthorities() {

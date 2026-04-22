@@ -35,21 +35,23 @@ import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlat
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.investor.domain.ExternalAssetOwnerRepository;
+import org.apache.fineract.investor.service.AccountingService;
+import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMappingRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,14 +65,11 @@ public class AccountingJournalEntryConfiguration {
     public AccountingProcessorHelper accountingProcessorHelper(JournalEntryRepository glJournalEntryRepository,
             ProductToGLAccountMappingRepository accountMappingRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository, GLClosureRepository closureRepository,
-            GLAccountRepository glAccountRepository, OfficeRepository officeRepository, LoanTransactionRepository loanTransactionRepository,
-            ClientTransactionRepository clientTransactionRepository,
-            SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            GLAccountRepository glAccountRepository, OfficeRepository officeRepository,
             AccountTransfersReadPlatformService accountTransfersReadPlatformService, ChargeRepositoryWrapper chargeRepositoryWrapper,
             BusinessEventNotifierService businessEventNotifierService) {
         return new AccountingProcessorHelper(glJournalEntryRepository, accountMappingRepository, financialActivityAccountRepository,
-                closureRepository, glAccountRepository, officeRepository, loanTransactionRepository, clientTransactionRepository,
-                savingsAccountTransactionRepository, accountTransfersReadPlatformService, chargeRepositoryWrapper,
+                closureRepository, glAccountRepository, officeRepository, accountTransfersReadPlatformService, chargeRepositoryWrapper,
                 businessEventNotifierService);
     }
 
@@ -95,11 +94,16 @@ public class AccountingJournalEntryConfiguration {
             GLAccountReadPlatformService glAccountReadPlatformService, OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository,
             PlatformSecurityContext context, PaymentDetailWritePlatformService paymentDetailWritePlatformService,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions) {
+            CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions,
+            ConfigurationReadPlatformService configurationReadPlatformService, AccountingService accountingService,
+            ExternalAssetOwnerRepository externalAssetOwnerRepository,
+            LoanAmortizationAllocationMappingRepository loanAmortizationAllocationMappingRepository,
+            LoanTransactionRepository loanTransactionRepository) {
         return new JournalEntryWritePlatformServiceJpaRepositoryImpl(glClosureRepository, glAccountRepository, glJournalEntryRepository,
                 officeRepositoryWrapper, accountingProcessorForLoanFactory, accountingProcessorForSavingsFactory,
                 accountingProcessorForSharesFactory, helper, fromApiJsonDeserializer, accountingRuleRepository,
                 glAccountReadPlatformService, organisationCurrencyRepository, context, paymentDetailWritePlatformService,
-                financialActivityAccountRepositoryWrapper, accountingProcessorForClientTransactions);
+                financialActivityAccountRepositoryWrapper, accountingProcessorForClientTransactions, configurationReadPlatformService,
+                accountingService, externalAssetOwnerRepository, loanAmortizationAllocationMappingRepository, loanTransactionRepository);
     }
 }

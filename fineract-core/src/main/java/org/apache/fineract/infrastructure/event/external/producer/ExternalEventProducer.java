@@ -28,9 +28,7 @@ public interface ExternalEventProducer {
      * Sends the created ExternalEvents
      *
      * @param partitions
-     *            is a Map<Long, List<byte[]>> partitions, the key here the id of the aggregated root. The value is list
-     *            of external events belong to the same key, serialized into byte array
-     * @throws AcknowledgementTimeoutException
+     *            The value is list of external events belong to the same key, serialized into byte array
      */
     void sendEvents(Map<Long, List<byte[]>> partitions) throws AcknowledgementTimeoutException;
 }

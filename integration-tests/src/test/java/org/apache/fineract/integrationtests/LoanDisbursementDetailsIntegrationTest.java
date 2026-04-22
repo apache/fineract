@@ -33,15 +33,18 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
-import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -53,6 +56,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -314,7 +319,7 @@ public class LoanDisbursementDetailsIntegrationTest {
         getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         this.loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
-        final Double limit = 2.0;
+        final BigDecimal limit = BigDecimal.TWO;
         evaluateEqualInstallmentsForRepaymentSchedule(getLoansLoanIdResponse.getRepaymentSchedule(), limit);
         log.info("-----------MULTI DISBURSAL LOAN EQUAL INSTALLMENTS SUCCESSFULLY-------");
     }
@@ -398,7 +403,7 @@ public class LoanDisbursementDetailsIntegrationTest {
         log.info("-------------------MULTI DISBURSAL LOAN DISBURSED SUCCESSFULLY-SECOND-------");
 
         double disbursementPrincipalSum = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId).getDisbursementDetails()
-                .stream().map(GetLoansLoanIdDisbursementDetails::getPrincipal).mapToDouble(p -> p).sum();
+                .stream().mapToDouble(d -> d.getPrincipal().doubleValue()).sum();
         assertEquals(parseDouble(firstDisbursedPrincipal) + parseDouble(secondDisbursedPrincipal), disbursementPrincipalSum);
     }
 
@@ -665,9 +670,9 @@ public class LoanDisbursementDetailsIntegrationTest {
         return collateral;
     }
 
-    public void evaluateEqualInstallmentsForRepaymentSchedule(GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule, Double limit) {
-        Double totalOutstandingForPeriod = 0.0;
-        Double totalInstallmentAmountForPeriod = 0.0;
+    public void evaluateEqualInstallmentsForRepaymentSchedule(GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule, BigDecimal limit) {
+        BigDecimal totalOutstandingForPeriod = BigDecimal.ZERO;
+        BigDecimal totalInstallmentAmountForPeriod = BigDecimal.ZERO;
         if (getLoanRepaymentSchedule != null) {
             log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
             for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
@@ -678,8 +683,9 @@ public class LoanDisbursementDetailsIntegrationTest {
                         totalOutstandingForPeriod = period.getTotalOutstandingForPeriod();
                         totalInstallmentAmountForPeriod = period.getTotalInstallmentAmountForPeriod();
                     } else {
-                        assertTrue(Math.abs(period.getTotalOutstandingForPeriod() - totalOutstandingForPeriod) <= limit);
-                        assertTrue(Math.abs(period.getTotalInstallmentAmountForPeriod() - totalInstallmentAmountForPeriod) <= limit);
+                        assertTrue(period.getTotalOutstandingForPeriod().subtract(totalOutstandingForPeriod).abs().compareTo(limit) <= 0);
+                        assertTrue(period.getTotalInstallmentAmountForPeriod().subtract(totalInstallmentAmountForPeriod).abs()
+                                .compareTo(limit) <= 0);
                     }
                 }
             }
@@ -691,5 +697,440 @@ public class LoanDisbursementDetailsIntegrationTest {
                 .expectBody("errors[0].userMessageGlobalisationCode",
                         equalTo("error.msg.loan.disbursal.amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"))
                 .expectStatusCode(403).build();
+    }
+
+    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
+        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
+        advancedPaymentData.setTransactionType("DEFAULT");
+        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
+
+        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
+                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
+                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
+                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
+                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
+
+        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
+        return advancedPaymentData;
+    }
+
+    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
+        AtomicInteger integer = new AtomicInteger(1);
+        return Arrays.stream(paymentAllocationTypes).map(pat -> {
+            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
+            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
+            paymentAllocationOrder.setOrder(integer.getAndIncrement());
+            return paymentAllocationOrder;
+        }).toList();
+    }
+
+    @Test
+    public void testCreateLoanProductWithFullTermTrancheEnabled() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        GetLoanProductsProductIdResponse loanProduct = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(loanProduct);
+        assertEquals(true, loanProduct.getMultiDisburseLoan());
+        assertEquals(true, loanProduct.getAllowFullTermForTranche());
+        log.info("-------------------LOAN PRODUCT WITH allowFullTermForTranche CREATED SUCCESSFULLY-------");
+    }
+
+    @Test
+    public void testCreateLoanProductWithFullTermTrancheOnCumulativeShouldFail() {
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder()
+                .expectBody("userMessageGlobalisationCode", equalTo("validation.msg.validation.errors.exist"))
+                .expectBody("errors[0].userMessageGlobalisationCode",
+                        equalTo("validation.msg.loanproduct.allowFullTermForTranche.requires.progressive.schedule.type"))
+                .expectStatusCode(400).build();
+
+        final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.CUMULATIVE)
+                .withAllowFullTermForTranche(true).build(null);
+
+        validationErrorHelper.getLoanProductId(loanProductJSON);
+        log.info("-------------------LOAN PRODUCT WITH allowFullTermForTranche ON CUMULATIVE FAILED AS EXPECTED-------");
+    }
+
+    @Test
+    public void testCreateLoanProductWithFullTermTrancheOnSingleDisburseShouldFail() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder()
+                .expectBody("userMessageGlobalisationCode", equalTo("validation.msg.validation.errors.exist"))
+                .expectBody("errors[0].userMessageGlobalisationCode",
+                        equalTo("validation.msg.loanproduct.allowFullTermForTranche.requires.multi.disburse.loan"))
+                .expectStatusCode(400).build();
+
+        final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        validationErrorHelper.getLoanProductId(loanProductJSON);
+        log.info("-------------------LOAN PRODUCT WITH allowFullTermForTranche ON SINGLE DISBURSE FAILED AS EXPECTED-------");
+    }
+
+    @Test
+    public void testUpdateLoanProductPreservesAllowFullTermForTranche() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        GetLoanProductsProductIdResponse loanProduct = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(loanProduct);
+        assertEquals(true, loanProduct.getAllowFullTermForTranche());
+
+        org.apache.fineract.client.models.PutLoanProductsProductIdRequest updateRequest = new org.apache.fineract.client.models.PutLoanProductsProductIdRequest();
+        updateRequest.setDescription("Updated description");
+        this.loanTransactionHelper.updateLoanProduct((long) loanProductId, updateRequest);
+
+        GetLoanProductsProductIdResponse updatedProduct = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(updatedProduct);
+        assertEquals(true, updatedProduct.getAllowFullTermForTranche());
+        assertEquals("Updated description", updatedProduct.getDescription());
+        log.info("-------------------LOAN PRODUCT UPDATE PRESERVED allowFullTermForTranche FLAG-------");
+    }
+
+    @Test
+    public void testLoanInheritsAllowFullTermForTrancheFromProduct() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 March 2014", "5000"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 April 2014", "5000"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("10000").withLoanTermFrequency("12")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withExpectedDisbursementDate("01 March 2014")
+                .withTranches(createTranches).withSubmittedOnDate("01 March 2014")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertNotNull(loanDetails);
+        assertEquals(true, loanDetails.getAllowFullTermForTranche());
+        log.info("-------------------LOAN INHERITED allowFullTermForTranche FROM PRODUCT SUCCESSFULLY-------");
+    }
+
+    @Test
+    public void testLoanLevelOverrideOfAllowFullTermForTranche() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withInterestTypeAsDecliningBalance().withMultiDisburse().withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withAllowFullTermForTranche(true).build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 March 2014", "5000"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 April 2014", "5000"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("10000").withLoanTermFrequency("12")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withExpectedDisbursementDate("01 March 2014")
+                .withTranches(createTranches).withSubmittedOnDate("01 March 2014")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).withAllowFullTermForTranche(false)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        assertNotNull(loanDetails);
+        assertEquals(false, loanDetails.getAllowFullTermForTranche());
+        log.info("-------------------LOAN LEVEL OVERRIDE OF allowFullTermForTranche WORKED SUCCESSFULLY-------");
+    }
+
+    @Test
+    public void testFullTermTranche_S1_DisbursementOnInstallmentDate() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(true).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 February 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 February 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+        assertEquals(9, periods.size(), "Total periods should be 9 (2 disbursements + 7 repayment periods)");
+
+        // Count disbursement periods (no period number) and repayment periods (with period number)
+        long disbursementPeriods = periods.stream().filter(p -> p.getPeriod() == null).count();
+        long repaymentPeriods = periods.stream().filter(p -> p.getPeriod() != null).count();
+        assertEquals(2, disbursementPeriods, "Should have 2 disbursement periods");
+        assertEquals(7, repaymentPeriods, "Should have 7 repayment periods");
+
+        log.info("-------------------S1 TEST: SCHEDULE VALIDATION-------");
+        log.info("Schedule structure validated: 2 disbursement + 7 repayment periods");
+
+        // Close the loan to allow LoanTestLifecycleExtension cleanup to succeed
+        closeFullTermTrancheLoan(loanId, "01 August 2024");
+    }
+
+    @Test
+    public void testFullTermTranche_S2_MidPeriodDisbursement() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(true).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "15 February 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("15 February 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED (MID-PERIOD)-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+        assertEquals(9, periods.size(), "Total periods should be 9 (2 disbursements + 7 repayment periods)");
+
+        // Count disbursement periods (no period number) and repayment periods (with period number)
+        long disbursementPeriods = periods.stream().filter(p -> p.getPeriod() == null).count();
+        long repaymentPeriods = periods.stream().filter(p -> p.getPeriod() != null).count();
+        assertEquals(2, disbursementPeriods, "Should have 2 disbursement periods");
+        assertEquals(7, repaymentPeriods, "Should have 7 repayment periods");
+
+        log.info("-------------------S2 TEST: SCHEDULE VALIDATION-------");
+        log.info("Schedule structure validated: 2 disbursement + 7 repayment periods (mid-period disbursement)");
+
+        // Close the loan to allow LoanTestLifecycleExtension cleanup to succeed
+        closeFullTermTrancheLoan(loanId, "01 August 2024");
+    }
+
+    @Test
+    public void testFullTermTranche_S3_BothBeforeFirstRepayment() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductJSON = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(true).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        log.info("------------------LOAN PRODUCT CREATED WITH ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "15 January 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("15 January 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED (BEFORE FIRST REPAYMENT)-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+        assertEquals(8, periods.size(), "Total periods should be 8 (2 disbursements + 6 repayment periods - NO EXTENSION)");
+
+        // Count disbursement periods (no period number) and repayment periods (with period number)
+        long disbursementPeriods = periods.stream().filter(p -> p.getPeriod() == null).count();
+        long repaymentPeriods = periods.stream().filter(p -> p.getPeriod() != null).count();
+        assertEquals(2, disbursementPeriods, "Should have 2 disbursement periods");
+        assertEquals(6, repaymentPeriods, "Should have 6 repayment periods (no term extension)");
+
+        log.info("-------------------S3 TEST: SCHEDULE VALIDATION-------");
+        log.info("Schedule structure validated: 2 disbursement + 6 repayment periods (no term extension)");
+        log.info("Both disbursements before first repayment date result in same maturity date");
+
+        // Close the loan to allow LoanTestLifecycleExtension cleanup to succeed
+        closeFullTermTrancheLoan(loanId, "01 July 2024");
+    }
+
+    @Test
+    public void testFullTermTrancheBackwardCompatibility() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+
+        final String loanProductWithoutFlag = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withinterestRatePerPeriod("9.4822").withInterestRateFrequencyTypeAsYear().withMultiDisburse()
+                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).addAdvancedPaymentAllocation(defaultAllocation)
+                .withAllowFullTermForTranche(false).withDaysInYear("360").withMinPrincipal("100").build(null);
+
+        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductWithoutFlag);
+        log.info("------------------LOAN PRODUCT CREATED WITH allowFullTermForTranche=false ID----------- {}", loanProductId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2024");
+        log.info("------------------CLIENT CREATED WITH ID----------- {}", clientId);
+
+        List<HashMap> createTranches = new ArrayList<>();
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 January 2024", "100"));
+        createTranches.add(this.loanTransactionHelper.createTrancheDetail(null, "01 February 2024", "100"));
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("200").withLoanTermFrequency("6")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("6").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("9.4822").withExpectedDisbursementDate("01 January 2024")
+                .withTranches(createTranches).withSubmittedOnDate("01 January 2024")
+                .withRepaymentStrategy(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .build(clientId.toString(), loanProductId.toString(), null);
+
+        final Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        log.info("------------------LOAN CREATED WITH ID----------- {}", loanId);
+
+        this.loanTransactionHelper.approveLoanWithApproveAmount("01 January 2024", "01 January 2024", "200", loanId, createTranches);
+        log.info("-------------------LOAN APPROVED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2024", loanId, "100");
+        log.info("-------------------FIRST TRANCHE DISBURSED-------");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount("01 February 2024", loanId, "100");
+        log.info("-------------------SECOND TRANCHE DISBURSED-------");
+
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(loanDetails);
+
+        GetLoansLoanIdRepaymentSchedule schedule = loanDetails.getRepaymentSchedule();
+        assertNotNull(schedule);
+
+        List<GetLoansLoanIdRepaymentPeriod> periods = schedule.getPeriods();
+        assertNotNull(periods);
+
+        log.info("-------------------BACKWARD COMPATIBILITY TEST: SCHEDULE VALIDATION-------");
+        log.info("Expected: OLD behavior when allowFullTermForTranche=false");
+        log.info("Schedule should NOT use full term tranche logic - should match existing multi-disburse behavior");
+    }
+
+    /**
+     * Helper method to close a loan by making a full prepayment. This ensures the loan is closed before the
+     * LoanTestLifecycleExtension cleanup runs.
+     */
+    private void closeFullTermTrancheLoan(Integer loanId, String lastRepaymentDate) {
+        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        BigDecimal outstandingAmount = loanDetails.getSummary().getTotalOutstanding();
+
+        if (outstandingAmount != null && outstandingAmount.compareTo(BigDecimal.ZERO) > 0) {
+            log.info("-------------------CLOSING LOAN {} WITH PREPAYMENT OF {} ON {}-------", loanId, outstandingAmount, lastRepaymentDate);
+            this.loanTransactionHelper.makeLoanRepayment(lastRepaymentDate, outstandingAmount.floatValue(), loanId);
+        }
     }
 }

@@ -36,7 +36,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
@@ -87,9 +87,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
         // Client and Loan account creation
 
@@ -113,7 +112,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 500.0);
+        assertEquals(500.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Repayment
         PostLoansLoanIdTransactionsResponse chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(
@@ -128,7 +127,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 1000.0);
+        assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // Goodwill Credit
         final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
@@ -142,7 +141,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 800.0);
+        assertEquals(800.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Goodwill Credit Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, goodwillCredit_1.getResourceId(),
@@ -166,7 +165,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 700.0);
+        assertEquals(700.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Payout Refund Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, payoutRefund_1.getResourceId(),
@@ -181,7 +180,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 1000.0);
+        assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // Merchant Issued Refund
 
@@ -196,12 +195,12 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 900.0);
+        assertEquals(900.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         // chargeback on Merchant Issued Refund Transaction
         chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
                 merchantIssuedRefund_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0).paymentTypeId(1L));
+                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0));
 
         // verify transaction relation and outstanding balance
         assertNotNull(chargebackTransactionResponse);
@@ -212,7 +211,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
-        assertEquals(loanDetails.getSummary().getTotalOutstanding(), 1000.0);
+        assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
     }
 
@@ -223,9 +222,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                delinquencyBucketId);
+        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
         // Client and Loan account creation
 
@@ -252,7 +250,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Integer delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
+            final Long delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
         final HashMap<String, Object> loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);

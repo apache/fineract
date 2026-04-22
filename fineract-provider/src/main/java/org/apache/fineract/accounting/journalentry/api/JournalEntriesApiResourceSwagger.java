@@ -22,9 +22,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.organisation.monetary.api.CurrenciesApiResourceSwagger.CurrencyItem;
-import org.apache.fineract.portfolio.note.api.NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse;
-import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceSwagger.GetPaymentTypesResponse;
+import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Created by sanyam on 25/7/17.
@@ -69,6 +68,26 @@ final class JournalEntriesApiResourceSwagger {
         public Long officeId;
     }
 
+    public static final class CurrencyItem {
+
+        private CurrencyItem() {}
+
+        @Schema(example = "USD")
+        public String code;
+        @Schema(example = "US Dollar")
+        public String name;
+        @Schema(example = "2")
+        public Integer decimalPlaces;
+        @Schema(example = "100")
+        public Integer inMultiplesOf;
+        @Schema(example = "$")
+        public String displaySymbol;
+        @Schema(example = "currency.USD")
+        public String nameCode;
+        @Schema(example = "US Dollar ($)")
+        public String displayLabel;
+    }
+
     static final class EnumOptionType {
 
         private EnumOptionType() {}
@@ -91,7 +110,7 @@ final class JournalEntriesApiResourceSwagger {
 
             @Schema(example = "62")
             public Long id;
-            public GetPaymentTypesResponse paymentType;
+            public PaymentTypeData paymentType;
             @Schema(example = "acc123")
             public String accountNumber;
             @Schema(example = "che123")
@@ -111,7 +130,7 @@ final class JournalEntriesApiResourceSwagger {
             @Schema(example = "2")
             public Long transactionId;
             public EnumOptionType transactionType;
-            public GetResourceTypeResourceIdNotesResponse noteData;
+            public NoteData noteData;
             public PaymentDetailData paymentDetails;
         }
 
@@ -158,6 +177,8 @@ final class JournalEntriesApiResourceSwagger {
         public String createdByUserName;
         @Schema(example = "[2022, 07, 01]")
         public LocalDate createdDate;
+        @Schema(example = "qwerty1234")
+        public String externalAssetOwner;
 
         public CurrencyItem currency;
         public EnumOptionType glAccountType;

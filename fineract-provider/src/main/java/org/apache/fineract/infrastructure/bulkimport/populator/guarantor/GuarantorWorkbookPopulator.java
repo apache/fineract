@@ -147,7 +147,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         dateCellStyle.setDataFormat(df);
         int rowIndex = 1;
         Row row;
-        Collections.sort(loans, LoanAccountData.ClientNameComparator);
+        loans.sort(LoanAccountData.LOAN_ACCOUNT_DATA_COMPARATOR_BY_CLIENT_NAME);
         for (LoanAccountData loan : loans) {
             if (addGuarantorSheet.getRow(rowIndex) == null) {
                 row = addGuarantorSheet.createRow(rowIndex++);
@@ -209,8 +209,9 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
                 "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
         DataValidationConstraint savingsaccountNumberConstraint = validationHelper.createFormulaListConstraint(
                 "INDIRECT(CONCATENATE(\"SavingsAccount_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($G1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
-        DataValidationConstraint guranterTypeConstraint = validationHelper.createExplicitListConstraint(
-                new String[] { TemplatePopulateImportConstants.GUARANTOR_INTERNAL, TemplatePopulateImportConstants.GUARANTOR_EXTERNAL });
+        DataValidationConstraint guranterTypeConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.GUARANTOR_INTERNAL,
+                        TemplatePopulateImportConstants.GUARANTOR_EXTERNAL, TemplatePopulateImportConstants.GUARANTOR_GROUP });
         DataValidationConstraint guarantorRelationshipConstraint = validationHelper.createFormulaListConstraint("GuarantorRelationship");
         DataValidationConstraint entityofficeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint entityclientNameConstraint = validationHelper

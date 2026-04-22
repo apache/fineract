@@ -1,0 +1,225 @@
+= Refactoring Instructions
+
+IMPORTANT: The content of this section will be probably distributed to the other parts of this chapter. Just to say: this is work in progress!
+
+== General
+
+=== POJOs/DTOs
+
+Please make sure that all POJOs (for request and response types) have a similar structure. They should:
+
+* use Lombok to reduce boilerplate code
+* make sure that all annotations are always in the same order as shown below
+* avoid `records` for now (we might or might not migrate later from Lombok to `record`)
+* each class should implement `java.io.Serializable`
+* each class should contain a serialization version set to `1L`
+
+Example:
+
+.Anatomy of a DTO
+[source,java]
+----
+include::{rootdir}/fineract-command-test/src/main/java/org/apache/fineract/command/test/sample/data/DummyRequest.java[lines=30..]
+----
+
+=== Transformation between types
+
+If you need to transform/convert two classes then then use https://mapstruct.org/[MapStruct] whenever possible. Place the link:++https://mapstruct.org/[MapStruct]++[MapStruct] interfaces under a sibling package `mapping` next to the `data` package (e.g. `org.apache.fineract.xxx.data` and `org.apache.fineract.xxx.mapping`).
+
+=== Package structure (`org.apache.fineract.xxx.*`)
+
+Please make sure to always follow this package structure pattern (aka layered architecture):
+
+* `api`: contains all REST JAX-RS resource classes (later Spring Web MVC controllers)
+* `command`: primarily used for command specific child class implementations of `org.apache.fineract.command.core.Command` (see section "Command Dispatcher preserving Type Information")
+* `data`: contains all DTOs (request and response types)
+* `domain`: contains all entity/table mapping classes
+* `handler`: contains all command handlers
+* `service`: contains business logic services
+* `mapping`: contains MapStruct interfaces
+* `security`: might contain later so called Spring Security "authorization managers" for more complex use cases
+* `serialization`: technically we should not need this package anymore after we are done with the refactorings; in theory there could be very complex data structures that are not easily digestable by Jackson; for those case we could still use this package to add de-/serialization helpers (Jackson provides a proper API for this). We should avoid complex structures!
+* `starter`: Spring Java configuration that allows us to make Fineract customizable (make parts of the system replaceable)
+* `validation`: contains custom Jakarta Validation components/annotations
+
+In general avoid too many nesting levels. Ideally we would only have one additional underneath the base package (`org.apache.fineract.*`) where in turn only the above package patterns are used.
+
+== REST API
+
+=== Read Requests
+
+The *read requests* (HTTP `*GET*`) usually only require to refactor (if at all) the business logic services in case they don't return proper Java POJOs. More often than not service functions have a return type of `org.apache.fineract.infrastructure.core.data.CommandProcessingResult`. This type belongs to the legacy command processing mechanics and basically is just a thin wrapper around a JSON object that is stored in a string variable.
+
+Please name all return types for these read requests consistently. We propose to add always a suffix `Response`; this makes it immediately clear that we are dealing with a data transfer object (vs database mapping entities) and that it's something that we return to the clients (vs incoming requests). Historically we've used `Data` as a suffix, but this doesn't make it clear if it's used as input or output. Let's see an example.
+
+This is how the legacy code used to look like:
+
+.Business Date JAX-RS Resource (*legacy*)
+[source,java]
+----
+public class BusinessDateApiResource {
+    // ...
+    @GET
+    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "List all business dates", description = "")
+    public String getBusinessDates(@Context final UriInfo uriInfo) {
+        securityContext.authenticatedUser().validateHasReadPermission("BUSINESS_DATE");
+        final List<BusinessDateData> foundBusinessDates = this.readPlatformService.findAll();
+        ApiRequestJsonSerializationSettings settings = parameterHelper.process(uriInfo.getQueryParameters());
+        return this.jsonSerializer.serialize(settings, foundBusinessDates);
+    }
+    // ...
+}
+----
+
+This is how the refactored code should look like; there is absolutely no need to manually serialize:
+
+.Business Date JAX-RS Resource (*refactored*)
+[source,java]
+----
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/infrastructure/businessdate/api/BusinessDateApiResource.java[lines=48..49;54..60;85..86]
+----
+
+On occasions it could be that there could be a service read function that returns a collection of some data structure. In those cases it is fine to use a DTO class with suffix `Data`. In the current code base we have all kinds of variations like `DTO`, `Dto`, `DATA` and so on. Make sure we are consistent with the naming and let's use the `Data` suffix in these cases.
+
+Very often you'll see the use of `PlatformSecurityContext` (which is a wrapper around Spring Security's `org.springframework.security.core.context.SecurityContextHolder`) to validate read permissions. Avoid this please! Fortunately, the fix is relatively easy. We just need to introduce an "Ant matcher" configuration in the Spring web security configuration (`org.apache.fineract.infrastructure.core.config.SecurityConfig`). The change should look something like this:
+
+.Security Configuration (best practice)
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/infrastructure/core/config/SecurityConfig.java[lines=82..83;138..142;489]
+----
+
+The nice side effect is that we'll have all security rules that we are enforcing in one place. This will enable more flexibility with customizations around security (will be handled in the modular security proposal).
+
+=== Write Requests
+
+The *write requests* (HTTP `*PUT*` and `*POST*`) are the ones that affect the command processing infrastructure. The JSON body in pretty much all nthe legacy cases is probably represented as a simple string variable that gets passed to a command wrapper class (`org.apache.fineract.commands.domain.CommandWrapper`). All these variables need to be replaced by proper POJO classes that represent the request body. You can get hints how these classes should look like by checking the OpenAPI dummy classes we created to re-introduce the type information for the OpenAPI descriptor (see Swagger annotations).
+
+Usually you'll have 2 classes to take care of: *requests* (incoming input parameters) and *responses* (outgoing results). These classes are technically *DTOs* (data transfer objects) or *VOs* (value objects) and to make them more recognizable as such I would start standardizing the naming. E.g. if I have a use case aka REST endpoint that creates client data we would name that DTO class `CreateClientRequest`; and if any data needs to be sent back to the client then that class should be called `CreateClientResponse`. This is a very simple mechanic that helps identifying immediately what is what and doesn't require the developers to come up with any naming stunts. Do not try to re-use these DTOs on multiple endpoints, it's not worth it. Create a separate DTO for each endpoint. Nice side effect: all this becomes then nicer to read (both in Java code and in the OpenAPI descriptor and the resulting Asciidoc documentation) and this will make it less likely that names are clashing in the OpenAPI descriptor (and during code generation for the Fineract Java Client).
+
+Only new thing that needs to be injected in those REST API resource classes (JAX-RS) or controllers (Spring Web MVC) is the `CommandDispatcher` component that allows you to send requests to the *command dispatcher* which in turn will be processed by *handlers* that eventually call one or more *business logic services*. Results are sent back to the dispatcher and are received in the REST API aka returned by `CommandDispatcher` as a `*java.util.Supplier*` *functional interface*, i.e. there is only one function to be implemented (`get()`). This small abstraction helps us to standardize how the results are delivered (*synchronous*, *asynchronous*, *non-blocking*) and maintain the same internal API.
+
+=== Jakarta Validation
+
+TBD
+
+Example POJO:
+
+[source,java]
+----
+include::{rootdir}/fineract-command-test/src/main/java/org/apache/fineract/command/test/sample/data/DummyRequest.java[lines=30..]
+----
+
+Add your translation keys to `fineract-validation/src/main/resources/ValidationMessages.properties`
+
+=== **Future**: Spring Web MVC
+
+We will not do this right now, but later we might move away from JAX-RS and introduce **Spring Web MVC** which is mostly just changing the annotations (e.g. `*@POST*` vs `*@PostRequest*`). This process should be pretty straight forward and could be even (semi-) automated by using **OpenRewrite** recipes. Once we have proper POJOs for requests and response we can also use **Jakarta Validation** annotations to validate the request content. You'll see that currently we have an explicit service injected everywhere that does those checks manually (that includes some JSON parsing); very tedious and work intensive and hard to refactor. The first setup with Jakarta Validation take a little longer, but once that is working for one use case it should be pretty much rinse and repeat for the rest. Occasionally for very exotic validations there might be a need to implement **custom validations**. Another advantage of this approach: we can finally add the proper **internationalized error messages** on the server side, not only the translation keys. This removes a ton of code on the client side and ensures that the clients always have the correct messages. Read the Jakarta Validation documentation on how that works and use **Hibernate Validation** to implement this (pretty much the defacto standard library).
+
+== Command Dispatcher preserving Type Information
+
+`CommandDispatcher` needs to be injected where needed (usually only REST API controllers). By default everything is configured for `sync`(-hronous) processing. Other modes (`async`, `disruptor`) can be easily configured via application.properties, but need more testing and are out of scope for now. As you can see the command object just contains some of metadata (`createdAt`, `username` etc.) and the payload aka request object. Obviously we have different use cases so that *payload* attribute is defined as a generic *type*. Please check the unit test code how to create a command object with payload/request properly.
+
+[source,java]
+----
+public class DummyApiResource {
+    // ...
+    @GET
+    DummyResponse dummy(@HeaderParam("x-fineract-request-id") UUID requestId, @HeaderParam("Fineract-Platform-TenantId") String tenantId, DummyRequest request) {
+        var command = new DummyCommand();
+        command.setId(requestId);
+        command.setPayload(request);
+
+        tenantService.set(tenantId);
+
+        Supplier<DummyResponse> result = pipeline.send(command);
+
+        return result.get();
+    }
+    // ...
+}
+----
+
+Make sure to create command specific child class of the generic (and abstract) `org.apache.fineract.command.core.Command` class. Example:
+
+[source,java]
+----
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class DummyCommand extends Command<DummyRequest> {}
+----
+
+If everything is done correctly then no type information will be lost and everything can be parsed without further help by the Jackson parser. Eventually all handcrafted boilerplate JSON parsing code can be dumped. In rare cases we might need to add de-/serialization helper classes (a concept provided by Jackson) to help the parser identify the types properly.
+
+When we use **Spring Web MVC unit testing** (actually integration testing) gets very easy. Just a couple of annotations and you can execute them pretty much like simple unit tests in your IDE (because Spring Web MVC is a first class citizen obviously in the Spring Framework). NONE of that handcrafted client code like in our current integration tests is required; the tests should be easier to refactor and easier to understand. Writing those tests is **optional** for now, because we have already over **1000 integration tests**. After all those refactorings the REST API should be 100% compatible to upstream even if it uses a different technology stack. If everything passes those ""old"" integration tests then we can be pretty confident that we didn't mess something up. Migrating the integration tests to simpler Spring Web tests can be done later."
+
+== Command Handlers
+
+In the current CQRS implementation we have already a concept called *command handlers*. Those handlers are responsible to receive the command objects with their (request) payloads and transform the requests as needed an pass them to one or more business logic services. The refactoring of those handlers should not be too complicated, they just need to implement the Java interface `CommandHandler`. Look at my test samples to see how the implementation details look like.
+
+The old handlers look somewhat like this:
+
+[source,java]
+----
+@Service
+@CommandType(entity = "PAYMENTTYPE", action = "CREATE")
+public class CreatePaymentTypeCommandHandler implements NewCommandSourceHandler {
+
+    private final PaymentTypeWriteService paymentTypeWriteService;
+
+    @Autowired
+    public CreatePaymentTypeCommandHandler(final PaymentTypeWriteService paymentTypeWriteService) {
+        this.paymentTypeWriteService = paymentTypeWriteService;
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        return this.paymentTypeWriteService.createPaymentType(command);
+    }
+}
+----
+
+... and this is how the refactored handler could look like:
+
+[source,java]
+----
+@Slf4j
+@RequiredArgsConstructor
+@Component
+public class PaymentTypeCreateCommandHandler implements CommandHandler<PaymentTypeCreateRequest, PaymentTypeCreateResponse> {
+
+    private final PaymentTypeWriteService paymentTypeWriteService;
+
+    @Override
+    public PaymentTypeCreateResponse handle(Command<PaymentTypeCreateRequest> command) {
+        // TODO: refactor business logic service to accept properly typed request objects as input
+        return paymentTypeWriteService.createPaymentType(command.getPayload());
+    }
+}
+----
+
+
+== Dispatch Types
+
+=== Sync Execution
+
+This is the default execution mode. Performance is to be expected on par with the current legacy implementation all tests need to work with this mode.
+
+=== **Skip**: Async Execution
+
+Already included in the current implementation. Just needs a proper **configuration** in **application.properties** (see unit tests). One thing that might need some additional coding: the use of **thread local variables in multi threaded environments** needs some special care to properly work (we use this to identify the current tenant). Also: we should upgrade to JDK 21 and make use of virtual threads (very easy in Spring Boot, simple configuration property). This allows for massive parallel execution that is not bound by physical CPU cores without (take this with a pinch of salt) performance penalties (read: use millions of threads).
+
+=== **Skip**: Non-blocking Execution
+
+Already included in the current implementation and configurable. I've tried a couple of combinations with https://lmax-exchange.github.io/disruptor/user-guide[LMAX disruptor], but this needs more testing to figure out optimal an configuration. Would be worth to create more realistic JMH benchmarks. I have added a simple one to get a first idea how the mechanics are working.
+
+== Maker-Checker
+
+This will be part of a separate proposal. The only related feature I've added here was command persistence so that you can save commands for deferred execution. Other than that I want to keep this concept (command processing) clean and avoid mixing to many concepts/concerns in one place. This ensures better maintainability. Maker-checker is actually a security related concept and should probably be handled with the proper Spring Security APIs (`AuthorizationManager` interface comes to mind). But again, different proposal and can be ignored here for now.
+
+When we encounter the first need to take care of Maker-Checker then let's figure out a solution that has minimal impact and do a proper cleanup when the Maker-Checker proposal is available.
+
+[!NOTE] The best guess is that Maker-Checker will probably implemented

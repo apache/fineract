@@ -6376,11 +6376,6 @@ GET https://DomainName/api/v1/clients/{clientId}
 						</dd>
 						<dd>Use externalId of clients to restrict results.</dd>
 
-						<dt>sqlSearch</dt>
-						<dd>
-							String <span>optional</span>
-						</dd>
-						<dd>Use an sql fragment valid for the underlying client schema to filter results. e.g. display_name like %K%</dd>
 						<dt>orphansOnly</dt>
 						<dd>
 							Boolean <span>optional</span>, defaults to false
@@ -6489,9 +6484,6 @@ DELETE https://DomainName/api/v1/clients/{clientId}
 					<code class="method-request">
 DELETE clients/3
 Content-Type: application/json
-Request Body:
-{
-}
 					</code>
 					<code class="method-response">
 {
@@ -8339,11 +8331,6 @@ GET https://DomainName/fineract-provider/api/v1/centers/9
 						</dd>
 						<dd>Use externalId of center to restrict results.</dd>
 
-						<dt>sqlSearch</dt>
-						<dd>
-							String <span>optional</span>
-						</dd>
-						<dd>Use an sql fragment valid for the underlying center schema to filter results. e.g. display_name like %K%</dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>centers</div>
@@ -9774,11 +9761,6 @@ DELETE groups/2
 						</dd>
 						<dd>Use externalId of groups to restrict results.</dd>
 
-						<dt>sqlSearch</dt>
-						<dd>
-							String <span>optional</span>
-						</dd>
-						<dd>Use an sql fragment valid for the underlying group schema to filter results. e.g. display_name like %K%</dd>
 						<dt>orphansOnly</dt>
 						<dd>
 							Boolean <span>optional</span>, defaults to false
@@ -10321,7 +10303,7 @@ GET  https://DomainName/fineract-provider/api/v1/groups/{groupId}/glimaccounts
 							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
 						<tr class=alt>
-							<td>allowPartialPeriodInterestCalcualtion</td>
+							<td>allowPartialPeriodInterestCalculation</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods.
@@ -11165,17 +11147,31 @@ GET https://DomainName/api/v1/loans/{loanId}
 						</dd>
 						<dd>Use account no. of loans to restrict results.</dd>
 
+                        <dt>clientId</dt>
+                        <dd>
+                            String <span>optional</span>
+                        </dd>
+                        <dd>Use client ID of loans to restrict results.</dd>
+
+                        <dt>associations</dt>
+                        <dd>String <span>optional,</span>
+                            <span>Comma separated list of recurring loan 'associations' (itemized below).</span>
+                        </dd>
+                        <dd>
+                            <br>
+                                Associations are just extra pieces of data that you might or might not want to retrieve.<br>
+                            <br>
+                        </dd>
+                        <dd>
+                            <b>'summary':</b> Gets loan account summarry related information.
+                        </dd>
+
 						<dt>externalId</dt>
 						<dd>
 							String <span>optional</span>
 						</dd>
 						<dd>Use externalId of loan to restrict results.</dd>
 
-						<dt>sqlSearch</dt>
-						<dd>
-							String <span>optional</span>
-						</dd>
-						<dd>Use an sql fragment valid for the underlying loan schema to filter results. e.g. display_name like %K%</dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>loans</div>
@@ -11633,7 +11629,7 @@ Request Body:
 							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalculation,
 								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true), daysInYearType
 							</td>
 						</tr>
@@ -15692,7 +15688,7 @@ Request Body:
 							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
 						<tr class=alt>
-							<td>allowPartialPeriodInterestCalcualtion</td>
+							<td>allowPartialPeriodInterestCalculation</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods.
@@ -15845,7 +15841,7 @@ An enumeration that indicates the type of transaction processing strategy to be 
 						</tr>
 						<tr>
 							<td class=fielddesc>Specifies what action should perform on loan repayment schedule for advance payments. <br>
-							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount</td>
+							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount, 4=Adjust last, unpaid period</td>
 						</tr>
 						<tr class=alt>
 							<td>recalculationCompoundingFrequencyType</td>
@@ -17176,7 +17172,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion, rates
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalculation, rates
 							</td>
 						</tr>
 					</table>
@@ -18440,6 +18436,7 @@ Request Body:
 						<li><b>savings-interest-posting-current-period-end</b> - Set it at the database level before any savings interest is posted. When set as false(default), interest will be posted on the first date of next period. If set as true, interest will be posted on last date of current period. There is no difference in the interest amount posted.</li>
 						<li><b>financial-year-beginning-month</b> - Set it at the database level before any savings interest is posted. Allowed values 1 - 12 (January - December). Interest posting periods are evaluated based on this configuration.</li>
 						<li><b>meetings-mandatory-for-jlg-loans</b> - if set to true, enforces all JLG loans to follow a meeting schedule belonging to either the parent group or Center.</li>
+						<li><b>max-login-retry-attempts</b> - defaults to 5 - when enabled, limits failed login attempts and locks the user after N failed attempts.</li>
 					</ol>
 				</div>
 			</div>
@@ -34783,7 +34780,7 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
-<!-- end of acount transfers api -->
+<!-- end of account transfers api -->
 
 <!-- Start Account Trasfer Standing Instrution-->
 
@@ -36180,11 +36177,6 @@ No Request Body:
                 <dd>Filters for transactions whose entry Date is lesser than or equal to the passed in Date
                 </dd>
 
-                <dt>sqlSearch</dt>
-                <dd>
-                    String <span>optional</span>
-                </dd>
-                <dd>Use an sql fragment valid for the underlying standing instruction schema to filter results. e.g. name like %K%</dd>
             </dl>
 	        <p>Example Requests : </p>
 	        <div class=apiClick>standinginstructionrunhistory</div>
@@ -38958,9 +38950,6 @@ DELETE https://DomainName/api/v1/reportmailingjobs/{id}
 					<code class="method-request">
 DELETE reportmailingjobs/1
 Content-Type: application/json
-Request Body:
-{
-}
 					</code>
 					<code class="method-response">
 {
@@ -39435,6 +39424,40 @@ Request body:
 				</div>
 			</div>
 
+            <a id="users_changepwd" name="users_changepwd" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Change the password of a User</h4>
+                    <p>
+                        <b>Note:</b> When updating a password you must provide the
+                        repeatPassword parameter also.
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/users/{userId)/pwd
+                    </code>
+                    <code class="method-request">
+POST users/3/pwd
+Content-Type: application/json
+Request body:
+{
+    "password": "window75",
+    "repeatPassword": "window75"
+}
+                    </code>
+                    <code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 3,
+    "changes": {
+        "passwordEncoded": "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
+    }
+}
+                    </code>
+                </div>
+            </div>
+
 			<a id="users_update" name="users_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -39463,8 +39486,7 @@ Request body:
     "officeId": 1,
     "resourceId": 3,
     "changes": {
-        "firstname": "Test",
-        "passwordEncoded": "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
+        "firstname": "Test"
     }
 }
 					</code>
@@ -44708,7 +44730,7 @@ No Request Body:
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>debitAcountId</td>
+							<td>debitAccountId</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>
@@ -44721,7 +44743,7 @@ No Request Body:
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>debitAcountId</td>
+							<td>debitAccountId</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>
@@ -44765,13 +44787,13 @@ No Request Body:
 							<td>debitAccountType</td>
 						</tr>
 						<tr class=alt>
-							<td>debitAcountId</td>
+							<td>debitAccountId</td>
 						</tr>
 						<tr class=alt>
 							<td>creditAccountType</td>
 						</tr>
 						<tr class=alt>
-							<td>creditAcountId</td>
+							<td>creditAccountId</td>
 						</tr>
 						<tr class=alt>
 							<td>startDate</td>
@@ -44790,7 +44812,7 @@ No Request Body:
 						"name": "tax component 1",
 						"percentage": "10",
 						"creditAccountType": 2,
-						"creditAcountId": 4,
+						"creditAccountId": 4,
 						"locale": "en",
 						"dateFormat": "dd MMMM yyyy",
 						"startDate": "11 April 2016"
@@ -48378,7 +48400,7 @@ Request Body:
 							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalculation,
 								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)
 							</td>
 						</tr>
@@ -51595,7 +51617,7 @@ No Request Body:
 							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
 						<tr class=alt>
-							<td>allowPartialPeriodInterestCalcualtion</td>
+							<td>allowPartialPeriodInterestCalculation</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods.
@@ -51748,7 +51770,7 @@ An enumeration that indicates the type of transaction processing strategy to be 
 						</tr>
 						<tr>
 							<td class=fielddesc>Specifies what action should perform on loan repayment schedule for advance payments. <br>
-							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount</td>
+							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount, 4=Adjust last, unpaid period</td>
 						</tr>
 						<tr class=alt>
 							<td>recalculationCompoundingFrequencyType</td>

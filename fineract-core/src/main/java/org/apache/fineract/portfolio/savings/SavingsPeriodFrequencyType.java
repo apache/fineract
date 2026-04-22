@@ -51,28 +51,16 @@ public enum SavingsPeriodFrequencyType {
         if (v == null) {
             return INVALID;
         }
-
-        switch (v) {
-            case 0:
-                return DAYS;
-            case 1:
-                return WEEKS;
-            case 2:
-                return MONTHS;
-            case 3:
-                return YEARS;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 0 -> DAYS;
+            case 1 -> WEEKS;
+            case 2 -> MONTHS;
+            case 3 -> YEARS;
+            default -> INVALID;
+        };
     }
 
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return this.equals(INVALID);
-    }
-
-    // TODO: do we really need this?!?
-    public static Object[] integerValues() {
-        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
+    public static Integer[] integerValues() {
+        return Arrays.stream(values()).filter(v -> v != INVALID).map(v -> v.value).toArray(Integer[]::new);
     }
 }

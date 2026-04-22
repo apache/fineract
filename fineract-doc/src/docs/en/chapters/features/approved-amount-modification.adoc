@@ -1,0 +1,140 @@
+= Approved amount modification on loans
+
+== Overview
+
+In Apache Fineract, after a loan is disbursed, it is possible to alter the principal amount that the loan was approved with. This means that the amount to be disbursed can be fine-tuned throughout the loan lifecycle. The approved loan amount can either be modified directly or indirectly through different endpoints.
+
+== Supported Loan Type
+
+Approved amount modifications are supported on all loan types.
+
+== Business Events
+
+* Triggers a new business event: Loan Approved Amount Changed
+
+== API Endpoints
+
+=== Modifying approved amount on loans
+
+Fineract supports the direct modification of the approved amount on loans
+
+* *Endpoint*: `/loans/<loan_id>/approved-amount`
+* *Alternative Endpoint*: `/loans/external-id/<loan_external_id>/approved-amount`
+* *Method*: `PUT`
+
+[source,json]
+----
+{
+    "amount": 1000.0,
+    "locale": "en"
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "changes": {
+        "locale": "en",
+        "newApprovedAmount": 1000.0,
+        "oldApprovedAmount": 1500.0
+    },
+    "clientId": 6,
+    "groupId": 10,
+    "officeId": 2,
+    "resourceExternalId": "95174ff9-1a75-4d72-a413-6f9b1cb988b7",
+    "resourceId": 3
+}
+----
+
+==== Validations
+
+* The approved amount of the loan cannot be lower than the `total principal disbursed + total expected principal + total principal from capitalized income transactions`.
+* The approved amount of the loan cannot be set higher, than the proposed amount of the loan or if `allow approved/disbursed over applied amount` configuration is enabled then the calculated threshold.
+
+=== Modifying available disbursement amount on loans
+
+Fineract supports the indirect modification of the approved amount on loans. This is called modifying the available disbursement amount.
+
+[IMPORTANT]
+====
+Available disbursement amount is only a calculated value used by this endpoint to indirectly update the approved amount of the loan. It is not stored anywhere.
+====
+
+The approved amount is calculated as: `total principal disbursed + total expected principal + total principal from capitalized income + "amount" from the request`.
+
+* *Endpoint*: `/loans/<loan_id>/available-disbursement-amount`
+* *Alternative Endpoint*: `/loans/external-id/<loan_external_id>/available-disbursement-amount`
+* *Method*: `PUT`
+
+[source,json]
+----
+{
+    "amount": 100.0,
+    "locale": "en"
+}
+----
+
+==== Response Body
+
+[source,json]
+----
+{
+    "changes": {
+        "locale": "en",
+        "newApprovedAmount": 100.0,
+        "oldApprovedAmount": 1000.0,
+        "newAvailableDisbursementAmount": 100.0,
+        "oldAvailableDisbursementAmount": 1000.0
+    },
+    "clientId": 6,
+    "groupId": 10,
+    "officeId": 2,
+    "resourceExternalId": "95174ff9-1a75-4d72-a413-6f9b1cb988b7",
+    "resourceId": 3
+}
+----
+
+==== Validations
+
+* The available disbursement amount cannot be lower than 0.
+* The approved amount of the loan cannot be set higher, than the proposed amount of the loan or if `allow approved/disbursed over applied amount` configuration is enabled then the calculated threshold. This means that the new available disbursement amount cannot be higher than `maximumLoanPrincipalThreshold - total principal disbursed - total expected principal - total principal from capitalized income`
+
+=== Approved amount history
+
+Modifying the approved amount of the loan through either endpoint also creates a history entry that can be used to observe the changes overtime.
+
+* *Endpoint*: `/loans/<loan_id>/approved-amount`
+* *Alternative Endpoint*: `/loans/external-id/<loan_external_id>/approved-amount`
+* *Method*: `GET`
+
+==== Response Body
+
+[source,json]
+----
+[
+  {
+    "loanId": 152,
+    "externalLoanId": "9e058913-3de8-4f6e-9e09-4b2067c4bb91",
+    "newApprovedAmount": 800.000000,
+    "oldApprovedAmount": 1000.000000,
+    "dateOfChange": "2025-08-05T16:35:43.427229+02:00"
+  },
+  {
+    "loanId": 152,
+    "externalLoanId": "9e058913-3de8-4f6e-9e09-4b2067c4bb91",
+    "newApprovedAmount": 600.000000,
+    "oldApprovedAmount": 800.000000,
+    "dateOfChange": "2025-08-05T16:35:43.543779+02:00"
+  },
+  {
+    "loanId": 152,
+    "externalLoanId": "9e058913-3de8-4f6e-9e09-4b2067c4bb91",
+    "newApprovedAmount": 400.000000,
+    "oldApprovedAmount": 600.000000,
+    "dateOfChange": "2025-08-05T16:35:43.603855+02:00"
+  }
+]
+----
+

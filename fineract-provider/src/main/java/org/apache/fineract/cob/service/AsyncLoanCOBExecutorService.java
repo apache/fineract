@@ -18,9 +18,4 @@
  */
 package org.apache.fineract.cob.service;
 
-import org.apache.fineract.infrastructure.core.domain.FineractContext;
-
-public interface AsyncLoanCOBExecutorService {
-
-    void executeLoanCOBCatchUpAsync(FineractContext context);
-}
+public interface AsyncLoanCOBExecutorService extends AsyncCOBExecutorService {}

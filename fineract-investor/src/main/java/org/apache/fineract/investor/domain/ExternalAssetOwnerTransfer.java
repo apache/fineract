@@ -41,7 +41,7 @@ import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 @Table(name = "m_external_asset_owner_transfer")
 @NoArgsConstructor
 @Entity
-public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTimeCustom {
+public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
@@ -79,4 +79,10 @@ public class ExternalAssetOwnerTransfer extends AbstractAuditableWithUTCDateTime
     @Column(name = "external_loan_id", length = 100)
     private ExternalId externalLoanId;
 
+    @Column(name = "external_group_id", length = 100)
+    private ExternalId externalGroupId;
+
+    @ManyToOne
+    @JoinColumn(name = "previous_owner_id")
+    private ExternalAssetOwner previousOwner;
 }

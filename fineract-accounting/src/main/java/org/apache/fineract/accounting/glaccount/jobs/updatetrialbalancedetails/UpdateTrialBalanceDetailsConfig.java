@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.accounting.glaccount.jobs.updatetrialbalancedetails;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepository;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.batch.core.Job;
@@ -27,22 +30,20 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@RequiredArgsConstructor
 public class UpdateTrialBalanceDetailsConfig {
 
-    @Autowired
-    private JobRepository jobRepository;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-    @Autowired
-    private RoutingDataSourceServiceFactory dataSourceServiceFactory;
-    @Autowired
-    private TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
+    private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final TrialBalanceRepository trialBalanceRepository;
+    private final JournalEntryRepository journalEntryRepository;
 
     @Bean
     protected Step updateTrialBalanceDetailsStep() {
@@ -58,6 +59,7 @@ public class UpdateTrialBalanceDetailsConfig {
 
     @Bean
     public UpdateTrialBalanceDetailsTasklet updateTrialBalanceDetailsTasklet() {
-        return new UpdateTrialBalanceDetailsTasklet(dataSourceServiceFactory, trialBalanceRepositoryWrapper);
+        return new UpdateTrialBalanceDetailsTasklet(dataSourceServiceFactory, trialBalanceRepositoryWrapper, trialBalanceRepository,
+                journalEntryRepository);
     }
 }

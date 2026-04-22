@@ -28,6 +28,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -55,7 +56,7 @@ public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<Un
                 .append(parameterName) //
                 .append(" has an unsupported value of: ") //
                 .append(parameterValue);
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultEnglishMessage);
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
 
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 parameterName, parameterName, parameterValue, exception.getSupportedParams());

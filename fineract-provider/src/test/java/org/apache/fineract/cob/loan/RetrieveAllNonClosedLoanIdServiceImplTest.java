@@ -22,7 +22,7 @@ import static org.mockito.Mockito.times;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.cob.data.LoanCOBPartition;
+import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ public class RetrieveAllNonClosedLoanIdServiceImplTest {
     @Captor
     private ArgumentCaptor<SqlParameterSource> paramsCaptor;
     @Captor
-    private ArgumentCaptor<RowMapper<LoanCOBPartition>> rowMapper;
+    private ArgumentCaptor<RowMapper<COBPartition>> rowMapper;
 
     @Test
     public void testRetrieveLoanCOBPartitionsNoCatchup() {
@@ -75,8 +75,7 @@ public class RetrieveAllNonClosedLoanIdServiceImplTest {
     }
 
     private void testRetrieveLoanCOBPartitions(String expectedSQL, boolean isCatchup) {
-        RetrieveAllNonClosedLoanIdServiceImpl service = new RetrieveAllNonClosedLoanIdServiceImpl(loanRepository,
-                namedParameterJdbcTemplate);
+        RetrieveAllNonClosedIdServiceImpl service = new RetrieveAllNonClosedIdServiceImpl(loanRepository, namedParameterJdbcTemplate);
         LocalDate businessDate = LocalDate.parse("2023-06-28");
         service.retrieveLoanCOBPartitions(1L, businessDate, isCatchup, 5);
         Mockito.verify(namedParameterJdbcTemplate, times(1)).query(sqlCaptor.capture(), paramsCaptor.capture(), rowMapper.capture());

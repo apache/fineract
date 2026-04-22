@@ -49,7 +49,7 @@ import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotB
         @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_org") })
 @Getter
 @Setter
-public class Office extends AbstractPersistableCustom implements Serializable {
+public class Office extends AbstractPersistableCustom<Long> implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

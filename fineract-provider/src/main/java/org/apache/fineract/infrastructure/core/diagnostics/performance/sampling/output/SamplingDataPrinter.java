@@ -53,6 +53,7 @@ public class SamplingDataPrinter {
         }
     }
 
+    @SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
     private String getFormattedSamplingData(Class<?> clazz, SamplingData samplingData) {
         if (clazz != null && samplingData != null) {
             Map<String, List<Duration>> timings = samplingData.getTimings();

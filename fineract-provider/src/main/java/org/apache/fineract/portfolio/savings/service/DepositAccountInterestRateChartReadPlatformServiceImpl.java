@@ -38,9 +38,9 @@ import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
-import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestIncentiveDropdownReadService;
 import org.apache.fineract.portfolio.interestratechart.service.InterestIncentivesEnumerations;
-import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadPlatformService;
+import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartDropdownReadService;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartEnumerations;
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestIncentiveData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountInterestRateChartData;
@@ -59,8 +59,8 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     private final JdbcTemplate jdbcTemplate;
     private static final DepositAccountInterestRateChartMapper CHART_ROW_MAPPER = new DepositAccountInterestRateChartMapper();
     private final DepositAccountInterestRateChartExtractor chartExtractor;
-    private final InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService;
-    private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
+    private final InterestRateChartDropdownReadService chartDropdownReadPlatformService;
+    private final InterestIncentiveDropdownReadService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Override
@@ -169,7 +169,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     }
 
     public static final class DepositAccountInterestRateChartExtractor
-            implements ResultSetExtractor<Collection<DepositAccountInterestRateChartData>> {
+            implements ResultSetExtractor<List<DepositAccountInterestRateChartData>> {
 
         DepositAccountInterestRateChartMapper chartMapper = new DepositAccountInterestRateChartMapper();
         InterestRateChartSlabExtractor chartSlabsMapper = new InterestRateChartSlabExtractor();
@@ -206,7 +206,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         }
 
         @Override
-        public Collection<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public List<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             List<DepositAccountInterestRateChartData> chartDataList = new ArrayList<>();
 

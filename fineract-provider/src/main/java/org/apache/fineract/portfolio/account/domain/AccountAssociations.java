@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
 @Table(name = "m_portfolio_account_associations")
-public class AccountAssociations extends AbstractPersistableCustom {
+public class AccountAssociations extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_account_id", nullable = true)

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="1774447666778-1">
+        <insert tableName="m_batch_business_steps">
+            <column name="job_name" value="WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS"/>
+            <column name="step_name" value="WC_LOAN_DELINQUENCY_CLASSIFICATION"/>
+            <column name="step_order" value="3"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fineract" id="1774523385156-1">
+        <insert tableName="c_configuration">
+            <column name="name" value="enable-instant-delinquency-calculation"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description"
+                    value="When enabled, allows delinquency evaluation right after monetary transaction processing"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="1774944259572-1" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_wc_loan_range_delinquency_tag"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_wc_loan_range_delinquency_tag">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_wc_loan_range_delinquency_tag"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_modified_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delinquency_range_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="loan_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="range_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="addedon_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="liftedon_date" type="DATE"/>
+            <column name="outstanding_amount" type="DECIMAL(19, 6)"/>
+            <column name="version" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+
+    <!-- Add UTC datetime columns for audit (MySQL) -->
+    <changeSet author="fineract" id="1774944425269-1" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_wc_loan_range_delinquency_tag" columnName="created_on_utc"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_range_delinquency_tag">
+            <column name="created_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="DATETIME(6)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add UTC datetime columns for audit (PostgreSQL) -->
+    <changeSet author="fineract" id="1774944419953-1" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_wc_loan_range_delinquency_tag" columnName="created_on_utc"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_range_delinquency_tag">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="1774944259572-2" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_DELINQUENCY_RANGE"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="delinquency_range_id" baseTableName="m_wc_loan_range_delinquency_tag"
+                                 constraintName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_DELINQUENCY_RANGE"
+                                 referencedColumnNames="id" referencedTableName="m_delinquency_range"/>
+    </changeSet>
+    <changeSet id="1774944259572-3" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_LOAN"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_wc_loan_range_delinquency_tag"
+                                 constraintName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_LOAN" referencedColumnNames="id"
+                                 referencedTableName="m_wc_loan"/>
+    </changeSet>
+    <changeSet id="1774944259572-4" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_RANGE"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="range_id" baseTableName="m_wc_loan_range_delinquency_tag"
+                                 constraintName="FK_M_WC_LOAN_RANGE_DELINQUENCY_TAG_ON_RANGE" referencedColumnNames="id"
+                                 referencedTableName="m_wc_loan_delinquency_range_schedule"/>
+    </changeSet>
+
+</databaseChangeLog>

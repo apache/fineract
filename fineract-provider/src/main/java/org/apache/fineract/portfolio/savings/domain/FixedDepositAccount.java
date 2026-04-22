@@ -55,6 +55,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -170,9 +171,9 @@ public class FixedDepositAccount extends SavingsAccount {
                     penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
                     final PreClosurePenalInterestOnType preClosurePenalInterestOnType = this.accountTermAndPreClosure
                             .depositPreClosureDetail().preClosurePenalInterestOnType();
-                    if (preClosurePenalInterestOnType.isWholeTerm()) {
+                    if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.WHOLE_TERM) {
                         depositCloseDate = interestCalculatedUpto();
-                    } else if (preClosurePenalInterestOnType.isTillPrematureWithdrawal()) {
+                    } else if (preClosurePenalInterestOnType == PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL) {
                         depositCloseDate = interestPostingUpToDate;
                     }
                 }
@@ -311,10 +312,7 @@ public class FixedDepositAccount extends SavingsAccount {
         List<SavingsAccountTransactionDetailsForPostingPeriod> savingsAccountTransactionDetailsForPostingPeriodList = toSavingsAccountTransactionDetailsForPostingPeriodList(
                 transactions);
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
-            boolean isUserPosting = false;
-            if (postedAsOnTransactionDates.contains(periodInterval.endDate())) {
-                isUserPosting = true;
-            }
+            boolean isUserPosting = postedAsOnTransactionDates.contains(periodInterval.endDate());
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     savingsAccountTransactionDetailsForPostingPeriodList, this.currency, compoundingPeriodType, interestCalculationType,
                     interestRateAsFraction, daysInYearType.getValue(), maturityDate, interestPostTransactions, isInterestTransfer,
@@ -794,7 +792,7 @@ public class FixedDepositAccount extends SavingsAccount {
         return this.accountTermAndPreClosure.getTransferToSavingsAccountId();
     }
 
-    public FixedDepositAccount reInvest(BigDecimal depositAmount) {
+    public FixedDepositAccount reInvest(BigDecimal depositAmount, ExternalId externalId) {
 
         final DepositAccountTermAndPreClosure newAccountTermAndPreClosure = this.accountTermAndPreClosure.copy(depositAmount);
         final SavingsProduct product = this.product;
@@ -882,4 +880,12 @@ public class FixedDepositAccount extends SavingsAccount {
         return SavingsAccountStatusType.MATURED.getValue().equals(this.status);
     }
 
+    public void setClosedOnDate(final LocalDate closedOnDate) {
+        this.closedOnDate = closedOnDate;
+    }
+
+    @Override
+    public DepositAccountType depositAccountType() {
+        return DepositAccountType.fromInt(200);
+    }
 }

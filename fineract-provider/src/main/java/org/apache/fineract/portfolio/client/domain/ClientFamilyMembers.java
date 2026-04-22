@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_family_members")
-public class ClientFamilyMembers extends AbstractPersistableCustom {
+public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_id")

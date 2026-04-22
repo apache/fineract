@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_deposit_product_recurring_detail")
-public class DepositProductRecurringDetail extends AbstractPersistableCustom {
+public class DepositProductRecurringDetail extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private DepositRecurringDetail recurringDetail;

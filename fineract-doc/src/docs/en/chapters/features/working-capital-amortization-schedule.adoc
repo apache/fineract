@@ -1,0 +1,744 @@
+= Working Capital Loan — Projected Amortization Schedule
+
+== Overview
+
+Dynamically updated amortization schedule for Working Capital (WC) Loans — zero-interest, discount/fee-based products with flexible, sales-based repayments. Uses EIR methodology for income recognition, deferral, and NPV calculation.
+
+Each payment period is exactly *one day*: period `N` date = `expectedDisbursementDate + N days`.
+
+== Goal
+
+To design and implement a Working Capital Loan product with an Effective Interest Rate (EIR)-based calculation, enabling accurate interest recognition, regulatory compliance, and flexible repayment structures.
+
+The objective includes building a loan framework capable of:
+
+* Supporting discount/fees-based working capital financing
+* Accurately calculating and amortizing loans using EIR methodology, ensuring transparent cost of credit and compliance with accounting and regulatory standards
+* Supporting excess payments, fewer payments, and no-payment calculation scenarios without impacting financial accuracy
+
+== Configuration at Loan Product Level
+
+=== Product Parameters
+
+[cols="2,1,1,3",options="header"]
+|===
+| Parameter | Type | Required | Description
+
+| `name`
+| VARCHAR(100)
+| Yes
+| Product name (unique)
+
+| `shortName`
+| VARCHAR(4)
+| Yes
+| Product short code (unique)
+
+| `currencyCode`
+| VARCHAR(3)
+| Yes
+| ISO currency code
+
+| `digitsAfterDecimal`
+| SMALLINT
+| Yes
+| Decimal places for currency
+
+| `principal`
+| DECIMAL(19,6)
+| Yes
+| Default principal amount
+
+| `periodPaymentRate`
+| DECIMAL(19,6)
+| Yes
+| Rate applied to Total Payment Value (e.g., 0.18 = 18%)
+
+| `npvDayCount`
+| INT
+| Yes
+| Day-count convention for NPV (e.g., 360)
+
+| `amortizationType`
+| ENUM
+| Yes
+| `EIR` (Effective Interest Rate) or `FLAT`
+
+| `repaymentEvery`
+| INT
+| Yes
+| Repayment interval count
+
+| `repaymentFrequencyType`
+| ENUM
+| Yes
+| DAYS, MONTHS, YEARS
+
+| `discount`
+| DECIMAL(19,6)
+| No
+| Default origination fee / discount amount
+
+| `minPrincipal` / `maxPrincipal`
+| DECIMAL(19,6)
+| No
+| Principal range constraints
+
+| `minPeriodPaymentRate` / `maxPeriodPaymentRate`
+| DECIMAL(19,6)
+| No
+| Payment rate range constraints
+
+| `delinquencyBucketId`
+| BIGINT
+| No
+| Delinquency bucket classification
+
+| `delinquencyGraceDays`
+| INT
+| No
+| Grace days before delinquency (default: 0)
+
+| `delinquencyStartType`
+| ENUM
+| No
+| FIRST_OVERDUE_INSTALLMENT or LOAN_START_DATE
+
+| `breachId`
+| BIGINT
+| No
+| Breach classification reference
+|===
+
+=== Configurable Attributes (Loan-Level Overrides)
+
+These flags control whether the corresponding field can be overridden at the individual loan level:
+
+[cols="2,3",options="header"]
+|===
+| Attribute | Description
+
+| `discountDefaultOverridable`
+| Allow override of origination fee / discount at loan level
+
+| `periodPaymentFrequencyOverridable`
+| Allow override of repayment interval
+
+| `periodPaymentFrequencyTypeOverridable`
+| Allow override of repayment frequency type
+
+| `delinquencyBucketClassificationOverridable`
+| Allow override of delinquency bucket
+
+| `breachOverridable`
+| Allow override of breach classification
+|===
+
+=== Payment Allocation Rules
+
+Each product defines payment allocation rules per transaction type. The allocation order for Working Capital loans uses only three categories (no interest component):
+
+. *PENALTY* — Applied first to any outstanding penalties
+. *FEE* — Applied to fees (e.g., NSF fees)
+. *PRINCIPAL* — Applied to outstanding principal balance
+
+[NOTE]
+====
+Working Capital loans have no nominal interest rate. Revenue is generated through origination fee amortization using EIR methodology, tracked via `realized_income` and `unrealized_income` on the loan balance.
+====
+
+== Origination Fee (Discount) Treatment
+
+The origination fee — referred to as "discount" in the product and loan configuration — is the upfront fee that represents the cost of credit. It is the difference between what the borrower must repay (Total Payment Value) and the net amount disbursed.
+
+=== Lifecycle of the Discount
+
+[cols="1,3",options="header"]
+|===
+| Stage | Behavior
+
+| *Create*
+| Discount amount entered (optional). Defaults to product-level value if not specified.
+
+| *Approve*
+| Discount can be reduced but not increased beyond the created amount. If approval is undone, discount resets to product default.
+
+| *Disburse*
+| Discount can be set if not already customized at an earlier stage. After disbursement, the discount is locked and used for EIR calculation.
+
+| *Post-Disbursement*
+| Discount can only be updated on the disbursement date if it was not already customized at create/approve/disburse stages.
+|===
+
+=== Deferred Income at Disbursement
+
+At disbursement, the origination fee becomes the initial *deferred balance* (unrealized income). This amount is progressively recognized as income over the loan lifecycle through the EIR amortization model:
+
+* `principal_outstanding` = disbursed amount + discount
+* `unrealized_income` = origination fee amount (full deferred balance)
+* `realized_income` = 0 (nothing recognized yet)
+
+As repayments are received, the cursor-based amortization mechanism transfers portions from `unrealized_income` to `realized_income` based on the actual payment relative to the expected payment.
+
+== Lifecycle
+
+[cols="1,3",options="header"]
+|===
+| Stage | Behavior
+
+| *Create* | `generateModel()` — initial schedule from application parameters.
+| *Disburse* | `addDisbursement()` — recalculates with actual disbursement amounts/date, preserves applied payments.
+| *Repayment* | `applyPayment()` — records payment, full schedule rebuild. Calculates actual amortization (income recognition) and income modification.
+|===
+
+=== State Transitions
+
+[cols="1,2,2,3",options="header"]
+|===
+| Command | From State | To State | Key Validations
+
+| `approve`
+| Submitted and Pending Approval
+| Approved
+| Approval date not future, not before submitted date; approved amount <= proposed principal; discount <= created discount
+
+| `reject`
+| Submitted and Pending Approval
+| Rejected
+| Rejection date not future, not before submitted date
+
+| `undoapproval`
+| Approved
+| Submitted and Pending Approval
+| Discount resets to product default
+
+| `disburse`
+| Approved
+| Active
+| Disbursement date not future, not before submitted/approval date; amount > 0 and <= approved principal; client must be active
+
+| `undodisbursal`
+| Active
+| Approved
+| Reverses disbursement; amortization schedule regenerated
+|===
+
+== Input Parameters
+
+The amortization schedule model is calculated from these loan-level parameters:
+
+[cols="2,1,4",options="header"]
+|===
+| Parameter | Type | Description
+
+| `originationFeeAmount` | Money | Upfront discount/fee. Amortized over lifecycle.
+| `netDisbursementAmount` | Money | Principal disbursed. Must be positive.
+| `totalPaymentValue` | Money | Merchant's TPV.
+| `periodPaymentRate` | BigDecimal | Rate applied to TPV (e.g., 0.18 = 18%).
+| `npvDayCount` | Integer | Day-count convention (e.g., 360). Must be positive.
+| `expectedDisbursementDate` | Date | Loan start date.
+|===
+
+== Formulas
+
+----
+expectedPaymentAmount = (TPV × periodPaymentRate) / npvDayCount
+loanTerm             = roundUp((netDisbursement + originationFee) / expectedPayment)
+EIR                  = RATE(loanTerm, -expectedPayment, netDisbursement)   // Newton-Raphson, tol=1E-10, max 100 iter
+paymentsLeft         = max(0, paymentNo - appliedPaymentCount)
+discountFactor       = 1 / (1 + EIR) ^ paymentsLeft                       // model wrapper: returns 1.0 if ≤ 0
+npvSource            = actualPayment (if applied) or forecastPayment (if not)
+npvValue             = max(0, npvSource × discountFactor)   // row 0: -netDisbursementAmount (unclamped)
+----
+
+=== Stored Values at Loan Account Level
+
+After EIR calculation, the following values are persisted:
+
+* *Period Payment Amount* — constant daily expected payment
+* *Total Days* — loan term in days
+* *Daily EIR* — the effective interest rate per period
+* *Calculated Annual EIR* — annualized effective rate
+
+=== Stored Values per Repayment
+
+For each actual repayment transaction:
+
+* *Payment Amount* — actual cash received
+* *Actual Amortization (Income)* — fee income recognized for this payment
+* *Income Modification* — difference between actual and expected amortization
+
+== Schedule Fields
+
+[cols="2,4",options="header"]
+|===
+| Field | Formula / Description
+
+| `paymentNo` | 1-based. Row 0 = disbursement.
+| `paymentDate` | `expectedDisbursementDate + paymentNo` days.
+| `count` | `loanTerm + appliedPaymentCount - paymentNo`. Can be negative for tail periods.
+| `paymentsLeft` | `max(0, paymentNo - appliedPaymentCount)`. Zero for row 0.
+| `expectedPaymentAmount` | Constant. Row 0: `-netDisbursementAmount`. Tail: null.
+| `forecastPaymentAmount` | Expected payment reduced by excess (backward from last period), clamped to zero. Row 0: null.
+| `discountFactor` | `1/(1+EIR)^paymentsLeft`. Row 0 and paid periods: 1.0.
+| `npvValue` | `max(0, npvSource × DF)`. Row 0: `-netDisbursementAmount`.
+| `balance` | `balance[i-1]×(1+EIR) - expectedPayment`. Row 0: `+netDisbursementAmount`. Tail: null.
+| `expectedAmortizationAmount` | `min(balance[i] + expectedPayment - balance[i-1], originationFee)`. Row 0 / tail: null.
+| `netAmortizationAmount` | Paid: `min(totalNetAmort - cumulativeActualAmort_before, originationFee)` where `cumulativeActualAmort_before` excludes the current period. Unpaid: 0. Row 0: null.
+| `actualPaymentAmount` | Actual cash paid. Null if no payment.
+| `actualAmortizationAmount` | Cursor-based: `actualPayment/expectedPayment` periods of expected amortization consumed. Null if no payment.
+| `incomeModification` | Paid: `actualAmort - expectedAmort`. Unpaid: `-expectedAmort`. Row 0 / tail: null.
+| `deferredBalance` | `originationFee - cumulativeActualAmort`. Row 0: `originationFee`. Tail: null.
+|===
+
+=== Disbursement Row (paymentNo = 0)
+
+[cols="1,2"]
+|===
+| `count` | `loanTerm + appliedPaymentCount`
+| `paymentsLeft` | 0
+| `expectedPaymentAmount` | `-netDisbursementAmount`
+| `forecastPaymentAmount` | null
+| `discountFactor` | 1.0
+| `npvValue` | `-netDisbursementAmount`
+| `balance` | `+netDisbursementAmount`
+| `deferredBalance` | `originationFeeAmount`
+| all other nullable fields | null
+|===
+
+=== Tail Periods
+
+Appended when shortfall remains after loanTerm. Each forecasts `min(remainingShortfall, expectedPayment)`. Structural fields (`paymentNo`, `paymentDate`, `count`, `paymentsLeft`) are always set. Among nullable fields, only `forecastPaymentAmount`, `discountFactor`, `npvValue`, `netAmortizationAmount` (zero) are populated; rest are null. Trailing rows with zero forecast are trimmed.
+
+== EIR-Based Income Recognition
+
+=== Cursor-Based Actual Amortization
+
+When a repayment is received, the system calculates how much origination fee income to recognize using a *cursor-based* approach:
+
+. The cursor tracks how many "periods worth" of expected amortization have been consumed
+. For each payment: `periodsConsumed = actualPaymentAmount / expectedPaymentAmount`
+. The cursor advances by this amount, consuming the corresponding expected amortization amounts
+. Partial periods are interpolated
+
+This mechanism means:
+
+* A payment equal to the expected amount recognizes exactly one period's expected amortization
+* A payment larger than expected (excess) recognizes proportionally more income
+* A payment smaller than expected recognizes proportionally less income
+* No payment on a given day means no income is recognized for that day
+
+=== Income Modification
+
+The `incomeModification` field tracks the difference between what was actually amortized and what was expected:
+
+* *Paid periods*: `incomeModification = actualAmortization - expectedAmortization`
+** Positive value = more income recognized than expected (excess payment)
+** Negative value = less income recognized than expected (underpayment)
+* *Unpaid periods*: `incomeModification = -expectedAmortization` (full deferral)
+
+=== Deferred Balance Tracking
+
+The deferred balance represents the remaining unrecognized origination fee:
+
+* At disbursement: `deferredBalance = originationFeeAmount`
+* After each payment: `deferredBalance = originationFee - cumulativeActualAmortization`
+* At loan maturity (fully paid): `deferredBalance = 0`
+
+== Calculation Algorithm
+
+. *Balances & expected amortizations*: `balance[i] = balance[i-1]×(1+EIR) - expectedPayment`. Expected amort capped at `originationFee`.
+. *Aggregate payments by date* (same-date payments summed). Payments must occupy consecutive day slots starting from day 1.
+. *Shortfall/excess analysis*: compare each applied payment to expected.
+. *Cursor-based actual amortization*: cursor advances by `actualPayment/expectedPayment` periods; interpolates partial periods.
+. *Excess distribution*: reduces forecast payments backward from last period.
+. *Tail periods*: appended for remaining shortfall.
+. *Total net amortization*: `-netDisbursement + Σ(npvSource[i] × DF[i]) + tailNpv`.
+. *Assemble rows*, trim trailing zero-forecast.
+
+=== Rebuild Flow
+
+Every state change triggers full rebuild: aggregate payments → build payment list (1 to loanTerm, actual or null) → balances → payment analysis → cursor amortizations → excess distribution → tail → net amortization → assemble rows → trim.
+
+== Loan Balance
+
+The `m_wc_loan_balance` table maintains a running balance snapshot for each loan:
+
+[cols="2,3",options="header"]
+|===
+| Field | Description
+
+| `principal_outstanding`
+| Remaining principal owed. Initialized at disbursement as `disbursedAmount + discount`.
+
+| `total_paid_principal`
+| Cumulative principal repaid.
+
+| `total_payment`
+| Cumulative total payments received.
+
+| `realized_income`
+| Origination fee income that has been recognized (amortized). Increases as repayments trigger cursor-based amortization.
+
+| `unrealized_income`
+| Deferred origination fee income not yet recognized. Decreases as income is realized.
+|===
+
+=== Balance Invariants
+
+* `principal_outstanding >= 0`
+* `total_paid_principal >= 0`
+* `total_payment >= 0`
+* `realized_income >= 0`
+* `unrealized_income >= 0`
+* `realized_income + unrealized_income = originationFeeAmount` (at any point in the loan lifecycle)
+
+== COB (Close of Business) Processing
+
+The Working Capital COB job processes WC loans daily during the Close of Business batch run.
+
+=== Job Configuration
+
+* Job name: `WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS`
+* Display name: "Working Capital Loan COB"
+* Coexists with the standard `LOAN_CLOSE_OF_BUSINESS` job without interference
+
+=== Processing Behavior
+
+* Updates `lastClosedBusinessDate` to `businessDate - 1` for each eligible loan
+* Increments loan `version` for each day processed
+* Processes loans one day at a time when catching up over skipped dates
+* Releases all account locks after completion
+
+=== Status Eligibility
+
+[cols="1,1",options="header"]
+|===
+| Status | Processed by COB?
+
+| Submitted and Pending Approval | Yes
+| Approved | Yes
+| Active | Yes
+| Transfer in Progress | Yes
+| Transfer on Hold | Yes
+| Closed (Obligations Met) | No
+|===
+
+=== Business Steps
+
+The following business steps are executed during COB for each eligible loan:
+
+. *Delinquency Range Schedule* — Generates and evaluates delinquency range periods based on product configuration (frequency, minimum payment)
+
+=== Inline COB
+
+WC loans also support inline COB processing for individual loans, with the same behavior as batch COB. This is useful for immediate processing without waiting for the scheduled batch run.
+
+=== COB Catch-Up
+
+When the system has skipped business dates (e.g., after maintenance), the COB catch-up mechanism processes each missed day sequentially until `lastClosedBusinessDate` reaches `currentBusinessDate - 1`.
+
+== Special Handling
+
+=== Excess Payments
+
+When actual payment exceeds expected payment for a period:
+
+* The excess is distributed backward from the last period, reducing forecast payments
+* More origination fee income is recognized (proportional to payment ratio)
+* Loan may mature earlier than originally projected
+
+=== Shortfall (Underpayment)
+
+When actual payment is less than expected:
+
+* Less income is recognized for the period
+* Tail periods are appended to the schedule for the remaining shortfall
+* Each tail period forecasts `min(remainingShortfall, expectedPayment)`
+
+=== No Payment
+
+When no payment is received on a given day:
+
+* No income is recognized (`actualAmortizationAmount = null`)
+* `incomeModification = -expectedAmortizationAmount` (full deferral)
+* Deferred balance remains unchanged
+
+=== Repayment Rate Modification
+
+The repayment percentage can be modified during the loan lifecycle:
+
+* Affects expected period payment recalculation
+* Triggers full amortization schedule rebuild
+* Does not retroactively change already-recognized income
+
+=== Re-Age
+
+Re-aging works only for the delinquency range schedule:
+
+* Does not impact the amortization schedule or income recognition
+* Period payment amount is unchanged
+
+=== Payment Holidays
+
+Payment holidays only affect the delinquency range schedules:
+
+* Amortization schedule and income recognition are not directly impacted
+
+=== Charge-Off
+
+Remaining unrecognized amortization (unrealized income) is charged off:
+
+* No further income recognition occurs after charge-off
+
+=== Write-Off
+
+Supported for Working Capital loans. Outstanding principal and any unrealized income are written off.
+
+=== Credit Balance Refund (CBR)
+
+Supported when the loan has a credit balance (overpayment beyond principal). The excess amount can be refunded to the borrower.
+
+== Accounting Entries
+
+[cols="3*",options="header"]
+|===
+| Transaction Type | Debit | Credit
+
+| Disbursement
+| Loan Portfolio (Asset)
+| Fund Source (Asset)
+
+| Repayment
+| Fund Source (Asset)
+| Loan Portfolio (Asset)
+
+| Fee Income Recognition (via EIR Amortization)
+| Unrealized Income / Deferred Income (Liability)
+| Realized Income / Income from Origination Fee (Income)
+
+| Charge-Off (remaining deferred income)
+| Unrealized Income / Deferred Income (Liability)
+| Charge-Off Expense (Expense)
+
+| Write-Off
+| Write-Off Expense (Expense)
+| Loan Portfolio (Asset)
+|===
+
+[NOTE]
+====
+Working Capital loans do not generate interest-related journal entries. All revenue recognition flows through the origination fee (discount) amortization via the `realized_income` and `unrealized_income` balance fields. The actual GL account IDs are configured at the loan product level.
+====
+
+== API Endpoints
+
+=== POST /v1/working-capital-loan-products
+
+Creates a new Working Capital loan product with EIR amortization configuration.
+
+=== POST /v1/working-capital-loans
+
+Creates a new Working Capital loan application. Required fields include: `productId`, `clientId`, `principal`, `totalPayment`, `periodPaymentRate`, `submittedOnDate`, `expectedDisbursementDate`.
+
+=== POST /v1/working-capital-loans/{loanId}?command=approve
+
+Approves a submitted loan application. Optional overrides: `approvedOnDate`, `approvedLoanAmount`, `expectedDisbursementDate`, `discount`.
+
+=== POST /v1/working-capital-loans/{loanId}?command=disburse
+
+Disburses an approved loan. Required: `actualDisbursementDate`, `transactionAmount`. Triggers amortization schedule generation.
+
+=== PUT /v1/working-capital-loans/{loanId}/discount
+
+Updates the discount (origination fee) amount. Only allowed once after disbursement and only on the disbursement date. Request body uses `discountAmount` field. Also available via external ID: `PUT /v1/working-capital-loans/external-id/{externalId}/discount`.
+
+[NOTE]
+====
+The WC transaction API (`/v1/working-capital-loans/{loanId}/transactions`) currently only exposes *read* endpoints (GET). Write operations for repayments are handled through the loan command endpoints above.
+====
+
+=== GET /v1/working-capital-loans/{loanId}/amortization-schedule
+
+Retrieves the projected amortization schedule for a Working Capital loan.
+
+Example Request:
+
+ GET /fineract-provider/api/v1/working-capital-loans/1/amortization-schedule
+
+Example Response (first 3 payments shown):
+
+[source,json]
+----
+{
+  "originationFeeAmount": 1000.00,
+  "netDisbursementAmount": 9000.00,
+  "totalPaymentValue": 100000.00,
+  "periodPaymentRate": 0.18,
+  "npvDayCount": 360,
+  "expectedDisbursementDate": "2019-01-01",
+  "expectedPaymentAmount": 50.00,
+  "loanTerm": 200,
+  "effectiveInterestRate": 0.0010678144878363462,
+  "payments": [
+    {
+      "paymentNo": 0,
+      "paymentDate": "2019-01-01",
+      "count": 200,
+      "paymentsLeft": 0,
+      "expectedPaymentAmount": -9000.00,
+      "forecastPaymentAmount": null,
+      "discountFactor": 1,
+      "npvValue": -9000.00,
+      "balance": 9000.00,
+      "expectedAmortizationAmount": null,
+      "netAmortizationAmount": null,
+      "actualPaymentAmount": null,
+      "actualAmortizationAmount": null,
+      "incomeModification": null,
+      "deferredBalance": 1000.00
+    },
+    {
+      "paymentNo": 1,
+      "paymentDate": "2019-01-02",
+      "count": 199,
+      "paymentsLeft": 1,
+      "expectedPaymentAmount": 50.00,
+      "forecastPaymentAmount": 50.00,
+      "discountFactor": 0.998933324523691,
+      "npvValue": 49.95,
+      "balance": 8959.61,
+      "expectedAmortizationAmount": 9.61,
+      "netAmortizationAmount": 0.00,
+      "actualPaymentAmount": null,
+      "actualAmortizationAmount": null,
+      "incomeModification": -9.61,
+      "deferredBalance": 1000.00
+    },
+    {
+      "paymentNo": 2,
+      "paymentDate": "2019-01-03",
+      "count": 198,
+      "paymentsLeft": 2,
+      "expectedPaymentAmount": 50.00,
+      "forecastPaymentAmount": 50.00,
+      "discountFactor": 0.9978677868439537,
+      "npvValue": 49.89,
+      "balance": 8919.18,
+      "expectedAmortizationAmount": 9.57,
+      "netAmortizationAmount": 0.00,
+      "actualPaymentAmount": null,
+      "actualAmortizationAmount": null,
+      "incomeModification": -9.57,
+      "deferredBalance": 1000.00
+    }
+  ]
+}
+----
+
+[NOTE]
+====
+In the example above:
+
+* The origination fee of 1000.00 starts as the full `deferredBalance`
+* `expectedAmortizationAmount` starts at 9.61 on day 1 and *decreases daily* (9.57 on day 2), demonstrating the EIR front-loading effect
+* With no actual payments, `incomeModification` equals the negative of `expectedAmortizationAmount`, indicating full deferral
+* The `balance` decreases daily from 9000.00 toward 0.00 over the 200-day term
+====
+
+== Business Events
+
+=== Loan Lifecycle Events
+
+[cols="1,2",options="header"]
+|===
+| Event | Trigger
+
+| `LOAN_APPROVED`
+| Loan application approved
+
+| `LOAN_APPROVAL_UNDO`
+| Loan approval reversed
+
+| `LOAN_REJECTED`
+| Loan application rejected
+
+| `LOAN_DISBURSED`
+| Loan funds disbursed; amortization schedule generated
+
+| `LOAN_DISBURSAL_UNDO`
+| Disbursement reversed; amortization schedule regenerated
+|===
+
+== Database
+
+.Table: `m_wc_loan_amortization_model`
+[cols="2,1,3",options="header"]
+|===
+| Column | Type | Description
+
+| `id` | BIGINT | PK, auto-increment.
+| `version` | INT | Optimistic lock.
+| `loan_id` | BIGINT | FK → `m_wc_loan`. Unique.
+| `json_model` | LONGTEXT (MySQL/MariaDB) / TEXT (PostgreSQL) | Serialized model (Gson). `@JsonExclude` on `MathContext`, `MonetaryCurrency`; restored via `forDeserialization()`.
+| `business_date` | DATE | Last generated/updated.
+| `last_modified_on_utc` | DATETIME(6) / TIMESTAMP WITH TIME ZONE | Audit. MySQL / PostgreSQL.
+| `json_model_version` | VARCHAR(10) | Currently `"1"`.
+|===
+
+== Transaction Types
+
+Working Capital loans support the following transaction types:
+
+[cols="1,3",options="header"]
+|===
+| Transaction Type | Description
+
+| *Disbursement*
+| Initial funding of the loan. Triggers amortization schedule generation and deferred income initialization.
+
+| *Repayment*
+| Merchant payment applied to the loan. Triggers cursor-based amortization and schedule rebuild. Payment allocated in order: PENALTY → FEE → PRINCIPAL.
+
+| *Discount / Discount Adjustment*
+| Sets or adjusts the origination fee (discount). Only full adjustments are supported; partial adjustments are Phase 2.
+
+| *Charge / Charge Adjustment*
+| Fee charges (e.g., NSF fees) added to the loan. Charge adjustments reverse or reduce charges.
+
+| *Goodwill Credit*
+| Credit applied to the loan as a gesture of goodwill.
+
+| *Charge-Off*
+| Writes off the loan as non-performing. Remaining unrealized income is charged off.
+
+| *Write-Off*
+| Writes off outstanding principal and unrealized income.
+
+| *Credit Balance Refund*
+| Refunds excess payment (credit balance) back to the borrower.
+
+| *Reversal*
+| Reverses a previously posted transaction (e.g., repayment reversal). Triggers full schedule rebuild.
+|===
+
+== Constraints and Limitations
+
+[IMPORTANT]
+====
+Current limitations of the Working Capital amortization model:
+
+* *Flat amortization*: Defined in the enum (`WorkingCapitalAmortizationType.FLAT`) but not supported in the current implementation. Phase 2.
+* *Partial fee adjustments*: Only full fee adjustments are supported. Partial fee adjustments are planned for Phase 2.
+* *Chargeback*: Not yet implemented. Phase 2.
+* *No traditional repayment schedule*: WC loans have no fixed installments or maturity date like term loans. Repayments are sales-based.
+* *No accrual transactions*: Unlike standard loans, WC loans do not generate accrual or accrual activity transactions. Income recognition occurs through the cursor-based amortization mechanism at repayment time.
+* *No monetary transactions after full repayment*: Once the loan is fully paid, no further monetary transactions are accepted.
+* *Single disbursement (business rule)*: While the schema and domain model support multiple disbursement detail rows (`List<WorkingCapitalLoanDisbursementDetails>`), the current business logic restricts WC loans to a single disbursement event.
+====
+
+== Appendix: TVM Functions
+
+*RATE*: Newton-Raphson solving `pv×(1+r)^n + pmt×((1+r)^n−1)/r = 0`. Initial guess: `2×(pmt×n+pv)/(pv×n)`, fallback 0.01. Tolerance 1E-10, max 100 iterations.
+
+*Discount Factor*: `1/(1+eir)^days`. Returns 1.0 when days=0. Throws `IllegalArgumentException` for negative days. The model wraps this via `safeDiscountFactor()` which additionally returns 1.0 when the computed result is ≤ 0.

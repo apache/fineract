@@ -22,6 +22,16 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class CommandParameterUtil {
 
+    public static final String GENERATE_COLLECTION_SHEET_COMMAND_VALUE = "generateCollectionSheet";
+    public static final String SAVE_COLLECTION_SHEET_COMMAND_VALUE = "saveCollectionSheet";
+    public static final String INTERMEDIARY_SALE_COMMAND_VALUE = "intermediarySale";
+    public static final String SALE_COMMAND_VALUE = "sale";
+    public static final String BUY_BACK_COMMAND_VALUE = "buyback";
+    public static final String CANCEL_COMMAND_VALUE = "cancel";
+    public static final String UPDATE_COMMAND_VALUE = "update";
+    public static final String DELETE_COMMAND_VALUE = "delete";
+    public static final String CREATE_COMMAND_VALUE = "create";
+
     private CommandParameterUtil() {}
 
     public static boolean is(final String commandParam, final String commandValue) {

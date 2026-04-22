@@ -26,34 +26,32 @@ public enum InterestIncentiveAttributeName {
     GENDER(2, "InterestIncentiveAttributeName.gender"), //
     AGE(3, "InterestIncentiveAttributeName.age"), //
     CLIENT_TYPE(4, "InterestIncentiveAttributeName.clientType"), //
-    CLIENT_CLASSIFICATION(5, "InterestIncentiveAttributeName.clientClassification"); //
+    CLIENT_CLASSIFICATION(5, "InterestIncentiveAttributeName.clientClassification");
 
     private final Integer value;
     private final String code;
-
-    public static InterestIncentiveAttributeName fromInt(final Integer value) {
-        switch (value) {
-            case 2:
-                return GENDER;
-            case 3:
-                return AGE;
-            case 4:
-                return CLIENT_TYPE;
-            case 5:
-                return CLIENT_CLASSIFICATION;
-            default:
-                return INVALID;
-        }
-    }
 
     InterestIncentiveAttributeName(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
 
+    public static InterestIncentiveAttributeName fromInt(final Integer value) {
+        if (value == null) {
+            return INVALID;
+        }
+        return switch (value) {
+            case 2 -> GENDER;
+            case 3 -> AGE;
+            case 4 -> CLIENT_TYPE;
+            case 5 -> CLIENT_CLASSIFICATION;
+            default -> INVALID;
+        };
+    }
+
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replace("_", " ");
     }
 
     public Integer getValue() {
@@ -64,45 +62,14 @@ public enum InterestIncentiveAttributeName {
         return this.code;
     }
 
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isGender() {
-        return GENDER.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isAge() {
-        return AGE.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isClientType() {
-        return CLIENT_TYPE.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isClientClassification() {
-        return CLIENT_CLASSIFICATION.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return INVALID.equals(this);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
     public static boolean isCodeValueAttribute(InterestIncentiveAttributeName attributeName) {
-        switch (attributeName) {
-            case GENDER:
-            case CLIENT_TYPE:
-            case CLIENT_CLASSIFICATION:
-                return true;
-            default:
-                return false;
-        }
+        return switch (attributeName) {
+            case GENDER, CLIENT_TYPE, CLIENT_CLASSIFICATION -> true;
+            default -> false;
+        };
     }
 
-    // TODO: do we really need this?!?
-    public static Object[] integerValues() {
-        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
+    public static Integer[] integerValues() {
+        return Arrays.stream(values()).filter(v -> v != INVALID).map(v -> v.value).toArray(Integer[]::new);
     }
 }

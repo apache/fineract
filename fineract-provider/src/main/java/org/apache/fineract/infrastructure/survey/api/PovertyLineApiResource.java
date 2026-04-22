@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.survey.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -46,7 +45,6 @@ public class PovertyLineApiResource {
 
     @GET
     @Path("{ppiName}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@PathParam("ppiName") final String ppiName) {
 
@@ -59,7 +57,6 @@ public class PovertyLineApiResource {
 
     @GET
     @Path("{ppiName}/{likelihoodId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@PathParam("ppiName") final String ppiName, @PathParam("likelihoodId") final Long likelihoodId) {
 

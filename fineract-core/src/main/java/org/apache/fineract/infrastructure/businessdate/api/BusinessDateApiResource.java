@@ -20,34 +20,25 @@ package org.apache.fineract.infrastructure.businessdate.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
+import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.businessdate.command.BusinessDateUpdateCommand;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateResponse;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateRequest;
+import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateUpdateResponse;
+import org.apache.fineract.infrastructure.businessdate.mapper.BusinessDateMapper;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -56,52 +47,38 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Business Date Management", description = "Business date management enables you to set up, fetch and adjust organisation business dates")
 public class BusinessDateApiResource {
 
-    private final ApiRequestParameterHelper parameterHelper;
-    private final PlatformSecurityContext securityContext;
-    private final DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer;
     private final BusinessDateReadPlatformService readPlatformService;
-    private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
+    private final CommandDispatcher dispatcher;
+    private final BusinessDateMapper businessDateMapper;
 
     @GET
-    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "List all business dates", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class)))) })
-    public String getBusinessDates(@Context final UriInfo uriInfo) {
-        securityContext.authenticatedUser().validateHasReadPermission("BUSINESS_DATE");
-        final List<BusinessDateData> foundBusinessDates = this.readPlatformService.findAll();
-        ApiRequestJsonSerializationSettings settings = parameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializer.serialize(settings, foundBusinessDates);
+    public List<BusinessDateResponse> getBusinessDates() {
+        return businessDateMapper.mapFetchResponse(this.readPlatformService.findAll());
     }
 
     @GET
     @Path("{type}")
-    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Business date", description = "")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class))) })
-    public String getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type, @Context final UriInfo uriInfo) {
-        securityContext.authenticatedUser().validateHasReadPermission("BUSINESS_DATE");
-        final BusinessDateData businessDate = this.readPlatformService.findByType(type);
-        ApiRequestJsonSerializationSettings settings = parameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializer.serialize(settings, businessDate);
+    public BusinessDateResponse getBusinessDate(@PathParam("type") @Parameter(description = "type") final String type) {
+        return businessDateMapper.mapFetchResponse(this.readPlatformService.findByType(type));
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Business Date", description = "")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateResponse.class))) })
-    public String updateBusinessDate(final String jsonRequestBody, @Context UriInfo uriInfo) {
-        securityContext.authenticatedUser().validateHasUpdatePermission("BUSINESS_DATE");
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessDate().withJson(jsonRequestBody).build();
+    public BusinessDateUpdateResponse updateBusinessDate(@Valid BusinessDateUpdateRequest request) {
 
-        CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);
-        return jsonSerializer.serialize(result);
+        final BusinessDateUpdateCommand command = new BusinessDateUpdateCommand();
+
+        command.setPayload(request);
+
+        final Supplier<BusinessDateUpdateResponse> response = dispatcher.dispatch(command);
+
+        return response.get();
     }
 
 }

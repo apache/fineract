@@ -23,11 +23,13 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
+import org.apache.fineract.cob.service.InlineWorkingCapitalLoanCOBExecutorServiceImpl;
 
 @RequiredArgsConstructor
 public enum InlineJobType {
 
-    LOAN_COB("LOAN_COB", "INLINE_LOAN_COB", InlineLoanCOBExecutorServiceImpl.class);
+    LOAN_COB("LOAN_COB", "INLINE_LOAN_COB", InlineLoanCOBExecutorServiceImpl.class), WC_LOAN_COB("WC_LOAN_COB",
+            "INLINE_WORKING_CAPITAL_LOAN_COB", InlineWorkingCapitalLoanCOBExecutorServiceImpl.class);
 
     private final String jobName;
     @Getter

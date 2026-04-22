@@ -135,13 +135,14 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     private String getSQLForRetriveEntityAccessFor() {
-        StringBuilder str = new StringBuilder("select  eem.rel_id as relId,eem.from_id as fromId, ");
-        str.append("eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate ");
-        str.append("from  m_entity_to_entity_mapping eem ");
-        str.append("where eem.rel_id = ? ");
-        str.append("and eem.from_id = ? ");
-        LOG.debug("{}", str);
-        return str.toString();
+        final String sql = """
+                select  eem.rel_id as relId,eem.from_id as fromId,
+                eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate
+                from  m_entity_to_entity_mapping eem
+                where eem.rel_id = ?
+                and eem.from_id = ?\s""";
+        LOG.debug("{}", sql);
+        return sql;
     }
 
     @Override
@@ -186,10 +187,10 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     private static final class EntityRelationMapper implements RowMapper<FineractEntityRelationData> {
 
-        private final StringBuilder sqlBuilder = new StringBuilder("select id as id,code_name as mapping_Types from m_entity_relation ");
+        private static final String ENTITY_RELATION_SCHEMA = "select id as id,code_name as mapping_Types from m_entity_relation ";
 
         public String schema() {
-            return this.sqlBuilder.toString();
+            return ENTITY_RELATION_SCHEMA;
         }
 
         @Override
@@ -221,19 +222,16 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     private static final class GetOneEntityMapper implements RowMapper<FineractEntityToEntityMappingData> {
 
-        private final String schema;
+        private static final String GET_ONE_ENTITY_SCHEMA = """
+                select eem.rel_id as relId,
+                eem.from_id as fromId,eem.to_Id as toId,eem.start_date as startDate,eem.end_date as endDate
+                from m_entity_to_entity_mapping eem
+                where eem.id= ?\s""";
 
-        GetOneEntityMapper() {
-
-            StringBuilder str = new StringBuilder("select eem.rel_id as relId, ");
-            str.append("eem.from_id as fromId,eem.to_Id as toId,eem.start_date as startDate,eem.end_date as endDate ");
-            str.append("from m_entity_to_entity_mapping eem ");
-            str.append("where eem.id= ? ");
-            this.schema = str.toString();
-        }
+        GetOneEntityMapper() {}
 
         public String schema() {
-            return this.schema;
+            return GET_ONE_ENTITY_SCHEMA;
         }
 
         @Override
@@ -254,58 +252,54 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     private static final class EntityToEntityMapper implements RowMapper<FineractEntityToEntityMappingData> {
 
-        private final String schema;
+        private static final String ENTITY_TO_ENTITY_SCHEMA = """
+                select eem.id as mapId,
+                eem.rel_id as relId,
+                eem.from_id as from_id,
+                eem.to_id as to_id,
+                eem.start_date as startDate,
+                eem.end_date as endDate,
+                case er.code_name
+                when 'office_access_to_loan_products' then
+                o.name
+                when 'office_access_to_savings_products' then
+                o.name
+                when 'office_access_to_fees/charges' then
+                o.name
+                when 'role_access_to_loan_products' then
+                r.name
+                when 'role_access_to_savings_products' then
+                r.name
+                end as from_name,
+                case er.code_name
+                when 'office_access_to_loan_products' then
+                lp.name
+                when 'office_access_to_savings_products' then
+                sp.name
+                when 'office_access_to_fees/charges' then
+                charge.name
+                when 'role_access_to_loan_products' then
+                lp.name
+                when 'role_access_to_savings_products' then
+                sp.name
+                end as to_name,
+                er.code_name
+                from m_entity_to_entity_mapping eem
+                join m_entity_relation er on eem.rel_id = er.id
+                left join m_office o on er.from_entity_type = 1 and eem.from_id = o.id
+                left join m_role r on er.from_entity_type = 5 and eem.from_id = r.id
+                left join m_product_loan lp on er.to_entity_type = 2 and eem.to_id = lp.id
+                left join m_savings_product sp on er.to_entity_type = 3 and eem.to_id = sp.id
+                left join m_charge charge on er.to_entity_type = 4 and eem.to_id = charge.id
+                where
+                er.id = ? and
+                ( ? = 0 or from_id = ? ) and
+                ( ? = 0 or to_id = ? )\s""";
 
-        EntityToEntityMapper() {
-
-            StringBuilder str = new StringBuilder("select eem.id as mapId, ");
-            str.append("eem.rel_id as relId, ");
-            str.append("eem.from_id as from_id, ");
-            str.append("eem.to_id as to_id, ");
-            str.append("eem.start_date as startDate, ");
-            str.append("eem.end_date as endDate, ");
-            str.append("case er.code_name ");
-            str.append("when 'office_access_to_loan_products' then ");
-            str.append("o.name ");
-            str.append("when 'office_access_to_savings_products' then ");
-            str.append("o.name ");
-            str.append("when 'office_access_to_fees/charges' then ");
-            str.append("o.name ");
-            str.append("when 'role_access_to_loan_products' then ");
-            str.append("r.name ");
-            str.append("when 'role_access_to_savings_products' then ");
-            str.append("r.name ");
-            str.append("end as from_name, ");
-            str.append("case er.code_name ");
-            str.append("when 'office_access_to_loan_products' then ");
-            str.append("lp.name ");
-            str.append("when 'office_access_to_savings_products' then ");
-            str.append("sp.name ");
-            str.append("when 'office_access_to_fees/charges' then ");
-            str.append("charge.name ");
-            str.append("when 'role_access_to_loan_products' then ");
-            str.append("lp.name ");
-            str.append("when 'role_access_to_savings_products' then ");
-            str.append("sp.name ");
-            str.append("end as to_name, ");
-            str.append("er.code_name ");
-            str.append("from m_entity_to_entity_mapping eem ");
-            str.append("join m_entity_relation er on eem.rel_id = er.id ");
-            str.append("left join m_office o on er.from_entity_type = 1 and eem.from_id = o.id ");
-            str.append("left join m_role r on er.from_entity_type = 5 and eem.from_id = r.id ");
-            str.append("left join m_product_loan lp on er.to_entity_type = 2 and eem.to_id = lp.id ");
-            str.append("left join m_savings_product sp on er.to_entity_type = 3 and eem.to_id = sp.id ");
-            str.append("left join m_charge charge on er.to_entity_type = 4 and eem.to_id = charge.id ");
-            str.append("where ");
-            str.append("er.id = ? and ");
-            str.append("( ? = 0 or from_id = ? ) and ");
-            str.append("( ? = 0 or to_id = ? ) ");
-
-            this.schema = str.toString();
-        }
+        EntityToEntityMapper() {}
 
         public String schema() {
-            return this.schema;
+            return ENTITY_TO_ENTITY_SCHEMA;
         }
 
         @Override

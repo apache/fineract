@@ -86,16 +86,6 @@ public enum PeriodFrequencyType {
         return this.equals(DAYS);
     }
 
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isWholeTerm() {
-        return this.equals(WHOLE_TERM);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return this.equals(INVALID);
-    }
-
     // TODO: do we really need this?!?
     public static Object[] integerValues() {
         return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();

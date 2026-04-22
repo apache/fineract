@@ -32,6 +32,15 @@ public final class SharesEnumerations {
 
     }
 
+    public static EnumOptionData status(final ShareAccountStatusEnumData status) {
+
+        Long id = status.getId();
+        String code = status.getCode();
+        String value = status.getValue();
+
+        return new EnumOptionData(id, code, value);
+    }
+
     public static ShareAccountStatusEnumData status(final Integer statusEnum) {
         return status(ShareAccountStatusType.fromInt(statusEnum));
     }

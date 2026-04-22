@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.batch.command.internal;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

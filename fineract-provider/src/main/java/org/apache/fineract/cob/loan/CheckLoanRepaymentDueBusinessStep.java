@@ -80,7 +80,7 @@ public class CheckLoanRepaymentDueBusinessStep implements LoanCOBBusinessStep {
             LoanRepaymentScheduleInstallment repaymentScheduleInstallment, LocalDate repaymentDate, List<LoanStatus> nonDisbursedStatuses) {
         return repaymentDate.minusDays(numberOfDaysBeforeDueDateToRaiseEvent).equals(currentDate)
                 && !nonDisbursedStatuses.contains(loan.getStatus())
-                && loan.getLoanSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0
+                && loan.getSummary().getTotalOutstanding().compareTo(BigDecimal.ZERO) > 0
                 && repaymentScheduleInstallment.getTotalOutstanding(loan.getCurrency()).isGreaterThanZero();
     }
 }

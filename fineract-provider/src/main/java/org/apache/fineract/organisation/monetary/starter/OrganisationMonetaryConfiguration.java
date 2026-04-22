@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.organisation.monetary.starter;
 
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
+import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformServiceImpl;
 import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformService;
 import org.apache.fineract.organisation.monetary.service.CurrencyWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.apache.fineract.organisation.monetary.service.OrganisationCurrencyReadPlatformServiceImpl;
-import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepository;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -41,19 +39,17 @@ public class OrganisationMonetaryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CurrencyReadPlatformService.class)
-    public CurrencyReadPlatformService currencyReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate) {
-        return new CurrencyReadPlatformServiceImpl(context, jdbcTemplate);
+    public CurrencyReadPlatformService currencyReadPlatformService(JdbcTemplate jdbcTemplate) {
+        return new CurrencyReadPlatformServiceImpl(jdbcTemplate);
     }
 
     @Bean
     @ConditionalOnMissingBean(CurrencyWritePlatformService.class)
-    public CurrencyWritePlatformService currencyWritePlatformService(PlatformSecurityContext context,
-            ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            OrganisationCurrencyRepository organisationCurrencyRepository, CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            LoanProductReadPlatformService loanProductService, SavingsProductReadPlatformService savingsProductService,
-            ChargeReadPlatformService chargeService) {
-        return new CurrencyWritePlatformServiceJpaRepositoryImpl(context, applicationCurrencyRepository, organisationCurrencyRepository,
-                fromApiJsonDeserializer, loanProductService, savingsProductService, chargeService);
+    public CurrencyWritePlatformService currencyWritePlatformService(ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+            OrganisationCurrencyRepository organisationCurrencyRepository, LoanProductReadPlatformService loanProductService,
+            SavingsProductReadPlatformService savingsProductService, ChargeReadPlatformService chargeService) {
+        return new CurrencyWritePlatformServiceJpaRepositoryImpl(applicationCurrencyRepository, organisationCurrencyRepository,
+                loanProductService, savingsProductService, chargeService);
     }
 
     @Bean

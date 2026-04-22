@@ -21,10 +21,16 @@ package org.apache.fineract.infrastructure.core.service.migration;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import com.zaxxer.hikari.HikariDataSource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import javax.sql.DataSource;
+import liquibase.Scope;
+import liquibase.ThreadLocalScopeManager;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
@@ -33,10 +39,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -47,10 +55,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TenantDatabaseUpgradeService implements InitializingBean {
 
-    private static final String TENANT_STORE_DB_CONTEXT = "tenant_store_db";
-    private static final String INITIAL_SWITCH_CONTEXT = "initial_switch";
-    private static final String TENANT_DB_CONTEXT = "tenant_db";
-    private static final String CUSTOM_CHANGELOG_CONTEXT = "custom_changelog";
+    public static final String TENANT_STORE_DB_CONTEXT = "tenant_store_db";
+    public static final String INITIAL_SWITCH_CONTEXT = "initial_switch";
+    public static final String TENANT_DB_CONTEXT = "tenant_db";
+    public static final String CUSTOM_CHANGELOG_CONTEXT = "custom_changelog";
 
     private final TenantDetailsService tenantDetailsService;
     @Qualifier("hikariTenantDataSource")
@@ -64,6 +72,10 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     // DO NOT REMOVE! Required for liquibase custom task initialization
     private final List<CustomTaskChange> customTaskChangesForDependencyInjection;
 
+    static {
+        System.setProperty("liquibase.analytics.enabled", "false");
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         if (notLiquibaseOnlyMode()) {
@@ -76,6 +88,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
             }
         }
         try {
+            Scope.setScopeManager(new ThreadLocalScopeManager());
             upgradeTenantStore();
             upgradeIndividualTenants();
         } catch (LiquibaseException e) {
@@ -110,6 +123,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
         log.info("- fineract.tenant.description: {}", tenant.getDescription());
         log.info("- fineract.tenant.identifier: {}", tenant.getIdentifier());
         log.info("- fineract.tenant.name: {}", tenant.getName());
+        log.info("- liquibase.analytics.enabled: {}", System.getProperty("liquibase.analytics.enabled"));
 
         String readOnlyUsername = tenant.getReadOnlyUsername();
         if (isNotBlank(readOnlyUsername)) {
@@ -121,15 +135,46 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
 
     }
 
-    private void upgradeIndividualTenants() throws LiquibaseException {
+    private void upgradeIndividualTenants() {
         log.info("Upgrading all tenants");
         List<FineractPlatformTenant> tenants = tenantDetailsService.findAllTenants();
+        List<Future<String>> futures = new ArrayList<>();
+        final ThreadPoolTaskExecutor tenantUpgradeThreadPoolTaskExecutor = createTenantUpgradeThreadPoolTaskExecutor();
         if (isNotEmpty(tenants)) {
             for (FineractPlatformTenant tenant : tenants) {
-                upgradeIndividualTenant(tenant);
+                futures.add(tenantUpgradeThreadPoolTaskExecutor.submit(() -> {
+                    upgradeIndividualTenant(tenant);
+                    return tenant.getName();
+                }));
             }
         }
-        log.info("Tenant upgrades have finished");
+
+        List<Exception> exceptions = new ArrayList<>();
+        try {
+            for (Future<String> future : futures) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException exception) {
+            exceptions.add(exception);
+        } finally {
+            tenantUpgradeThreadPoolTaskExecutor.shutdown();
+        }
+
+        if (exceptions.isEmpty()) {
+            log.info("Tenant upgrades have successfully finished");
+        } else {
+            exceptions.forEach(e -> log.error("Exception: ", e));
+            throw new RuntimeException("Tenant upgrades had exceptions");
+        }
+    }
+
+    private ThreadPoolTaskExecutor createTenantUpgradeThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+        threadPoolTaskExecutor.setCorePoolSize(fineractProperties.getTaskExecutor().getTenantUpgradeTaskExecutorCorePoolSize());
+        threadPoolTaskExecutor.setMaxPoolSize(fineractProperties.getTaskExecutor().getTenantUpgradeTaskExecutorMaxPoolSize());
+        threadPoolTaskExecutor.setQueueCapacity(fineractProperties.getTaskExecutor().getTenantUpgradeTaskExecutorQueueCapacity());
+        threadPoolTaskExecutor.initialize();
+        return threadPoolTaskExecutor;
     }
 
     /**
@@ -142,20 +187,29 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
      * @throws LiquibaseException
      */
     private void upgradeIndividualTenant(FineractPlatformTenant tenant) throws LiquibaseException {
-        log.info("Upgrade for tenant {} has started", tenant.getTenantIdentifier());
-        DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
-        if (databaseStateVerifier.isFirstLiquibaseMigration(tenantDataSource)) {
-            ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, INITIAL_SWITCH_CONTEXT,
-                    tenant.getTenantIdentifier());
-            applyInitialLiquibase(tenantDataSource, liquibase, tenant.getTenantIdentifier(),
-                    (ds) -> !databaseStateVerifier.isTenantOnLatestUpgradableVersion(ds));
+        try {
+            ThreadLocalContextUtil.setTenant(tenant);
+            log.info("Upgrade for tenant {} has started", tenant.getTenantIdentifier());
+            try (HikariDataSource tenantDataSource = tenantDataSourceFactory.create(tenant)) {
+                // 'initial_switch' and 'custom_changelog' contexts should be controlled by the application
+                // configuration
+                // settings, and we should not use them to control the script order
+                if (databaseStateVerifier.isFirstLiquibaseMigration(tenantDataSource)) {
+                    ExtendedSpringLiquibase liquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT,
+                            CUSTOM_CHANGELOG_CONTEXT, INITIAL_SWITCH_CONTEXT, tenant.getTenantIdentifier());
+                    applyInitialLiquibase(tenantDataSource, liquibase, tenant.getTenantIdentifier(),
+                            (ds) -> !databaseStateVerifier.isTenantOnLatestUpgradableVersion(ds));
+                }
+                SpringLiquibase tenantLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT,
+                        tenant.getTenantIdentifier());
+                tenantLiquibase.afterPropertiesSet();
+                log.info("Upgrade for tenant {} has finished", tenant.getTenantIdentifier());
+            } catch (Exception e) {
+                throw new RuntimeException("Exception while upgrading tenant " + tenant.getTenantIdentifier(), e);
+            }
+        } finally {
+            ThreadLocalContextUtil.reset();
         }
-        SpringLiquibase tenantLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, tenant.getTenantIdentifier());
-        tenantLiquibase.afterPropertiesSet();
-        SpringLiquibase customChangelogLiquibase = liquibaseFactory.create(tenantDataSource, TENANT_DB_CONTEXT, CUSTOM_CHANGELOG_CONTEXT,
-                tenant.getTenantIdentifier());
-        customChangelogLiquibase.afterPropertiesSet();
-        log.info("Upgrade for tenant {} has finished", tenant.getTenantIdentifier());
     }
 
     private void applyInitialLiquibase(DataSource dataSource, ExtendedSpringLiquibase liquibase, String id,

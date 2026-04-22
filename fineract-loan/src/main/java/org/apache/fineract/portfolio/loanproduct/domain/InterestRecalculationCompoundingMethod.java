@@ -36,7 +36,7 @@ public enum InterestRecalculationCompoundingMethod {
     NONE(0, "interestRecalculationCompoundingMethod.none"), //
     INTEREST(1, "interestRecalculationCompoundingMethod.interest"), //
     FEE(2, "interestRecalculationCompoundingMethod.fee"), //
-    INTEREST_AND_FEE(3, "interestRecalculationCompoundingMethod.interest.and.fee");
+    INTEREST_AND_FEE(3, "interestRecalculationCompoundingMethod.interest.and.fee"); //
 
     private final Integer value;
     private final String code;

@@ -35,6 +35,9 @@ public class JobDetailData {
     private String displayName;
 
     @SuppressWarnings("unused")
+    private String shortName;
+
+    @SuppressWarnings("unused")
     private Date nextRunTime;
 
     @SuppressWarnings("unused")
@@ -50,4 +53,22 @@ public class JobDetailData {
 
     @SuppressWarnings("unused")
     private JobDetailHistoryData lastRunHistory;
+
+    public JobDetailData(Long jobId, String displayName, String shortName, Date nextRunTime, String initializingError,
+            String cronExpression, boolean active, boolean currentlyRunning, Long version, Date jobRunStartTime, Date jobRunEndTime,
+            String status, String jobRunErrorMessage, String triggerType, String jobRunErrorLog) {
+        this.jobId = jobId;
+        this.displayName = displayName;
+        this.shortName = shortName;
+        this.nextRunTime = nextRunTime;
+        this.initializingError = initializingError;
+        this.cronExpression = cronExpression;
+        this.active = active;
+        this.currentlyRunning = currentlyRunning;
+        if (version != null) {
+            this.lastRunHistory = new JobDetailHistoryData().setVersion(version).setJobRunStartTime(jobRunStartTime)
+                    .setJobRunEndTime(jobRunEndTime).setStatus(status).setJobRunErrorMessage(jobRunErrorMessage).setTriggerType(triggerType)
+                    .setJobRunErrorLog(jobRunErrorLog);
+        }
+    }
 }

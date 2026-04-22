@@ -1,0 +1,147 @@
+@startuml
+title Command Processor Class Diagram
+
+interface CommandDispatcher {
+    +dispatch(command: Command): Result
+}
+
+class CommandDispatcher implements ICommandDispatcher {
+    -commandProcessor: ICommandProcessor
+    +execute(command: Command): Result
+}
+
+interface ICommandProcessor {
+    +process(command: Command, handlerType: Type): Result
+}
+
+class CommandProcessor implements ICommandProcessor {
+    -preProcessorChain: IPreProcessorChain
+    -postProcessorChain: IPostProcessorChain
+    -errorProcessorChain: IErrorProcessorChain
+    -router: ICommandRouter
+    +process(command: Command, handlerType: Type): Result
+    -executeHandler(handler: ICommandHandler, command: Command): Result
+}
+
+interface IProcessorChain {
+    +execute(context: ExecutionContext): void
+}
+
+interface IPreProcessorChain extends IProcessorChain {
+    +execute(context: ExecutionContext): void
+}
+
+interface IPostProcessorChain extends IProcessorChain {
+    +execute(context: ExecutionContext, result: Result): void
+}
+
+interface IErrorProcessorChain extends IProcessorChain {
+    +execute(context: ExecutionContext, exception: Exception): void
+}
+
+class PreProcessorChain implements IPreProcessorChain {
+    -processors: List<IPreProcessor>
+    +register(processor: IPreProcessor): void
+    +execute(context: ExecutionContext): void
+}
+
+class PostProcessorChain implements IPostProcessorChain {
+    -processors: List<IPostProcessor>
+    +register(processor: IPostProcessor): void
+    +execute(context: ExecutionContext, result: Result): void
+}
+
+class ErrorProcessorChain implements IErrorProcessorChain {
+    -processors: List<IErrorProcessor>
+    +register(processor: IErrorProcessor): void
+    +execute(context: ExecutionContext, exception: Exception): void
+}
+
+interface IPreProcessor {
+    +process(context: ExecutionContext): void
+    +getOrder(): int
+}
+
+interface IPostProcessor {
+    +process(context: ExecutionContext, result: Result): void
+    +getOrder(): int
+}
+
+interface IErrorProcessor {
+    +process(context: ExecutionContext, exception: Exception): void
+    +getOrder(): int
+}
+
+class ValidationPreProcessor implements IPreProcessor {
+    +process(context: ExecutionContext): void
+    +getOrder(): int
+}
+
+class AuthorizationPreProcessor implements IPreProcessor {
+    +process(context: ExecutionContext): void
+    +getOrder(): int
+}
+
+class AuditPostProcessor implements IPostProcessor {
+    +process(context: ExecutionContext, result: Result): void
+    +getOrder(): int
+}
+
+class EventPublisherPostProcessor implements IPostProcessor {
+    +process(context: ExecutionContext, result: Result): void
+    +getOrder(): int
+}
+
+class ErrorLoggingProcessor implements IErrorProcessor {
+    +process(context: ExecutionContext, exception: Exception): void
+    +getOrder(): int
+}
+
+class CompensationProcessor implements IErrorProcessor {
+    +process(context: ExecutionContext, exception: Exception): void
+    +getOrder(): int
+}
+
+class ExecutionContext {
+    -command: Command
+    -handler: ICommandHandler
+    -startTime: DateTime
+    -metadata: Map<String, Object>
+    -validationResults: List<ValidationResult>
+    +addMetadata(key: String, value: Object): void
+    +getMetadata(key: String): Object
+    +addValidationResult(result: ValidationResult): void
+}
+
+interface ICommandRouter {
+    +getHandler(commandType: Type): ICommandHandler
+    +register(commandType: Type, handler: ICommandHandler): void
+}
+
+interface ICommandHandler {
+    +execute(command: Command): Result
+}
+
+' Relationships
+CommandDispatcher --> CommandProcessor : uses
+CommandProcessor --> PreProcessorChain : delegates pre-processing
+CommandProcessor --> PostProcessorChain : delegates post-processing
+CommandProcessor --> ErrorProcessorChain : delegates error handling
+CommandProcessor --> ICommandRouter : uses
+
+PreProcessorChain o-- IPreProcessor : contains
+PostProcessorChain o-- IPostProcessor : contains
+ErrorProcessorChain o-- IErrorProcessor : contains
+
+IPreProcessor <|.. ValidationPreProcessor
+IPreProcessor <|.. AuthorizationPreProcessor
+IPostProcessor <|.. AuditPostProcessor
+IPostProcessor <|.. EventPublisherPostProcessor
+IErrorProcessor <|.. ErrorLoggingProcessor
+IErrorProcessor <|.. CompensationProcessor
+
+CommandProcessor ..> ExecutionContext : creates and manages
+ExecutionContext --> ICommandHandler : references
+ExecutionContext --> Command : contains
+
+@enduml

@@ -18,26 +18,19 @@
  */
 package org.apache.fineract.portfolio.loanproduct.productmix.data;
 
+import java.io.Serializable;
 import java.util.Collection;
+import lombok.Data;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
-public class ProductMixData {
+@Data
+public class ProductMixData implements Serializable {
 
     private final Long productId;
     private final String productName;
     private final Collection<LoanProductData> restrictedProducts;
     private final Collection<LoanProductData> allowedProducts;
-    @SuppressWarnings("unused")
     private final Collection<LoanProductData> productOptions;
-
-    public ProductMixData(final Long productId, final String productName, final Collection<LoanProductData> restrictedProducts,
-            final Collection<LoanProductData> allowedProducts, final Collection<LoanProductData> productOptions) {
-        this.productId = productId;
-        this.productName = productName;
-        this.restrictedProducts = restrictedProducts;
-        this.allowedProducts = allowedProducts;
-        this.productOptions = productOptions;
-    }
 
     public static ProductMixData template(final Collection<LoanProductData> productOptions) {
         return new ProductMixData(null, null, null, null, productOptions);
@@ -58,5 +51,4 @@ public class ProductMixData {
             final Collection<LoanProductData> allowedProducts) {
         return new ProductMixData(null, null, restrictedProducts, allowedProducts, null);
     }
-
 }

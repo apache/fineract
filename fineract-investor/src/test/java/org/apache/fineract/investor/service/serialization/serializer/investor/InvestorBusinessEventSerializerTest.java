@@ -18,30 +18,39 @@
  */
 package org.apache.fineract.investor.service.serialization.serializer.investor;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.ACTIVE_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.BUYBACK_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.CANCELLED;
 import static org.apache.fineract.investor.data.ExternalTransferStatus.DECLINED;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING;
+import static org.apache.fineract.investor.data.ExternalTransferStatus.PENDING_INTERMEDIATE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_NEGATIVE;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.BALANCE_ZERO;
 import static org.apache.fineract.investor.data.ExternalTransferSubStatus.SAMEDAY_TRANSFERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanOwnershipTransferDataV1;
 import org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.investor.data.ExternalTransferData;
 import org.apache.fineract.investor.data.ExternalTransferDataDetails;
 import org.apache.fineract.investor.data.ExternalTransferLoanData;
@@ -49,6 +58,7 @@ import org.apache.fineract.investor.data.ExternalTransferOwnerData;
 import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.apache.fineract.investor.data.ExternalTransferSubStatus;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
+import org.apache.fineract.investor.domain.InvestorBusinessEvent;
 import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -65,54 +75,87 @@ public class InvestorBusinessEventSerializerTest {
     public static final String LOAN_EXTERNAL_ID = "29641fe0-0ac6-409a-bb8b-24fdf08d2891";
     public static final ExternalId TRANSFER_EXTERNAL_ID = new ExternalId("ac303982-46a5-4cea-9f71-67b69063a2b7");
 
+    private static final String CUSTOM_DATA_PREFIX = "test_data_invertor_business_event";
+
     @Test
     public void testSerializationSellOK() {
-        doTest(ACTIVE, null, "SALE", "EXECUTED", null);
+        doTest(ACTIVE, null, null, "SALE", "EXECUTED", null);
     }
 
     @Test
     public void testSerializationBuybackOK() {
-        doTest(BUYBACK, null, "BUYBACK", "EXECUTED", null);
+        doTest(BUYBACK, null, null, "BUYBACK", "EXECUTED", null);
+    }
+
+    @Test
+    public void testSerializationIntermediarySaleOK() {
+        doTest(ACTIVE_INTERMEDIATE, null, null, "INTERMEDIARYSALE", "EXECUTED", null);
+    }
+
+    @Test
+    public void testSerializationBuybackIntermediateOK() {
+        doTest(BUYBACK_INTERMEDIATE, null, null, "BUYBACK", "EXECUTED", null);
     }
 
     @Test
     public void testSerializationDeclinedNegativeBalance() {
-        doTest(DECLINED, BALANCE_NEGATIVE, "SALE", "DECLINED", "BALANCE_NEGATIVE");
+        doTest(DECLINED, BALANCE_NEGATIVE, PENDING, "SALE", "DECLINED", "BALANCE_NEGATIVE");
     }
 
     @Test
     public void testSerializationDeclinedBalanceZero() {
-        doTest(DECLINED, BALANCE_ZERO, "SALE", "DECLINED", "BALANCE_ZERO");
+        doTest(DECLINED, BALANCE_ZERO, PENDING, "SALE", "DECLINED", "BALANCE_ZERO");
+    }
+
+    @Test
+    public void testSerializationDeclinedPendingIntermediateNegativeBalance() {
+        doTest(DECLINED, BALANCE_NEGATIVE, PENDING_INTERMEDIATE, "INTERMEDIARYSALE", "DECLINED", "BALANCE_NEGATIVE");
+    }
+
+    @Test
+    public void testSerializationDeclinedPendingIntermediateBalanceZero() {
+        doTest(DECLINED, BALANCE_ZERO, PENDING_INTERMEDIATE, "INTERMEDIARYSALE", "DECLINED", "BALANCE_ZERO");
     }
 
     @Test
     public void testSerializationCancelledSameDayTransfer() {
-        doTest(CANCELLED, SAMEDAY_TRANSFERS, "SALE", "CANCELLED", "SAMEDAY_TRANSFERS");
+        doTest(CANCELLED, SAMEDAY_TRANSFERS, PENDING, "SALE", "CANCELLED", "SAMEDAY_TRANSFERS");
     }
 
-    private void doTest(ExternalTransferStatus status, ExternalTransferSubStatus subStatus, String expectedType, String expectedStatus,
-            String expectedReason) {
+    @Test
+    public void testSerializationCancelledPendingIntermediateSameDayTransfer() {
+        doTest(CANCELLED, SAMEDAY_TRANSFERS, PENDING_INTERMEDIATE, "INTERMEDIARYSALE", "CANCELLED", "SAMEDAY_TRANSFERS");
+    }
+
+    private void doTest(ExternalTransferStatus status, ExternalTransferSubStatus subStatus, ExternalTransferStatus firstTransferStatus,
+            String expectedType, String expectedStatus, String expectedReason) {
         // given
         ExternalAssetOwnersReadService mockReadService = Mockito.mock(ExternalAssetOwnersReadService.class);
         when(mockReadService.retrieveTransferData(123L)).thenReturn(createTransferData(status, subStatus));
-        when(mockReadService.retrieveFirstTransferByExternalId(any(ExternalId.class))).thenReturn(createTransferData(ACTIVE, null));
+        when(mockReadService.retrieveFirstTransferByExternalId(any(ExternalId.class)))
+                .thenReturn(createTransferData(firstTransferStatus, null));
         Loan loan = Mockito.mock(Loan.class);
         when(loan.getCurrency()).thenReturn(new MonetaryCurrency("EUR", 2, 1));
-        List<LoanCharge> loanCharges = createMockCharges();
+        final Set<LoanCharge> loanCharges = createMockCharges();
         when(loan.getLoanCharges()).thenReturn(loanCharges);
         LoanOwnershipTransferBusinessEvent loanOwnershipTransferBusinessEvent = new LoanOwnershipTransferBusinessEvent(
                 createExternalAssetOwnerTransfer(status, subStatus), loan);
 
         // when
-        InvestorBusinessEventSerializer serializer = new InvestorBusinessEventSerializer(mockReadService);
-        ByteBufferSerializable byteBufferSerializable = serializer.toAvroDTO(loanOwnershipTransferBusinessEvent);
+        InvestorBusinessEventSerializer serializer = new InvestorBusinessEventSerializer(mockReadService, createCustomDataForEvents());
+        final ByteBufferSerializable byteBufferSerializable = serializer.toAvroDTO(loanOwnershipTransferBusinessEvent);
+        final LoanOwnershipTransferDataV1 result = (LoanOwnershipTransferDataV1) byteBufferSerializable;
 
         // then
         verifyFields(byteBufferSerializable, expectedType, expectedStatus, expectedReason);
+        assertNotNull(result.getCustomData());
+        final Map<String, ByteBuffer> customData = result.getCustomData();
+        assertEquals(CUSTOM_DATA_PREFIX + "_1", new String(customData.get("test_key_1").array(), UTF_8));
+        assertEquals(CUSTOM_DATA_PREFIX + "_2", new String(customData.get("test_key_2").array(), UTF_8));
     }
 
-    private List<LoanCharge> createMockCharges() {
-        List<LoanCharge> loanCharges = new ArrayList<>();
+    private Set<LoanCharge> createMockCharges() {
+        final Set<LoanCharge> loanCharges = new HashSet<>();
         loanCharges.add(loanCharge(1L, "charge a", new BigDecimal("10.00000")));
         loanCharges.add(loanCharge(1L, "charge a", new BigDecimal("15.00000")));
         loanCharges.add(loanCharge(2L, "charge b", BigDecimal.ZERO));
@@ -140,6 +183,7 @@ public class InvestorBusinessEventSerializerTest {
         assertEquals(1, result.getCurrency().getInMultiplesOf());
         assertEquals("1.0", result.getPurchasePriceRatio());
         assertEquals(ASSET_OWNER_EXTERNAL_ID, result.getAssetOwnerExternalId());
+        assertEquals("previous-owner-123", result.getPreviousOwnerExternalId());
         assertEquals(LOAN_EXTERNAL_ID, result.getLoanExternalId());
         assertEquals(TRANSFER_EXTERNAL_ID.getValue(), result.getTransferExternalId());
         assertEquals(LOAN_ID, result.getLoanId());
@@ -189,6 +233,7 @@ public class InvestorBusinessEventSerializerTest {
 
         ExternalTransferData data = new ExternalTransferData();
         data.setOwner(new ExternalTransferOwnerData(ASSET_OWNER_EXTERNAL_ID));
+        data.setPreviousOwner(new ExternalTransferOwnerData("previous-owner-123"));
         data.setStatus(status);
         data.setSubStatus(subStatus);
         data.setTransferId(123L);
@@ -200,6 +245,43 @@ public class InvestorBusinessEventSerializerTest {
         data.setTransferExternalId(TRANSFER_EXTERNAL_ID.getValue());
         data.setDetails(details);
         return data;
+    }
+
+    private List<ExternalEventCustomDataSerializer<InvestorBusinessEvent>> createCustomDataForEvents() {
+        return List.of(new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final InvestorBusinessEvent event) {
+                return ByteBuffer.wrap(CUSTOM_DATA_PREFIX.getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_1";
+            }
+        }, new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final InvestorBusinessEvent event) {
+                return ByteBuffer.wrap((CUSTOM_DATA_PREFIX + "_1").getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_1";
+            }
+        }, new ExternalEventCustomDataSerializer<>() {
+
+            @Override
+            public ByteBuffer serialize(final InvestorBusinessEvent event) {
+                return ByteBuffer.wrap((CUSTOM_DATA_PREFIX + "_2").getBytes(UTF_8));
+            }
+
+            @Override
+            public String key() {
+                return "test_key_2";
+            }
+        });
     }
 
 }

@@ -83,7 +83,7 @@ public class MessageFactory implements InitializingBean {
     }
 
     public MessageV1 createMessage(ExternalEventView event) {
-        MessageId id = new MessageId(event.getId().intValue());
+        MessageId id = new MessageId(event.getId());
         MessageSource source = new MessageSource(SOURCE_UUID);
         MessageType type = new MessageType(event.getType());
         MessageCategory category = new MessageCategory(event.getCategory());

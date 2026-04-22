@@ -19,6 +19,11 @@
 
 :doctitle: Fineract Platform Documentation
 
+// Never show URI for named links.
+// There's no need as long as all of our output formats are digital (hence, click/touch-able).
+// Only applies to PDF backend.
+:!show-link-uri:
+
 include::config.adoc[]
 
 = Fineract Documentation
@@ -34,6 +39,10 @@ include::introduction.adoc[leveloffset=+1]
 include::chapters/deployment/index.adoc[leveloffset=+1]
 
 include::chapters/architecture/index.adoc[leveloffset=+1]
+
+include::chapters/command/index.adoc[leveloffset=+1]
+
+include::chapters/features/index.adoc[leveloffset=+1]
 
 include::chapters/development/index.adoc[leveloffset=+1]
 
@@ -51,12 +60,18 @@ include::chapters/release/index.adoc[leveloffset=+1]
 
 include::chapters/sdk/index.adoc[leveloffset=+1]
 
-include::fineract-client.adoc[leveloffset=+1]
+// Broken: asciidoc is only partially rendered.
+//include::fineract-client.adoc[leveloffset=+1]
 
 include::faq.adoc[leveloffset=+1]
 
 include::glossary.adoc[leveloffset=+1]
 
+// See https://docs.asciidoctor.org/asciidoc/latest/sections/user-index/ .
+// Limit this to PDF because the HTML backend can't (yet) create an index.
+// Also, we don't yet have any indexed terms, so it might make more sense to remove the index even for PDF.
+ifdef::backend-pdf[]
 include::indices.adoc[leveloffset=+1]
+endif::[]
 
 include::chapters/appendix/index.adoc[]

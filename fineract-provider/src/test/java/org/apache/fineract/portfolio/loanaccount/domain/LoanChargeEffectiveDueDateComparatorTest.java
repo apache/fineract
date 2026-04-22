@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class LoanChargeEffectiveDueDateComparatorTest {

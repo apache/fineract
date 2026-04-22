@@ -19,18 +19,19 @@
 package org.apache.fineract.portfolio.savings;
 
 import java.util.Arrays;
+import lombok.Getter;
 
 /**
- * An enumeration of different options available on account closure {@link FixedDepositAccount} &amp;
- * {@link RecurringDepositAccount}.
+ * An enumeration of different options available on account closure
  */
+@Getter
 public enum DepositAccountOnClosureType {
 
     INVALID(0, "depositAccountClosureType.invalid"), //
     WITHDRAW_DEPOSIT(100, "depositAccountClosureType.withdrawDeposit"), //
     TRANSFER_TO_SAVINGS(200, "depositAccountClosureType.transferToSavings"), //
-    REINVEST_PRINCIPAL_AND_INTEREST(300, "depositAccountClosureType.reinvestPrincipalAndInterest"), REINVEST_PRINCIPAL_ONLY(400,
-            "depositAccountClosureType.reinvestPrincipalOnly"); //
+    REINVEST_PRINCIPAL_AND_INTEREST(300, "depositAccountClosureType.reinvestPrincipalAndInterest"), //
+    REINVEST_PRINCIPAL_ONLY(400, "depositAccountClosureType.reinvestPrincipalOnly"); //
 
     private final Integer value;
     private final String code;
@@ -40,65 +41,21 @@ public enum DepositAccountOnClosureType {
         this.code = code;
     }
 
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
     public static DepositAccountOnClosureType fromInt(final Integer v) {
         if (v == null) {
             return INVALID;
         }
 
-        switch (v) {
-            case 100:
-                return WITHDRAW_DEPOSIT;
-            case 200:
-                return TRANSFER_TO_SAVINGS;
-            case 300:
-                return REINVEST_PRINCIPAL_AND_INTEREST;
-            case 400:
-                return REINVEST_PRINCIPAL_ONLY;
-            default:
-                return INVALID;
-        }
+        return switch (v) {
+            case 100 -> WITHDRAW_DEPOSIT;
+            case 200 -> TRANSFER_TO_SAVINGS;
+            case 300 -> REINVEST_PRINCIPAL_AND_INTEREST;
+            case 400 -> REINVEST_PRINCIPAL_ONLY;
+            default -> INVALID;
+        };
     }
 
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isWithdarwDeposit() {
-        return this.equals(WITHDRAW_DEPOSIT);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isTransferToSavings() {
-        return this.equals(TRANSFER_TO_SAVINGS);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isReinvest() {
-        return this.equals(REINVEST_PRINCIPAL_AND_INTEREST) || this.equals(REINVEST_PRINCIPAL_ONLY);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isReinvestPrincipal() {
-        return this.equals(REINVEST_PRINCIPAL_ONLY);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isReinvestPrincipalAndInterest() {
-        return this.equals(REINVEST_PRINCIPAL_AND_INTEREST);
-    }
-
-    // TODO: why not just use the enum values... just more boilerplate code here!!
-    public boolean isInvalid() {
-        return this.equals(INVALID);
-    }
-
-    // TODO: do we really need this?!?
-    public static Object[] integerValues() {
-        return Arrays.stream(values()).filter(value -> !INVALID.equals(value)).map(value -> value.value).toList().toArray();
+    public static Integer[] integerValues() {
+        return Arrays.stream(values()).filter(v -> v != INVALID).map(v -> v.value).toArray(Integer[]::new);
     }
 }

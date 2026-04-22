@@ -2,33 +2,46 @@
 
 == Description
 
-Finally create a directory with release name ({revnumber} in this example) in https://dist.apache.org/repos/dist/dev/fineract and add the following files in this new directory:
+Next we'll stage the release candidate. Create a new folder and add these files:
 
-* apache-fineract-{revnumber}-binary.tar.gz.sha
-* apache-fineract-{revnumber}-binary.tar.gz
-* apache-fineract-{revnumber}-binary.tar.gz.asc
-* apache-fineract-{revnumber}-binary.tar.gz.md5
-* apache-fineract-{revnumber}-src.tar.gz.sha
-* apache-fineract-{revnumber}-src.tar.gz
-* apache-fineract-{revnumber}-src.tar.gz.asc
-* apache-fineract-{revnumber}-src.tar.gz.md5
+* apache-fineract-bin-{revnumber}.tar.gz
+* apache-fineract-bin-{revnumber}.tar.gz.sha512
+* apache-fineract-bin-{revnumber}.tar.gz.asc
+* apache-fineract-src-{revnumber}.tar.gz
+* apache-fineract-src-{revnumber}.tar.gz.sha512
+* apache-fineract-src-{revnumber}.tar.gz.asc
 
-Upload binary and source archives to ASF's distribution dev (staging) area:
+These files (or "artifacts") comprise the release candidate.
 
-[source,bash,subs="attributes+,+macros"]
+First, upload these files to https://release-test.apache.org/compose/fineract/{revnumber}. This tool will initiate automated checks on the files. We'll come back to those in next step and ensure they pass.
+
+Next, upload these files to https://www.apache.org/legal/release-policy.html#stage[ASF's distribution dev/staging area] like so:
+
+[source,bash,subs="attributes+"]
 ----
-% svn co https://dist.apache.org/repos/dist/dev/fineract/ fineract-dist-dev
-% mkdir fineract-dist-dev/{revnumber}
-% cp fineract/build/distributions/* fineract-dist-dev/{revnumber}/
-% svn commit
+# this is a remote operation
+svn mkdir -m "Create Fineract {revnumber} staging area 🏗️" \
+  https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+
+# create local svn-tracked folder "{revnumber}"
+svn checkout https://dist.apache.org/repos/dist/dev/fineract/{revnumber}
+
+# prepare to upload
+cp path/to/new/folder/* {revnumber}/
+cd {revnumber}/
+
+# actual upload occurs here
+svn add * && svn commit -m "Stage Fineract {revnumber} 🎭"
 ----
 
-NOTE: You will need your ASF Committer credentials to be able to access the Subversion host https://dist.apache.org via.
+NOTE: You will need your ASF Committer credentials to be able to access the Subversion host at `dist.apache.org`.
 
 == Gradle Task
 
 .Command
 [source,bash,subs="attributes+,+macros"]
 ----
-% ./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
+./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
 ----
+
+CAUTION: Gradle task 8 is inefficient. We recommend `svn mkdir` and other manual steps above.

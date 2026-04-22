@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory
 import java.security.GeneralSecurityException
 import java.security.MessageDigest
 import java.security.Security
+import java.util.Locale
 
 class GpgService {
     private static final Logger log = LoggerFactory.getLogger(GpgService.class)
@@ -64,7 +65,7 @@ class GpgService {
                             def k = iterator.next();
 
                             if (k.isEncryptionKey()) {
-                                def keyName = Long.toHexString(k.keyID).toUpperCase()
+                                def keyName = Long.toHexString(k.keyID).toUpperCase(java.util.Locale.ROOT)
 
                                 if(config.keyName.substring(config.keyName.length()-keyName.length()) == keyName) {
                                     publicKey = k;
@@ -114,15 +115,6 @@ class GpgService {
         }
 
         return generator.generate();
-    }
-
-
-    void md5(FineractPluginExtension.FineractPluginGpgParams params) {
-        params.files.findAll {
-            def result = calc(new FileInputStream(it), MessageDigest.getInstance("MD5", BouncyCastleProvider.PROVIDER_NAME))
-            def file = new File("${it}.md5")
-            file.write result
-        }
     }
 
     void sha512(FineractPluginExtension.FineractPluginGpgParams params) {

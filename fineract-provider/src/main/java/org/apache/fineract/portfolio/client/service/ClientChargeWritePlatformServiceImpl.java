@@ -165,11 +165,13 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             generateAccountingEntries(clientTransaction);
 
             return new CommandProcessingResultBuilder() //
-                    .withTransactionId(clientTransaction.getId().toString())//
+                    .withTransactionId(clientTransaction.getId().toString()) //
                     .withEntityId(clientCharge.getId()) //
-                    .withSubEntityId(clientTransaction.getId()).withSubEntityExternalId(clientTransaction.getExternalId())
+                    .withSubEntityId(clientTransaction.getId()) //
+                    .withSubEntityExternalId(clientTransaction.getExternalId()) //
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
-                    .withClientId(clientCharge.getClient().getId()).build();
+                    .withClientId(clientCharge.getClient().getId()) //
+                    .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(clientId, clientChargeId, throwable, dve);
@@ -205,7 +207,8 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
             final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, waivedAmount.getAmount());
             clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
 
-            return new CommandProcessingResultBuilder().withTransactionId(clientTransaction.getId().toString())//
+            return new CommandProcessingResultBuilder() //
+                    .withTransactionId(clientTransaction.getId().toString()) //
                     .withEntityId(clientCharge.getId()) //
                     .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                     .withClientId(clientCharge.getClient().getId()) //

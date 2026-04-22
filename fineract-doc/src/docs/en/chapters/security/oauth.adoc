@@ -1,66 +1,75 @@
 = OAuth
 
-Fineract has a (basic) OAuth2 support based on Spring Boot Security. Here's how to use it:
+Fineract has basic OAuth support based on Spring Boot Security.
 
-== Build
+This can be enabled at runtime in one of two ways:
 
-You must re-build the distribution JAR (or WAR) using the special `-Psecurity=oauth` flag:
-
+. Use environment variables (best choice if you run with Docker Compose):
++
+[source,bash]
 ----
-./gradlew bootRun -Psecurity=oauth
+FINERACT_SECURITY_BASICAUTH_ENABLED=false
+FINERACT_SECURITY_OAUTH_ENABLED=true
+FINERACT_SERVER_OAUTH_RESOURCE_URL=http://localhost:9000/realms/fineract
 ----
 
-Downloads from https://fineract.apache.org, or using e.g. the https://hub.docker.com/r/apache/fineract container image, or on https://www.fineract.dev, this will not work, because they have not been built using this flag.
+. Use JVM parameters (best choice if you run the Spring Boot JAR):
++
+[source,bash]
+----
+java -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth2.enabled=true -jar fineract-provider.jar
+----
 
-Previous versions of Fineract included a built-in authorisation server for issuing OAuth tokens. However, as the spring-security-oauth2 package was deprecated and replaced by built-in OAuth support in Spring Security, this is no longer supported as part of the package. Instead, you need to run a separate OAuth authorization server (e.g. https://github.com/spring-projects/spring-authorization-server) or use a 3rd-party OAuth authorization provider (https://en.wikipedia.org/wiki/List_of_OAuth_providers)
-
-This instruction describes how to get Fineract OAuth working with a Keycloak (http://keycloak.org) based authentication provider running in a Docker container. The steps required for other OAuth providers will be similar. 
+Here's how to test OAuth with https://www.keycloak.org[Keycloak].
+The steps required for other OAuth providers will be similar.
 
 == Set up Keycloak
 
-1. From terminal, run: 'docker run -p 9000:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin quay.io/keycloak/keycloak:15.0.2'
-2. Go to URL 'http://localhost:9000/auth/admin' and login with admin/admin
-3. Hover your mouse over text "Master" and click on "Add realm"
-4. Enter name "fineract" for your realm
-5. Click on tab "Users" on the left, then "Add user" and create user with username "mifos"
-6. Click on tab "Credentials" at the top, and set password to "password", turning "temporary" setting to off
-7. Click on tab "Clients" on the left, and create client with ID 'community-app'
-8. In settings tab, set 'access-type' to 'confidential' and enter 'localhost' in the valid redirect URIs.
-9. In credentials tab, copy string in field 'secret' as this will be needed in the step to request the access token
+. From terminal, run: `docker run -p 9000:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.2.5 start-dev`
+. Go to URL 'http://localhost:9000/admin' and login with admin/admin
+. Click 'Manage realms', then 'Create realm'
+. Enter name `fineract` for the realm name
+. Click on tab 'Users' on the left, then 'Create new user' with username `mifos`, email `test@example.com`, First name `Mifos`, Last name `User`
+. Click on tab 'Credentials' at the top, and set password to `password`, turning 'temporary' setting to off
+. Click on tab 'Clients' on the left, and create client with ID `community-app`
+. In Settings tab, set 'Valid redirect URIs' to `localhost`, enable 'Client authentication', check 'Direct access grants'
+. Click 'Save' and a 'Credentials' tab will appear
+. In Credentials tab, copy string in field 'secret' as this will be needed in the step to request the access token
 
 Finally we need to change Keycloak configuration so that it uses the username as a subject of the token:
 
-1. Choose client 'community-app' in the tab 'Clients'
-2. Go to tab 'Mappers' and click on 'Create'
-3. Enter 'usernameInSub' as 'Name'
-4. Choose mapper type 'User Property'
-5. Enter 'username' into the field 'Property' and 'sub' into the field 'Token Claim Name'. Choose 'String' as 'Claim JSON Type'
+. Choose client `community-app` in the tab 'Clients'
+. Click on tab 'Client scopes', then `community-app-dedicated`
+. Go to tab 'Mappers', click 'Configure a new mapper' and choose 'User Property'
+. Enter `usernameInSub` as 'Name'
+. Enter `username` into the field 'Property' and `sub` into the field 'Token Claim Name'
 
 You are now ready to test out OAuth:
 
 == Retrieve an access token from Keycloak
 
+[source,bash]
 ----
-curl --location --request POST \
-'http://localhost:9000/auth/realms/fineract/protocol/openid-connect/token' \
---header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'username=mifos' \
---data-urlencode 'password=password' \
---data-urlencode 'client_id=community-app' \
---data-urlencode 'grant_type=password' \
---data-urlencode 'client_secret=<enter the client secret from credentials tab>'
+curl --request POST \
+  "$FINERACT_SERVER_OAUTH_RESOURCE_URL/protocol/openid-connect/token" \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'username=mifos' \
+  --data-urlencode 'password=password' \
+  --data-urlencode 'client_id=community-app' \
+  --data-urlencode 'grant_type=password' \
+  --data-urlencode 'client_secret=<enter the client secret from credentials tab>'
 ----
 
-The reply should contain a field 'access_token'. Copy the field's value and use it in the API call below:
+The reply should contain a field `access_token`. Copy the field's value and use it in the API call below:
 
 == Invoke APIs and pass `Authorization: bearer ...` header
 
+[source,bash]
 ----
-curl --location --request GET \
-'https://localhost:8443/fineract-provider/api/v1/offices' \
---header 'Fineract-Platform-TenantId: default' \
---header 'Authorization: bearer <enter the value of the access_token field>'
-
+curl --insecure \
+  'https://localhost:8443/fineract-provider/api/v1/offices' \
+  --header 'Fineract-Platform-TenantId: default' \
+  --header 'Authorization: bearer <enter the value of the access_token field>'
 ----
 
-NOTE: See also https://fineract.apache.org/legacy-docs/apiLive.htm#authentication_oauth
+NOTE: See also https://fineract.apache.org/docs/legacy/#authentication_oauth

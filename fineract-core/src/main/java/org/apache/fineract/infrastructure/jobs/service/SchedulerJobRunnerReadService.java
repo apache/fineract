@@ -19,21 +19,24 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.api.IdTypeResolver;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
+import org.springframework.lang.NonNull;
 
 public interface SchedulerJobRunnerReadService {
 
-    List<JobDetailData> findAllJobDeatils();
+    List<JobDetailData> findAllJobDetails();
 
-    JobDetailData retrieveOne(Long jobId);
+    JobDetailData retrieveOne(@NonNull IdTypeResolver.IdType idType, String identifier);
 
-    JobDetailData retrieveOneByName(String jobName);
+    Page<JobDetailHistoryData> retrieveJobHistory(@NonNull IdTypeResolver.IdType idType, String identifier,
+            SearchParameters searchParameters);
 
-    Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters);
+    @NonNull
+    Long retrieveId(@NonNull IdTypeResolver.IdType idType, String identifier);
 
     boolean isUpdatesAllowed();
-
 }

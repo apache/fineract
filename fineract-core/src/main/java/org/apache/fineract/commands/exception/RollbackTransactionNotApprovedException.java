@@ -31,7 +31,10 @@ public class RollbackTransactionNotApprovedException extends RuntimeException {
     private final CommandProcessingResult result;
 
     public RollbackTransactionNotApprovedException(Long commandId, Long entityId) {
-        this.result = new CommandProcessingResultBuilder().withCommandId(commandId).withEntityId(entityId).setRollbackTransaction(true)
+        this.result = new CommandProcessingResultBuilder() //
+                .withCommandId(commandId) //
+                .withEntityId(entityId) //
+                .setRollbackTransaction(true) //
                 .build();
     }
 

@@ -58,6 +58,7 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -65,7 +66,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
@@ -729,19 +729,17 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
     private void checkClientOrGroupActive(final SavingsAccount account) {
         final Client client = account.getClient();
-        if (client != null) {
-            if (client.isNotActive()) {
-                throw new ClientNotActiveException(client.getId());
-            }
+        if (client != null && client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
         }
+
         final Group group = account.group();
-        if (group != null) {
-            if (group.isNotActive()) {
-                if (group.isCenter()) {
-                    throw new CenterNotActiveException(group.getId());
-                }
-                throw new GroupNotActiveException(group.getId());
+        if (group != null && group.isNotActive()) {
+            if (group.isCenter()) {
+                throw new CenterNotActiveException(group.getId());
             }
+            throw new GroupNotActiveException(group.getId());
         }
+
     }
 }

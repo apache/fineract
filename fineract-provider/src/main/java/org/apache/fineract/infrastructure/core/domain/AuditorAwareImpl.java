@@ -35,7 +35,7 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         if (securityContext != null) {
             final Authentication authentication = securityContext.getAuthentication();
-            if (authentication != null) {
+            if (authentication != null && authentication.getPrincipal() instanceof AppUser) {
                 currentUserId = Optional.ofNullable(((AppUser) authentication.getPrincipal()).getId());
             } else {
                 currentUserId = retrieveSuperUser();

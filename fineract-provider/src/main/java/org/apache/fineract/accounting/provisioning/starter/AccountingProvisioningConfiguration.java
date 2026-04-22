@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategoryRepository;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -56,12 +56,12 @@ public class AccountingProvisioningConfiguration {
     public ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService(
             ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
             ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService, LoanProductRepository loanProductRepository,
-            GLAccountRepository glAccountRepository, OfficeRepositoryWrapper officeRepositoryWrapper,
+            GLAccountRepository glAccountRepository, OfficeRepository officeRepository,
             ProvisioningCategoryRepository provisioningCategoryRepository, PlatformSecurityContext platformSecurityContext,
             ProvisioningEntryRepository provisioningEntryRepository, JournalEntryWritePlatformService journalEntryWritePlatformService,
             ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer, FromJsonHelper fromApiJsonHelper) {
         return new ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl(provisioningEntriesReadPlatformService,
-                provisioningCriteriaReadPlatformService, loanProductRepository, glAccountRepository, officeRepositoryWrapper,
+                provisioningCriteriaReadPlatformService, loanProductRepository, glAccountRepository, officeRepository,
                 provisioningCategoryRepository, platformSecurityContext, provisioningEntryRepository, journalEntryWritePlatformService,
                 fromApiJsonDeserializer, fromApiJsonHelper) {};
     }

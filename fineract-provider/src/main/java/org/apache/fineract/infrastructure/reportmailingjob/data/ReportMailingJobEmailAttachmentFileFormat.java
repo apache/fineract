@@ -25,9 +25,10 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum ReportMailingJobEmailAttachmentFileFormat {
 
-    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"), XLS(1, "ReportMailingJobEmailAttachmentFileFormat.XLS",
-            "XLS"), PDF(2, "ReportMailingJobEmailAttachmentFileFormat.PDF",
-                    "PDF"), CSV(3, "ReportMailingJobEmailAttachmentFileFormat.CSV", "CSV");
+    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"), //
+    XLS(1, "ReportMailingJobEmailAttachmentFileFormat.XLS", "XLS"), //
+    PDF(2, "ReportMailingJobEmailAttachmentFileFormat.PDF", "PDF"), //
+    CSV(3, "ReportMailingJobEmailAttachmentFileFormat.CSV", "CSV"); //
 
     private final String code;
     private final String value;
@@ -103,27 +104,13 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     }
 
     /**
-     * @return true if the enum is equals to "INVALID"
-     */
-    public boolean isInvalid() {
-        return this.equals(INVALID);
-    }
-
-    /**
-     * @return true if the enum is not equals to "INVALID"
-     */
-    public boolean isValid() {
-        return !this.isInvalid();
-    }
-
-    /**
      * @return list of valid ReportMailingJobEmailAttachmentFileFormat values
      **/
     public static Object[] validValues() {
         List<Object> validValues = new ArrayList<>();
 
         for (ReportMailingJobEmailAttachmentFileFormat constant : ReportMailingJobEmailAttachmentFileFormat.values()) {
-            if (constant.isValid()) {
+            if (constant != INVALID) {
                 validValues.add(constant.value);
             }
         }
@@ -138,7 +125,7 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
         List<Object> validValues = new ArrayList<>();
 
         for (ReportMailingJobEmailAttachmentFileFormat constant : ReportMailingJobEmailAttachmentFileFormat.values()) {
-            if (constant.isValid()) {
+            if (constant != INVALID) {
                 validValues.add(constant.id);
             }
         }
@@ -168,7 +155,7 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
         List<EnumOptionData> options = new ArrayList<>();
 
         for (ReportMailingJobEmailAttachmentFileFormat constant : ReportMailingJobEmailAttachmentFileFormat.values()) {
-            if (constant.isValid()) {
+            if (constant != INVALID) {
                 options.add(constant.toEnumOptionData());
             }
         }

@@ -18,14 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,18 +43,22 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
+import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
+import org.apache.fineract.portfolio.loanaccount.service.LoanBalanceService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargeService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanScheduleGeneratorService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanTransactionProcessingService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.springframework.lang.NonNull;
 
 public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
 
     private final SingleLoanChargeRepaymentScheduleProcessingWrapper underTest = new SingleLoanChargeRepaymentScheduleProcessingWrapper();
-    private static final MockedStatic<MoneyHelper> MONEY_HELPER = Mockito.mockStatic(MoneyHelper.class);
+    private static final MockedStatic<MoneyHelper> MONEY_HELPER = mockStatic(MoneyHelper.class);
 
     private MonetaryCurrency currency = MonetaryCurrency.fromCurrencyData(new CurrencyData("USD"));
 
@@ -61,94 +69,104 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapperTest {
     private ArgumentCaptor<Money> penaltyChargesWaived = ArgumentCaptor.forClass(Money.class);
     private ArgumentCaptor<Money> penaltyChargesWrittenOff = ArgumentCaptor.forClass(Money.class);
 
+    private final LoanChargeService loanChargeService = new LoanChargeService(mock(LoanChargeValidator.class),
+            mock(LoanTransactionProcessingService.class), mock(LoanLifecycleStateMachine.class), mock(LoanBalanceService.class),
+            mock(LoanScheduleGeneratorService.class));
+
     @BeforeAll
     public static void init() {
         MONEY_HELPER.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
+        MONEY_HELPER.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
+    }
+
+    @AfterAll
+    public static void destruct() {
+        MONEY_HELPER.close();
     }
 
     @Test
     public void testOnePeriodWithFeeCharge() {
-        LocalDate disbursementDate = LocalDate.of(2023, 01, 1);
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate)));
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(new EnumMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate))));
 
-        LoanRepaymentScheduleInstallment period = createPeriod(1, LocalDate.of(2023, 01, 1), LocalDate.of(2023, 01, 30));
-        LoanCharge loanCharge = createCharge(false);
+        LoanRepaymentScheduleInstallment period = createPeriod(1, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 30));
+        underTest.reprocess(currency, disbursementDate, List.of(period), createCharge(false));
 
-        underTest.reprocess(currency, disbursementDate, List.of(period), loanCharge);
-
-        verify(period, "10.0", "0.0", "0.0", "0.0", "0.0", "0.0");
+        customVerify(period, "10.0", "0.0", "0.0", "0.0", "0.0", "0.0");
     }
 
     @Test
     public void testOnePeriodWithPenaltyCharge() {
-        LocalDate disbursementDate = LocalDate.of(2023, 01, 1);
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate)));
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(new EnumMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate))));
 
-        LoanRepaymentScheduleInstallment period = createPeriod(1, LocalDate.of(2023, 01, 1), LocalDate.of(2023, 01, 30));
-        LoanCharge loanCharge = createCharge(true);
+        LoanRepaymentScheduleInstallment period = createPeriod(1, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 30));
+        underTest.reprocess(currency, disbursementDate, List.of(period), createCharge(true));
 
-        underTest.reprocess(currency, disbursementDate, List.of(period), loanCharge);
-
-        verify(period, "0.0", "0.0", "0.0", "10.0", "0.0", "0.0");
+        customVerify(period, "0.0", "0.0", "0.0", "10.0", "0.0", "0.0");
     }
 
     @Test
     public void testTwoPeriodsWithPenaltyCharge() {
-        LocalDate disbursementDate = LocalDate.of(2023, 01, 1);
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate)));
+        LocalDate disbursementDate = LocalDate.of(2023, 1, 1);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(new EnumMap<>(Map.of(BusinessDateType.BUSINESS_DATE, disbursementDate))));
 
-        LoanRepaymentScheduleInstallment period1 = createPeriod(1, LocalDate.of(2023, 01, 1), LocalDate.of(2023, 01, 31));
-        LoanRepaymentScheduleInstallment period2 = createPeriod(1, LocalDate.of(2023, 02, 1), LocalDate.of(2023, 02, 28));
+        LoanRepaymentScheduleInstallment period1 = createPeriod(1, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31));
+        LoanRepaymentScheduleInstallment period2 = createPeriod(1, LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28));
 
-        LoanCharge loanCharge = createCharge(true);
+        underTest.reprocess(currency, disbursementDate, List.of(period1, period2), createCharge(true));
 
-        underTest.reprocess(currency, disbursementDate, List.of(period1, period2), loanCharge);
-
-        verify(period1, "0.0", "0.0", "0.0", "10.0", "0.0", "0.0");
-        verify(period2, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
+        customVerify(period1, "0.0", "0.0", "0.0", "10.0", "0.0", "0.0");
+        customVerify(period2, "0.0", "0.0", "0.0", "0.0", "0.0", "0.0");
     }
 
-    private void verify(LoanRepaymentScheduleInstallment period, String expectedFeeChargesDue, String expectedFeeChargesWaived,
+    private void customVerify(LoanRepaymentScheduleInstallment period, String expectedFeeChargesDue, String expectedFeeChargesWaived,
             String expectedFeeChargesWrittenOff, String expectedPenaltyChargesDue, String expectedPenaltyChargesWaived,
             String expectedPenaltyChargesWrittenOff) {
 
-        Mockito.verify(period, times(1)).addToChargePortion(feeChargesDue.capture(), feeChargesWaived.capture(),
-                feeChargesWrittenOff.capture(), penaltyChargesDue.capture(), penaltyChargesWaived.capture(),
-                penaltyChargesWrittenOff.capture());
+        verify(period, times(1)).addToChargePortion(feeChargesDue.capture(), feeChargesWaived.capture(), feeChargesWrittenOff.capture(),
+                penaltyChargesDue.capture(), penaltyChargesWaived.capture(), penaltyChargesWrittenOff.capture());
 
-        Assertions.assertTrue(new BigDecimal(expectedFeeChargesDue).compareTo(feeChargesDue.getValue().getAmount()) == 0);
-        Assertions.assertTrue(new BigDecimal(expectedFeeChargesWaived).compareTo(feeChargesWaived.getValue().getAmount()) == 0);
-        Assertions.assertTrue(new BigDecimal(expectedFeeChargesWrittenOff).compareTo(feeChargesWrittenOff.getValue().getAmount()) == 0);
-        Assertions.assertTrue(new BigDecimal(expectedPenaltyChargesDue).compareTo(penaltyChargesDue.getValue().getAmount()) == 0);
-        Assertions.assertTrue(new BigDecimal(expectedPenaltyChargesWaived).compareTo(penaltyChargesWaived.getValue().getAmount()) == 0);
-        Assertions.assertTrue(
-                new BigDecimal(expectedPenaltyChargesWrittenOff).compareTo(penaltyChargesWrittenOff.getValue().getAmount()) == 0);
+        assertEquals(new BigDecimal(expectedFeeChargesDue).setScale(1, RoundingMode.UNNECESSARY),
+                feeChargesDue.getValue().getAmount().setScale(1, RoundingMode.UNNECESSARY));
+        assertEquals(new BigDecimal(expectedFeeChargesWaived).setScale(1, RoundingMode.UNNECESSARY),
+                feeChargesWaived.getValue().getAmount().setScale(1, RoundingMode.UNNECESSARY));
+        assertEquals(new BigDecimal(expectedFeeChargesWrittenOff).setScale(1, RoundingMode.UNNECESSARY),
+                feeChargesWrittenOff.getValue().getAmount().setScale(1, RoundingMode.UNNECESSARY));
+        assertEquals(new BigDecimal(expectedPenaltyChargesDue).setScale(1, RoundingMode.UNNECESSARY),
+                penaltyChargesDue.getValue().getAmount().setScale(1, RoundingMode.UNNECESSARY));
+        assertEquals(new BigDecimal(expectedPenaltyChargesWaived).setScale(1, RoundingMode.UNNECESSARY),
+                penaltyChargesWaived.getValue().getAmount().setScale(1, RoundingMode.UNNECESSARY));
+        assertEquals(new BigDecimal(expectedPenaltyChargesWrittenOff).setScale(1, RoundingMode.UNNECESSARY),
+                penaltyChargesWrittenOff.getValue().getAmount().setScale(1, RoundingMode.UNNECESSARY));
     }
 
-    @NotNull
-    private static LoanCharge createCharge(boolean penalty) {
+    @NonNull
+    private LoanCharge createCharge(boolean penalty) {
         Charge charge = mock(Charge.class);
         when(charge.getId()).thenReturn(1L);
         when(charge.getName()).thenReturn("charge a");
         when(charge.getCurrencyCode()).thenReturn("UDS");
         when(charge.isPenalty()).thenReturn(penalty);
-        LoanCharge loanCharge = new LoanCharge(null, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
-                ChargeCalculationType.FLAT, LocalDate.of(2023, 01, 15), ChargePaymentMode.REGULAR, 1, null, null);
-        return loanCharge;
+        Loan loan = mock(Loan.class);
+        when(loan.isInterestBearing()).thenReturn(false);
+
+        return loanChargeService.create(loan, charge, new BigDecimal(1000), new BigDecimal(10), ChargeTimeType.SPECIFIED_DUE_DATE,
+                ChargeCalculationType.FLAT, LocalDate.of(2023, 1, 15), ChargePaymentMode.REGULAR, 1, null, null);
     }
 
-    @NotNull
+    @NonNull
     private LoanRepaymentScheduleInstallment createPeriod(int periodId, LocalDate start, LocalDate end) {
-        LoanRepaymentScheduleInstallment period = Mockito.mock(LoanRepaymentScheduleInstallment.class);
-        Mockito.when(period.getInstallmentNumber()).thenReturn(periodId);
-        Mockito.when(period.getFromDate()).thenReturn(start);
-        Mockito.when(period.getDueDate()).thenReturn(end);
-        Money principal = Money.of(currency, new BigDecimal("1000.0"));
-        Money interest = Money.of(currency, BigDecimal.ZERO);
+        LoanRepaymentScheduleInstallment period = mock(LoanRepaymentScheduleInstallment.class);
+        MathContext mc = new MathContext(12, RoundingMode.HALF_EVEN);
+        when(period.getInstallmentNumber()).thenReturn(periodId);
+        when(period.getFromDate()).thenReturn(start);
+        when(period.getDueDate()).thenReturn(end);
+        Money principal = Money.of(currency, new BigDecimal("1000.0"), mc);
+        Money interest = Money.of(currency, BigDecimal.ZERO, mc);
 
-        Mockito.when(period.getPrincipal(eq(currency))).thenReturn(principal);
-        Mockito.when(period.getInterestCharged(eq(currency))).thenReturn(interest);
+        when(period.getPrincipal(currency)).thenReturn(principal);
+        when(period.getInterestCharged(currency)).thenReturn(interest);
         return period;
     }
-
 }

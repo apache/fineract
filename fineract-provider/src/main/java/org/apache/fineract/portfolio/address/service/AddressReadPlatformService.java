@@ -18,20 +18,23 @@
  */
 package org.apache.fineract.portfolio.address.service;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.portfolio.address.data.AddressData;
+import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
 
 public interface AddressReadPlatformService {
 
-    Collection<AddressData> retrieveAddressFields(long clientid);
+    List<AddressData> retrieveAddressFields(long clientid);
 
-    Collection<AddressData> retrieveAllClientAddress(long clientid);
+    List<AddressData> retrieveAllClientAddress(long clientid);
 
-    Collection<AddressData> retrieveAddressbyType(long clientid, long typeid);
+    List<AddressData> retrieveAddressbyType(long clientid, long typeid);
 
-    Collection<AddressData> retrieveAddressbyTypeAndStatus(long clientid, long typeid, String status);
+    List<AddressData> retrieveAddressbyTypeAndStatus(long clientid, long typeid, String status);
 
-    Collection<AddressData> retrieveAddressbyStatus(long clientid, String status);
+    List<AddressData> retrieveAddressbyStatus(long clientid, String status);
+
+    List<AddressData> retrieveBySearchParam(ClientAddressSearchParam searchFilter);
 
     AddressData retrieveTemplate();
 }

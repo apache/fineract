@@ -32,7 +32,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -45,8 +45,8 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
     private final FineractProperties fineractProperties;
 
     @Override
-    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-            @NotNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         Mutable<ContentCachingResponseWrapper> wrapper = new MutableObject<>();
         if (helper.isAllowedContentTypeRequest(request)) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));
@@ -54,17 +54,17 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
         extractIdempotentKeyFromHttpServletRequest(request).ifPresent(idempotentKey -> fineractRequestContextHolder
                 .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey, request));
 
-        filterChain.doFilter(request, wrapper.getValue() != null ? wrapper.getValue() : response);
+        filterChain.doFilter(request, wrapper.get() != null ? wrapper.get() : response);
         Optional<Long> commandId = helper.getCommandId(request);
-        boolean isSuccessWithoutStored = commandId.isPresent() && wrapper.getValue() != null && helper.isStoreIdempotencyKey(request)
+        boolean isSuccessWithoutStored = commandId.isPresent() && wrapper.get() != null && helper.isStoreIdempotencyKey(request)
                 && helper.isAllowedContentTypeResponse(response);
         if (isSuccessWithoutStored) {
-            helper.storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.getValue())
+            helper.storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.get())
                     .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
                     commandId.get());
         }
-        if (wrapper.getValue() != null) {
-            wrapper.getValue().copyBodyToResponse();
+        if (wrapper.get() != null) {
+            wrapper.get().copyBodyToResponse();
         }
     }
 

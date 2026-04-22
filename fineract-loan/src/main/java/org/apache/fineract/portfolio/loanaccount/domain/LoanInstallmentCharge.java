@@ -24,6 +24,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -31,13 +33,15 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
 @Entity
+@Getter
 @Table(name = "m_loan_installment_charge")
-public class LoanInstallmentCharge extends AbstractPersistableCustom implements Comparable<LoanInstallmentCharge> {
+public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "loan_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
@@ -48,6 +52,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
     @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPaid;
 
+    @Setter
     @Column(name = "amount_waived_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountWaived;
 
@@ -60,9 +65,11 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
     @Column(name = "amount_through_charge_payment", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountThroughChargePayment;
 
+    @Setter
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
 
+    @Setter
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
@@ -92,16 +99,26 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         this.paid = determineIfFullyPaid();
     }
 
-    public Money waive(final MonetaryCurrency currency) {
+    public void waive() {
         this.amountWaived = this.amountOutstanding;
         this.amountOutstanding = BigDecimal.ZERO;
         this.paid = false;
         this.waived = true;
-        return getAmountWaived(currency);
+    }
+
+    public void undoWaive() {
+        this.amountOutstanding = this.amountWaived;
+        this.amountWaived = BigDecimal.ZERO;
+        this.paid = false;
+        this.waived = false;
     }
 
     public Money getAmountWaived(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountWaived);
+    }
+
+    public Money getAmountOutstanding(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountOutstanding);
     }
 
     private boolean determineIfFullyPaid() {
@@ -140,10 +157,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         return this.amount.subtract(totalAccountedFor);
     }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
     public Money getAmount(final MonetaryCurrency currency) {
         return Money.of(currency, this.amount);
     }
@@ -152,20 +165,8 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         return Money.of(currency, this.amountPaid);
     }
 
-    public BigDecimal getAmountOutstanding() {
-        return this.amountOutstanding;
-    }
-
     private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
         return getAmount(currency).minus(getAmountWaived(currency)).minus(getAmountPaid(currency)).getAmount();
-    }
-
-    public boolean isPaid() {
-        return this.paid;
-    }
-
-    public boolean isWaived() {
-        return this.waived;
     }
 
     public boolean isPending() {
@@ -226,10 +227,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         this.amountPaid = BigDecimal.ZERO;
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.paid = false;
-    }
-
-    public void setAmountWaived(final BigDecimal amountWaived) {
-        this.amountWaived = amountWaived;
     }
 
     public void undoWaiveFlag() {
@@ -315,14 +312,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
 
     public LoanCharge getLoanCharge() {
         return this.loancharge;
-    }
-
-    public LoanRepaymentScheduleInstallment getInstallment() {
-        return this.installment;
-    }
-
-    public void setInstallment(LoanRepaymentScheduleInstallment installment) {
-        this.installment = installment;
     }
 
     public LoanInstallmentChargeData toData() {

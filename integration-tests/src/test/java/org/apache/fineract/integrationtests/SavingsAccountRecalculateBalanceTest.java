@@ -37,11 +37,13 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings({ "rawtypes" })
 @Order(2)
+@ExtendWith({ SavingsTestLifecycleExtension.class })
 public class SavingsAccountRecalculateBalanceTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountRecalculateBalanceTest.class);
@@ -66,6 +69,7 @@ public class SavingsAccountRecalculateBalanceTest {
     private SavingsProductHelper savingsProductHelper;
     private SchedulerJobHelper scheduleJobHelper;
     private PaymentTypeHelper paymentTypeHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
     public void setup() {
@@ -75,6 +79,7 @@ public class SavingsAccountRecalculateBalanceTest {
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.paymentTypeHelper = new PaymentTypeHelper();
+        this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
     @Test
@@ -224,7 +229,7 @@ public class SavingsAccountRecalculateBalanceTest {
 
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 }

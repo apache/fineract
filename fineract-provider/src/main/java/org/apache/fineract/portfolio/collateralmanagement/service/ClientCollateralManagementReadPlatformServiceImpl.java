@@ -34,8 +34,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ClientCollateralManagementReadPlatformServiceImpl implements ClientCollateralManagementReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -81,7 +83,7 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
                 LoanTransaction loanTransaction = this.loanTransactionRepository.findById(transactionId)
                         .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
                 LoanTransactionData loanTransactionData = LoanTransactionData.instance(loanTransaction.getLoan().getId(),
-                        loanTransaction.getCreatedDateTime(), loanTransaction.getOutstandingLoanBalance(),
+                        loanTransaction.getCreatedDate().orElse(null), loanTransaction.getOutstandingLoanBalance(),
                         loanTransaction.getPrincipalPortion());
                 loanTransactionDataList.add(loanTransactionData);
             }

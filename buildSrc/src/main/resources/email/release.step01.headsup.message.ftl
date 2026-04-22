@@ -20,11 +20,9 @@
 -->
 Hello everyone,
 
-... based on our "How to Release Apache Fineract" process documented at https://cwiki.apache.org/confluence/x/DRwIB:
+... based on our release process (https://fineract.apache.org/docs/current/#_releases), I will create a release/${project['fineract.release.version']} branch off develop in our git repository at https://github.com/apache/fineract on ${project['fineract.releaseBranch.date']}.
 
-I will create a ${project['fineract.release.version']} branch off develop in our git repository at https://github.com/apache/fineract on ${project['fineract.release.date']}.
-
-The release tracking umbrella issue for tracking all activity in JIRA is FINERACT-${project['fineract.release.issue']!'0000'} (https://issues.apache.org/jira/browse/FINERACT-${project['fineract.release.issue']!'0000'}) for this Fineract ${project['fineract.release.version']}.
+The release tracking umbrella issue for tracking all activity in JIRA is FINERACT-${project['fineract.release.issue']!'0000'} (https://issues.apache.org/jira/browse/FINERACT-${project['fineract.release.issue']!'0000'}).
 
 If you have any work in progress that you would like to see included in this release, please add "blocking" links to the release JIRA issue.
 

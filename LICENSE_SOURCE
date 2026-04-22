@@ -208,10 +208,10 @@
 ======================================
 
 All the source code for the Apache Fineract project is released under the
-license above. Additionally, the Apache Fineract source and binary
-distribution includes a number of third-party files that are required in
-order to the software to function. Unless noted below, these jars
-and resource files are also released under the ASF license above.
+license above. Additionally, the Apache Fineract source and binary distribution
+includes a number of third-party files that are required in order to the
+software to function. Unless noted below, these jars and resource files are
+also released under the Apache License, Version 2.0.
 
 ==================================================
 *The exceptions for source release are as follows:

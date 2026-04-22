@@ -23,9 +23,10 @@ dependencies {
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
     // We also (normally should have) no need to ever use 'compileOnly'.
 
-    implementation(
-            project(path: ':fineract-avro-schemas')
-            )
+    implementation(project(path: ':fineract-avro-schemas'))
+    implementation(project(path: ':fineract-command'))
+    implementation(project(path: ':fineract-validation'))
+
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     implementation(
@@ -86,7 +87,6 @@ dependencies {
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(
-            'org.apache.bval:org.apache.bval.bundle',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility

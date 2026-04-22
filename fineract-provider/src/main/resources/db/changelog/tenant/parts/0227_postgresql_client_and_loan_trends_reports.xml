@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="postgresql-client-trends-by-week" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, EXTRACT(WEEK FROM cl.activation_date) AS Weeks
+            FROM m_office o LEFT JOIN m_client cl on o.id = cl.office_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (cl.activation_date BETWEEN (CURRENT_DATE - INTERVAL '12 weeks') AND CURRENT_DATE)
+            GROUP BY EXTRACT(WEEK FROM cl.activation_date)"/>
+            <where>report_name = 'ClientTrendsByWeek'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="fineract" id="postgresql-client-trends-by-month" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(cl.id) AS count, TRIM(TO_CHAR(cl.activation_date, 'Month')) AS Months
+            FROM m_office o LEFT JOIN m_client cl ON o.id = cl.office_id
+            WHERE o.hierarchy LIKE CONCAT((SELECT ino.hierarchy FROM m_office ino WHERE ino.id = ${officeId}), '%')
+                AND (cl.activation_date BETWEEN (CURRENT_DATE - INTERVAL '12 months') AND CURRENT_DATE)
+            GROUP BY TRIM(TO_CHAR(cl.activation_date, 'Month')), EXTRACT(MONTH FROM cl.activation_date)
+            ORDER BY EXTRACT(MONTH FROM cl.activation_date) ASC"/>
+            <where>report_name = 'ClientTrendsByMonth'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="fineract" id="postgresql-loan-trends-by-week" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, EXTRACT(WEEK FROM ln.disbursedon_date) AS Weeks
+            FROM m_office o
+                LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN (CURRENT_DATE - INTERVAL '12 weeks') AND CURRENT_DATE)
+            GROUP BY EXTRACT(WEEK FROM ln.disbursedon_date)"/>
+            <where>report_name = 'LoanTrendsByWeek'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="fineract" id="postgresql-loan-trends-by-month" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="SELECT COUNT(ln.id) AS lcount, TRIM(TO_CHAR(ln.disbursedon_date, 'Month')) AS Months
+            FROM m_office o
+                LEFT JOIN m_client cl on o.id = cl.office_id
+                LEFT JOIN m_loan ln on cl.id = ln.client_id
+            WHERE o.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )
+                AND (ln.disbursedon_date BETWEEN (CURRENT_DATE - INTERVAL '12 months') AND CURRENT_DATE)
+            GROUP BY TRIM(TO_CHAR(ln.disbursedon_date, 'Month')), EXTRACT(MONTH FROM ln.disbursedon_date)
+            ORDER BY EXTRACT(MONTH FROM ln.disbursedon_date) ASC"/>
+            <where>report_name = 'LoanTrendsByMonth'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

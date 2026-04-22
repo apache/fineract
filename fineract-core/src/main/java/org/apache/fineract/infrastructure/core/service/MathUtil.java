@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.springframework.lang.NonNull;
 
 public final class MathUtil {
 
@@ -39,8 +39,8 @@ public final class MathUtil {
         return nullToDefault(value, 0L);
     }
 
-    public static Long nullToDefault(Long value, Long def) {
-        return value == null ? def : value;
+    public static Integer nullToZero(Integer value) {
+        return nullToDefault(value, 0);
     }
 
     public static Long zeroToNull(Long value) {
@@ -113,8 +113,12 @@ public final class MathUtil {
      * @param notNull
      *            if true then null parameter is omitted, otherwise returns null
      */
-    public static Long min(Long first, Long second, Long third, boolean notNull) {
-        return min(min(first, second, notNull), third, notNull);
+    public static Long min(boolean notNull, Long first, Long... amounts) {
+        Long result = first;
+        for (Long amount : amounts) {
+            result = min(result, amount, notNull);
+        }
+        return result;
     }
 
     /** @return sum the two values considering null values */
@@ -123,18 +127,12 @@ public final class MathUtil {
     }
 
     /** @return sum the values considering null values */
-    public static Long add(Long first, Long second, Long third) {
-        return add(add(first, second), third);
-    }
-
-    /** @return sum the values considering null values */
-    public static Long add(Long first, Long second, Long third, Long fourth) {
-        return add(add(add(first, second), third), fourth);
-    }
-
-    /** @return sum the values considering null values */
-    public static Long add(Long first, Long second, Long third, Long fourth, Long fifth) {
-        return add(add(add(add(first, second), third), fourth), fifth);
+    public static Long add(Long... amounts) {
+        Long result = null;
+        for (Long amount : amounts) {
+            result = add(result, amount);
+        }
+        return result;
     }
 
     /** @return first minus second considering null values, maybe negative */
@@ -142,18 +140,24 @@ public final class MathUtil {
         return first == null ? null : second == null ? first : Math.subtractExact(first, second);
     }
 
-    /**
-     * @return first minus the others considering null values, maybe negative
-     */
-    public static Long subtractToZero(Long first, Long second, Long third) {
-        return subtractToZero(subtract(first, second), third);
+    /** @return first minus second considering null values, maybe negative */
+    public static Long subtract(Long first, Long... amounts) {
+        Long result = first;
+        for (Long amount : amounts) {
+            result = subtract(result, amount);
+        }
+        return result;
     }
 
     /**
      * @return first minus the others considering null values, maybe negative
      */
-    public static Long subtractToZero(Long first, Long second, Long third, Long fourth) {
-        return subtractToZero(subtract(subtract(first, second), third), fourth);
+    public static Long subtractToZero(Long first, Long... amounts) {
+        Long result = first;
+        for (Long amount : amounts) {
+            result = subtractToZero(result, amount);
+        }
+        return result;
     }
 
     /** @return NONE negative first minus second considering null values */
@@ -213,6 +217,10 @@ public final class MathUtil {
         return nullToZero(first).compareTo(nullToZero(second)) < 0;
     }
 
+    public static boolean isLessThanOrEqualTo(BigDecimal first, BigDecimal second) {
+        return nullToZero(first).compareTo(second) <= 0;
+    }
+
     public static boolean isGreaterThanOrEqualTo(BigDecimal first, BigDecimal second) {
         return nullToZero(first).compareTo(nullToZero(second)) >= 0;
     }
@@ -232,7 +240,7 @@ public final class MathUtil {
      *            if true then null parameter is omitted, otherwise returns null
      */
     public static BigDecimal min(BigDecimal first, BigDecimal second, boolean notNull) {
-        return notNull ? first == null ? second : second == null ? first : min(first, second, false)
+        return notNull ? (first == null ? second : (second == null ? first : min(first, second, false)))
                 : isLessThan(first, second) ? first : second;
     }
 
@@ -241,8 +249,12 @@ public final class MathUtil {
      * @param notNull
      *            if true then null parameter is omitted, otherwise returns null
      */
-    public static BigDecimal min(BigDecimal first, BigDecimal second, BigDecimal third, boolean notNull) {
-        return min(min(first, second, notNull), third, notNull);
+    public static BigDecimal min(boolean notNull, BigDecimal first, BigDecimal... amounts) {
+        BigDecimal result = first;
+        for (BigDecimal amount : amounts) {
+            result = min(result, amount, notNull);
+        }
+        return result;
     }
 
     /** @return sum the two values considering null values */
@@ -256,39 +268,25 @@ public final class MathUtil {
     }
 
     /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third) {
-        return add(first, second, third, MoneyHelper.getMathContext());
+    public static BigDecimal add(BigDecimal... amounts) {
+        return add(MoneyHelper.getMathContext(), amounts);
     }
 
-    /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, MathContext mc) {
-        return add(add(first, second, mc), third, mc);
-    }
-
-    /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth) {
-        return add(first, second, third, fourth, MoneyHelper.getMathContext());
-    }
-
-    /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth, MathContext mc) {
-        return add(add(add(first, second, mc), third, mc), fourth, mc);
-    }
-
-    /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth, BigDecimal fifth) {
-        return add(first, second, third, fourth, fifth, MoneyHelper.getMathContext());
-    }
-
-    /** @return sum the values considering null values */
-    public static BigDecimal add(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth, BigDecimal fifth,
-            MathContext mc) {
-        return add(add(add(add(first, second, mc), third, mc), fourth, mc), fifth, mc);
+    public static BigDecimal add(MathContext mc, BigDecimal... amounts) {
+        BigDecimal result = null;
+        for (BigDecimal amount : amounts) {
+            result = add(result, amount, mc);
+        }
+        return result;
     }
 
     /** @return first minus second considering null values, maybe negative */
-    public static BigDecimal subtract(BigDecimal first, BigDecimal second) {
-        return subtract(first, second, MoneyHelper.getMathContext());
+    public static BigDecimal subtract(BigDecimal first, BigDecimal... amounts) {
+        BigDecimal result = first;
+        for (BigDecimal amount : amounts) {
+            result = subtract(result, amount, MoneyHelper.getMathContext());
+        }
+        return result;
     }
 
     /** @return first minus second considering null values, maybe negative */
@@ -297,28 +295,15 @@ public final class MathUtil {
     }
 
     /** @return NONE negative first minus second considering null values */
-    public static BigDecimal subtractToZero(BigDecimal first, BigDecimal second) {
-        return negativeToZero(subtract(first, second));
-    }
-
-    /**
-     * @return first minus the others considering null values, maybe negative
-     */
-    public static BigDecimal subtractToZero(BigDecimal first, BigDecimal second, BigDecimal third) {
-        return subtractToZero(subtract(first, second), third);
-    }
-
-    /**
-     * @return first minus the others considering null values, maybe negative
-     */
-    public static BigDecimal subtractToZero(BigDecimal first, BigDecimal second, BigDecimal third, BigDecimal fourth) {
-        return subtractToZero(subtract(subtract(first, second), third), fourth);
+    public static BigDecimal subtractToZero(BigDecimal first, BigDecimal... amounts) {
+        BigDecimal result = subtract(first, amounts);
+        return negativeToZero(result);
     }
 
     /**
      * @return BigDecimal with scale set to the 'digitsAfterDecimal' of the parameter currency
      */
-    public static BigDecimal normalizeAmount(BigDecimal amount, @NotNull MonetaryCurrency currency) {
+    public static BigDecimal normalizeAmount(BigDecimal amount, @NonNull MonetaryCurrency currency) {
         return amount == null ? null : amount.setScale(currency.getDigitsAfterDecimal(), MoneyHelper.getRoundingMode());
     }
 
@@ -336,10 +321,22 @@ public final class MathUtil {
         return amount == null ? null : amount.toPlainString();
     }
 
+    public static Money toMoney(BigDecimal amount, @NonNull MonetaryCurrency currency) {
+        return amount == null ? null : Money.of(currency, amount);
+    }
+
     // ----------------- Money -----------------
 
-    public static Money nullToZero(Money value, @NotNull MonetaryCurrency currency) {
+    public static BigDecimal toBigDecimal(Money value) {
+        return value == null ? null : value.getAmount();
+    }
+
+    public static Money nullToZero(Money value, @NonNull MonetaryCurrency currency) {
         return nullToDefault(value, Money.zero(currency));
+    }
+
+    public static Money nullToZero(Money value, @NonNull MonetaryCurrency currency, @NonNull MathContext mc) {
+        return nullToDefault(value, Money.zero(currency, mc));
     }
 
     public static Money nullToDefault(Money value, Money def) {
@@ -352,7 +349,12 @@ public final class MathUtil {
 
     /** @return parameter value or ZERO if it is negative */
     public static Money negativeToZero(Money value) {
-        return value == null || isGreaterThanZero(value) ? value : Money.zero(value.getCurrency());
+        return value == null || isGreaterThanZero(value) ? value : Money.zero(value.getCurrencyData());
+    }
+
+    /** @return parameter value or ZERO if it is negative */
+    public static Money negativeToZero(Money value, MathContext mc) {
+        return value == null || isGreaterThanZero(value, mc) ? value : Money.zero(value.getCurrencyData(), mc);
     }
 
     public static boolean isEmpty(Money value) {
@@ -361,6 +363,10 @@ public final class MathUtil {
 
     public static boolean isGreaterThanZero(Money value) {
         return value != null && value.isGreaterThanZero();
+    }
+
+    public static boolean isGreaterThanZero(Money value, MathContext mc) {
+        return value != null && value.isGreaterThanZero(mc);
     }
 
     public static boolean isLessThanZero(Money value) {
@@ -383,35 +389,43 @@ public final class MathUtil {
         return first == null ? second : second == null ? first : first.plus(second);
     }
 
-    public static Money plus(Money first, Money second, Money third) {
-        return plus(plus(first, second), third);
+    public static Money plus(Money first, Money second, MathContext mc) {
+        return first == null ? second : second == null ? first : first.plus(second, mc);
     }
 
-    public static Money plus(Money first, Money second, Money third, Money fourth) {
-        return plus(plus(plus(first, second), third), fourth);
+    public static Money plus(Money... multipleAmounts) {
+        Money result = null;
+        for (Money amount : multipleAmounts) {
+            result = plus(result, amount);
+        }
+        return result;
+    }
+
+    public static Money plus(MathContext mc, Money... multipleAmounts) {
+        Money result = null;
+        for (Money amount : multipleAmounts) {
+            result = plus(result, amount, mc);
+        }
+        return result;
     }
 
     public static Money minus(Money first, Money second) {
         return first == null ? null : second == null ? first : first.minus(second);
     }
 
-    /**
-     * @return first minus the others considering null values, maybe negative
-     */
-    public static Money minusToZero(Money first, Money second, Money third) {
-        return minusToZero(minus(first, second), third);
+    public static Money minus(Money first, Money... multipleAmounts) {
+        Money result = first;
+        for (Money amount : multipleAmounts) {
+            result = minus(result, amount);
+        }
+        return result;
     }
 
     /**
      * @return first minus the others considering null values, maybe negative
      */
-    public static Money minusToZero(Money first, Money second, Money third, Money fourth) {
-        return minusToZero(minus(minus(first, second), third), fourth);
-    }
-
-    /** @return NONE negative first minus second considering null values */
-    public static Money minusToZero(Money first, Money second) {
-        return negativeToZero(minus(first, second));
+    public static Money minusToZero(Money first, Money... multipleAmounts) {
+        return negativeToZero(minus(first, multipleAmounts));
     }
 
     /**
@@ -429,8 +443,22 @@ public final class MathUtil {
      * @param notNull
      *            if true then null parameter is omitted, otherwise returns null
      */
-    public static Money min(Money first, Money second, Money third, boolean notNull) {
-        return min(min(first, second, notNull), third, notNull);
+    public static Money min(boolean notNull, Money first, Money... amounts) {
+        Money result = first;
+        for (Money amount : amounts) {
+            result = min(result, amount, notNull);
+        }
+        return result;
+    }
+
+    /** @return Money null safe negate */
+    public static Money negate(Money amount) {
+        return negate(amount, MoneyHelper.getMathContext());
+    }
+
+    /** @return Money null safe negate */
+    public static Money negate(Money amount, MathContext mc) {
+        return isEmpty(amount) ? amount : amount.negated(mc);
     }
 
     /**
@@ -442,13 +470,7 @@ public final class MathUtil {
      * @return
      */
     public static BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage, final int precision) {
-        BigDecimal percentageOf = BigDecimal.ZERO;
-        if (isGreaterThanZero(value)) {
-            final MathContext mc = new MathContext(precision, MoneyHelper.getRoundingMode());
-            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
-            percentageOf = value.multiply(multiplicand, mc);
-        }
-        return percentageOf;
+        return percentageOf(value, percentage, new MathContext(precision, MoneyHelper.getRoundingMode()));
     }
 
     /**
@@ -466,5 +488,29 @@ public final class MathUtil {
             percentageOf = value.multiply(multiplicand, mc);
         }
         return percentageOf;
+    }
+
+    /**
+     * Remove unused zeros from end of BigDecimal fraction and keep the format "0.0"
+     *
+     * @param value
+     * @return
+     */
+    public static BigDecimal stripTrailingZeros(final BigDecimal value) {
+        return value == null ? null : new BigDecimal(value.stripTrailingZeros().toPlainString());
+    }
+
+    /**
+     * @return calculates maximum of the two values considering null values
+     * @param notNull
+     *            if true then null parameter is omitted, otherwise returns null
+     */
+    public static Money max(Money first, Money second, boolean notNull) {
+        return notNull ? first == null ? second : second == null ? first : max(first, second, false)
+                : isGreaterThan(first, second) ? first : second;
+    }
+
+    public static boolean isEqualTo(Integer first, Integer second) {
+        return nullToZero(first).equals(nullToZero(second));
     }
 }

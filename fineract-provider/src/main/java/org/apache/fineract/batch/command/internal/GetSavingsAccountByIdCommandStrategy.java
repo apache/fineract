@@ -29,8 +29,13 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountsApiResource;
+import org.apache.fineract.portfolio.savings.api.SavingsApiSetConstants;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +44,8 @@ import org.springframework.stereotype.Component;
 public class GetSavingsAccountByIdCommandStrategy implements CommandStrategy {
 
     private final SavingsAccountsApiResource savingsAccountsApiResource;
+    private final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Override
     public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo) {
@@ -57,6 +64,7 @@ public class GetSavingsAccountByIdCommandStrategy implements CommandStrategy {
 
         String staffInSelectedOfficeOnly = null;
         String chargeStatus = null;
+        String associations = null;
         if (!queryParameters.isEmpty()) {
             if (queryParameters.containsKey("staffInSelectedOfficeOnly")) {
                 staffInSelectedOfficeOnly = queryParameters.get("staffInSelectedOfficeOnly");
@@ -64,10 +72,17 @@ public class GetSavingsAccountByIdCommandStrategy implements CommandStrategy {
             if (queryParameters.containsKey("chargeStatus")) {
                 chargeStatus = queryParameters.get("chargeStatus");
             }
+            if (queryParameters.containsKey("associations")) {
+                associations = queryParameters.get("associations");
+            }
         }
 
-        final String responseBody = savingsAccountsApiResource.retrieveOne(savingsAccountId,
-                Boolean.parseBoolean(staffInSelectedOfficeOnly), chargeStatus, uriInfo);
+        SavingsAccountData savingsAccountData = savingsAccountsApiResource.retrieveOne(savingsAccountId,
+                Boolean.parseBoolean(staffInSelectedOfficeOnly), chargeStatus, associations, uriInfo);
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final String responseBody = toApiJsonSerializer.serialize(settings, savingsAccountData,
+                SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
 
         return new BatchResponse().setRequestId(batchRequest.getRequestId()).setStatusCode(HttpStatus.SC_OK).setBody(responseBody)
                 .setHeaders(batchRequest.getHeaders());

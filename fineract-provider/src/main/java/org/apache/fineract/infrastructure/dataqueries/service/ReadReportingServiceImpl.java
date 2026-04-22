@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,6 +26,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -53,13 +51,16 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterJoinData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import org.apache.fineract.infrastructure.dataqueries.domain.ReportType;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.owasp.esapi.ESAPI;
-import org.owasp.esapi.codecs.UnixCodec;
+import org.openpdf.text.Document;
+import org.openpdf.text.PageSize;
+import org.openpdf.text.pdf.PdfPTable;
+import org.openpdf.text.pdf.PdfWriter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -78,11 +79,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final FineractProperties fineractProperties;
 
     @Override
-    public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+    public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams) {
         return out -> {
             try {
-                final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
+                final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
                 generateCsvFileBuffer(result, out);
             } catch (final Exception e) {
                 throw ErrorHandler.getMappable(e);
@@ -106,8 +106,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+    public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
 
         final long startTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
@@ -115,7 +114,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     LogParameterEscapeUtil.escapeLogParameter(type));
         }
 
-        final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
+        final String sql = getSQLtoRun(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
@@ -127,8 +126,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 
-    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
 
         String sql = getSql(name, type);
 
@@ -143,7 +141,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // (typically used to return report lists containing only reports
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}", Boolean.toString(isSelfServiceUserReport));
         sql = this.genericDataService.replace(sql, "${currentDate}", sqlGenerator.currentBusinessDate());
         sql = StringUtils.replaceIgnoreCase(sql, "NOW()", sqlGenerator.currentTenantDateTime());
         sql = StringUtils.replaceIgnoreCase(sql, "curdate()", sqlGenerator.currentBusinessDate());
@@ -154,34 +151,71 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     private String getSql(final String name, final String type) {
-        final String encodedName = sqlInjectionPreventerService.encodeSql(name);
-        final String encodedType = sqlInjectionPreventerService.encodeSql(type);
+        if (name == null || type == null) {
+            throw new IllegalArgumentException("Report name and type cannot be null");
+        }
 
-        final String inputSql = "select " + encodedType + "_sql as the_sql from stretchy_" + encodedType + " where " + encodedType
-                + "_name = ?";
+        // Validate report type against whitelist - this prevents SQL injection in table names
+        if (!ReportType.isValidType(type)) {
+            throw new IllegalArgumentException("Invalid report type provided");
+        }
+
+        final ReportType reportType = ReportType.fromValue(type);
+        final String quotedTableName = getQuotedTableName(reportType);
+        final String quotedColumnSqlName = getQuotedColumnName(reportType, "_sql");
+        final String quotedColumnNameName = getQuotedColumnName(reportType, "_name");
+
+        // Use parameterized query with validated and quoted identifiers to prevent SQL injection
+        final String inputSql = "SELECT " + quotedColumnSqlName + " AS the_sql FROM " + quotedTableName + " WHERE " + quotedColumnNameName
+                + " = ?";
 
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
-        // the return statement contains the exact sql required
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, encodedName);
+        // Use parameterized query - name parameter is safely handled by JDBC
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, name);
 
         if (rs.next() && rs.getString("the_sql") != null) {
             return rs.getString("the_sql");
         }
-        throw new ReportNotFoundException(encodedName);
+        throw new ReportNotFoundException(name);
+    }
+
+    /**
+     * Gets the properly quoted table name for the given report type. This method ensures SQL injection prevention by
+     * using only validated enum values.
+     */
+    private String getQuotedTableName(ReportType reportType) {
+        String tableName = "stretchy_" + reportType.getValue();
+        return sqlInjectionPreventerService.quoteIdentifier(tableName);
+    }
+
+    /**
+     * Gets the properly quoted column name by combining the report type prefix with a suffix. This method ensures SQL
+     * injection prevention by using only validated enum values and safely constructing the full column name before
+     * quoting.
+     *
+     * @param reportType
+     *            the validated report type
+     * @param suffix
+     *            the column name suffix (e.g., "_sql", "_name")
+     * @return the properly quoted full column name
+     */
+    private String getQuotedColumnName(ReportType reportType, String suffix) {
+        String fullColumnName = reportType.getValue() + suffix;
+        return sqlInjectionPreventerService.quoteIdentifier(fullColumnName);
     }
 
     @Override
-    public String getReportType(final String reportName, final boolean isSelfServiceUserReport, final boolean isParameterType) {
+    public String getReportType(final String reportName, final boolean isParameterType) {
         if (isParameterType) {
             return "Table";
         }
 
-        final String sql = "SELECT coalesce(report_type,'') AS report_type FROM stretchy_report WHERE report_name = ? AND self_service_user_report = ?";
+        final String sql = "SELECT coalesce(report_type,'') AS report_type FROM stretchy_report WHERE report_name = ?";
 
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, reportName, isSelfServiceUserReport);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, reportName);
 
         if (rs.next()) {
             return rs.getString("report_type");
@@ -190,8 +224,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams) {
 
         final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
@@ -201,7 +234,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
 
         try {
-            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport);
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
 
             final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             final List<ResultsetRowData> data = result.getData();
@@ -212,8 +245,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             final Document document = new Document(PageSize.B0.rotate());
 
-            String validatedFileName = ESAPI.encoder().encodeForOS(new UnixCodec(), reportName);
-            PdfWriter.getInstance(document, new FileOutputStream(fileLocation + validatedFileName + ".pdf"));
+            // Validate filename characters and use Path.of() for safe handling
+            if (!reportName.matches("^[a-zA-Z0-9_.-]+$")) {
+                throw new IllegalArgumentException("Invalid report name format");
+            }
+            Path validatedPath = Paths.get(fileLocation, reportName + ".pdf").normalize();
+            if (!validatedPath.startsWith(Paths.get(fileLocation))) {
+                throw new IllegalArgumentException("Path traversal attempt detected");
+            }
+            PdfWriter.getInstance(document, new FileOutputStream(validatedPath.toString()));
             document.open();
 
             final PdfPTable table = new PdfPTable(chSize);

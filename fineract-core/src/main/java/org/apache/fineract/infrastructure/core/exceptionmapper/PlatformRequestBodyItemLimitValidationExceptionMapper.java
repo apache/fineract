@@ -24,6 +24,7 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformRequestBodyItemLimitValidationException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ public class PlatformRequestBodyItemLimitValidationExceptionMapper
     @Override
     public Response toResponse(PlatformRequestBodyItemLimitValidationException exception) {
         String globalisationMessage = "error.msg.validation.request.body.item.limit.validation";
-        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), exception.getMessage());
+        log.warn("Exception occurred", ErrorHandler.findMostSpecificException(exception));
         final ApiGlobalErrorResponse badRequestErrorResponse = ApiGlobalErrorResponse.badClientRequest(globalisationMessage,
                 exception.getMessage());
         return Response.status(Response.Status.BAD_REQUEST).entity(badRequestErrorResponse).type(MediaType.APPLICATION_JSON).build();

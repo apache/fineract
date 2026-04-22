@@ -25,10 +25,27 @@ dependencies {
     }
 
     implementation(project(path: ':fineract-core'))
+    implementation(project(path: ':fineract-cob'))
+    implementation(project(path: ':fineract-command'))
+    implementation(project(path: ':fineract-command-audit'))
+    implementation(project(path: ':fineract-command-jdbc'))
+    implementation(project(path: ':fineract-validation'))
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-investor'))
+    implementation(project(path: ':fineract-rates'))
+    implementation(project(path: ':fineract-charge'))
     implementation(project(path: ':fineract-loan'))
     implementation(project(path: ':fineract-savings'))
+    implementation(project(path: ':fineract-branch'))
+    implementation(project(path: ':fineract-document'))
+    implementation(project(path: ':fineract-progressive-loan'))
+    implementation(project(path: ':fineract-report'))
+    implementation(project(path: ':fineract-tax'))
+    implementation(project(path: ':fineract-loan-origination'))
+    implementation(project(path: ':fineract-security'))
+    implementation(project(path: ':fineract-working-capital-loan'))
+    implementation(project(path: ':fineract-mix'))
+
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
@@ -42,11 +59,14 @@ dependencies {
             )
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
+            'org.springframework.boot:spring-boot-starter-oauth2-authorization-server',
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
             'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.boot:spring-boot-starter-data-jdbc',
             'org.springframework.batch:spring-batch-integration',
             'org.springframework.boot:spring-boot-starter-integration',
             'org.springframework.integration:spring-integration-event',
@@ -105,13 +125,12 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
+            'org.reflections:reflections',
             )
 
-    implementation ('software.amazon.msk:aws-msk-iam-auth:2.0.3') {
-        exclude group: 'commons-logging'
-    }
+    implementation 'software.amazon.msk:aws-msk-iam-auth'
 
-    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.19'
+    implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta'
 
     implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
@@ -130,7 +149,7 @@ dependencies {
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.apache.activemq:activemq-client-jakarta') {
+    implementation ('org.apache.activemq:activemq-client') {
         exclude group: 'org.apache.geronimo.specs'
         exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }
@@ -175,8 +194,6 @@ dependencies {
 
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(
-            'org.apache.bval:org.apache.bval.bundle',
-
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient'
@@ -193,6 +210,7 @@ dependencies {
     implementation 'org.apache.commons:commons-math3'
 
     implementation 'io.github.classgraph:classgraph'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!

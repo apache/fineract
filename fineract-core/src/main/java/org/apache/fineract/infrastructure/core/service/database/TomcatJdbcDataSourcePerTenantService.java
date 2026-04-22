@@ -18,13 +18,17 @@
  */
 package org.apache.fineract.infrastructure.core.service.database;
 
+import com.google.common.collect.Sets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.configuration.service.MoneyHelperInitializationService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -43,21 +47,19 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Map<Long, DataSource> TENANT_TO_DATA_SOURCE_MAP = new ConcurrentHashMap<>();
+    @Qualifier("hikariTenantDataSource")
     private final DataSource tenantDataSource;
     private final TenantDetailsService tenantDetailsService;
 
     private final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory;
 
-    @Autowired
-    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource,
-            final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory, final TenantDetailsService tenantDetailsService) {
-        this.tenantDataSource = tenantDataSource;
-        this.dataSourcePerTenantServiceFactory = dataSourcePerTenantServiceFactory;
-        this.tenantDetailsService = tenantDetailsService;
-    }
+    private final Set<Long> tenantMoneyInitializingSet = Sets.newConcurrentHashSet();
+    @Autowired(required = false)
+    private MoneyHelperInitializationService moneyHelperInitializationService;
 
     @Override
     public DataSource retrieveDataSource() {
@@ -70,11 +72,25 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
             Long tenantConnectionKey = tenantConnection.getConnectionId();
             // if tenantConnection information available switch to the
             // appropriate datasource for that tenant.
-            actualDataSource = TENANT_TO_DATA_SOURCE_MAP.computeIfAbsent(tenantConnectionKey, (key) -> {
-                DataSource tenantSpecificDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection);
-                return tenantSpecificDataSource;
-            });
+            actualDataSource = TENANT_TO_DATA_SOURCE_MAP.computeIfAbsent(tenantConnectionKey,
+                    (key) -> dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenant, tenantConnection));
+        }
 
+        // TODO: This is definitely not the optimal place to initialize the rounding modes
+        // Preferably nothing should use a statically referenced context and the initialization
+        // should happen within the rounding mode retrieval
+        if (moneyHelperInitializationService != null && tenant != null) {
+            Long connectionId = tenant.getConnection().getConnectionId();
+            if (!tenantMoneyInitializingSet.contains(connectionId) && !moneyHelperInitializationService.isTenantInitialized(tenant)) {
+                // Double check to prevent visibility and race-condition issues
+                synchronized (tenantMoneyInitializingSet) {
+                    if (!tenantMoneyInitializingSet.contains(connectionId)) {
+                        tenantMoneyInitializingSet.add(connectionId);
+                        moneyHelperInitializationService.initializeTenantRoundingMode(tenant);
+                        tenantMoneyInitializingSet.remove(connectionId);
+                    }
+                }
+            }
         }
 
         return actualDataSource;
@@ -93,7 +109,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
         Long tenantConnectionKey = tenantConnection.getConnectionId();
         TENANT_TO_DATA_SOURCE_MAP.computeIfAbsent(tenantConnectionKey, (key) -> {
-            DataSource tenantSpecificDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection);
+            DataSource tenantSpecificDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenant, tenantConnection);
             try (Connection connection = tenantSpecificDataSource.getConnection()) {
                 String url = connection.getMetaData().getURL();
                 log.debug("Established database connection with URL {}", url);

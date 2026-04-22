@@ -58,7 +58,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
+import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
@@ -79,7 +79,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
@@ -169,7 +168,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                     Group group = this.groupRepositoryWrapper.findOneWithNotFoundDetection(groupId);
 
-                    if (command.booleanObjectValueOfParameterNamed("isParentAccount") != null) {
+                    if (command.booleanObjectValueOfParameterNamed("isParentAccount") != null
+                            && ("1".equals(command.stringValueOfParameterNamed("isParentAccount"))
+                                    || command.booleanObjectValueOfParameterNamed("isParentAccount"))) {
                         // empty table check
                         if (gsimRepository.count() != 0) {
                             // Parent-Not an empty table
@@ -194,7 +195,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     } else {
                         if (gsimRepository.count() != 0) {
                             // Child-Not an empty table check
-                            gsimAccount = gsimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId);
+                            if (applicationId.compareTo(BigDecimal.ZERO) == 0) {
+                                gsimAccount = gsimRepository.findOneByIsAcceptingChildAndApplicationIdAndGroupId(true, applicationId,
+                                        groupId);
+                            } else {
+                                gsimAccount = gsimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId);
+                            }
                             accountNumber = gsimAccount.getAccountNumber() + (gsimAccount.getChildAccountsCount() + 1);
                             account.updateAccountNo(accountNumber);
                             this.gsimWritePlatformService.incrementChildAccountCount(gsimAccount);
@@ -227,13 +233,11 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             // end of gsim
             final Long savingsId = account.getId();
             if (command.parameterExists(SavingsApiConstants.datatables)) {
-                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
-                        EntityTables.SAVINGS.getName(), savingsId, account.productId(),
-                        command.arrayOfParameterNamed(SavingsApiConstants.datatables));
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(), EntityTables.SAVINGS.getName(),
+                        savingsId, account.productId(), command.arrayOfParameterNamed(SavingsApiConstants.datatables));
             }
             this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
-                    StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
-                    account.productId());
+                    StatusEnum.CREATE.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), account.productId());
 
             businessEventNotifierService.notifyPostBusinessEvent(new SavingsCreateBusinessEvent(account));
 
@@ -244,7 +248,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     .withClientId(account.clientId()) //
                     .withGroupId(account.groupId()) //
                     .withSavingsId(savingsId) //
-                    .withGsimId(gsimAccount == null ? 0 : gsimAccount.getId()).build();
+                    .withGsimId(gsimAccount == null ? 0 : gsimAccount.getId()) //
+                    .build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -396,9 +401,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
         }
 
-        final List<Note> relatedNotes = this.noteRepository.findBySavingsAccount(account);
-        this.noteRepository.deleteAllInBatch(relatedNotes);
-
+        this.noteRepository.deleteAllBySavingsAccount(account);
         this.savingAccountRepository.delete(account);
 
         return new CommandProcessingResultBuilder() //
@@ -448,8 +451,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         checkClientOrGroupActive(savingsAccount);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
-                StatusEnum.APPROVE.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
-                savingsAccount.productId());
+                StatusEnum.APPROVE.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command);
         if (!changes.isEmpty()) {
@@ -571,8 +573,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         checkClientOrGroupActive(savingsAccount);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
-                StatusEnum.REJECTED.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
-                savingsAccount.productId());
+                StatusEnum.REJECTED.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command);
         if (!changes.isEmpty()) {
@@ -608,8 +609,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         checkClientOrGroupActive(savingsAccount);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
-                StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(),
-                savingsAccount.productId());
+                StatusEnum.WITHDRAWN.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command);
         if (!changes.isEmpty()) {
@@ -681,7 +681,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         return new CommandProcessingResultBuilder() //
                 .withSavingsId(account.getId()) //
-                .setRollbackTransaction(rollbackTransaction)//
+                .setRollbackTransaction(rollbackTransaction) //
                 .build();
     }
 

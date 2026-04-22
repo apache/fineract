@@ -49,7 +49,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 
 @Entity
 @Table(name = "m_deposit_account_term_and_preclosure")
-public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
+public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<Long> {
 
     @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositAmount;
@@ -281,11 +281,13 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
     }
 
     public boolean isReinvestOnClosure() {
-        return DepositAccountOnClosureType.fromInt(this.onAccountClosureType).isReinvest();
+        final DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(this.onAccountClosureType);
+        return closureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
+                || closureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY;
     }
 
     public boolean isTransferToSavingsOnClosure() {
-        return DepositAccountOnClosureType.fromInt(this.onAccountClosureType).isTransferToSavings();
+        return DepositAccountOnClosureType.fromInt(this.onAccountClosureType) == DepositAccountOnClosureType.TRANSFER_TO_SAVINGS;
     }
 
     public DepositAccountTermAndPreClosure copy(BigDecimal depositAmount) {

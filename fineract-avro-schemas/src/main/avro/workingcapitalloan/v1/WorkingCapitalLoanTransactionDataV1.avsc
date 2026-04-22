@@ -1,0 +1,127 @@
+{
+    "name": "WorkingCapitalLoanTransactionDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "wcLoanId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "type",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanTransactionEnumDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transactionDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transactionAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentDetailData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.payment.v1.PaymentDetailDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "classification",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversalExternalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "principalPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "feeChargesPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "penaltyChargesPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

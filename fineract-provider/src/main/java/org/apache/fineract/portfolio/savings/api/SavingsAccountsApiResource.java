@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -43,7 +42,6 @@ import jakarta.ws.rs.core.UriInfo;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -65,6 +63,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
@@ -73,6 +72,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountTemplateReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
@@ -85,6 +85,7 @@ import org.springframework.util.CollectionUtils;
 public class SavingsAccountsApiResource {
 
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private final SavingsAccountTemplateReadPlatformService savingsAccountTemplateReadPlatformService;
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -92,16 +93,15 @@ public class SavingsAccountsApiResource {
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final SqlValidator sqlValidator;
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Savings Account Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Savings Account Template", operationId = "retrieveSavingsAccountTemplate", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "savingsaccounts/template?clientId=1\n"
             + "\n" + "\n" + "savingsaccounts/template?clientId=1&productId=1")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsTemplateResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsTemplateResponse.class)))
     public String template(@QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @QueryParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @QueryParam("productId") @Parameter(description = "productId") final Long productId,
@@ -110,7 +110,7 @@ public class SavingsAccountsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final SavingsAccountData savingsAccount = savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId,
+        final SavingsAccountData savingsAccount = savingsAccountTemplateReadPlatformService.retrieveTemplate(clientId, groupId, productId,
                 staffInSelectedOfficeOnly);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -118,12 +118,10 @@ public class SavingsAccountsApiResource {
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List savings applications/accounts", description = "Lists savings applications/accounts\n\n"
+    @Operation(summary = "List savings applications/accounts", operationId = "retrieveAllSavingsAccounts", description = "Lists savings applications/accounts\n\n"
             + "Example Requests:\n" + "\n" + "savingsaccounts\n" + "\n" + "\n" + "savingsaccounts?fields=name")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsResponse.class)))
     public String retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             // @QueryParam("underHierarchy") final String hierarchy,
@@ -134,7 +132,11 @@ public class SavingsAccountsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final SearchParameters searchParameters = SearchParameters.forSavings(externalId, offset, limit, orderBy, sortOrder);
+        sqlValidator.validate(orderBy);
+        sqlValidator.validate(sortOrder);
+        sqlValidator.validate(externalId);
+        final SearchParameters searchParameters = SearchParameters.builder().limit(limit).externalId(externalId).offset(offset)
+                .orderBy(orderBy).sortOrder(sortOrder).build();
 
         final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
 
@@ -145,14 +147,13 @@ public class SavingsAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Submit new savings application", description = "Submits new savings application\n\n"
+    @Operation(summary = "Submit new savings application", operationId = "submitSavingsApplication", description = "Submits new savings application\n\n"
             + "Mandatory Fields: clientId or groupId, productId, submittedOnDate\n\n"
             + "Optional Fields: accountNo, externalId, fieldOfficerId\n\n"
             + "Inherited from Product (if not provided): nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax\n\n"
             + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type Savings: datatables")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsResponse.class)))
     public String submitApplication(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
@@ -177,33 +178,24 @@ public class SavingsAccountsApiResource {
 
     @GET
     @Path("{accountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a savings application/account", description = "Retrieves a savings application/account\n\n"
-            + "Example Requests :\n" + "\n" + "savingsaccounts/1\n" + "\n" + "\n" + "savingsaccounts/1?associations=all")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsAccountIdResponse.class))) })
-    public String retrieveOne(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
-            @Context final UriInfo uriInfo) {
+    @Operation(summary = "Retrieve a savings account", operationId = "retrieveSavingsAccount")
+    public SavingsAccountData retrieveOne(@PathParam("accountId") final Long accountId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
+            @QueryParam("associations") final String associations, @Context final UriInfo uriInfo) {
 
         return retrieveSavingAccount(accountId, null, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
     }
 
     @GET
     @Path("/external-id/{externalId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a savings application/account by external id", description = "Retrieves a savings application/account by external id\n\n"
-            + "Example Requests :\n" + "\n" + "savingsaccounts/external-id/ExternalId1\n" + "\n" + "\n"
-            + "savingsaccounts/external-id/ExternalId1?associations=all")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsAccountIdResponse.class))) })
-    public String retrieveOne(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
-            @Context final UriInfo uriInfo) {
+    @Operation(summary = "Retrieve a savings account by external ID", operationId = "retrieveSavingsAccountByExternalId")
+    public SavingsAccountData retrieveOne(@PathParam("externalId") final String externalId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
+            @QueryParam("associations") final String associations, @Context final UriInfo uriInfo) {
 
         return retrieveSavingAccount(null, externalId, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
     }
@@ -212,14 +204,13 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability", description = "Modify a savings application:\n\n"
+    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability", operationId = "updateSavingsAccount", description = "Modify a savings application:\n\n"
             + "Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc\n\n"
             + "Modify savings account withhold tax applicability:\n\n"
             + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
             + "Showing request/response for 'Modify a savings application'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
     public String update(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
@@ -231,14 +222,13 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability", description = "Modify a savings application:\n\n"
+    @Operation(summary = "Modify a savings application | Modify savings account withhold tax applicability by externalId", operationId = "updateSavingsAccountByExternalId", description = "Modify a savings application by externalId:\n\n"
             + "Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc\n\n"
             + "Modify savings account withhold tax applicability:\n\n"
             + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
             + "Showing request/response for 'Modify a savings application'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
     public String update(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
@@ -349,10 +339,9 @@ public class SavingsAccountsApiResource {
             + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
             + "Unblock Savings Account debit transactions:\n\n"
             + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
-            + "Showing request/response for 'Unassign Savings Officer'")
+            + "Showing request/response for 'Unassign Savings Officer'", operationId = "handleCommandsSavingsAccount")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
     public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -395,10 +384,9 @@ public class SavingsAccountsApiResource {
             + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
             + "Unblock Savings Account debit transactions:\n\n"
             + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
-            + "Showing request/response for 'Unassign Savings Officer'")
+            + "Showing request/response for 'Unassign Savings Officer'", operationId = "handleCommandsSavingsAccountByExternalId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class))) })
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
     public String handleCommands(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -412,11 +400,9 @@ public class SavingsAccountsApiResource {
 
     @DELETE
     @Path("{accountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a savings application", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class))) })
+    @Operation(summary = "Delete a savings application", operationId = "deleteSavingsAccount", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
     public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
 
         return deleteSavingAccount(accountId, null);
@@ -424,11 +410,9 @@ public class SavingsAccountsApiResource {
 
     @DELETE
     @Path("/external-id/{externalId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a savings application", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class))) })
+    @Operation(summary = "Delete a savings application by externalId", operationId = "deleteSavingsAccountByExternalId", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
     public String delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
 
         return deleteSavingAccount(null, externalId);
@@ -476,8 +460,8 @@ public class SavingsAccountsApiResource {
         return toApiJsonSerializer.serialize(importDocumentId);
     }
 
-    private String retrieveSavingAccount(Long accountId, String externalId, boolean staffInSelectedOfficeOnly, String chargeStatus,
-            UriInfo uriInfo) {
+    private SavingsAccountData retrieveSavingAccount(Long accountId, String externalId, boolean staffInSelectedOfficeOnly,
+            String chargeStatus, UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (!(is(chargeStatus, "all") || is(chargeStatus, "active") || is(chargeStatus, "inactive"))) {
@@ -488,14 +472,7 @@ public class SavingsAccountsApiResource {
         accountId = getResolvedAccountId(accountId, accountExternalId);
         final SavingsAccountData savingsAccount = savingsAccountReadPlatformService.retrieveOne(accountId);
 
-        final Set<String> mandatoryResponseParameters = new HashSet<>();
-        final SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount,
-                staffInSelectedOfficeOnly, chargeStatus, uriInfo, mandatoryResponseParameters);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
-                mandatoryResponseParameters);
-        return toApiJsonSerializer.serialize(settings, savingsAccountTemplate,
-                SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+        return populateTemplateAndAssociations(accountId, savingsAccount, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
     }
 
     private String updateSavingAccount(Long accountId, String externalId, String apiRequestBodyAsJson, String commandParam) {
@@ -621,8 +598,7 @@ public class SavingsAccountsApiResource {
     }
 
     private SavingsAccountData populateTemplateAndAssociations(final Long accountId, final SavingsAccountData savingsAccount,
-            final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo,
-            final Set<String> mandatoryResponseParameters) {
+            final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
@@ -635,7 +611,6 @@ public class SavingsAccountsApiResource {
             }
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
-                mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = savingsAccountReadPlatformService
                         .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
@@ -644,7 +619,6 @@ public class SavingsAccountsApiResource {
             }
 
             if (associationParameters.contains(SavingsApiConstants.charges)) {
-                mandatoryResponseParameters.add(SavingsApiConstants.charges);
                 final Collection<SavingsAccountChargeData> currentCharges = savingsAccountChargeReadPlatformService
                         .retrieveSavingsAccountCharges(accountId, chargeStatus);
                 if (!CollectionUtils.isEmpty(currentCharges)) {
@@ -656,8 +630,8 @@ public class SavingsAccountsApiResource {
         SavingsAccountData templateData = null;
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            templateData = savingsAccountReadPlatformService.retrieveTemplate(savingsAccount.getClientId(), savingsAccount.getGroupId(),
-                    savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
+            templateData = savingsAccountTemplateReadPlatformService.retrieveTemplate(savingsAccount.getClientId(),
+                    savingsAccount.getGroupId(), savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
         }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);

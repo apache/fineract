@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -49,6 +50,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncod
  * Wraps the provided JSON with convenience functions for extracting parameter values and checking for changes against
  * an existing value.
  */
+
+@Getter
 public final class JsonCommand {
 
     private final String jsonCommand;
@@ -68,30 +71,34 @@ public final class JsonCommand {
     private final Long creditBureauId;
     private final Long organisationCreditBureauId;
     private final String jobName;
+    private final ExternalId loanExternalId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId,
-            final Long creditBureauId, final Long organisationCreditBureauId, final String jobName) {
+            final Long creditBureauId, final Long organisationCreditBureauId, final String jobName, final ExternalId loanExternalId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId, creditBureauId, organisationCreditBureauId, jobName);
+                clientId, loanId, savingsId, transactionId, url, productId, creditBureauId, organisationCreditBureauId, jobName,
+                loanExternalId);
 
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final String url, final Long productId, final Long creditBureauId, final Long organisationCreditBureauId,
-            final String jobName) {
+            final String url, final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
+            final ExternalId loanExternalId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
-                null, null, null, url, productId, creditBureauId, organisationCreditBureauId, jobName);
+                null, null, null, url, productId, creditBureauId, organisationCreditBureauId, jobName, loanExternalId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId, Long creditBureauId, final Long organisationCreditBureauId, final String jobName) {
+            final Long productId, Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
+            final ExternalId loanExternalId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId, creditBureauId, organisationCreditBureauId, jobName);
+                clientId, loanId, savingsId, transactionId, url, productId, creditBureauId, organisationCreditBureauId, jobName,
+                loanExternalId);
 
     }
 
@@ -100,7 +107,7 @@ public final class JsonCommand {
         return new JsonCommand(command.commandId, jsonCommand, parsedCommand, command.fromApiJsonHelper, command.entityName,
                 command.resourceId, command.subresourceId, command.groupId, command.clientId, command.loanId, command.savingsId,
                 command.transactionId, command.url, command.productId, command.creditBureauId, command.organisationCreditBureauId,
-                command.jobName);
+                command.jobName, command.loanExternalId);
     }
 
     public static JsonCommand fromExistingCommand(JsonCommand command, final JsonElement parsedCommand, final Long clientId) {
@@ -108,13 +115,14 @@ public final class JsonCommand {
         return new JsonCommand(command.commandId, jsonCommand, parsedCommand, command.fromApiJsonHelper, command.entityName,
                 command.resourceId, command.subresourceId, command.groupId, clientId, command.loanId, command.savingsId,
                 command.transactionId, command.url, command.productId, command.creditBureauId, command.organisationCreditBureauId,
-                command.jobName);
+                command.jobName, command.loanExternalId);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName) {
+            final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
+            final ExternalId loanExternalId) {
 
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
@@ -133,6 +141,7 @@ public final class JsonCommand {
         this.creditBureauId = creditBureauId;
         this.organisationCreditBureauId = organisationCreditBureauId;
         this.jobName = jobName;
+        this.loanExternalId = loanExternalId;
     }
 
     public static JsonCommand fromJsonElement(final Long resourceId, final JsonElement parsedCommand) {
@@ -162,13 +171,14 @@ public final class JsonCommand {
         this.creditBureauId = null;
         this.organisationCreditBureauId = null;
         this.jobName = null;
+        this.loanExternalId = null;
     }
 
     public JsonCommand(final Long resourceId, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
         this.parsedCommand = parsedCommand;
         this.resourceId = resourceId;
         this.commandId = null;
-        this.jsonCommand = null;
+        this.jsonCommand = parsedCommand.toString();
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.entityName = null;
         this.subresourceId = null;
@@ -182,19 +192,13 @@ public final class JsonCommand {
         this.creditBureauId = null;
         this.organisationCreditBureauId = null;
         this.jobName = null;
+        this.loanExternalId = null;
     }
 
     public static JsonCommand from(final String jsonCommand) {
-        return new JsonCommand(null, jsonCommand, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new JsonCommand(null, jsonCommand, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null);
 
-    }
-
-    public Long getOrganisationCreditBureauId() {
-        return this.organisationCreditBureauId;
-    }
-
-    public Long getCreditBureauId() {
-        return this.creditBureauId;
     }
 
     public String json() {
@@ -225,48 +229,12 @@ public final class JsonCommand {
         return this.commandId;
     }
 
-    public String entityName() {
-        return this.entityName;
-    }
-
     public Long entityId() {
         return this.resourceId;
     }
 
     public Long subentityId() {
         return this.subresourceId;
-    }
-
-    public Long getGroupId() {
-        return this.groupId;
-    }
-
-    public Long getClientId() {
-        return this.clientId;
-    }
-
-    public Long getLoanId() {
-        return this.loanId;
-    }
-
-    public Long getSavingsId() {
-        return this.savingsId;
-    }
-
-    public String getTransactionId() {
-        return this.transactionId;
-    }
-
-    public String getUrl() {
-        return this.url;
-    }
-
-    public Long getProductId() {
-        return this.productId;
-    }
-
-    public String getJobName() {
-        return this.jobName;
     }
 
     private boolean differenceExists(final TemporalAccessor baseValue, final TemporalAccessor workingCopyValue) {
@@ -301,6 +269,10 @@ public final class JsonCommand {
 
     public boolean hasParameter(final String parameterName) {
         return parameterExists(parameterName);
+    }
+
+    public boolean hasParameterValue(final String parameterName) {
+        return this.fromApiJsonHelper.parameterHasValue(parameterName, this.parsedCommand);
     }
 
     public String dateFormat() {
@@ -387,6 +359,10 @@ public final class JsonCommand {
             isChanged = differenceExists(existingValue, workingValue);
         }
         return isChanged;
+    }
+
+    public <T extends Enum<T>> T enumValueOfParameterNamed(String parameterName, Class<T> enumType) {
+        return this.fromApiJsonHelper.enumValueOfParameterNamed(parameterName, this.parsedCommand, enumType);
     }
 
     public String stringValueOfParameterNamed(final String parameterName) {
@@ -564,7 +540,7 @@ public final class JsonCommand {
      */
     public boolean booleanPrimitiveValueOfParameterNamed(final String parameterName) {
         final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, this.parsedCommand);
-        return ObjectUtils.defaultIfNull(value, Boolean.FALSE);
+        return ObjectUtils.getIfNull(value, Boolean.FALSE);
     }
 
     public boolean isChangeInArrayParameterNamed(final String parameterName, final String[] existingValue) {
@@ -620,5 +596,4 @@ public final class JsonCommand {
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Set<String> requestDataParameters) {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, requestDataParameters);
     }
-
 }

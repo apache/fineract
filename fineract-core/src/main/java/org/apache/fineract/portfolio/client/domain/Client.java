@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,9 +26,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -45,7 +45,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -58,7 +57,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Setter
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
-public class Client extends AbstractAuditableWithUTCDateTimeCustom {
+public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
@@ -71,13 +70,9 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "transfer_to_office_id")
     private Office transferToOffice;
 
-    @OneToOne(optional = true)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @Column(name = "image_id")
+    private Long imageId;
 
-    /**
-     * A value from {@link ClientStatus}.
-     */
     @Column(name = "status_enum", nullable = false)
     private Integer status;
 
@@ -133,9 +128,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
 
-    @Transient
-    private boolean accountNumberRequiresAutoGeneration = false;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "closure_reason_cv_id")
     private CodeValue closureReason;
@@ -179,16 +171,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "submittedon_date")
     private LocalDate submittedOnDate;
 
-    /*
-     * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
-     *
-     * @Column(name = "updated_on") private LocalDate updatedOnDate;
-     *
-     * @ManyToOne(optional = true, fetch = FetchType.LAZY)
-     *
-     * @JoinColumn(name = "updated_by") private AppUser updatedBy;
-     */
-
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "activatedon_userid")
     private AppUser activatedBy;
@@ -220,6 +202,9 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "proposed_transfer_date")
     private LocalDate proposedTransferDate;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "client", orphanRemoval = true, fetch = FetchType.LAZY)
+    protected Set<ClientIdentifier> identifiers = new HashSet<>();
+
     public static Client instance(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
@@ -242,7 +227,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
-            this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
@@ -332,21 +316,12 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     }
 
-    public boolean isAccountNumberRequiresAutoGeneration() {
-        return this.accountNumberRequiresAutoGeneration;
-    }
-
-    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
-        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
-    }
-
     public boolean identifiedBy(final Long clientId) {
         return getId().equals(clientId);
     }
 
     public void updateAccountNo(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
-        this.accountNumberRequiresAutoGeneration = false;
     }
 
     public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
@@ -513,10 +488,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         return this.office.getId();
     }
 
-    public void setImage(final Image image) {
-        this.image = image;
-    }
-
     public String mobileNo() {
         return this.mobileNo;
     }
@@ -527,10 +498,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setMobileNo(final String mobileNo) {
         this.mobileNo = mobileNo;
-    }
-
-    public boolean isNotStaff() {
-        return !isStaff();
     }
 
     public boolean isStaff() {
@@ -746,5 +713,4 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             setDisplayName(null);
         }
     }
-
 }

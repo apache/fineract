@@ -26,7 +26,7 @@ import java.util.Map;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
-import org.apache.fineract.infrastructure.bulkimport.constants.ChartOfAcountsConstants;
+import org.apache.fineract.infrastructure.bulkimport.constants.ChartOfAccountsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -103,22 +103,23 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
 
     private void setRules(Sheet chartOfAccountsSheet) {
         CellRangeAddressList accountTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.ACCOUNT_TYPE_COL, ChartOfAcountsConstants.ACCOUNT_TYPE_COL);
+                ChartOfAccountsConstants.ACCOUNT_TYPE_COL, ChartOfAccountsConstants.ACCOUNT_TYPE_COL);
         CellRangeAddressList accountUsageRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.ACCOUNT_USAGE_COL, ChartOfAcountsConstants.ACCOUNT_USAGE_COL);
+                ChartOfAccountsConstants.ACCOUNT_USAGE_COL, ChartOfAccountsConstants.ACCOUNT_USAGE_COL);
         CellRangeAddressList manualEntriesAllowedRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.MANUAL_ENTRIES_ALLOWED_COL, ChartOfAcountsConstants.MANUAL_ENTRIES_ALLOWED_COL);
+                ChartOfAccountsConstants.MANUAL_ENTRIES_ALLOWED_COL, ChartOfAccountsConstants.MANUAL_ENTRIES_ALLOWED_COL);
         CellRangeAddressList parentRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.PARENT_COL, ChartOfAcountsConstants.PARENT_COL);
+                ChartOfAccountsConstants.PARENT_COL, ChartOfAccountsConstants.PARENT_COL);
         CellRangeAddressList tagRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.TAG_COL, ChartOfAcountsConstants.TAG_COL);
+                ChartOfAccountsConstants.TAG_COL, ChartOfAccountsConstants.TAG_COL);
         CellRangeAddressList officeNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.OFFICE_COL, ChartOfAcountsConstants.OFFICE_COL); // validation for opening bal
-                                                                                         // office column
+                ChartOfAccountsConstants.OFFICE_COL, ChartOfAccountsConstants.OFFICE_COL); // validation for opening bal
+                                                                                           // office column
         CellRangeAddressList currencyCodeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                ChartOfAcountsConstants.CURRENCY_CODE, ChartOfAcountsConstants.CURRENCY_CODE);// validation for currency
-                                                                                              // code for opening
-                                                                                              // balance
+                ChartOfAccountsConstants.CURRENCY_CODE, ChartOfAccountsConstants.CURRENCY_CODE);// validation for
+                                                                                                // currency
+                                                                                                // code for opening
+                                                                                                // balance
 
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) chartOfAccountsSheet);
         setNames(chartOfAccountsSheet, accountTypesNoDuplicatesList, offices);
@@ -183,16 +184,12 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                 if (row == null) {
                     row = worksheet.createRow(rowNo);
                 }
-                writeFormula(ChartOfAcountsConstants.PARENT_ID_COL, row,
+                writeFormula(ChartOfAccountsConstants.PARENT_ID_COL, row,
                         "IF(ISERROR(VLOOKUP($E" + (rowNo + 1) + ",$T$2:$U$" + (glAccounts.size() + 1) + ",2,FALSE))," + "\"\",(VLOOKUP($E"
                                 + (rowNo + 1) + ",$T$2:$U$" + (glAccounts.size() + 1) + ",2,FALSE)))");
-                writeFormula(ChartOfAcountsConstants.TAG_ID_COL, row,
+                writeFormula(ChartOfAccountsConstants.TAG_ID_COL, row,
                         "IF(ISERROR(VLOOKUP($H" + (rowNo + 1) + ",$V$2:$W$" + (glAccounts.size() + 1) + ",2,FALSE))," + "\"\",(VLOOKUP($H"
                                 + (rowNo + 1) + ",$V$2:$W$" + (glAccounts.size() + 1) + ",2,FALSE)))");
-                // auto populate office id for bulk import of opening balance
-                writeFormula(ChartOfAcountsConstants.OFFICE_COL_ID, row,
-                        "IF(ISERROR(VLOOKUP($K" + (rowNo + 1) + ",$X$2:$Y$" + (offices.size() + 1) + ",2,FALSE)),\"\",(VLOOKUP($K"
-                                + (rowNo + 1) + ",$X$2:$Y$" + (offices.size() + 1) + ",2,FALSE)))");
             }
         } catch (Exception e) {
             LOG.error("Problem occurred in setDefaults function", e);
@@ -213,24 +210,40 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         for (String accountType : accountTypesNoDuplicatesList) {
             startIndex = rowIndex + 1;
             Row row = chartOfAccountsSheet.createRow(rowIndex);
-            writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_TYPE_COL, row, accountType);
+            writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_TYPE_COL, row, accountType);
             List<String> accountNamesandTags = accountTypeToAccountNameAndTag.get(accountType);
             if (!accountNamesandTags.isEmpty()) {
                 for (String accountNameandTag : accountNamesandTags) {
                     if (chartOfAccountsSheet.getRow(rowIndex) != null) {
                         List<String> accountNameAndTagAr = Splitter.on('-').splitToList(accountNameandTag);
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
+                        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
+                        if (accountNameAndTagAr.get(2).equals("null")) {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_COL, row, "");
+                        } else {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
+                        }
+                        if (accountNameAndTagAr.get(3).equals("0")) {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_ID_COL, row, "");
+                        } else {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        }
                         rowIndex++;
                     } else {
                         row = chartOfAccountsSheet.createRow(rowIndex);
                         List<String> accountNameAndTagAr = Splitter.on('-').splitToList(accountNameandTag);
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
+                        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
+                        if (accountNameAndTagAr.get(2).equals("null")) {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_COL, row, "");
+                        } else {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
+                        }
+                        if (accountNameAndTagAr.get(3).equals("0")) {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_ID_COL, row, "");
+                        } else {
+                            writeString(ChartOfAccountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
+                        }
                         rowIndex++;
                     }
                 }
@@ -246,14 +259,14 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
             startIndex = rowIndex + 1;
             if (chartOfAccountsSheet.getRow(rowIndex) != null) {
                 Row row = chartOfAccountsSheet.getRow(rowIndex);
-                writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, row, office.getName());
-                writeLong(ChartOfAcountsConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
+                writeString(ChartOfAccountsConstants.LOOKUP_OFFICE_COL, row, office.getName());
+                writeLong(ChartOfAccountsConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
                 rowIndex++;
 
             } else {
                 Row row = chartOfAccountsSheet.createRow(rowIndex);
-                writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, row, office.getName());
-                writeLong(ChartOfAcountsConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
+                writeString(ChartOfAccountsConstants.LOOKUP_OFFICE_COL, row, office.getName());
+                writeLong(ChartOfAccountsConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
                 rowIndex++;
             }
 
@@ -263,58 +276,53 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
     private void setLayout(Sheet chartOfAccountsSheet) {
 
         Row rowHeader = chartOfAccountsSheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.ACCOUNT_TYPE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.ACCOUNT_NAME_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.ACCOUNT_USAGE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.MANUAL_ENTRIES_ALLOWED_COL,
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.ACCOUNT_TYPE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.ACCOUNT_NAME_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.ACCOUNT_USAGE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.MANUAL_ENTRIES_ALLOWED_COL,
                 TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.PARENT_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.PARENT_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.GL_CODE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.TAG_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.TAG_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.DESCRIPTION_COL, TemplatePopulateImportConstants.EXTRALARGE_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.OFFICE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.OFFICE_COL_ID, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.CURRENCY_CODE, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.DEBIT_AMOUNT, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.CREDIT_AMOUNT, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_ACCOUNT_TYPE_COL,
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.PARENT_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.PARENT_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.GL_CODE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.TAG_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.TAG_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.DESCRIPTION_COL, TemplatePopulateImportConstants.EXTRALARGE_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.OFFICE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.OFFICE_COL_ID, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.CURRENCY_CODE, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.DEBIT_AMOUNT, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.CREDIT_AMOUNT, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_ACCOUNT_TYPE_COL,
                 TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL,
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_ACCOUNT_NAME_COL,
                 TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_TAG_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_ACCOUNT_ID_COL,
+                TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_TAG_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_TAG_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         // adding lookup for opening balance bulk import
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_OFFICE_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_OFFICE_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        chartOfAccountsSheet.setColumnWidth(ChartOfAccountsConstants.LOOKUP_OFFICE_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
 
-        writeString(ChartOfAcountsConstants.ACCOUNT_TYPE_COL, rowHeader, "Account Type*");
-        writeString(ChartOfAcountsConstants.GL_CODE_COL, rowHeader, "GL Code *");
-        writeString(ChartOfAcountsConstants.ACCOUNT_USAGE_COL, rowHeader, "Account Usage *");
-        writeString(ChartOfAcountsConstants.MANUAL_ENTRIES_ALLOWED_COL, rowHeader, "Manual entries allowed *");
-        writeString(ChartOfAcountsConstants.PARENT_COL, rowHeader, "Parent");
-        writeString(ChartOfAcountsConstants.PARENT_ID_COL, rowHeader, "Parent Id");
-        writeString(ChartOfAcountsConstants.ACCOUNT_NAME_COL, rowHeader, "Account Name");
-        writeString(ChartOfAcountsConstants.TAG_COL, rowHeader, "Tag");
-        writeString(ChartOfAcountsConstants.TAG_ID_COL, rowHeader, "Tag Id");
-        writeString(ChartOfAcountsConstants.DESCRIPTION_COL, rowHeader, "Description *");
-        // adding data for opening balance bulk import
-        writeString(ChartOfAcountsConstants.OFFICE_COL, rowHeader, "Parent Office for Opening Balance");
-        writeString(ChartOfAcountsConstants.OFFICE_COL_ID, rowHeader, "Parent Office Code Opening Balance");
-        writeString(ChartOfAcountsConstants.CURRENCY_CODE, rowHeader, "Currency Code");
-        writeString(ChartOfAcountsConstants.DEBIT_AMOUNT, rowHeader, "Debit Amount");
-        writeString(ChartOfAcountsConstants.CREDIT_AMOUNT, rowHeader, "Credit Amount");
+        writeString(ChartOfAccountsConstants.ACCOUNT_TYPE_COL, rowHeader, "Account Type*");
+        writeString(ChartOfAccountsConstants.GL_CODE_COL, rowHeader, "GL Code *");
+        writeString(ChartOfAccountsConstants.ACCOUNT_USAGE_COL, rowHeader, "Account Usage *");
+        writeString(ChartOfAccountsConstants.MANUAL_ENTRIES_ALLOWED_COL, rowHeader, "Manual entries allowed *");
+        writeString(ChartOfAccountsConstants.PARENT_COL, rowHeader, "Parent");
+        writeString(ChartOfAccountsConstants.PARENT_ID_COL, rowHeader, "Parent Id");
+        writeString(ChartOfAccountsConstants.ACCOUNT_NAME_COL, rowHeader, "Account Name");
+        writeString(ChartOfAccountsConstants.TAG_COL, rowHeader, "Tag");
+        writeString(ChartOfAccountsConstants.TAG_ID_COL, rowHeader, "Tag Id");
+        writeString(ChartOfAccountsConstants.DESCRIPTION_COL, rowHeader, "Description *");
 
-        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_TYPE_COL, rowHeader, "Lookup Account type");
-        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, rowHeader, "Lookup Tag");
-        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, rowHeader, "Lookup Tag Id");
-        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, rowHeader, "Lookup Account name *");
-        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, rowHeader, "Lookup Account Id");
+        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_TYPE_COL, rowHeader, "Lookup Account type");
+        writeString(ChartOfAccountsConstants.LOOKUP_TAG_COL, rowHeader, "Lookup Tag");
+        writeString(ChartOfAccountsConstants.LOOKUP_TAG_ID_COL, rowHeader, "Lookup Tag Id");
+        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_NAME_COL, rowHeader, "Lookup Account name *");
+        writeString(ChartOfAccountsConstants.LOOKUP_ACCOUNT_ID_COL, rowHeader, "Lookup Account Id");
         // adding lookup for opening balance bulk import
-        writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, rowHeader, "Lookup Office Name");
-        writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_ID_COL, rowHeader, "Lookup Office Id");
+        writeString(ChartOfAccountsConstants.LOOKUP_OFFICE_COL, rowHeader, "Lookup Office Name");
+        writeString(ChartOfAccountsConstants.LOOKUP_OFFICE_ID_COL, rowHeader, "Lookup Office Id");
 
     }
 

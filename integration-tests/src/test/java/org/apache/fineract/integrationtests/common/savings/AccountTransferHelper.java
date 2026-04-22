@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.savings;
 
 import com.google.gson.Gson;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class AccountTransferHelper {
     private static final String OFFICE_ID = "1";
     private static final String TRANSFER_DESCRIPTION = "Transfer";
     public static final String ACCOUNT_TRANSFER_DATE = "01 March 2013";
+    public static final String ACCOUNT_TRANSFER_INVALID_DATE = "01 05 2013";
 
     private String transferDate = "";
     private String officeId = OFFICE_ID;
@@ -43,11 +45,19 @@ public class AccountTransferHelper {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public AccountTransferHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
             final String fromAccountType, final String toAccountType, final String transferAmount) {
 
@@ -75,6 +85,10 @@ public class AccountTransferHelper {
         return this;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer accountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
@@ -86,6 +100,76 @@ public class AccountTransferHelper {
                 accountTransferJSON, "savingsId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public Object nonExistentAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount);
+
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "savingsId");
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public Object insufficientBalanceAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount);
+
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "savingsId");
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public Object invalidAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount);
+
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "savingsId");
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public Object accountTransferWithInvalidDate(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_INVALID_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "savingsId");
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId,
             final Integer toClientId, final Integer toAccountId, final String fromAccountType, final String toAccountType,
             final String transferAmount) {

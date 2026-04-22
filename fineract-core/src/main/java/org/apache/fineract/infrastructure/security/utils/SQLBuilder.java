@@ -22,14 +22,14 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import lombok.Getter;
 
 /**
- * Utility to assemble the WHERE clause of an SQL query without the risk of SQL injection.
- *
- * <p>
- * When using this utility instead of manually assembling SQL queries, then {@link SQLInjectionValidator} should not be
- * required anymore. (Correctly using this means only ever passing completely fixed String literals to .)
+ * Utility to assemble the WHERE clause of an SQL query without the risk of SQL injection. When using this utility
+ * instead of manually assembling SQL queries, then SqlValidator should not be required anymore. (Correctly using this
+ * means only ever passing completely fixed String literals to .)
  *
  * @author Michael Vorburger <mike@vorburger.ch>
  */
@@ -57,15 +57,14 @@ public class SQLBuilder {
      *            placeholder)
      * @param argument
      *            The argument to be filtered on (e.g. "Michael" or 123). The null value is explicitly permitted.
+     * @param whereLogicalOperator
+     *            operator between the criteria
      */
-    public void addCriteria(String criteria, Object argument) {
+    public void addCriteria(String criteria, Object argument, WhereLogicalOperator whereLogicalOperator) {
         if (criteria == null || criteria.trim().isEmpty()) {
             throw new IllegalArgumentException("criteria cannot be null");
         }
         String trimmedCriteria = criteria.trim();
-        if (trimmedCriteria.isEmpty()) {
-            throw new IllegalArgumentException("criteria cannot be null");
-        }
         if (trimmedCriteria.contains("?")) {
             throw new IllegalArgumentException(
                     "criteria cannot contain a '?' (that is automatically added at the end): " + trimmedCriteria);
@@ -85,15 +84,16 @@ public class SQLBuilder {
                     "criteria cannot contain more than 1 space (between column name and operator): " + trimmedCriteria);
         }
         if (!operator.equals("=") && !operator.equals("<") && !operator.equals(">") && !operator.equals("<=") && !operator.equals(">=")
-                && !operator.equals("<>") && !operator.equals("LIKE") && !operator.equals("like") && !operator.toLowerCase().equals("is")) {
+                && !operator.equals("<>") && !operator.equalsIgnoreCase("like") && !operator.equalsIgnoreCase("is")) {
             // add support for SQL's BETWEEN and IN, if/when ever needed.. (it's
             // a little more than just adding above, as it can have multiple
             // arguments)
             throw new IllegalArgumentException("criteria must end with valid SQL operator for WHERE: " + trimmedCriteria);
         }
 
-        if (sb.length() > 0) {
-            sb.append("  AND  ");
+        // TODO: Would be better to use SqlOperator functionality to handle
+        if (!sb.isEmpty()) {
+            sb.append(whereLogicalOperator.getSqlStr());
         }
         sb.append(trimmedCriteria);
         sb.append(" ?");
@@ -101,13 +101,30 @@ public class SQLBuilder {
         args.add(argument);
     }
 
+    public void addCriteria(String criteria, Object argument) {
+        addCriteria(criteria, argument, WhereLogicalOperator.AND);
+    }
+
     /**
      * Delegates to {@link #addCriteria(String, Object)} if argument is not null, otherwise does nothing.
      */
-    public void addNonNullCriteria(String criteria, Object argument) {
+    public void addNonNullCriteria(String criteria, Object argument, WhereLogicalOperator whereLogicalOperator) {
         if (argument != null) {
-            addCriteria(criteria, argument);
+            addCriteria(criteria, argument, whereLogicalOperator);
         }
+    }
+
+    public void addNonNullCriteria(String criteria, Object argument) {
+        addNonNullCriteria(criteria, argument, WhereLogicalOperator.AND);
+    }
+
+    public void addSubOperation(Consumer<SQLBuilder> subOperation) {
+        if (!sb.isEmpty()) {
+            sb.append(WhereLogicalOperator.AND.getSqlStr());
+        }
+        sb.append(" ( ");
+        subOperation.accept(this);
+        sb.append(" ) ");
     }
 
     /**
@@ -116,8 +133,8 @@ public class SQLBuilder {
      * @return SQL WHERE clause, almost always starting with " WHERE ..." (unless no criteria, then empty)
      */
     public String getSQLTemplate() {
-        if (sb.length() > 0) {
-            return " WHERE  " + sb.toString();
+        if (!sb.isEmpty()) {
+            return " WHERE  " + sb;
         }
         return "";
     }
@@ -141,9 +158,9 @@ public class SQLBuilder {
         StringBuilder whereClause = new StringBuilder("SQLBuilder{");
         for (int i = 0; i < args.size(); i++) {
             if (i != 0) {
-                whereClause.append("  AND  ");
+                whereClause.append(WhereLogicalOperator.AND.getSqlStr());
             } else {
-                whereClause.append("WHERE  ");
+                whereClause.append("WHERE ");
             }
             Object currentArg = args.get(i);
             whereClause.append(crts.get(i));
@@ -156,11 +173,26 @@ public class SQLBuilder {
             } else if (currentArg == null) {
                 whereClause.append("null");
             } else {
-                whereClause.append(String.valueOf(currentArg));
+                whereClause.append(currentArg);
             }
             whereClause.append("]");
         }
         whereClause.append("}");
         return whereClause.toString();
+    }
+
+    @Getter
+    public enum WhereLogicalOperator {
+
+        NONE(""), //
+        AND(" AND "), //
+        OR(" OR "); //
+
+        private final String sqlStr;
+
+        WhereLogicalOperator(String sqlStr) {
+            this.sqlStr = sqlStr;
+        }
+
     }
 }

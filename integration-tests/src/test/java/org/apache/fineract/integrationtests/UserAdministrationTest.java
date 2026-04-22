@@ -19,6 +19,7 @@
 
 package org.apache.fineract.integrationtests;
 
+import com.google.gson.JsonObject;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -27,6 +28,8 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
@@ -35,7 +38,6 @@ import org.apache.fineract.client.models.PutUsersUserIdRequest;
 import org.apache.fineract.client.models.PutUsersUserIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
@@ -143,37 +145,6 @@ public class UserAdministrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testCreateNewUserBlocksDuplicateClientId() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(staffId);
-
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientId);
-
-        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId,
-                "resourceId");
-        Assertions.assertNotNull(userId);
-        this.transientUsers.add(userId);
-
-        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId,
-                "errors");
-        Map reason = (Map) errors.get(0);
-        Assertions.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.",
-                reason.get("defaultUserMessage"));
-    }
-
-    @Test
-    public void testDeleteSystemUser() {
-        final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
-        Assertions.assertNotNull(userId);
-
-        UserHelper.deleteUser(requestSpec, expectStatusCode(403), userId.intValue());
-    }
-
-    @Test
     public void testModifySystemUser() {
         final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
         Assertions.assertNotNull(userId);
@@ -182,49 +153,82 @@ public class UserAdministrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testApplicationUserCanChangeOwnPassword() {
+    public void testApplicationUserCanUpdateOwnPassword() {
         // Admin creates a new user with an empty role
         Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        String originalPassword = "aA1qwerty56";
+        String originalPassword = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(originalPassword).repeatPassword(originalPassword).sendPasswordToEmail(false)
-                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
+                .roles(List.of(Long.valueOf(roleId)));
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Long userId = userCreationResponse.getResourceId();
         Assertions.assertNotNull(userId);
 
         // User updates its own password
-        String updatedPassword = "aA1qwerty56!";
-        PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineract(simpleUsername, originalPassword).users.update26(userId,
+        String updatedPassword = "QwE!5rTy#9uP0u";
+        PutUsersUserIdResponse putUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users.updateUser(userId,
                 new PutUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
         Assertions.assertNotNull(putUsersUserIdResponse.getResourceId());
 
         // From then on the originalPassword is not working anymore
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineract(simpleUsername, originalPassword).users.retrieveOne31(userId));
+            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOneUser(userId));
         });
         Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
         Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
 
         // The update password is still working perfectly
-        GetUsersUserIdResponse ok = ok(newFineract(simpleUsername, updatedPassword).users.retrieveOne31(userId));
+        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOneUser(userId));
+    }
+
+    @Test
+    public void testApplicationUserCanChangeOwnPassword() {
+        // Admin creates a new user with an empty role
+        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        String originalPassword = "QwE!5rTy#9uP0";
+        String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(originalPassword)
+                .repeatPassword(originalPassword).sendPasswordToEmail(false).officeId(headOffice.getId())
+                .roles(List.of(Long.valueOf(roleId)));
+
+        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+        Long userId = userCreationResponse.getResourceId();
+        Assertions.assertNotNull(userId);
+
+        // User changes its own password
+
+        String updatedPassword = "pX268-4Pfv|kF6";
+        ChangePwdUsersUserIdResponse changePwdUsersUserIdResponse = ok(newFineractClient(simpleUsername, originalPassword).users
+                .changePasswordUser(userId, new ChangePwdUsersUserIdRequest().password(updatedPassword).repeatPassword(updatedPassword)));
+        Assertions.assertNotNull(changePwdUsersUserIdResponse.getResourceId());
+
+        // From then on the originalPassword is not working anymore
+        CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
+            ok(newFineractClient(simpleUsername, originalPassword).users.retrieveOneUser(userId));
+        });
+        Assertions.assertEquals(401, callFailedRuntimeException.getResponse().raw().code());
+        Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("Unauthorized"));
+
+        // The update password is still working perfectly
+        GetUsersUserIdResponse ok = ok(newFineractClient(simpleUsername, updatedPassword).users.retrieveOneUser(userId));
     }
 
     @Test
     public void testApplicationUserShallNotBeAbleToChangeItsOwnRoles() {
         // Admin creates a new user with one role assigned
         Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        String password = "aA1qwerty56";
+        String password = "QwE!5rTy#9uP0";
         String simpleUsername = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice(requestSpec, responseSpec);
-        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername)
-                .firstname(Utils.randomStringGenerator("NotificationFN", 4)).lastname(Utils.randomStringGenerator("NotificationLN", 4))
-                .email("whatever@mifos.org").password(password).repeatPassword(password).sendPasswordToEmail(false)
-                .officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
+        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(simpleUsername).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(Long.valueOf(roleId)));
 
         PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
         Long userId = userCreationResponse.getResourceId();
@@ -235,7 +239,7 @@ public class UserAdministrationTest extends IntegrationTest {
 
         // User tries to update it's own roles
         CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class, () -> {
-            ok(newFineract(simpleUsername, password).users.update26(userId,
+            ok(newFineractClient(simpleUsername, password).users.updateUser(userId,
                     new PutUsersUserIdRequest().roles(List.of(Long.valueOf(roleId2)))));
         });
 
@@ -243,4 +247,41 @@ public class UserAdministrationTest extends IntegrationTest {
         Assertions.assertTrue(callFailedRuntimeException.getMessage().contains("not.enough.permission.to.update.fields"));
     }
 
+    @Test
+    public void testUserCreationWithValidPassword() {
+        String validPassword = "Abcdef1#2$3%XYZ";
+
+        PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, validPassword);
+        PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+
+        Assertions.assertNotNull(userCreationResponse.getResourceId());
+    }
+
+    @Test
+    public void testUserCreationWithInvalidPasswords() {
+        Map<String, String> invalidPasswords = Map.ofEntries(Map.entry("TooShort", "Ab1#Xyz"), // Less than 12
+                                                                                               // characters
+                Map.entry("NoUppercase", "abcdefg1#2$3%xyz"), // Missing uppercase letter
+                Map.entry("NoLowercase", "ABCDEFG1#2$3%XYZ"), // Missing lowercase letter
+                Map.entry("NoDigit", "Abcdefg#@$%XYZabc"), // Missing digit
+                Map.entry("NoSpecialChar", "Abcdefg123456XYZ"), // Missing special character
+                Map.entry("ContainsWhitespace", "Abcdefg1# 2$3%"), // Contains whitespace
+                Map.entry("RepeatedCharacters", "AAbbcc11##$$%%YY") // Contains repeated characters
+        );
+        this.responseSpec = new ResponseSpecBuilder().build();
+
+        invalidPasswords.forEach((description, password) -> {
+            PostUsersRequest createUserRequest = UserHelper.buildUserRequest(responseSpec, requestSpec, password);
+            JsonObject jsonResponse = UserHelper.createUserWithJsonResponse(requestSpec, responseSpec, createUserRequest);
+            Assertions.assertEquals("400", jsonResponse.get("httpStatusCode").getAsString(), "Expected HTTP 400 for: " + description);
+            Assertions.assertEquals("validation.msg.validation.errors.exist",
+                    jsonResponse.get("userMessageGlobalisationCode").getAsString(), "Expected user message code for: " + description);
+
+            JsonObject errorDetails = jsonResponse.getAsJsonArray("errors").get(0).getAsJsonObject();
+            Assertions.assertEquals("password", errorDetails.get("parameterName").getAsString(),
+                    "Expected validation error parameter name for: " + description);
+            Assertions.assertEquals("validation.msg.user.password.does.not.match.regexp",
+                    errorDetails.get("userMessageGlobalisationCode").getAsString(), "Expected validation code for: " + description);
+        });
+    }
 }

@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.core.service.database.SqlOperator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
@@ -45,50 +44,44 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatatableChecksReadService {
 
     private final JdbcTemplate jdbcTemplate;
-    protected final DatabaseTypeResolver databaseTypeResolver;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final RegisterDataTableMapper registerDataTableMapper;
     private final EntityDataTableChecksMapper entityDataTableChecksMapper;
     private final EntityDatatableChecksRepository entityDatatableChecksRepository;
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final DatatableReadService datatableReadService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final PaginationHelper paginationHelper;
 
-    @Autowired
-    public EntityDatatableChecksReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseTypeResolver databaseTypeResolver,
-            DatabaseSpecificSQLGenerator sqlGenerator, final LoanProductReadPlatformService loanProductReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final EntityDatatableChecksRepository entityDatatableChecksRepository,
-            final ReadWriteNonCoreDataService readWriteNonCoreDataService, PaginationHelper paginationHelper) {
-
+    public EntityDatatableChecksReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final DatabaseSpecificSQLGenerator sqlGenerator,
+            final EntityDatatableChecksRepository entityDatatableChecksRepository, final DatatableReadService datatableReadService,
+            final LoanProductReadPlatformService loanProductReadPlatformService,
+            final SavingsProductReadPlatformService savingsProductReadPlatformService, final PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;
-        this.databaseTypeResolver = databaseTypeResolver;
         this.sqlGenerator = sqlGenerator;
-        this.registerDataTableMapper = new RegisterDataTableMapper();
-        this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
+        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
+        this.datatableReadService = datatableReadService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
-        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
         this.paginationHelper = paginationHelper;
+        this.registerDataTableMapper = new RegisterDataTableMapper();
+        this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
     }
 
     @Override
-    public Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, final Long status, final String entity,
-            final Long productId) {
+    public Page<EntityDataTableChecksData> retrieveAll(@NonNull SearchParameters searchParameters, final Integer status,
+            final String entity, final Long productId) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.entityDataTableChecksMapper.schema());
+        sqlBuilder.append("select ").append(sqlGenerator.calcFoundRows()).append(" ").append(this.entityDataTableChecksMapper.schema());
 
         if (status != null || entity != null || productId != null) {
             sqlBuilder.append(" where ");
@@ -109,9 +102,9 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             paramList.add(productId);
         }
 
-        if (searchParameters.isLimited()) {
+        if (searchParameters.hasLimit()) {
             sqlBuilder.append(" ");
-            if (searchParameters.isOffset()) {
+            if (searchParameters.hasOffset()) {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
             } else {
                 sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
@@ -122,20 +115,19 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     }
 
     @Override
-    public List<DatatableData> retrieveTemplates(final Long status, final String entity, final Long productId) {
-
+    public List<DatatableData> retrieveTemplates(final Integer status, final String entity, final Long productId) {
         List<EntityDatatableChecks> tableRequiredBeforeAction = null;
         if (productId != null) {
             tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndProduct(entity, status, productId);
         }
 
-        if (tableRequiredBeforeAction == null || tableRequiredBeforeAction.size() < 1) {
+        if (tableRequiredBeforeAction == null || tableRequiredBeforeAction.isEmpty()) {
             tableRequiredBeforeAction = this.entityDatatableChecksRepository.findByEntityStatusAndNoProduct(entity, status);
         }
-        if (tableRequiredBeforeAction != null && tableRequiredBeforeAction.size() > 0) {
+        if (tableRequiredBeforeAction != null && !tableRequiredBeforeAction.isEmpty()) {
             List<DatatableData> ret = new ArrayList<>();
             for (EntityDatatableChecks t : tableRequiredBeforeAction) {
-                ret.add(this.readWriteNonCoreDataService.retrieveDatatable(t.getDatatableName()));
+                ret.add(this.datatableReadService.retrieveDatatable(t.getDatatableName()));
             }
             return ret;
         }
@@ -162,7 +154,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         List<DatatableCheckStatusData> ret = new ArrayList<>();
         if (statuses != null) {
             for (StatusEnum status : statuses) {
-                ret.add(new DatatableCheckStatusData(status.name(), status.getCode()));
+                ret.add(new DatatableCheckStatusData(status.name(), status.getValue()));
             }
         }
         return ret;
@@ -196,14 +188,10 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
 
         @Override
         public EntityDataTableChecksData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
             final Long id = JdbcSupport.getLong(rs, "id");
             final String entity = rs.getString("entity");
-            final Long status = rs.getLong("status");
-            EnumOptionData statusEnum = null;
-            if (status != null) {
-                statusEnum = StatusEnum.statusTypeEnum(status.intValue());
-            }
+            final int status = rs.getInt("status");
+            EnumOptionData statusEnum = StatusEnum.toEnumOptionData(status);
             final String datatableName = rs.getString("datatableName");
             final boolean systemDefined = rs.getBoolean("systemDefined");
             final Long productId = JdbcSupport.getLong(rs, "productId");
@@ -222,5 +210,4 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
                     + "left join m_savings_product sp on sp.id = t.product_id and t.application_table_name = 'm_savings_account' ";
         }
     }
-
 }

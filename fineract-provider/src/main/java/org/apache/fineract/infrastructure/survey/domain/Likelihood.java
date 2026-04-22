@@ -38,7 +38,7 @@ import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public final class Likelihood extends AbstractPersistableCustom {
+public final class Likelihood extends AbstractPersistableCustom<Long> {
 
     @Column(name = "ppi_name", nullable = false)
     private String ppiName;

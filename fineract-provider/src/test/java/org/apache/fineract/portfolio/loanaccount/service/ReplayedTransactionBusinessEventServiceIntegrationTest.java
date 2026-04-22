@@ -27,6 +27,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -88,8 +89,9 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         LoanTransaction oldLoanTransaction = Mockito.mock(LoanTransaction.class);
         LoanTransaction newLoanTransaction = Mockito.mock(LoanTransaction.class);
         lenient().when(loanTransactionRepository.findById(1L)).thenReturn(Optional.of(oldLoanTransaction));
+        lenient().when(oldLoanTransaction.getId()).thenReturn(1L);
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        changedTransactionDetail.getNewTransactionMappings().put(1L, newLoanTransaction);
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(oldLoanTransaction, newLoanTransaction));
         // when
         underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
@@ -103,13 +105,16 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
     @Test
     public void testWhenParamHasTwoNewTransaction() {
         // given
-        LoanTransaction oldLoanTransaction = Mockito.mock(LoanTransaction.class);
+        LoanTransaction oldLoanTransaction1 = Mockito.mock(LoanTransaction.class);
+        LoanTransaction oldLoanTransaction2 = Mockito.mock(LoanTransaction.class);
         LoanTransaction newLoanTransaction = Mockito.mock(LoanTransaction.class);
-        lenient().when(loanTransactionRepository.findById(1L)).thenReturn(Optional.of(oldLoanTransaction));
-        lenient().when(loanTransactionRepository.findById(2L)).thenReturn(Optional.of(oldLoanTransaction));
+        lenient().when(loanTransactionRepository.findById(1L)).thenReturn(Optional.of(oldLoanTransaction1));
+        lenient().when(loanTransactionRepository.findById(2L)).thenReturn(Optional.of(oldLoanTransaction2));
+        lenient().when(oldLoanTransaction1.getId()).thenReturn(1L);
+        lenient().when(oldLoanTransaction2.getId()).thenReturn(2L);
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        changedTransactionDetail.getNewTransactionMappings().put(1L, newLoanTransaction);
-        changedTransactionDetail.getNewTransactionMappings().put(2L, newLoanTransaction);
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(oldLoanTransaction1, newLoanTransaction));
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(oldLoanTransaction2, newLoanTransaction));
         // when
         underTest.raiseTransactionReplayedEvents(changedTransactionDetail);
         // then
@@ -128,8 +133,9 @@ class ReplayedTransactionBusinessEventServiceIntegrationTest {
         LoanTransaction oldLoanTransaction = Mockito.mock(LoanTransaction.class);
         LoanTransaction newLoanTransaction = Mockito.mock(LoanTransaction.class);
         lenient().when(loanTransactionRepository.findById(1L)).thenReturn(Optional.of(oldLoanTransaction));
+        lenient().when(oldLoanTransaction.getId()).thenReturn(1L);
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        changedTransactionDetail.getNewTransactionMappings().put(1L, newLoanTransaction);
+        changedTransactionDetail.addTransactionChange(new TransactionChangeData(oldLoanTransaction, newLoanTransaction));
         // when
         assertThrows(RuntimeException.class, () -> underTest.raiseTransactionReplayedEvents(changedTransactionDetail));
         // then

@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Accessors(chain = true)
 @Entity
 @Table(name = "m_loanproduct_provisioning_entry")
-public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
+public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "history_id", referencedColumnName = "id", nullable = false)

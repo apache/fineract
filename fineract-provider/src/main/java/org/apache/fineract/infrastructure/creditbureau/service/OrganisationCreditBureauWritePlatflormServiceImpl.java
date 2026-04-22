@@ -64,7 +64,9 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
 
         this.organisationCreditBureauRepository.saveAndFlush(organisationCreditBureau);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(organisationCreditBureau.getId())
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(organisationCreditBureau.getId()) //
                 .build();
     }
 
@@ -84,7 +86,10 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
 
         organisationCreditBureauRepository.saveAndFlush(orgcb);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(orgcb.getId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(orgcb.getId()) //
+                .build();
 
     }
 

@@ -71,7 +71,7 @@ public class SavingsApiConstants {
     public static final String dateFormatParamName = "dateFormat";
     public static final String monthDayFormatParamName = "monthDayFormat";
     public static final String staffIdParamName = "savingsOfficerId";
-
+    public static final String accountIdParamName = "accountId";
     // savings product and account parameters
     public static final String idParamName = "id";
     public static final String isGSIM = "isGSIM";
@@ -104,6 +104,7 @@ public class SavingsApiConstants {
     public static final String activeParamName = "active";
     public static final String nameParamName = "name";
     public static final String shortNameParamName = "shortName";
+    public static final String interestReceivableAccount = "interestReceivableAccountId";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
     public static final String digitsAfterDecimalParamName = "digitsAfterDecimal";
@@ -170,6 +171,9 @@ public class SavingsApiConstants {
     public static final String amountOutstandingParamName = "amountOutstanding";
     public static final String amountOrPercentageParamName = "amountOrPercentage";
     public static final String amountParamName = "amount";
+    public static final String isManualTransaction = "isManualTransaction";
+    public static final String lienTransaction = "lienTransaction";
+    public static final String chargesPaidByData = "chargesPaidByData";
     public static final String amountPaidParamName = "amountPaid";
     public static final String chargeOptionsParamName = "chargeOptions";
     public static final String chargePaymentModeParamName = "chargePaymentMode";

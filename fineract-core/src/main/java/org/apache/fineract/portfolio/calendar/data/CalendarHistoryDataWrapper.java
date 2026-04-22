@@ -37,7 +37,7 @@ public class CalendarHistoryDataWrapper {
 
             @Override
             public int compare(CalendarHistory calendarHistory1, CalendarHistory calendarHistory2) {
-                return DateUtils.compare(calendarHistory1.getEndDate(), calendarHistory2.getEndDate());
+                return DateUtils.compareWithNullsLast(calendarHistory1.getEndDate(), calendarHistory2.getEndDate());
             }
         };
         this.calendarHistoryList.sort(orderByDate);

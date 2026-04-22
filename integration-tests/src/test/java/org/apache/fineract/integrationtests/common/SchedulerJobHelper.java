@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common;
 
 import static java.time.Instant.now;
+import static org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants.SHORT_NAME_PARAM;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,6 +29,7 @@ import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -37,29 +39,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SchedulerJobHelper extends IntegrationTest {
+public class SchedulerJobHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification response200Spec;
     private final ResponseSpecification response202Spec;
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public SchedulerJobHelper(final RequestSpecification requestSpec) {
         this.requestSpec = requestSpec;
         this.response200Spec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.response202Spec = new ResponseSpecBuilder().expectStatusCode(202).build();
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private List<Map<String, Object>> getAllSchedulerJobs() {
         final String GET_ALL_SCHEDULER_JOBS_URL = "/fineract-provider/api/v1/jobs?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING ALL SCHEDULER JOBS -------------------------");
@@ -80,6 +93,10 @@ public class SchedulerJobHelper extends IntegrationTest {
         return getAllSchedulerJobDetails(map -> (String) map.get("displayName"));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map<String, Object> getSchedulerJobById(int jobId) {
         final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
@@ -89,6 +106,23 @@ public class SchedulerJobHelper extends IntegrationTest {
         return response;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    private Map<String, Object> getSchedulerJobByShortName(String shortName) {
+        final String GET_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + SHORT_NAME_PARAM + "/" + shortName + "?"
+                + Utils.TENANT_IDENTIFIER;
+        LOG.info("------------------------ RETRIEVING SCHEDULER JOB BY SHORT NAME -------------------------");
+        Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_URL, "");
+        assertNotNull(response);
+        return response;
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Boolean getSchedulerStatus() {
         final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING SCHEDULER STATUS -------------------------");
@@ -98,9 +132,13 @@ public class SchedulerJobHelper extends IntegrationTest {
 
     public void updateSchedulerStatus(final boolean on) {
         String command = on ? "start" : "stop";
-        ok(fineract().jobsScheduler.changeSchedulerStatus(command));
+        Calls.ok(FineractClientHelper.getFineractClient().jobsScheduler.changeSchedulerStatus(command));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {
         final String UPDATE_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ UPDATING SCHEDULER JOB -------------------------");
@@ -110,9 +148,13 @@ public class SchedulerJobHelper extends IntegrationTest {
     }
 
     public void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
-        ok(fineract().jobs.updateJobDetail(jobId, request));
+        Calls.ok(FineractClientHelper.getFineractClient().jobs.updateJobDetail(jobId, request));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String updateSchedulerJobAsJSON(final boolean active) {
         final Map<String, String> map = new HashMap<>();
         map.put("active", Boolean.toString(active));
@@ -121,16 +163,43 @@ public class SchedulerJobHelper extends IntegrationTest {
     }
 
     public void runSchedulerJob(int jobId) {
-        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        runSchedulerJob(jobId, responseSpec);
+        Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob((long) jobId, "executeJob"));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void runSchedulerJob(int jobId, ResponseSpecification responseSpec) {
         final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public void runSchedulerJobByShortName(String shortName) {
+        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
+        runSchedulerJobByShortName(shortName, responseSpec);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public void runSchedulerJobByShortName(String shortName, ResponseSpecification responseSpec) {
+        final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + SHORT_NAME_PARAM + "/" + shortName + "?command=executeJob&"
+                + Utils.TENANT_IDENTIFIER;
+        LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
+        Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String runSchedulerJobAsJSON() {
         final Map<String, String> map = new HashMap<>();
         String runSchedulerJob = new Gson().toJson(map);
@@ -149,6 +218,13 @@ public class SchedulerJobHelper extends IntegrationTest {
                 "No such named Job (see org.apache.fineract.infrastructure.jobs.service.JobName enum):" + jobName);
     }
 
+    public Long getSchedulerJobIdByShortName(String shortName) {
+        LOG.info("------------------------ RETRIEVING SCHEDULER JOB ID BY SHORT NAME -------------------------");
+        GetJobsResponse job = Calls.ok(FineractClientHelper.getFineractClient().jobs.retrieveByShortName(shortName));
+        assertNotNull(job);
+        return job.getJobId();
+    }
+
     /**
      * Launches a Job and awaits its completion.
      *
@@ -158,36 +234,59 @@ public class SchedulerJobHelper extends IntegrationTest {
      * @author Michael Vorburger.ch
      */
     public void executeAndAwaitJob(String jobName) {
-        final Duration timeout = Duration.ofMinutes(4);
-        final Duration pause = Duration.ofSeconds(2);
-        DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
-        Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
+        int jobId = getSchedulerJobIdByName(jobName);
+        executeAndAwaitJob(jobId, (a) -> runSchedulerJob(jobId), () -> jobLastRunHistorySupplier(jobId));
+    }
 
+    /**
+     * Launches a Job and awaits its completion.
+     *
+     * @param shortName
+     *            shortName of Scheduler Job
+     *
+     * @author Michael Vorburger.ch
+     */
+    public void executeAndAwaitJobByShortName(String shortName) {
+        executeAndAwaitJob(shortName, (a) -> runSchedulerJobByShortName(shortName), () -> jobLastRunHistoryByShortName(shortName));
+    }
+
+    public <T extends Serializable> void executeAndAwaitJob(T jobParam, Consumer<T> runSchedulerJob,
+            Supplier<Callable<Map<String, String>>> retrievelastRunHistory) {
         // Stop the Scheduler while we manually trigger execution of job, to
         // avoid side effects and simplify debugging when readings logs
         updateSchedulerStatus(false);
 
+        Instant beforeExecuteTime = now().truncatedTo(ChronoUnit.SECONDS);
         // Executing Scheduler Job
-        int jobId = getSchedulerJobIdByName(jobName);
-        runSchedulerJob(jobId);
+        runSchedulerJob.accept(jobParam);
 
+        awaitJob(beforeExecuteTime, retrievelastRunHistory);
+    }
+
+    private void awaitJob(Instant beforeExecuteTime, Supplier<Callable<Map<String, String>>> retrieveLastRunHistory) {
+        final Duration timeout = Duration.ofMinutes(2);
+        final Duration pause = Duration.ofSeconds(1);
+        DateTimeFormatter df = DateTimeFormatter.ISO_INSTANT; // FINERACT-926
         // Await JobDetailData.lastRunHistory [JobDetailHistoryData]
         // jobRunStartTime >= beforeExecuteTime (or timeout)
         // jobRunEndTime to be both set and >= jobRunStartTime (or timeout)
-        Map<String, String> finalLastRunHistory = await().atMost(timeout).pollInterval(pause).until(jobLastRunHistorySupplier(jobId),
-                lastRunHistory -> {
-                    String jobRunStartText = lastRunHistory.get("jobRunStartTime");
-                    if (jobRunStartText == null) {
-                        return false;
-                    }
-                    String jobRunEndText = lastRunHistory.get("jobRunEndTime");
-                    if (jobRunEndText == null) {
-                        return false;
-                    }
-                    Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
-                    Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
-                    return !jobRunStartTime.isBefore(beforeExecuteTime) && !jobRunEndTime.isBefore(jobRunStartTime);
-                });
+        Map<String, String> finalLastRunHistory = await().atMost(timeout) //
+                .pollInterval(pause) //
+                .pollDelay(pause) //
+                .until(retrieveLastRunHistory.get(), //
+                        lastRunHistory -> {
+                            String jobRunStartText = lastRunHistory.get("jobRunStartTime");
+                            if (jobRunStartText == null) {
+                                return false;
+                            }
+                            String jobRunEndText = lastRunHistory.get("jobRunEndTime");
+                            if (jobRunEndText == null) {
+                                return false;
+                            }
+                            Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
+                            Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
+                            return !jobRunStartTime.isBefore(beforeExecuteTime) && !jobRunEndTime.isBefore(jobRunStartTime);
+                        });
 
         // Verify triggerType
         MatcherAssert.assertThat(finalLastRunHistory.get("triggerType"), is("application"));
@@ -217,6 +316,17 @@ public class SchedulerJobHelper extends IntegrationTest {
     private Callable<Map<String, String>> jobLastRunHistorySupplier(int jobId) {
         return () -> {
             Map<String, Object> job = getSchedulerJobById(jobId);
+            if (job == null) {
+                return null;
+            }
+            return (Map<String, String>) job.get("lastRunHistory");
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    private Callable<Map<String, String>> jobLastRunHistoryByShortName(String shortName) {
+        return () -> {
+            Map<String, Object> job = getSchedulerJobByShortName(shortName);
             if (job == null) {
                 return null;
             }

@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.jpa;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -41,7 +42,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CriteriaQueryFactory {
 
-    private final EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public List<Order> ordersFromPageable(Pageable pageable, CriteriaBuilder cb, Root<?> root) {
         return ordersFromPageable(pageable, cb, root, () -> null);

@@ -19,32 +19,23 @@
 package org.apache.fineract.organisation.workingdays.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
+import java.time.Instant;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.organisation.workingdays.command.WorkingDaysUpdateCommand;
 import org.apache.fineract.organisation.workingdays.data.WorkingDaysData;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequest;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateRequestValidator;
+import org.apache.fineract.organisation.workingdays.data.WorkingDaysUpdateResponse;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -53,28 +44,19 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Working days", description = "The days of the week that are workdays.\n" + "\n"
         + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations\n"
         + "\n"
-        + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
+        + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non-workingday parameter in Global configurations.")
 @RequiredArgsConstructor
 public class WorkingDaysApiResource {
 
-    private final DefaultToApiJsonSerializer<WorkingDaysData> toApiJsonSerializer;
     private final WorkingDaysReadPlatformService workingDaysReadPlatformService;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final PlatformSecurityContext context;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final WorkingDaysUpdateRequestValidator workingDaysUpdateRequestValidator;
+    private final CommandDispatcher dispatcher;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Working days", description = "Example Requests:\n" + "\n" + "workingdays")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.GetWorkingDaysResponse.class)))) })
-    public String retrieveAll(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(WorkingDaysApiConstants.WORKING_DAYS_RESOURCE_NAME);
-        final WorkingDaysData workingDaysData = this.workingDaysReadPlatformService.retrieve();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, workingDaysData);
+    public WorkingDaysData retrieveAll() {
+        return this.workingDaysReadPlatformService.retrieve();
     }
 
     @PUT
@@ -82,34 +64,26 @@ public class WorkingDaysApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Working Day", description = "Mandatory Fields\n"
             + "recurrence,repaymentRescheduleType,extendTermForDailyRepayments,locale")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.PutWorkingDaysRequest.class)))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.PutWorkingDaysResponse.class))) })
-    public String update(@Parameter(hidden = true) final String jsonRequestBody) {
+    public WorkingDaysUpdateResponse update(@Valid WorkingDaysUpdateRequest request) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateWorkingDays().withJson(jsonRequestBody).build();
+        final var command = new WorkingDaysUpdateCommand();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        command.setCommandId(System.currentTimeMillis());
+        command.setCreatedAt(Instant.now());
+        command.setPayload(request);
 
-        return this.toApiJsonSerializer.serialize(result);
+        final Supplier<WorkingDaysUpdateResponse> response = dispatcher.dispatch(command);
+
+        return response.get();
     }
 
     @GET
     @Path("/template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Working Days Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for working days.\n"
             + "\n" + "Example Request:\n" + "\n" + "workingdays/template")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingDaysApiResourceSwagger.GetWorkingDaysTemplateResponse.class))) })
-    public String template(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(WorkingDaysApiConstants.WORKING_DAYS_RESOURCE_NAME);
-
-        final WorkingDaysData repaymentRescheduleOptions = this.workingDaysReadPlatformService.repaymentRescheduleType();
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, repaymentRescheduleOptions,
-                WorkingDaysApiConstants.WORKING_DAYS_TEMPLATE_PARAMETERS);
+    public WorkingDaysData template() {
+        return this.workingDaysReadPlatformService.repaymentRescheduleType();
     }
 
 }

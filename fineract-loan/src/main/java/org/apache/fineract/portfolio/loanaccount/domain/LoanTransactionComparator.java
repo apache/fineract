@@ -22,7 +22,8 @@ import java.util.Comparator;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 /**
- * Sort loan transactions by transaction date, created date and transaction type placing
+ * Sort loan transactions by transaction date, submitted date, created date, transaction type placing, lastly compare
+ * ids
  */
 public class LoanTransactionComparator implements Comparator<LoanTransaction> {
 
@@ -30,22 +31,27 @@ public class LoanTransactionComparator implements Comparator<LoanTransaction> {
 
     @Override
     public int compare(final LoanTransaction o1, final LoanTransaction o2) {
-        int result = DateUtils.compare(o1.getTransactionDate(), o2.getTransactionDate());
+        int result = DateUtils.compareWithNullsLast(o1.getTransactionDate(), o2.getTransactionDate());
         if (result != 0) {
             return result;
         }
-        // For transactions bearing the same transaction date, we sort transactions based on created date (when
-        // available) after which sorting for waivers takes place
-        result = o1.getCreatedDate().isPresent()
-                ? (o2.getCreatedDate().isPresent() ? DateUtils.compare(o1.getCreatedDateTime(), o2.getCreatedDateTime()) : -1)
-                : (o2.getCreatedDate().isPresent() ? 1 : 0);
+        // Accrual activity as last
+        if (o1.isAccrualActivity() != o2.isAccrualActivity()) {
+            return o1.isAccrualActivity() ? 1 : -1;
+        }
+        result = DateUtils.compareWithNullsLast(o1.getSubmittedOnDate(), o2.getSubmittedOnDate());
         if (result != 0) {
             return result;
         }
-        // equal transaction dates
+        result = DateUtils.compareWithNullsLast(o1.getCreatedDate(), o2.getCreatedDate());
+        if (result != 0) {
+            return result;
+        }
+        // income posting takes priority
         if (o1.isIncomePosting() != o2.isIncomePosting()) {
             return o1.isIncomePosting() ? -1 : 1;
         }
+        // waive takes priority
         if (o1.isWaiver() != o2.isWaiver()) {
             return o1.isWaiver() ? -1 : 1;
         }

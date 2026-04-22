@@ -112,7 +112,9 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
             handleDataIntegrityIssues(null, throwable, dve);
             return CommandProcessingResult.empty();
         }
-        return new CommandProcessingResultBuilder().withEntityId(resourceId).build();
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(resourceId) //
+                .build();
     }
 
     /*

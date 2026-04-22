@@ -38,10 +38,11 @@ public final class TransactionConstants {
     public static final int ROUTING_CODE_COL = 11;
     public static final int RECEIPT_NO_COL = 12;
     public static final int BANK_NO_COL = 13;
-    public static final int STATUS_COL = 14;
-    public static final int LOOKUP_CLIENT_NAME_COL = 15;
-    public static final int LOOKUP_ACCOUNT_NO_COL = 16;
-    public static final int LOOKUP_PRODUCT_COL = 17;
-    public static final int LOOKUP_OPENING_BALANCE_COL = 18;
-    public static final int LOOKUP_SAVINGS_ACTIVATION_DATE_COL = 19;
+    public static final int NOTE_COL = 14;
+    public static final int STATUS_COL = 15;
+    public static final int LOOKUP_CLIENT_NAME_COL = 16;
+    public static final int LOOKUP_ACCOUNT_NO_COL = 17;
+    public static final int LOOKUP_PRODUCT_COL = 18;
+    public static final int LOOKUP_OPENING_BALANCE_COL = 19;
+    public static final int LOOKUP_SAVINGS_ACTIVATION_DATE_COL = 20;
 }

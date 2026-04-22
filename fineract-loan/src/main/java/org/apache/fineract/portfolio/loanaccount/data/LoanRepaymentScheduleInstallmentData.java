@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -25,7 +27,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public final class LoanRepaymentScheduleInstallmentData {
+public final class LoanRepaymentScheduleInstallmentData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

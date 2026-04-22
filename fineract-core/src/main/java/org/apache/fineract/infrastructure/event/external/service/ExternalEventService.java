@@ -63,7 +63,7 @@ public class ExternalEventService {
         }
 
         try {
-            flushChangesBeforeSerialization();
+            entityManager.flush();
             ExternalEvent externalEvent;
             if (event instanceof BulkBusinessEvent) {
                 externalEvent = handleBulkBusinessEvent((BulkBusinessEvent) event);
@@ -79,12 +79,17 @@ public class ExternalEventService {
 
     }
 
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     private ExternalEvent handleBulkBusinessEvent(BulkBusinessEvent bulkBusinessEvent) throws IOException {
         List<BulkMessageItemV1> messages = new ArrayList<>();
         List<BusinessEvent<?>> events = bulkBusinessEvent.get();
         for (int i = 0; i < events.size(); i++) {
             BusinessEvent<?> event = events.get(i);
-            int id = i + 1;
+            long id = (long) i + 1;
             BulkMessageItemV1 message = bulkMessageItemFactory.createBulkMessageItem(id, event);
             messages.add(message);
         }
@@ -108,14 +113,5 @@ public class ExternalEventService {
         Long aggregateRootId = event.getAggregateRootId();
 
         return new ExternalEvent(eventType, eventCategory, schema, data, idempotencyKey, aggregateRootId);
-    }
-
-    private void flushChangesBeforeSerialization() {
-        entityManager.flush();
-    }
-
-    @PersistenceContext
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
     }
 }

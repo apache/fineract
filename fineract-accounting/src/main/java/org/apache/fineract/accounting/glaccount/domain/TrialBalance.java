@@ -38,7 +38,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class TrialBalance extends AbstractPersistableCustom {
+public class TrialBalance extends AbstractPersistableCustom<Long> {
 
     @Column(name = "office_id", nullable = false)
     private Long officeId;

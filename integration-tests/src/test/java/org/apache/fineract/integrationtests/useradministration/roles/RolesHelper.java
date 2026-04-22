@@ -28,12 +28,13 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.PutPermissionsRequest;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.useradministration.data.PermissionData;
 
-public final class RolesHelper extends IntegrationTest {
+public final class RolesHelper {
 
     public static final long SUPER_USER_ROLE_ID = 1L; // This is hardcoded into the initial Liquibase migration
 
@@ -49,10 +50,18 @@ public final class RolesHelper extends IntegrationTest {
 
     private static final Gson GSON = new JSON().getGson();
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer createRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_ROLE_URL, getTestCreateRoleAsJSON(), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String getTestCreateRoleAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", Utils.uniqueRandomStringGenerator("Role_Name_", 5));
@@ -60,33 +69,57 @@ public final class RolesHelper extends IntegrationTest {
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static HashMap<String, Object> getRoleDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId) {
         final String GET_ROLE_URL = "/fineract-provider/api/v1/roles/" + roleId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_ROLE_URL, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId) {
         return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(DISABLE_ROLE_COMMAND, roleId), "", "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer enableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId) {
         return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "", "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId) {
         return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static String addPermissionsToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer roleId, final Map<String, Boolean> permissionMap) {
         return Utils.performServerPut(requestSpec, responseSpec, ROLE_URL + "/" + roleId + "/permissions?" + Utils.TENANT_IDENTIFIER,
                 getAddPermissionsToRoleJSON(permissionMap));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public static List<PermissionData> getPermissions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             boolean makerCheckerable) {
         String response = Utils.performServerGet(requestSpec, responseSpec,
@@ -96,15 +129,23 @@ public final class RolesHelper extends IntegrationTest {
     }
 
     public CommandProcessingResult updatePermissions(PutPermissionsRequest request) {
-        return ok(fineract().permissions.updatePermissionsDetails(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().permissions.updatePermissionsDetails(request));
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String getAddPermissionsToRoleJSON(Map<String, Boolean> permissionMap) {
         final HashMap<String, Map<String, Boolean>> map = new HashMap<>();
         map.put("permissions", permissionMap);
         return new Gson().toJson(map);
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     private static String createRoleOperationURL(final String command, final Integer roleId) {
         return ROLE_URL + "/" + roleId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }

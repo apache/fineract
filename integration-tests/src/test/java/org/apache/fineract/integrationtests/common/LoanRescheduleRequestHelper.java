@@ -23,13 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import java.util.List;
+import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansResponse;
-import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.client.util.Calls;
 
-public class LoanRescheduleRequestHelper extends IntegrationTest {
+public class LoanRescheduleRequestHelper {
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -41,34 +43,62 @@ public class LoanRescheduleRequestHelper extends IntegrationTest {
         this.responseSpec = responseSpec;
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer createLoanRescheduleRequest(final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public HashMap createLoanRescheduleRequestWithFullResponse(final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer rejectLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER + "&command=reject";
 
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Integer approveLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER + "&command=approve";
 
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
     }
 
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public Object getLoanRescheduleRequest(final Integer requestId, final String param) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER;
 
         return Utils.performServerGet(requestSpec, responseSpec, URL, param);
     }
 
+    public GetLoanRescheduleRequestResponse readLoanRescheduleRequest(final Long requestId, final String param) {
+        return Calls.ok(FineractClientHelper.getFineractClient().rescheduleLoans.readLoanRescheduleRequest(requestId, param));
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public void verifyCreationOfLoanRescheduleRequest(final Integer requestId) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER;
 
@@ -77,10 +107,21 @@ public class LoanRescheduleRequestHelper extends IntegrationTest {
     }
 
     public PostCreateRescheduleLoansResponse createLoanRescheduleRequest(PostCreateRescheduleLoansRequest request) {
-        return ok(fineract().rescheduleLoans.createLoanRescheduleRequest(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().rescheduleLoans.createLoanRescheduleRequest(request));
     }
 
     public PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
-        return ok(fineract().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "approve"));
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "approve"));
     }
+
+    public PostUpdateRescheduleLoansResponse rejectLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
+        return Calls
+                .ok(FineractClientHelper.getFineractClient().rescheduleLoans.updateLoanRescheduleRequest(scheduleId, request, "reject"));
+    }
+
+    public List<GetLoanRescheduleRequestResponse> retrieveLoanRescheduleRequestsByLoan(final String command, final Long loanId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().rescheduleLoans.retrieveAllRescheduleRequest(command, loanId));
+    }
+
 }

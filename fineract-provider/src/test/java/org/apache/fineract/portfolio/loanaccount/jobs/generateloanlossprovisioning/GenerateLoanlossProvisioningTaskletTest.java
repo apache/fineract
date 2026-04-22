@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.batch.repeat.RepeatStatus.FINISHED;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,13 +68,14 @@ class GenerateLoanlossProvisioningTaskletTest {
 
     @BeforeEach
     public void setUp() {
-        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
+        ThreadLocalContextUtil.setBusinessDates(
+                new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE, BusinessDateType.COB_DATE, BUSINESS_DATE)));
     }
 
     @Test
     public void testExecuteShouldCreateProvisioningEntry() throws Exception {
         // given
-        Collection<ProvisioningCriteriaData> provisioningCriterias = List.of(new ProvisioningCriteriaData());
+        List<ProvisioningCriteriaData> provisioningCriterias = List.of(new ProvisioningCriteriaData());
         given(provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias()).willReturn(provisioningCriterias);
         // when
         RepeatStatus result = underTest.execute(stepContribution, chunkContext);
@@ -87,7 +87,7 @@ class GenerateLoanlossProvisioningTaskletTest {
     @Test
     public void testExecuteShouldNotCreateProvisioningEntryWhenNoProvisioningCriteriasArePresent() throws Exception {
         // given
-        Collection<ProvisioningCriteriaData> provisioningCriterias = List.of();
+        List<ProvisioningCriteriaData> provisioningCriterias = List.of();
         given(provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias()).willReturn(provisioningCriterias);
         // when
         RepeatStatus result = underTest.execute(stepContribution, chunkContext);
@@ -110,7 +110,7 @@ class GenerateLoanlossProvisioningTaskletTest {
     @Test
     public void testExecuteShouldNotFailWhenProvisioningEntryIsAlreadyCreated() throws Exception {
         // given
-        Collection<ProvisioningCriteriaData> provisioningCriterias = List.of(new ProvisioningCriteriaData());
+        List<ProvisioningCriteriaData> provisioningCriterias = List.of(new ProvisioningCriteriaData());
         given(provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias()).willReturn(provisioningCriterias);
         given(provisioningEntriesWritePlatformService.createProvisioningEntry(BUSINESS_DATE, true))
                 .willThrow(new ProvisioningEntryAlreadyCreatedException(1L, BUSINESS_DATE));
@@ -124,7 +124,7 @@ class GenerateLoanlossProvisioningTaskletTest {
     @Test
     public void testExecuteShouldNotFailWhenExceptionIsThrownInProvisioningEntryCreation() throws Exception {
         // given
-        Collection<ProvisioningCriteriaData> provisioningCriterias = List.of(new ProvisioningCriteriaData());
+        List<ProvisioningCriteriaData> provisioningCriterias = List.of(new ProvisioningCriteriaData());
         given(provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias()).willReturn(provisioningCriterias);
         given(provisioningEntriesWritePlatformService.createProvisioningEntry(BUSINESS_DATE, true)).willThrow(new RuntimeException("Test"));
         // when

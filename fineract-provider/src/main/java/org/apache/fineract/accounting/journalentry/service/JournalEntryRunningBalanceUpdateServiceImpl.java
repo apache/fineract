@@ -84,7 +84,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         this.dataValidator.validateForUpdateRunningBalance(command);
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue(),
                 command.parsedJson());
-        CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder()
+        CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId());
         if (officeId == null) {
             updateRunningBalance();
@@ -278,7 +278,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             final EnumOptionData entryType = AccountingEnumerations.journalEntryType(entryTypeId);
 
             return new JournalEntryData(id, officeId, null, null, glAccountId, null, accountType, null, entryType, amount, null, null, null,
-                    null, null, null, null, null, null, null, null, null, null, null, null);
+                    null, null, null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 

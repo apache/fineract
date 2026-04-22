@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.batch.command;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -39,7 +44,7 @@ public final class CommandStrategyUtils {
      *
      * @param relativeUrl
      *            the relative URL
-     * @return the query parameters in a map
+     * @return the query parameters in a map with URL-decoded values
      */
     public static Map<String, String> getQueryParameters(final String relativeUrl) {
         final String queryParameterStr = StringUtils.substringAfter(relativeUrl, "?");
@@ -47,7 +52,14 @@ public final class CommandStrategyUtils {
         final Map<String, String> queryParametersMap = new HashMap<>();
         for (String parameterStr : queryParametersArray) {
             String[] keyValue = StringUtils.split(parameterStr, "=");
-            queryParametersMap.put(keyValue[0], keyValue[1]);
+            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+            String value = "";
+            if (keyValue.length > 1 && StringUtils.isNotEmpty(keyValue[1])) {
+                value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+            } else if (keyValue.length > 1) {
+                value = keyValue[1];
+            }
+            queryParametersMap.put(key, value);
         }
         return queryParametersMap;
     }
@@ -84,6 +96,81 @@ public final class CommandStrategyUtils {
     public static boolean isRelativeUrlVersioned(String relativeUrl) {
         Matcher m = VERSIONED_RELATIVE_URL_PATTERN.matcher(relativeUrl);
         return m.matches();
+    }
+
+    /**
+     * Builds a request object from query parameters using reflection and the builder pattern. This method automatically
+     * detects field types and converts string values to the appropriate type (Integer, String, etc.).
+     *
+     * @param queryParameters
+     *            map of query parameter names to their string values
+     * @param requestClass
+     *            the class of the request object to build (must have a builder() method)
+     * @param <T>
+     *            the type of the request object
+     * @return the built request object with fields populated from query parameters
+     * @throws RuntimeException
+     *             if the request class doesn't have a builder or if reflection fails
+     */
+    public static <T> T buildRequestFromQueryParameters(final Map<String, String> queryParameters, final Class<T> requestClass) {
+        try {
+            // Get the builder
+            Method builderMethod = requestClass.getMethod("builder");
+            Object builder = builderMethod.invoke(null);
+            Class<?> builderClass = builder.getClass();
+
+            // Iterate through all declared fields of the request class
+            for (Field field : requestClass.getDeclaredFields()) {
+                String fieldName = field.getName();
+                String paramValue = queryParameters.get(fieldName);
+
+                // Skip if parameter is not present or is the serialVersionUID field
+                if (paramValue == null || "serialVersionUID".equals(fieldName)) {
+                    continue;
+                }
+
+                // Find the builder method for this field
+                Method builderSetter = builderClass.getMethod(fieldName, field.getType());
+
+                // Convert the string value to the appropriate type and invoke builder method
+                Object convertedValue = convertValue(paramValue, field.getType());
+                builderSetter.invoke(builder, convertedValue);
+            }
+
+            // Call build() method to create the final object
+            Method buildMethod = builderClass.getMethod("build");
+            return requestClass.cast(buildMethod.invoke(builder));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to build request object from query parameters", e);
+        }
+    }
+
+    /**
+     * Converts a string value to the target type.
+     *
+     * @param value
+     *            the string value to convert
+     * @param targetType
+     *            the target type
+     * @return the converted value
+     */
+    private static Object convertValue(final String value, final Class<?> targetType) {
+        if (targetType == String.class) {
+            return value;
+        } else if (targetType == Integer.class || targetType == int.class) {
+            return Integer.parseInt(value);
+        } else if (targetType == Long.class || targetType == long.class) {
+            return Long.parseLong(value);
+        } else if (targetType == BigDecimal.class) {
+            return new BigDecimal(value);
+        } else if (targetType == Double.class || targetType == double.class) {
+            return Double.parseDouble(value);
+        } else if (targetType == Boolean.class || targetType == boolean.class) {
+            return Boolean.parseBoolean(value);
+        } else {
+            // Default to string for unknown types
+            return value;
+        }
     }
 
 }

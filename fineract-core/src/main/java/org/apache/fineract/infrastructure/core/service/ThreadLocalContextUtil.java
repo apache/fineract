@@ -27,7 +27,8 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.springframework.util.Assert;
 
 /**
- *
+ * A utility class for managing ThreadLocal context in the application. Provides methods for context initialization and
+ * cleanup.
  */
 public final class ThreadLocalContextUtil {
 
@@ -124,4 +125,5 @@ public final class ThreadLocalContextUtil {
         businessDateContext.remove();
         actionContext.remove();
     }
+
 }

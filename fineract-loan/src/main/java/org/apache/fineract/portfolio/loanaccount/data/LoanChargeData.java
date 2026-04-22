@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,7 +66,7 @@ public class LoanChargeData {
 
     private final BigDecimal amountOrPercentage;
 
-    private final Collection<ChargeData> chargeOptions;
+    private final List<ChargeData> chargeOptions;
 
     private final boolean penalty;
 
@@ -84,7 +84,7 @@ public class LoanChargeData {
 
     private final BigDecimal maxCap;
 
-    private final Collection<LoanInstallmentChargeData> installmentChargeData;
+    private final List<LoanInstallmentChargeData> installmentChargeData;
 
     private BigDecimal amountAccrued;
 
@@ -94,7 +94,7 @@ public class LoanChargeData {
 
     private final ExternalId externalLoanId;
 
-    public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
+    public static LoanChargeData template(final List<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null,
                 ExternalId.empty(), null, null, null, null, ExternalId.empty());
     }
@@ -116,7 +116,7 @@ public class LoanChargeData {
             final LocalDate dueDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
             final BigDecimal amountPercentageAppliedTo, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
             final boolean waived, final Long loanId, final ExternalId externalLoanId, final BigDecimal minCap, final BigDecimal maxCap,
-            final BigDecimal amountOrPercentage, Collection<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
+            final BigDecimal amountOrPercentage, List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -160,9 +160,9 @@ public class LoanChargeData {
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal percentage, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
-            final Collection<ChargeData> chargeOptions, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
+            final List<ChargeData> chargeOptions, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
             final boolean waived, final Long loanId, final ExternalId externalLoanId, final BigDecimal minCap, final BigDecimal maxCap,
-            final BigDecimal amountOrPercentage, Collection<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
+            final BigDecimal amountOrPercentage, List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -207,7 +207,7 @@ public class LoanChargeData {
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final LocalDate submittedOnDate, final BigDecimal amountOutstanding,
             EnumOptionData chargeTimeType, final Long loanId, final ExternalId externalLoanId,
-            Collection<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
+            List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
         this.id = id;
         this.chargeId = null;
         this.name = null;
@@ -308,7 +308,7 @@ public class LoanChargeData {
         this.externalId = chargeData.externalId;
     }
 
-    public LoanChargeData(LoanChargeData chargeData, Collection<LoanInstallmentChargeData> installmentChargeData) {
+    public LoanChargeData(LoanChargeData chargeData, List<LoanInstallmentChargeData> installmentChargeData) {
         this.id = chargeData.id;
         this.chargeId = chargeData.chargeId;
         this.name = chargeData.name;

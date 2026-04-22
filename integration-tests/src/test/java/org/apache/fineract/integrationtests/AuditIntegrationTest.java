@@ -36,6 +36,7 @@ import java.util.List;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,7 @@ public class AuditIntegrationTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private AuditHelper auditHelper;
+    private SchedulerJobHelper schedulerJobHelper;
     private static final SecureRandom rand = new SecureRandom();
 
     /**
@@ -65,6 +67,7 @@ public class AuditIntegrationTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.auditHelper = new AuditHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
     }
 
     @Test
@@ -117,8 +120,8 @@ public class AuditIntegrationTest {
         }
 
         // When Office is created
-        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        int officeId = officeHelper.createOffice("22 June 2020");
+        OfficeHelper officeHelper = new OfficeHelper();
+        int officeId = officeHelper.createOffice(java.time.LocalDate.of(2020, 6, 22)).getResourceId().intValue();
         auditsRecieved = auditHelper.getAuditDetails(officeId, "CREATE", "OFFICE");
         auditHelper.verifyOneAuditOnly(auditsRecieved, officeId, "CREATE", "OFFICE");
     }
@@ -155,6 +158,21 @@ public class AuditIntegrationTest {
             auditHelper.verifyOrderBysupported(shouldBeSupportedFor.get(i));
         }
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void executeSchedulerJobShouldCreateAuditEntry() {
+        // given
+        int jobId = schedulerJobHelper.getSchedulerJobIdByShortName("SA_AANF").intValue();
+        List<HashMap<String, Object>> auditsRecievedInitial = auditHelper.getAuditDetails(jobId, "EXECUTEJOB", "SCHEDULER");
+
+        // when
+        schedulerJobHelper.runSchedulerJob(jobId);
+
+        // then
+        List<HashMap<String, Object>> auditsRecieved = auditHelper.getAuditDetails(jobId, "EXECUTEJOB", "SCHEDULER");
+        auditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, jobId, "EXECUTEJOB", "SCHEDULER");
     }
 
 }

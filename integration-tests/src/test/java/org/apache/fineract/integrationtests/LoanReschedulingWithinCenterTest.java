@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -43,7 +44,6 @@ import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -51,18 +51,15 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanReschedulingWithinCenterTest {
+public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
     private RequestSpecification requestSpec;
@@ -82,14 +79,14 @@ public class LoanReschedulingWithinCenterTest {
         this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void testCenterReschedulingLoansWithInterestRecalculationEnabled() {
 
-        Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
@@ -222,7 +219,7 @@ public class LoanReschedulingWithinCenterTest {
     @Test
     public void testCenterReschedulingMultiTrancheLoansWithInterestRecalculationEnabled() {
 
-        Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
@@ -316,11 +313,11 @@ public class LoanReschedulingWithinCenterTest {
 
         ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanID);
         // VERIFY RESCHEDULED DATE
-        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
+        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(3)).get("dueDate");
         assertEquals(getDateAsArray(todaysdate, 0), dueDateLoanSchedule);
 
         // VERIFY THE INTEREST
-        Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
+        Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(3)).get("interestDue");
         assertEquals("41.05", String.valueOf(interestDue));
 
         // DISBURSE THE SECOND TRANCHE (for let the loan test lifecycle callback to close the loan

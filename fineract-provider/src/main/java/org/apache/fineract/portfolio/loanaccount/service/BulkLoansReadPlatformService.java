@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollectionData;
+import org.apache.fineract.portfolio.loanaccount.data.StaffAccountSummaryCollectionData;
 
 public interface BulkLoansReadPlatformService {
 
