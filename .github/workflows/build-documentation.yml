@@ -1,9 +1,15 @@
 name: Fineract Documentation build
-on: [push, pull_request]
+on:
+  workflow_run:
+    workflows:
+      - Fineract Build & Cucumber tests (without E2E tests)
+    types:
+      - completed
 permissions:
   contents: read
 jobs:
   build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.event != 'pull_request' || github.event.workflow_run.pull_requests[0].head.repo.full_name == github.repository) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -12,12 +18,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: ${{ github.event.workflow_run.event == 'pull_request' && format('refs/pull/{0}/merge', github.event.workflow_run.pull_requests[0].number) || github.event.workflow_run.head_sha }}
           fetch-depth: 0
       - name: Set up JDK 21
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'zulu'
+      - name: Restore compiled Fineract
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            .gradle
+            **/build/classes
+            **/build/generated
+            **/build/libs
+            **/build/resources
+            **/build/tmp
+          key: fineract-compiled-${{ runner.os }}-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}
+          fail-on-cache-miss: true
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6

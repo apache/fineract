@@ -1,12 +1,18 @@
 name: Verify Liquibase Backward Compatibility
 
-on: [pull_request]
+on:
+  workflow_run:
+    workflows:
+      - Fineract Build & Cucumber tests (without E2E tests)
+    types:
+      - completed
 
 permissions:
   contents: read
 
 jobs:
   liquibase-backward-compatibility-check:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0].number != '' && github.event.workflow_run.pull_requests[0].head.repo.full_name == github.repository }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
@@ -31,26 +37,38 @@ jobs:
       TZ: Asia/Kolkata
 
     steps:
-      - name: Checkout base commit
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          repository: ${{ github.event.pull_request.base.repo.full_name }}
-          ref: ${{ github.event.pull_request.base.sha }}
-          fetch-depth: 0
-          path: baseline
-
       - name: Checkout PR merge commit
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.sha }}
+          ref: refs/pull/${{ github.event.workflow_run.pull_requests[0].number }}/merge
           fetch-depth: 0
-          path: current
+
+      - name: Checkout base commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.event.workflow_run.pull_requests[0].base.repo.full_name }}
+          ref: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
+          fetch-depth: 0
+          path: baseline
 
       - name: Set up JDK 21
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           distribution: 'zulu'
           java-version: '21'
+
+      - name: Restore compiled Fineract
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            .gradle
+            **/build/classes
+            **/build/generated
+            **/build/libs
+            **/build/resources
+            **/build/tmp
+          key: fineract-compiled-${{ runner.os }}-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}
+          fail-on-cache-miss: true
 
       - name: Wait for PostgreSQL
         run: |
@@ -67,24 +85,24 @@ jobs:
 
       - name: Print checked out revisions
         run: |
-          echo "Base branch ref: ${{ github.event.pull_request.base.ref }}"
+          echo "Base branch ref: ${{ github.event.workflow_run.pull_requests[0].base.ref }}"
           echo "Base branch event SHA:"
-          echo "${{ github.event.pull_request.base.sha }}"
+          echo "${{ github.event.workflow_run.pull_requests[0].base.sha }}"
           echo "PR head SHA:"
-          echo "${{ github.event.pull_request.head.sha }}"
-          echo "GitHub merge SHA:"
-          echo "${{ github.sha }}"
+          echo "${{ github.event.workflow_run.head_sha }}"
+          echo "GitHub PR merge ref:"
+          echo "refs/pull/${{ github.event.workflow_run.pull_requests[0].number }}/merge"
           echo "Baseline revision:"
           git -C baseline rev-parse HEAD
           git -C baseline log -1 --oneline
           echo "Merged PR revision:"
-          git -C current rev-parse HEAD
-          git -C current log -1 --oneline
+          git rev-parse HEAD
+          git log -1 --oneline
 
       - name: Start backend on base commit
         working-directory: baseline
         run: |
-          ./gradlew :fineract-provider:devRun --args="\
+          ./gradlew --no-daemon :fineract-provider:devRun --args="\
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
           --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
           --spring.datasource.hikari.username=root \
@@ -132,9 +150,8 @@ jobs:
           sleep 10
 
       - name: Start backend on merged PR commit
-        working-directory: current
         run: |
-          ./gradlew :fineract-provider:devRun --args="\
+          ./gradlew --no-daemon :fineract-provider:devRun --args="\
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
           --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
           --spring.datasource.hikari.username=root \
@@ -176,7 +193,6 @@ jobs:
 
       - name: Stop PR backend
         if: always()
-        working-directory: current
         run: |
           kill $(cat backend.pid)
           sleep 10
