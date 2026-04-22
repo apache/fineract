@@ -1,6 +1,7 @@
 name: Verify API Backward Compatibility
 
-on: [pull_request]
+on:
+  workflow_call:
 
 permissions:
   contents: read
@@ -8,6 +9,7 @@ permissions:
 
 jobs:
   api-compatibility-check:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
@@ -15,6 +17,12 @@ jobs:
       TZ: Asia/Kolkata
 
     steps:
+      - name: Checkout PR merge commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          fetch-depth: 0
+
       - name: Checkout base branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -23,20 +31,12 @@ jobs:
           fetch-depth: 0
           path: baseline
 
-      - name: Checkout PR branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-          path: current
-
       - name: Compute merge-base commit
         id: merge-base
         run: |
           cd baseline
-          # For fork PRs, fetch PR head from the local current/ checkout
-          git fetch "${GITHUB_WORKSPACE}/current" HEAD --no-tags 2>/dev/null || true
+          # For fork PRs, fetch PR head from the root checkout.
+          git fetch "${GITHUB_WORKSPACE}" HEAD --no-tags 2>/dev/null || true
           MERGE_BASE=$(git merge-base ${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.sha }})
           echo "Merge-base commit: ${MERGE_BASE}"
           echo "sha=${MERGE_BASE}" >> "$GITHUB_OUTPUT"
@@ -55,12 +55,24 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Restore compiled Fineract
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            .gradle
+            **/build/classes
+            **/build/generated
+            **/build/libs
+            **/build/resources
+            **/build/tmp
+          key: fineract-compiled-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
       - name: Generate baseline spec
         working-directory: baseline
         run: ./gradlew :fineract-provider:resolve --no-daemon
 
       - name: Generate PR spec
-        working-directory: current
         run: ./gradlew :fineract-provider:resolve --no-daemon
 
       - name: Sanitize specs
@@ -86,25 +98,24 @@ jobs:
               print(f'{path}: fixed {fixed} entries')
 
           sanitize('${GITHUB_WORKSPACE}/baseline/fineract-provider/build/resources/main/static/fineract.json')
-          sanitize('${GITHUB_WORKSPACE}/current/fineract-provider/build/resources/main/static/fineract.json')
+          sanitize('${GITHUB_WORKSPACE}/fineract-provider/build/resources/main/static/fineract.json')
           "
 
       - name: Check breaking changes
         id: breaking-check
         continue-on-error: true
-        working-directory: current
         run: |
           set -o pipefail
-          ./gradlew :fineract-provider:checkBreakingChanges \
+          ./gradlew --no-daemon :fineract-provider:checkBreakingChanges \
             -PapiBaseline="${GITHUB_WORKSPACE}/baseline/fineract-provider/build/resources/main/static/fineract.json" \
-            -PapiNew="${GITHUB_WORKSPACE}/current/fineract-provider/build/resources/main/static/fineract.json" \
+            -PapiNew="${GITHUB_WORKSPACE}/fineract-provider/build/resources/main/static/fineract.json" \
             --no-daemon
 
       - name: Build report
         if: steps.breaking-check.outcome == 'failure'
         id: report
         run: |
-          REPORT_DIR="current/fineract-provider/build/swagger-brake"
+          REPORT_DIR="fineract-provider/build/swagger-brake"
 
           python3 -c "
           import json, glob, os
@@ -234,7 +245,7 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: api-compatibility-report
-          path: current/fineract-provider/build/swagger-brake/
+          path: fineract-provider/build/swagger-brake/
           retention-days: 30
 
       - name: Fail if breaking changes detected

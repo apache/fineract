@@ -1,12 +1,14 @@
 name: Fineract Liquibase Only mode - PostgreSQL
 
-on: [push, pull_request]
+on:
+  workflow_call:
 
 permissions:
   contents: read
 
 jobs:
   test:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-22.04
     timeout-minutes: 60
 
@@ -45,6 +47,19 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
+      - name: Restore compiled Fineract
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            .gradle
+            **/build/classes
+            **/build/generated
+            **/build/libs
+            **/build/resources
+            **/build/tmp
+          key: fineract-compiled-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
       - name: Setup Gradle and Validate Wrapper
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
         with:
@@ -78,4 +93,4 @@ jobs:
           FINERACT_HIKARI_USERNAME: "root"
           SPRING_PROFILES_ACTIVE: "liquibase-only"
         run:
-          ./gradlew fineract-provider:bootRun
+          ./gradlew --no-daemon fineract-provider:bootRun

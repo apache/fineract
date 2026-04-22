@@ -1,12 +1,11 @@
 name: Fineract Sonarqube
 on:
-  push:
-    branches:
-      - develop
+  workflow_call:
 permissions:
   contents: read
 jobs:
   build:
+    if: ${{ github.event_name == 'push' && github.ref_name == 'develop' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -28,11 +27,21 @@ jobs:
         with:
           java-version: '21'
           distribution: 'zulu'
+      - name: Restore compiled Fineract
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            .gradle
+            **/build/classes
+            **/build/generated
+            **/build/libs
+            **/build/resources
+            **/build/tmp
+          key: fineract-compiled-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
       - name: Setup Gradle and Validate Wrapper
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
         with:
           validate-wrappers: true
-      - name: Build
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:build -x test -x cucumber
       - name: Sonar
         run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar

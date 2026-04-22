@@ -1,4 +1,4 @@
-name: Fineract Cucumber tests (without E2E tests)
+name: Fineract Progressive Loan build
 
 on:
   workflow_call:
@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  cucumber:
+  build-progressive-loan:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -54,22 +54,49 @@ jobs:
         with:
           validate-wrappers: true
 
-      - name: Run Cucumber
-        run: ./gradlew --no-daemon cucumber -x :fineract-e2e-tests-runner:cucumber -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
+      - name: Build and Test Progressive Loan
+        run: |
+          # Build the JAR
+          ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:shadowJar
+
+          # Store the JAR filename in an environment variable
+          EMBEDDABLE_JAR_FILE=$(ls fineract-progressive-loan-embeddable-schedule-generator/build/libs/*-all.jar | head -n 1)
+          echo "EMBEDDABLE_JAR_FILE=$EMBEDDABLE_JAR_FILE" >> $GITHUB_ENV
+          echo "JAR file: $EMBEDDABLE_JAR_FILE"
+
+          # Run unit tests
+          ./gradlew --no-daemon --console=plain :fineract-progressive-loan-embeddable-schedule-generator:test
+
+          # Build and run sample application
+          mkdir -p sample-app
+          javac -cp "$EMBEDDABLE_JAR_FILE" -d sample-app fineract-progressive-loan-embeddable-schedule-generator/misc/Main.java
+          java -cp "$EMBEDDABLE_JAR_FILE:sample-app" Main
+          java -cp "$EMBEDDABLE_JAR_FILE:sample-app" Main 25
 
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: test-results-cucumber
-          path: '**/build/reports/'
+          name: test-results-build-progressive-loan
+          path: |
+            **/build/reports/
+            **/fineract-progressive-loan-embeddable-schedule-generator/build/reports/
           if-no-files-found: ignore
           retention-days: 5
+
+      - name: Archive Progressive Loan JAR
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: progressive-loan-jar
+          path: ${{ env.EMBEDDABLE_JAR_FILE }}
+          retention-days: 5
+          if-no-files-found: ignore
 
       - name: Archive server logs
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: server-logs-cucumber
+          name: server-logs-build-progressive-loan
           path: '**/build/cargo/'
           retention-days: 5

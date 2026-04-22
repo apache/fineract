@@ -1,4 +1,4 @@
-name: Fineract Cucumber tests (without E2E tests)
+name: Fineract Build Core
 
 on:
   workflow_call:
@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  cucumber:
+  build-core:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -36,8 +36,31 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
-      - name: Restore compiled Fineract
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          validate-wrappers: true
+
+      - name: Build Avro Java SDK
+        run: ./gradlew --no-daemon :fineract-avro-schemas:buildJavaSdk -x test -x cucumber -x doc
+
+      - name: Compile Fineract Provider
+        run: ./gradlew --no-daemon :fineract-provider:compileJava -x test -x cucumber -x doc -x buildJavaSdk
+
+      - name: Generate Fineract Git Properties
+        run: ./gradlew --no-daemon :fineract-provider:generateGitProperties
+
+      - name: Build Fineract Client Java SDK
+        run: ./gradlew --no-daemon :fineract-client:buildJavaSdk -x test -x cucumber -x doc
+
+      - name: Build Fineract Client Feign Java SDK
+        run: ./gradlew --no-daemon :fineract-client-feign:buildJavaSdk -x test -x cucumber -x doc
+
+      - name: Build Fineract
+        run: ./gradlew --no-daemon build -x test -x cucumber -x doc
+
+      - name: Save compiled Fineract
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: |
             .gradle
@@ -47,21 +70,12 @@ jobs:
             **/build/resources
             **/build/tmp
           key: fineract-compiled-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
-
-      - name: Setup Gradle and Validate Wrapper
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
-        with:
-          validate-wrappers: true
-
-      - name: Run Cucumber
-        run: ./gradlew --no-daemon cucumber -x :fineract-e2e-tests-runner:cucumber -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer
 
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: test-results-cucumber
+          name: test-results-build-core
           path: '**/build/reports/'
           if-no-files-found: ignore
           retention-days: 5
@@ -70,6 +84,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: server-logs-cucumber
+          name: server-logs-build-core
           path: '**/build/cargo/'
           retention-days: 5

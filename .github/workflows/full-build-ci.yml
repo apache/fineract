@@ -1,0 +1,87 @@
+name: Fineract CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-core:
+    uses: ./.github/workflows/build-core.yml
+    secrets: inherit
+
+  cucumber:
+    needs: build-core
+    uses: ./.github/workflows/build-cucumber.yml
+    secrets: inherit
+
+  build-progressive-loan:
+    needs: build-core
+    uses: ./.github/workflows/build-progressive-loan.yml
+    secrets: inherit
+
+  postgresql:
+    needs: build-core
+    uses: ./.github/workflows/build-postgresql.yml
+    secrets: inherit
+
+  mysql:
+    needs: build-core
+    uses: ./.github/workflows/build-mysql.yml
+    secrets: inherit
+
+  mariadb:
+    needs: build-core
+    uses: ./.github/workflows/build-mariadb.yml
+    secrets: inherit
+
+  docker:
+    needs: build-core
+    uses: ./.github/workflows/build-docker.yml
+    secrets: inherit
+
+  documentation:
+    needs: build-core
+    uses: ./.github/workflows/build-documentation.yml
+    secrets: inherit
+
+  e2e:
+    needs: build-core
+    uses: ./.github/workflows/build-e2e-tests.yml
+    secrets: inherit
+
+  liquibase-only-postgresql:
+    needs: build-core
+    uses: ./.github/workflows/liquibase-only-postgresql.yml
+    secrets: inherit
+
+  messaging-smoke:
+    needs: build-core
+    uses: ./.github/workflows/smoke-messaging.yml
+    secrets: inherit
+
+  api-backward-compatibility:
+    needs: build-core
+    uses: ./.github/workflows/verify-api-backward-compatibility.yml
+    secrets: inherit
+
+  liquibase-backward-compatibility:
+    needs: build-core
+    uses: ./.github/workflows/verify-liquibase-backward-compatibility.yml
+    secrets: inherit
+
+  sonarqube:
+    needs: build-core
+    uses: ./.github/workflows/sonarqube.yml
+    secrets: inherit
+
+  sequential-postgresql:
+    needs: build-core
+    uses: ./.github/workflows/run-integration-test-sequentially-postgresql.yml
+    secrets: inherit
+
+  publish-dockerhub:
+    needs: build-core
+    uses: ./.github/workflows/publish-dockerhub.yml
+    secrets: inherit
