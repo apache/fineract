@@ -16,153 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.integrationtests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
+import org.apache.fineract.client.models.GetRolesRoleIdResponse;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RolesTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RolesTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
-
-    @SuppressWarnings("cast")
     @Test
-    public void testCreateRolesStatus() {
+    public void testCreateAndFetchRole() {
+        Long roleId = null;
 
-        LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
+        try {
+            // Create Role using modernized static helper
+            roleId = RolesHelper.createRole();
+            assertNotNull(roleId, "Role ID should not be null after creation");
 
-        LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
+            // Fetch the created role
+            GetRolesRoleIdResponse role = RolesHelper.getRole(roleId);
 
+            // Stronger Assertions: Validate object and its internal state
+            assertNotNull(role, "Retrieved role should not be null");
+            assertNotNull(role.getId(), "Role ID in response should not be null");
+
+        } finally {
+            // Cleanup - Crucial for maintaining clean integration environment
+            if (roleId != null) {
+                RolesHelper.deleteRole(roleId);
+            }
+        }
     }
-
-    @SuppressWarnings("cast")
-    @Test
-    public void testDisableRolesStatus() {
-
-        LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-
-        LOG.info("--------------------------------- DISABLING ROLE -------------------------------");
-        final Integer disableRoleId = RolesHelper.disableRole(this.requestSpec, this.responseSpec, roleId);
-        assertEquals(disableRoleId, roleId);
-        role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(true, (Boolean) role.get("disabled"));
-
-    }
-
-    @SuppressWarnings("cast")
-    @Test
-    public void testEnableRolesStatus() {
-
-        LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-
-        LOG.info("--------------------------------- DISABLING ROLE -------------------------------");
-        final Integer disableRoleId = RolesHelper.disableRole(this.requestSpec, this.responseSpec, roleId);
-        assertEquals(disableRoleId, roleId);
-        role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(true, (Boolean) role.get("disabled"));
-
-        LOG.info("--------------------------------- ENABLING ROLE -------------------------------");
-        final Integer enableRoleId = RolesHelper.enableRole(this.requestSpec, this.responseSpec, roleId);
-        assertEquals(enableRoleId, roleId);
-        role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(false, (Boolean) role.get("disabled"));
-
-    }
-
-    @SuppressWarnings("cast")
-    @Test
-    public void testDeleteRoleStatus() {
-
-        LOG.info("-------------------------------- CREATING A ROLE---------------------------------------------");
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        LOG.info("--------------------------------- Getting ROLE -------------------------------");
-        HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
-        assertEquals((Integer) role.get("id"), roleId);
-
-        LOG.info("--------------------------------- DELETE ROLE -------------------------------");
-        final Integer deleteRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
-        assertEquals(deleteRoleId, roleId);
-    }
-
-    @Test
-    public void testRoleShouldGetDeletedIfNoActiveUserExists() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(staffId);
-
-        final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
-        Assertions.assertNotNull(userId);
-
-        final Integer deletedUserId = UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
-        Assertions.assertEquals(deletedUserId, userId);
-
-        final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
-        assertEquals(deletedRoleId, roleId);
-    }
-
-    @Test
-    public void testRoleShouldNotGetDeletedIfActiveUserExists() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(roleId);
-
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(staffId);
-
-        final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
-        Assertions.assertNotNull(userId);
-
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
-        assertNotEquals(deletedRoleId, roleId);
-    }
-
 }

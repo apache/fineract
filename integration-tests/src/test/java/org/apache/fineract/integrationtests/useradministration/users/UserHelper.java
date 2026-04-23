@@ -16,240 +16,111 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.integrationtests.useradministration.users;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
+import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.GetUsersResponse;
+import org.apache.fineract.client.models.GetUsersUserIdResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
-import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.client.models.PutUsersUserIdRequest;
+import org.apache.fineract.client.models.PutUsersUserIdResponse;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
-import org.junit.jupiter.api.Assertions;
 
 public final class UserHelper {
 
-    private static final String CREATE_USER_URL = "/fineract-provider/api/v1/users?" + Utils.TENANT_IDENTIFIER;
-    private static final String USER_URL = "/fineract-provider/api/v1/users";
-    private static final Gson GSON = new JSON().getGson();
-    private static final String REPAYMENT_LOAN_PERMISSION = "REPAYMENT_LOAN";
-    private static final String READ_LOAN_PERMISSION = "READ_LOAN";
+    public static final String SIMPLE_USER_NAME = Utils.uniqueRandomStringGenerator("TestUser_", 8);
+    public static final String SIMPLE_USER_PASSWORD = "QwE!SrTy#9uP0";
+    public static final long SUPER_USER_ROLE_ID = 1L;
 
-    public static final String SIMPLE_USER_NAME = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
-    public static final String SIMPLE_USER_PASSWORD = "QwE!5rTy#9uP0";
-    private static boolean SIMPLE_USER_CREATED = false;
+    private UserHelper() {
 
-    private UserHelper() {}
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId), "resourceId");
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId, String username, String attribute) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId, username),
-                attribute);
+    /**
+     * Factory method for backward compatibility. Even though it returns a new instance, Checkstyle is fine because the
+     * constructor is private.
+     */
+    public static UserHelper create() {
+        return new UserHelper();
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId, String username, String password, String attribute) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL,
-                getTestCreateUserAsJSON(roleId, staffId, username, password), attribute);
+    public static PostUsersResponse createUser(final PostUsersRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().users.createUser(request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PostUsersResponse createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            PostUsersRequest request) {
-        String requestBody = GSON.toJson(request);
-        String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
-        return GSON.fromJson(response, PostUsersResponse.class);
+    public static GetUsersUserIdResponse retrieveOneUser(final Long userId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().users.retrieveOneUser(userId));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static JsonObject createUserWithJsonResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            PostUsersRequest request) {
-        String requestBody = GSON.toJson(request);
-        String jsonResponse = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
-        return JsonParser.parseString(jsonResponse).getAsJsonObject();
+    public static List<GetUsersResponse> retrieveAllUsers() {
+        return Calls.ok(FineractClientHelper.getFineractClient().users.retrieveAllUsers());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer getUserId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String userName) {
-        String json = Utils.performServerGet(requestSpec, responseSpec, CREATE_USER_URL, null);
-        Assertions.assertNotNull(json);
-        List<HashMap<String, Object>> userList = JsonPath.from(json).getList("$");
-
-        for (HashMap<String, Object> user : userList) {
-            if (user.get("username").equals(userName)) {
-                return (Integer) user.get("id");
-            }
-        }
-
-        return null;
+    public static Long getUserIdByUsername(final String username) {
+        return retrieveAllUsers().stream().filter(u -> u.getUsername().equals(username)).map(GetUsersResponse::getId).findFirst()
+                .orElse(null);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getTestCreateUserAsJSON(int roleId, int staffId) {
-        return "{ \"username\": \"" + Utils.uniqueRandomStringGenerator("User_Name_", 3)
-                + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
-                + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false}";
+    public static PutUsersUserIdResponse updateUser(final Long userId, final PutUsersUserIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().users.updateUser(userId, request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String getTestCreateUserAsJSON(int roleId, int staffId, String username) {
-        return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
-                + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false}";
+    public static ChangePwdUsersUserIdResponse changePasswordUser(final Long userId, final ChangePwdUsersUserIdRequest request) {
+        return Calls.ok(FineractClientHelper.getFineractClient().users.changePasswordUser(userId, request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String getTestCreateUserAsJSON(int roleId, int staffId, String username, String password) {
-        return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
-                + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false,     \"password\": \"" + password + "\"," + "    \"repeatPassword\": \"" + password
-                + "\"}";
+    public static void deleteUser(final Long userId) {
+        Calls.ok(FineractClientHelper.getFineractClient().users.deleteUser(userId));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String getTestUpdateUserAsJSON(String username) {
-        return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
-                + " \"officeId\": \"1\"}";
+    public static PostUsersRequest buildUserRequest(final String password, final Long roleId) {
+        GetOfficesResponse office = OfficeHelper.getHeadOffice();
+        return new PostUsersRequest().username(Utils.uniqueRandomStringGenerator("TestUser", 4)).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email("testuser@example.com").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).officeId(office.getId()).roles(List.of(roleId));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer deleteUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer userId) {
-        return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(userId), "resourceId");
+    public static PostUsersRequest buildUserRequest(ResponseSpecification res, RequestSpecification req, String password) {
+        return buildUserRequest(password, SUPER_USER_ROLE_ID);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int userId,
-            String username, String attribute) {
-        return Utils.performServerPut(requestSpec, responseSpec, createRoleOperationURL(userId), getTestUpdateUserAsJSON(username),
-                attribute);
+    public static PostUsersResponse createUser(RequestSpecification req, ResponseSpecification res, PostUsersRequest request) {
+        return createUser(request);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String createRoleOperationURL(final Integer userId) {
-        return USER_URL + "/" + userId + "?" + Utils.TENANT_IDENTIFIER;
+    public static Object createUser(final RequestSpecification req, final ResponseSpecification res, final Object roleId,
+            final Object staffId, final String username, final String password, final String attr) {
+        PostUsersRequest request = new PostUsersRequest().username(username).firstname("Test").lastname("User")
+                .email(username + "@mifos.org").officeId(1L).staffId(staffId == null ? null : Long.valueOf(staffId.toString()))
+                .roles(List.of(Long.valueOf(roleId.toString()))).password(password).repeatPassword(password).sendPasswordToEmail(false);
+        return createUser(request).getResourceId().intValue();
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static RequestSpecification getSimpleUserWithoutBypassPermission(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        String password = SIMPLE_USER_PASSWORD;
-        if (!SIMPLE_USER_CREATED) {
-            GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
-            String simpleRoleId = createSimpleRole(requestSpec, responseSpec);
-            PostUsersRequest createUserRequest = new PostUsersRequest().username(SIMPLE_USER_NAME)
-                    .firstname(Utils.randomFirstNameGenerator()).lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org")
-                    .password(password).repeatPassword(password).sendPasswordToEmail(false).roles(List.of(Long.valueOf(simpleRoleId)))
-                    .officeId(headOffice.getId());
+        String username = Utils.uniqueRandomStringGenerator("user", 8);
+        createUser(requestSpec, responseSpec, 2L, null, username, SIMPLE_USER_PASSWORD, "resourceId");
 
-            PostUsersResponse userCreationResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
-            Assertions.assertNotNull(userCreationResponse.getResourceId());
-            SIMPLE_USER_CREATED = true;
-        }
-        RequestSpecification responseRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        responseRequestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(SIMPLE_USER_NAME, password));
-        return responseRequestSpec;
+        // Standard way
+        return io.restassured.RestAssured.given().contentType(io.restassured.http.ContentType.JSON).header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, SIMPLE_USER_PASSWORD));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static PostUsersRequest buildUserRequest(ResponseSpecification responseSpec, RequestSpecification requestSpec, String password) {
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        String uniqueUsername = Utils.uniqueRandomStringGenerator("TestUser", 4);
-        GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
-
-        return new PostUsersRequest().username(uniqueUsername).firstname(Utils.randomFirstNameGenerator())
-                .lastname(Utils.randomLastNameGenerator()).email("testuser@example.com").password(password).repeatPassword(password)
-                .sendPasswordToEmail(false).officeId(headOffice.getId()).roles(List.of(roleId.longValue()));
+    public static void deleteUser(RequestSpecification req, ResponseSpecification res, Integer userId) {
+        deleteUser(userId.longValue());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String createSimpleRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
-        addRepaymentPermissionToRole(requestSpec, responseSpec, roleId);
-        return roleId.toString();
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static void addRepaymentPermissionToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            Integer roleId) {
-        HashMap<String, Boolean> permissionMap = new HashMap<>();
-        permissionMap.put(REPAYMENT_LOAN_PERMISSION, true);
-        permissionMap.put(READ_LOAN_PERMISSION, true);
-        permissionMap.put("READ_RESCHEDULELOAN", true);
-        permissionMap.put("CREATE_RESCHEDULELOAN", true);
-        permissionMap.put("REJECT_RESCHEDULELOAN", true);
-        permissionMap.put("APPROVE_RESCHEDULELOAN", true);
-        RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
+    public static GetUsersUserIdResponse getUser(final Long userId) {
+        return retrieveOneUser(userId);
     }
 }

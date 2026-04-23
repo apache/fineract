@@ -270,6 +270,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+
         return loginIntoServerAndGetBase64EncodedAuthenticationKey(ConfigProperties.Backend.USERNAME, ConfigProperties.Backend.PASSWORD);
     }
 
