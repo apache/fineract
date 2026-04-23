@@ -140,6 +140,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         final WorkingCapitalLoanBalance balance = WorkingCapitalLoanBalance.createFor(loan);
         balance.setPrincipalOutstanding(principal != null ? principal : BigDecimal.ZERO);
         balance.setTotalPayment(totalPayment != null ? totalPayment : BigDecimal.ZERO);
+        balance.setOverpaymentAmount(BigDecimal.ZERO);
         loan.setBalance(balance);
         loan.setLoanProductRelatedDetails(loanProductRelatedDetails);
 
@@ -423,6 +424,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
             final WorkingCapitalLoanBalance balance = WorkingCapitalLoanBalance.createFor(loan);
             balance.setPrincipalOutstanding(BigDecimal.ZERO);
             balance.setTotalPayment(BigDecimal.ZERO);
+            balance.setOverpaymentAmount(BigDecimal.ZERO);
             loan.setBalance(balance);
         }
         return loan.getBalance();

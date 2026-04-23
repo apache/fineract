@@ -16,27 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.service;
+package org.apache.fineract.portfolio.workingcapitalloan.handler;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
+import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanWritePlatformService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface ClientChargeWritePlatformService {
+@Service
+@RequiredArgsConstructor
+@CommandType(entity = "WORKINGCAPITALLOAN", action = "CREDITBALANCEREFUND")
+public class CreditBalanceRefundWorkingCapitalLoanCommandHandler implements NewCommandSourceHandler {
+
+    private final WorkingCapitalLoanWritePlatformService writePlatformService;
 
     @Transactional
-    CommandProcessingResult addCharge(Long clientId, JsonCommand command);
-
-    @Transactional
-    CommandProcessingResult updateCharge(Long clientId, JsonCommand command);
-
-    @Transactional
-    CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId);
-
-    @Transactional
-    CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId);
-
-    @Transactional
-    CommandProcessingResult payCharge(Long clientId, Long clientChargeId, JsonCommand command);
-
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.writePlatformService.creditBalanceRefund(command.entityId(), command);
+    }
 }

@@ -249,4 +249,5 @@
     <include file="parts/0228_add_configuration_block_transactions_on_closed_overpaid_loans.xml" relativeToChangelogFile="true" />
     <include file="parts/0229_trial_balance_summary_fix_empty_space.xml" relativeToChangelogFile="true" />
     <include file="parts/0230_add_forgot_password.xml" relativeToChangelogFile="true" />
+    <include file="parts/0231_remove_clientcharge_inactivate_permissions.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

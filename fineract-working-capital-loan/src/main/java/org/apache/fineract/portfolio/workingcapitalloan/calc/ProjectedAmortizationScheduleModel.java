@@ -167,16 +167,26 @@ public final class ProjectedAmortizationScheduleModel {
     public LocalDate normalizePaymentDateForSchedule(final LocalDate paymentDate) {
         Objects.requireNonNull(paymentDate, "paymentDate");
         final LocalDate firstInstallmentDate = expectedDisbursementDate.plusDays(1);
+        final LocalDate lastInstallmentDate = expectedDisbursementDate.plusDays(loanTerm);
         if (paymentDate.isBefore(firstInstallmentDate) || paymentDate.equals(expectedDisbursementDate)) {
             return firstInstallmentDate;
         }
 
         if (payments == null || payments.isEmpty()) {
+            if (paymentDate.isAfter(lastInstallmentDate)) {
+                return lastInstallmentDate;
+            }
             return paymentDate;
         }
         final ProjectedPayment nearestUnpaid = payments.stream().filter(p -> p.paymentNo() > 0).filter(p -> p.actualPaymentAmount() == null)
                 .findFirst().orElse(null);
         if (nearestUnpaid != null && nearestUnpaid.date() != null) {
+            if (nearestUnpaid.date().isBefore(firstInstallmentDate)) {
+                return firstInstallmentDate;
+            }
+            if (nearestUnpaid.date().isAfter(lastInstallmentDate)) {
+                return lastInstallmentDate;
+            }
             return nearestUnpaid.date();
         }
         return paymentDate;

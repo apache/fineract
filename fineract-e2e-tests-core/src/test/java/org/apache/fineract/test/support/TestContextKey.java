@@ -28,6 +28,7 @@ public abstract class TestContextKey {
     public static final String CLIENT_CREATE_SECOND_CLIENT_RESPONSE = "clientCreateSecondClientResponse";
     public static final String LOAN_CREATE_REQUEST = "loanCreateRequest";
     public static final String LOAN_CREATE_RESPONSE = "loanCreateResponse";
+    public static final String WORKING_CAPITAL_LOAN_CREATE_RESPONSE = "workingCapitalLoanCreateResponse";
     public static final String LOAN_CREATE_SECOND_LOAN_RESPONSE = "loanCreateSecondLoanResponse";
     public static final String LOAN_MODIFY_RESPONSE = "loanModifyResponse";
     public static final String LOAN_DELETE_RESPONSE = "loanDeleteResponse";

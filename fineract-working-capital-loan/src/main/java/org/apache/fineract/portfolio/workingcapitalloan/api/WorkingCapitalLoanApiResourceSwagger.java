@@ -230,6 +230,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public java.math.BigDecimal realizedIncome;
         @Schema(example = "0.00")
         public java.math.BigDecimal unrealizedIncome;
+        @Schema(example = "0.00")
+        public java.math.BigDecimal overpaymentAmount;
     }
 
     @Schema(description = "Single disbursement detail (expected and actual)")

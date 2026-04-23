@@ -33,7 +33,6 @@ public class ClientApiConstants {
     public static final String CLIENT_CHARGE_ACTION_DELETE = "DELETE";
     public static final String CLIENT_CHARGE_ACTION_WAIVE = "WAIVE";
     public static final String CLIENT_CHARGE_ACTION_PAY = "PAY";
-    public static final String CLIENT_CHARGE_ACTION_INACTIVATE = "INACTIVATE";
 
     // Client charge associations and query parameters
     public static final String CLIENT_CHARGE_QUERY_PARAM_STATUS = "chargeStatus";
@@ -49,7 +48,6 @@ public class ClientApiConstants {
     // Commands
     public static final String CLIENT_CHARGE_COMMAND_WAIVE_CHARGE = "waive";
     public static final String CLIENT_CHARGE_COMMAND_PAY_CHARGE = "paycharge";
-    public static final String CLIENT_CHARGE_COMMAND_INACTIVATE_CHARGE = "inactivate";
     public static final String CLIENT_TRANSACTION_COMMAND_UNDO = "undo";
 
     public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";

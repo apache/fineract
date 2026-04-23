@@ -881,6 +881,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder creditBalanceRefundWorkingCapitalLoanTransaction(final Long loanId) {
+        this.actionName = ACTION_CREDITBALANCEREFUND;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions?command=creditBalanceRefund";
+        return this;
+    }
+
     public CommandWrapperBuilder createClientIdentifier(final Long clientId) {
         this.actionName = ACTION_CREATE;
         this.entityName = ENTITY_CLIENTIDENTIFIER;
@@ -3167,15 +3175,6 @@ public class CommandWrapperBuilder {
         this.entityId = chargeId;
         this.clientId = clientId;
         this.href = "/clients/" + clientId + "/charges/" + chargeId + "?command=paycharge";
-        return this;
-    }
-
-    public CommandWrapperBuilder inactivateClientCharge(final Long clientId, final Long chargeId) {
-        this.actionName = ACTION_INACTIVATE;
-        this.entityName = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME;
-        this.entityId = chargeId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/charges/" + chargeId + "?command=inactivate";
         return this;
     }
 

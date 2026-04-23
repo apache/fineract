@@ -182,7 +182,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @Path("{loanId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionById", summary = "Execute Working Capital Loan transaction", description = "Supported command query parameter: repayment")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionById", summary = "Execute Working Capital Loan transaction", description = "Supported command query parameter: repayment, creditBalanceRefund")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsResponse.class))) })
@@ -197,7 +197,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @Path("external-id/{loanExternalId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionByExternalId", summary = "Execute Working Capital Loan transaction by external id", description = "Supported command query parameter: repayment")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionByExternalId", summary = "Execute Working Capital Loan transaction by external id", description = "Supported command query parameter: repayment, creditBalanceRefund")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsResponse.class))) })
@@ -219,6 +219,8 @@ public class WorkingCapitalLoanTransactionsApiResource {
         final CommandWrapper commandRequest;
         if (CommandParameterUtil.is(commandParam, "repayment")) {
             commandRequest = builder.repaymentWorkingCapitalLoanTransaction(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "creditBalanceRefund")) {
+            commandRequest = builder.creditBalanceRefundWorkingCapitalLoanTransaction(resolvedLoanId).build();
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

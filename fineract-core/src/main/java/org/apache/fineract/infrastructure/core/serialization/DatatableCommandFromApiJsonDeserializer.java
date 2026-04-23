@@ -65,6 +65,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -132,10 +133,11 @@ public class DatatableCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(API_PARAM_APPTABLE_NAME).value(apptableName).notBlank().notExceedingLengthOf(50)
                 .isOneOfTheseStringValues(EntityTables.getEntityNames());
 
-        EntityTables entityTable = EntityTables.fromEntityName(apptableName);
-        validateEntitySubType(baseDataValidator, element, entityTable);
+        final Optional<EntityTables> entityTable = Optional.ofNullable(EntityTables.fromEntityName(apptableName));
+        entityTable.ifPresent(et -> validateEntitySubType(baseDataValidator, element, et));
 
-        final String fkColumnName = entityTable == null ? null : entityTable.getForeignKeyColumnNameOnDatatable();
+        final Object[] reservedColumnNames = entityTable.map(et -> new Object[] { TABLE_FIELD_ID, et.getForeignKeyColumnNameOnDatatable() })
+                .orElseGet(() -> new Object[] { TABLE_FIELD_ID });
 
         final Boolean multiRow = this.fromApiJsonHelper.extractBooleanNamed(API_PARAM_MULTIROW, element);
         baseDataValidator.reset().parameter(API_PARAM_MULTIROW).value(multiRow).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
@@ -148,8 +150,8 @@ public class DatatableCommandFromApiJsonDeserializer {
                 this.fromApiJsonHelper.checkForUnsupportedParameters(column.getAsJsonObject(), SUPPORTED_PARAMETERS_FOR_CREATE_COLUMNS);
 
                 final String name = this.fromApiJsonHelper.extractStringNamed(API_FIELD_NAME, column);
-                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank()
-                        .isNotOneOfTheseValues(TABLE_FIELD_ID, fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
+                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank().isNotOneOfTheseValues(reservedColumnNames)
+                        .matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
 
                 validateType(baseDataValidator, column);
 
@@ -194,10 +196,11 @@ public class DatatableCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(API_PARAM_APPTABLE_NAME).value(apptableName).ignoreIfNull().notBlank()
                 .isOneOfTheseStringValues(EntityTables.getEntityNames());
 
-        EntityTables entityTable = EntityTables.fromEntityName(apptableName);
-        validateEntitySubType(baseDataValidator, element, entityTable);
+        final Optional<EntityTables> entityTable = Optional.ofNullable(EntityTables.fromEntityName(apptableName));
+        entityTable.ifPresent(et -> validateEntitySubType(baseDataValidator, element, et));
 
-        final String fkColumnName = entityTable.getForeignKeyColumnNameOnDatatable();
+        final Object[] reservedColumnNames = entityTable.map(et -> new Object[] { TABLE_FIELD_ID, et.getForeignKeyColumnNameOnDatatable() })
+                .orElseGet(() -> new Object[] { TABLE_FIELD_ID });
 
         final JsonArray changeColumns = this.fromApiJsonHelper.extractJsonArrayNamed(API_PARAM_CHANGECOLUMNS, element);
         baseDataValidator.reset().parameter(API_PARAM_CHANGECOLUMNS).value(changeColumns).ignoreIfNull().jsonArrayNotEmpty();
@@ -207,12 +210,12 @@ public class DatatableCommandFromApiJsonDeserializer {
                 this.fromApiJsonHelper.checkForUnsupportedParameters(column.getAsJsonObject(), SUPPORTED_PARAMETERS_FOR_CHANGE_COLUMNS);
 
                 final String name = this.fromApiJsonHelper.extractStringNamed(API_FIELD_NAME, column);
-                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank()
-                        .isNotOneOfTheseValues(TABLE_FIELD_ID, fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
+                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank().isNotOneOfTheseValues(reservedColumnNames)
+                        .matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
 
                 final String newName = this.fromApiJsonHelper.extractStringNamed(API_FIELD_NEWNAME, column);
                 baseDataValidator.reset().parameter(API_FIELD_NEWNAME).value(newName).ignoreIfNull().notBlank().notExceedingLengthOf(50)
-                        .isNotOneOfTheseValues(TABLE_FIELD_ID, fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
+                        .isNotOneOfTheseValues(reservedColumnNames).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
 
                 if (this.fromApiJsonHelper.parameterExists(API_FIELD_LENGTH, column)) {
                     final String lengthStr = this.fromApiJsonHelper.extractStringNamed(API_FIELD_LENGTH, column);
@@ -262,8 +265,8 @@ public class DatatableCommandFromApiJsonDeserializer {
                 this.fromApiJsonHelper.checkForUnsupportedParameters(column.getAsJsonObject(), SUPPORTED_PARAMETERS_FOR_ADD_COLUMNS);
 
                 final String name = this.fromApiJsonHelper.extractStringNamed(API_FIELD_NAME, column);
-                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank()
-                        .isNotOneOfTheseValues(TABLE_FIELD_ID, fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
+                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank().isNotOneOfTheseValues(reservedColumnNames)
+                        .matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
 
                 validateType(baseDataValidator, column);
 
@@ -292,8 +295,8 @@ public class DatatableCommandFromApiJsonDeserializer {
                 this.fromApiJsonHelper.checkForUnsupportedParameters(column.getAsJsonObject(), SUPPORTED_PARAMETERS_FOR_DROP_COLUMNS);
 
                 final String name = this.fromApiJsonHelper.extractStringNamed(API_FIELD_NAME, column);
-                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank()
-                        .isNotOneOfTheseValues(TABLE_FIELD_ID, fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
+                baseDataValidator.reset().parameter(API_FIELD_NAME).value(name).notBlank().isNotOneOfTheseValues(reservedColumnNames)
+                        .matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
             }
         }
 

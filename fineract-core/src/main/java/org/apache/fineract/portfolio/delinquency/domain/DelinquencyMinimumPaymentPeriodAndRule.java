@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "m_delinquency_payment_rule")
+@Table(name = "m_wc_delinquency_configuration")
 public class DelinquencyMinimumPaymentPeriodAndRule extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Serial

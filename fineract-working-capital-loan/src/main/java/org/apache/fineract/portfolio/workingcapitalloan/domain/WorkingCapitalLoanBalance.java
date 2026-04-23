@@ -65,6 +65,10 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @Setter
     private BigDecimal unrealizedIncome = BigDecimal.ZERO;
 
+    @Column(name = "overpayment_amount", scale = 6, precision = 19, nullable = false)
+    @Setter
+    private BigDecimal overpaymentAmount = BigDecimal.ZERO;
+
     @Version
     @Column(name = "version")
     private Integer version;

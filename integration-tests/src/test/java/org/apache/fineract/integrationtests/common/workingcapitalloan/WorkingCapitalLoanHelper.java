@@ -163,6 +163,16 @@ public class WorkingCapitalLoanHelper {
                 Map.of("command", "repayment")));
     }
 
+    public void makeCreditBalanceRefundByLoanId(final Long loanId, final String jsonBody) {
+        final PostWorkingCapitalLoanTransactionsRequest request = fromJson(jsonBody, PostWorkingCapitalLoanTransactionsRequest.class);
+        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
+    }
+
+    public CallFailedRuntimeException runCreditBalanceRefundByLoanIdExpectingFailure(final Long loanId, final String jsonBody) {
+        final PostWorkingCapitalLoanTransactionsRequest request = fromJson(jsonBody, PostWorkingCapitalLoanTransactionsRequest.class);
+        return FeignCalls.fail(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
+    }
+
     public Long updateDiscountById(final Long loanId, final String jsonBody) {
         PutWorkingCapitalLoansLoanIdDiscountRequest request = fromJson(jsonBody, PutWorkingCapitalLoansLoanIdDiscountRequest.class);
         return FeignCalls.ok(() -> api().updateWorkingCapitalLoanDiscountById(loanId, request)).getResourceId();

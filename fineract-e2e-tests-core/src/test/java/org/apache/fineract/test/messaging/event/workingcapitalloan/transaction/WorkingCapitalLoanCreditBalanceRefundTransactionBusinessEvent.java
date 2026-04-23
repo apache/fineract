@@ -16,16 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.domain;
+package org.apache.fineract.test.messaging.event.workingcapitalloan.transaction;
 
-public enum WorkingCapitalLoanEvent {
+public class WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent extends AbstractWorkingCapitalLoanTransactionEvent {
 
-    LOAN_APPROVED, //
-    LOAN_APPROVAL_UNDO, //
-    LOAN_REJECTED, //
-    LOAN_DISBURSED, //
-    LOAN_DISBURSAL_UNDO, //
-    LOAN_REPAID_IN_FULL, //
-    LOAN_OVERPAID, //
-    LOAN_CREDIT_BALANCE_REFUND_IN_FULL //
+    @Override
+    public String getEventName() {
+        return "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent";
+    }
 }
