@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -52,7 +54,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsAccrualAccountingIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccrualAccountingIntegrationTest.class);
@@ -88,8 +90,8 @@ public class SavingsAccrualAccountingIntegrationTest {
             final Account savingsControlAccount = this.accountHelper.createLiabilityAccount("Savings Control");
             final Account interestPayableAccount = this.accountHelper.createLiabilityAccount("Interest Payable (Liability)");
             final Account incomeFromFeesAccount = this.accountHelper.createIncomeAccount("Income from Fees");
-            final Account[] accountList = { savingsReferenceAccount, savingsControlAccount, interestOnSavingsAccount,
-                    interestPayableAccount, incomeFromFeesAccount };
+            final Account[] accountList = {savingsReferenceAccount, savingsControlAccount, interestOnSavingsAccount,
+                    interestPayableAccount, incomeFromFeesAccount};
 
             final SavingsProductHelper productHelper = new SavingsProductHelper().withNominalAnnualInterestRate(new BigDecimal("10.0"))
                     .withAccountingRuleAsAccrualBased(accountList)
@@ -167,8 +169,8 @@ public class SavingsAccrualAccountingIntegrationTest {
             final Account overdraftInterestIncomeAccount = this.accountHelper.createIncomeAccount("Overdraft Interest Income");
             final Account expenseAccount = this.accountHelper.createExpenseAccount("Interest on Savings (Expense)");
 
-            final Account[] accountList = { savingsReferenceAccount, savingsControlAccount, expenseAccount,
-                    overdraftInterestIncomeAccount };
+            final Account[] accountList = {savingsReferenceAccount, savingsControlAccount, expenseAccount,
+                    overdraftInterestIncomeAccount};
 
             final String overdraftLimit = "10000";
             final String overdraftInterestRate = "21.0";

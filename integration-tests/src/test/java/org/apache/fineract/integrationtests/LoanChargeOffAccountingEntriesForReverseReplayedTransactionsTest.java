@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -112,8 +113,8 @@ public class LoanChargeOffAccountingEntriesForReverseReplayedTransactionsTest ex
             // make refund on 26 May equal to disbursal amount
             String merchantIssuedRefundExternalId = UUID.randomUUID().toString();
             Long merchantIssuedRefundId = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("26 May 2024").locale("en")
-                            .transactionAmount(200.0).externalId(merchantIssuedRefundExternalId))
+                            new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("26 May 2024").locale("en")
+                                    .transactionAmount(200.0).externalId(merchantIssuedRefundExternalId))
                     .getResourceId();
 
             // verify transactions

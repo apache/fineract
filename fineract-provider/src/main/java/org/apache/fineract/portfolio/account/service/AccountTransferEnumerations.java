@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -43,15 +43,15 @@ public final class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                break;
+                    break;
                 case LOAN:
                     optionData = new EnumOptionData(PortfolioAccountType.LOAN.getValue().longValue(), PortfolioAccountType.LOAN.getCode(),
                             "Loan Account");
-                break;
+                    break;
                 case SAVINGS:
                     optionData = new EnumOptionData(PortfolioAccountType.SAVINGS.getValue().longValue(),
                             PortfolioAccountType.SAVINGS.getCode(), "Savings Account");
-                break;
+                    break;
             }
         }
 
@@ -67,15 +67,15 @@ public final class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                break;
+                    break;
                 case PERIODIC:
                     optionData = new EnumOptionData(AccountTransferRecurrenceType.PERIODIC.getValue().longValue(),
                             AccountTransferRecurrenceType.PERIODIC.getCode(), "Periodic Recurrence");
-                break;
+                    break;
                 case AS_PER_DUES:
                     optionData = new EnumOptionData(AccountTransferRecurrenceType.AS_PER_DUES.getValue().longValue(),
                             AccountTransferRecurrenceType.AS_PER_DUES.getCode(), "As Per Dues Recurrence");
-                break;
+                    break;
             }
         }
         return optionData;
@@ -90,27 +90,27 @@ public final class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                break;
+                    break;
                 case ACCOUNT_TRANSFER:
                     optionData = new EnumOptionData(AccountTransferType.ACCOUNT_TRANSFER.getValue().longValue(),
                             AccountTransferType.ACCOUNT_TRANSFER.getCode(), "Account Transfer");
-                break;
+                    break;
                 case LOAN_REPAYMENT:
                     optionData = new EnumOptionData(AccountTransferType.LOAN_REPAYMENT.getValue().longValue(),
                             AccountTransferType.LOAN_REPAYMENT.getCode(), "Loan Repayment");
-                break;
+                    break;
                 case CHARGE_PAYMENT:
                     optionData = new EnumOptionData(AccountTransferType.CHARGE_PAYMENT.getValue().longValue(),
                             AccountTransferType.CHARGE_PAYMENT.getCode(), "Charge Payment");
-                break;
+                    break;
                 case INTEREST_TRANSFER:
                     optionData = new EnumOptionData(AccountTransferType.INTEREST_TRANSFER.getValue().longValue(),
                             AccountTransferType.INTEREST_TRANSFER.getCode(), "Interest Transfer");
-                break;
+                    break;
                 case LOAN_DOWN_PAYMENT:
                     optionData = new EnumOptionData(AccountTransferType.LOAN_DOWN_PAYMENT.getValue().longValue(),
                             AccountTransferType.LOAN_DOWN_PAYMENT.getCode(), "Loan Down Payment");
-                break;
+                    break;
 
             }
         }
@@ -126,23 +126,23 @@ public final class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                break;
+                    break;
                 case HIGH:
                     optionData = new EnumOptionData(StandingInstructionPriority.HIGH.getValue().longValue(),
                             StandingInstructionPriority.HIGH.getCode(), "High Priority");
-                break;
+                    break;
                 case LOW:
                     optionData = new EnumOptionData(StandingInstructionPriority.LOW.getValue().longValue(),
                             StandingInstructionPriority.LOW.getCode(), "Low Priority");
-                break;
+                    break;
                 case MEDIUM:
                     optionData = new EnumOptionData(StandingInstructionPriority.MEDIUM.getValue().longValue(),
                             StandingInstructionPriority.MEDIUM.getCode(), "Medium Priority");
-                break;
+                    break;
                 case URGENT:
                     optionData = new EnumOptionData(StandingInstructionPriority.URGENT.getValue().longValue(),
                             StandingInstructionPriority.URGENT.getCode(), "Urgent Priority");
-                break;
+                    break;
             }
         }
         return optionData;
@@ -157,19 +157,19 @@ public final class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                break;
+                    break;
                 case ACTIVE:
                     optionData = new EnumOptionData(StandingInstructionStatus.ACTIVE.getValue().longValue(),
                             StandingInstructionStatus.ACTIVE.getCode(), "Active");
-                break;
+                    break;
                 case DELETED:
                     optionData = new EnumOptionData(StandingInstructionStatus.DELETED.getValue().longValue(),
                             StandingInstructionStatus.DELETED.getCode(), "Deleted");
-                break;
+                    break;
                 case DISABLED:
                     optionData = new EnumOptionData(StandingInstructionStatus.DISABLED.getValue().longValue(),
                             StandingInstructionStatus.DISABLED.getCode(), "Disabled");
-                break;
+                    break;
             }
         }
         return optionData;
@@ -184,15 +184,15 @@ public final class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                break;
+                    break;
                 case DUES:
                     optionData = new EnumOptionData(StandingInstructionType.DUES.getValue().longValue(),
                             StandingInstructionType.DUES.getCode(), "Dues");
-                break;
+                    break;
                 case FIXED:
                     optionData = new EnumOptionData(StandingInstructionType.FIXED.getValue().longValue(),
                             StandingInstructionType.FIXED.getCode(), "Fixed");
-                break;
+                    break;
 
             }
         }

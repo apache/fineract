@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,19 +21,21 @@ package org.apache.fineract.test.support.loader;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+@SuppressFBWarnings({"VA_FORMAT_STRING_USES_NEWLINE"})
 public final class FineractConfigLoader {
 
     public static final String FINERACT_TEST_CONFIG_LOCATION = "META-INF/fineract-test.config";
 
     public static final String INITIALIZER_CONFIG_KEY = "org.apache.fineract.test.initializer.Configuration";
 
-    private FineractConfigLoader() {}
+    private FineractConfigLoader() {
+    }
 
     public static Set<Class<?>> getInitializerConfigurationClasses() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

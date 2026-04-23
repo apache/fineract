@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -53,10 +53,11 @@ public class AccountAssociations extends AbstractPersistableCustom<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    protected AccountAssociations() {}
+    protected AccountAssociations() {
+    }
 
     private AccountAssociations(final Loan loanAccount, final SavingsAccount savingsAccount, final Loan linkedLoanAccount,
-            final SavingsAccount linkedSavingsAccount, final Integer associationType, boolean active) {
+                                final SavingsAccount linkedSavingsAccount, final Integer associationType, boolean active) {
         this.loanAccount = loanAccount;
         this.savingsAccount = savingsAccount;
         this.linkedLoanAccount = linkedLoanAccount;
@@ -66,12 +67,12 @@ public class AccountAssociations extends AbstractPersistableCustom<Long> {
     }
 
     public static AccountAssociations associateSavingsAccount(final Loan loan, final SavingsAccount savingsAccount,
-            final Integer associationType, boolean isActive) {
+                                                              final Integer associationType, boolean isActive) {
         return new AccountAssociations(loan, null, null, savingsAccount, associationType, isActive);
     }
 
     public static AccountAssociations associateSavingsAccount(final SavingsAccount savingsAccount,
-            final SavingsAccount linkedSavingsAccount, final Integer associationType, boolean isActive) {
+                                                              final SavingsAccount linkedSavingsAccount, final Integer associationType, boolean isActive) {
         return new AccountAssociations(null, savingsAccount, null, linkedSavingsAccount, associationType, isActive);
     }
 

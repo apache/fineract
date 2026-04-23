@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -130,15 +131,15 @@ public class LoanTransactionData implements Serializable {
     private LocalDate calculatedStartDate;
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
-            Integer rowIndex, String locale, String dateFormat) {
+                                                     Integer rowIndex, String locale, String dateFormat) {
         return LoanTransactionData.builder().transactionAmount(repaymentAmount).transactionDate(lastRepaymentDate)
                 .paymentTypeId(repaymentTypeId).rowIndex(rowIndex).locale(locale).dateFormat(dateFormat).externalLoanId(ExternalId.empty())
                 .externalId(ExternalId.empty()).reversalExternalId(ExternalId.empty()).manuallyReversed(false).build();
     }
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate repaymentDate, Long repaymentTypeId,
-            String accountNumber, Integer checkNumber, Integer routingCode, Integer receiptNumber, Integer bankNumber, Long loanAccountId,
-            String transactionType, Integer rowIndex, String locale, String dateFormat) {
+                                                     String accountNumber, Integer checkNumber, Integer routingCode, Integer receiptNumber, Integer bankNumber, Long loanAccountId,
+                                                     String transactionType, Integer rowIndex, String locale, String dateFormat) {
         return LoanTransactionData.builder().transactionAmount(repaymentAmount).transactionDate(repaymentDate)
                 .paymentTypeId(repaymentTypeId).accountNumber(accountNumber).checkNumber(checkNumber).routingCode(routingCode)
                 .receiptNumber(receiptNumber).bankNumber(bankNumber).accountId(loanAccountId).transactionType(transactionType)
@@ -147,7 +148,7 @@ public class LoanTransactionData implements Serializable {
     }
 
     public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
-            final Collection<PaymentTypeData> paymentTypeOptions) {
+                                                    final Collection<PaymentTypeData> paymentTypeOptions) {
         return builder().id(loanTransactionData.id).officeId(loanTransactionData.officeId).officeName(loanTransactionData.officeName)
                 .type(loanTransactionData.type).paymentDetailData(loanTransactionData.paymentDetailData)
                 .currency(loanTransactionData.currency).date(loanTransactionData.date).amount(loanTransactionData.amount)
@@ -176,18 +177,18 @@ public class LoanTransactionData implements Serializable {
     }
 
     public static LoanTransactionData loanTransactionDataForCreditTemplate(final LoanTransactionEnumData transactionType,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final Collection<PaymentTypeData> paymentOptions,
-            final CurrencyData currency, List<CodeValueData> classificationOptions) {
+                                                                           final LocalDate transactionDate, final BigDecimal transactionAmount, final Collection<PaymentTypeData> paymentOptions,
+                                                                           final CurrencyData currency, List<CodeValueData> classificationOptions) {
         return builder().type(transactionType).date(transactionDate).amount(transactionAmount).paymentTypeOptions(paymentOptions)
                 .currency(currency).externalLoanId(ExternalId.empty()).externalId(ExternalId.empty()).reversalExternalId(ExternalId.empty())
                 .manuallyReversed(false).classificationOptions(classificationOptions).build();
     }
 
     public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType,
-            final LocalDate expectedDisbursedOnLocalDateForTemplate, final BigDecimal disburseAmountForTemplate,
-            final BigDecimal netDisbursalAmount, final Collection<PaymentTypeData> paymentOptions, final BigDecimal fixedEmiAmount,
-            final LocalDate possibleNextRepaymentDate, final CurrencyData currency,
-            final BigDecimal availableDisbursementAmountWithOverApplied) {
+                                                                              final LocalDate expectedDisbursedOnLocalDateForTemplate, final BigDecimal disburseAmountForTemplate,
+                                                                              final BigDecimal netDisbursalAmount, final Collection<PaymentTypeData> paymentOptions, final BigDecimal fixedEmiAmount,
+                                                                              final LocalDate possibleNextRepaymentDate, final CurrencyData currency,
+                                                                              final BigDecimal availableDisbursementAmountWithOverApplied) {
         return builder().type(transactionType).date(expectedDisbursedOnLocalDateForTemplate).amount(disburseAmountForTemplate)
                 .netDisbursalAmount(netDisbursalAmount).paymentTypeOptions(paymentOptions).fixedEmiAmount(fixedEmiAmount)
                 .possibleNextRepaymentDate(possibleNextRepaymentDate).currency(currency)

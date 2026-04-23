@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -117,7 +118,7 @@ class ProgressiveEMICalculatorTest {
     }
 
     private BigDecimal getRateFactorsByMonth(final DaysInYearType daysInYearType, final DaysInMonthType daysInMonthType,
-            final BigDecimal interestRate, LoanRepaymentScheduleInstallment period) {
+                                             final BigDecimal interestRate, LoanRepaymentScheduleInstallment period) {
         final BigDecimal daysInPeriod = BigDecimal.valueOf(DateUtils.getDifferenceInDays(period.getFromDate(), period.getDueDate()));
         final BigDecimal daysInYear = BigDecimal.valueOf(daysInYearType.getNumberOfDays(period.getFromDate()));
         final BigDecimal daysInMonth = BigDecimal.valueOf(daysInMonthType.getNumberOfDays(period.getFromDate()));
@@ -130,8 +131,8 @@ class ProgressiveEMICalculatorTest {
         // Given
         final DaysInYearType daysInYearType = DaysInYearType.DAYS_365;
         final DaysInMonthType daysInMonthType = DaysInMonthType.ACTUAL;
-        final String[] expectedValues = new String[] { "0.008053375342", "0.007533802740", "0.008053375342", "0.007793589041",
-                "0.008053375342", "0.007793589041" };
+        final String[] expectedValues = new String[]{"0.008053375342", "0.007533802740", "0.008053375342", "0.007793589041",
+                "0.008053375342", "0.007793589041"};
 
         // Then
         for (LoanRepaymentScheduleInstallment period : periods) {
@@ -146,8 +147,8 @@ class ProgressiveEMICalculatorTest {
         final DaysInYearType daysInYearType = DaysInYearType.ACTUAL;
         final DaysInMonthType daysInMonthType = DaysInMonthType.ACTUAL;
 
-        final String[] expectedValues = new String[] { "0.008031371585", "0.007513218579", "0.008031371585", "0.007772295082",
-                "0.008031371585", "0.007772295082" };
+        final String[] expectedValues = new String[]{"0.008031371585", "0.007513218579", "0.008031371585", "0.007772295082",
+                "0.008031371585", "0.007772295082"};
 
         // Then
         for (LoanRepaymentScheduleInstallment period : periods) {
@@ -162,8 +163,8 @@ class ProgressiveEMICalculatorTest {
         final DaysInYearType daysInYearType = DaysInYearType.DAYS_365;
         final DaysInMonthType daysInMonthType = DaysInMonthType.ACTUAL;
 
-        final String[] expectedValues = new String[] { "1.00000000000", "2.00753380274", "3.02370122596", "4.04726671069", "5.07986086861",
-                "6.11945121660" };
+        final String[] expectedValues = new String[]{"1.00000000000", "2.00753380274", "3.02370122596", "4.04726671069", "5.07986086861",
+                "6.11945121660"};
 
         final List<BigDecimal> fnValuesCalculated = new ArrayList<>();
         BigDecimal previousFnValue = BigDecimal.ZERO;
@@ -5160,7 +5161,7 @@ class ProgressiveEMICalculatorTest {
     }
 
     List<LoanScheduleModelRepaymentPeriod> expectedRepaymentsMonthly(final LocalDate disbursementDate, final int periods,
-            final int length) {
+                                                                     final int length) {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>(periods);
         IntStream.range(0, periods).forEach(i -> expectedRepaymentPeriods
                 .add(periodData(disbursementDate.plusMonths((long) i * length), disbursementDate.plusMonths((long) (i + 1) * length))));
@@ -5189,7 +5190,7 @@ class ProgressiveEMICalculatorTest {
     }
 
     private static void checkDailyInterest(final ProgressiveLoanInterestScheduleModel interestModel, final LocalDate repaymentPeriodDueDate,
-            final LocalDate interestStartDay, final int dayOffset, final double dailyInterest, final double interest) {
+                                           final LocalDate interestStartDay, final int dayOffset, final double dailyInterest, final double interest) {
         Money previousInterest = emiCalculator.getPeriodInterestTillDate(interestModel, interestStartDay, repaymentPeriodDueDate,
                 interestStartDay.plusDays(dayOffset - 1), true, true);
         Money currentInterest = emiCalculator.getPeriodInterestTillDate(interestModel, interestStartDay, repaymentPeriodDueDate,
@@ -5199,25 +5200,25 @@ class ProgressiveEMICalculatorTest {
     }
 
     private static void checkEmi(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
-            final double emiValue) {
+                                 final double emiValue) {
         Assertions.assertEquals(emiValue, toDouble(interestScheduleModel.repaymentPeriods().get(repaymentIdx).getEmi()));
     }
 
     private static void checkTotalInterestDue(final ProgressiveLoanInterestScheduleModel interestScheduleModel,
-            final double totalInterestDue) {
+                                              final double totalInterestDue) {
         Assertions.assertEquals(totalInterestDue, toDouble(interestScheduleModel.getTotalDueInterest()));
     }
 
     private static void checkPeriod(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
-            final int interestIdx, final double emiValue, final double rateFactor, final double interestDue, final double principalDue,
-            final double remaingBalance) {
+                                    final int interestIdx, final double emiValue, final double rateFactor, final double interestDue, final double principalDue,
+                                    final double remaingBalance) {
         checkPeriod(interestScheduleModel, repaymentIdx, interestIdx, emiValue, rateFactor, interestDue, interestDue, principalDue,
                 remaingBalance);
     }
 
     private static void checkPeriod(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
-            final double emiValue, final double interestDueCumulated, final double principalDue, final double remainingBalance,
-            final boolean fullyRepaid) {
+                                    final double emiValue, final double interestDueCumulated, final double principalDue, final double remainingBalance,
+                                    final boolean fullyRepaid) {
         final RepaymentPeriod repaymentPeriod = interestScheduleModel.repaymentPeriods().get(repaymentIdx);
 
         Assertions.assertEquals(emiValue, toDouble(repaymentPeriod.getEmi()));
@@ -5228,8 +5229,8 @@ class ProgressiveEMICalculatorTest {
     }
 
     private static void checkPeriod(final ProgressiveLoanInterestScheduleModel interestScheduleModel, final int repaymentIdx,
-            final int interestIdx, final double emiValue, final double rateFactor, final double interestDue,
-            final double interestDueCumulated, final double principalDue, final double remaingBalance) {
+                                    final int interestIdx, final double emiValue, final double rateFactor, final double interestDue,
+                                    final double interestDueCumulated, final double principalDue, final double remaingBalance) {
         Assertions.assertTrue(repaymentIdx < interestScheduleModel.repaymentPeriods().size(),
                 repaymentIdx + "th repaymentPeriod is not found.");
         final RepaymentPeriod repaymentPeriod = interestScheduleModel.repaymentPeriods().get(repaymentIdx);
@@ -5262,7 +5263,7 @@ class ProgressiveEMICalculatorTest {
     }
 
     private static void verifyAllPeriods(final ProgressiveLoanInterestScheduleModel expectedModel,
-            final ProgressiveLoanInterestScheduleModel actualModel) {
+                                         final ProgressiveLoanInterestScheduleModel actualModel) {
         for (int repInd = 0; repInd < expectedModel.repaymentPeriods().size(); repInd++) {
             RepaymentPeriod repaymentPeriod = expectedModel.repaymentPeriods().get(repInd);
             for (int interestPeriodIndex = 0; interestPeriodIndex < repaymentPeriod.getInterestPeriods().size(); interestPeriodIndex++) {

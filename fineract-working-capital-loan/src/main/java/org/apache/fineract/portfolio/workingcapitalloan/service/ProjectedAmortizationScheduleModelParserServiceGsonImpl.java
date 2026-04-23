@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,8 +22,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.ToNumberPolicy;
+
 import java.math.MathContext;
 import java.time.LocalDate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.serialization.gson.JsonExcludeAnnotationBasedExclusionStrategy;
 import org.apache.fineract.infrastructure.core.serialization.gson.LocalDateAdapter;
@@ -73,7 +75,7 @@ public class ProjectedAmortizationScheduleModelParserServiceGsonImpl implements 
     @Override
     @Nullable
     public ProjectedAmortizationScheduleModel fromJson(@Nullable final String json, @NonNull final MathContext mc,
-            @NonNull final MonetaryCurrency currency) {
+                                                       @NonNull final MonetaryCurrency currency) {
         if (json == null) {
             return null;
         }

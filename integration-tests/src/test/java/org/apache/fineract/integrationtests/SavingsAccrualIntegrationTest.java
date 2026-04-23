@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -53,7 +55,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsAccrualIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccrualIntegrationTest.class);
@@ -91,7 +93,7 @@ public class SavingsAccrualIntegrationTest {
             final SavingsProductHelper productHelper = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
                     .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
                     .withNominalAnnualInterestRate(new BigDecimal(interestRate))
-                    .withAccountingRuleAsAccrualBased(new Account[] { assetAccount, liabilityAccount, incomeAccount, expenseAccount });
+                    .withAccountingRuleAsAccrualBased(new Account[]{assetAccount, liabilityAccount, incomeAccount, expenseAccount});
 
             final Integer savingsProductId = SavingsProductHelper.createSavingsProduct(productHelper.build(), this.requestSpec,
                     this.responseSpec);
@@ -167,7 +169,7 @@ public class SavingsAccrualIntegrationTest {
             final SavingsProductHelper productHelper = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
                     .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
                     .withNominalAnnualInterestRate(new BigDecimal(interestRate))
-                    .withAccountingRuleAsAccrualBased(new Account[] { assetAccount, liabilityAccount, incomeAccount, expenseAccount });
+                    .withAccountingRuleAsAccrualBased(new Account[]{assetAccount, liabilityAccount, incomeAccount, expenseAccount});
 
             final Integer savingsProductId = SavingsProductHelper.createSavingsProduct(productHelper.build(), this.requestSpec,
                     this.responseSpec);

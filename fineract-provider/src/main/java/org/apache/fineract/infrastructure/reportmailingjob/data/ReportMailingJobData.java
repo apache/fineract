@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.reportmailingjob.data;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -61,12 +62,12 @@ public final class ReportMailingJobData {
      * @return an instance of the ReportMailingJobData class
      **/
     public static ReportMailingJobData newInstance(final Long id, final String name, final String description,
-            final ZonedDateTime startDateTime, final String recurrence, final ReportMailingJobTimelineData timeline,
-            final String emailRecipients, final String emailSubject, final String emailMessage,
-            final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
-            final ZonedDateTime previousRunDateTime, final ZonedDateTime nextRunDateTime, final String previousRunStatus,
-            final String previousRunErrorLog, final String previousRunErrorMessage, final Integer numberOfRuns, final boolean isActive,
-            final Long runAsUserId) {
+                                                   final ZonedDateTime startDateTime, final String recurrence, final ReportMailingJobTimelineData timeline,
+                                                   final String emailRecipients, final String emailSubject, final String emailMessage,
+                                                   final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
+                                                   final ZonedDateTime previousRunDateTime, final ZonedDateTime nextRunDateTime, final String previousRunStatus,
+                                                   final String previousRunErrorLog, final String previousRunErrorMessage, final Integer numberOfRuns, final boolean isActive,
+                                                   final Long runAsUserId) {
         return new ReportMailingJobData().setId(id).setName(name).setDescription(description).setStartDateTime(startDateTime)
                 .setRecurrence(recurrence).setTimeline(timeline).setEmailRecipients(emailRecipients).setEmailSubject(emailSubject)
                 .setEmailMessage(emailMessage).setEmailAttachmentFileFormat(emailAttachmentFileFormat).setStretchyReport(stretchyReport)
@@ -80,7 +81,7 @@ public final class ReportMailingJobData {
      * @return an instance of the ReportMailingJobData class
      **/
     public static ReportMailingJobData newInstance(final List<EnumOptionData> emailAttachmentFileFormatOptions,
-            final List<EnumOptionData> stretchyReportParamDateOptions) {
+                                                   final List<EnumOptionData> stretchyReportParamDateOptions) {
         return new ReportMailingJobData().setEmailAttachmentFileFormatOptions(emailAttachmentFileFormatOptions)
                 .setStretchyReportParamDateOptions(stretchyReportParamDateOptions);
     }
@@ -89,7 +90,7 @@ public final class ReportMailingJobData {
      * @return an instance of the ReportMailingJobData class
      **/
     public static ReportMailingJobData newInstance(final ReportMailingJobData dataWithoutEnumOptions,
-            final ReportMailingJobData dataWithEnumOptions) {
+                                                   final ReportMailingJobData dataWithEnumOptions) {
         return new ReportMailingJobData().setId(dataWithoutEnumOptions.id).setName(dataWithoutEnumOptions.name)
                 .setDescription(dataWithoutEnumOptions.description).setStartDateTime(dataWithoutEnumOptions.startDateTime)
                 .setRecurrence(dataWithoutEnumOptions.recurrence).setTimeline(dataWithoutEnumOptions.timeline)

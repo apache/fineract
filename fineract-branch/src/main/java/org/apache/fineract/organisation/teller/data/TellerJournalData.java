@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -71,7 +72,7 @@ public final class TellerJournalData implements Serializable {
      * @return the new created {@code TellerJournalData}
      */
     public static TellerJournalData instance(final Long officeId, final Long tellerId, final LocalDate day, final Double openingBalance,
-            final Double settledBalance, final Double closingBalance, final Double sumReceipts, final Double sumPayments) {
+                                             final Double settledBalance, final Double closingBalance, final Double sumReceipts, final Double sumPayments) {
         return new TellerJournalData().setOfficeId(officeId).setTellerId(tellerId).setDay(day).setOpeningBalance(openingBalance)
                 .setSettledBalance(settledBalance).setClosingBalance(closingBalance).setSumReceipts(sumReceipts)
                 .setSumPayments(sumPayments);

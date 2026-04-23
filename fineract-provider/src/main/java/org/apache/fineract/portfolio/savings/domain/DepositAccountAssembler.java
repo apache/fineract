@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -56,6 +56,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -64,6 +65,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -125,15 +127,15 @@ public class DepositAccountAssembler {
 
     @Autowired
     public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
-            final StaffRepositoryWrapper staffRepository, final FixedDepositProductRepository fixedDepositProductRepository,
-            final SavingsAccountRepositoryWrapper savingsAccountRepository,
-            final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final DepositProductAssembler depositProductAssembler,
-            final RecurringDepositProductRepository recurringDepositProductRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final PlatformSecurityContext context,
-            final PaymentDetailAssembler paymentDetailAssembler, ExternalIdFactory externalIdFactory,
-            final ConfigurationDomainService configurationDomainService) {
+                                   final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
+                                   final StaffRepositoryWrapper staffRepository, final FixedDepositProductRepository fixedDepositProductRepository,
+                                   final SavingsAccountRepositoryWrapper savingsAccountRepository,
+                                   final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
+                                   final DepositProductAssembler depositProductAssembler,
+                                   final RecurringDepositProductRepository recurringDepositProductRepository,
+                                   final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final PlatformSecurityContext context,
+                                   final PaymentDetailAssembler paymentDetailAssembler, ExternalIdFactory externalIdFactory,
+                                   final ConfigurationDomainService configurationDomainService) {
 
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -185,13 +187,13 @@ public class DepositAccountAssembler {
         if (clientId != null) {
             final boolean isCalendarInherited = command.booleanPrimitiveValueOfParameterNamed(isCalendarInheritedParamName);
             client = this.clientRepository.findOneWithNotFoundDetection(clientId, isCalendarInherited); // we
-                                                                                                        // need
-                                                                                                        // group
-                                                                                                        // collection
-                                                                                                        // if
-                                                                                                        // isCalendarInherited
-                                                                                                        // is
-                                                                                                        // true
+            // need
+            // group
+            // collection
+            // if
+            // isCalendarInherited
+            // is
+            // true
             accountType = AccountType.INDIVIDUAL;
             if (client.isNotActive()) {
                 throw new ClientNotActiveException(clientId);
@@ -378,7 +380,7 @@ public class DepositAccountAssembler {
     }
 
     public DepositAccountTermAndPreClosure assembleAccountTermAndPreClosure(final JsonCommand command,
-            final DepositProductTermAndPreClosure productTermAndPreclosure) {
+                                                                            final DepositProductTermAndPreClosure productTermAndPreclosure) {
         final DepositPreClosureDetail productPreClosure = (productTermAndPreclosure == null) ? null
                 : productTermAndPreclosure.depositPreClosureDetail();
         final DepositTermDetail productTerm = (productTermAndPreclosure == null) ? null : productTermAndPreclosure.depositTermDetail();
@@ -397,7 +399,7 @@ public class DepositAccountAssembler {
 
         // calculate maturity amount
         final BigDecimal maturityAmount = null;// calculated and updated in
-                                               // account
+        // account
         final LocalDate maturityDate = null;// calculated and updated in account
         final Integer accountOnClosureTypeId = command.integerValueOfParameterNamed(maturityInstructionIdParamName);
         final DepositAccountOnClosureType accountOnClosureType = accountOnClosureTypeId != null
@@ -410,7 +412,7 @@ public class DepositAccountAssembler {
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(final JsonCommand command,
-            final DepositRecurringDetail prodRecurringDetail) {
+                                                                        final DepositRecurringDetail prodRecurringDetail) {
 
         final BigDecimal recurringDepositAmount = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
         boolean isMandatoryDeposit;
@@ -448,7 +450,7 @@ public class DepositAccountAssembler {
     }
 
     public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command,
-            final PaymentDetail paymentDetail) {
+                                                                                                       final PaymentDetail paymentDetail) {
         final String json = command.json();
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();

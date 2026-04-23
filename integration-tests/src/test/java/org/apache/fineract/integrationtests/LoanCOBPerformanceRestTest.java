@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
@@ -182,7 +184,7 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
     }
 
     public List<Long> createLoans(int numberOfLoans, String disbursementDate, Double amount, Double interestRate,
-            Integer numberOfInstallments) {
+                                  Integer numberOfInstallments) {
         LOG.info("Creating {} loans...", numberOfLoans);
         long startTime = System.nanoTime();
 
@@ -207,7 +209,7 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
 
     // random number from 3,4,6,12
     private Integer getRandomNumberOfInstallments() {
-        int[] possibleValues = { 3, 4, 6, 12 };
+        int[] possibleValues = {3, 4, 6, 12};
         return possibleValues[random.nextInt(possibleValues.length)];
     }
 
@@ -220,7 +222,7 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 10, 50, 100 })
+    @ValueSource(ints = {10, 50, 100})
     public void testLoanCOBPerformanceWithDifferentLoansCount(int loanCount, TestInfo testInfo) {
         String testName = testInfo.getDisplayName();
         LOG.info("Starting test: {} with {} loans", testName, loanCount);

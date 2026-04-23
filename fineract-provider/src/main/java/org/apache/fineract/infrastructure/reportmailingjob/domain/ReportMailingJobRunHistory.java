@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -65,7 +67,7 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom<Long> 
      * @return ReportMailingJobRunHistory object
      **/
     public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final LocalDateTime startDateTime,
-            final LocalDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
+                                                         final LocalDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
         return new ReportMailingJobRunHistory().setReportMailingJob(reportMailingJob).setStartDateTime(startDateTime)
                 .setEndDateTime(endDateTime).setStatus(status).setErrorMessage(errorMessage).setErrorLog(errorLog);
     }

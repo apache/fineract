@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
@@ -80,9 +81,11 @@ public class Main {
         for (LoanSchedulePlanPeriod period : plan.getPeriods()) {
             if (period instanceof LoanSchedulePlanDisbursementPeriod dp) {
                 System.out.printf("  Disbursement - Date: %s, Amount: %s%n", dp.periodDueDate(), dp.getPrincipalAmount());
-            } if (period instanceof LoanSchedulePlanDownPaymentPeriod rp) {
+            }
+            if (period instanceof LoanSchedulePlanDownPaymentPeriod rp) {
                 System.out.printf("  Down payment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Total: %s, Total Outstanding Balance: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
-            } if (period instanceof LoanSchedulePlanRepaymentPeriod rp) {
+            }
+            if (period instanceof LoanSchedulePlanRepaymentPeriod rp) {
                 System.out.printf("  Repayment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Interest: %s, Total: %s, Total Outstanding Balance: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getInterestAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
             }
         }

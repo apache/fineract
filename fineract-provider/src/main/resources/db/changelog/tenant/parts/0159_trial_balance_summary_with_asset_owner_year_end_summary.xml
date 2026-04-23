@@ -25,7 +25,7 @@
 
     <changeSet author="fineract" id="3">
         <update tableName="stretchy_report">
-            <column name="report_sql"  value="WITH retained_earning AS (SELECT distinct '${endDate}'  AS postingdate,
+            <column name="report_sql" value="WITH retained_earning AS (SELECT distinct '${endDate}'  AS postingdate,
                                           lp.name                                                     AS product,
                                           gl_code                                                     AS glacct,
                                           COALESCE((select name from acc_gl_account where gl_code = e.gl_code),

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,8 +24,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -68,7 +70,7 @@ public class LoanInstallmentDelinquencyTag extends AbstractAuditableWithUTCDateT
     private Long version;
 
     public LoanInstallmentDelinquencyTag(DelinquencyRange delinquencyRange, Loan loan, LoanRepaymentScheduleInstallment installment,
-            LocalDate addedOnDate, LocalDate liftedOnDate, LocalDate firstOverdueDate, BigDecimal outstandingAmount) {
+                                         LocalDate addedOnDate, LocalDate liftedOnDate, LocalDate firstOverdueDate, BigDecimal outstandingAmount) {
         this.delinquencyRange = delinquencyRange;
         this.loan = loan;
         this.installment = installment;

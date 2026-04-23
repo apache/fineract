@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -51,27 +51,27 @@ public enum NthDayType {
             switch (frequency) {
                 case 1:
                     repaymentFrequencyNthDayType = NthDayType.ONE;
-                break;
+                    break;
                 case 2:
                     repaymentFrequencyNthDayType = NthDayType.TWO;
-                break;
+                    break;
                 case 3:
                     repaymentFrequencyNthDayType = NthDayType.THREE;
-                break;
+                    break;
                 case 4:
                     repaymentFrequencyNthDayType = NthDayType.FOUR;
-                break;
+                    break;
                 case 5:
                     repaymentFrequencyNthDayType = NthDayType.FIVE;
-                break;
+                    break;
                 case -1:
                     repaymentFrequencyNthDayType = NthDayType.LAST;
-                break;
+                    break;
                 case -2:
                     repaymentFrequencyNthDayType = NthDayType.ONDAY;
-                break;
+                    break;
                 default:
-                break;
+                    break;
             }
         }
         return repaymentFrequencyNthDayType;

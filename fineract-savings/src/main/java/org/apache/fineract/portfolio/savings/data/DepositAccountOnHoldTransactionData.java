@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
@@ -55,8 +56,8 @@ public final class DepositAccountOnHoldTransactionData implements Serializable {
     private final String loanClientName;
 
     private DepositAccountOnHoldTransactionData(final Long id, final BigDecimal amount, final EnumOptionData transactionType,
-            final LocalDate transactionDate, final boolean reversed, final Long savingsId, final String savingsAccNo,
-            final String savingsClientName, final Long loanId, final String loanAccNo, final String loanClientName) {
+                                                final LocalDate transactionDate, final boolean reversed, final Long savingsId, final String savingsAccNo,
+                                                final String savingsClientName, final Long loanId, final String loanAccNo, final String loanClientName) {
         this.id = id;
         this.amount = amount;
         this.transactionType = transactionType;
@@ -71,7 +72,7 @@ public final class DepositAccountOnHoldTransactionData implements Serializable {
     }
 
     private DepositAccountOnHoldTransactionData(final Long id, final BigDecimal amount, final EnumOptionData transactionType,
-            final LocalDate transactionDate, final boolean reversed) {
+                                                final LocalDate transactionDate, final boolean reversed) {
         this.id = id;
         this.amount = amount;
         this.transactionType = transactionType;
@@ -86,14 +87,14 @@ public final class DepositAccountOnHoldTransactionData implements Serializable {
     }
 
     public static DepositAccountOnHoldTransactionData instance(final Long id, final BigDecimal amount, final EnumOptionData transactionType,
-            final LocalDate transactionDate, final boolean reversed, final Long savingsId, final String savingsAccountNo,
-            final String savingsClientName, final Long loanId, final String loanAccountNo, final String loanClientName) {
+                                                               final LocalDate transactionDate, final boolean reversed, final Long savingsId, final String savingsAccountNo,
+                                                               final String savingsClientName, final Long loanId, final String loanAccountNo, final String loanClientName) {
         return new DepositAccountOnHoldTransactionData(id, amount, transactionType, transactionDate, reversed, savingsId, savingsAccountNo,
                 savingsClientName, loanId, loanAccountNo, loanClientName);
     }
 
     public static DepositAccountOnHoldTransactionData instance(Long transactionId, BigDecimal amount, EnumOptionData transactionType,
-            LocalDate date, boolean transactionReversed) {
+                                                               LocalDate date, boolean transactionReversed) {
         return new DepositAccountOnHoldTransactionData(transactionId, amount, transactionType, date, transactionReversed);
     }
 }

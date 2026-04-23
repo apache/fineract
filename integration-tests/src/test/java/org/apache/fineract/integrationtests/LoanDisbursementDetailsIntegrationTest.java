@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -64,7 +66,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanDisbursementDetailsIntegrationTest {
 
@@ -252,7 +254,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithEmiAmount(final Integer clientId, final Integer loanProductId, final String proposedAmount,
-            List<HashMap> tranches, final String installmentAmount) {
+                                                         List<HashMap> tranches, final String installmentAmount) {
 
         log.info("----------------APPLYING FOR LOAN APPLICATION");
         List<HashMap> collaterals = new ArrayList<>();
@@ -603,7 +605,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     }
 
     private String buildLoanApplicationJSON(final Integer clientId, final Integer loanProductId, String principal, List<HashMap> tranches,
-            final String operationDate, List<HashMap> collaterals) {
+                                            final String operationDate, List<HashMap> collaterals) {
 
         return new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -621,7 +623,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithTranches(final Integer clientId, final Integer loanProductId, String principal,
-            List<HashMap> tranches) {
+                                                        List<HashMap> tranches) {
         log.info("----------------APPLYING FOR LOAN APPLICATION");
         List<HashMap> collaterals = new ArrayList<>();
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
@@ -637,7 +639,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     }
 
     private Integer applyForMultiTrancheLoanApplication(final String clientId, final String loanProductId, String principal,
-            String operationDate) {
+                                                        String operationDate) {
         log.info("----------------APPLYING FOR MULTI TRANCHE LOAN APPLICATION");
         List<HashMap> emptyData = new ArrayList<>();
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //

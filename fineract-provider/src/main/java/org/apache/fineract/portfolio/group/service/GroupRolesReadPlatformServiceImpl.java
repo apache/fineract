@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.group.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -42,7 +43,7 @@ public class GroupRolesReadPlatformServiceImpl implements GroupRolesReadPlatform
         this.context.authenticatedUser();
         final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
         final String sql = "Select " + mapper.schema() + " where role.group_id=?";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { groupId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{groupId}); // NOSONAR
     }
 
     @Override
@@ -51,7 +52,7 @@ public class GroupRolesReadPlatformServiceImpl implements GroupRolesReadPlatform
             this.context.authenticatedUser();
             final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
             final String sql = "Select " + mapper.schema() + " where role.group_id=? and role.id=?";
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { groupId, roleId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[]{groupId, roleId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new GroupRoleNotFoundException(roleId, e);
         }

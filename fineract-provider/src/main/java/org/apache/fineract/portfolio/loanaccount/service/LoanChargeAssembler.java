@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -256,7 +258,7 @@ public class LoanChargeAssembler {
     }
 
     public LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command,
-            final LocalDate dueDate) {
+                                        final LocalDate dueDate) {
         final Locale locale = command.extractLocale();
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount", locale);
 
@@ -271,7 +273,7 @@ public class LoanChargeAssembler {
                 } else {
                     amountPercentageAppliedTo = loan.getPrincipal().getAmount();
                 }
-            break;
+                break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 if (command.hasParameter("principal") && command.hasParameter("interest")) {
                     amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal")
@@ -279,16 +281,16 @@ public class LoanChargeAssembler {
                 } else {
                     amountPercentageAppliedTo = loan.getPrincipal().getAmount().add(loan.getTotalInterest());
                 }
-            break;
+                break;
             case PERCENT_OF_INTEREST:
                 if (command.hasParameter("interest")) {
                     amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("interest");
                 } else {
                     amountPercentageAppliedTo = loan.getTotalInterest();
                 }
-            break;
+                break;
             default:
-            break;
+                break;
         }
 
         BigDecimal loanCharge = BigDecimal.ZERO;
@@ -323,8 +325,8 @@ public class LoanChargeAssembler {
      * loanPrincipal is required for charges that are percentage based
      */
     public LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
-            final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final ExternalId externalId) {
+                                           final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
+                                           final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final ExternalId externalId) {
         return loanChargeService.create(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, numberOfRepayments, BigDecimal.ZERO, externalId);
     }

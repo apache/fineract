@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,10 @@
 package org.apache.fineract.organisation.teller.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.util.Map;
 import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -329,10 +331,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     @Override
     public CommandProcessingResult allocateCashToCashier(final Long cashierId, JsonCommand command) {
         return doTransactionForCashier(cashierId, CashierTxnType.ALLOCATE, command); // For
-                                                                                     // fund
-                                                                                     // allocation
-                                                                                     // to
-                                                                                     // cashier
+        // fund
+        // allocation
+        // to
+        // cashier
     }
 
     @Override
@@ -341,10 +343,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         this.cashierTransactionDataValidator.validateSettleCashAndCashOutTransactions(cashierId, command);
 
         return doTransactionForCashier(cashierId, CashierTxnType.SETTLE, command); // For
-                                                                                   // fund
-                                                                                   // settlement
-                                                                                   // from
-                                                                                   // cashier
+        // fund
+        // settlement
+        // from
+        // cashier
     }
 
     private CommandProcessingResult doTransactionForCashier(final Long cashierId, final CashierTxnType txnType, JsonCommand command) {
@@ -407,28 +409,28 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final String transactionId = Long.toHexString(Long.parseLong(uniqueVal));
 
             final JournalEntry debitJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
-                                                                                               // detail
+                    // detail
                     debitAccount, cashierTxn.getCurrencyCode(),
 
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.DEBIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
                     null, null, null, null); // Loan
-                                             // and
-                                             // Savings
-                                             // Txn
+            // and
+            // Savings
+            // Txn
 
             final JournalEntry creditJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
-                                                                                                // detail
+                    // detail
                     creditAccount, cashierTxn.getCurrencyCode(),
 
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.CREDIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
                     null, null, null, null); // Loan
-                                             // and
-                                             // Savings
-                                             // Txn
+            // and
+            // Savings
+            // Txn
 
             this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
             this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);

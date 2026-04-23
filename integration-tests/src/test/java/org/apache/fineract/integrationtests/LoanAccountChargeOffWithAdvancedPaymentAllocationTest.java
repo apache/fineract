@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
@@ -596,7 +598,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
     }
 
     private void verifyJournalEntry(JournalEntryTransactionItem journalEntryTransactionItem, Double amount, LocalDate entryDate,
-            Account account, String type) {
+                                    Account account, String type) {
         assertEquals(amount, journalEntryTransactionItem.getAmount());
         assertEquals(entryDate, journalEntryTransactionItem.getTransactionDate());
         assertEquals(account.getAccountID().longValue(), journalEntryTransactionItem.getGlAccountId().longValue());
@@ -604,8 +606,8 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends BaseL
     }
 
     private void verifyTransaction(final LocalDate transactionDate, final Float transactionAmount, final Float principalPortion,
-            final Float interestPortion, final Float feePortion, final Float penaltyPortion, final Integer loanID,
-            final String transactionOfType) {
+                                   final Float interestPortion, final Float feePortion, final Float penaltyPortion, final Integer loanID,
+                                   final String transactionOfType) {
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
                 this.responseSpec, loanID);
         boolean isTransactionFound = false;

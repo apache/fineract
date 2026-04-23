@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler.sharedaccount;
 
 import com.google.gson.GsonBuilder;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -68,7 +70,7 @@ public class SharedAccountImportHandler implements ImportHandler {
     }
 
     private void readExcelFile(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final List<String> statuses,
-            final String locale, String dateFormat) {
+                               final String locale, String dateFormat) {
         Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(sharedAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
@@ -81,7 +83,7 @@ public class SharedAccountImportHandler implements ImportHandler {
     }
 
     private ShareAccountData readSharedAccount(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
-            final String dateFormat) {
+                                               final String dateFormat) {
         String clientName = ImportHandlerUtils.readAsString(SharedAccountsConstants.CLIENT_NAME_COL, row);
         Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
 

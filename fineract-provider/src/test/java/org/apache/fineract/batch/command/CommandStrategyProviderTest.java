@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.HttpMethod;
+
 import java.util.stream.Stream;
+
 import org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy;
 import org.apache.fineract.batch.command.internal.AdjustChargeByChargeExternalIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.AdjustChargeCommandStrategy;
@@ -261,7 +263,7 @@ public class CommandStrategyProviderTest {
     @ParameterizedTest
     @MethodSource("provideCommandStrategies")
     public void testGetCommandStrategySuccess_OldUrls(final String url, final String httpMethod, final String beanName,
-            final CommandStrategy commandStrategy) {
+                                                      final CommandStrategy commandStrategy) {
         final ApplicationContext applicationContext = mock(ApplicationContext.class);
         final CommandStrategyProvider commandStrategyProvider = new CommandStrategyProvider(applicationContext);
         when(applicationContext.getBean(beanName)).thenReturn(commandStrategy);
@@ -284,7 +286,7 @@ public class CommandStrategyProviderTest {
     @ParameterizedTest
     @MethodSource("provideCommandStrategies")
     public void testGetCommandStrategySuccess_VersionedUrls(final String url, final String httpMethod, final String beanName,
-            final CommandStrategy commandStrategy) {
+                                                            final CommandStrategy commandStrategy) {
         String versionedUrl = "v1/" + url;
         final ApplicationContext applicationContext = mock(ApplicationContext.class);
         final CommandStrategyProvider commandStrategyProvider = new CommandStrategyProvider(applicationContext);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.interoperation.data;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.interoperation.domain.InteropActionState;
 
 public final class InteropQuoteResponseData extends InteropResponseData {
@@ -34,8 +36,8 @@ public final class InteropQuoteResponseData extends InteropResponseData {
     private MoneyData fspCommission;
 
     private InteropQuoteResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
-            @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration, List<ExtensionData> extensionList,
-            @NotNull String quoteCode, MoneyData fspFee, MoneyData fspCommission) {
+                                     @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration, List<ExtensionData> extensionList,
+                                     @NotNull String quoteCode, MoneyData fspFee, MoneyData fspCommission) {
         super(resourceId, officeId, commandId, changesOnly, transactionCode, state, expiration, extensionList);
         this.quoteCode = quoteCode;
         this.fspFee = fspFee;
@@ -43,25 +45,25 @@ public final class InteropQuoteResponseData extends InteropResponseData {
     }
 
     public static InteropQuoteResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-            LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
-            MoneyData fspCommission) {
+                                                 LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
+                                                 MoneyData fspCommission) {
         return new InteropQuoteResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList, quoteCode,
                 fspFee, fspCommission);
     }
 
     public static InteropQuoteResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
-            LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
-            MoneyData fspCommission) {
+                                                 LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
+                                                 MoneyData fspCommission) {
         return build(null, transactionCode, state, expiration, extensionList, quoteCode, fspFee, fspCommission);
     }
 
     public static InteropQuoteResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-            @NotNull String quoteCode) {
+                                                 @NotNull String quoteCode) {
         return build(commandId, transactionCode, state, null, null, quoteCode, null, null);
     }
 
     public static InteropQuoteResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
-            @NotNull String quoteCode) {
+                                                 @NotNull String quoteCode) {
         return build(null, transactionCode, state, quoteCode);
     }
 

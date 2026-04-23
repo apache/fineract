@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,6 +33,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -400,7 +402,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
-            Integer numberOfRepayments, String loanDisbursementDate, double amount, String externalLoanId) {
+                                                                                                  Integer numberOfRepayments, String loanDisbursementDate, double amount, String externalLoanId) {
         LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");
         PostLoansRequest applicationRequest = applyLoanRequestProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(clientId,
                 loanProductId, externalLoanId, amount, numberOfRepayments, loanDisbursementDate);
@@ -418,7 +420,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private PostLoansRequest applyLoanRequestProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanId,
-            String loanExternalId, double amount, Integer numberOfRepayments, String loanDisbursementDate) {
+                                                                                                           String loanExternalId, double amount, Integer numberOfRepayments, String loanDisbursementDate) {
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId).productId(loanId)
                 .submittedOnDate(loanDisbursementDate).expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .locale("en").loanType("individual")
@@ -2100,7 +2102,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private static Long applyForLoanApplicationWithInterest(final Long clientID, final Long loanProductID, BigDecimal principal,
-            String applicationDisbursementDate) {
+                                                            String applicationDisbursementDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
@@ -2112,8 +2114,8 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
-            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+                                             boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
+                                             LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         AdvancedPaymentData goodwillCreditAllocation = createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT");
         AdvancedPaymentData interestPaymentWaiver = createPaymentAllocation("INTEREST_PAYMENT_WAIVER", "LAST_INSTALLMENT");
@@ -2136,9 +2138,9 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
-            String loanScheduleProcessingType) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
+                                                             String loanScheduleProcessingType) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
@@ -2151,15 +2153,15 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate) {
         return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
                 interestRate, expectedDisbursementDate, submittedOnDate, LoanScheduleProcessingType.HORIZONTAL);
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate, LoanScheduleProcessingType loanScheduleProcessingType) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate, LoanScheduleProcessingType loanScheduleProcessingType) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
                 interestRate, expectedDisbursementDate, submittedOnDate,
@@ -2167,7 +2169,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private static void validateLoanTransaction(GetLoansLoanIdResponse loanDetails, int index, double transactionAmount,
-            double principalPortion, double overPaidPortion, double loanBalance) {
+                                                double principalPortion, double overPaidPortion, double loanBalance) {
         assertEquals(transactionAmount, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getAmount()));
         assertEquals(principalPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getPrincipalPortion()));
         assertEquals(overPaidPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOverpaymentPortion()));
@@ -2175,7 +2177,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     }
 
     private void validateLoanCharge(GetLoansLoanIdResponse loanDetails, int index, LocalDate dueDate, double charged, double paid,
-            double outstanding) {
+                                    double outstanding) {
         GetLoansLoanIdLoanChargeData chargeData = loanDetails.getCharges().get(index);
         assertEquals(dueDate, chargeData.getDueDate());
         assertEquals(charged, Utils.getDoubleValue(chargeData.getAmount()));

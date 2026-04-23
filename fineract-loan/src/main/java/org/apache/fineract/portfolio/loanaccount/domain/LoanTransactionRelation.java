@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -52,10 +52,11 @@ public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCus
     @Column(name = "relation_type_enum", nullable = false)
     private LoanTransactionRelationTypeEnum relationType;
 
-    protected LoanTransactionRelation() {}
+    protected LoanTransactionRelation() {
+    }
 
     protected LoanTransactionRelation(@NotNull LoanTransaction fromTransaction, LoanTransaction toTransaction, LoanCharge toCharge,
-            LoanTransactionRelationTypeEnum relationType) {
+                                      LoanTransactionRelationTypeEnum relationType) {
         this.fromTransaction = fromTransaction;
         this.toTransaction = toTransaction;
         this.toCharge = toCharge;
@@ -63,14 +64,14 @@ public class LoanTransactionRelation extends AbstractAuditableWithUTCDateTimeCus
     }
 
     public static LoanTransactionRelation linkToTransaction(@NotNull LoanTransaction fromTransaction,
-            @NotNull LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relation) {
+                                                            @NotNull LoanTransaction toTransaction, LoanTransactionRelationTypeEnum relation) {
         LoanTransactionRelation loanTransactionRelation = new LoanTransactionRelation(fromTransaction, toTransaction, null, relation);
         fromTransaction.getLoanTransactionRelations().add(loanTransactionRelation);
         return loanTransactionRelation;
     }
 
     public static LoanTransactionRelation linkToCharge(@NotNull LoanTransaction fromTransaction, @NotNull LoanCharge loanCharge,
-            LoanTransactionRelationTypeEnum relation) {
+                                                       LoanTransactionRelationTypeEnum relation) {
         return new LoanTransactionRelation(fromTransaction, null, loanCharge, relation);
     }
 }

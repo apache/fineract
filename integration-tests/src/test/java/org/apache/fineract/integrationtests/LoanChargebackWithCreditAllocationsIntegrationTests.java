@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
@@ -90,7 +91,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Add Chargeback
             addChargebackForLoan(loanId, repaymentTransaction, 100.0); // 20 penalty + 50 fee + 0 interest + 30
-                                                                       // principal
+            // principal
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -568,7 +569,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Add Repayment
             Long repaymentTransaction = addRepaymentForLoan(loanId, 1370.0, "20 January 2023"); // 1250 + 70 = 1320; 50
-                                                                                                // overpayment
+            // overpayment
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -636,7 +637,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Add Repayment
             Long repaymentTransaction = addRepaymentForLoan(loanId, 1370.0, "20 January 2023"); // 1250 + 70 = 1320; 50
-                                                                                                // overpayment
+            // overpayment
 
             verifyRepaymentSchedule(loanId, //
                     installment(1250.0, null, "01 January 2023"), //
@@ -1774,7 +1775,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     }
 
     private void verifyLoanSummaryAmounts(Long loanId, double creditedPrincipal, double creditedFee, double creditedPenalty,
-            double totalOutstanding) {
+                                          double totalOutstanding) {
         GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         GetLoansLoanIdSummary summary = loanResponse.getSummary();
         Assertions.assertNotNull(summary);
@@ -1814,7 +1815,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     }
 
     private PostLoanProductsRequest loanProductWithAdvancedPaymentAllocationWith4Installments(AdvancedPaymentData defaultAllocation,
-            CreditAllocationData creditAllocationData) {
+                                                                                              CreditAllocationData creditAllocationData) {
         return createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().numberOfRepayments(4)//
                 .repaymentEvery(1)//
                 .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//

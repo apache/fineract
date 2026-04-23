@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.journalentry.service;
 
 import java.time.LocalDate;
+
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;
@@ -30,8 +31,8 @@ public interface JournalEntryReadPlatformService {
     JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId, JournalEntryAssociationParametersData associationParametersData);
 
     Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries, LocalDate fromDate,
-            LocalDate toDate, LocalDate submittedOnDateFrom, LocalDate submittedOnDateTo, String transactionId, Integer entityType,
-            JournalEntryAssociationParametersData associationParametersData);
+                                       LocalDate toDate, LocalDate submittedOnDateFrom, LocalDate submittedOnDateTo, String transactionId, Integer entityType,
+                                       JournalEntryAssociationParametersData associationParametersData);
 
     OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId, String currencyCode);
 

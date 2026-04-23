@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.organisation.teller.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -137,7 +139,8 @@ final class TellerApiResourceSwagger {
 
         static final class PutTellersResponseChanges {
 
-            private PutTellersResponseChanges() {}
+            private PutTellersResponseChanges() {
+            }
 
             @Schema(example = "teller cash handling")
             public String description;
@@ -281,7 +284,8 @@ final class TellerApiResourceSwagger {
 
         static final class PutTellersTellerIdCashiersCashierIdResponseChanges {
 
-            private PutTellersTellerIdCashiersCashierIdResponseChanges() {}
+            private PutTellersTellerIdCashiersCashierIdResponseChanges() {
+            }
 
             @Schema(example = "25 February 2015")
             public LocalDate endDate;

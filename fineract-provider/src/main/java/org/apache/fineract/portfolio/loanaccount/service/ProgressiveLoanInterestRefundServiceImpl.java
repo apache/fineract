@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,7 +62,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     private final LoanTransactionProcessingService loanTransactionProcessingService;
 
     private static void simulateRepaymentForDisbursements(LoanTransaction lt, final AtomicReference<BigDecimal> refundFinal,
-            List<LoanTransaction> collect) {
+                                                          List<LoanTransaction> collect) {
         LoanTransaction copy = new LoanTransaction(lt.getLoan(), lt.getLoan().getOffice(), lt.getTypeOf(), lt.getDateOf(), lt.getAmount(),
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null, null);
         if (LoanTransactionType.CHARGE_PAYMENT.equals(copy.getTypeOf())
@@ -89,7 +90,7 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     }
 
     private Money recalculateTotalInterest(AdvancedPaymentScheduleTransactionProcessor processor, Loan loan,
-            LocalDate relatedRefundTransactionDate, List<LoanTransaction> transactionsToReprocess) {
+                                           LocalDate relatedRefundTransactionDate, List<LoanTransaction> transactionsToReprocess) {
 
         final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
         loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
@@ -120,8 +121,8 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
     @Override
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public Money totalInterestByTransactions(LoanRepaymentScheduleTransactionProcessor processor, final Long loanId,
-            LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds,
-            List<LoanTermVariations> activeLoanTermVariations) {
+                                             LocalDate relatedRefundTransactionDate, List<LoanTransaction> newTransactions, List<Long> oldTransactionIds,
+                                             List<LoanTermVariations> activeLoanTermVariations) {
         Loan loan = loanAssembler.assembleFrom(loanId);
         loan.setLoanTermVariations(activeLoanTermVariations);
         if (processor == null) {
@@ -136,11 +137,11 @@ public class ProgressiveLoanInterestRefundServiceImpl implements InterestRefundS
         List<LoanTransactionType> interestRefundTypes = loan.getSupportedInterestRefundTransactionTypes();
 
         List<LoanTransaction> transactions = Stream.concat(loan.getLoanTransactions().stream() //
-                .filter(lt -> isTransactionNeededForInterestRefundCalculations(lt) //
-                        && oldTransactionIds.contains(lt.getId())), //
-                newTransactions.stream() //
-                        .filter(this::isTransactionNeededForInterestRefundCalculations) //
-                        .map(LoanTransaction::copyTransactionProperties)) //
+                                .filter(lt -> isTransactionNeededForInterestRefundCalculations(lt) //
+                                        && oldTransactionIds.contains(lt.getId())), //
+                        newTransactions.stream() //
+                                .filter(this::isTransactionNeededForInterestRefundCalculations) //
+                                .map(LoanTransaction::copyTransactionProperties)) //
                 .toList();
 
         final AtomicReference<BigDecimal> refundFinal = new AtomicReference<>(

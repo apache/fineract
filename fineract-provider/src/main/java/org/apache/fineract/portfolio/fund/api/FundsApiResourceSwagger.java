@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,12 +25,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 final class FundsApiResourceSwagger {
 
-    private FundsApiResourceSwagger() {}
+    private FundsApiResourceSwagger() {
+    }
 
     @Schema(description = "PostFundsResponse")
     public static final class PostFundsResponse {
 
-        private PostFundsResponse() {}
+        private PostFundsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -39,7 +41,8 @@ final class FundsApiResourceSwagger {
     @Schema(description = "PutFundsFundIdRequest")
     public static final class PutFundsFundIdRequest {
 
-        private PutFundsFundIdRequest() {}
+        private PutFundsFundIdRequest() {
+        }
 
         @Schema(example = "EU Agri Fund (2010-2020)")
         public String name;
@@ -49,7 +52,8 @@ final class FundsApiResourceSwagger {
     @Schema(description = "PutFundsFundIdResponse")
     public static final class PutFundsFundIdResponse {
 
-        private PutFundsFundIdResponse() {}
+        private PutFundsFundIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.data;
 
 import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,8 +53,8 @@ public final class ImportData {
     private Integer failureCount;
 
     public static ImportData instance(final Long importId, final Long documentId, final LocalDate importTime, final LocalDate endTime,
-            final Boolean completed, final String name, final Long createdBy, final Integer totalRecords, final Integer successCount,
-            final Integer failureCount) {
+                                      final Boolean completed, final String name, final Long createdBy, final Integer totalRecords, final Integer successCount,
+                                      final Integer failureCount) {
         return new ImportData(importId, documentId, importTime, endTime, completed, name, createdBy, totalRecords, successCount,
                 failureCount);
     }
@@ -63,8 +64,8 @@ public final class ImportData {
     }
 
     private ImportData(final Long importId, final Long documentId, final LocalDate importTime, final LocalDate endTime,
-            final Boolean completed, final String name, final Long createdBy, final Integer totalRecords, final Integer successCount,
-            final Integer failureCount) {
+                       final Boolean completed, final String name, final Long createdBy, final Integer totalRecords, final Integer successCount,
+                       final Integer failureCount) {
         this.importId = importId;
         this.documentId = documentId;
         this.name = name;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBConstant;
@@ -77,7 +78,7 @@ public abstract class AsyncCommonCOBExecutorService implements AsyncCOBExecutorS
             // Throwing an error here is useless as it will be swallowed hence it is async method
             log.error("Job not found: {}", getJobName(), new JobNotFoundException(getJobName(), e));
         } catch (JobInstanceAlreadyCompleteException | JobRestartException | JobParametersInvalidException
-                | JobExecutionAlreadyRunningException | JobExecutionException e) {
+                 | JobExecutionAlreadyRunningException | JobExecutionException e) {
             // Throwing an error here is useless as it will be swallowed hence it is async method
             log.error("Error executing job", e);
         } finally {

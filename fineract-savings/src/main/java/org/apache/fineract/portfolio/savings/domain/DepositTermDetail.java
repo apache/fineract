@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,10 +27,12 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
@@ -62,8 +64,8 @@ public class DepositTermDetail {
     private Integer inMultiplesOfDepositTermType;
 
     public static DepositTermDetail createFrom(final Integer minDepositTerm, final Integer maxDepositTerm,
-            final SavingsPeriodFrequencyType minDepositTermType, final SavingsPeriodFrequencyType maxDepositTermType,
-            final Integer inMultiplesOfDepositTerm, final SavingsPeriodFrequencyType inMultiplesOfDepositTermType) {
+                                               final SavingsPeriodFrequencyType minDepositTermType, final SavingsPeriodFrequencyType maxDepositTermType,
+                                               final Integer inMultiplesOfDepositTerm, final SavingsPeriodFrequencyType inMultiplesOfDepositTermType) {
 
         return new DepositTermDetail(minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm,
                 inMultiplesOfDepositTermType);
@@ -74,8 +76,8 @@ public class DepositTermDetail {
     }
 
     private DepositTermDetail(final Integer minDepositTerm, final Integer maxDepositTerm,
-            final SavingsPeriodFrequencyType minDepositTermType, final SavingsPeriodFrequencyType maxDepositTermType,
-            final Integer inMultiplesOfDepositTerm, final SavingsPeriodFrequencyType inMultiplesOfDepositTermType) {
+                              final SavingsPeriodFrequencyType minDepositTermType, final SavingsPeriodFrequencyType maxDepositTermType,
+                              final Integer inMultiplesOfDepositTerm, final SavingsPeriodFrequencyType inMultiplesOfDepositTermType) {
         this.minDepositTerm = minDepositTerm;
         this.maxDepositTerm = maxDepositTerm;
         this.minDepositTermType = (minDepositTermType == null) ? null : minDepositTermType.getValue();
@@ -203,25 +205,25 @@ public class DepositTermDetail {
     }
 
     public Integer depositPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate,
-            final SavingsPeriodFrequencyType periodFrequencyType) {
+                                 final SavingsPeriodFrequencyType periodFrequencyType) {
         Integer actualDepositPeriod = 0;
 
         switch (periodFrequencyType) {
             case DAYS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
-            break;
+                break;
             case WEEKS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(periodStartDate, periodEndDate));
-            break;
+                break;
             case MONTHS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(periodStartDate, periodEndDate));
-            break;
+                break;
             case YEARS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(periodStartDate, periodEndDate));
-            break;
+                break;
             case INVALID:
                 actualDepositPeriod = 0;// default value
-            break;
+                break;
         }
         return actualDepositPeriod;
     }
@@ -231,19 +233,19 @@ public class DepositTermDetail {
         switch (periodFrequencyType) {
             case DAYS:
                 toDays = period;
-            break;
+                break;
             case WEEKS:
                 toDays = period * 7;
-            break;
+                break;
             case MONTHS:
                 toDays = period * 30;// converting to stard 30 days
-            break;
+                break;
             case YEARS:
                 toDays = period * 365;
-            break;
+                break;
             case INVALID:
                 toDays = 0;// default value
-            break;
+                break;
         }
         return toDays;
     }

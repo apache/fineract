@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -76,14 +76,14 @@ public class ShareAccountsConfiguration {
     @Bean(value = "SHAREACCOUNT_COMMANDSERVICE")
     @ConditionalOnMissingBean(AccountsCommandsService.class)
     public AccountsCommandsService accountsCommandsService(FromJsonHelper fromApiJsonHelper,
-            ShareAccountDataSerializer shareAccountDataSerializer) {
+                                                           ShareAccountDataSerializer shareAccountDataSerializer) {
         return new ShareAccountCommandsServiceImpl(fromApiJsonHelper, shareAccountDataSerializer);
     }
 
     @Bean
     @ConditionalOnMissingBean(ShareAccountDividendReadPlatformService.class)
     public ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService(JdbcTemplate jdbcTemplate,
-            ColumnValidator columnValidator, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                                           ColumnValidator columnValidator, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new ShareAccountDividendReadPlatformServiceImpl(jdbcTemplate, columnValidator, paginationHelper, sqlGenerator);
 
     }
@@ -91,12 +91,12 @@ public class ShareAccountsConfiguration {
     @Bean(value = "share" + AccountsApiConstants.READPLATFORM_NAME)
     @ConditionalOnMissingBean(ShareAccountReadPlatformService.class)
     public ShareAccountReadPlatformService shareAccountReadPlatformService(ApplicationContext applicationContext,
-            ChargeReadPlatformService chargeReadPlatformService,
-            ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
-            SavingsAccountReadPlatformService savingsAccountReadPlatformService, ClientReadPlatformService clientReadPlatformService,
-            ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService,
-            PurchasedSharesReadPlatformService purchasedSharesReadPlatformService, JdbcTemplate jdbcTemplate,
-            PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                           ChargeReadPlatformService chargeReadPlatformService,
+                                                                           ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
+                                                                           SavingsAccountReadPlatformService savingsAccountReadPlatformService, ClientReadPlatformService clientReadPlatformService,
+                                                                           ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService,
+                                                                           PurchasedSharesReadPlatformService purchasedSharesReadPlatformService, JdbcTemplate jdbcTemplate,
+                                                                           PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new ShareAccountReadPlatformServiceImpl(applicationContext, chargeReadPlatformService,
                 shareProductDropdownReadPlatformService, savingsAccountReadPlatformService, clientReadPlatformService,
                 shareAccountChargeReadPlatformService, purchasedSharesReadPlatformService, jdbcTemplate, paginationHelper, sqlGenerator);
@@ -105,17 +105,17 @@ public class ShareAccountsConfiguration {
     @Bean
     @ConditionalOnMissingBean(ShareAccountSchedularService.class)
     public ShareAccountSchedularService shareAccountSchedularService(ShareAccountDividendRepository shareAccountDividendRepository,
-            SavingsAccountDomainService savingsAccountDomainService, SavingsAccountAssembler savingsAccountAssembler) {
+                                                                     SavingsAccountDomainService savingsAccountDomainService, SavingsAccountAssembler savingsAccountAssembler) {
         return new ShareAccountSchedularServiceImpl(shareAccountDividendRepository, savingsAccountDomainService, savingsAccountAssembler);
     }
 
     @Bean
     @ConditionalOnMissingBean(ShareAccountWritePlatformService.class)
     public ShareAccountWritePlatformService shareAccountWritePlatformService(ShareAccountDataSerializer accountDataSerializer,
-            ShareAccountRepositoryWrapper shareAccountRepository, ShareProductRepositoryWrapper shareProductRepository,
-            AccountNumberGenerator accountNumberGenerator, AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            JournalEntryWritePlatformService journalEntryWritePlatformService, NoteRepository noteRepository,
-            BusinessEventNotifierService businessEventNotifierService) {
+                                                                             ShareAccountRepositoryWrapper shareAccountRepository, ShareProductRepositoryWrapper shareProductRepository,
+                                                                             AccountNumberGenerator accountNumberGenerator, AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
+                                                                             JournalEntryWritePlatformService journalEntryWritePlatformService, NoteRepository noteRepository,
+                                                                             BusinessEventNotifierService businessEventNotifierService) {
         return new ShareAccountWritePlatformServiceJpaRepositoryImpl(accountDataSerializer, shareAccountRepository, shareProductRepository,
                 accountNumberGenerator, accountNumberFormatRepository, journalEntryWritePlatformService, noteRepository,
                 businessEventNotifierService);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import static org.apache.fineract.batch.command.CommandStrategyUtils.isResourceV
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -144,7 +145,7 @@ public class CommandStrategyProvider {
                 "getSavingsAccountByIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/savingsaccounts").method(POST).build(), "applySavingsCommandStrategy");
         commandStrategies.put(CommandContext
-                .resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions" + OPTIONAL_COMMAND_PARAM_REGEX).method(POST).build(),
+                        .resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions" + OPTIONAL_COMMAND_PARAM_REGEX).method(POST).build(),
                 "savingsAccountTransactionCommandStrategy");
         commandStrategies.put(CommandContext
                 .resource("v1\\/savingsaccounts\\/" + NUMBER_REGEX + "\\/transactions\\/" + NUMBER_REGEX + OPTIONAL_COMMAND_PARAM_REGEX)
@@ -255,7 +256,7 @@ public class CommandStrategyProvider {
                 CommandContext.resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses").method(POST).build(),
                 "createLoanInterestPauseByExternalIdCommandStrategy");
         commandStrategies.put(CommandContext
-                .resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses\\/" + NUMBER_REGEX).method(PUT).build(),
+                        .resource("v1\\/loans\\/external-id\\/" + UUID_PARAM_REGEX + "\\/interest-pauses\\/" + NUMBER_REGEX).method(PUT).build(),
                 "updateLoanInterestPauseByExternalIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("v1\\/accounttransfers").method(POST).build(),
                 "createAccountTransferCommandStrategy");

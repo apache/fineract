@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,8 +20,10 @@ package org.apache.fineract.integrationtests.common.accounting;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.client.models.DeleteFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
@@ -45,7 +47,7 @@ public class FinancialActivityAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object createFinancialActivityAccount(Integer financialActivityId, Integer glAccountId,
-            final ResponseSpecification responseSpecification, String jsonBack) {
+                                                 final ResponseSpecification responseSpecification, String jsonBack) {
         String json = FinancialActivityAccountsMappingBuilder.build(financialActivityId, glAccountId);
         return Utils.performServerPost(this.requestSpec, responseSpecification,
                 FINANCIAL_ACTIVITY_ACCOUNT_MAPPING_URL + "?" + Utils.TENANT_IDENTIFIER, json, jsonBack);
@@ -56,7 +58,7 @@ public class FinancialActivityAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object updateFinancialActivityAccount(Integer financialActivityAccountId, Integer financialActivityId, Integer glAccountId,
-            final ResponseSpecification responseSpecification, String jsonBack) {
+                                                 final ResponseSpecification responseSpecification, String jsonBack) {
         String json = FinancialActivityAccountsMappingBuilder.build(financialActivityId, glAccountId);
         return Utils.performServerPut(this.requestSpec, responseSpecification,
                 FINANCIAL_ACTIVITY_ACCOUNT_MAPPING_URL + "/" + financialActivityAccountId + "?" + Utils.TENANT_IDENTIFIER, json, jsonBack);
@@ -67,7 +69,7 @@ public class FinancialActivityAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public HashMap getFinancialActivityAccount(final Integer financialActivityAccountId,
-            final ResponseSpecification responseSpecification) {
+                                               final ResponseSpecification responseSpecification) {
         final String url = FINANCIAL_ACTIVITY_ACCOUNT_MAPPING_URL + "/" + financialActivityAccountId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpecification, url, "");
     }
@@ -86,7 +88,7 @@ public class FinancialActivityAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer deleteFinancialActivityAccount(final Integer financialActivityAccountId,
-            final ResponseSpecification responseSpecification, String jsonBack) {
+                                                  final ResponseSpecification responseSpecification, String jsonBack) {
         final String url = FINANCIAL_ACTIVITY_ACCOUNT_MAPPING_URL + "/" + financialActivityAccountId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, responseSpecification, url, jsonBack);
     }

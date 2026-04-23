@@ -27,7 +27,7 @@
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
     <changeSet id="1744116182-1" author="fineract">
         <createTable tableName="m_loan_progressive_model">
-            <column  autoIncrement="true" name="id" type="BIGINT">
+            <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_loan_progressive_model"/>
             </column>
             <column name="version" type="INT">

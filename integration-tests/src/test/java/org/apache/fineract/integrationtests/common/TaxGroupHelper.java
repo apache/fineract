@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.client.models.GetTaxesGroupResponse;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupResponse;
@@ -46,7 +48,7 @@ public final class TaxGroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createTaxGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Collection<Integer> taxComponentIds) {
+                                         final Collection<Integer> taxComponentIds) {
         LOG.info("---------------------------------CREATING A TAX GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL, getTaxGroupAsJSON(taxComponentIds),
                 "resourceId");

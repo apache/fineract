@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -50,7 +51,7 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
     public static final String STRATEGY_NAME = "Penalties, Fees, Interest, Principal order";
 
     public FineractStyleLoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
-            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
+                                                                  final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
         super(externalIdFactory, loanChargeValidator, loanBalanceService);
     }
 
@@ -69,8 +70,8 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
      */
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+                                                                         final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
+                                                                         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
                 charges);
@@ -81,9 +82,9 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
      */
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
-            Set<LoanCharge> charges) {
+                                                                       final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
+                                                                       final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
+                                                                       Set<LoanCharge> charges) {
 
         return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
                 transactionMappings, charges);
@@ -94,8 +95,8 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
      */
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+                                                                      final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
+                                                                      List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
@@ -152,8 +153,8 @@ public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends Abst
 
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+                                                                final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
+                                                                List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();

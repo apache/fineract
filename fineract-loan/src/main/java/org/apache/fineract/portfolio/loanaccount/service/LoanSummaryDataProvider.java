@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionBalance;
@@ -33,15 +34,15 @@ public interface LoanSummaryDataProvider {
     BigDecimal computeTotalUnpaidPayableDueInterestAmount(Collection<LoanSchedulePeriodData> periods, LocalDate businessDate);
 
     BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(Loan loan, Collection<LoanSchedulePeriodData> periods,
-            LocalDate businessDate, CurrencyData currency, BigDecimal totalUnpaidPayableDueInterest);
+                                                                           LocalDate businessDate, CurrencyData currency, BigDecimal totalUnpaidPayableDueInterest);
 
     LoanSummaryData withOnlyCurrencyData(CurrencyData currencyData);
 
     LoanSummaryData withTransactionAmountsSummary(Long loanId, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<? extends LoanTransactionBalance> loanTransactionBalances);
+                                                  Collection<? extends LoanTransactionBalance> loanTransactionBalances);
 
     LoanSummaryData withTransactionAmountsSummary(Loan loan, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<? extends LoanTransactionBalance> loanTransactionBalances);
+                                                  Collection<? extends LoanTransactionBalance> loanTransactionBalances);
 
     boolean accept(String loanProcessingStrategyCode);
 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignTimeLine;
@@ -94,7 +95,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
                 left join m_appuser clu on clu.id = ec.closedon_userid
                 left join stretchy_report sr on ec.stretchy_report_id = sr.id\s""";
 
-        private EmailCampaignMapper() {}
+        private EmailCampaignMapper() {
+        }
 
         public String schema() {
             return EMAIL_CAMPAIGN_SCHEMA;
@@ -154,7 +156,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
                 left join stretchy_report_parameter as srp on srp.report_id = sr.id
                 left join stretchy_parameter as sp on sp.id = srp.parameter_id\s""";
 
-        private BusinessRuleMapper() {}
+        private BusinessRuleMapper() {
+        }
 
         public String schema() {
             return BUSINESS_RULE_SCHEMA;
@@ -216,7 +219,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
         final String sql = "select " + this.businessRuleMapper.schema() + " where sr.report_type = ? and sr.id = ?";
 
         List<EmailBusinessRulesData> retrieveOne = this.jdbcTemplate.query(sql, this.businessRuleMapper, // NOSONAR
-                new Object[] { searchType, resourceId });
+                new Object[]{searchType, resourceId});
         try {
             EmailBusinessRulesData emailBusinessRulesData = retrieveOne.get(0);
             return emailBusinessRulesData;
@@ -231,7 +234,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
         final boolean isVisible = true;
         try {
             final String sql = "select " + this.emailCampaignMapper.schema() + " where ec.id = ? and ec.is_visible = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, new Object[] { resourceId, isVisible }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, new Object[]{resourceId, isVisible}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new EmailCampaignNotFound(resourceId, e);
         }
@@ -251,7 +254,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
         final boolean visible = true;
         final String sql = "select " + this.emailCampaignMapper.schema()
                 + " where ec.status_enum = ? and ec.campaign_type = ? and ec.is_visible = ?";
-        return this.jdbcTemplate.query(sql, this.emailCampaignMapper, new Object[] { statusEnum, scheduleCampaignType, visible }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.emailCampaignMapper, new Object[]{statusEnum, scheduleCampaignType, visible}); // NOSONAR
     }
 
 }

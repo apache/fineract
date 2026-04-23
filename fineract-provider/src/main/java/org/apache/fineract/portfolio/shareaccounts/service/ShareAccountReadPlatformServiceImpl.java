@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -179,7 +180,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             sqlBuilder.append(" offset ").append(offSet);
         }
 
-        Object[] whereClauseItemsitems = new Object[] { ShareAccountStatusType.ACTIVE.getValue() };
+        Object[] whereClauseItemsitems = new Object[]{ShareAccountStatusType.ACTIVE.getValue()};
         return this.shareAccountDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), whereClauseItemsitems, mapper);
     }
 
@@ -190,7 +191,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
     @Override
     public Collection<ShareAccountData> retrieveAllShareAccountDataForDividends(final Long id, final boolean fetchInActiveAccounts,
-            final LocalDate startDate) {
+                                                                                final LocalDate startDate) {
         ShareAccountMapperForDividents mapper = new ShareAccountMapperForDividents();
         StringBuilder sb = new StringBuilder("select ");
         sb.append(mapper.schema);
@@ -267,7 +268,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                 left join m_savings_account msa on sa.savings_account_id = msa.id\s""";
 
         ShareAccountMapper(final Collection<ShareAccountChargeData> charges,
-                final Collection<ShareAccountTransactionData> purchasedShares) {
+                           final Collection<ShareAccountTransactionData> purchasedShares) {
             this.charges = charges;
             this.purchasedShares = purchasedShares;
         }
@@ -371,9 +372,9 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     sa.account_no as accountNo,
                     sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf,\s"""
                     + purchasedSharesDataRowMapper.schema() + """
-                            from m_share_account sa
-                            join m_client c ON c.id = sa.client_id
-                            join m_share_account_transactions saps ON saps.account_id = sa.id\s""";
+                    from m_share_account sa
+                    join m_client c ON c.id = sa.client_id
+                    join m_share_account_transactions saps ON saps.account_id = sa.id\s""";
         }
 
         @Override
@@ -429,7 +430,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                 saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount,
                 saps.amount_paid as amountPaid\s""";
 
-        PurchasedSharesDataRowMapper() {}
+        PurchasedSharesDataRowMapper() {
+        }
 
         @Override
         public ShareAccountTransactionData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
@@ -461,7 +463,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                  from m_share_account_dividend_details sadd
                 JOIN m_share_product_dividend_pay_out spdp ON spdp.id = sadd.dividend_pay_out_id\s""";
 
-        ShareAccountDividendRowMapper() {}
+        ShareAccountDividendRowMapper() {
+        }
 
         @SuppressWarnings("unused")
         @Override

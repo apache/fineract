@@ -23,7 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1" context="tenant_store_db">
-        <dropColumn tableName="tenant_server_connections" columnName="deadlock_max_retries" />
-        <dropColumn tableName="tenant_server_connections" columnName="deadlock_max_retry_interval" />
+        <dropColumn tableName="tenant_server_connections" columnName="deadlock_max_retries"/>
+        <dropColumn tableName="tenant_server_connections" columnName="deadlock_max_retry_interval"/>
     </changeSet>
 </databaseChangeLog>

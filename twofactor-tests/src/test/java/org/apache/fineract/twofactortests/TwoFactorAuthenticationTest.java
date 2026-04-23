@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,12 +36,14 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.mail.MessagingException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -275,7 +277,7 @@ public class TwoFactorAuthenticationTest {
 
     @SuppressWarnings("unchecked")
     private static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
+                                          final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         if (jsonAttributeToGetBack == null) {
             return (T) json;
@@ -285,7 +287,7 @@ public class TwoFactorAuthenticationTest {
 
     @SuppressWarnings("unchecked")
     private static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+                                           final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
                 .andReturn().asString();
         if (jsonAttributeToGetBack == null) {
@@ -296,7 +298,7 @@ public class TwoFactorAuthenticationTest {
 
     @SuppressWarnings("unchecked")
     public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+                                         final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);

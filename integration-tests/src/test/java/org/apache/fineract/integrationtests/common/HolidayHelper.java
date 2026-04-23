@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,13 +21,15 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({"unused", "rawtypes"})
 public class HolidayHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(HolidayHelper.class);
@@ -127,7 +129,7 @@ public class HolidayHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer activateHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String holidayID) {
+                                           final String holidayID) {
         final String ACTIVATE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, ACTIVATE_HOLIDAY_URL, getActivateHolidayDataAsJSON(), "resourceId");
     }
@@ -137,7 +139,7 @@ public class HolidayHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap getHolidayById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String holidayID) {
+                                         final String holidayID) {
         final String GET_HOLIDAY_BY_ID_URL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING HOLIDAY BY ID -------------------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_HOLIDAY_BY_ID_URL, "");
@@ -149,7 +151,7 @@ public class HolidayHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer deleteHoliday(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer holidayID) {
+                                        final Integer holidayID) {
         final String DELETE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(requestSpec, responseSpec, DELETE_HOLIDAY_URL, "{}", "resourceId");
     }

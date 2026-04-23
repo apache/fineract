@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.bulkimport.service;
 
 import java.io.InputStream;
 import java.util.Collection;
+
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -27,7 +28,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 public interface BulkImportWorkbookService {
 
     Long importWorkbook(String entityType, InputStream inputStream, FormDataContentDisposition fileDetail, String locale,
-            String dateFormat);
+                        String dateFormat);
 
     Collection<ImportData> getImports(GlobalEntityType type);
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,10 +26,12 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +59,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            @SuppressWarnings("unused") final boolean active) {
+                                      @SuppressWarnings("unused") final boolean active) {
         LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return createGroup(requestSpec, responseSpec, "04 March 2011");
     }
@@ -67,7 +69,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String activationDate) {
+                                      final String activationDate) {
         LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(true, activationDate), "groupId");
     }
@@ -96,7 +98,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createGroupPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String registeredTableName) {
+                                                          final String registeredTableName) {
         LOG.info("-------------------------- CREATING A GROUP WITH DATATABLES --------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupWithDatatableAsJson(registeredTableName),
                 "groupId");
@@ -107,7 +109,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String groupId, final String clientMember) {
+                                          final String groupId, final String clientMember) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=associateClients&"
                 + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Associate Client To A GROUP---------------------------------------------");
@@ -119,7 +121,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String groupId, final String clientMember) {
+                                             final String groupId, final String clientMember) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=disassociateClients&"
                 + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
@@ -131,7 +133,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String groupId) {
+                                        final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Activate A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
@@ -142,7 +144,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String name,
-            final String groupId) {
+                                      final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE GROUP---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
@@ -153,7 +155,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String groupId) {
+                                      final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
@@ -164,7 +166,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
-            final Long staffId) {
+                                     final Long staffId) {
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
@@ -176,7 +178,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String groupId, final String staffId) {
+                                                                  final ResponseSpecification responseSpec, final String groupId, final String staffId) {
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
@@ -277,7 +279,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedGroupID) {
+                                                  final Integer generatedGroupID) {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
@@ -289,7 +291,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedGroupID, final String field, final String expectedValue) {
+                                          final Integer generatedGroupID, final String field, final String expectedValue) {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
@@ -301,7 +303,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedGroupID, final boolean generatedGroupStatus) {
+                                                    final Integer generatedGroupID, final boolean generatedGroupStatus) {
         LOG.info("------------------------------CHECK GROUP STATUS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
@@ -313,7 +315,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedGroupID, final Integer groupMember) {
+                                          final Integer generatedGroupID, final Integer groupMember) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&"
@@ -328,7 +330,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyOrphanGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            int officeId) {
+                                                int officeId) {
         LOG.info("------------------------------CHECK ORPHAN GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups" + "?officeId=" + officeId + "&orphansOnly=true&"
                 + Utils.TENANT_IDENTIFIER;
@@ -341,7 +343,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedGroupID) {
+                                               final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&"
@@ -356,7 +358,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedGroupID) {
+                                          final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP DELETED------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/?" + Utils.TENANT_IDENTIFIER;
@@ -370,7 +372,7 @@ public class GroupHelper {
     @Deprecated(forRemoval = true)
     // Glim_Gsim_testing
     public static List<String> verifyRetrieveGlimAccountsByGroupId(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer groupID) {
+                                                                   final ResponseSpecification responseSpec, final Integer groupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP Retrieve Accounts------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + groupID + "/glimaccounts?" + Utils.TENANT_IDENTIFIER;
@@ -384,7 +386,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<String> verifyRetrieveGlimAccountsByGlimId(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer glimId) {
+                                                                  final ResponseSpecification responseSpec, final Integer glimId) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP Retrieve Accounts------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/loans/glimAccount/" + glimId + "?" + Utils.TENANT_IDENTIFIER;
@@ -398,7 +400,7 @@ public class GroupHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<String> verifyRetrieveGsimAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer groupID) {
+                                                          final Integer groupID) {
         List<String> list = new ArrayList<>();
         LOG.info("------------------------------CHECK GROUP Retrieve Accounts------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + groupID + "/gsimaccounts?" + Utils.TENANT_IDENTIFIER;
@@ -408,7 +410,7 @@ public class GroupHelper {
     }
 
     public static Integer getChildAccountCount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer groupID) {
+                                               final Integer groupID) {
         List<Object> list;
         LOG.info("------------------------------GET CHILD ACCOUNT COUNT------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + groupID + "/gsimaccounts?" + Utils.TENANT_IDENTIFIER;

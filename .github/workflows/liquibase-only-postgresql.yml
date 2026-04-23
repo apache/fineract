@@ -1,6 +1,6 @@
 name: Fineract Liquibase Only mode - PostgreSQL
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 permissions:
   contents: read

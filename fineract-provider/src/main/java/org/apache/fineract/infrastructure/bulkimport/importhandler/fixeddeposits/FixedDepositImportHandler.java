@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,10 +22,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -79,8 +81,8 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private void readExcelFile(final Workbook workbook, final List<FixedDepositAccountData> savings,
-            final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
-            final List<ClosingOfSavingsAccounts> closedOnDate, final List<String> statuses, final String locale, final String dateFormat) {
+                               final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
+                               final List<ClosingOfSavingsAccounts> closedOnDate, final List<String> statuses, final String locale, final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
@@ -127,7 +129,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private FixedDepositAccountData readSavings(final Workbook workbook, final List<String> statuses, final Row row, final String locale,
-            final String dateFormat) {
+                                                final String dateFormat) {
 
         String productName = ImportHandlerUtils.readAsString(FixedDepositConstants.PRODUCT_COL, row);
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME), productName);
@@ -270,8 +272,8 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<FixedDepositAccountData> savings,
-            final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
-            final List<ClosingOfSavingsAccounts> closedOnDates, final List<String> statuses, String dateFormat) {
+                               final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
+                               final List<ClosingOfSavingsAccounts> closedOnDates, final List<String> statuses, String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -323,7 +325,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private void writeFixedDepositErrorMessage(final Workbook workbook, final Long savingsId, final String errorMessage,
-            final int progressLevel, final Cell statusCell, Cell errorReportCell, Row row) {
+                                               final int progressLevel, final Cell statusCell, Cell errorReportCell, Row row) {
         String status = "";
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
@@ -342,7 +344,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private int importSavingsClosing(List<ClosingOfSavingsAccounts> closedOnDates, final Long savingsId, final int i,
-            final String dateFormat) {
+                                     final String dateFormat) {
         if (closedOnDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, closedOnDates.get(i).getLocale()));
@@ -380,7 +382,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private int importSavingsApproval(final List<SavingsApproval> approvalDates, final Long savingsId, final int i,
-            final String dateFormat) {
+                                      final String dateFormat) {
         if (approvalDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, approvalDates.get(i).getLocale()));
@@ -395,7 +397,7 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private int importSavingsActivation(final List<SavingsActivation> activationDates, final Long savingsId, final int i,
-            final String dateFormat) {
+                                        final String dateFormat) {
         if (activationDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, activationDates.get(i).getLocale()));

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.integrationtests.common;
 
 import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +47,8 @@ public class CenterDomain implements Comparable<CenterDomain> {
         private final ArrayList<HashMap> groupMembers;
 
         private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-                final String name, final String externalId, final Integer staffId, final int officeId, final String officeName,
-                final String hierarchy, final ArrayList<HashMap> groupMembers) {
+                        final String name, final String externalId, final Integer staffId, final int officeId, final String officeName,
+                        final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
             this.accountNo = null;
             this.status = new HashMap<>();
@@ -88,8 +90,8 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode,
-            final String statusvalue, final boolean active, final String name, final String externalId, final Integer staffId,
-            final Integer officeId, final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
+                         final String statusvalue, final boolean active, final String name, final String externalId, final Integer staffId,
+                         final Integer officeId, final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
         this.status = new HashMap<>();
@@ -115,16 +117,16 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     public static Builder create(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,
-            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeId,
-            final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
+                                 final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeId,
+                                 final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
         return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeId, officeName, hierarchy,
                 groupMembers);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static String jsonRequestToCreateCenter(Integer id, Integer statusId, String statusCode, String statusValue, Boolean active,
-            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeId,
-            String officeName, String hierarchy, final int[] groupMembers) {
+                                                   String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeId,
+                                                   String officeName, String hierarchy, final int[] groupMembers) {
         // String ids = String.valueOf(id);
         final HashMap map = new HashMap<>();
         if (id != null) {

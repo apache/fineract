@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.test.support.loader;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,14 +30,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.StringUtils;
 
-@SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+@SuppressFBWarnings({"VA_FORMAT_STRING_USES_NEWLINE"})
 public final class PropertiesResourceLoader {
 
-    private PropertiesResourceLoader() {}
+    private PropertiesResourceLoader() {
+    }
 
     public static Map<String, List<String>> load(String resourceLocation, ClassLoader classLoader) {
 

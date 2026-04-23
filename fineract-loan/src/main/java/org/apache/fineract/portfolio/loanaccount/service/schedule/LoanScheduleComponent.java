@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service.schedule;
 
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -80,7 +81,7 @@ public class LoanScheduleComponent {
     }
 
     private LoanRepaymentScheduleInstallment findByInstallmentNumber(final Collection<LoanRepaymentScheduleInstallment> installments,
-            final Integer installmentNumber) {
+                                                                     final Integer installmentNumber) {
         return installments.stream().filter(i -> installmentNumber.compareTo(i.getInstallmentNumber()) == 0).findFirst().orElse(null);
     }
 

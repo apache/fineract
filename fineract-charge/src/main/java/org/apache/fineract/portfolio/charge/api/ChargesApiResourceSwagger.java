@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.charge.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.util.Set;
 
@@ -30,7 +31,8 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "GetChargesResponse")
     public static final class GetChargesResponse {
 
-        private GetChargesResponse() {}
+        private GetChargesResponse() {
+        }
 
         static final class GetChargesCurrencyResponse {
 
@@ -50,7 +52,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesTimeTypeResponse {
 
-            private GetChargesTimeTypeResponse() {}
+            private GetChargesTimeTypeResponse() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -62,7 +65,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesAppliesToResponse {
 
-            private GetChargesAppliesToResponse() {}
+            private GetChargesAppliesToResponse() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -74,7 +78,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesCalculationTypeResponse {
 
-            private GetChargesCalculationTypeResponse() {}
+            private GetChargesCalculationTypeResponse() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -86,7 +91,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesPaymentModeResponse {
 
-            private GetChargesPaymentModeResponse() {}
+            private GetChargesPaymentModeResponse() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -98,7 +104,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesTaxGroup {
 
-            private GetChargesTaxGroup() {}
+            private GetChargesTaxGroup() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -129,7 +136,8 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "PostChargesRequest")
     public static final class PostChargesRequest {
 
-        private PostChargesRequest() {}
+        private PostChargesRequest() {
+        }
 
         @Schema(example = "Loan Service fee")
         public String name;
@@ -164,7 +172,8 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "PostChargesResponse")
     public static final class PostChargesResponse {
 
-        private PostChargesResponse() {}
+        private PostChargesResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -173,7 +182,8 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "PutChargesChargeIdRequest")
     public static final class PutChargesChargeIdRequest {
 
-        private PutChargesChargeIdRequest() {}
+        private PutChargesChargeIdRequest() {
+        }
 
         @Schema(example = "Loan service fee(changed)")
         public String name;
@@ -226,7 +236,8 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "PutChargesChargeIdResponse")
     public static final class PutChargesChargeIdResponse {
 
-        private PutChargesChargeIdResponse() {}
+        private PutChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -236,7 +247,8 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "DeleteChargesChargeIdResponse")
     public static final class DeleteChargesChargeIdResponse {
 
-        private DeleteChargesChargeIdResponse() {}
+        private DeleteChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -245,11 +257,13 @@ final class ChargesApiResourceSwagger {
     @Schema(description = "GetChargesTemplateResponse")
     public static final class GetChargesTemplateResponse {
 
-        private GetChargesTemplateResponse() {}
+        private GetChargesTemplateResponse() {
+        }
 
         static final class GetChargesTemplateLoanChargeCalculationTypeOptions {
 
-            private GetChargesTemplateLoanChargeCalculationTypeOptions() {}
+            private GetChargesTemplateLoanChargeCalculationTypeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -261,7 +275,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesTemplateLoanChargeTimeTypeOptions {
 
-            private GetChargesTemplateLoanChargeTimeTypeOptions() {}
+            private GetChargesTemplateLoanChargeTimeTypeOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -273,7 +288,8 @@ final class ChargesApiResourceSwagger {
 
         static final class GetChargesTemplateFeeFrequencyOptions {
 
-            private GetChargesTemplateFeeFrequencyOptions() {}
+            private GetChargesTemplateFeeFrequencyOptions() {
+            }
 
             @Schema(example = "0")
             public Long id;

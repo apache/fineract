@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
@@ -41,8 +43,8 @@ import org.junit.jupiter.api.Test;
 
 public class DividendsIntegrationTests {
 
-    private final String[] dates = { "01 Jan 2015", "01 Apr 2015", "01 Oct 2015", "01 Dec 2015", "01 Mar 2016" };
-    private final String[] shares = { "100", "200", "300", "100", "500" };
+    private final String[] dates = {"01 Jan 2015", "01 Apr 2015", "01 Oct 2015", "01 Dec 2015", "01 Mar 2016"};
+    private final String[] shares = {"100", "200", "300", "100", "500"};
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -187,7 +189,7 @@ public class DividendsIntegrationTests {
     }
 
     private Integer createShareAccount(final Integer clientId, final Integer productId, final Integer savingsAccountId,
-            String applicationDate, String requestedShares) {
+                                       String applicationDate, String requestedShares) {
         String josn = new ShareAccountHelper().withClientId(String.valueOf(clientId)).withProductId(String.valueOf(productId))
                 .withExternalId("External1").withSavingsAccountId(String.valueOf(savingsAccountId)).withSubmittedDate("01 Jan 2016")
                 .withApplicationDate(applicationDate).withRequestedShares(requestedShares).build();

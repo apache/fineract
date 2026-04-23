@@ -43,7 +43,9 @@
         </createTable>
     </changeSet>
     <changeSet author="fineract" id="2">
-        <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_account_locks" constraintName="fk_loan_id" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+        <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_account_locks"
+                                 constraintName="fk_loan_id" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan" validate="true"/>
     </changeSet>
 </databaseChangeLog>

@@ -47,16 +47,16 @@ class JiraService {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
 
         OkHttpClient.Builder okClient = new OkHttpClient.Builder()
-            .connectionPool(connectionPool)
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor(new Interceptor() {
-                @Override
-                Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
-                    def request = chain.request()
-                    request = request.newBuilder().header("Authorization", credentials).build()
-                    return chain.proceed(request)
-                }
-            })
+                .connectionPool(connectionPool)
+                .addInterceptor(loggingInterceptor)
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
+                        def request = chain.request()
+                        request = request.newBuilder().header("Authorization", credentials).build()
+                        return chain.proceed(request)
+                    }
+                })
 
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -79,19 +79,19 @@ class JiraService {
         def query = [:]
 
         query['jql'] = params.query
-        query['startAt'] = params.pageOffset?:0
-        query['maxResults'] = params.pageSize?:50
+        query['startAt'] = params.pageOffset ?: 0
+        query['maxResults'] = params.pageSize ?: 50
         // query['expand'] = [
         //     "names",
         //     "schema",
         //     "operations"
         // ]
         // query['fields'] = params.fields?:"*all"
-        query['fields'] = params.includes?:[
-            "summary",
-            "status",
-            "assignee",
-            "fixVersions"
+        query['fields'] = params.includes ?: [
+                "summary",
+                "status",
+                "assignee",
+                "fixVersions"
         ]
 
         // params.total = params.total?:1000
@@ -101,7 +101,7 @@ class JiraService {
 
         params.result.addAll(result?.issues as List)
 
-        if(result?.issues.size()>=params.pageSize && params.result.size() < params.total) {
+        if (result?.issues.size() >= params.pageSize && params.result.size() < params.total) {
             params.pageOffset += params.pageSize
             search(params);
         }

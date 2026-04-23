@@ -7,9 +7,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -123,7 +124,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
             BigDecimal gsimId = gsimAccount.getGsimId();
             savingswhereClauseForGroup = " where sa.group_id = ? and sa.gsim_id = ? order by sa.status_enum ASC, sa.account_no ASC";
 
-            childSavings = retrieveAccountDetails(savingswhereClauseForGroup, new Object[] { groupId, gsimId });
+            childSavings = retrieveAccountDetails(savingswhereClauseForGroup, new Object[]{groupId, gsimId});
 
             gsimAccounts.add(new GSIMContainer(gsimAccount.getGsimId(), gsimAccount.getGroupId(), gsimAccount.getAccountNumber(),
                     childSavings, gsimAccount.getParentDeposit(), gsimAccount.getSavingsStatus()));
@@ -145,7 +146,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         List<GSIMContainer> gsimAccounts = new ArrayList<GSIMContainer>();
         for (GroupSavingsIndividualMonitoringAccountData gsimAccount : gsimInfo) {
 
-            List<SavingsSummaryCustom> childSavings = retrieveAccountDetails(savingswhereClauseForGroup, new Object[] { accountNumber });
+            List<SavingsSummaryCustom> childSavings = retrieveAccountDetails(savingswhereClauseForGroup, new Object[]{accountNumber});
 
             gsimAccounts.add(new GSIMContainer(gsimAccount.getGsimId(), gsimAccount.getGroupId(), gsimAccount.getAccountNumber(),
                     childSavings, gsimAccount.getParentDeposit(), gsimAccount.getSavingsStatus()));
@@ -164,7 +165,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         // Object[] { groupId });
         final String savingswhereClauseForGroup = " where sa.gsim_id = ? order by sa.status_enum ASC, sa.account_no ASC";
 
-        List<SavingsSummaryCustom> childSavings = retrieveAccountDetails(savingswhereClauseForGroup, new Object[] { parentAccountId });
+        List<SavingsSummaryCustom> childSavings = retrieveAccountDetails(savingswhereClauseForGroup, new Object[]{parentAccountId});
 
         List<GSIMContainer> parentGsim = new ArrayList<GSIMContainer>();
 
@@ -182,7 +183,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMFieldsMapper rm = new GSIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and gsim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { gsimId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{gsimId}); // NOSONAR
     }
 
     @Override
@@ -192,7 +193,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[]{gsimId}); // NOSONAR
     }
 
     @Override
@@ -202,7 +203,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{Long.parseLong(groupId)}); // NOSONAR
     }
 
     @Override
@@ -212,7 +213,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{parentAccountIds}); // NOSONAR
     }
 
     @Override
@@ -223,7 +224,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
         final String sql = "select " + rm.schema() + " where gsim.group_id=? and gsim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo });// NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{groupId, accountNo});// NOSONAR
     }
 
     private List<SavingsSummaryCustom> retrieveAccountDetails(final String savingswhereClause, final Object[] inputs) {

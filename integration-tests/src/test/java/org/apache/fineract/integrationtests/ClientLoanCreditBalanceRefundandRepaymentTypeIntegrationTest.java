@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -70,7 +72,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 @Slf4j
 public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extends BaseLoanIntegrationTest {
@@ -119,7 +121,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     }
 
     private Integer createLoanProduct(LoanProductTestBuilder loanProductTestBuilder, final String principal,
-            final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+                                      final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         log.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         loanProductTestBuilder = loanProductTestBuilder //
                 .withPrincipal(principal) //
@@ -142,7 +144,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate,
-            String repaymentStrategy) {
+                                            String repaymentStrategy) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -163,7 +165,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     }
 
     private Integer fromStartToDisburseLoan(LoanProductTestBuilder loanProductTestBuilder, String submitApproveDisburseDate,
-            String principal, final String accountingRule, final Account... accounts) {
+                                            String principal, final String accountingRule, final Account... accounts) {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);

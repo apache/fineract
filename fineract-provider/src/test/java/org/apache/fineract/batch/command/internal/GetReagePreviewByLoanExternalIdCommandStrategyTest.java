@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,10 +27,12 @@ import static org.mockito.Mockito.verify;
 
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.UriInfo;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -103,7 +105,7 @@ public class GetReagePreviewByLoanExternalIdCommandStrategyTest {
         assertThat(capturedRequest.getFrequencyType()).isNull(); // freqType was sent, not frequencyType
         assertThat(capturedRequest.getStartDate()).isNull(); // start was sent, not startDate
         assertThat(capturedRequest.getNumberOfInstallments()).isNull(); // installments was sent, not
-                                                                        // numberOfInstallments
+        // numberOfInstallments
         assertThat(capturedRequest.getDateFormat()).isNull(); // format was sent, not dateFormat
         assertThat(capturedRequest.getLocale()).isNull(); // lang was sent, not locale
     }
@@ -114,7 +116,7 @@ public class GetReagePreviewByLoanExternalIdCommandStrategyTest {
     @ParameterizedTest
     @MethodSource("provideQueryParameters")
     public void testExecuteSuccessScenario(final Integer frequencyNumber, final String frequencyType, final String startDate,
-            final Integer numberOfInstallments, final String dateFormat, final String locale) {
+                                           final Integer numberOfInstallments, final String dateFormat, final String locale) {
         // given
         final TestContext testContext = new TestContext();
 
@@ -176,7 +178,7 @@ public class GetReagePreviewByLoanExternalIdCommandStrategyTest {
      * @return BatchRequest
      */
     private BatchRequest getBatchRequest(final String loanExternalId, final Integer frequencyNumber, final String frequencyType,
-            final String startDate, final Integer numberOfInstallments, final String dateFormat, final String locale) {
+                                         final String startDate, final Integer numberOfInstallments, final String dateFormat, final String locale) {
 
         final BatchRequest br = new BatchRequest();
         String relativeUrl = "loans/external-id/" + loanExternalId + "/transactions/reage-preview";

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 /**
@@ -41,13 +42,13 @@ public class ClientNonPersonData implements Serializable {
     private String dateFormat;
 
     public static ClientNonPersonData importInstance(String incorporationNo, LocalDate incorpValidityTillDate, String remarks,
-            Long mainBusinessLineId, Long constitutionId, String locale, String dateFormat) {
+                                                     Long mainBusinessLineId, Long constitutionId, String locale, String dateFormat) {
         return new ClientNonPersonData(incorporationNo, incorpValidityTillDate, remarks, mainBusinessLineId, constitutionId, locale,
                 dateFormat);
     }
 
     private ClientNonPersonData(String incorpNumber, LocalDate incorpValidityTillDate, String remarks, Long mainBusinessLineId,
-            Long constitutionId, String locale, String dateFormat) {
+                                Long constitutionId, String locale, String dateFormat) {
 
         this.incorpNumber = incorpNumber;
         this.incorpValidityTillDate = incorpValidityTillDate;
@@ -61,7 +62,7 @@ public class ClientNonPersonData implements Serializable {
     }
 
     public ClientNonPersonData(CodeValueData constitution, String incorpNo, LocalDate incorpValidityTillDate,
-            CodeValueData mainBusinessLine, String remarks) {
+                               CodeValueData mainBusinessLine, String remarks) {
 
         this.constitution = constitution;
         this.incorpNumber = incorpNo;

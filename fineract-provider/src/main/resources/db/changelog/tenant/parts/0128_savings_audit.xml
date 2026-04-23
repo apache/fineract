@@ -25,10 +25,11 @@
     <!--  add audit fields -->
     <changeSet id="1" author="fineract">
         <addColumn tableName="m_savings_account">
-            <column name="created_by" type="BIGINT"  valueComputed="submittedon_userid"/>
+            <column name="created_by" type="BIGINT" valueComputed="submittedon_userid"/>
             <column name="last_modified_by" type="BIGINT"/>
         </addColumn>
-        <renameColumn tableName="m_savings_account_transaction" oldColumnName="appuser_id" newColumnName="created_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_savings_account_transaction" oldColumnName="appuser_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
         <addColumn tableName="m_savings_account_transaction">
             <column name="last_modified_by" type="BIGINT"/>
         </addColumn>
@@ -40,10 +41,14 @@
             <column name="created_by" type="BIGINT"/>
             <column name="last_modified_by" type="BIGINT"/>
         </addColumn>
-        <renameColumn tableName="m_savings_officer_assignment_history" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_savings_officer_assignment_history" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_mandatory_savings_schedule" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_mandatory_savings_schedule" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_savings_officer_assignment_history" oldColumnName="createdby_id"
+                      newColumnName="created_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_savings_officer_assignment_history" oldColumnName="lastmodifiedby_id"
+                      newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_mandatory_savings_schedule" oldColumnName="createdby_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
+        <renameColumn tableName="m_mandatory_savings_schedule" oldColumnName="lastmodifiedby_id"
+                      newColumnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="2" author="fineract" context="mysql">
         <addColumn tableName="m_savings_account">
@@ -106,7 +111,8 @@
         <addNotNullConstraint tableName="m_savings_account" columnName="created_by" columnDataType="BIGINT"/>
         <addNotNullConstraint tableName="m_savings_account" columnName="last_modified_by" columnDataType="BIGINT"/>
         <addNotNullConstraint tableName="m_savings_account" columnName="created_on_utc" columnDataType="DATETIME(6)"/>
-        <addNotNullConstraint tableName="m_savings_account" columnName="last_modified_on_utc" columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_account" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME(6)"/>
     </changeSet>
     <changeSet id="3" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
@@ -121,10 +127,14 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_savings_account_transaction</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="last_modified_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="created_on_utc" columnDataType="DATETIME(6)"/>
-        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="last_modified_on_utc" columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="created_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="created_on_utc"
+                              columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_account_transaction" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME(6)"/>
     </changeSet>
     <changeSet id="4" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
@@ -139,10 +149,14 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_deposit_account_on_hold_transaction</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="last_modified_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="created_on_utc" columnDataType="DATETIME(6)"/>
-        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="last_modified_on_utc" columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="created_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="created_on_utc"
+                              columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME(6)"/>
     </changeSet>
     <changeSet id="5" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
@@ -158,9 +172,12 @@
             <sqlCheck expectedResult="0">select count(*) from m_savings_account_charge</sqlCheck>
         </preConditions>
         <addNotNullConstraint tableName="m_savings_account_charge" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_savings_account_charge" columnName="last_modified_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_savings_account_charge" columnName="created_on_utc" columnDataType="DATETIME(6)"/>
-        <addNotNullConstraint tableName="m_savings_account_charge" columnName="last_modified_on_utc" columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_account_charge" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_savings_account_charge" columnName="created_on_utc"
+                              columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_account_charge" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME(6)"/>
     </changeSet>
     <changeSet id="6" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
@@ -175,10 +192,14 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_savings_officer_assignment_history</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="last_modified_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="created_on_utc" columnDataType="DATETIME(6)"/>
-        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="last_modified_on_utc" columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="created_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="created_on_utc"
+                              columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_savings_officer_assignment_history" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME(6)"/>
     </changeSet>
     <changeSet id="7" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
@@ -194,9 +215,12 @@
             <sqlCheck expectedResult="0">select count(*) from m_mandatory_savings_schedule</sqlCheck>
         </preConditions>
         <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="last_modified_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="created_on_utc" columnDataType="DATETIME(6)"/>
-        <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="last_modified_on_utc" columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="created_on_utc"
+                              columnDataType="DATETIME(6)"/>
+        <addNotNullConstraint tableName="m_mandatory_savings_schedule" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME(6)"/>
     </changeSet>
     <changeSet id="8" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
@@ -209,58 +233,73 @@
     </changeSet>
     <changeSet id="9" author="fineract">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_savings_account"
-                                 constraintName="FK_savings_account_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_account_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_savings_account"
-                                 constraintName="FK_savings_account_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_account_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_savings_account_transaction"
-                                 constraintName="FK_savings_account_transaction_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_account_transaction_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_savings_account_transaction"
-                                 constraintName="FK_savings_account_transaction_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_account_transaction_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_deposit_account_on_hold_transaction"
-                                 constraintName="FK_deposit_account_on_hold_transaction_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_deposit_account_on_hold_transaction_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_deposit_account_on_hold_transaction"
-                                 constraintName="FK_deposit_account_on_hold_transaction_last_modified_by" deferrable="false" initiallyDeferred="false"
+        <addForeignKeyConstraint baseColumnNames="last_modified_by"
+                                 baseTableName="m_deposit_account_on_hold_transaction"
+                                 constraintName="FK_deposit_account_on_hold_transaction_last_modified_by"
+                                 deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_savings_account_charge"
-                                 constraintName="FK_savings_account_charge_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_account_charge_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_savings_account_charge"
-                                 constraintName="FK_savings_account_charge_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_account_charge_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_savings_officer_assignment_history"
-                                 constraintName="FK_savings_officer_assignment_history_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_officer_assignment_history_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_savings_officer_assignment_history"
-                                 constraintName="FK_savings_officer_assignment_history_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_savings_officer_assignment_history_last_modified_by"
+                                 deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_mandatory_savings_schedule"
-                                 constraintName="FK_mandatory_savings_schedule_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_mandatory_savings_schedule_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_mandatory_savings_schedule"
-                                 constraintName="FK_mandatory_savings_schedule_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_mandatory_savings_schedule_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
 
     <!--  old fields -->
     <changeSet id="10" author="fineract">
-        <dropNotNullConstraint tableName="m_savings_account_transaction" columnName="created_date" columnDataType="DATETIME"/>
-        <dropNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="created_date" columnDataType="DATETIME"/>
+        <dropNotNullConstraint tableName="m_savings_account_transaction" columnName="created_date"
+                               columnDataType="DATETIME"/>
+        <dropNotNullConstraint tableName="m_deposit_account_on_hold_transaction" columnName="created_date"
+                               columnDataType="DATETIME"/>
     </changeSet>
 </databaseChangeLog>

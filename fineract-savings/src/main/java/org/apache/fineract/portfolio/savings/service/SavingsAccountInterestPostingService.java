@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,12 +20,13 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.math.MathContext;
 import java.time.LocalDate;
+
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 
 public interface SavingsAccountInterestPostingService {
 
     SavingsAccountData postInterest(MathContext mc, LocalDate interestPostingUpToDate, boolean isInterestTransfer,
-            boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth, LocalDate postInterestOnDate,
-            boolean backdatedTxnsAllowedTill, SavingsAccountData savingsAccountData);
+                                    boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth, LocalDate postInterestOnDate,
+                                    boolean backdatedTxnsAllowedTill, SavingsAccountData savingsAccountData);
 
 }

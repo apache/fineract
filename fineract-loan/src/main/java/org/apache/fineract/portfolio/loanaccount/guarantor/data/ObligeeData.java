@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,7 +34,7 @@ public final class ObligeeData {
     private final BigDecimal amountTransferred;
 
     private ObligeeData(String firstName, String lastName, String displayName, String accountNumber, BigDecimal loanAmount,
-            BigDecimal guaranteeAmount, BigDecimal amountReleased, BigDecimal amountTransferred) {
+                        BigDecimal guaranteeAmount, BigDecimal amountReleased, BigDecimal amountTransferred) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.displayName = displayName;
@@ -46,8 +46,8 @@ public final class ObligeeData {
     }
 
     public static ObligeeData instance(final String firstName, final String lastName, final String displayName, final String accountNumber,
-            final BigDecimal loanAmount, final BigDecimal guaranteeAmount, final BigDecimal amountReleased,
-            final BigDecimal amountTransferred) {
+                                       final BigDecimal loanAmount, final BigDecimal guaranteeAmount, final BigDecimal amountReleased,
+                                       final BigDecimal amountTransferred) {
         return new ObligeeData(firstName, lastName, displayName, accountNumber, loanAmount, guaranteeAmount, amountReleased,
                 amountTransferred);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -53,8 +53,8 @@ public class ReportData {
     private Collection<ReportParameterData> allowedParameters;
 
     public ReportData(final Long id, final String reportName, final String reportType, final String reportSubType,
-            final String reportCategory, final String description, final String reportSql, final Boolean coreReport,
-            final Boolean useReport, final Collection<ReportParameterData> reportParameters) {
+                      final String reportCategory, final String description, final String reportSql, final Boolean coreReport,
+                      final Boolean useReport, final Collection<ReportParameterData> reportParameters) {
         this.id = id;
         this.reportName = reportName;
         this.reportType = reportType;

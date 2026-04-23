@@ -25,7 +25,8 @@
 
     <changeSet id="loan-origination-perm-001" author="fineract">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'CREATE_LOAN_ORIGINATOR'</sqlCheck>
+            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'CREATE_LOAN_ORIGINATOR'
+            </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio"/>
@@ -38,7 +39,8 @@
 
     <changeSet id="loan-origination-perm-002" author="fineract">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'READ_LOAN_ORIGINATOR'</sqlCheck>
+            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'READ_LOAN_ORIGINATOR'
+            </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio"/>
@@ -51,7 +53,8 @@
 
     <changeSet id="loan-origination-perm-003" author="fineract">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'UPDATE_LOAN_ORIGINATOR'</sqlCheck>
+            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'UPDATE_LOAN_ORIGINATOR'
+            </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio"/>
@@ -64,7 +67,8 @@
 
     <changeSet id="loan-origination-perm-004" author="fineract">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'DELETE_LOAN_ORIGINATOR'</sqlCheck>
+            <sqlCheck expectedResult="0">SELECT COUNT(1) FROM m_permission WHERE code = 'DELETE_LOAN_ORIGINATOR'
+            </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio"/>

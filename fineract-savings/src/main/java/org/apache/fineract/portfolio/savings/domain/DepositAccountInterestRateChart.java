@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,10 +26,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
@@ -71,7 +73,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistableCustom<L
     }
 
     private DepositAccountInterestRateChart(InterestRateChartFields chartFields, SavingsAccount account,
-            Set<DepositAccountInterestRateChartSlabs> chartSlabs) {
+                                            Set<DepositAccountInterestRateChartSlabs> chartSlabs) {
         this.chartFields = chartFields;
         this.account = account;
         this.chartSlabs = chartSlabs;
@@ -128,7 +130,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistableCustom<L
     }
 
     public BigDecimal getApplicableInterestRate(final BigDecimal depositAmount, final LocalDate periodStartDate,
-            final LocalDate periodEndDate, final Client client) {
+                                                final LocalDate periodEndDate, final Client client) {
         BigDecimal effectiveInterestRate = BigDecimal.ZERO;
         for (DepositAccountInterestRateChartSlabs slab : setOfChartSlabs()) {
             if (slab.slabFields().isBetweenPeriod(periodStartDate, periodEndDate) && slab.slabFields().isAmountBetween(depositAmount)) {

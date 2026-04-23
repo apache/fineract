@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -28,16 +29,19 @@ import java.util.Set;
  */
 final class SavingsProductsApiResourceSwagger {
 
-    private SavingsProductsApiResourceSwagger() {}
+    private SavingsProductsApiResourceSwagger() {
+    }
 
     @Schema(description = "PostSavingsProductsRequest")
     public static final class PostSavingsProductsRequest {
 
-        private PostSavingsProductsRequest() {}
+        private PostSavingsProductsRequest() {
+        }
 
         static final class PostSavingsCharges {
 
-            private PostSavingsCharges() {}
+            private PostSavingsCharges() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -87,7 +91,8 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "PostSavingsProductsResponse")
     public static final class PostSavingsProductsResponse {
 
-        private PostSavingsProductsResponse() {}
+        private PostSavingsProductsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -96,7 +101,8 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "PutSavingsProductsProductIdRequest")
     public static final class PutSavingsProductsProductIdRequest {
 
-        private PutSavingsProductsProductIdRequest() {}
+        private PutSavingsProductsProductIdRequest() {
+        }
 
         @Schema(example = "Passbook Savings Lite.")
         public String description;
@@ -109,11 +115,13 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "PutSavingsProductsProductIdResponse")
     public static final class PutSavingsProductsProductIdResponse {
 
-        private PutSavingsProductsProductIdResponse() {}
+        private PutSavingsProductsProductIdResponse() {
+        }
 
         static final class PutSavingsChanges {
 
-            private PutSavingsChanges() {}
+            private PutSavingsChanges() {
+            }
 
             @Schema(example = "Passbook Savings Lite.")
             public String description;
@@ -131,11 +139,13 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "GetSavingsProductsResponse")
     public static final class GetSavingsProductsResponse {
 
-        private GetSavingsProductsResponse() {}
+        private GetSavingsProductsResponse() {
+        }
 
         static final class GetSavingsCurrency {
 
-            private GetSavingsCurrency() {}
+            private GetSavingsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -153,7 +163,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsInterestCompoundingPeriodType {
 
-            private GetSavingsProductsInterestCompoundingPeriodType() {}
+            private GetSavingsProductsInterestCompoundingPeriodType() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -165,7 +176,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsInterestPostingPeriodType {
 
-            private GetSavingsProductsInterestPostingPeriodType() {}
+            private GetSavingsProductsInterestPostingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Integer id;
@@ -177,7 +189,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsInterestCalculationType {
 
-            private GetSavingsProductsInterestCalculationType() {}
+            private GetSavingsProductsInterestCalculationType() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -189,7 +202,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsInterestCalculationDaysInYearType {
 
-            private GetSavingsProductsInterestCalculationDaysInYearType() {}
+            private GetSavingsProductsInterestCalculationDaysInYearType() {
+            }
 
             @Schema(example = "365")
             public Integer id;
@@ -201,7 +215,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsAccountingRule {
 
-            private GetSavingsProductsAccountingRule() {}
+            private GetSavingsProductsAccountingRule() {
+            }
 
             @Schema(example = "2")
             public Integer id;
@@ -234,11 +249,13 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "GetSavingsProductsProductIdResponse")
     public static final class GetSavingsProductsProductIdResponse {
 
-        private GetSavingsProductsProductIdResponse() {}
+        private GetSavingsProductsProductIdResponse() {
+        }
 
         static final class GetSavingsProductsGlAccount {
 
-            private GetSavingsProductsGlAccount() {}
+            private GetSavingsProductsGlAccount() {
+            }
 
             @Schema(example = "12")
             public Long id;
@@ -250,7 +267,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsAccountingMappings {
 
-            private GetSavingsProductsAccountingMappings() {}
+            private GetSavingsProductsAccountingMappings() {
+            }
 
             public GetSavingsProductsGlAccount savingsReferenceAccount;
             public GetSavingsProductsGlAccount overdraftPortfolioControl;
@@ -269,11 +287,13 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsPaymentChannelToFundSourceMappings {
 
-            private GetSavingsProductsPaymentChannelToFundSourceMappings() {}
+            private GetSavingsProductsPaymentChannelToFundSourceMappings() {
+            }
 
             static final class GetSavingsProductsPaymentType {
 
-                private GetSavingsProductsPaymentType() {}
+                private GetSavingsProductsPaymentType() {
+                }
 
                 @Schema(example = "10")
                 public Long id;
@@ -283,7 +303,8 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsProductsFundSourceAccount {
 
-                private GetSavingsProductsFundSourceAccount() {}
+                private GetSavingsProductsFundSourceAccount() {
+                }
 
                 @Schema(example = "12")
                 public Long id;
@@ -299,11 +320,13 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsFeeToIncomeAccountMappings {
 
-            private GetSavingsProductsFeeToIncomeAccountMappings() {}
+            private GetSavingsProductsFeeToIncomeAccountMappings() {
+            }
 
             static final class GetSavingsProductsFeeToIncomeAccountMappingsCharge {
 
-                private GetSavingsProductsFeeToIncomeAccountMappingsCharge() {}
+                private GetSavingsProductsFeeToIncomeAccountMappingsCharge() {
+                }
 
                 @Schema(example = "11")
                 public Long id;
@@ -317,7 +340,8 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount {
 
-                private GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount() {}
+                private GetSavingsProductsFeeToIncomeAccountMappingsIncomeAccount() {
+                }
 
                 @Schema(example = "16")
                 public Long id;
@@ -333,11 +357,13 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsPenaltyToIncomeAccountMappings {
 
-            private GetSavingsProductsPenaltyToIncomeAccountMappings() {}
+            private GetSavingsProductsPenaltyToIncomeAccountMappings() {
+            }
 
             static final class GetSavingsProductsPenaltyToIncomeAccountMappingsCharge {
 
-                private GetSavingsProductsPenaltyToIncomeAccountMappingsCharge() {}
+                private GetSavingsProductsPenaltyToIncomeAccountMappingsCharge() {
+                }
 
                 @Schema(example = "12")
                 public Long id;
@@ -382,11 +408,13 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "GetSavingsProductsTemplateResponse")
     public static final class GetSavingsProductsTemplateResponse {
 
-        private GetSavingsProductsTemplateResponse() {}
+        private GetSavingsProductsTemplateResponse() {
+        }
 
         static final class GetSavingsProductsTemplateAccountingRule {
 
-            private GetSavingsProductsTemplateAccountingRule() {}
+            private GetSavingsProductsTemplateAccountingRule() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -398,7 +426,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsLockinPeriodFrequencyTypeOptions {
 
-            private GetSavingsProductsLockinPeriodFrequencyTypeOptions() {}
+            private GetSavingsProductsLockinPeriodFrequencyTypeOptions() {
+            }
 
             @Schema(example = "0")
             public Integer id;
@@ -410,7 +439,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsWithdrawalFeeTypeOptions {
 
-            private GetSavingsProductsWithdrawalFeeTypeOptions() {}
+            private GetSavingsProductsWithdrawalFeeTypeOptions() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -422,7 +452,8 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsPaymentTypeOptions {
 
-            private GetSavingsProductsPaymentTypeOptions() {}
+            private GetSavingsProductsPaymentTypeOptions() {
+            }
 
             @Schema(example = "14")
             public Integer id;
@@ -438,15 +469,18 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsAccountingMappingOptions {
 
-            private GetSavingsProductsAccountingMappingOptions() {}
+            private GetSavingsProductsAccountingMappingOptions() {
+            }
 
             static final class GetSavingsProductsLiabilityAccountOptions {
 
-                private GetSavingsProductsLiabilityAccountOptions() {}
+                private GetSavingsProductsLiabilityAccountOptions() {
+                }
 
                 static final class GetSavingsProductsLiabilityType {
 
-                    private GetSavingsProductsLiabilityType() {}
+                    private GetSavingsProductsLiabilityType() {
+                    }
 
                     @Schema(example = "2")
                     public Integer id;
@@ -458,7 +492,8 @@ final class SavingsProductsApiResourceSwagger {
 
                 static final class GetSavingsProductsLiabilityUsage {
 
-                    private GetSavingsProductsLiabilityUsage() {}
+                    private GetSavingsProductsLiabilityUsage() {
+                    }
 
                     @Schema(example = "1")
                     public Integer id;
@@ -470,7 +505,8 @@ final class SavingsProductsApiResourceSwagger {
 
                 static final class GetSavingsProductsLiabilityTagId {
 
-                    private GetSavingsProductsLiabilityTagId() {}
+                    private GetSavingsProductsLiabilityTagId() {
+                    }
 
                     @Schema(example = "0")
                     public Long id;
@@ -495,11 +531,13 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsProductsAssetAccountOptions {
 
-                private GetSavingsProductsAssetAccountOptions() {}
+                private GetSavingsProductsAssetAccountOptions() {
+                }
 
                 static final class GetSavingsAssetLiabilityType {
 
-                    private GetSavingsAssetLiabilityType() {}
+                    private GetSavingsAssetLiabilityType() {
+                    }
 
                     @Schema(example = "1")
                     public Integer id;
@@ -511,7 +549,8 @@ final class SavingsProductsApiResourceSwagger {
 
                 static final class GetSavingsAssetTagId {
 
-                    private GetSavingsAssetTagId() {}
+                    private GetSavingsAssetTagId() {
+                    }
                 }
 
                 @Schema(example = "2")
@@ -531,11 +570,13 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsProductsExpenseAccountOptions {
 
-                private GetSavingsProductsExpenseAccountOptions() {}
+                private GetSavingsProductsExpenseAccountOptions() {
+                }
 
                 static final class GetSavingsProductsExpenseType {
 
-                    private GetSavingsProductsExpenseType() {}
+                    private GetSavingsProductsExpenseType() {
+                    }
 
                     @Schema(example = "5")
                     public Integer id;
@@ -562,11 +603,13 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsProductsIncomeAccountOptions {
 
-                private GetSavingsProductsIncomeAccountOptions() {}
+                private GetSavingsProductsIncomeAccountOptions() {
+                }
 
                 static final class GetSavingsProductsIncomeType {
 
-                    private GetSavingsProductsIncomeType() {}
+                    private GetSavingsProductsIncomeType() {
+                    }
 
                     @Schema(example = "4")
                     public Integer id;
@@ -600,11 +643,13 @@ final class SavingsProductsApiResourceSwagger {
 
         static final class GetSavingsProductsChargeOptions {
 
-            private GetSavingsProductsChargeOptions() {}
+            private GetSavingsProductsChargeOptions() {
+            }
 
             static final class GetSavingsChargeTimeType {
 
-                private GetSavingsChargeTimeType() {}
+                private GetSavingsChargeTimeType() {
+                }
 
                 @Schema(example = "chargeTimeType.specifiedDueDate")
                 public String code;
@@ -616,7 +661,8 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsProductsChargeAppliesTo {
 
-                private GetSavingsProductsChargeAppliesTo() {}
+                private GetSavingsProductsChargeAppliesTo() {
+                }
 
                 @Schema(example = "chargeAppliesTo.savings")
                 public String code;
@@ -628,7 +674,8 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsChargeCalculationType {
 
-                private GetSavingsChargeCalculationType() {}
+                private GetSavingsChargeCalculationType() {
+                }
 
                 @Schema(example = "chargeCalculationType.flat")
                 public String code;
@@ -640,7 +687,8 @@ final class SavingsProductsApiResourceSwagger {
 
             static final class GetSavingsChargePaymentMode {
 
-                private GetSavingsChargePaymentMode() {}
+                private GetSavingsChargePaymentMode() {
+                }
 
                 @Schema(example = "chargepaymentmode.regular")
                 public String code;
@@ -691,7 +739,8 @@ final class SavingsProductsApiResourceSwagger {
     @Schema(description = "DeleteSavingsProductsProductIdResponse")
     public static final class DeleteSavingsProductsProductIdResponse {
 
-        private DeleteSavingsProductsProductIdResponse() {}
+        private DeleteSavingsProductsProductIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;

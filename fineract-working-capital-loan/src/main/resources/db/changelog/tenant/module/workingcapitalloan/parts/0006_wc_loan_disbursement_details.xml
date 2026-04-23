@@ -39,7 +39,8 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="wc_loan_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="FK_m_wc_loan_disbursement_detail_loan" referencedTableName="m_wc_loan" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="FK_m_wc_loan_disbursement_detail_loan"
+                             referencedTableName="m_wc_loan" referencedColumnNames="id"/>
             </column>
             <column name="expected_disburse_date" type="date"/>
             <column name="expected_amount" type="DECIMAL(19, 6)"/>
@@ -47,7 +48,8 @@
             <column name="actual_disburse_date" type="date"/>
             <column name="actual_amount" type="DECIMAL(19, 6)"/>
             <column name="disbursedon_userid" type="BIGINT">
-                <constraints nullable="true" foreignKeyName="FK_m_wc_loan_disbursement_detail_user" referencedTableName="m_appuser" referencedColumnNames="id"/>
+                <constraints nullable="true" foreignKeyName="FK_m_wc_loan_disbursement_detail_user"
+                             referencedTableName="m_appuser" referencedColumnNames="id"/>
             </column>
         </createTable>
     </changeSet>

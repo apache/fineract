@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -115,8 +116,8 @@ public class CacheConfig {
     }
 
     private javax.cache.configuration.Configuration<Object, Object> generateCustomCacheConfiguration(String cacheIdentifier,
-            javax.cache.configuration.Configuration<Object, Object> defaultTemplate, Duration defaultTimeToLive,
-            Integer defaultMaxEntries) {
+                                                                                                     javax.cache.configuration.Configuration<Object, Object> defaultTemplate, Duration defaultTimeToLive,
+                                                                                                     Integer defaultMaxEntries) {
         javax.cache.configuration.Configuration<Object, Object> configurationTemplate = defaultTemplate;
         if (fineractProperties.getCache().getCustomTemplates().containsKey(cacheIdentifier)) {
             Duration timeToLiveExpiration = Objects.requireNonNullElse(
@@ -129,7 +130,7 @@ public class CacheConfig {
     }
 
     private static javax.cache.configuration.Configuration<Object, Object> generateCacheConfiguration(Integer defaultMaxEntries,
-            Duration defaultTimeToLive) {
+                                                                                                      Duration defaultTimeToLive) {
         return Eh107Configuration.fromEhcacheCacheConfiguration(CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(Object.class, Object.class, ResourcePoolsBuilder.heap(defaultMaxEntries))
                 .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(defaultTimeToLive)).build());

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,16 +19,18 @@
 package org.apache.fineract.integrationtests.client.feign.modules;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 
 public final class LoanRequestBuilders {
 
-    private LoanRequestBuilders() {}
+    private LoanRequestBuilders() {
+    }
 
     public static PostLoansRequest applyLoan(Long clientId, Long productId, String submittedOnDate, Double principal,
-            Integer numberOfRepayments) {
+                                             Integer numberOfRepayments) {
         return new PostLoansRequest()//
                 .clientId(clientId)//
                 .productId(productId)//
@@ -51,7 +53,7 @@ public final class LoanRequestBuilders {
     }
 
     public static PostLoansRequest applyCumulativeLoan(Long clientId, Long productId, String submittedOnDate, Double principal,
-            Integer numberOfRepayments, Double interestRate) {
+                                                       Integer numberOfRepayments, Double interestRate) {
         return new PostLoansRequest()//
                 .clientId(clientId)//
                 .productId(productId)//
@@ -74,7 +76,7 @@ public final class LoanRequestBuilders {
     }
 
     public static PostLoansRequest applyProgressiveLoan(Long clientId, Long productId, String submittedOnDate, Double principal,
-            Integer numberOfRepayments, Double interestRate) {
+                                                        Integer numberOfRepayments, Double interestRate) {
         return applyCumulativeLoan(clientId, productId, submittedOnDate, principal, numberOfRepayments, interestRate);
     }
 

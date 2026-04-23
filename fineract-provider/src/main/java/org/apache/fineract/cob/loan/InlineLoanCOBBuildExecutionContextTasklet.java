@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStep;
@@ -88,7 +90,8 @@ public class InlineLoanCOBBuildExecutionContextTasklet<T extends AbstractPersist
         CustomJobParameter customJobParameter = customJobParameterRepository.findById(customJobParameterId)
                 .orElseThrow(() -> new LoanNotFoundException(customJobParameterId));
         String parameterJson = customJobParameter.getParameterJson();
-        Set<JobParameterDTO> jobParameters = gson.fromJson(parameterJson, new TypeToken<HashSet<JobParameterDTO>>() {}.getType());
+        Set<JobParameterDTO> jobParameters = gson.fromJson(parameterJson, new TypeToken<HashSet<JobParameterDTO>>() {
+        }.getType());
         JobParameterDTO businessDateParameter = jobParameters.stream()
                 .filter(jobParameterDTO -> jobParameterDTO.getParameterName().equals(COBConstant.BUSINESS_DATE_PARAMETER_NAME)).findFirst()
                 .orElseThrow(() -> new CustomJobParameterNotFoundException(COBConstant.BUSINESS_DATE_PARAMETER_NAME));
@@ -102,6 +105,7 @@ public class InlineLoanCOBBuildExecutionContextTasklet<T extends AbstractPersist
         JobParameterDTO loanIdsParameter = jobParameters.stream()
                 .filter(jobParameterDTO -> jobParameterDTO.getParameterName().equals(COBConstant.INLINE_IDS_PARAMETER_NAME)).findFirst()
                 .orElseThrow(() -> new CustomJobParameterNotFoundException(COBConstant.INLINE_IDS_PARAMETER_NAME));
-        return gson.fromJson(loanIdsParameter.getParameterValue(), new TypeToken<ArrayList<Long>>() {}.getType());
+        return gson.fromJson(loanIdsParameter.getParameterValue(), new TypeToken<ArrayList<Long>>() {
+        }.getType());
     }
 }

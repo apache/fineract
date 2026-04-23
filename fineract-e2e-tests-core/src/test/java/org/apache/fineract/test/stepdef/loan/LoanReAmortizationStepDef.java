@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -276,7 +278,7 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
 
     @SuppressFBWarnings("SF_SWITCH_NO_DEFAULT")
     private void validateRepaymentScheduleTotal(final List<String> header, final LoanScheduleData repaymentSchedule,
-            final List<String> expectedAmounts) {
+                                                final List<String> expectedAmounts) {
         Double paidActual = 0.0;
         final List<LoanSchedulePeriodData> periods = repaymentSchedule.getPeriods();
         for (LoanSchedulePeriodData period : periods) {
@@ -338,15 +340,17 @@ public class LoanReAmortizationStepDef extends AbstractStepDef {
         final List<String> actualValues = new ArrayList<>();
         for (String headerName : header) {
             switch (headerName) {
-                case "Nr" -> actualValues.add(repaymentPeriod.getPeriod() == null ? null : String.valueOf(repaymentPeriod.getPeriod()));
+                case "Nr" ->
+                        actualValues.add(repaymentPeriod.getPeriod() == null ? null : String.valueOf(repaymentPeriod.getPeriod()));
                 case "Days" ->
-                    actualValues.add(repaymentPeriod.getDaysInPeriod() == null ? null : String.valueOf(repaymentPeriod.getDaysInPeriod()));
+                        actualValues.add(repaymentPeriod.getDaysInPeriod() == null ? null : String.valueOf(repaymentPeriod.getDaysInPeriod()));
                 case "Date" ->
-                    actualValues.add(repaymentPeriod.getDueDate() == null ? null : FORMATTER.format(repaymentPeriod.getDueDate()));
+                        actualValues.add(repaymentPeriod.getDueDate() == null ? null : FORMATTER.format(repaymentPeriod.getDueDate()));
                 case "Paid date" -> actualValues.add(repaymentPeriod.getObligationsMetOnDate() == null ? null
                         : FORMATTER.format(repaymentPeriod.getObligationsMetOnDate()));
-                case "Balance of loan" -> actualValues.add(repaymentPeriod.getPrincipalLoanBalanceOutstanding() == null ? null
-                        : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalLoanBalanceOutstanding().doubleValue()).format());
+                case "Balance of loan" ->
+                        actualValues.add(repaymentPeriod.getPrincipalLoanBalanceOutstanding() == null ? null
+                                : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalLoanBalanceOutstanding().doubleValue()).format());
                 case "Principal due" -> actualValues.add(repaymentPeriod.getPrincipalDue() == null ? null
                         : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalDue().doubleValue()).format());
                 case "Interest" -> actualValues.add(repaymentPeriod.getInterestDue() == null ? null

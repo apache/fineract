@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanAccountDelinquencyRangeDataV1;
@@ -730,8 +732,9 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
             switch (headerName) {
                 case "active" -> actualValues.add(t.getActive() == null ? null : t.getActive().toString());
                 case "pausePeriodStart" ->
-                    actualValues.add(t.getPausePeriodStart() == null ? null : FORMATTER.format(t.getPausePeriodStart()));
-                case "pausePeriodEnd" -> actualValues.add(t.getPausePeriodEnd() == null ? null : FORMATTER.format(t.getPausePeriodEnd()));
+                        actualValues.add(t.getPausePeriodStart() == null ? null : FORMATTER.format(t.getPausePeriodStart()));
+                case "pausePeriodEnd" ->
+                        actualValues.add(t.getPausePeriodEnd() == null ? null : FORMATTER.format(t.getPausePeriodEnd()));
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }
@@ -739,7 +742,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
     }
 
     private void errorMessageAssertationFeign(long loanId, PostLoansDelinquencyActionRequest request, int errorCodeExpected,
-            String errorMessageExpected) {
+                                              String errorMessageExpected) {
         CallFailedRuntimeException exception = fail(() -> fineractClient.loans().createLoanDelinquencyAction(loanId, request));
 
         assertThat(exception.getStatus()).as(ErrorMessageHelper.wrongErrorCode(exception.getStatus(), errorCodeExpected))

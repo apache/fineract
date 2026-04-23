@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
@@ -685,14 +687,14 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                             loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getNewTransactionDetail().getAmount())
                     .isEqualTo(BigDecimal.valueOf(amountValue));
             eventAssertionBuilder.extractingData(
-                    loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getNewTransactionDetail().getExternalOwnerId())
+                            loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getNewTransactionDetail().getExternalOwnerId())
                     .isEqualTo(externalOwnerId);
         }
     }
 
     @Then("Customer undo {string}th transaction made on {string} results a {int} error and {string} error message")
     public void undoTransactionResultsError(final String nthItemStr, final String transactionDate, final int errorCodeExpected,
-            final String errorMessageCode) {
+                                            final String errorMessageCode) {
         eventStore.reset();
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

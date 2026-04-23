@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -381,7 +382,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final String sql = "select " + this.centerMapper.schema()
                 + " where g.office_id = ? and g.parent_id is null and g.level_Id = ? and o.hierarchy like ? order by g.hierarchy";
 
-        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[]{officeId, GroupTypes.CENTER.getId(), hierarchySearchString}); // NOSONAR
     }
 
     @Override
@@ -434,7 +435,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final String hierarchySearchString = hierarchy + "%";
 
             final String sql = "select " + this.centerMapper.schema() + " where g.id = ? and o.hierarchy like ?";
-            return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[]{centerId, hierarchySearchString}); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new CenterNotFoundException(centerId, e);
@@ -477,7 +478,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Collection<GroupGeneralData> retrieveAssociatedGroups(final Long centerId) {
         final String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? order by g.id";
-        return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[] { centerId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[]{centerId}); // NOSONAR
     }
 
     @Override
@@ -489,7 +490,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Override
     public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final LocalDate meetingDate,
-            final Long staffId) {
+                                                                      final Long staffId) {
         validateForGenerateCollectionSheet(staffId);
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
         String sql = centerCalendarMapper.schema();

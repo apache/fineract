@@ -594,7 +594,8 @@
             <column name="id" valueNumeric="92"/>
             <column name="country_code" value="CA"/>
             <column name="timezonename" value="America/Nipigon"/>
-            <column name="comments" value="Eastern Time - Ontario &amp; Quebec - places that did not observe DST 1967-1973"/>
+            <column name="comments"
+                    value="Eastern Time - Ontario &amp; Quebec - places that did not observe DST 1967-1973"/>
         </insert>
         <insert tableName="timezones">
             <column name="id" valueNumeric="93"/>
@@ -690,7 +691,8 @@
             <column name="id" valueNumeric="108"/>
             <column name="country_code" value="CA"/>
             <column name="timezonename" value="America/Dawson_Creek"/>
-            <column name="comments" value="Mountain Standard Time - Dawson Creek &amp; Fort Saint John, British Columbia"/>
+            <column name="comments"
+                    value="Mountain Standard Time - Dawson Creek &amp; Fort Saint John, British Columbia"/>
         </insert>
         <insert tableName="timezones">
             <column name="id" valueNumeric="109"/>
@@ -1176,7 +1178,8 @@
             <column name="id" valueNumeric="189"/>
             <column name="country_code" value="ID"/>
             <column name="timezonename" value="Asia/Makassar"/>
-            <column name="comments" value="east &amp; south Borneo, Sulawesi (Celebes), Bali, Nusa Tengarra, west Timor"/>
+            <column name="comments"
+                    value="east &amp; south Borneo, Sulawesi (Celebes), Bali, Nusa Tengarra, west Timor"/>
         </insert>
         <insert tableName="timezones">
             <column name="id" valueNumeric="190"/>
@@ -1590,7 +1593,8 @@
             <column name="id" valueNumeric="258"/>
             <column name="country_code" value="MX"/>
             <column name="timezonename" value="America/Monterrey"/>
-            <column name="comments" value="Mexican Central Time - Coahuila, Durango, Nuevo Leon, Tamaulipas away from US border"/>
+            <column name="comments"
+                    value="Mexican Central Time - Coahuila, Durango, Nuevo Leon, Tamaulipas away from US border"/>
         </insert>
         <insert tableName="timezones">
             <column name="id" valueNumeric="259"/>
@@ -2334,7 +2338,8 @@
             <column name="id" valueNumeric="382"/>
             <column name="country_code" value="US"/>
             <column name="timezonename" value="America/Menominee"/>
-            <column name="comments" value="Central Time - Michigan - Dickinson, Gogebic, Iron &amp; Menominee Counties"/>
+            <column name="comments"
+                    value="Central Time - Michigan - Dickinson, Gogebic, Iron &amp; Menominee Counties"/>
         </insert>
         <insert tableName="timezones">
             <column name="id" valueNumeric="383"/>

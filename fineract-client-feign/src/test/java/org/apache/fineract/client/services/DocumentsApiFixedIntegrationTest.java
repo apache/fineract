@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,12 +27,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import feign.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.fineract.client.feign.FineractFeignClientConfig;
 import org.apache.fineract.client.feign.services.DocumentsApiFixed;
 import org.apache.fineract.client.models.DocumentData;
@@ -169,8 +171,8 @@ class DocumentsApiFixedIntegrationTest {
 
     @Test
     void testMultipleEntityTypes() {
-        String[] entityTypes = { "clients", "loans", "savings", "groups" };
-        Long[] entityIds = { 100L, 200L, 300L, 400L };
+        String[] entityTypes = {"clients", "loans", "savings", "groups"};
+        Long[] entityIds = {100L, 200L, 300L, 400L};
 
         for (int i = 0; i < entityTypes.length; i++) {
             String entityType = entityTypes[i];

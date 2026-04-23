@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,13 +24,15 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.time.LocalDate;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.jersey.converter.LocalDateJsonConverter;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArraySerializer;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 
-@SuppressFBWarnings({ "SE_BAD_FIELD", "SE_BAD_FIELD_STORE" })
+@SuppressFBWarnings({"SE_BAD_FIELD", "SE_BAD_FIELD_STORE"})
 public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifier {
 
     private final JsonSerializer<?> localDateSerializer = new JacksonSerializerAdapter<>(new LocalDateJsonConverter());
@@ -39,7 +41,7 @@ public class JacksonLocalDateBeanSerializerModifier extends BeanSerializerModifi
     @Override
     @SuppressWarnings("unchecked")
     public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc,
-            List<BeanPropertyWriter> beanProperties) {
+                                                     List<BeanPropertyWriter> beanProperties) {
         if (beanDesc.getBeanClass().isAnnotationPresent(JsonLocalDateArrayFormat.class)) {
             assignLocalDateSerializer(beanProperties, (JsonSerializer<Object>) localDateArraySerializer);
         } else {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.sms.service;
 
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -48,7 +49,7 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
 
     @Autowired
     public SmsWritePlatformServiceJpaRepositoryImpl(final SmsMessageAssembler assembler, final SmsMessageRepository repository,
-            final SmsDataValidator validator) {
+                                                    final SmsDataValidator validator) {
         this.assembler = assembler;
         this.repository = repository;
         this.validator = validator;
@@ -128,7 +129,7 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final Throwable realCause,
-            final NonTransientDataAccessException dve) {
+                                           final NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("mobile_no")) {
             throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists",
                     "The group, client or staff provided has no mobile no.", "id");

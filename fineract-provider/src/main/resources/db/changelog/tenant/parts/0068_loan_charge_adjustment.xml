@@ -39,8 +39,8 @@
             </column>
         </addColumn>
         <dropNotNullConstraint columnDataType="BIGINT"
-                                columnName="to_loan_transaction_id"
-                                tableName="m_loan_transaction_relation"/>
+                               columnName="to_loan_transaction_id"
+                               tableName="m_loan_transaction_relation"/>
         <addForeignKeyConstraint baseColumnNames="to_loan_charge_id" baseTableName="m_loan_transaction_relation"
                                  constraintName="FK_m_loan_charge_to_relation" deferrable="false"
                                  initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"

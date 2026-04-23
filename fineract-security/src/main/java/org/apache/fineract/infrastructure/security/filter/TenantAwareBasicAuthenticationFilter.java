@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,9 +23,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
@@ -81,10 +83,10 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private RequestMatcher requestMatcher = AnyRequestMatcher.INSTANCE;
 
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-            final AuthenticationEntryPoint authenticationEntryPoint, ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
-            ConfigurationDomainService configurationDomainService, CacheWritePlatformService cacheWritePlatformService,
-            UserNotificationService userNotificationService, AuthTenantDetailsService basicAuthTenantDetailsService,
-            BusinessDateReadPlatformService businessDateReadPlatformService) {
+                                                final AuthenticationEntryPoint authenticationEntryPoint, ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
+                                                ConfigurationDomainService configurationDomainService, CacheWritePlatformService cacheWritePlatformService,
+                                                UserNotificationService userNotificationService, AuthTenantDetailsService basicAuthTenantDetailsService,
+                                                BusinessDateReadPlatformService businessDateReadPlatformService) {
         super(authenticationManager, authenticationEntryPoint);
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.configurationDomainService = configurationDomainService;

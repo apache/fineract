@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -149,7 +151,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> paymentAllocations = new ArrayList<>();
         map.put("paymentAllocation", paymentAllocations);
-        List<String> allocationRule = Arrays.asList(new String[] { "invalid", null, "IN_ADVANCE_PENALTY" });
+        List<String> allocationRule = Arrays.asList(new String[]{"invalid", null, "IN_ADVANCE_PENALTY"});
         paymentAllocations.add(createPaymentAllocationEntry("DEFAULT", "NEXT_INSTALLMENT", allocationRule));
         JsonCommand command = createJsonCommand(map);
 
@@ -203,7 +205,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     public Map<String, Object> createPaymentAllocationEntry(String transactionType, String futureInstallmentAllocation,
-            List<String> orderedRules) {
+                                                            List<String> orderedRules) {
         Map<String, Object> map = new HashMap<>();
         map.put("transactionType", transactionType);
         map.put("futureInstallmentAllocationRule", futureInstallmentAllocation);

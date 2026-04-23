@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import java.util.concurrent.ThreadPoolExecutor;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
@@ -41,9 +42,9 @@ public class SpringConfig {
 
     @Bean(name = "fineractEventExecutor")
     public ThreadPoolTaskExecutor fineractEventExecutor(ThreadPoolTaskExecutorBuilder builder,
-            @Value("${spring.task.execution.pool.core-size:-1}") int configuredCore,
-            @Value("${spring.task.execution.pool.max-size:-1}") int configuredMax,
-            @Value("${spring.task.execution.pool.queue-capacity:-1}") int configuredQueueCapacity) {
+                                                        @Value("${spring.task.execution.pool.core-size:-1}") int configuredCore,
+                                                        @Value("${spring.task.execution.pool.max-size:-1}") int configuredMax,
+                                                        @Value("${spring.task.execution.pool.queue-capacity:-1}") int configuredQueueCapacity) {
 
         int cpus = Runtime.getRuntime().availableProcessors();
         int smartCore = cpus * 2;

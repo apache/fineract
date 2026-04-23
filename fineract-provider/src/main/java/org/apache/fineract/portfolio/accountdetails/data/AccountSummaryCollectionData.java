@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,10 +41,10 @@ public class AccountSummaryCollectionData {
      * METHOD SIGNATURE CHANGE NOTICE: Method's signature was changed for GLIM & GSIM implementation
      */
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
-            final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
-            final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts,
-            final Collection<GuarantorAccountSummaryData> guarantorAccounts,
-            final Collection<WorkingCapitalLoanAccountSummaryData> workingCapitalLoanAccounts) {
+                                        final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
+                                        final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts,
+                                        final Collection<GuarantorAccountSummaryData> guarantorAccounts,
+                                        final Collection<WorkingCapitalLoanAccountSummaryData> workingCapitalLoanAccounts) {
 
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
         this.groupLoanIndividualMonitoringAccounts = groupLoanIndividualMonitoringAccounts;
@@ -58,10 +58,10 @@ public class AccountSummaryCollectionData {
     }
 
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
-            final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
-            final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<GuarantorAccountSummaryData> guarantorAccounts,
-            final Collection<LoanAccountSummaryData> memberLoanAccounts, final Collection<SavingsAccountSummaryData> memberSavingsAccounts,
-            final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts) {
+                                        final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
+                                        final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<GuarantorAccountSummaryData> guarantorAccounts,
+                                        final Collection<LoanAccountSummaryData> memberLoanAccounts, final Collection<SavingsAccountSummaryData> memberSavingsAccounts,
+                                        final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts) {
         /* Note to Self: GSIM not passed in */
 
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);

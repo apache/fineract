@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,17 +21,19 @@ package org.apache.fineract.integrationtests.common.fixeddeposit;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({"unused", "rawtypes"})
 public class FixedDepositProductHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(FixedDepositProductHelper.class);
@@ -505,7 +507,7 @@ public class FixedDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createFixedDepositProduct(final String fixedDepositProductCreateJson, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                    final ResponseSpecification responseSpec) {
         LOG.info("--------------------- CREATING FIXED DEPOSIT PRODUCT ------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_FIXED_DEPOSIT_PRODUCT_URL, fixedDepositProductCreateJson,
                 CommonConstants.RESPONSE_RESOURCE_ID);
@@ -516,7 +518,7 @@ public class FixedDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList retrieveAllFixedDepositProducts(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                            final ResponseSpecification responseSpec) {
         LOG.info("-------------------- RETRIEVING ALL FIXED DEPOSIT PRODUCTS ---------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
                 FIXED_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
@@ -528,7 +530,7 @@ public class FixedDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap retrieveFixedDepositProductById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String productId) {
+                                                          final String productId) {
         LOG.info("------------------------ RETRIEVING FIXED DEPOSIT PRODUCT BY ID ------------------------");
         final String GET_FD_PRODUCT_BY_ID_URL = FIXED_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_FD_PRODUCT_BY_ID_URL, "");
@@ -540,7 +542,7 @@ public class FixedDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer productId) {
+                                                                 final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
                 "chartSlabs");

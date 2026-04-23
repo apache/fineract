@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
@@ -72,20 +73,20 @@ class LoanCOBPartitionerTest {
         when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                 .thenReturn(BUSINESS_STEP_SET);
         when(retrieveIdService.retrieveLoanCOBPartitions(1L, BUSINESS_DATE, false, 5))
-                .thenReturn(List.of(new COBPartition(1L,10L, 1L, 5L), new COBPartition(11L,20L, 2L, 4L)));
+                .thenReturn(List.of(new COBPartition(1L, 10L, 1L, 5L), new COBPartition(11L, 20L, 2L, 4L)));
         when(stepExecution.getJobExecution()).thenReturn(jobExecution);
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
         when(executionContext.get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)).thenReturn(BUSINESS_DATE);
         when(executionContext.get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)).thenReturn(false);
-        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator,stepExecution, 1L);
+        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator, stepExecution, 1L);
 
         //when
         Map<String, ExecutionContext> partitions = loanCOBPartitioner.partition(1);
 
         //then
         Assertions.assertEquals(2, partitions.size());
-        validatePartitions(partitions, 1, 1,  10, BUSINESS_DATE.toString(), "false");
-        validatePartitions(partitions, 2, 11,  20, BUSINESS_DATE.toString(), "false");
+        validatePartitions(partitions, 1, 1, 10, BUSINESS_DATE.toString(), "false");
+        validatePartitions(partitions, 2, 11, 20, BUSINESS_DATE.toString(), "false");
     }
 
     @Test
@@ -119,18 +120,18 @@ class LoanCOBPartitionerTest {
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
         when(executionContext.get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)).thenReturn(BUSINESS_DATE);
         when(executionContext.get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)).thenReturn(false);
-        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator,stepExecution, 1L);
+        LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator, stepExecution, 1L);
 
         //when
         Map<String, ExecutionContext> partitions = loanCOBPartitioner.partition(1);
 
         //then
         Assertions.assertEquals(1, partitions.size());
-        validatePartitions(partitions, 1, 0,  0, BUSINESS_DATE.toString(), "false");
+        validatePartitions(partitions, 1, 0, 0, BUSINESS_DATE.toString(), "false");
     }
 
     private void validatePartitions(Map<String, ExecutionContext> partitions, int index, long min, long max, String businessDate,
-            String isCatchUp) {
+                                    String isCatchUp) {
         Assertions.assertEquals(BUSINESS_STEP_SET,
                 partitions.get(COBConstant.PARTITION_PREFIX + index).get(LoanCOBConstant.BUSINESS_STEPS));
         Assertions.assertEquals(new COBParameter(min, max),

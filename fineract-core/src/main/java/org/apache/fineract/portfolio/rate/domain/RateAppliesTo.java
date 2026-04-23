@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -47,10 +47,10 @@ public enum RateAppliesTo {
             switch (rateAppliesTo) {
                 case 1:
                     rateAppliesToType = LOAN;
-                break;
+                    break;
                 default:
                     rateAppliesToType = INVALID;
-                break;
+                    break;
             }
         }
 
@@ -62,6 +62,6 @@ public enum RateAppliesTo {
     }
 
     public static Object[] validValues() {
-        return new Object[] { RateAppliesTo.LOAN.getValue() };
+        return new Object[]{RateAppliesTo.LOAN.getValue()};
     }
 }

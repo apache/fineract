@@ -23,7 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet id="1" author="fineract">
-        <modifyDataType tableName="m_client" columnName="fullname" newDataType="VARCHAR(160)" />
-        <modifyDataType tableName="m_client" columnName="display_name" newDataType="VARCHAR(160)" />
+        <modifyDataType tableName="m_client" columnName="fullname" newDataType="VARCHAR(160)"/>
+        <modifyDataType tableName="m_client" columnName="display_name" newDataType="VARCHAR(160)"/>
     </changeSet>
 </databaseChangeLog>

@@ -27,11 +27,13 @@
     <changeSet author="fineract" id="1" runInTransaction="false" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="m_external_asset_owner_loan_product_configurable_attributes" columnNames="loan_product_id"/>
+                <indexExists tableName="m_external_asset_owner_loan_product_configurable_attributes"
+                             columnNames="loan_product_id"/>
             </not>
         </preConditions>
         <sql>
-            create index concurrently IND_m_ext_asset_ow_lp_config_lp_id on m_external_asset_owner_loan_product_configurable_attributes(loan_product_id);
+            create index concurrently IND_m_ext_asset_ow_lp_config_lp_id on
+            m_external_asset_owner_loan_product_configurable_attributes(loan_product_id);
         </sql>
     </changeSet>
 </databaseChangeLog>

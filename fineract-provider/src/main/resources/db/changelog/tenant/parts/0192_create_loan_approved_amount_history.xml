@@ -64,15 +64,18 @@
     </changeSet>
     <changeSet author="fineract" id="3">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_approved_amount_history"
-                                 constraintName="FK_loan_approved_amount_history_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_approved_amount_history_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_approved_amount_history"
-                                 constraintName="FK_loan_approved_amount_history_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_approved_amount_history_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_approved_amount_history"
-                                 constraintName="FK_loan_approved_amount_history_loan_id" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_approved_amount_history_loan_id" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan" validate="true"/>
     </changeSet>

@@ -25,53 +25,53 @@ apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencie
 war {
     description = 'Assembles a WAR archive containing the web application'
     archiveFileName = 'fineract-provider.war'
-    
+
     // Enable caching
     outputs.cacheIf { true }
-    
+
     // Track inputs explicitly
     inputs.files(project.configurations.runtimeClasspath)
-        .withPropertyName("runtimeClasspath")
-        .withPathSensitivity(PathSensitivity.RELATIVE)
+            .withPropertyName("runtimeClasspath")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(project.sourceSets.main.output.classesDirs)
-        .withPropertyName("classes")
-        .withPathSensitivity(PathSensitivity.RELATIVE)
-        
+            .withPropertyName("classes")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
     def licensesDir = file("$rootDir/licenses/binary/")
     if (licensesDir.exists()) {
         inputs.dir(licensesDir)
-            .withPropertyName("licenses")
-            .withPathSensitivity(PathSensitivity.RELATIVE)
-            
+                .withPropertyName("licenses")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+
         from(licensesDir) {
             into "WEB-INF/licenses/binary/"
         }
     }
-    
+
     def legalFiles = [
-        file("$rootDir/LICENSE_RELEASE"),
-        file("$rootDir/NOTICE_RELEASE"),
-        file("$rootDir/DISCLAIMER")
+            file("$rootDir/LICENSE_RELEASE"),
+            file("$rootDir/NOTICE_RELEASE"),
+            file("$rootDir/DISCLAIMER")
     ].findAll { it.exists() }
-    
+
     if (!legalFiles.empty) {
         inputs.files(legalFiles)
-            .withPropertyName("legalFiles")
-            .withPathSensitivity(PathSensitivity.RELATIVE)
+                .withPropertyName("legalFiles")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
     }
-    
+
     legalFiles.each { file ->
         from(file) {
             into "WEB-INF/"
         }
     }
-    
-    rename ('LICENSE_RELEASE', 'LICENSE')
-    rename ('NOTICE_RELEASE', 'NOTICE')
-    
+
+    rename('LICENSE_RELEASE', 'LICENSE')
+    rename('NOTICE_RELEASE', 'NOTICE')
+
     enabled = true
     archiveClassifier = ''
-    
+
     // Ensure reproducible output
     preserveFileTimestamps = false
     reproducibleFileOrder = true
@@ -97,10 +97,10 @@ dependencies {
 tasks.withType(Tar) {
     compression Compression.GZIP
     archiveExtension = 'tar.gz'
-    
+
     // Enable caching for all tar tasks
     outputs.cacheIf { true }
-    
+
     // Ensure reproducible output
     preserveFileTimestamps = false
     reproducibleFileOrder = true
@@ -114,14 +114,14 @@ distributions {
             filesMatching('**/*.jar') {
                 it.path = it.path.replaceAll('-\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?', '-' + version)
             }
-            
-            from ("$rootDir/fineract-client/build/libs/") {
+
+            from("$rootDir/fineract-client/build/libs/") {
                 include 'fineract-client-*.jar'
             }
-            from ("$rootDir/fineract-avro-schemas/build/libs/") {
+            from("$rootDir/fineract-avro-schemas/build/libs/") {
                 include 'fineract-avro-schemas-*.jar'
             }
-            from ("$rootDir/fineract-provider/build/libs/") {
+            from("$rootDir/fineract-provider/build/libs/") {
                 include 'fineract-provider-*.jar'
                 exclude 'fineract-provider-*-plain.jar'
             }
@@ -131,17 +131,17 @@ distributions {
             }
             from "$rootDir/LICENSE_RELEASE"
             from "$rootDir/NOTICE_RELEASE"
-            rename ('LICENSE_RELEASE', 'LICENSE')
-            rename ('NOTICE_RELEASE', 'NOTICE')
+            rename('LICENSE_RELEASE', 'LICENSE')
+            rename('NOTICE_RELEASE', 'NOTICE')
 
             from "$rootDir/DISCLAIMER"
             from "$rootDir/README.md"
 
             from "$rootDir/fineract-doc/build/docs/pdf/en/index.pdf"
-            rename ('index.pdf', 'fineract-documentation.pdf')
+            rename('index.pdf', 'fineract-documentation.pdf')
 
             from "$rootDir/.atr-rat-excludes-bin.txt"
-            rename ('.atr-rat-excludes-bin.txt', '.rat-excludes')
+            rename('.atr-rat-excludes-bin.txt', '.rat-excludes')
         }
     }
     src {
@@ -149,20 +149,20 @@ distributions {
         contents {
             // Track inputs explicitly for source distribution
             from("$rootDir/") {
-                exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', 
-                        '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', 
-                        '**/.externalToolbuilders', '.theia', 'LICENSE_RELEASE', 
-                        'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', 
+                exclude '**/build', '.git', '**/.gradle', '.github', '**/.settings', '**/.project',
+                        '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent',
+                        '**/.externalToolbuilders', '.theia', 'LICENSE_RELEASE',
+                        'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore',
                         '**/.gitkeep', '*.swp', '.atr-rat-excludes-bin.txt'
-                
+
                 // Ensure consistent file paths for caching
                 eachFile { details ->
                     details.path = details.path.replace('\\', '/')
                 }
             }
-            rename ('LICENSE_SOURCE', 'LICENSE')
-            rename ('NOTICE_SOURCE', 'NOTICE')
-            rename ('.atr-rat-excludes-src.txt', '.rat-excludes')
+            rename('LICENSE_SOURCE', 'LICENSE')
+            rename('NOTICE_SOURCE', 'NOTICE')
+            rename('.atr-rat-excludes-src.txt', '.rat-excludes')
         }
     }
 }
@@ -171,12 +171,12 @@ distributions {
 tasks.named('binaryDistTar') {
     description = 'Assembles the binary distribution as a tar archive'
     outputs.cacheIf { true }
-    
+
     // Track dependencies explicitly
-    dependsOn(war, ':fineract-client:jar', ':fineract-avro-schemas:jar', 
-              ':fineract-provider:build', ':fineract-doc:doc',
-              ':fineract-client:javadocJar', ':fineract-client:sourcesJar',
-              ':fineract-avro-schemas:javadocJar', ':fineract-avro-schemas:sourcesJar')
+    dependsOn(war, ':fineract-client:jar', ':fineract-avro-schemas:jar',
+            ':fineract-provider:build', ':fineract-doc:doc',
+            ':fineract-client:javadocJar', ':fineract-client:sourcesJar',
+            ':fineract-avro-schemas:javadocJar', ':fineract-avro-schemas:sourcesJar')
 }
 
 tasks.named('srcDistTar') {

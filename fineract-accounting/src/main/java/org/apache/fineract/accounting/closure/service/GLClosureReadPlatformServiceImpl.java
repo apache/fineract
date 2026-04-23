@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
@@ -97,7 +98,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             final GLClosureMapper rm = new GLClosureMapper();
             final String sql = "select " + rm.schema() + " and glClosure.id = ?";
 
-            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId }); // NOSONAR
+            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{glClosureId}); // NOSONAR
 
             return glAccountData;
         } catch (final EmptyResultDataAccessException e) {

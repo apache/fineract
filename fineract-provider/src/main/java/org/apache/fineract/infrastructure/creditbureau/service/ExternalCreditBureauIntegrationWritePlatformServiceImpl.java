@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import jakarta.annotation.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -38,6 +39,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
@@ -88,7 +90,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImpl implements 
     @Transactional
     @Override
     public String okHttpConnectionMethod(String userName, String password, String subscriptionKey, String subscriptionId, String url,
-            String token, File file, FormDataContentDisposition fileData, Long uniqueId, String nrcId, @NonNull String process) {
+                                         String token, File file, FormDataContentDisposition fileData, Long uniqueId, String nrcId, @NonNull String process) {
 
         String responseMessage = null;
         if (StringUtils.isBlank(url)) {
@@ -103,10 +105,10 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImpl implements 
         Request.Builder baseRequestBuilder = createRequestBuilder(subscriptionKey, subscriptionId, token, okHttpUrl);
         switch (process) {
             case UPLOAD_CREDIT_REPORT ->
-                request = createRequest(baseRequestBuilder, () -> new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart("file", fileData.getFileName(), RequestBody.create(file, MediaType.parse("multipart/form-data")))
-                        .addFormDataPart("BODY", "formdata").addFormDataPart("userName", userName).build(),
-                        (requestBody, builder) -> builder.header(CONTENT_TYPE, MULTIPART_FORM_DATA).post(requestBody).build());
+                    request = createRequest(baseRequestBuilder, () -> new MultipartBody.Builder().setType(MultipartBody.FORM)
+                                    .addFormDataPart("file", fileData.getFileName(), RequestBody.create(file, MediaType.parse("multipart/form-data")))
+                                    .addFormDataPart("BODY", "formdata").addFormDataPart("userName", userName).build(),
+                            (requestBody, builder) -> builder.header(CONTENT_TYPE, MULTIPART_FORM_DATA).post(requestBody).build());
             case "CreditReport" -> request = createRequest(baseRequestBuilder,
                     builder -> builder.header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED).get().build());
             case "token" -> request = createRequest(baseRequestBuilder,
@@ -169,7 +171,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImpl implements 
      * @return return the generated request object
      */
     private Request createRequest(Request.Builder builder, Supplier<RequestBody> requestBodySupplier,
-            BiFunction<RequestBody, Request.Builder, Request> requestBuilder) {
+                                  BiFunction<RequestBody, Request.Builder, Request> requestBuilder) {
         return requestBuilder.apply(requestBodySupplier.get(), builder);
     }
 

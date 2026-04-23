@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,9 +41,9 @@ public class IncreaseBusinessDateBy1DayConfig {
 
     @Bean
     public Job increaseBusinessDateBy1DayJob(PlatformTransactionManager transactionManager, JobRepository jobRepository,
-            IncreaseBusinessDateBy1DayTasklet tasklet) {
+                                             IncreaseBusinessDateBy1DayTasklet tasklet) {
         return new JobBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).start(
-                new StepBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).tasklet(tasklet, transactionManager).build())
+                        new StepBuilder(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.name(), jobRepository).tasklet(tasklet, transactionManager).build())
                 .incrementer(new RunIdIncrementer()).build();
     }
 }

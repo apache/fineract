@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,12 +19,14 @@
 package org.apache.fineract.infrastructure.campaigns.jobs.sendmessagetosmsgateway;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -140,7 +142,8 @@ public class SendMessageToSmsGatewayTasklet implements Tasklet {
                 SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
         URI uri = (URI) hostConfig.get("uri");
         HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
-        ResponseEntity<String> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity, new ParameterizedTypeReference<>() {});
+        ResponseEntity<String> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity, new ParameterizedTypeReference<>() {
+        });
         if (!responseOne.getStatusCode().equals(HttpStatus.ACCEPTED)) {
             log.debug("{}", responseOne.getStatusCode().value());
             throw new ConnectionFailureException(SmsCampaignConstants.SMS);

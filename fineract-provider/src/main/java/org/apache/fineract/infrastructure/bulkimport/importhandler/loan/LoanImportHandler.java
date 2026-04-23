@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,12 +22,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -84,8 +86,8 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private void readExcelFile(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
-            final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, List<String> statuses,
-            final String locale, final String dateFormat) {
+                               final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, List<String> statuses,
+                               final String locale, final String dateFormat) {
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(loanSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
@@ -140,7 +142,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private LoanAccountData readLoan(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
-            final String dateFormat) {
+                                     final String dateFormat) {
         ExternalId externalId = ExternalIdFactory.produce(ImportHandlerUtils.readAsString(LoanConstants.EXTERNAL_ID_COL, row));
         String status = ImportHandlerUtils.readAsString(LoanConstants.STATUS_COL, row);
         String productName = ImportHandlerUtils.readAsString(LoanConstants.PRODUCT_COL, row);
@@ -375,8 +377,8 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
-            final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, final List<String> statuses,
-            final String dateFormat) {
+                               final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, final List<String> statuses,
+                               final String dateFormat) {
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -429,7 +431,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private void writeLoanErrorMessage(final Workbook workbook, final String loanId, final String errorMessage, final int progressLevel,
-            final Cell statusCell, final Cell errorReportCell, final Row row) {
+                                       final Cell statusCell, final Cell errorReportCell, final Row row) {
         String status = EMPTY_STR;
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
@@ -458,7 +460,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private Integer importLoanRepayment(final List<LoanTransactionData> loanRepayments, final CommandProcessingResult result,
-            final int rowIndex, final String dateFormat) {
+                                        final int rowIndex, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, loanRepayments.get(rowIndex).getLocale()));
         JsonObject loanRepaymentJsonob = gsonBuilder.create().toJsonTree(loanRepayments.get(rowIndex)).getAsJsonObject();
@@ -476,7 +478,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private Integer importDisbursalData(final List<LoanApprovalData> approvalDates, final List<DisbursementData> disbursalDates,
-            final CommandProcessingResult result, final int rowIndex, final String dateFormat) {
+                                        final CommandProcessingResult result, final int rowIndex, final String dateFormat) {
         if (approvalDates.get(rowIndex) != null && disbursalDates.get(rowIndex) != null) {
 
             DisbursementData disbusalData = disbursalDates.get(rowIndex);
@@ -504,7 +506,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private Integer importLoanApproval(final List<LoanApprovalData> approvalDates, final CommandProcessingResult result, final int rowIndex,
-            final String dateFormat) {
+                                       final String dateFormat) {
         if (approvalDates.get(rowIndex) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, approvalDates.get(rowIndex).getLocale()));

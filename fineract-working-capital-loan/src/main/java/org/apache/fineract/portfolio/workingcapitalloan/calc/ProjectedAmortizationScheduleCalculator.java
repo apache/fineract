@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.calc;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.springframework.lang.NonNull;
 
@@ -37,8 +38,8 @@ public interface ProjectedAmortizationScheduleCalculator {
      */
     @NonNull
     ProjectedAmortizationScheduleModel generateModel(@NonNull BigDecimal originationFeeAmount, @NonNull BigDecimal netDisbursementAmount,
-            @NonNull BigDecimal totalPaymentValue, @NonNull BigDecimal periodPaymentRate, int npvDayCount,
-            @NonNull LocalDate expectedDisbursementDate, @NonNull MathContext mc, @NonNull MonetaryCurrency currency);
+                                                     @NonNull BigDecimal totalPaymentValue, @NonNull BigDecimal periodPaymentRate, int npvDayCount,
+                                                     @NonNull LocalDate expectedDisbursementDate, @NonNull MathContext mc, @NonNull MonetaryCurrency currency);
 
     /**
      * Recalculates the model with updated financial parameters (at approval or disbursement). Preserves already applied
@@ -56,7 +57,7 @@ public interface ProjectedAmortizationScheduleCalculator {
      */
     @NonNull
     ProjectedAmortizationScheduleModel addDisbursement(@NonNull ProjectedAmortizationScheduleModel model,
-            @NonNull BigDecimal newDiscountAmount, @NonNull BigDecimal newNetAmount, @NonNull LocalDate newStartDate);
+                                                       @NonNull BigDecimal newDiscountAmount, @NonNull BigDecimal newNetAmount, @NonNull LocalDate newStartDate);
 
     /**
      * Applies a payment to the model. The model is mutated in place; callers can read the updated payment directly from

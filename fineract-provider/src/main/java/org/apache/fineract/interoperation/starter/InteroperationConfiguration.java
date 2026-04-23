@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -48,14 +48,14 @@ public class InteroperationConfiguration {
     @Bean
     @ConditionalOnMissingBean(InteropService.class)
     public InteropService interopService(PlatformSecurityContext securityContext, InteropDataValidator interopDataValidator,
-            SavingsAccountRepository savingsAccountRepository, SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
-            PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository,
-            LoanRepositoryWrapper loanRepositoryWrapper, SavingsHelper savingsHelper,
-            SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            SavingsAccountDomainService savingsAccountService, ConfigurationDomainService configurationDomainService,
-            JdbcTemplate jdbcTemplate, PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                         SavingsAccountRepository savingsAccountRepository, SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+                                         ApplicationCurrencyRepository applicationCurrencyRepository, NoteRepository noteRepository,
+                                         PaymentTypeRepository paymentTypeRepository, InteropIdentifierRepository identifierRepository,
+                                         LoanRepositoryWrapper loanRepositoryWrapper, SavingsHelper savingsHelper,
+                                         SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+                                         SavingsAccountDomainService savingsAccountService, ConfigurationDomainService configurationDomainService,
+                                         JdbcTemplate jdbcTemplate, PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                                         DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new InteropServiceImpl(securityContext, interopDataValidator, savingsAccountRepository, savingsAccountTransactionRepository,
                 applicationCurrencyRepository, noteRepository, paymentTypeRepository, identifierRepository, loanRepositoryWrapper,
                 savingsHelper, savingsAccountTransactionSummaryWrapper, savingsAccountService, configurationDomainService, jdbcTemplate,

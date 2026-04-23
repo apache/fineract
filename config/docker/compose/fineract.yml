@@ -26,6 +26,6 @@ services:
       - ${PWD}/build/fineract/logs:/var/logs/fineract:rw
       # - ${PWD}/build/fineract/tmp:/tmp:rw
     healthcheck:
-      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "localhost" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      test: [ "CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "localhost" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
       timeout: 1s
       retries: 60

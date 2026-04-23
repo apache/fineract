@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -84,12 +84,15 @@ public final class LoanEnumerations {
 
     public static EnumOptionData repaymentStartDateType(final RepaymentStartDateType type) {
         return switch (type) {
-            case DISBURSEMENT_DATE -> new EnumOptionData(RepaymentStartDateType.DISBURSEMENT_DATE.getValue().longValue(),
-                    RepaymentStartDateType.DISBURSEMENT_DATE.getCode(), "Disbursement Date");
-            case SUBMITTED_ON_DATE -> new EnumOptionData(RepaymentStartDateType.SUBMITTED_ON_DATE.getValue().longValue(),
-                    RepaymentStartDateType.SUBMITTED_ON_DATE.getCode(), "Submitted On Date");
-            default -> new EnumOptionData(RepaymentStartDateType.INVALID.getValue().longValue(), RepaymentStartDateType.INVALID.getCode(),
-                    "Invalid");
+            case DISBURSEMENT_DATE ->
+                    new EnumOptionData(RepaymentStartDateType.DISBURSEMENT_DATE.getValue().longValue(),
+                            RepaymentStartDateType.DISBURSEMENT_DATE.getCode(), "Disbursement Date");
+            case SUBMITTED_ON_DATE ->
+                    new EnumOptionData(RepaymentStartDateType.SUBMITTED_ON_DATE.getValue().longValue(),
+                            RepaymentStartDateType.SUBMITTED_ON_DATE.getCode(), "Submitted On Date");
+            default ->
+                    new EnumOptionData(RepaymentStartDateType.INVALID.getValue().longValue(), RepaymentStartDateType.INVALID.getCode(),
+                            "Invalid");
         };
     }
 
@@ -109,7 +112,7 @@ public final class LoanEnumerations {
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
             default ->
-                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -129,7 +132,7 @@ public final class LoanEnumerations {
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
             default ->
-                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -184,7 +187,7 @@ public final class LoanEnumerations {
             case YEARS -> new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.YEARS.getCode(), "Years");
             default ->
-                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -202,7 +205,7 @@ public final class LoanEnumerations {
             case WHOLE_TERM -> new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(),
                     codePrefix + PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole term");
             default ->
-                new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -217,7 +220,7 @@ public final class LoanEnumerations {
             case EQUAL_PRINCIPAL -> new EnumOptionData(AmortizationMethod.EQUAL_PRINCIPAL.getValue().longValue(),
                     AmortizationMethod.EQUAL_PRINCIPAL.getCode(), "Equal principal payments");
             default ->
-                new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -227,10 +230,12 @@ public final class LoanEnumerations {
 
     public static EnumOptionData interestType(final InterestMethod type) {
         return switch (type) {
-            case FLAT -> new EnumOptionData(InterestMethod.FLAT.getValue().longValue(), InterestMethod.FLAT.getCode(), "Flat");
+            case FLAT ->
+                    new EnumOptionData(InterestMethod.FLAT.getValue().longValue(), InterestMethod.FLAT.getCode(), "Flat");
             case DECLINING_BALANCE -> new EnumOptionData(InterestMethod.DECLINING_BALANCE.getValue().longValue(),
                     InterestMethod.DECLINING_BALANCE.getCode(), "Declining Balance");
-            default -> new EnumOptionData(InterestMethod.INVALID.getValue().longValue(), InterestMethod.INVALID.getCode(), "Invalid");
+            default ->
+                    new EnumOptionData(InterestMethod.INVALID.getValue().longValue(), InterestMethod.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -243,8 +248,8 @@ public final class LoanEnumerations {
             case DAILY -> new EnumOptionData(InterestCalculationPeriodMethod.DAILY.getValue().longValue(),
                     InterestCalculationPeriodMethod.DAILY.getCode(), "Daily");
             case SAME_AS_REPAYMENT_PERIOD ->
-                new EnumOptionData(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
-                        InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
+                    new EnumOptionData(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
+                            InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
             default -> new EnumOptionData(InterestCalculationPeriodMethod.INVALID.getValue().longValue(),
                     InterestCalculationPeriodMethod.INVALID.getCode(), "Invalid");
         };
@@ -263,91 +268,113 @@ public final class LoanEnumerations {
             case REPAYMENT -> new LoanTransactionEnumData(LoanTransactionType.REPAYMENT.getValue().longValue(),
                     LoanTransactionType.REPAYMENT.getCode(), "Repayment");
             case REPAYMENT_AT_DISBURSEMENT ->
-                new LoanTransactionEnumData(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(),
-                        LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getCode(), "Repayment (at time of disbursement)");
+                    new LoanTransactionEnumData(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(),
+                            LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getCode(), "Repayment (at time of disbursement)");
             case CONTRA -> new LoanTransactionEnumData(LoanTransactionType.CONTRA.getValue().longValue(),
                     LoanTransactionType.CONTRA.getCode(), "Reversal");
-            case WAIVE_INTEREST -> new LoanTransactionEnumData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(),
-                    LoanTransactionType.WAIVE_INTEREST.getCode(), "Waive interest");
-            case MARKED_FOR_RESCHEDULING -> new LoanTransactionEnumData(LoanTransactionType.MARKED_FOR_RESCHEDULING.getValue().longValue(),
-                    LoanTransactionType.MARKED_FOR_RESCHEDULING.getCode(), "Close (as rescheduled)");
+            case WAIVE_INTEREST ->
+                    new LoanTransactionEnumData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(),
+                            LoanTransactionType.WAIVE_INTEREST.getCode(), "Waive interest");
+            case MARKED_FOR_RESCHEDULING ->
+                    new LoanTransactionEnumData(LoanTransactionType.MARKED_FOR_RESCHEDULING.getValue().longValue(),
+                            LoanTransactionType.MARKED_FOR_RESCHEDULING.getCode(), "Close (as rescheduled)");
             case WRITEOFF -> new LoanTransactionEnumData(LoanTransactionType.WRITEOFF.getValue().longValue(),
                     LoanTransactionType.WRITEOFF.getCode(), "Close (as written-off)");
-            case RECOVERY_REPAYMENT -> new LoanTransactionEnumData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(),
-                    LoanTransactionType.RECOVERY_REPAYMENT.getCode(), "Repayment (after write-off)");
+            case RECOVERY_REPAYMENT ->
+                    new LoanTransactionEnumData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(),
+                            LoanTransactionType.RECOVERY_REPAYMENT.getCode(), "Repayment (after write-off)");
             case WAIVE_CHARGES -> new LoanTransactionEnumData(LoanTransactionType.WAIVE_CHARGES.getValue().longValue(),
                     LoanTransactionType.WAIVE_CHARGES.getCode(), "Waive loan charges");
             case ACCRUAL -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL.getValue().longValue(),
                     LoanTransactionType.ACCRUAL.getCode(), "Accrual");
-            case APPROVE_TRANSFER -> new LoanTransactionEnumData(LoanTransactionType.APPROVE_TRANSFER.getValue().longValue(),
-                    LoanTransactionType.APPROVE_TRANSFER.getCode(), "Transfer approved");
-            case INITIATE_TRANSFER -> new LoanTransactionEnumData(LoanTransactionType.INITIATE_TRANSFER.getValue().longValue(),
-                    LoanTransactionType.INITIATE_TRANSFER.getCode(), "Transfer initiated");
-            case WITHDRAW_TRANSFER -> new LoanTransactionEnumData(LoanTransactionType.WITHDRAW_TRANSFER.getValue().longValue(),
-                    LoanTransactionType.WITHDRAW_TRANSFER.getCode(), "Transfer Withdrawn");
-            case REJECT_TRANSFER -> new LoanTransactionEnumData(LoanTransactionType.REJECT_TRANSFER.getValue().longValue(),
-                    LoanTransactionType.REJECT_TRANSFER.getCode(), "Transfer Rejected");
+            case APPROVE_TRANSFER ->
+                    new LoanTransactionEnumData(LoanTransactionType.APPROVE_TRANSFER.getValue().longValue(),
+                            LoanTransactionType.APPROVE_TRANSFER.getCode(), "Transfer approved");
+            case INITIATE_TRANSFER ->
+                    new LoanTransactionEnumData(LoanTransactionType.INITIATE_TRANSFER.getValue().longValue(),
+                            LoanTransactionType.INITIATE_TRANSFER.getCode(), "Transfer initiated");
+            case WITHDRAW_TRANSFER ->
+                    new LoanTransactionEnumData(LoanTransactionType.WITHDRAW_TRANSFER.getValue().longValue(),
+                            LoanTransactionType.WITHDRAW_TRANSFER.getCode(), "Transfer Withdrawn");
+            case REJECT_TRANSFER ->
+                    new LoanTransactionEnumData(LoanTransactionType.REJECT_TRANSFER.getValue().longValue(),
+                            LoanTransactionType.REJECT_TRANSFER.getCode(), "Transfer Rejected");
             case REFUND -> new LoanTransactionEnumData(LoanTransactionType.REFUND.getValue().longValue(),
                     LoanTransactionType.REFUND.getCode(), "Transfer Refund");
-            case CHARGE_PAYMENT -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_PAYMENT.getValue().longValue(),
-                    LoanTransactionType.CHARGE_PAYMENT.getCode(), "Charge Payment");
-            case REFUND_FOR_ACTIVE_LOAN -> new LoanTransactionEnumData(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getValue().longValue(),
-                    LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getCode(), "Refund");
-            case INCOME_POSTING -> new LoanTransactionEnumData(LoanTransactionType.INCOME_POSTING.getValue().longValue(),
-                    LoanTransactionType.INCOME_POSTING.getCode(), "Income Posting");
-            case CREDIT_BALANCE_REFUND -> new LoanTransactionEnumData(LoanTransactionType.CREDIT_BALANCE_REFUND.getValue().longValue(),
-                    LoanTransactionType.CREDIT_BALANCE_REFUND.getCode(), "Credit Balance Refund");
-            case MERCHANT_ISSUED_REFUND -> new LoanTransactionEnumData(LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue().longValue(),
-                    LoanTransactionType.MERCHANT_ISSUED_REFUND.getCode(), "Merchant Issued Refund");
+            case CHARGE_PAYMENT ->
+                    new LoanTransactionEnumData(LoanTransactionType.CHARGE_PAYMENT.getValue().longValue(),
+                            LoanTransactionType.CHARGE_PAYMENT.getCode(), "Charge Payment");
+            case REFUND_FOR_ACTIVE_LOAN ->
+                    new LoanTransactionEnumData(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getValue().longValue(),
+                            LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getCode(), "Refund");
+            case INCOME_POSTING ->
+                    new LoanTransactionEnumData(LoanTransactionType.INCOME_POSTING.getValue().longValue(),
+                            LoanTransactionType.INCOME_POSTING.getCode(), "Income Posting");
+            case CREDIT_BALANCE_REFUND ->
+                    new LoanTransactionEnumData(LoanTransactionType.CREDIT_BALANCE_REFUND.getValue().longValue(),
+                            LoanTransactionType.CREDIT_BALANCE_REFUND.getCode(), "Credit Balance Refund");
+            case MERCHANT_ISSUED_REFUND ->
+                    new LoanTransactionEnumData(LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue().longValue(),
+                            LoanTransactionType.MERCHANT_ISSUED_REFUND.getCode(), "Merchant Issued Refund");
             case PAYOUT_REFUND -> new LoanTransactionEnumData(LoanTransactionType.PAYOUT_REFUND.getValue().longValue(),
                     LoanTransactionType.PAYOUT_REFUND.getCode(), "Payout Refund");
-            case GOODWILL_CREDIT -> new LoanTransactionEnumData(LoanTransactionType.GOODWILL_CREDIT.getValue().longValue(),
-                    LoanTransactionType.GOODWILL_CREDIT.getCode(), "Goodwill Credit");
-            case INTEREST_PAYMENT_WAIVER -> new LoanTransactionEnumData(LoanTransactionType.INTEREST_PAYMENT_WAIVER.getValue().longValue(),
-                    LoanTransactionType.INTEREST_PAYMENT_WAIVER.getCode(), "Interest Payment Waiver");
+            case GOODWILL_CREDIT ->
+                    new LoanTransactionEnumData(LoanTransactionType.GOODWILL_CREDIT.getValue().longValue(),
+                            LoanTransactionType.GOODWILL_CREDIT.getCode(), "Goodwill Credit");
+            case INTEREST_PAYMENT_WAIVER ->
+                    new LoanTransactionEnumData(LoanTransactionType.INTEREST_PAYMENT_WAIVER.getValue().longValue(),
+                            LoanTransactionType.INTEREST_PAYMENT_WAIVER.getCode(), "Interest Payment Waiver");
             case CHARGE_REFUND -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_REFUND.getValue().longValue(),
                     LoanTransactionType.CHARGE_REFUND.getCode(), "Charge Refund");
             case CHARGEBACK -> new LoanTransactionEnumData(LoanTransactionType.CHARGEBACK.getValue().longValue(),
                     LoanTransactionType.CHARGEBACK.getCode(), "Chargeback");
-            case CHARGE_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_ADJUSTMENT.getValue().longValue(),
-                    LoanTransactionType.CHARGE_ADJUSTMENT.getCode(), "Charge Adjustment");
+            case CHARGE_ADJUSTMENT ->
+                    new LoanTransactionEnumData(LoanTransactionType.CHARGE_ADJUSTMENT.getValue().longValue(),
+                            LoanTransactionType.CHARGE_ADJUSTMENT.getCode(), "Charge Adjustment");
             case CHARGE_OFF -> new LoanTransactionEnumData(LoanTransactionType.CHARGE_OFF.getValue().longValue(),
                     LoanTransactionType.CHARGE_OFF.getCode(), "Charge-off");
             case DOWN_PAYMENT -> new LoanTransactionEnumData(LoanTransactionType.DOWN_PAYMENT.getValue().longValue(),
                     LoanTransactionType.DOWN_PAYMENT.getCode(), "Down Payment");
-            case REAGE -> new LoanTransactionEnumData(LoanTransactionType.REAGE.getValue().longValue(), LoanTransactionType.REAGE.getCode(),
-                    "Re-age");
+            case REAGE ->
+                    new LoanTransactionEnumData(LoanTransactionType.REAGE.getValue().longValue(), LoanTransactionType.REAGE.getCode(),
+                            "Re-age");
             case REAMORTIZE -> new LoanTransactionEnumData(LoanTransactionType.REAMORTIZE.getValue().longValue(),
                     LoanTransactionType.REAMORTIZE.getCode(), "Re-amortize");
-            case ACCRUAL_ACTIVITY -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ACTIVITY.getValue().longValue(),
-                    LoanTransactionType.ACCRUAL_ACTIVITY.getCode(), "Accrual Activity");
-            case INTEREST_REFUND -> new LoanTransactionEnumData(LoanTransactionType.INTEREST_REFUND.getValue().longValue(),
-                    LoanTransactionType.INTEREST_REFUND.getCode(), "Interest Refund");
-            case ACCRUAL_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ADJUSTMENT.getValue().longValue(),
-                    LoanTransactionType.ACCRUAL_ADJUSTMENT.getCode(), "Accrual Adjustment");
-            case CAPITALIZED_INCOME -> new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME.getValue().longValue(),
-                    LoanTransactionType.CAPITALIZED_INCOME.getCode(), "Capitalized Income");
+            case ACCRUAL_ACTIVITY ->
+                    new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ACTIVITY.getValue().longValue(),
+                            LoanTransactionType.ACCRUAL_ACTIVITY.getCode(), "Accrual Activity");
+            case INTEREST_REFUND ->
+                    new LoanTransactionEnumData(LoanTransactionType.INTEREST_REFUND.getValue().longValue(),
+                            LoanTransactionType.INTEREST_REFUND.getCode(), "Interest Refund");
+            case ACCRUAL_ADJUSTMENT ->
+                    new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ADJUSTMENT.getValue().longValue(),
+                            LoanTransactionType.ACCRUAL_ADJUSTMENT.getCode(), "Accrual Adjustment");
+            case CAPITALIZED_INCOME ->
+                    new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME.getValue().longValue(),
+                            LoanTransactionType.CAPITALIZED_INCOME.getCode(), "Capitalized Income");
             case CAPITALIZED_INCOME_AMORTIZATION ->
-                new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getValue().longValue(),
-                        LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getCode(), "Capitalized Income Amortization");
+                    new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getValue().longValue(),
+                            LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION.getCode(), "Capitalized Income Amortization");
             case CAPITALIZED_INCOME_ADJUSTMENT ->
-                new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT.getValue().longValue(),
-                        LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT.getCode(), "Capitalized Income Adjustment");
-            case CONTRACT_TERMINATION -> new LoanTransactionEnumData(LoanTransactionType.CONTRACT_TERMINATION.getValue().longValue(),
-                    LoanTransactionType.CONTRACT_TERMINATION.getCode(), "Contract Termination");
+                    new LoanTransactionEnumData(LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT.getValue().longValue(),
+                            LoanTransactionType.CAPITALIZED_INCOME_ADJUSTMENT.getCode(), "Capitalized Income Adjustment");
+            case CONTRACT_TERMINATION ->
+                    new LoanTransactionEnumData(LoanTransactionType.CONTRACT_TERMINATION.getValue().longValue(),
+                            LoanTransactionType.CONTRACT_TERMINATION.getCode(), "Contract Termination");
             case CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT -> new LoanTransactionEnumData(
                     LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT.getValue().longValue(),
                     LoanTransactionType.CAPITALIZED_INCOME_AMORTIZATION_ADJUSTMENT.getCode(), "Capitalized Income Amortization Adjustment");
             case BUY_DOWN_FEE -> new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE.getValue().longValue(),
                     LoanTransactionType.BUY_DOWN_FEE.getCode(), "Buy Down Fee");
-            case BUY_DOWN_FEE_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getValue().longValue(),
-                    LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getCode(), "Buy Down Fee Adjustment");
+            case BUY_DOWN_FEE_ADJUSTMENT ->
+                    new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getValue().longValue(),
+                            LoanTransactionType.BUY_DOWN_FEE_ADJUSTMENT.getCode(), "Buy Down Fee Adjustment");
             case BUY_DOWN_FEE_AMORTIZATION ->
-                new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getValue().longValue(),
-                        LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getCode(), "Buy Down Fee Amortization");
+                    new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getValue().longValue(),
+                            LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION.getCode(), "Buy Down Fee Amortization");
             case BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT ->
-                new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getValue().longValue(),
-                        LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getCode(), "Buy Down Fee Amortization Adjustment");
+                    new LoanTransactionEnumData(LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getValue().longValue(),
+                            LoanTransactionType.BUY_DOWN_FEE_AMORTIZATION_ADJUSTMENT.getCode(), "Buy Down Fee Amortization Adjustment");
         };
     }
 
@@ -366,22 +393,29 @@ public final class LoanEnumerations {
 
     public static LoanStatusEnumData status(final LoanStatus status) {
         return switch (status) {
-            case INVALID -> new LoanStatusEnumData(LoanStatus.INVALID.getValue().longValue(), LoanStatus.INVALID.getCode(), "Invalid");
-            case SUBMITTED_AND_PENDING_APPROVAL -> new LoanStatusEnumData(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
-                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
-            case APPROVED -> new LoanStatusEnumData(LoanStatus.APPROVED.getValue().longValue(), LoanStatus.APPROVED.getCode(), "Approved");
-            case ACTIVE -> new LoanStatusEnumData(LoanStatus.ACTIVE.getValue().longValue(), LoanStatus.ACTIVE.getCode(), "Active");
-            case REJECTED -> new LoanStatusEnumData(LoanStatus.REJECTED.getValue().longValue(), LoanStatus.REJECTED.getCode(), "Rejected");
+            case INVALID ->
+                    new LoanStatusEnumData(LoanStatus.INVALID.getValue().longValue(), LoanStatus.INVALID.getCode(), "Invalid");
+            case SUBMITTED_AND_PENDING_APPROVAL ->
+                    new LoanStatusEnumData(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
+                            LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
+            case APPROVED ->
+                    new LoanStatusEnumData(LoanStatus.APPROVED.getValue().longValue(), LoanStatus.APPROVED.getCode(), "Approved");
+            case ACTIVE ->
+                    new LoanStatusEnumData(LoanStatus.ACTIVE.getValue().longValue(), LoanStatus.ACTIVE.getCode(), "Active");
+            case REJECTED ->
+                    new LoanStatusEnumData(LoanStatus.REJECTED.getValue().longValue(), LoanStatus.REJECTED.getCode(), "Rejected");
             case WITHDRAWN_BY_CLIENT -> new LoanStatusEnumData(LoanStatus.WITHDRAWN_BY_CLIENT.getValue().longValue(),
                     LoanStatus.WITHDRAWN_BY_CLIENT.getCode(), "Withdrawn by applicant");
-            case CLOSED_OBLIGATIONS_MET -> new LoanStatusEnumData(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue().longValue(),
-                    LoanStatus.CLOSED_OBLIGATIONS_MET.getCode(), "Closed (obligations met)");
+            case CLOSED_OBLIGATIONS_MET ->
+                    new LoanStatusEnumData(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue().longValue(),
+                            LoanStatus.CLOSED_OBLIGATIONS_MET.getCode(), "Closed (obligations met)");
             case CLOSED_WRITTEN_OFF -> new LoanStatusEnumData(LoanStatus.CLOSED_WRITTEN_OFF.getValue().longValue(),
                     LoanStatus.CLOSED_WRITTEN_OFF.getCode(), "Closed (written off)");
             case CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT ->
-                new LoanStatusEnumData(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getValue().longValue(),
-                        LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getCode(), "Closed (rescheduled)");
-            case OVERPAID -> new LoanStatusEnumData(LoanStatus.OVERPAID.getValue().longValue(), LoanStatus.OVERPAID.getCode(), "Overpaid");
+                    new LoanStatusEnumData(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getValue().longValue(),
+                            LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getCode(), "Closed (rescheduled)");
+            case OVERPAID ->
+                    new LoanStatusEnumData(LoanStatus.OVERPAID.getValue().longValue(), LoanStatus.OVERPAID.getCode(), "Overpaid");
             case TRANSFER_IN_PROGRESS -> new LoanStatusEnumData(LoanStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
                     LoanStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
             case TRANSFER_ON_HOLD -> new LoanStatusEnumData(LoanStatus.TRANSFER_ON_HOLD.getValue().longValue(),
@@ -417,7 +451,7 @@ public final class LoanEnumerations {
             case REPAYMENT -> new EnumOptionData(LoanProductParamType.REPAYMENT.getValue().longValue(),
                     LoanProductParamType.REPAYMENT.getCode(), "repayment");
             default ->
-                new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(), LoanProductParamType.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(), LoanProductParamType.INVALID.getCode(), "Invalid");
         };
     }
 
@@ -431,27 +465,32 @@ public final class LoanEnumerations {
                     LoanTermVariationType.EMI_AMOUNT.getCode(), "emiAmount");
             case INTEREST_RATE -> new EnumOptionData(LoanTermVariationType.INTEREST_RATE.getValue().longValue(),
                     LoanTermVariationType.INTEREST_RATE.getCode(), "interestRate");
-            case DELETE_INSTALLMENT -> new EnumOptionData(LoanTermVariationType.DELETE_INSTALLMENT.getValue().longValue(),
-                    LoanTermVariationType.DELETE_INSTALLMENT.getCode(), "deleteInstallment");
+            case DELETE_INSTALLMENT ->
+                    new EnumOptionData(LoanTermVariationType.DELETE_INSTALLMENT.getValue().longValue(),
+                            LoanTermVariationType.DELETE_INSTALLMENT.getCode(), "deleteInstallment");
             case DUE_DATE -> new EnumOptionData(LoanTermVariationType.DUE_DATE.getValue().longValue(),
                     LoanTermVariationType.DUE_DATE.getCode(), "dueDate");
-            case INSERT_INSTALLMENT -> new EnumOptionData(LoanTermVariationType.INSERT_INSTALLMENT.getValue().longValue(),
-                    LoanTermVariationType.DUE_DATE.getCode(), "insertInstallment");
+            case INSERT_INSTALLMENT ->
+                    new EnumOptionData(LoanTermVariationType.INSERT_INSTALLMENT.getValue().longValue(),
+                            LoanTermVariationType.DUE_DATE.getCode(), "insertInstallment");
             case PRINCIPAL_AMOUNT -> new EnumOptionData(LoanTermVariationType.PRINCIPAL_AMOUNT.getValue().longValue(),
                     LoanTermVariationType.PRINCIPAL_AMOUNT.getCode(), "principalAmount");
             case GRACE_ON_INTEREST -> new EnumOptionData(LoanTermVariationType.GRACE_ON_INTEREST.getValue().longValue(),
                     LoanTermVariationType.GRACE_ON_INTEREST.getCode(), "graceOnInterest");
-            case GRACE_ON_PRINCIPAL -> new EnumOptionData(LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue().longValue(),
-                    LoanTermVariationType.GRACE_ON_PRINCIPAL.getCode(), "graceOnPrincipal");
-            case EXTEND_REPAYMENT_PERIOD -> new EnumOptionData(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue().longValue(),
-                    LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getCode(), "extendRepaymentPeriod");
+            case GRACE_ON_PRINCIPAL ->
+                    new EnumOptionData(LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue().longValue(),
+                            LoanTermVariationType.GRACE_ON_PRINCIPAL.getCode(), "graceOnPrincipal");
+            case EXTEND_REPAYMENT_PERIOD ->
+                    new EnumOptionData(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue().longValue(),
+                            LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getCode(), "extendRepaymentPeriod");
             case INTEREST_RATE_FROM_INSTALLMENT ->
-                new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
-                        LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
+                    new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
+                            LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
             case INTEREST_PAUSE -> new EnumOptionData(LoanTermVariationType.INTEREST_PAUSE.getValue().longValue(),
                     LoanTermVariationType.INTEREST_PAUSE.getCode(), "interestPause");
-            default -> new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(), LoanTermVariationType.INVALID.getCode(),
-                    "Invalid");
+            default ->
+                    new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(), LoanTermVariationType.INVALID.getCode(),
+                            "Invalid");
         };
     }
 
@@ -465,8 +504,9 @@ public final class LoanEnumerations {
                     InterestRecalculationCompoundingMethod.FEE.getCode(), "Fee");
             case INTEREST -> new EnumOptionData(InterestRecalculationCompoundingMethod.INTEREST.getValue().longValue(),
                     InterestRecalculationCompoundingMethod.INTEREST.getCode(), "Interest");
-            case INTEREST_AND_FEE -> new EnumOptionData(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getValue().longValue(),
-                    InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getCode(), "Fee and Interest");
+            case INTEREST_AND_FEE ->
+                    new EnumOptionData(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getValue().longValue(),
+                            InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getCode(), "Fee and Interest");
             default -> new EnumOptionData(InterestRecalculationCompoundingMethod.NONE.getValue().longValue(),
                     InterestRecalculationCompoundingMethod.NONE.getCode(), "None");
         };
@@ -511,17 +551,18 @@ public final class LoanEnumerations {
 
     public static EnumOptionData rescheduleStrategyType(final LoanRescheduleStrategyMethod type) {
         return switch (type) {
-            case REDUCE_EMI_AMOUNT -> new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getValue().longValue(),
-                    LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getCode(), "Reduce EMI amount");
+            case REDUCE_EMI_AMOUNT ->
+                    new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getValue().longValue(),
+                            LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getCode(), "Reduce EMI amount");
             case REDUCE_NUMBER_OF_INSTALLMENTS ->
-                new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getValue().longValue(),
-                        LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getCode(), "Reduce number of installments");
+                    new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getValue().longValue(),
+                            LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getCode(), "Reduce number of installments");
             case RESCHEDULE_NEXT_REPAYMENTS ->
-                new EnumOptionData(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getValue().longValue(),
-                        LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getCode(), "Reschedule next repayments");
+                    new EnumOptionData(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getValue().longValue(),
+                            LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getCode(), "Reschedule next repayments");
             case ADJUST_LAST_UNPAID_PERIOD ->
-                new EnumOptionData(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getValue().longValue(),
-                        LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getCode(), "Adjust last, unpaid period");
+                    new EnumOptionData(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getValue().longValue(),
+                            LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getCode(), "Adjust last, unpaid period");
             default -> new EnumOptionData(LoanRescheduleStrategyMethod.INVALID.getValue().longValue(),
                     LoanRescheduleStrategyMethod.INVALID.getCode(), "Invalid");
         };
@@ -537,8 +578,9 @@ public final class LoanEnumerations {
                     RecalculationFrequencyType.DAILY.getCode(), "Daily");
             case MONTHLY -> new EnumOptionData(RecalculationFrequencyType.MONTHLY.getValue().longValue(),
                     RecalculationFrequencyType.MONTHLY.getCode(), "Monthly");
-            case SAME_AS_REPAYMENT_PERIOD -> new EnumOptionData(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
-                    RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
+            case SAME_AS_REPAYMENT_PERIOD ->
+                    new EnumOptionData(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
+                            RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
             case WEEKLY -> new EnumOptionData(RecalculationFrequencyType.WEEKLY.getValue().longValue(),
                     RecalculationFrequencyType.WEEKLY.getCode(), "Weekly");
             default -> new EnumOptionData(RecalculationFrequencyType.INVALID.getValue().longValue(),
@@ -556,13 +598,13 @@ public final class LoanEnumerations {
             case TILL_PRE_CLOSURE_DATE:
                 optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue().longValue(),
                         LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getCode(), "Till Pre-Close Date");
-            break;
+                break;
             case TILL_REST_FREQUENCY_DATE:
                 optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue().longValue(),
                         LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getCode(), "Till Rest Frequency Date");
-            break;
+                break;
             case NONE:
-            break;
+                break;
         }
         return optionData;
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.client.models.QuestionData;
 import org.apache.fineract.client.models.ResponseData;
 import org.apache.fineract.client.models.SurveyData;
@@ -222,13 +223,13 @@ public class SurveyHelper {
 
     @Deprecated(forRemoval = true)
     public static Integer fulfilSurvey(final io.restassured.specification.RequestSpecification requestSpec,
-            final io.restassured.specification.ResponseSpecification responseSpec) {
+                                       final io.restassured.specification.ResponseSpecification responseSpec) {
         return fulfilSurvey(requestSpec, responseSpec, "04 March 2011");
     }
 
     @Deprecated(forRemoval = true)
     public static Integer fulfilSurvey(final io.restassured.specification.RequestSpecification requestSpec,
-            final io.restassured.specification.ResponseSpecification responseSpec, final String activationDate) {
+                                       final io.restassured.specification.ResponseSpecification responseSpec, final String activationDate) {
         LOG.info("---------------------------------FULFIL PPI ---------------------------------------------");
         final String FULFIL_SURVEY_URL = "/fineract-provider/api/v1/survey/ppi_kenya_2009/clientId?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, FULFIL_SURVEY_URL, getTestPPIAsJSON(), "clientId");
@@ -258,7 +259,7 @@ public class SurveyHelper {
 
     @Deprecated(forRemoval = true)
     public static void verifySurveyCreatedOnServer(final io.restassured.specification.RequestSpecification requestSpec,
-            final io.restassured.specification.ResponseSpecification responseSpec, final Integer generatedClientID) {
+                                                   final io.restassured.specification.ResponseSpecification responseSpec, final Integer generatedClientID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String SURVEY_URL = "/fineract-provider/api/v1/Survey/ppi_kenya_2009/clientid/entryId" + generatedClientID + "?"
                 + Utils.TENANT_IDENTIFIER;

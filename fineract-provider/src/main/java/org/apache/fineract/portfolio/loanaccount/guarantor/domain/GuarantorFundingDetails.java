@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,9 +26,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -64,7 +66,8 @@ public class GuarantorFundingDetails extends AbstractPersistableCustom<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantorFundingDetails", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GuarantorFundingTransaction> guarantorFundingTransactions = new ArrayList<>();
 
-    protected GuarantorFundingDetails() {}
+    protected GuarantorFundingDetails() {
+    }
 
     public GuarantorFundingDetails(final AccountAssociations accountAssociations, final Integer status, final BigDecimal amount) {
         this.accountAssociations = accountAssociations;

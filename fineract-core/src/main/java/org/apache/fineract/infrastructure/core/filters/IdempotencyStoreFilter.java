@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,9 +22,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -36,6 +33,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Slf4j
 public class IdempotencyStoreFilter extends OncePerRequestFilter {
@@ -46,8 +47,17 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         Mutable<ContentCachingResponseWrapper> wrapper = new MutableObject<>();
+        String headerName = fineractProperties.getIdempotencyKeyHeaderName();
+        String idempotencyKey = request.getHeader(headerName);
+
+        if (headerName != null && !headerName.isBlank()
+                && (idempotencyKey == null || idempotencyKey.isBlank())) {
+
+            log.debug("Missing {} header", headerName);
+        }
+
         if (helper.isAllowedContentTypeRequest(request)) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));
         }
@@ -60,7 +70,7 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
                 && helper.isAllowedContentTypeResponse(response);
         if (isSuccessWithoutStored) {
             helper.storeCommandResult(response.getStatus(), Optional.ofNullable(wrapper.get())
-                    .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
+                            .map(ContentCachingResponseWrapper::getContentAsByteArray).map(s -> new String(s, StandardCharsets.UTF_8)).orElse(null),
                     commandId.get());
         }
         if (wrapper.get() != null) {

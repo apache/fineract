@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,10 +27,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
@@ -92,17 +94,18 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom<Long
     /**
      * LoanRepaymentScheduleHistory constructor
      **/
-    protected LoanRepaymentScheduleHistory() {}
+    protected LoanRepaymentScheduleHistory() {
+    }
 
     /**
      * LoanRepaymentScheduleHistory constructor
      **/
     private LoanRepaymentScheduleHistory(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
-            final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
-            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
-            final OffsetDateTime lastModifiedDate) {
+                                         final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+                                         final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
+                                         final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
+                                         final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
+                                         final OffsetDateTime lastModifiedDate) {
 
         this.loan = loan;
         this.loanRescheduleRequest = loanRescheduleRequest;
@@ -126,11 +129,11 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom<Long
      * @return an instance of the LoanRepaymentScheduleHistory class
      **/
     public static LoanRepaymentScheduleHistory instance(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
-            final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
-            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
-            final OffsetDateTime lastModifiedDate) {
+                                                        final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+                                                        final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
+                                                        final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
+                                                        final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
+                                                        final OffsetDateTime lastModifiedDate) {
 
         return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, fromDate, dueDate, principal,
                 interestCharged, feeChargesCharged, penaltyCharges, oldCreatedOnDate, createdByUser, lastModifiedByUser,

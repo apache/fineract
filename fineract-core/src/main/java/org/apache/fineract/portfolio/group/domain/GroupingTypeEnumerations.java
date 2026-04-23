@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -37,27 +37,27 @@ public final class GroupingTypeEnumerations {
             case INVALID:
                 optionData = new EnumOptionData(GroupingTypeStatus.INVALID.getValue().longValue(), GroupingTypeStatus.INVALID.getCode(),
                         "Invalid");
-            break;
+                break;
             case PENDING:
                 optionData = new EnumOptionData(GroupingTypeStatus.PENDING.getValue().longValue(), GroupingTypeStatus.PENDING.getCode(),
                         "Pending");
-            break;
+                break;
             case ACTIVE:
                 optionData = new EnumOptionData(GroupingTypeStatus.ACTIVE.getValue().longValue(), GroupingTypeStatus.ACTIVE.getCode(),
                         "Active");
-            break;
+                break;
             case CLOSED:
                 optionData = new EnumOptionData(GroupingTypeStatus.CLOSED.getValue().longValue(), GroupingTypeStatus.CLOSED.getCode(),
                         "Closed");
-            break;
+                break;
             case TRANSFER_IN_PROGRESS:
                 optionData = new EnumOptionData(GroupingTypeStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
                         GroupingTypeStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
-            break;
+                break;
             case TRANSFER_ON_HOLD:
                 optionData = new EnumOptionData(GroupingTypeStatus.TRANSFER_ON_HOLD.getValue().longValue(),
                         GroupingTypeStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
-            break;
+                break;
         }
 
         return optionData;

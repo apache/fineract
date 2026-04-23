@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.chartofaccounts;
 
 import com.google.common.base.Splitter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
@@ -114,22 +116,22 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                 ChartOfAccountsConstants.TAG_COL, ChartOfAccountsConstants.TAG_COL);
         CellRangeAddressList officeNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 ChartOfAccountsConstants.OFFICE_COL, ChartOfAccountsConstants.OFFICE_COL); // validation for opening bal
-                                                                                           // office column
+        // office column
         CellRangeAddressList currencyCodeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 ChartOfAccountsConstants.CURRENCY_CODE, ChartOfAccountsConstants.CURRENCY_CODE);// validation for
-                                                                                                // currency
-                                                                                                // code for opening
-                                                                                                // balance
+        // currency
+        // code for opening
+        // balance
 
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) chartOfAccountsSheet);
         setNames(chartOfAccountsSheet, accountTypesNoDuplicatesList, offices);
 
         DataValidationConstraint accountTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { GLAccountType.ASSET.toString(), GLAccountType.LIABILITY.toString(),
-                        GLAccountType.EQUITY.toString(), GLAccountType.INCOME.toString(), GLAccountType.EXPENSE.toString() });
+                .createExplicitListConstraint(new String[]{GLAccountType.ASSET.toString(), GLAccountType.LIABILITY.toString(),
+                        GLAccountType.EQUITY.toString(), GLAccountType.INCOME.toString(), GLAccountType.EXPENSE.toString()});
         DataValidationConstraint accountUsageConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { GLAccountUsage.DETAIL.toString(), GLAccountUsage.HEADER.toString() });
-        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+                .createExplicitListConstraint(new String[]{GLAccountUsage.DETAIL.toString(), GLAccountUsage.HEADER.toString()});
+        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
         DataValidationConstraint parentConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"AccountName_\",$A1))");
         DataValidationConstraint tagConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Tags_\",$A1))");
@@ -247,7 +249,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                         rowIndex++;
                     }
                 }
-                accountTypeToBeginEndIndexesofAccountNames.put(accountTypeIndex++, new Integer[] { startIndex, rowIndex });
+                accountTypeToBeginEndIndexesofAccountNames.put(accountTypeIndex++, new Integer[]{startIndex, rowIndex});
             } else {
                 accountTypeIndex++;
             }

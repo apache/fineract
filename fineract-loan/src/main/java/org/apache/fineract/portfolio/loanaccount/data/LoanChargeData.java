@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -103,20 +104,20 @@ public class LoanChargeData {
      * used when populating with details from charge definition (for crud on charges)
      */
     public static LoanChargeData newLoanChargeDetails(final Long chargeId, final String name, final CurrencyData currency,
-            final BigDecimal amount, final BigDecimal percentage, final EnumOptionData chargeTimeType,
-            final EnumOptionData chargeCalculationType, final boolean penalty, final EnumOptionData chargePaymentMode,
-            final BigDecimal minCap, final BigDecimal maxCap, final ExternalId externalId) {
+                                                      final BigDecimal amount, final BigDecimal percentage, final EnumOptionData chargeTimeType,
+                                                      final EnumOptionData chargeCalculationType, final boolean penalty, final EnumOptionData chargePaymentMode,
+                                                      final BigDecimal minCap, final BigDecimal maxCap, final ExternalId externalId) {
         return new LoanChargeData(null, chargeId, name, currency, amount, percentage, chargeTimeType, chargeCalculationType, null, penalty,
                 chargePaymentMode, false, false, null, ExternalId.empty(), minCap, maxCap, null, null, externalId);
     }
 
     public LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
-            final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
-            final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate submittedOnDate,
-            final LocalDate dueDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
-            final BigDecimal amountPercentageAppliedTo, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
-            final boolean waived, final Long loanId, final ExternalId externalLoanId, final BigDecimal minCap, final BigDecimal maxCap,
-            final BigDecimal amountOrPercentage, List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
+                          final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
+                          final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate submittedOnDate,
+                          final LocalDate dueDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
+                          final BigDecimal amountPercentageAppliedTo, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
+                          final boolean waived, final Long loanId, final ExternalId externalLoanId, final BigDecimal minCap, final BigDecimal maxCap,
+                          final BigDecimal amountOrPercentage, List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -159,10 +160,10 @@ public class LoanChargeData {
     }
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
-            final BigDecimal percentage, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
-            final List<ChargeData> chargeOptions, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
-            final boolean waived, final Long loanId, final ExternalId externalLoanId, final BigDecimal minCap, final BigDecimal maxCap,
-            final BigDecimal amountOrPercentage, List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
+                           final BigDecimal percentage, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
+                           final List<ChargeData> chargeOptions, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
+                           final boolean waived, final Long loanId, final ExternalId externalLoanId, final BigDecimal minCap, final BigDecimal maxCap,
+                           final BigDecimal amountOrPercentage, List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -206,8 +207,8 @@ public class LoanChargeData {
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final LocalDate submittedOnDate, final BigDecimal amountOutstanding,
-            EnumOptionData chargeTimeType, final Long loanId, final ExternalId externalLoanId,
-            List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
+                          EnumOptionData chargeTimeType, final Long loanId, final ExternalId externalLoanId,
+                          List<LoanInstallmentChargeData> installmentChargeData, final ExternalId externalId) {
         this.id = id;
         this.chargeId = null;
         this.name = null;
@@ -241,8 +242,8 @@ public class LoanChargeData {
     }
 
     public LoanChargeData(final Long id, final Long chargeId, final LocalDate dueAsOfDate, final LocalDate submittedOnDate,
-            EnumOptionData chargeTimeType, final BigDecimal amount, final BigDecimal amountAccrued, final BigDecimal amountWaived,
-            final boolean penalty, final ExternalId externalId) {
+                          EnumOptionData chargeTimeType, final BigDecimal amount, final BigDecimal amountAccrued, final BigDecimal amountWaived,
+                          final boolean penalty, final ExternalId externalId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = null;
@@ -342,7 +343,7 @@ public class LoanChargeData {
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amount, final EnumOptionData chargeCalculationType,
-            final EnumOptionData chargeTimeType) {
+                          final EnumOptionData chargeTimeType) {
         this.id = null;
         this.chargeId = id;
         this.name = null;

@@ -28,7 +28,8 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="loan_product_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="m_loan_product_payment_allocation_rule_fk" referencedTableName="m_product_loan" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="m_loan_product_payment_allocation_rule_fk"
+                             referencedTableName="m_product_loan" referencedColumnNames="id"/>
             </column>
             <column name="transaction_type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -51,7 +52,8 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="loan_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="m_loan_payment_allocation_rule_fk" referencedTableName="m_loan" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="m_loan_payment_allocation_rule_fk"
+                             referencedTableName="m_loan" referencedColumnNames="id"/>
             </column>
             <column name="transaction_type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -107,21 +109,28 @@
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="1002-3">
-        <addUniqueConstraint tableName="m_loan_product_payment_allocation_rule" columnNames="loan_product_id,transaction_type" constraintName="uq_m_loan_product_payment_allocation_rule"/>
-        <addUniqueConstraint tableName="m_loan_payment_allocation_rule" columnNames="loan_id,transaction_type" constraintName="uq_m_loan_payment_allocation_rule"/>
+        <addUniqueConstraint tableName="m_loan_product_payment_allocation_rule"
+                             columnNames="loan_product_id,transaction_type"
+                             constraintName="uq_m_loan_product_payment_allocation_rule"/>
+        <addUniqueConstraint tableName="m_loan_payment_allocation_rule" columnNames="loan_id,transaction_type"
+                             constraintName="uq_m_loan_payment_allocation_rule"/>
     </changeSet>
     <changeSet author="fineract" id="1002-4">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_product_payment_allocation_rule"
-                                 constraintName="FK_loan_product_payment_allocation_rule_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_product_payment_allocation_rule_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_product_payment_allocation_rule"
-                                 constraintName="FK_loan_product_payment_allocation_rule_last_modified_by" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="last_modified_by"
+                                 baseTableName="m_loan_product_payment_allocation_rule"
+                                 constraintName="FK_loan_product_payment_allocation_rule_last_modified_by"
+                                 deferrable="false"
                                  initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_payment_allocation_rule"
-                                 constraintName="FK_loan_payment_allocation_rule_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_payment_allocation_rule_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_payment_allocation_rule"
@@ -131,7 +140,8 @@
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
     <changeSet id="fineract" author="1002-5">
-        <createIndex tableName="m_loan_product_payment_allocation_rule" indexName="IND_loan_product_payment_allocation_rule_loan_product_id">
+        <createIndex tableName="m_loan_product_payment_allocation_rule"
+                     indexName="IND_loan_product_payment_allocation_rule_loan_product_id">
             <column name="loan_product_id"/>
         </createIndex>
         <createIndex tableName="m_loan_payment_allocation_rule" indexName="IND_loan_payment_allocation_rule_loan_id">

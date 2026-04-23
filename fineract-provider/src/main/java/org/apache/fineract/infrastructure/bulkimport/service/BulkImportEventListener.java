@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.service;
 
 import java.util.function.Supplier;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandDispatcher;
@@ -57,27 +58,36 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
             final ImportHandler importHandler = switch (entityType) {
                 case OFFICES -> this.applicationContext.getBean("officeImportHandler", ImportHandler.class);
                 case CENTERS -> this.applicationContext.getBean("centerImportHandler", ImportHandler.class);
-                case CHART_OF_ACCOUNTS -> this.applicationContext.getBean("chartOfAccountsImportHandler", ImportHandler.class);
-                case CLIENTS_ENTITY -> this.applicationContext.getBean("clientEntityImportHandler", ImportHandler.class);
-                case CLIENTS_PERSON -> this.applicationContext.getBean("clientPersonImportHandler", ImportHandler.class);
-                case FIXED_DEPOSIT_ACCOUNTS -> this.applicationContext.getBean("fixedDepositImportHandler", ImportHandler.class);
+                case CHART_OF_ACCOUNTS ->
+                        this.applicationContext.getBean("chartOfAccountsImportHandler", ImportHandler.class);
+                case CLIENTS_ENTITY ->
+                        this.applicationContext.getBean("clientEntityImportHandler", ImportHandler.class);
+                case CLIENTS_PERSON ->
+                        this.applicationContext.getBean("clientPersonImportHandler", ImportHandler.class);
+                case FIXED_DEPOSIT_ACCOUNTS ->
+                        this.applicationContext.getBean("fixedDepositImportHandler", ImportHandler.class);
                 case FIXED_DEPOSIT_TRANSACTIONS ->
-                    this.applicationContext.getBean("fixedDepositTransactionImportHandler", ImportHandler.class);
+                        this.applicationContext.getBean("fixedDepositTransactionImportHandler", ImportHandler.class);
                 case GROUPS -> this.applicationContext.getBean("groupImportHandler", ImportHandler.class);
                 case GUARANTORS -> this.applicationContext.getBean("guarantorImportHandler", ImportHandler.class);
-                case GL_JOURNAL_ENTRIES -> this.applicationContext.getBean("journalEntriesImportHandler", ImportHandler.class);
+                case GL_JOURNAL_ENTRIES ->
+                        this.applicationContext.getBean("journalEntriesImportHandler", ImportHandler.class);
                 case LOANS -> this.applicationContext.getBean("loanImportHandler", ImportHandler.class);
-                case LOAN_TRANSACTIONS -> this.applicationContext.getBean("loanRepaymentImportHandler", ImportHandler.class);
-                case RECURRING_DEPOSIT_ACCOUNTS -> this.applicationContext.getBean("recurringDepositImportHandler", ImportHandler.class);
+                case LOAN_TRANSACTIONS ->
+                        this.applicationContext.getBean("loanRepaymentImportHandler", ImportHandler.class);
+                case RECURRING_DEPOSIT_ACCOUNTS ->
+                        this.applicationContext.getBean("recurringDepositImportHandler", ImportHandler.class);
                 case RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS ->
-                    this.applicationContext.getBean("recurringDepositTransactionImportHandler", ImportHandler.class);
+                        this.applicationContext.getBean("recurringDepositTransactionImportHandler", ImportHandler.class);
                 case SAVINGS_ACCOUNT -> this.applicationContext.getBean("savingsImportHandler", ImportHandler.class);
-                case SAVINGS_TRANSACTIONS -> this.applicationContext.getBean("savingsTransactionImportHandler", ImportHandler.class);
-                case SHARE_ACCOUNTS -> this.applicationContext.getBean("sharedAccountImportHandler", ImportHandler.class);
+                case SAVINGS_TRANSACTIONS ->
+                        this.applicationContext.getBean("savingsTransactionImportHandler", ImportHandler.class);
+                case SHARE_ACCOUNTS ->
+                        this.applicationContext.getBean("sharedAccountImportHandler", ImportHandler.class);
                 case STAFF -> this.applicationContext.getBean("staffImportHandler", ImportHandler.class);
                 case USERS -> this.applicationContext.getBean("userImportHandler", ImportHandler.class);
                 default ->
-                    throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
+                        throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
             };
 
             final var count = importHandler.process(event.getWorkbook(), event.getLocale(), event.getDateFormat());

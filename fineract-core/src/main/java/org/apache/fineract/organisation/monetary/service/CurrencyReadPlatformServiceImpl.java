@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.monetary.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -51,7 +52,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
     public CurrencyData retrieveCurrency(final String code) {
         final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c  where c.code = ? order by c.name";
 
-        return this.jdbcTemplate.queryForObject(sql, this.currencyRowMapper, new Object[] { code }); // NOSONAR
+        return this.jdbcTemplate.queryForObject(sql, this.currencyRowMapper, new Object[]{code}); // NOSONAR
     }
 
     private static final class CurrencyRowMapper implements RowMapper<CurrencyData> {

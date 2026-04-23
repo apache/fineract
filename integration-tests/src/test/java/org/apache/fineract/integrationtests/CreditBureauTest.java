@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,12 +28,14 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.integrationtests.common.CreditBureauConfigurationHelper;
 import org.apache.fineract.integrationtests.common.CreditBureauIntegrationHelper;
@@ -69,7 +71,8 @@ public class CreditBureauTest {
             CreditBureauConfigurationHelper.updateOrganisationCreditBureau("1", true);
         }
         String configJson = CreditBureauConfigurationHelper.getCreditBureauConfiguration(1L);
-        List<Map<String, Object>> configurations = new Gson().fromJson(configJson, new TypeToken<List<Map<String, Object>>>() {}.getType());
+        List<Map<String, Object>> configurations = new Gson().fromJson(configJson, new TypeToken<List<Map<String, Object>>>() {
+        }.getType());
         Assertions.assertNotNull(configurations);
         Map<String, Long> currentConfiguration = configurations.stream()
                 .collect(Collectors.toMap(k -> String.valueOf(k.get("configurationKey")).toUpperCase(),

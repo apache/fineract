@@ -23,38 +23,39 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="command-00002" context="mysql">
-        <renameTable oldTableName="command" newTableName="m_command" />
+        <renameTable oldTableName="command" newTableName="m_command"/>
         <addColumn tableName="m_command">
-            <column name="updated_at" type="datetime" />
-            <column name="executed_at" type="datetime" />
-            <column name="approved_at" type="datetime" />
-            <column name="rejected_at" type="datetime" />
+            <column name="updated_at" type="datetime"/>
+            <column name="executed_at" type="datetime"/>
+            <column name="approved_at" type="datetime"/>
+            <column name="rejected_at" type="datetime"/>
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="command-00003" context="postgresql">
         <addColumn tableName="m_command">
-            <column name="updated_at" type="timestamp with time zone" />
-            <column name="executed_at" type="timestamp with time zone" />
-            <column name="approved_at" type="timestamp with time zone" />
-            <column name="rejected_at" type="timestamp with time zone" />
+            <column name="updated_at" type="timestamp with time zone"/>
+            <column name="executed_at" type="timestamp with time zone"/>
+            <column name="approved_at" type="timestamp with time zone"/>
+            <column name="rejected_at" type="timestamp with time zone"/>
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="command-00004" context="postgresql,mysql">
-        <renameColumn tableName="m_command" oldColumnName="username" newColumnName="initiated_by_username" columnDataType="varchar(255)" />
-        <renameColumn tableName="m_command" oldColumnName="payload" newColumnName="request" columnDataType="text" />
+        <renameColumn tableName="m_command" oldColumnName="username" newColumnName="initiated_by_username"
+                      columnDataType="varchar(255)"/>
+        <renameColumn tableName="m_command" oldColumnName="payload" newColumnName="request" columnDataType="text"/>
 
         <addColumn tableName="m_command">
-            <column name="idempotency_key" type="varchar(255)" />
-            <column name="executed_by_username" type="varchar(255)" />
-            <column name="approved_by_username" type="varchar(255)" />
-            <column name="rejected_by_username" type="varchar(255)" />
-            <column name="ip_address" type="varchar(255)" />
-            <column name="state" type="varchar(255)" />
-            <column name="response" type="text" />
-            <column name="error" type="text" />
+            <column name="idempotency_key" type="varchar(255)"/>
+            <column name="executed_by_username" type="varchar(255)"/>
+            <column name="approved_by_username" type="varchar(255)"/>
+            <column name="rejected_by_username" type="varchar(255)"/>
+            <column name="ip_address" type="varchar(255)"/>
+            <column name="state" type="varchar(255)"/>
+            <column name="response" type="text"/>
+            <column name="error" type="text"/>
         </addColumn>
         <createIndex tableName="m_command" indexName="m_command_idempotency_key_index">
-            <column name="idempotency_key" />
+            <column name="idempotency_key"/>
         </createIndex>
     </changeSet>
 </databaseChangeLog>

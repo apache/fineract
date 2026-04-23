@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,10 +38,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
@@ -72,8 +74,8 @@ public class InteropRequestData {
     private List<ExtensionData> extensionList;
 
     protected InteropRequestData(@NotNull String transactionCode, String requestCode, @NotNull String accountId, @NotNull MoneyData amount,
-            @NotNull InteropTransactionRole transactionRole, InteropTransactionTypeData transactionType, String note, GeoCodeData geoCode,
-            LocalDateTime expiration, List<ExtensionData> extensionList) {
+                                 @NotNull InteropTransactionRole transactionRole, InteropTransactionTypeData transactionType, String note, GeoCodeData geoCode,
+                                 LocalDateTime expiration, List<ExtensionData> extensionList) {
         this.transactionCode = transactionCode;
         this.requestCode = requestCode;
         this.accountId = accountId;
@@ -87,7 +89,7 @@ public class InteropRequestData {
     }
 
     protected InteropRequestData(@NotNull String transactionCode, @NotNull String accountId, @NotNull MoneyData amount,
-            @NotNull InteropTransactionRole transactionRole) {
+                                 @NotNull InteropTransactionRole transactionRole) {
         this(transactionCode, null, accountId, amount, transactionRole, null, null, null, null, null);
     }
 
@@ -160,7 +162,7 @@ public class InteropRequestData {
     }
 
     public static InteropRequestData validateAndParse(final DataValidatorBuilder dataValidator, JsonObject element,
-            FromJsonHelper jsonHelper) {
+                                                      FromJsonHelper jsonHelper) {
         if (element == null) {
             return null;
         }
@@ -213,6 +215,6 @@ public class InteropRequestData {
 
         return dataValidator.hasError() ? null
                 : new InteropRequestData(transactionCode, requestCode, accountId, amount, transactionRole, transactionType, note, geoCode,
-                        expiration, extensionList);
+                expiration, extensionList);
     }
 }

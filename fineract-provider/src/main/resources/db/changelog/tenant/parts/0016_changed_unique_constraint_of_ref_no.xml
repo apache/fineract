@@ -23,7 +23,8 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1" context="postgresql">
-        <dropUniqueConstraint tableName="m_savings_account_transaction" constraintName="m_savings_account_transaction_ref_no_key"/>
+        <dropUniqueConstraint tableName="m_savings_account_transaction"
+                              constraintName="m_savings_account_transaction_ref_no_key"/>
     </changeSet>
     <changeSet author="fineract" id="1" context="mysql">
         <dropUniqueConstraint tableName="m_savings_account_transaction" constraintName="ref_no"/>

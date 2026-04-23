@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -110,9 +112,9 @@ public class ShareAccountDataSerializer {
 
     @Autowired
     public ShareAccountDataSerializer(final PlatformSecurityContext platformSecurityContext, final FromJsonHelper fromApiJsonHelper,
-            final ChargeRepositoryWrapper chargeRepository, final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final ShareProductRepositoryWrapper shareProductRepository,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService) {
+                                      final ChargeRepositoryWrapper chargeRepository, final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+                                      final ClientRepositoryWrapper clientRepositoryWrapper, final ShareProductRepositoryWrapper shareProductRepository,
+                                      final SavingsAccountReadPlatformService savingsAccountReadPlatformService) {
         this.platformSecurityContext = platformSecurityContext;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.chargeRepository = chargeRepository;
@@ -127,7 +129,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -269,7 +272,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -462,7 +466,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), approvalParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -499,7 +504,7 @@ public class ShareAccountDataSerializer {
     }
 
     private void validateTotalSubsribedShares(final ShareAccount account, final ShareAccountTransaction transaction,
-            final DataValidatorBuilder baseDataValidator) {
+                                              final DataValidatorBuilder baseDataValidator) {
         Long totalSubsribedShares = account.getShareProduct().getSubscribedShares();
         Long requested = Long.valueOf(0);
         if (transaction.isActive() && transaction.isPendingForApprovalTransaction()) {
@@ -545,7 +550,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), activateParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -602,7 +608,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), activateParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -687,7 +694,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -728,7 +736,7 @@ public class ShareAccountDataSerializer {
     }
 
     private boolean isTransactionBeforeExistingTransactions(LocalDate requestedDate, boolean isTransactionBeforeExistingTransactions,
-            ShareAccount shareAccount) {
+                                                            ShareAccount shareAccount) {
         Collection<ShareAccountTransaction> activeTransactions = shareAccount.getShareAccountTransactions().stream()
                 .filter(tr -> tr.isActive() && !tr.isChargeTransaction() && !tr.isPurchaseRejectedTransaction()).toList();
 
@@ -764,7 +772,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -817,7 +826,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         JsonElement element = jsonCommand.parsedJson();
         final ArrayList<Long> purchasedShares = new ArrayList<>();
@@ -843,7 +853,7 @@ public class ShareAccountDataSerializer {
     }
 
     private void updateTotalChargeDerivedForAdditonalSharesReject(final ShareAccount shareAccount,
-            final ShareAccountTransaction transaction) {
+                                                                  final ShareAccountTransaction transaction) {
         Set<ShareAccountChargePaidBy> paidBySet = transaction.getChargesPaidBy();
         if (paidBySet != null && !paidBySet.isEmpty()) {
             for (ShareAccountChargePaidBy chargePaidBy : paidBySet) {
@@ -864,7 +874,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
@@ -895,7 +906,7 @@ public class ShareAccountDataSerializer {
     }
 
     private void validateRedeemRequest(final ShareAccount account, ShareAccountTransaction redeemTransaction,
-            final DataValidatorBuilder baseDataValidator, final List<ApiParameterError> dataValidationErrors) {
+                                       final DataValidatorBuilder baseDataValidator, final List<ApiParameterError> dataValidationErrors) {
 
         if (account.getTotalApprovedShares() < redeemTransaction.getTotalShares()) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname)
@@ -961,21 +972,21 @@ public class ShareAccountDataSerializer {
         if (periodType != null) {
             switch (periodType) {
                 case INVALID: // It never comes in to this state.
-                break;
+                    break;
                 case DAYS:
                     lockinDate = purchaseDate.plusDays(lockinPeriod);
-                break;
+                    break;
                 case WEEKS:
                     lockinDate = purchaseDate.plusWeeks(lockinPeriod);
-                break;
+                    break;
                 case MONTHS:
                     lockinDate = purchaseDate.plusMonths(lockinPeriod);
-                break;
+                    break;
                 case YEARS:
                     lockinDate = purchaseDate.plusYears(lockinPeriod);
-                break;
+                    break;
                 case WHOLE_TERM: // Never comes in to this state.
-                break;
+                    break;
             }
         }
         return lockinDate;
@@ -1011,7 +1022,8 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), closeParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");

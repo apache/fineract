@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,7 +22,9 @@ import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
+
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,7 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
-            final String fromAccountType, final String toAccountType, final String transferAmount) {
+                        final String fromAccountType, final String toAccountType, final String transferAmount) {
 
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
@@ -90,7 +92,7 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer accountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+                                   final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
@@ -105,7 +107,7 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object nonExistentAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+                                             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
@@ -122,7 +124,7 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object insufficientBalanceAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+                                                     final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
@@ -139,7 +141,7 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object invalidAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+                                         final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
@@ -156,7 +158,7 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object accountTransferWithInvalidDate(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+                                                 final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(ACCOUNT_TRANSFER_INVALID_DATE) //
@@ -171,8 +173,8 @@ public class AccountTransferHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId,
-            final Integer toClientId, final Integer toAccountId, final String fromAccountType, final String toAccountType,
-            final String transferAmount) {
+                                        final Integer toClientId, final Integer toAccountId, final String fromAccountType, final String toAccountType,
+                                        final String transferAmount) {
         LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(date) //

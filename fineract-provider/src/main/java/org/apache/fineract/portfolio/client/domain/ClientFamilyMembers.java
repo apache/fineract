@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,7 +24,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
@@ -77,8 +79,8 @@ public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
     private LocalDate dateOfBirth;
 
     private ClientFamilyMembers(final Client client, final String firstName, final String middleName, final String lastName,
-            final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
+                                final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
+                                final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
 
         this.client = client;
         this.firstName = firstName;
@@ -100,8 +102,8 @@ public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
     }
 
     public static ClientFamilyMembers fromJson(final Client client, final String firstName, final String middleName, final String lastName,
-            final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
+                                               final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
+                                               final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
         return new ClientFamilyMembers(client, firstName, middleName, lastName, qualification, mobileNumber, age, isDependent, relationship,
                 maritalStatus, gender, dateOfBirth, profession);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain.interest;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -34,7 +35,7 @@ public class EndOfDayBalance {
     private final int numberOfDays;
 
     public static EndOfDayBalance from(final LocalDate date, final Money openingBalance, final Money endOfDayBalance,
-            final int numberOfDays) {
+                                       final int numberOfDays) {
         return new EndOfDayBalance(date, openingBalance, endOfDayBalance, numberOfDays);
     }
 
@@ -61,8 +62,8 @@ public class EndOfDayBalance {
     }
 
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
-            final BigDecimal minOverdraftForInterestCalculation) {
+                                                 final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+                                                 final BigDecimal minOverdraftForInterestCalculation) {
 
         BigDecimal interest = BigDecimal.ZERO.setScale(9, MoneyHelper.getRoundingMode());
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
@@ -95,8 +96,8 @@ public class EndOfDayBalance {
      * nominalInterestRateAsFraction x 1/365 n = number of periods rate is compounded
      */
     public BigDecimal calculateInterestOnBalanceAndInterest(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
-            final BigDecimal minOverdraftForInterestCalculation) {
+                                                            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+                                                            final BigDecimal minOverdraftForInterestCalculation) {
         final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
 
         final BigDecimal presentValue = this.endOfDayBalance.getAmount().add(interestToCompound);

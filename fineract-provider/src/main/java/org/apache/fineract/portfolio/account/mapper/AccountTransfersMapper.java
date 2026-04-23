@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -73,7 +74,8 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
             left join m_loan_transaction fromloantran on fromloantran.id = att.from_savings_transaction_id
             left join m_loan_transaction toloantran on toloantran.id = att.to_savings_transaction_id\s""";
 
-    public AccountTransfersMapper() {}
+    public AccountTransfersMapper() {
+    }
 
     public String schema() {
         return ACCOUNT_TRANSFER_SCHEMA;

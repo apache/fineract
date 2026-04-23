@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -49,8 +50,8 @@ public final class TaxComponentData implements Serializable {
     private final Collection<EnumOptionData> glAccountTypeOptions;
 
     public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
-            final EnumOptionData debitAccountType, final GLAccountData debitAccount, final EnumOptionData creditAccountType,
-            final GLAccountData creditAccount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
+                                            final EnumOptionData debitAccountType, final GLAccountData debitAccount, final EnumOptionData creditAccountType,
+                                            final GLAccountData creditAccount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
@@ -72,7 +73,7 @@ public final class TaxComponentData implements Serializable {
     }
 
     public static TaxComponentData template(final Map<String, List<GLAccountData>> glAccountOptions,
-            final Collection<EnumOptionData> glAccountTypeOptions) {
+                                            final Collection<EnumOptionData> glAccountTypeOptions) {
         final Long id = null;
         final String name = null;
         final BigDecimal percentage = null;
@@ -87,7 +88,7 @@ public final class TaxComponentData implements Serializable {
     }
 
     private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
-            final GLAccountData creditAccount) {
+                             final GLAccountData creditAccount) {
         this.id = id;
         this.percentage = percentage;
         this.name = null;
@@ -102,7 +103,7 @@ public final class TaxComponentData implements Serializable {
     }
 
     public static TaxComponentData createTaxComponent(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
-            final GLAccountData creditAccount) {
+                                                      final GLAccountData creditAccount) {
         return new TaxComponentData(id, percentage, debitAccount, creditAccount);
     }
 

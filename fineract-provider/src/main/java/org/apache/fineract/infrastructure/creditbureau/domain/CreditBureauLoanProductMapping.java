@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
-@SuppressWarnings({ "MemberName" })
+@SuppressWarnings({"MemberName"})
 @Entity
 @Table(name = "m_creditbureau_loanproduct_mapping")
 @Getter
@@ -61,7 +61,7 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Lo
     private LoanProduct loanProduct;
 
     public static CreditBureauLoanProductMapping fromJson(final JsonCommand command, OrganisationCreditBureau organisation_creditbureau,
-            LoanProduct loanProduct) {
+                                                          LoanProduct loanProduct) {
         Boolean isCreditCheckMandatory = false;
         Boolean skipCreditCheckInFailure = false;
         Integer stalePeriod = -1;

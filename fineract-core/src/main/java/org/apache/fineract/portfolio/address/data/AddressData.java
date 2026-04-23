@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
@@ -81,7 +82,7 @@ public class AddressData implements Serializable {
     private final Collection<CodeValueData> addressTypeIdOptions;
 
     public AddressData(Long addressTypeId, String street, String addressLine1, String addressLine2, String addressLine3, String city,
-            String postalCode, Boolean isActive, Long stateProvinceId, Long countryId) {
+                       String postalCode, Boolean isActive, Long stateProvinceId, Long countryId) {
 
         this.addressTypeId = addressTypeId;
         this.isActive = isActive;
@@ -112,12 +113,12 @@ public class AddressData implements Serializable {
     }
 
     private AddressData(final String addressType, final Long clientID, final Long addressId, final Long addressTypeId,
-            final Boolean is_active, final String street, final String addressLine1, final String addressLine2, final String addressLine3,
-            final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
-            final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
-            final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
-            final LocalDate updatedOn, final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> addressTypeIdOptions) {
+                        final Boolean is_active, final String street, final String addressLine1, final String addressLine2, final String addressLine3,
+                        final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
+                        final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
+                        final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
+                        final LocalDate updatedOn, final Collection<CodeValueData> countryIdOptions,
+                        final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> addressTypeIdOptions) {
         this.addressType = addressType;
         this.clientID = clientID;
         this.addressId = addressId;
@@ -147,11 +148,11 @@ public class AddressData implements Serializable {
     }
 
     public static AddressData instance(final String addressType, final Long clientID, final Long addressId, final Long addressTypeId,
-            final Boolean is_active, final String street, final String addressLine1, final String addressLine2, final String addressLine3,
-            final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
-            final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
-            final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
-            final LocalDate updatedOn) {
+                                       final Boolean is_active, final String street, final String addressLine1, final String addressLine2, final String addressLine3,
+                                       final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
+                                       final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
+                                       final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
+                                       final LocalDate updatedOn) {
 
         return new AddressData(addressType, clientID, addressId, addressTypeId, is_active, street, addressLine1, addressLine2, addressLine3,
                 townVillage, city, countyDistrict, stateProvinceId, countryId, stateName, countryName, postalCode, latitude, longitude,
@@ -159,16 +160,16 @@ public class AddressData implements Serializable {
     }
 
     public static AddressData instance1(final Long addressId, final String street, final String addressLine1, final String addressLine2,
-            final String addressLine3, final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId,
-            final Long countryId, final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
-            final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn) {
+                                        final String addressLine3, final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId,
+                                        final Long countryId, final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
+                                        final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn) {
         return new AddressData(null, null, addressId, null, false, street, addressLine1, addressLine2, addressLine3, townVillage, city,
                 countyDistrict, stateProvinceId, countryId, null, null, postalCode, latitude, longitude, createdBy, createdOn, updatedBy,
                 updatedOn, null, null, null);
     }
 
     public static AddressData template(final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> addressTypeIdOptions) {
+                                       final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> addressTypeIdOptions) {
         final Long client_idtemp = null;
 
         final Long addressIdtemp = null;

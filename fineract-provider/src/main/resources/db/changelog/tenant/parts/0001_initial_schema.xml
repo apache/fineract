@@ -3184,7 +3184,8 @@
             <column defaultValueNumeric="50.00" name="principal_threshold_for_last_installment" type="DECIMAL(5, 2)">
                 <constraints nullable="false"/>
             </column>
-            <column defaultValueBoolean="false" name="account_moves_out_of_npa_only_on_arrears_completion" type="boolean">
+            <column defaultValueBoolean="false" name="account_moves_out_of_npa_only_on_arrears_completion"
+                    type="boolean">
                 <constraints nullable="false"/>
             </column>
             <column defaultValueBoolean="false" name="can_define_fixed_emi_amount" type="boolean">
@@ -5251,7 +5252,8 @@
         <addUniqueConstraint columnNames="enum_name, enum_value" constraintName="enum_value" tableName="r_enum_value"/>
     </changeSet>
     <changeSet author="fineract" id="230">
-        <addUniqueConstraint columnNames="external_id, level_id" constraintName="uk_m_group_external_id" tableName="m_group"/>
+        <addUniqueConstraint columnNames="external_id, level_id" constraintName="uk_m_group_external_id"
+                             tableName="m_group"/>
     </changeSet>
     <changeSet author="fineract" id="231">
         <addUniqueConstraint columnNames="from_entity_type, to_entity_type, code_name"
@@ -5277,7 +5279,8 @@
         <addUniqueConstraint columnNames="display_name, level_id" constraintName="name" tableName="m_group"/>
     </changeSet>
     <changeSet author="fineract" id="237">
-        <addUniqueConstraint columnNames="name, app_user_id, is_active" constraintName="uk_m_selfservice_beneficiaries_tpt_name"
+        <addUniqueConstraint columnNames="name, app_user_id, is_active"
+                             constraintName="uk_m_selfservice_beneficiaries_tpt_name"
                              tableName="m_selfservice_beneficiaries_tpt"/>
     </changeSet>
     <changeSet author="fineract" id="238">
@@ -6552,7 +6555,8 @@
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="488">
-        <createIndex indexName="fk_provisioning_criteria_definition_category" tableName="m_provisioning_criteria_definition">
+        <createIndex indexName="fk_provisioning_criteria_definition_category"
+                     tableName="m_provisioning_criteria_definition">
             <column name="category_id"/>
         </createIndex>
     </changeSet>
@@ -6637,17 +6641,20 @@
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="505">
-        <createIndex indexName="fk_loanproduct_provisioning_entry_criteria" tableName="m_loanproduct_provisioning_entry">
+        <createIndex indexName="fk_loanproduct_provisioning_entry_criteria"
+                     tableName="m_loanproduct_provisioning_entry">
             <column name="criteria_id"/>
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="506">
-        <createIndex indexName="fk_loanproduct_provisioning_mapping_criteria" tableName="m_loanproduct_provisioning_mapping">
+        <createIndex indexName="fk_loanproduct_provisioning_mapping_criteria"
+                     tableName="m_loanproduct_provisioning_mapping">
             <column name="criteria_id"/>
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="507">
-        <createIndex indexName="fk_loanproduct_criteria_definition_criteria" tableName="m_provisioning_criteria_definition">
+        <createIndex indexName="fk_loanproduct_criteria_definition_criteria"
+                     tableName="m_provisioning_criteria_definition">
             <column name="criteria_id"/>
         </createIndex>
     </changeSet>
@@ -6663,7 +6670,8 @@
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="510">
-        <createIndex indexName="fk_provisioning_criteria_definition_expense_account" tableName="m_provisioning_criteria_definition">
+        <createIndex indexName="fk_provisioning_criteria_definition_expense_account"
+                     tableName="m_provisioning_criteria_definition">
             <column defaultValueComputed="NULL" name="expense_account"/>
         </createIndex>
     </changeSet>
@@ -6859,12 +6867,14 @@
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="548">
-        <createIndex indexName="loanproduct_provisioning_entry_liability_account" tableName="m_loanproduct_provisioning_entry">
+        <createIndex indexName="loanproduct_provisioning_entry_liability_account"
+                     tableName="m_loanproduct_provisioning_entry">
             <column defaultValueComputed="NULL" name="liability_account"/>
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="549">
-        <createIndex indexName="provisioning_criteria_definition_liability_account" tableName="m_provisioning_criteria_definition">
+        <createIndex indexName="provisioning_criteria_definition_liability_account"
+                     tableName="m_provisioning_criteria_definition">
             <column defaultValueComputed="NULL" name="liability_account"/>
         </createIndex>
     </changeSet>

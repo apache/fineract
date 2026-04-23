@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -37,6 +37,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.MonthDay;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -53,7 +55,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 @Entity
 @Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "name" }, name = "name") })
+        @UniqueConstraint(columnNames = {"name"}, name = "name")})
 public class AccountTransferStandingInstruction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
@@ -104,9 +106,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     }
 
     public static AccountTransferStandingInstruction create(final AccountTransferDetails accountTransferDetails, final String name,
-            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
-            final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
-            final MonthDay recurrenceOnMonthDay) {
+                                                            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
+                                                            final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
+                                                            final MonthDay recurrenceOnMonthDay) {
         Integer recurrenceOnDay = null;
         Integer recurrenceOnMonth = null;
         if (recurrenceOnMonthDay != null) {
@@ -118,9 +120,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     }
 
     private AccountTransferStandingInstruction(final AccountTransferDetails accountTransferDetails, final String name,
-            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
-            final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
-            final Integer recurrenceOnDay, final Integer recurrenceOnMonth) {
+                                               final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
+                                               final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
+                                               final Integer recurrenceOnDay, final Integer recurrenceOnMonth) {
         this.accountTransferDetails = accountTransferDetails;
         this.name = name;
         this.priority = priority;

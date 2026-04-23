@@ -25,7 +25,8 @@
     <changeSet author="fineract" id="1" context="postgresql">
         <createTable tableName="m_loan_amortization_allocation_mapping">
             <column autoIncrement="true" name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_loan_amortization_allocation_mapping"/>
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="pk_m_loan_amortization_allocation_mapping"/>
             </column>
 
             <column name="loan_id" type="BIGINT">
@@ -55,7 +56,8 @@
     <changeSet author="fineract" id="2" context="mysql">
         <createTable tableName="m_loan_amortization_allocation_mapping">
             <column autoIncrement="true" name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_m_loan_amortization_allocation_mapping"/>
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="pk_m_loan_amortization_allocation_mapping"/>
             </column>
 
             <column name="loan_id" type="BIGINT">
@@ -87,7 +89,8 @@
                                  constraintName="FK_laam_created_by" deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_amortization_allocation_mapping"
+        <addForeignKeyConstraint baseColumnNames="last_modified_by"
+                                 baseTableName="m_loan_amortization_allocation_mapping"
                                  constraintName="FK_laam_last_modified_by" deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
@@ -95,12 +98,16 @@
                                  constraintName="FK_laam_loan_id" deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="base_loan_transaction_id" baseTableName="m_loan_amortization_allocation_mapping"
-                                 constraintName="FK_laam_base_transaction_id" deferrable="false" initiallyDeferred="false"
+        <addForeignKeyConstraint baseColumnNames="base_loan_transaction_id"
+                                 baseTableName="m_loan_amortization_allocation_mapping"
+                                 constraintName="FK_laam_base_transaction_id" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan_transaction" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="amortization_loan_transaction_id" baseTableName="m_loan_amortization_allocation_mapping"
-                                 constraintName="FK_laam_amortization_transaction_id" deferrable="false" initiallyDeferred="false"
+        <addForeignKeyConstraint baseColumnNames="amortization_loan_transaction_id"
+                                 baseTableName="m_loan_amortization_allocation_mapping"
+                                 constraintName="FK_laam_amortization_transaction_id" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan_transaction" validate="true"/>
     </changeSet>
@@ -111,7 +118,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently idx_m_loan_am_all_map_base_loan_id on m_loan_amortization_allocation_mapping(loan_id);
+            create index concurrently idx_m_loan_am_all_map_base_loan_id on
+            m_loan_amortization_allocation_mapping(loan_id);
         </sql>
     </changeSet>
     <changeSet id="5" author="fineract" context="mysql" runInTransaction="false">
@@ -131,7 +139,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently idx_m_loan_am_all_map_base_loan_txn_id on m_loan_amortization_allocation_mapping(base_loan_transaction_id);
+            create index concurrently idx_m_loan_am_all_map_base_loan_txn_id on
+            m_loan_amortization_allocation_mapping(base_loan_transaction_id);
         </sql>
     </changeSet>
     <changeSet id="7" author="fineract" context="mysql" runInTransaction="false">
@@ -147,21 +156,25 @@
     <changeSet id="8" author="fineract" context="postgresql" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="amortization_loan_transaction_id"/>
+                <indexExists tableName="m_loan_amortization_allocation_mapping"
+                             columnNames="amortization_loan_transaction_id"/>
             </not>
         </preConditions>
         <sql>
-            create index concurrently idx_m_loan_am_all_map_amort_loan_txn_id on m_loan_amortization_allocation_mapping(amortization_loan_transaction_id);
+            create index concurrently idx_m_loan_am_all_map_amort_loan_txn_id on
+            m_loan_amortization_allocation_mapping(amortization_loan_transaction_id);
         </sql>
     </changeSet>
     <changeSet id="9" author="fineract" context="mysql" runInTransaction="false">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="m_loan_amortization_allocation_mapping" columnNames="amortization_loan_transaction_id"/>
+                <indexExists tableName="m_loan_amortization_allocation_mapping"
+                             columnNames="amortization_loan_transaction_id"/>
             </not>
         </preConditions>
         <sql>
-            create index idx_m_loan_am_all_map_amort_loan_txn_id on batch_step_execution(amortization_loan_transaction_id);
+            create index idx_m_loan_am_all_map_amort_loan_txn_id on
+            batch_step_execution(amortization_loan_transaction_id);
         </sql>
     </changeSet>
 </databaseChangeLog>

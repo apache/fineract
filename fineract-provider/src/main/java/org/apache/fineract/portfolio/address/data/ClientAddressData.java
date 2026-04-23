@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,7 +31,7 @@ public final class ClientAddressData {
     private final boolean isActive;
 
     private ClientAddressData(final long clientAddressID, final long client_id, final long address_id, final long address_type_id,
-            final boolean isActive) {
+                              final boolean isActive) {
         this.clientAddressID = clientAddressID;
         this.clientID = client_id;
         this.addressID = address_id;
@@ -40,7 +40,7 @@ public final class ClientAddressData {
     }
 
     public static ClientAddressData instance(final long clientAddressID, final long client_id, final long address_id,
-            final long address_type_id, final boolean isActive) {
+                                             final long address_type_id, final boolean isActive) {
         return new ClientAddressData(clientAddressID, client_id, address_id, address_type_id, isActive);
     }
 }

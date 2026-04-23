@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
@@ -75,12 +76,12 @@ public final class PostingPeriod {
     }
 
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
-            final List<SavingsAccountTransactionDetailsForPostingPeriod> orderedListOfTransactions, final MonetaryCurrency currency,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final boolean isUserPosting, Integer financialYearBeginningMonth) {
+                                           final List<SavingsAccountTransactionDetailsForPostingPeriod> orderedListOfTransactions, final MonetaryCurrency currency,
+                                           final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                           final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+                                           final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+                                           final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                           final boolean isUserPosting, Integer financialYearBeginningMonth) {
 
         final BigDecimal overdraftInterestRateAsFraction = BigDecimal.ZERO;
         final Money minOverdraftForInterestCalculation = Money.zero(currency);
@@ -94,13 +95,13 @@ public final class PostingPeriod {
     // isInterestTransfer boolean is to identify newly created transaction is
     // interest transfer
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
-            final List<SavingsAccountTransactionDetailsForPostingPeriod> orderedListOfTransactions, final MonetaryCurrency currency,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
-            int financialYearBeginningMonth) {
+                                           final List<SavingsAccountTransactionDetailsForPostingPeriod> orderedListOfTransactions, final MonetaryCurrency currency,
+                                           final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                           final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+                                           final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+                                           final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                           final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
+                                           int financialYearBeginningMonth) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -167,13 +168,13 @@ public final class PostingPeriod {
     }
 
     public static PostingPeriod createFromDTO(final LocalDateInterval periodInterval, final Money periodStartingBalance,
-            final List<SavingsAccountTransactionData> orderedListOfTransactions, final MonetaryCurrency currency,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
-            int financialYearBeginningMonth, final boolean isAllowOverdraft) {
+                                              final List<SavingsAccountTransactionData> orderedListOfTransactions, final MonetaryCurrency currency,
+                                              final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                              final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+                                              final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+                                              final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                              final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
+                                              int financialYearBeginningMonth, final boolean isAllowOverdraft) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -241,11 +242,11 @@ public final class PostingPeriod {
     }
 
     private PostingPeriod(final LocalDateInterval periodInterval, final MonetaryCurrency currency, final Money openingBalance,
-            final Money closingBalance, final SavingsCompoundingInterestPeriodType interestCompoundingType,
-            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
-            final Money minOverdraftForInterestCalculation, boolean isUserPosting, Integer financialYearBeginningMonth) {
+                          final Money closingBalance, final SavingsCompoundingInterestPeriodType interestCompoundingType,
+                          final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+                          final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
+                          final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
+                          final Money minOverdraftForInterestCalculation, boolean isUserPosting, Integer financialYearBeginningMonth) {
         this.periodInterval = periodInterval;
         this.currency = currency;
         this.openingBalance = openingBalance;
@@ -324,19 +325,19 @@ public final class PostingPeriod {
     }
 
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,
-            final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances,
-            final LocalDate upToInterestCalculationDate, int financialYearBeginningMonth) {
+                                                                             final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances,
+                                                                             final LocalDate upToInterestCalculationDate, int financialYearBeginningMonth) {
 
         final List<CompoundingPeriod> compoundingPeriods = new ArrayList<>();
 
         CompoundingPeriod compoundingPeriod = null;
         switch (interestPeriodType) {
             case INVALID:
-            break;
+                break;
             case DAILY:
                 compoundingPeriod = DailyCompoundingPeriod.create(postingPeriodInterval, allEndOfDayBalances, upToInterestCalculationDate);
                 compoundingPeriods.add(compoundingPeriod);
-            break;
+                break;
             case MONTHLY:
                 final LocalDate postingPeriodEndDate = postingPeriodInterval.endDate();
 
@@ -361,7 +362,7 @@ public final class PostingPeriod {
                     // move periodStartDate forward to day after this period
                     periodStartDate = periodEndDate.plusDays(1);
                 }
-            break;
+                break;
             // case WEEKLY:
             // break;
             // case BIWEEKLY:
@@ -390,7 +391,7 @@ public final class PostingPeriod {
                     // move periodStartDate forward to day after this period
                     periodStartDate = periodEndDate.plusDays(1);
                 }
-            break;
+                break;
             case BI_ANNUAL:
                 final LocalDate bPostingPeriodEndDate = postingPeriodInterval.endDate();
 
@@ -416,7 +417,7 @@ public final class PostingPeriod {
                     // move periodStartDate forward to day after this period
                     periodStartDate = periodEndDate.plusDays(1);
                 }
-            break;
+                break;
             case ANNUAL:
                 final LocalDate aPostingPeriodEndDate = postingPeriodInterval.endDate();
 
@@ -443,7 +444,7 @@ public final class PostingPeriod {
                     // move periodStartDate forward to day after this period
                     periodStartDate = periodEndDate.plusDays(1);
                 }
-            break;
+                break;
             // case NO_COMPOUNDING_SIMPLE_INTEREST:
             // break;
         }
@@ -452,8 +453,8 @@ public final class PostingPeriod {
     }
 
     private static LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate,
-            final SavingsCompoundingInterestPeriodType interestPeriodType, final LocalDate upToInterestCalculationDate,
-            int financialYearBeginningMonth) {
+                                                                final SavingsCompoundingInterestPeriodType interestPeriodType, final LocalDate upToInterestCalculationDate,
+                                                                int financialYearBeginningMonth) {
 
         LocalDate periodEndDate = upToInterestCalculationDate;
         int previousMonth = financialYearBeginningMonth - 1;
@@ -463,10 +464,10 @@ public final class PostingPeriod {
         int periodsInMonth = 1;
         switch (interestPeriodType) {
             case INVALID:
-            break;
+                break;
             case DAILY:
                 periodEndDate = periodStartDate;
-            break;
+                break;
             // case WEEKLY:
             // periodEndDate = periodStartDate.dayOfWeek().withMaximumValue();
             // break;
@@ -478,23 +479,23 @@ public final class PostingPeriod {
             case MONTHLY:
                 // produce period end date on last day of current month
                 periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
-            break;
+                break;
             case QUATERLY:
                 periodsInMonth = 4;
                 periodEndDate = getPeriodEndDate(periodEndDate, previousMonth, periodsInMonth, periodStartDate);
-            break;
+                break;
             case BI_ANNUAL:
                 periodsInMonth = 2;
                 periodEndDate = getPeriodEndDate(periodEndDate, previousMonth, periodsInMonth, periodStartDate);
 
-            break;
+                break;
             case ANNUAL:
                 periodEndDate = periodStartDate.withMonth(previousMonth);
                 periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
                 if (DateUtils.isBefore(periodEndDate, periodStartDate)) {
                     periodEndDate = periodEndDate.plusYears(1);
                 }
-            break;
+                break;
 
             // case NO_COMPOUNDING_SIMPLE_INTEREST:
             // periodEndDate = periodStartDate.monthOfYear().withMaximumValue();

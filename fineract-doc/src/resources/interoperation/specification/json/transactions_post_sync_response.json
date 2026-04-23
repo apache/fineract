@@ -3,5 +3,6 @@
 
 //Response Body:
 {
-  "transactionId": "11436b17-c690-4a30-8505-42a2c4eafb9d" // mandatory, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+  "transactionId": "11436b17-c690-4a30-8505-42a2c4eafb9d"
+  // mandatory, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
 }

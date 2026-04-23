@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -64,9 +64,9 @@ public class LoanProductConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanProductReadPlatformService.class)
     public LoanProductReadPlatformService loanProductReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
-            ChargeReadPlatformService chargeReadPlatformService, RateReadService rateReadService, DatabaseSpecificSQLGenerator sqlGenerator,
-            FineractEntityAccessUtil fineractEntityAccessUtil, DelinquencyReadPlatformService delinquencyReadPlatformService,
-            LoanProductRepository loanProductRepository) {
+                                                                         ChargeReadPlatformService chargeReadPlatformService, RateReadService rateReadService, DatabaseSpecificSQLGenerator sqlGenerator,
+                                                                         FineractEntityAccessUtil fineractEntityAccessUtil, DelinquencyReadPlatformService delinquencyReadPlatformService,
+                                                                         LoanProductRepository loanProductRepository) {
         return new LoanProductReadPlatformServiceImpl(context, jdbcTemplate, chargeReadPlatformService, rateReadService, sqlGenerator,
                 fineractEntityAccessUtil, delinquencyReadPlatformService, loanProductRepository);
     }
@@ -74,15 +74,15 @@ public class LoanProductConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanProductWritePlatformService.class)
     public LoanProductWritePlatformService loanProductWritePlatformService(PlatformSecurityContext context,
-            LoanProductDataValidator fromApiJsonDeserializer, LoanProductRepository loanProductRepository, AprCalculator aprCalculator,
-            FundRepository fundRepository, ChargeRepositoryWrapper chargeRepository, RateRepositoryWrapper rateRepository,
-            ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            FineractEntityAccessUtil fineractEntityAccessUtil, FloatingRateRepositoryWrapper floatingRateRepository,
-            LoanRepositoryWrapper loanRepositoryWrapper, BusinessEventNotifierService businessEventNotifierService,
-            DelinquencyBucketRepository delinquencyBucketRepository,
-            LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            AdvancedPaymentAllocationsJsonParser advancedPaymentJsonParser, CreditAllocationsJsonParser creditAllocationsJsonParser,
-            LoanProductAssembler loanProductAssembler, LoanProductUpdateUtil loanProductUpdateUtil) {
+                                                                           LoanProductDataValidator fromApiJsonDeserializer, LoanProductRepository loanProductRepository, AprCalculator aprCalculator,
+                                                                           FundRepository fundRepository, ChargeRepositoryWrapper chargeRepository, RateRepositoryWrapper rateRepository,
+                                                                           ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
+                                                                           FineractEntityAccessUtil fineractEntityAccessUtil, FloatingRateRepositoryWrapper floatingRateRepository,
+                                                                           LoanRepositoryWrapper loanRepositoryWrapper, BusinessEventNotifierService businessEventNotifierService,
+                                                                           DelinquencyBucketRepository delinquencyBucketRepository,
+                                                                           LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
+                                                                           AdvancedPaymentAllocationsJsonParser advancedPaymentJsonParser, CreditAllocationsJsonParser creditAllocationsJsonParser,
+                                                                           LoanProductAssembler loanProductAssembler, LoanProductUpdateUtil loanProductUpdateUtil) {
         return new LoanProductWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer, loanProductRepository, aprCalculator,
                 fundRepository, chargeRepository, rateRepository, accountMappingWritePlatformService, fineractEntityAccessUtil,
                 floatingRateRepository, loanRepositoryWrapper, businessEventNotifierService, delinquencyBucketRepository,

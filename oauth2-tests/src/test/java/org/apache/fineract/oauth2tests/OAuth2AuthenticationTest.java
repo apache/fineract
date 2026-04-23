@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,6 +33,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -204,7 +206,7 @@ public class OAuth2AuthenticationTest {
 
     @SuppressWarnings("unchecked")
     private static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
+                                          final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         if (jsonAttributeToGetBack == null) {
             return (T) json;
@@ -213,7 +215,7 @@ public class OAuth2AuthenticationTest {
     }
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final Map<String, String> formBody, final String jsonAttributeToGetBack) {
+                                          final String putURL, final Map<String, String> formBody, final String jsonAttributeToGetBack) {
         final String response = given().spec(requestSpec).header("Content-Type", "application/x-www-form-urlencoded").formParams(formBody)
                 .expect().spec(responseSpec).log().ifError().when().post(putURL).andReturn().asString();
         return (T) JsonPath.from(response).get(jsonAttributeToGetBack);

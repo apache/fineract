@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,10 +20,12 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.recurringdep
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -77,8 +79,8 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private void readExcelFile(final Workbook workbook, final List<RecurringDepositAccountData> savings,
-            final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates, final List<String> statuses,
-            final String locale, final String dateFormat) {
+                               final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates, final List<String> statuses,
+                               final String locale, final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.ROWHEADER_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
@@ -112,7 +114,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private RecurringDepositAccountData readSavings(final Workbook workbook, final Row row, final List<String> statuses,
-            final String locale, final String dateFormat) {
+                                                    final String locale, final String dateFormat) {
 
         String productName = ImportHandlerUtils.readAsString(RecurringDepositConstants.PRODUCT_COL, row);
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME), productName);
@@ -272,8 +274,8 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<RecurringDepositAccountData> savings,
-            final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates, final List<String> statuses,
-            final String dateFormat) {
+                               final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates, final List<String> statuses,
+                               final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -319,7 +321,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private void writeRecurringDepositErrorMessage(final Workbook workbook, final Long savingsId, final String errorMessage,
-            final int progressLevel, final Cell statusCell, final Cell errorReportCell, final Row row) {
+                                                   final int progressLevel, final Cell statusCell, final Cell errorReportCell, final Row row) {
         String status = "";
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
@@ -347,7 +349,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private int importSavingsActivation(final List<SavingsActivation> activationDates, final Long savingsId, final int i,
-            final String dateFormat) {
+                                        final String dateFormat) {
         if (activationDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
@@ -362,7 +364,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private int importSavingsApproval(final List<SavingsApproval> approvalDates, final Long savingsId, final int i,
-            final String dateFormat) {
+                                      final String dateFormat) {
         if (approvalDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));

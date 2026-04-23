@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
@@ -57,15 +59,15 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     public static ResultsetColumnHeaderData detailed(final String columnName, final String columnType, final Long columnLength,
-            final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
-            final String columnCode, final boolean columnIsUnique, final boolean columnIsIndexed, DatabaseType dialect) {
+                                                     final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
+                                                     final String columnCode, final boolean columnIsUnique, final boolean columnIsIndexed, DatabaseType dialect) {
         return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
                 columnCode, columnIsUnique, columnIsIndexed, dialect);
     }
 
     private ResultsetColumnHeaderData(final String columnName, String columnType, final Long columnLength, final boolean columnNullable,
-            final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues, final String columnCode,
-            final boolean columnIsUnique, final boolean columnIsIndexed, DatabaseType dialect) {
+                                      final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues, final String columnCode,
+                                      final boolean columnIsUnique, final boolean columnIsIndexed, DatabaseType dialect) {
         this.columnName = columnName;
         this.columnLength = columnLength;
         this.isColumnNullable = columnNullable;

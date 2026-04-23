@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType
 public class FineractEntityAccessConfigurationException extends AbstractPlatformDomainRuleException {
 
     public FineractEntityAccessConfigurationException(final Long firstEntityId, final FineractEntityType entityType1,
-            final FineractEntityAccessType accessType, final FineractEntityType entityType2) {
+                                                      final FineractEntityAccessType accessType, final FineractEntityType entityType2) {
         super("error.msg.entityaccess.config", "Error while getting entity access configuration for " + entityType1.getType() + ":"
                 + firstEntityId + " with type " + accessType.getStr() + " against " + entityType2.getType());
     }

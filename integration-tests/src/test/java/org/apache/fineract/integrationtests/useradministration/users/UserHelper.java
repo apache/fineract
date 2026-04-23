@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,8 +26,10 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
@@ -49,14 +51,15 @@ public final class UserHelper {
     public static final String SIMPLE_USER_PASSWORD = "QwE!5rTy#9uP0";
     private static boolean SIMPLE_USER_CREATED = false;
 
-    private UserHelper() {}
+    private UserHelper() {
+    }
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId) {
+                                     int staffId) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId), "resourceId");
     }
 
@@ -65,7 +68,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId, String username, String attribute) {
+                                    int staffId, String username, String attribute) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId, username),
                 attribute);
     }
@@ -75,7 +78,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
-            int staffId, String username, String password, String attribute) {
+                                    int staffId, String username, String password, String attribute) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL,
                 getTestCreateUserAsJSON(roleId, staffId, username, password), attribute);
     }
@@ -85,7 +88,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static PostUsersResponse createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            PostUsersRequest request) {
+                                               PostUsersRequest request) {
         String requestBody = GSON.toJson(request);
         String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
         return GSON.fromJson(response, PostUsersResponse.class);
@@ -96,7 +99,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static JsonObject createUserWithJsonResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            PostUsersRequest request) {
+                                                        PostUsersRequest request) {
         String requestBody = GSON.toJson(request);
         String jsonResponse = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
         return JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -166,7 +169,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer deleteUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer userId) {
+                                     final Integer userId) {
         return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(userId), "resourceId");
     }
 
@@ -175,7 +178,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object updateUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int userId,
-            String username, String attribute) {
+                                    String username, String attribute) {
         return Utils.performServerPut(requestSpec, responseSpec, createRoleOperationURL(userId), getTestUpdateUserAsJSON(username),
                 attribute);
     }
@@ -193,7 +196,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static RequestSpecification getSimpleUserWithoutBypassPermission(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                                            final ResponseSpecification responseSpec) {
         String password = SIMPLE_USER_PASSWORD;
         if (!SIMPLE_USER_CREATED) {
             GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
@@ -242,7 +245,7 @@ public final class UserHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static void addRepaymentPermissionToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            Integer roleId) {
+                                                     Integer roleId) {
         HashMap<String, Boolean> permissionMap = new HashMap<>();
         permissionMap.put(REPAYMENT_LOAN_PERMISSION, true);
         permissionMap.put(READ_LOAN_PERMISSION, true);

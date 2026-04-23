@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
@@ -65,7 +66,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         public String schema() {
             StringBuilder sb = new StringBuilder();
             sb.append(
-                    " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, ")
+                            " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, ")
                     .append("classification_enum as classification, account_usage as accountUsage, gl.description as description, ")
                     .append(NAME_DECORATED_BASE_ON_HIERARCHY).append(" as nameDecorated, ")
                     .append("cv.id as codeId, cv.code_value as codeValue ");
@@ -109,8 +110,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,
-            final Boolean manualTransactionsAllowed, final Boolean disabled,
-            JournalEntryAssociationParametersData associationParametersData) {
+                                                     final Boolean manualTransactionsAllowed, final Boolean disabled,
+                                                     JournalEntryAssociationParametersData associationParametersData) {
         if (accountClassification != null && !checkValidGLAccountType(accountClassification)) {
             throw new GLAccountInvalidClassificationException(accountClassification);
         }
@@ -202,7 +203,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                         .append("  ORDER BY gl_j.entry_date DESC,gl_j.id DESC LIMIT 1");
             }
 
-            return this.jdbcTemplate.queryForObject(sql.toString(), rm, new Object[] { glAccountId });
+            return this.jdbcTemplate.queryForObject(sql.toString(), rm, new Object[]{glAccountId});
         } catch (final EmptyResultDataAccessException e) {
             throw new GLAccountNotFoundException(glAccountId, e);
         }
@@ -253,7 +254,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     public List<GLAccountDataForLookup> retrieveAccountsByTagId(final Long ruleId, final Integer transactionType) {
         final GLAccountDataLookUpMapper mapper = new GLAccountDataLookUpMapper();
         final String sql = "Select " + GLAccountDataLookUpMapper.LOOKUP_SCHEMA + " where rule.id=? and tags.acc_type_enum=?";
-        return this.jdbcTemplate.query(sql, mapper, (Object[]) new Object[] { ruleId, transactionType });// NOSONAR
+        return this.jdbcTemplate.query(sql, mapper, (Object[]) new Object[]{ruleId, transactionType});// NOSONAR
     }
 
     private static final class GLAccountDataLookUpMapper implements RowMapper<GLAccountDataForLookup> {

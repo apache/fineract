@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -42,7 +44,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 
 @Entity
-@Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
+@Table(name = "stretchy_report", uniqueConstraints = {@UniqueConstraint(columnNames = {"report_name"}, name = "unq_report_name")})
 public final class Report extends AbstractPersistableCustom<Long> {
 
     @Column(name = "report_name", nullable = false, unique = true)
@@ -113,7 +115,7 @@ public final class Report extends AbstractPersistableCustom<Long> {
     }
 
     public Report(final String reportName, final String reportType, final String reportSubType, final String reportCategory,
-            final String description, final boolean useReport, final String reportSql, final Collection<String> reportTypes) {
+                  final String description, final boolean useReport, final String reportSql, final Collection<String> reportTypes) {
         this.reportName = reportName;
         this.reportType = reportType;
         this.reportSubType = reportSubType;
@@ -226,7 +228,7 @@ public final class Report extends AbstractPersistableCustom<Long> {
             if (this.reportType.equals("Chart")) {
                 baseDataValidator.reset().parameter("reportSubType").value(this.reportSubType)
                         .cantBeBlankWhenParameterProvidedIs("reportType", this.reportType)
-                        .isOneOfTheseValues(new Object[] { "Bar", "Pie" });
+                        .isOneOfTheseValues(new Object[]{"Bar", "Pie"});
             } else {
                 baseDataValidator.reset().parameter("reportSubType").value(this.reportSubType)
                         .mustBeBlankWhenParameterProvidedIs("reportType", this.reportType);

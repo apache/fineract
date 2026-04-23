@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -171,7 +172,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             }
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[]{hierarchySearchString}); // NOSONAR
     }
 
     @Override
@@ -185,7 +186,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final OfficeDropdownMapper rm = new OfficeDropdownMapper();
         final String sql = "select " + rm.schema() + "where o.hierarchy like ? order by o.hierarchy";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{hierarchySearchString}); // NOSONAR
     }
 
     @Override
@@ -198,7 +199,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final OfficeMapper rm = new OfficeMapper();
             final String sql = "select " + rm.officeSchema() + " where o.id = ?";
 
-            final OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { officeId }); // NOSONAR
+            final OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{officeId}); // NOSONAR
 
             return selectedOffice;
         } catch (final EmptyResultDataAccessException e) {
@@ -256,7 +257,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final String sql = "select " + rm.schema()
                 + " where (fromoff.hierarchy like ? or tooff.hierarchy like ?) order by ot.transaction_date, ot.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString, hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{hierarchySearchString, hierarchySearchString}); // NOSONAR
     }
 
     @Override

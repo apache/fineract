@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -238,15 +240,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     private void createCalendar(final Loan loan, LocalDate calendarStartDate, Integer recalculationFrequencyNthDay,
-            final Integer repeatsOnDay, final RecalculationFrequencyType recalculationFrequencyType, Integer frequency,
-            CalendarEntityType calendarEntityType, final String title) {
+                                final Integer repeatsOnDay, final RecalculationFrequencyType recalculationFrequencyType, Integer frequency,
+                                CalendarEntityType calendarEntityType, final String title) {
         Integer updatedRepeatsOnDay = repeatsOnDay;
         final CalendarFrequencyType calendarFrequencyType = switch (recalculationFrequencyType) {
             case DAILY -> CalendarFrequencyType.DAILY;
             case WEEKLY -> CalendarFrequencyType.WEEKLY;
             case MONTHLY -> CalendarFrequencyType.MONTHLY;
             case SAME_AS_REPAYMENT_PERIOD ->
-                CalendarFrequencyType.from(loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType());
+                    CalendarFrequencyType.from(loan.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType());
             case INVALID -> CalendarFrequencyType.INVALID;
         };
 
@@ -344,7 +346,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     private void updateLinkedAccountAssociation(AccountAssociations accountAssociations, SavingsAccount savingsAccount,
-            Map<String, Object> changes) {
+                                                Map<String, Object> changes) {
         accountAssociations.updateLinkedSavingsAccount(savingsAccount);
         this.accountAssociationsRepository.save(accountAssociations);
         changes.put(LoanApiConstants.linkAccountIdParameterName, savingsAccount.getId());

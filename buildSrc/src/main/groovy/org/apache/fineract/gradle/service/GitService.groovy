@@ -88,7 +88,7 @@ class GitService {
 
         def status = git.status().call()
 
-        if(!status.isClean()) {
+        if (!status.isClean()) {
             git.add().addFilepattern(".").call()
 
             git.commit().setSign(true).setMessage("chore: Publish current docs").call()
@@ -121,7 +121,7 @@ class GitService {
             git.push().setPushTags().setForce(true).setDryRun(dryRun).call()
 
             log.warn("Tag created: ${name} (${ref.name})")
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error(e.toString(), e)
         }
     }

@@ -27,7 +27,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <conversionRule conversionWord="tenantId"
-                    converterClass="org.apache.fineract.infrastructure.core.logging.TenantIdentifierLoggingConverter" />
+                    converterClass="org.apache.fineract.infrastructure.core.logging.TenantIdentifierLoggingConverter"/>
 
     <appender name="CONSOLE" target="System.out" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

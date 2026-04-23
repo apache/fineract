@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,20 +29,24 @@ import java.util.Set;
  */
 final class ClientChargesApiResourceSwagger {
 
-    private ClientChargesApiResourceSwagger() {}
+    private ClientChargesApiResourceSwagger() {
+    }
 
     @Schema(description = "GetClientsClientIdChargesResponse")
     public static final class GetClientsClientIdChargesResponse {
 
-        private GetClientsClientIdChargesResponse() {}
+        private GetClientsClientIdChargesResponse() {
+        }
 
         static final class GetClientsChargesPageItems {
 
-            private GetClientsChargesPageItems() {}
+            private GetClientsChargesPageItems() {
+            }
 
             static final class GetClientChargeTimeType {
 
-                private GetClientChargeTimeType() {}
+                private GetClientChargeTimeType() {
+                }
 
                 @Schema(example = "2")
                 public Integer id;
@@ -53,7 +58,8 @@ final class ClientChargesApiResourceSwagger {
 
             static final class GetClientChargeCalculationType {
 
-                private GetClientChargeCalculationType() {}
+                private GetClientChargeCalculationType() {
+                }
 
                 @Schema(example = "1")
                 public Integer id;
@@ -65,7 +71,8 @@ final class ClientChargesApiResourceSwagger {
 
             static final class GetClientChargeCurrency {
 
-                private GetClientChargeCurrency() {}
+                private GetClientChargeCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -122,7 +129,8 @@ final class ClientChargesApiResourceSwagger {
     @Schema(description = "PostClientsClientIdChargesRequest")
     public static final class PostClientsClientIdChargesRequest {
 
-        private PostClientsClientIdChargesRequest() {}
+        private PostClientsClientIdChargesRequest() {
+        }
 
         @Schema(example = "100")
         public Integer amount;
@@ -139,7 +147,8 @@ final class ClientChargesApiResourceSwagger {
     @Schema(description = "PostClientsClientIdChargesResponse")
     public static final class PostClientsClientIdChargesResponse {
 
-        private PostClientsClientIdChargesResponse() {}
+        private PostClientsClientIdChargesResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -152,7 +161,8 @@ final class ClientChargesApiResourceSwagger {
     @Schema(description = "PostClientsClientIdChargesChargeIdRequest")
     public static final class PostClientsClientIdChargesChargeIdRequest {
 
-        private PostClientsClientIdChargesChargeIdRequest() {}
+        private PostClientsClientIdChargesChargeIdRequest() {
+        }
 
         @Schema(example = "200")
         public Integer amount;
@@ -169,7 +179,8 @@ final class ClientChargesApiResourceSwagger {
     @Schema(description = "PostClientsClientIdChargesChargeIdResponse")
     public static final class PostClientsClientIdChargesChargeIdResponse {
 
-        private PostClientsClientIdChargesChargeIdResponse() {}
+        private PostClientsClientIdChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -184,7 +195,8 @@ final class ClientChargesApiResourceSwagger {
     @Schema(description = "DeleteClientsClientIdChargesChargeIdResponse")
     public static final class DeleteClientsClientIdChargesChargeIdResponse {
 
-        private DeleteClientsClientIdChargesChargeIdResponse() {}
+        private DeleteClientsClientIdChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.rate.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
@@ -41,12 +42,12 @@ public final class RateData implements Serializable {
     private boolean active;
 
     public static RateData instance(final Long id, final String name, final BigDecimal percentage, final EnumOptionData productApply,
-            final boolean active) {
+                                    final boolean active) {
         return new RateData(id, name, percentage, productApply, active);
     }
 
     private RateData(final Long id, final String name, final BigDecimal percentage, final EnumOptionData productApply,
-            final boolean active) {
+                     final boolean active) {
         this.id = id;
         this.name = name;
         this.percentage = percentage;

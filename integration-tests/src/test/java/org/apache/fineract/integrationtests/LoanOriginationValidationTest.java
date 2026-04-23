@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
+
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
@@ -184,7 +186,7 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
                     .loanTermFrequencyType(2)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2)//
-            ;//
+                    ;//
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.applyLoan(applicationRequest01));
             assertEquals(400, callFailedRuntimeException.getResponse().code());
@@ -198,7 +200,7 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
                     .transactionProcessingStrategyCode(null)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2)//
-            ;//
+                    ;//
 
             callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.applyLoan(applicationRequest02));
@@ -213,7 +215,7 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2)//
-            ;//
+                    ;//
             callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.applyLoan(applicationRequest03));
             LOG.info("DETAIL: {}", callFailedRuntimeException.getMessage());
@@ -229,7 +231,7 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2)//
-            ;//
+                    ;//
             callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.applyLoan(applicationRequest04));
             assertEquals(400, callFailedRuntimeException.getResponse().code());
@@ -244,7 +246,7 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(2)//
-            ;//
+                    ;//
             callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> loanTransactionHelper.applyLoan(applicationRequest05));
             assertEquals(400, callFailedRuntimeException.getResponse().code());
@@ -254,8 +256,8 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
-            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+                                             boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
+                                             LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         AdvancedPaymentData goodwillCreditAllocation = createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT");
         AdvancedPaymentData merchantIssuedRefundAllocation = createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");

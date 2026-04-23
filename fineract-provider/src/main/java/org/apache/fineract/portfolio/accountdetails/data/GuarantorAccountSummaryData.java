@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 
@@ -46,10 +47,10 @@ public class GuarantorAccountSummaryData {
     private final BigDecimal onHoldAmount;
 
     public GuarantorAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
-            final EnumOptionData loanType, final Integer loanCycle, final Boolean inArrears, final BigDecimal originalLoan,
-            final BigDecimal loanBalance, final BigDecimal amountPaid, final Boolean isActive, final String relationship,
-            final BigDecimal onHoldAmount) {
+                                       final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+                                       final EnumOptionData loanType, final Integer loanCycle, final Boolean inArrears, final BigDecimal originalLoan,
+                                       final BigDecimal loanBalance, final BigDecimal amountPaid, final Boolean isActive, final String relationship,
+                                       final BigDecimal onHoldAmount) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;

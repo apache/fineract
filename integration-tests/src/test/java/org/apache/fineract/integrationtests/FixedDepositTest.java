@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.client.models.GetFixedDepositAccountsAccountIdTransactionsResponse;
@@ -87,7 +89,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 @Slf4j
-@SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
+@SuppressWarnings({"unused", "unchecked", "rawtypes", "static-access"})
 public class FixedDepositTest extends IntegrationTest {
 
     private ResponseSpecification responseSpec;
@@ -356,8 +358,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
@@ -379,8 +381,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries transactions for interest posting transaction
          */
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -489,8 +491,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
@@ -513,8 +515,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries transactions for interest posting transaction
          */
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -623,8 +625,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liabilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liabilityAccountInitialEntry);
 
@@ -775,7 +777,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private void testFixedDepositAccountForInterestRate(final String chartToUse, final String depositAmount, final String depositPeriod,
-            final Float interestRate) {
+                                                        final Float interestRate) {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
@@ -919,8 +921,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
@@ -942,8 +944,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries transactions for interest posting transaction
          */
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -1070,8 +1072,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
@@ -1087,8 +1089,8 @@ public class FixedDepositTest extends IntegrationTest {
         /***
          * Verify journal entries transactions for interest posting transaction
          */
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -2764,7 +2766,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, final String accountingRule,
-            Account... accounts) {
+                                              Account... accounts) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
@@ -2780,7 +2782,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer createFixedDepositProductWithoutCharts(final String validFrom, final String validTo, final String accountingRule,
-            Account... accounts) {
+                                                           Account... accounts) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
@@ -2794,7 +2796,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer createFixedDepositProductWithWithHoldTax(final String validFrom, final String validTo, final String taxGroupId,
-            final String accountingRule, Account... accounts) {
+                                                             final String accountingRule, Account... accounts) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
@@ -2809,7 +2811,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, final String accountingRule,
-            final String chartToBePicked, Account... accounts) {
+                                              final String chartToBePicked, Account... accounts) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
@@ -2820,18 +2822,18 @@ public class FixedDepositTest extends IntegrationTest {
         switch (chartToBePicked) {
             case "period":
                 fixedDepositProductHelper = fixedDepositProductHelper.withPeriodRangeChart();
-            break;
+                break;
             case "amount":
                 fixedDepositProductHelper = fixedDepositProductHelper.withAmountRangeChart();
-            break;
+                break;
             case "period_amount":
                 fixedDepositProductHelper = fixedDepositProductHelper.withPeriodAndAmountRangeChart();
-            break;
+                break;
             case "amount_period":
                 fixedDepositProductHelper = fixedDepositProductHelper.withAmountAndPeriodRangeChart();
-            break;
+                break;
             default:
-            break;
+                break;
         }
 
         final String fixedDepositProductJSON = fixedDepositProductHelper //
@@ -2840,7 +2842,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final String penalInterestType) {
+                                                    final String penalInterestType) {
         log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
@@ -2849,7 +2851,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final String penalInterestType, final Integer maturityInstructionId) {
+                                                    final String penalInterestType, final Integer maturityInstructionId) {
         log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).withMaturityInstructionId(maturityInstructionId)
@@ -2859,7 +2861,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final String penalInterestType, final String depositAmount, final String depositPeriod) {
+                                                    final String penalInterestType, final String depositAmount, final String depositPeriod) {
         log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec)
                 //
@@ -2870,7 +2872,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, final String accountingRule, Account... accounts) {
+                                         final String minOpenningBalance, final String accountingRule, Account... accounts) {
         log.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
@@ -2936,7 +2938,7 @@ public class FixedDepositTest extends IntegrationTest {
     }
 
     private void assertFinancialActivityAccountCreation(Integer financialActivityAccountId, Integer financialActivityId,
-            Account glAccount) {
+                                                        Account glAccount) {
         HashMap mappingDetails = this.financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId,
                 this.responseSpec);
         Assertions.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));

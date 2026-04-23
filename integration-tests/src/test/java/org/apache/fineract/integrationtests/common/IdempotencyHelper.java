@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import com.google.gson.reflect.TypeToken;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.data.BusinessStep;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
@@ -53,7 +55,8 @@ public final class IdempotencyHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static JobBusinessStepConfigData configuredBusinessStepFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -61,7 +64,8 @@ public final class IdempotencyHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static JobBusinessStepDetail availableBusinessStepFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<JobBusinessStepDetail>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<JobBusinessStepDetail>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -69,7 +73,7 @@ public final class IdempotencyHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static JobBusinessStepConfigData getConfiguredBusinessStepsByJobName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName) {
+                                                                                final ResponseSpecification responseSpec, String jobName) {
         final String response = Utils.performServerGet(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END);
         log.info("BusinessStepConfigurationHelper Response: {}", response);
@@ -81,7 +85,7 @@ public final class IdempotencyHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static JobBusinessStepDetail getAvailableBusinessStepsByJobName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName) {
+                                                                           final ResponseSpecification responseSpec, String jobName) {
         final String response = Utils.performServerGet(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + GET_AVAILABLE_BUSINESS_STEPS_API_URL_END);
         log.info("BusinessStepConfigurationHelper Response: {}", response);
@@ -93,7 +97,7 @@ public final class IdempotencyHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Response updateBusinessStepOrder(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            String jobName, String jsonBodyToSend, String idempotencyKey) {
+                                                   String jobName, String jsonBodyToSend, String idempotencyKey) {
         Response response = Utils.performServerPutRaw(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END,
                 request -> request.header("Idempotency-Key", idempotencyKey).body(jsonBodyToSend));
@@ -106,7 +110,7 @@ public final class IdempotencyHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Response updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend, String idempotencyKey) {
+                                                            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend, String idempotencyKey) {
         String url = BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END;
         return Utils.performServerPutRaw(requestSpec, responseSpec, url,
                 request -> request.header("Idempotency-Key", idempotencyKey).body(jsonBodyToSend));

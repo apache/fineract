@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -45,13 +46,13 @@ public class CumulativeLoanSummaryDataProvider extends CommonLoanSummaryDataProv
 
     @Override
     public BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(final Loan loan,
-            final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency,
-            BigDecimal totalUnpaidPayableDueInterest) {
+                                                                                  final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency,
+                                                                                  BigDecimal totalUnpaidPayableDueInterest) {
         // Find the current Period (If exists one) based on the Business date
         final Optional<LoanSchedulePeriodData> optCurrentPeriod = periods.stream().filter(period -> !period.isDownPaymentPeriod() //
-                && period.getPeriod() != null //
-                && !businessDate.isBefore(period.getFromDate()) //
-                && businessDate.isBefore(period.getDueDate())) //
+                        && period.getPeriod() != null //
+                        && !businessDate.isBefore(period.getFromDate()) //
+                        && businessDate.isBefore(period.getDueDate())) //
                 .findFirst();
 
         if (optCurrentPeriod.isPresent()) {
@@ -68,13 +69,13 @@ public class CumulativeLoanSummaryDataProvider extends CommonLoanSummaryDataProv
     @Override
     @Transactional(readOnly = true)
     public LoanSummaryData withTransactionAmountsSummary(Long loanId, LoanSummaryData defaultSummaryData,
-            LoanScheduleData repaymentSchedule, Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
+                                                         LoanScheduleData repaymentSchedule, Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
         Loan loan = null;
         return super.withTransactionAmountsSummary(loan, defaultSummaryData, repaymentSchedule, loanTransactionBalances);
     }
 
     private static BigDecimal computeAccruedInterestTillDay(final LoanSchedulePeriodData period, final long untilDay,
-            final CurrencyData currency) {
+                                                            final CurrencyData currency) {
         Integer remainingDays = period.getDaysInPeriod();
         BigDecimal totalAccruedInterest = BigDecimal.ZERO;
         while (remainingDays > untilDay) {

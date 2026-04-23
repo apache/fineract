@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.loanrepaymen
 import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -59,7 +61,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
 
     @Autowired
     public LoanRepaymentImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final LoanReadPlatformService loanReadPlatformService) {
+                                      final LoanReadPlatformService loanReadPlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.loanReadPlatformService = loanReadPlatformService;
     }
@@ -87,7 +89,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
     }
 
     private LoanTransactionData readLoanRepayment(final Workbook workbook, Long loanAccountId, final Row row, final String locale,
-            final String dateFormat) {
+                                                  final String dateFormat) {
         String loanaccountInfo = ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo != null) {
             List<String> loanAccountAr = Splitter.on(SEPARATOR).splitToList(loanaccountInfo);
@@ -111,7 +113,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<LoanTransactionData> loanRepayments, final String dateFormat,
-            final String locale) {
+                               final String locale) {
         Sheet loanRepaymentSheet = workbook.getSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;

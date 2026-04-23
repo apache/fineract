@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.account.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,16 +28,19 @@ import java.util.Set;
  */
 final class AccountTransfersApiResourceSwagger {
 
-    private AccountTransfersApiResourceSwagger() {}
+    private AccountTransfersApiResourceSwagger() {
+    }
 
     @Schema(description = "GetAccountTransfersTemplateResponse")
     public static final class GetAccountTransfersTemplateResponse {
 
-        private GetAccountTransfersTemplateResponse() {}
+        private GetAccountTransfersTemplateResponse() {
+        }
 
         static final class GetAccountTransfersFromOffice {
 
-            private GetAccountTransfersFromOffice() {}
+            private GetAccountTransfersFromOffice() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -54,7 +58,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersFromAccountType {
 
-            private GetAccountTransfersFromAccountType() {}
+            private GetAccountTransfersFromAccountType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -66,7 +71,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersFromOfficeOptions {
 
-            private GetAccountTransfersFromOfficeOptions() {}
+            private GetAccountTransfersFromOfficeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -78,7 +84,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersFromClientOptions {
 
-            private GetAccountTransfersFromClientOptions() {}
+            private GetAccountTransfersFromClientOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -92,7 +99,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersFromAccountTypeOptions {
 
-            private GetAccountTransfersFromAccountTypeOptions() {}
+            private GetAccountTransfersFromAccountTypeOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -104,7 +112,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersToOfficeOptions {
 
-            private GetAccountTransfersToOfficeOptions() {}
+            private GetAccountTransfersToOfficeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -116,7 +125,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersToAccountTypeOptions {
 
-            private GetAccountTransfersToAccountTypeOptions() {}
+            private GetAccountTransfersToAccountTypeOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -142,7 +152,8 @@ final class AccountTransfersApiResourceSwagger {
     @Schema(description = "PostAccountTransfersRequest")
     public static final class PostAccountTransfersRequest {
 
-        private PostAccountTransfersRequest() {}
+        private PostAccountTransfersRequest() {
+        }
 
         @Schema(example = "1")
         public Long fromOfficeId;
@@ -175,7 +186,8 @@ final class AccountTransfersApiResourceSwagger {
     @Schema(description = "PostAccountTransfersResponse")
     public static final class PostAccountTransfersResponse {
 
-        private PostAccountTransfersResponse() {}
+        private PostAccountTransfersResponse() {
+        }
 
         @Schema(example = "1")
         public Long savingsId;
@@ -186,15 +198,18 @@ final class AccountTransfersApiResourceSwagger {
     @Schema(description = "GetAccountTransfersResponse")
     public static final class GetAccountTransfersResponse {
 
-        private GetAccountTransfersResponse() {}
+        private GetAccountTransfersResponse() {
+        }
 
         static final class GetAccountTransfersPageItems {
 
-            private GetAccountTransfersPageItems() {}
+            private GetAccountTransfersPageItems() {
+            }
 
             static final class GetAccountTransfersPageItemsCurrency {
 
-                private GetAccountTransfersPageItemsCurrency() {}
+                private GetAccountTransfersPageItemsCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -212,7 +227,8 @@ final class AccountTransfersApiResourceSwagger {
 
             static final class GetAccountTransfersPageItemsFromOffice {
 
-                private GetAccountTransfersPageItemsFromOffice() {}
+                private GetAccountTransfersPageItemsFromOffice() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -222,7 +238,8 @@ final class AccountTransfersApiResourceSwagger {
 
             static final class GetAccountTransfersPageItemsFromAccount {
 
-                private GetAccountTransfersPageItemsFromAccount() {}
+                private GetAccountTransfersPageItemsFromAccount() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -232,7 +249,8 @@ final class AccountTransfersApiResourceSwagger {
 
             static final class GetAccountTransfersPageItemsToAccountType {
 
-                private GetAccountTransfersPageItemsToAccountType() {}
+                private GetAccountTransfersPageItemsToAccountType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -271,11 +289,13 @@ final class AccountTransfersApiResourceSwagger {
     @Schema(description = "GetAccountTransfersTemplateRefundByTransferResponse")
     public static final class GetAccountTransfersTemplateRefundByTransferResponse {
 
-        private GetAccountTransfersTemplateRefundByTransferResponse() {}
+        private GetAccountTransfersTemplateRefundByTransferResponse() {
+        }
 
         static final class GetAccountTransfersTemplateRefundByTransferCurrency {
 
-            private GetAccountTransfersTemplateRefundByTransferCurrency() {}
+            private GetAccountTransfersTemplateRefundByTransferCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -295,7 +315,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferFromOffice {
 
-            private GetAccountTransfersTemplateRefundByTransferFromOffice() {}
+            private GetAccountTransfersTemplateRefundByTransferFromOffice() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -313,11 +334,13 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferFromClient {
 
-            private GetAccountTransfersTemplateRefundByTransferFromClient() {}
+            private GetAccountTransfersTemplateRefundByTransferFromClient() {
+            }
 
             static final class GetAccountTransfersStatus {
 
-                private GetAccountTransfersStatus() {}
+                private GetAccountTransfersStatus() {
+                }
 
                 @Schema(example = "300")
                 public Long id;
@@ -329,22 +352,26 @@ final class AccountTransfersApiResourceSwagger {
 
             static final class GetAccountTransfersGender {
 
-                private GetAccountTransfersGender() {}
+                private GetAccountTransfersGender() {
+                }
             }
 
             static final class GetAccountTransfersClientType {
 
-                private GetAccountTransfersClientType() {}
+                private GetAccountTransfersClientType() {
+                }
             }
 
             static final class GetAccountTransfersClientClassification {
 
-                private GetAccountTransfersClientClassification() {}
+                private GetAccountTransfersClientClassification() {
+                }
             }
 
             static final class GetAccountTransfersTimeline {
 
-                private GetAccountTransfersTimeline() {}
+                private GetAccountTransfersTimeline() {
+                }
 
                 @Schema(example = "[2012, 2, 1]")
                 public LocalDate submittedOnDate;
@@ -366,7 +393,8 @@ final class AccountTransfersApiResourceSwagger {
 
             static final class GetAccountTransfersGroups {
 
-                private GetAccountTransfersGroups() {}
+                private GetAccountTransfersGroups() {
+                }
             }
 
             @Schema(example = "1")
@@ -397,7 +425,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferFromAccount {
 
-            private GetAccountTransfersTemplateRefundByTransferFromAccount() {}
+            private GetAccountTransfersTemplateRefundByTransferFromAccount() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -420,7 +449,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferToClient {
 
-            private GetAccountTransfersTemplateRefundByTransferToClient() {}
+            private GetAccountTransfersTemplateRefundByTransferToClient() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -434,7 +464,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferToAccount {
 
-            private GetAccountTransfersTemplateRefundByTransferToAccount() {}
+            private GetAccountTransfersTemplateRefundByTransferToAccount() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -455,7 +486,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferFromOfficeOptions {
 
-            private GetAccountTransfersTemplateRefundByTransferFromOfficeOptions() {}
+            private GetAccountTransfersTemplateRefundByTransferFromOfficeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -467,7 +499,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferFromClientOptions {
 
-            private GetAccountTransfersTemplateRefundByTransferFromClientOptions() {}
+            private GetAccountTransfersTemplateRefundByTransferFromClientOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -481,7 +514,8 @@ final class AccountTransfersApiResourceSwagger {
 
         static final class GetAccountTransfersTemplateRefundByTransferFromAccountOptions {
 
-            private GetAccountTransfersTemplateRefundByTransferFromAccountOptions() {}
+            private GetAccountTransfersTemplateRefundByTransferFromAccountOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -526,7 +560,8 @@ final class AccountTransfersApiResourceSwagger {
     @Schema(description = "PostAccountTransfersRefundByTransferRequest")
     public static final class PostAccountTransfersRefundByTransferRequest {
 
-        private PostAccountTransfersRefundByTransferRequest() {}
+        private PostAccountTransfersRefundByTransferRequest() {
+        }
 
         @Schema(example = "2")
         public Long fromAccountId;
@@ -559,7 +594,8 @@ final class AccountTransfersApiResourceSwagger {
     @Schema(description = "PostAccountTransfersRefundByTransferResponse")
     public static final class PostAccountTransfersRefundByTransferResponse {
 
-        private PostAccountTransfersRefundByTransferResponse() {}
+        private PostAccountTransfersRefundByTransferResponse() {
+        }
 
         @Schema(example = "1")
         public Long savingsId;

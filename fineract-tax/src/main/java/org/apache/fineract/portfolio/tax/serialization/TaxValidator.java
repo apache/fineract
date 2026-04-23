@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -247,11 +249,11 @@ public class TaxValidator {
                             taxComponent);
                     if (taxMappingId == null) {
                         baseDataValidator.reset().parameter(
-                                TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
+                                        TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
                                 .value(taxComponentId).notNull().longGreaterThanZero();
                     } else {
                         baseDataValidator.reset().parameter(
-                                TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
+                                        TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
                                 .value(taxComponentId).longGreaterThanZero();
                         baseDataValidator.reset()
                                 .parameter(TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.idParamName + AT_INDEX + i)
@@ -323,7 +325,7 @@ public class TaxValidator {
     }
 
     private void validateStartDate(final LocalDate existingStartDate, final LocalDate startDate,
-            final DataValidatorBuilder baseDataValidator) {
+                                   final DataValidatorBuilder baseDataValidator) {
         baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).validateDateAfter(existingStartDate);
     }
 
@@ -348,7 +350,7 @@ public class TaxValidator {
     }
 
     private void validateGroupTotal(final Set<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator,
-            final String paramenter) {
+                                    final String paramenter) {
         for (TaxGroupMappings groupMappingsOne : taxMappings) {
             Collection<LocalDate> dates = groupMappingsOne.getTaxComponent().allStartDates();
             for (LocalDate date : dates) {

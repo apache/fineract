@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,12 +29,14 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -250,14 +252,14 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
+                                                               final Long delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
         final HashMap<String, Object> loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }
 
     private Integer createLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
-            final String repaymentStrategy) {
+                                      final String repaymentStrategy) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
@@ -274,7 +276,7 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
     }
 
     private void reviewLoanTransactionRelations(final Integer loanId, final Long transactionId, final Integer expectedSize,
-            final Double outstandingBalance) {
+                                                final Double outstandingBalance) {
 
         GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,
                 transactionId.intValue());

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 // TODO FINERACT-1932-Fineract modularization: Move to fineract-progressive-loan module after refactor of Loan and LoanTransaction classes
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -28,7 +29,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,7 +47,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTypeLis
 @Setter
 @Entity
 @Table(name = "m_loan_payment_allocation_rule", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "loan_id", "transaction_type" }, name = "uq_m_loan_payment_allocation_rule") })
+        @UniqueConstraint(columnNames = {"loan_id", "transaction_type"}, name = "uq_m_loan_payment_allocation_rule")})
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoanPaymentAllocationRule extends AbstractAuditableWithUTCDateTimeCustom<Long> {

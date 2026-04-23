@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
@@ -41,7 +42,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 @Slf4j
 public class DelinquencyBucketsHelper {
 
-    protected DelinquencyBucketsHelper() {}
+    protected DelinquencyBucketsHelper() {
+    }
 
     public static List<DelinquencyBucketResponse> getBuckets() {
         return Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement.getBuckets());
@@ -74,8 +76,8 @@ public class DelinquencyBucketsHelper {
         List<Long> rangeIds = new ArrayList<>();
         rangesDef.forEach(range -> {
             rangeIds.add(Calls.ok(FineractClientHelper.getFineractClient().delinquencyRangeAndBucketsManagement
-                    .createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
-                            .minimumAgeDays(range.getLeft()).maximumAgeDays(range.getRight()).locale("en")))
+                            .createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
+                                    .minimumAgeDays(range.getLeft()).maximumAgeDays(range.getRight()).locale("en")))
                     .getResourceId());
         });
         return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds))
@@ -91,7 +93,7 @@ public class DelinquencyBucketsHelper {
     }
 
     public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,
-            Double amountExpected) {
+                                                  Double amountExpected) {
         GetLoansLoanIdDelinquencySummary getCollectionData = getLoansLoanIdResponse.getDelinquent();
         if (getCollectionData != null) {
             log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),

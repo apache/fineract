@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
@@ -63,8 +64,8 @@ public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends Abs
     private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
 
     public CumulativeDecliningBalanceInterestLoanScheduleGenerator(final ScheduledDateGenerator scheduledDateGenerator,
-            final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
-            final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper) {
+                                                                   final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
+                                                                   final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper) {
         super(loanTransactionRepository, currencyMapper);
         this.scheduledDateGenerator = scheduledDateGenerator;
         this.paymentPeriodsInOneYearCalculator = paymentPeriodsInOneYearCalculator;
@@ -82,12 +83,12 @@ public class CumulativeDecliningBalanceInterestLoanScheduleGenerator extends Abs
 
     @Override
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
-            final BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
-            @SuppressWarnings("unused") final Money totalCumulativeInterest,
-            @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
-            final TreeMap<LocalDate, Money> principalVariation, final Map<LocalDate, Money> compoundingMap, final LocalDate periodStartDate,
-            final LocalDate periodEndDate, final Collection<LoanTermVariationsData> termVariations) {
+                                                                           final BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
+                                                                           @SuppressWarnings("unused") final Money totalCumulativeInterest,
+                                                                           @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
+                                                                           final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
+                                                                           final TreeMap<LocalDate, Money> principalVariation, final Map<LocalDate, Money> compoundingMap, final LocalDate periodStartDate,
+                                                                           final LocalDate periodEndDate, final Collection<LoanTermVariationsData> termVariations) {
 
         LocalDate interestStartDate = periodStartDate;
         Money interestForThisInstallment = totalCumulativePrincipal.zero();

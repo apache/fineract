@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler.journalentry;
 
 import com.google.gson.GsonBuilder;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.accounting.journalentry.data.CreditDebit;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -127,7 +129,7 @@ public class JournalEntriesImportHandler implements ImportHandler {
     }
 
     private JournalEntryData readAddJournalEntries(final Workbook workbook, final Row row, LocalDate transactionDate, final String locale,
-            final String dateFormat) {
+                                                   final String dateFormat) {
         LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row);
         if (transactionDateCheck != null) {
             transactionDate = transactionDateCheck;
@@ -186,7 +188,7 @@ public class JournalEntriesImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<JournalEntryData> glTransactions, String dateFormat,
-            final String locale) {
+                               final String locale) {
         Sheet addJournalEntriesSheet = workbook.getSheet(TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;

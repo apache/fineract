@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.sms.constants;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -36,19 +37,19 @@ public final class SmsCampaignEnumerations {
                 SmsCampaignTriggerType.INVALID.getCode(), "Invalid");
         switch (type) {
             case INVALID:
-            break;
+                break;
             case DIRECT:
                 optionData = new EnumOptionData(SmsCampaignTriggerType.DIRECT.getValue().longValue(),
                         SmsCampaignTriggerType.DIRECT.getCode(), "Direct");
-            break;
+                break;
             case SCHEDULE:
                 optionData = new EnumOptionData(SmsCampaignTriggerType.SCHEDULE.getValue().longValue(),
                         SmsCampaignTriggerType.SCHEDULE.getCode(), "Scheduled");
-            break;
+                break;
             case TRIGGERED:
                 optionData = new EnumOptionData(SmsCampaignTriggerType.TRIGGERED.getValue().longValue(),
                         SmsCampaignTriggerType.TRIGGERED.getCode(), "Triggered");
-            break;
+                break;
         }
         return optionData;
     }
@@ -58,14 +59,14 @@ public final class SmsCampaignEnumerations {
                 "Invalid");
         switch (type) {
             case INVALID:
-            break;
+                break;
             case SMS:
                 optionData = new EnumOptionData(CampaignType.SMS.getValue().longValue(), CampaignType.SMS.getCode(), "SMS");
-            break;
+                break;
             case NOTIFICATION:
                 optionData = new EnumOptionData(CampaignType.NOTIFICATION.getValue().longValue(), CampaignType.NOTIFICATION.getCode(),
                         "NOTIFICATION");
-            break;
+                break;
         }
         return optionData;
     }
@@ -79,9 +80,9 @@ public final class SmsCampaignEnumerations {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final Month monthType : Month.values()) {
             if (Month.DECEMBER.compareTo(monthType) != 0) { // We are removing
-                                                            // December because
-                                                            // we are adding
-                                                            // yearly frequency
+                // December because
+                // we are adding
+                // yearly frequency
                 optionDatas.add(calendarMonthType(monthType));
             }
         }

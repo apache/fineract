@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.service;
 
 import java.time.LocalDate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -41,9 +42,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class InlineWorkingCapitalLoanCOBExecutorServiceImpl extends InlineCommonLockableCOBExecutorService<WorkingCapitalLoanAccountLock> {
 
     public InlineWorkingCapitalLoanCOBExecutorServiceImpl(WorkingCapitalAccountLockRepository loanAccountLockRepository,
-            InlineLoanCOBExecutionDataParser dataParser, JobLauncher jobLauncher, JobLocator jobLocator, JobExplorer jobExplorer,
-            TransactionTemplate transactionTemplate, CustomJobParameterRepository customJobParameterRepository,
-            PlatformSecurityContext context, WorkingCapitalLoanRetrieveIdService retrieveIdService, FineractProperties fineractProperties) {
+                                                          InlineLoanCOBExecutionDataParser dataParser, JobLauncher jobLauncher, JobLocator jobLocator, JobExplorer jobExplorer,
+                                                          TransactionTemplate transactionTemplate, CustomJobParameterRepository customJobParameterRepository,
+                                                          PlatformSecurityContext context, WorkingCapitalLoanRetrieveIdService retrieveIdService, FineractProperties fineractProperties) {
         super(loanAccountLockRepository, dataParser, jobLauncher, jobLocator, jobExplorer, transactionTemplate,
                 customJobParameterRepository, context, retrieveIdService, fineractProperties);
     }

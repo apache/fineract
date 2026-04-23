@@ -23,7 +23,8 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
-        <addUniqueConstraint columnNames="reversal_external_id," constraintName="UNIQUE_REVERSAL_EXTERNAL_ID_LOAN_TRANSACTION"
+        <addUniqueConstraint columnNames="reversal_external_id,"
+                             constraintName="UNIQUE_REVERSAL_EXTERNAL_ID_LOAN_TRANSACTION"
                              tableName="m_loan_transaction"/>
     </changeSet>
 </databaseChangeLog>

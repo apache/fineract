@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.reflections.scanners.Scanners.SubTypes;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import jakarta.transaction.Transactional;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -86,7 +88,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
     @Override
     @CacheEvict(cacheNames = "externalAssetOwnerLoanProductAttributes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#command.getProductId().toString() + #attributeKey)")
     public CommandProcessingResult updateExternalAssetOwnerLoanProductAttribute(JsonCommand command, String attributeKey,
-            String attributeValue) {
+                                                                                String attributeValue) {
         Long loanProductId = command.getProductId();
         Long attributeId = command.entityId();
         validateLoanProductAttributeRequest(command.json(), attributeKey, attributeValue);
@@ -105,7 +107,8 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
         final Set<String> requestParameters = new HashSet<>(
                 Arrays.asList(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_KEY,
                         ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_VALUE));
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, requestParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -174,7 +177,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
     }
 
     private ExternalAssetOwnerLoanProductAttributes createExternalAssetOwnerLoanProductAttribute(Long loanProductId, String attributeKey,
-            String attributeValue) {
+                                                                                                 String attributeValue) {
         ExternalAssetOwnerLoanProductAttributes attribute = new ExternalAssetOwnerLoanProductAttributes();
         attribute.setLoanProductId(loanProductId);
         attribute.setAttributeKey(attributeKey);

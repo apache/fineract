@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,9 +25,11 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.client.models.ChangePwdUsersUserIdRequest;
 import org.apache.fineract.client.models.ChangePwdUsersUserIdResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
@@ -260,7 +262,7 @@ public class UserAdministrationTest extends IntegrationTest {
     @Test
     public void testUserCreationWithInvalidPasswords() {
         Map<String, String> invalidPasswords = Map.ofEntries(Map.entry("TooShort", "Ab1#Xyz"), // Less than 12
-                                                                                               // characters
+                // characters
                 Map.entry("NoUppercase", "abcdefg1#2$3%xyz"), // Missing uppercase letter
                 Map.entry("NoLowercase", "ABCDEFG1#2$3%XYZ"), // Missing lowercase letter
                 Map.entry("NoDigit", "Abcdefg#@$%XYZabc"), // Missing digit

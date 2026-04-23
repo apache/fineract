@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanOwnershipTransferDataV1;
 import org.apache.fineract.avro.loan.v1.UnpaidChargeDataV1;
@@ -128,7 +129,7 @@ public class InvestorBusinessEventSerializerTest {
     }
 
     private void doTest(ExternalTransferStatus status, ExternalTransferSubStatus subStatus, ExternalTransferStatus firstTransferStatus,
-            String expectedType, String expectedStatus, String expectedReason) {
+                        String expectedType, String expectedStatus, String expectedReason) {
         // given
         ExternalAssetOwnersReadService mockReadService = Mockito.mock(ExternalAssetOwnersReadService.class);
         when(mockReadService.retrieveTransferData(123L)).thenReturn(createTransferData(status, subStatus));
@@ -212,7 +213,7 @@ public class InvestorBusinessEventSerializerTest {
     }
 
     private ExternalAssetOwnerTransfer createExternalAssetOwnerTransfer(ExternalTransferStatus status,
-            ExternalTransferSubStatus subStatus) {
+                                                                        ExternalTransferSubStatus subStatus) {
         ExternalAssetOwnerTransfer mock = Mockito.mock(ExternalAssetOwnerTransfer.class);
         when(mock.getStatus()).thenReturn(status);
         when(mock.getSubStatus()).thenReturn(subStatus);

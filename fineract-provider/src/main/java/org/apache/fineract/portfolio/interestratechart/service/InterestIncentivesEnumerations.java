@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.interestratechart.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveEntityType;
@@ -42,23 +43,23 @@ public final class InterestIncentivesEnumerations {
 
         switch (type) {
             case INVALID:
-            break;
+                break;
             case AGE:
                 nameOptionData = new EnumOptionData(InterestIncentiveAttributeName.AGE.getValue().longValue(),
                         InterestIncentiveAttributeName.AGE.getCode(), "age");
-            break;
+                break;
             case GENDER:
                 nameOptionData = new EnumOptionData(InterestIncentiveAttributeName.GENDER.getValue().longValue(),
                         InterestIncentiveAttributeName.GENDER.getCode(), "Gender");
-            break;
+                break;
             case CLIENT_TYPE:
                 nameOptionData = new EnumOptionData(InterestIncentiveAttributeName.CLIENT_TYPE.getValue().longValue(),
                         InterestIncentiveAttributeName.CLIENT_TYPE.getCode(), "Client Type");
-            break;
+                break;
             case CLIENT_CLASSIFICATION:
                 nameOptionData = new EnumOptionData(InterestIncentiveAttributeName.CLIENT_CLASSIFICATION.getValue().longValue(),
                         InterestIncentiveAttributeName.CLIENT_CLASSIFICATION.getCode(), "Client Classification");
-            break;
+                break;
         }
 
         return nameOptionData;
@@ -84,15 +85,15 @@ public final class InterestIncentivesEnumerations {
 
         switch (type) {
             case INVALID:
-            break;
+                break;
             case ACCOUNT:
                 nameOptionData = new EnumOptionData(InterestIncentiveEntityType.ACCOUNT.getValue().longValue(),
                         InterestIncentiveEntityType.ACCOUNT.getCode(), "account");
-            break;
+                break;
             case CUSTOMER:
                 nameOptionData = new EnumOptionData(InterestIncentiveEntityType.CUSTOMER.getValue().longValue(),
                         InterestIncentiveEntityType.CUSTOMER.getCode(), "Customer");
-            break;
+                break;
         }
 
         return nameOptionData;
@@ -118,15 +119,15 @@ public final class InterestIncentivesEnumerations {
 
         switch (type) {
             case INVALID:
-            break;
+                break;
             case FIXED:
                 nameOptionData = new EnumOptionData(InterestIncentiveType.FIXED.getValue().longValue(),
                         InterestIncentiveType.FIXED.getCode(), "Fixed");
-            break;
+                break;
             case INCENTIVE:
                 nameOptionData = new EnumOptionData(InterestIncentiveType.INCENTIVE.getValue().longValue(),
                         InterestIncentiveType.INCENTIVE.getCode(), "Incentive");
-            break;
+                break;
         }
 
         return nameOptionData;

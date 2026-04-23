@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -37,8 +39,8 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
 @Getter
-@ToString(exclude = { "repaymentPeriod" })
-@EqualsAndHashCode(exclude = { "repaymentPeriod" })
+@ToString(exclude = {"repaymentPeriod"})
+@EqualsAndHashCode(exclude = {"repaymentPeriod"})
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class InterestPeriod implements Comparable<InterestPeriod> {
 
@@ -92,14 +94,14 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
     }
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate,
-            LocalDate dueDate) {
+                                                  LocalDate dueDate) {
         final Money zero = repaymentPeriod.getZero();
         return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), false);
     }
 
     public static InterestPeriod withEmptyAmounts(@NotNull RepaymentPeriod repaymentPeriod, @NotNull LocalDate fromDate, LocalDate dueDate,
-            boolean isPaused) {
+                                                  boolean isPaused) {
         final Money zero = repaymentPeriod.getZero();
         return new InterestPeriod(repaymentPeriod, fromDate, dueDate, BigDecimal.ZERO, BigDecimal.ZERO, zero, zero, zero, zero, zero, zero,
                 zero.getMc(), isPaused);
@@ -147,7 +149,8 @@ public class InterestPeriod implements Comparable<InterestPeriod> {
             return BigDecimal.ZERO;
         }
         BigDecimal baseAmount = switch (method) {
-            case FLAT -> getRepaymentPeriod().calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(this).getAmount();
+            case FLAT ->
+                    getRepaymentPeriod().calculateTotalDisbursedAndCapitalizedIncomeAmountTillGivenPeriod(this).getAmount();
             case DECLINING_BALANCE -> getOutstandingLoanBalance().getAmount();
             default -> throw new UnsupportedOperationException("Method not implemented: " + method);
         };

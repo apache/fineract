@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -61,7 +62,7 @@ public class JournalEntryAggregationJobListener implements JobExecutionListener 
         final LocalDate aggregatedOnDate = providedAggregatedOnDate != null //
                 ? providedAggregatedOnDate.minusDays(fineractProperties.getJob().getJournalEntryAggregation().getExcludeRecentNDays()) //
                 : ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.BUSINESS_DATE)
-                        .minusDays(fineractProperties.getJob().getJournalEntryAggregation().getExcludeRecentNDays()); //
+                .minusDays(fineractProperties.getJob().getJournalEntryAggregation().getExcludeRecentNDays()); //
         // get last or most recent aggregatedOnDate from tacking table.
         final LocalDate lastAggregatedOnDate = journalEntryAggregationTrackingRepository.findLatestAggregatedOnDate();
 

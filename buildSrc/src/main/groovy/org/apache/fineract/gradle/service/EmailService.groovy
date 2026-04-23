@@ -42,7 +42,7 @@ class EmailService {
         this.properties.put("mail.smtp.host", config.host)
         this.properties.put("mail.smtp.auth", "true")
         this.properties.put("mail.smtp.starttls.enable", config.tls.toString())
-        if(config.ssl) {
+        if (config.ssl) {
             this.properties.put("mail.smtp.port", "465")
             this.properties.put("mail.smtp.socketFactory.port", "465");
             this.properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -67,10 +67,10 @@ class EmailService {
             Message msg = new MimeMessage(session)
             msg.setFrom(new InternetAddress(params.from, params.name))
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(params.to))
-            if(params.cc) {
+            if (params.cc) {
                 msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(params.cc))
             }
-            if(params.bcc) {
+            if (params.bcc) {
                 msg.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(params.bcc))
             }
             msg.setSubject(params.subject, "UTF-8")

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -46,12 +46,14 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHold
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import com.google.gson.JsonElement;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
@@ -104,13 +106,13 @@ public class SavingsAccountAssembler {
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper,
-            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
-            final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
-            final SavingsAccountRepositoryWrapper savingsAccountRepository,
-            final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory) {
+                                   final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper,
+                                   final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
+                                   final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
+                                   final SavingsAccountRepositoryWrapper savingsAccountRepository,
+                                   final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
+                                   final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
+                                   final ConfigurationDomainService configurationDomainService, ExternalIdFactory externalIdFactory) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsAccountTransactionDataSummaryWrapper = savingsAccountTransactionDataSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -429,7 +431,7 @@ public class SavingsAccountAssembler {
      * chosen {@link SavingsProduct}.
      */
     public SavingsAccount assembleFrom(final Client client, final Group group, final Long productId, final LocalDate appliedonDate,
-            final AppUser appliedBy) {
+                                       final AppUser appliedBy) {
 
         AccountType accountType = AccountType.INVALID;
         if (client != null) {

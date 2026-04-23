@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -42,7 +43,7 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult calculateInterest(Long savingsId);
 
     CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification,
-            JsonCommand command);
+                                               JsonCommand command);
 
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
@@ -77,7 +78,7 @@ public interface SavingsAccountWritePlatformService {
     void applyChargeDue(Long savingsAccountChargeId, Long accountId);
 
     void processPostActiveActions(SavingsAccount account, DateTimeFormatter fmt, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds);
+                                  Set<Long> existingReversedTransactionIds);
 
     CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
 
@@ -96,7 +97,7 @@ public interface SavingsAccountWritePlatformService {
     // boolean backdatedTxnsAllowedTill);
 
     SavingsAccountData postInterest(SavingsAccountData account, boolean postInterestAs, LocalDate transactionDate,
-            boolean backdatedTxnsAllowedTill);
+                                    boolean backdatedTxnsAllowedTill);
 
     CommandProcessingResult blockAccount(Long savingsId, JsonCommand command);
 

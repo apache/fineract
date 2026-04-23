@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,12 +22,14 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
 import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -74,7 +76,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
 
     @Override
     public Page<SavingsAccountTransactionData> searchTransactions(@NonNull Long savingsId,
-            @NonNull TransactionSearchRequest searchParameters) {
+                                                                  @NonNull TransactionSearchRequest searchParameters) {
         context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         String apptable = EntityTables.SAVINGS_TRANSACTION.getApptableName();
@@ -131,7 +133,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
     }
 
     private static void addFromToFilter(@NonNull String column, String fromValue, String toValue,
-            @NonNull List<ColumnFilterData> columnFilters) {
+                                        @NonNull List<ColumnFilterData> columnFilters) {
         if (fromValue != null) {
             columnFilters.add(toValue == null ? ColumnFilterData.create(column, SqlOperator.GTE, fromValue)
                     : ColumnFilterData.btw(column, fromValue, toValue));
@@ -142,7 +144,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
 
     @Nullable
     private static Boolean addTransactionTypesFilter(@NonNull TransactionSearchRequest searchParameters,
-            List<ColumnFilterData> columnFilters) {
+                                                     List<ColumnFilterData> columnFilters) {
         Predicate<SavingsAccountTransactionType> filter = null;
         Boolean credit = searchParameters.getCredit();
         Boolean debit = searchParameters.getDebit();

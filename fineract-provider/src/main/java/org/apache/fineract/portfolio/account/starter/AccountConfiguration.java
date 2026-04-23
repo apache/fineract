@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -74,10 +74,10 @@ public class AccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(AccountTransfersReadPlatformService.class)
     public AccountTransfersReadPlatformService accountTransfersReadPlatformService(JdbcTemplate jdbcTemplate,
-            ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            PortfolioAccountReadPlatformService portfolioAccountReadPlatformService, ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, AccountTransfersMapper accountTransfersMapper, PaginationHelper paginationHelper,
-            SqlValidator sqlValidator) {
+                                                                                   ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
+                                                                                   PortfolioAccountReadPlatformService portfolioAccountReadPlatformService, ColumnValidator columnValidator,
+                                                                                   DatabaseSpecificSQLGenerator sqlGenerator, AccountTransfersMapper accountTransfersMapper, PaginationHelper paginationHelper,
+                                                                                   SqlValidator sqlValidator) {
         return new AccountTransfersReadPlatformServiceImpl(jdbcTemplate, clientReadPlatformService, officeReadPlatformService,
                 portfolioAccountReadPlatformService, columnValidator, sqlGenerator, accountTransfersMapper, paginationHelper, sqlValidator);
     }
@@ -101,24 +101,24 @@ public class AccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(PortfolioAccountReadPlatformService.class)
     public PortfolioAccountReadPlatformService portfolioAccountReadPlatformService(JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                                   DatabaseSpecificSQLGenerator sqlGenerator) {
         return new PortfolioAccountReadPlatformServiceImpl(jdbcTemplate, sqlGenerator);
     }
 
     @Bean
     @ConditionalOnMissingBean(StandingInstructionHistoryReadPlatformService.class)
     public StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService(JdbcTemplate jdbcTemplate,
-            ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
+                                                                                                       ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         return new StandingInstructionHistoryReadPlatformServiceImpl(jdbcTemplate, columnValidator, sqlGenerator, paginationHelper);
     }
 
     @Bean
     @ConditionalOnMissingBean(StandingInstructionReadPlatformService.class)
     public StandingInstructionReadPlatformService standingInstructionReadPlatformService(JdbcTemplate jdbcTemplate,
-            ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
-            DropdownReadPlatformService dropdownReadPlatformService, ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
+                                                                                         ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
+                                                                                         PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
+                                                                                         DropdownReadPlatformService dropdownReadPlatformService, ColumnValidator columnValidator,
+                                                                                         DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         return new StandingInstructionReadPlatformServiceImpl(jdbcTemplate, clientReadPlatformService, officeReadPlatformService,
                 portfolioAccountReadPlatformService, dropdownReadPlatformService, columnValidator, sqlGenerator, paginationHelper);
     }

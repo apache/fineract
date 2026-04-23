@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Setter;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -40,8 +41,8 @@ public final class LoanRescheduleModelRepaymentPeriod implements LoanRescheduleM
     private boolean isNew;
 
     public LoanRescheduleModelRepaymentPeriod(final int periodNumber, final int oldPeriodNumber, LocalDate fromDate,
-            final LocalDate dueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, final boolean isNew) {
+                                              final LocalDate dueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
+                                              final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, final boolean isNew) {
         this.periodNumber = periodNumber;
         this.oldPeriodNumber = oldPeriodNumber;
         this.fromDate = fromDate;
@@ -56,8 +57,8 @@ public final class LoanRescheduleModelRepaymentPeriod implements LoanRescheduleM
     }
 
     public static LoanRescheduleModelRepaymentPeriod instance(final int periodNumber, final int oldPeriodNumber, LocalDate fromDate,
-            final LocalDate dueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, final boolean isNew) {
+                                                              final LocalDate dueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
+                                                              final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, final boolean isNew) {
 
         return new LoanRescheduleModelRepaymentPeriod(periodNumber, oldPeriodNumber, fromDate, dueDate, principalDue,
                 outstandingLoanBalance, interestDue, feeChargesDue, penaltyChargesDue, totalDue, isNew);

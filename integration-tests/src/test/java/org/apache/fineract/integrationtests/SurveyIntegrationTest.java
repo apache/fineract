@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import org.apache.fineract.client.models.SurveyData;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.SurveyHelper;
@@ -194,7 +195,7 @@ public class SurveyIntegrationTest extends IntegrationTest {
     }
 
     private void verifySurveyProperties(SurveyData survey, String expectedName, String expectedDescription, LocalDate expectedValidFrom,
-            LocalDate expectedValidTo, int expectedQuestionCount) {
+                                        LocalDate expectedValidTo, int expectedQuestionCount) {
         assertThat(surveyHelper.getSurveyName(survey)).isEqualTo(expectedName);
         assertThat(surveyHelper.getSurveyDescription(survey)).isEqualTo(expectedDescription);
         assertThat(surveyHelper.getSurveyValidFrom(survey)).isEqualTo(expectedValidFrom);

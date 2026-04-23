@@ -36,9 +36,11 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_client</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_client" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_client" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_client" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_client" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_client" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_client" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <!--Loan-->
@@ -57,7 +59,8 @@
         </preConditions>
         <addNotNullConstraint tableName="m_loan" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_loan" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_loan" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_loan" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_loan" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <!-- Loan transactions -->
@@ -67,16 +70,19 @@
         </preConditions>
         <addNotNullConstraint tableName="m_loan_transaction" columnName="created_on_utc" columnDataType="DATETIME"/>
         <addNotNullConstraint tableName="m_loan_transaction" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_loan_transaction" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME"/>
         <addNotNullConstraint tableName="m_loan_transaction" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="loan-transaction-13" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_loan_transaction</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_loan_transaction" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_loan_transaction" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_loan_transaction" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_loan_transaction" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <!-- Client transaction -->
@@ -105,16 +111,19 @@
     </changeSet>
     <changeSet author="fineract" id="client-transaction-3">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_client_transaction"
-                                 constraintName="FK_client_transaction_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_client_transaction_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_client_transaction"
-                                 constraintName="FK_client_transaction_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_client_transaction_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
     <changeSet id="client-transaction-4" author="fineract">
-        <dropForeignKeyConstraint baseTableName="m_client_transaction" constraintName="FK_m_client_transaction_m_appuser"/>
+        <dropForeignKeyConstraint baseTableName="m_client_transaction"
+                                  constraintName="FK_m_client_transaction_m_appuser"/>
         <dropColumn tableName="m_client_transaction">
             <column name="appuser_id"/>
         </dropColumn>
@@ -125,16 +134,19 @@
         </preConditions>
         <addNotNullConstraint tableName="m_client_transaction" columnName="created_on_utc" columnDataType="DATETIME"/>
         <addNotNullConstraint tableName="m_client_transaction" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_client_transaction" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_client_transaction" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME"/>
         <addNotNullConstraint tableName="m_client_transaction" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="client-transaction-5" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_client_transaction</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_client_transaction" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_client_transaction" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_client_transaction" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_client_transaction" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_client_transaction" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_client_transaction" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="client-transaction-6" author="fineract">
@@ -154,16 +166,20 @@
         </addColumn>
     </changeSet>
     <changeSet id="floating-rate-2" author="fineract">
-        <renameColumn tableName="m_floating_rates" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_floating_rates" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_floating_rates" oldColumnName="createdby_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
+        <renameColumn tableName="m_floating_rates" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by"
+                      columnDataType="BIGINT"/>
     </changeSet>
     <changeSet author="fineract" id="floating-rate-3">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_floating_rates"
-                                 constraintName="FK_floating_rates_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_floating_rates_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_floating_rates"
-                                 constraintName="FK_floating_rates_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_floating_rates_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -180,9 +196,11 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_client_transaction</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_floating_rates" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_floating_rates" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_floating_rates" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_floating_rates" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_floating_rates" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_floating_rates" columnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="floating-rate-5" author="fineract">
@@ -203,16 +221,20 @@
         </addColumn>
     </changeSet>
     <changeSet id="floating-rate-period-2" author="fineract">
-        <renameColumn tableName="m_floating_rates_periods" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_floating_rates_periods" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_floating_rates_periods" oldColumnName="createdby_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
+        <renameColumn tableName="m_floating_rates_periods" oldColumnName="lastmodifiedby_id"
+                      newColumnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet author="fineract" id="floating-rate-period-3">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_floating_rates_periods"
-                                 constraintName="FK_floating_rates_period_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_floating_rates_period_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_floating_rates_periods"
-                                 constraintName="FK_floating_rates_period_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_floating_rates_period_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -220,22 +242,30 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_floating_rates_periods</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="created_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="created_on_utc"
+                              columnDataType="DATETIME"/>
         <addNotNullConstraint tableName="m_floating_rates_periods" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
-        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_by" columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="floating-rate-period-4" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_floating_rates_periods</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
         <addNotNullConstraint tableName="m_floating_rates_periods" columnName="created_by" columnDataType="BIGINT"/>
-        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
-        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_by" columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_floating_rates_periods" columnName="last_modified_by"
+                              columnDataType="BIGINT"/>
     </changeSet>
     <changeSet id="floating-rate-period-5" author="fineract">
-        <dropNotNullConstraint tableName="m_floating_rates_periods" columnName="created_date" columnDataType="datetime"/>
-        <dropNotNullConstraint tableName="m_floating_rates_periods" columnName="lastmodified_date" columnDataType="datetime"/>
+        <dropNotNullConstraint tableName="m_floating_rates_periods" columnName="created_date"
+                               columnDataType="datetime"/>
+        <dropNotNullConstraint tableName="m_floating_rates_periods" columnName="lastmodified_date"
+                               columnDataType="datetime"/>
     </changeSet>
 </databaseChangeLog>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.savings;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -51,8 +52,8 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
     private final SavingsProductSheetPopulator productSheetPopulator;
 
     public SavingsWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
-            GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
-            SavingsProductSheetPopulator savingsProductSheetPopulator) {
+                                    GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
+                                    SavingsProductSheetPopulator savingsProductSheetPopulator) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.groupSheetPopulator = groupSheetPopulator;
@@ -242,7 +243,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
 
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint savingsTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Individual", "Group" });
+                .createExplicitListConstraint(new String[]{"Individual", "Group"});
         DataValidationConstraint clientNameConstraint = validationHelper.createFormulaListConstraint(
                 "IF($B1=\"Individual\",INDIRECT(CONCATENATE(\"Client_\",$A1)),INDIRECT(CONCATENATE(\"Group_\",$A1)))");
         DataValidationConstraint productNameConstraint = validationHelper.createFormulaListConstraint("Products");
@@ -257,27 +258,27 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint activationDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$G1", "=TODAY()", dateFormat);
         DataValidationConstraint interestCompudingPeriodConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_DAILY,
+                .createExplicitListConstraint(new String[]{TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_DAILY,
                         TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_MONTHLY,
                         TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_QUARTERLY,
                         TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_SEMI_ANNUALLY,
-                        TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY });
+                        TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY});
         DataValidationConstraint interestPostingPeriodConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY,
+                .createExplicitListConstraint(new String[]{TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY,
                         TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_QUARTERLY,
                         TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_BIANUALLY,
-                        TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_ANNUALLY });
-        DataValidationConstraint interestCalculationConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                TemplatePopulateImportConstants.INTEREST_CAL_DAILY_BALANCE, TemplatePopulateImportConstants.INTEREST_CAL_AVG_BALANCE });
+                        TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_ANNUALLY});
+        DataValidationConstraint interestCalculationConstraint = validationHelper.createExplicitListConstraint(new String[]{
+                TemplatePopulateImportConstants.INTEREST_CAL_DAILY_BALANCE, TemplatePopulateImportConstants.INTEREST_CAL_AVG_BALANCE});
         DataValidationConstraint interestCalculationDaysInYearConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_360,
-                        TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_365 });
+                .createExplicitListConstraint(new String[]{TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_360,
+                        TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_365});
         DataValidationConstraint lockinPeriodFrequencyConstraint = validationHelper.createExplicitListConstraint(
-                new String[] { TemplatePopulateImportConstants.FREQUENCY_DAYS, TemplatePopulateImportConstants.FREQUENCY_WEEKS,
-                        TemplatePopulateImportConstants.FREQUENCY_MONTHS, TemplatePopulateImportConstants.FREQUENCY_YEARS });
+                new String[]{TemplatePopulateImportConstants.FREQUENCY_DAYS, TemplatePopulateImportConstants.FREQUENCY_WEEKS,
+                        TemplatePopulateImportConstants.FREQUENCY_MONTHS, TemplatePopulateImportConstants.FREQUENCY_YEARS});
         DataValidationConstraint applyWithdrawalFeeForTransferConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "True", "False" });
-        DataValidationConstraint allowOverdraftConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+                .createExplicitListConstraint(new String[]{"True", "False"});
+        DataValidationConstraint allowOverdraftConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation savingsTypeValidation = validationHelper.createValidation(savingsTypeConstraint, savingsTypeRange);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
@@ -56,13 +57,13 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         private final boolean isAssociationParametersExists;
 
         AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate, final GLAccountReadPlatformService glAccountReadPlatformService,
-                final boolean isAssociationParametersExists) {
+                                    final boolean isAssociationParametersExists) {
             this.jdbcTemplate = jdbcTemplate;
             this.glAccountReadPlatformService = glAccountReadPlatformService;
             this.isAssociationParametersExists = isAssociationParametersExists;
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append(" rule.id as id,rule.name as name, rule.office_id as officeId,office.name as officeName,").append(
-                    " rule.description as description, rule.system_defined as systemDefined, rule.allow_multiple_debits as allowMultipleDebitEntries, rule.allow_multiple_credits as allowMultipleCreditEntries, ")
+                            " rule.description as description, rule.system_defined as systemDefined, rule.allow_multiple_debits as allowMultipleDebitEntries, rule.allow_multiple_credits as allowMultipleCreditEntries, ")
                     .append("debitAccount.id AS debitAccountId, debitAccount.name as debitAccountName, debitAccount.gl_code as debitAccountGLCode, ")
                     .append("creditAccount.id AS creditAccountId, creditAccount.name as creditAccountName, creditAccount.gl_code as creditAccountGLCode")
                     .append(" from m_office AS office, acc_accounting_rule AS rule ")
@@ -142,21 +143,21 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         private List<AccountingTagRuleData> getCreditOrDebitTags(final Long creditOrDebitAccount, final Integer transactionType) {
             final AccountingTagRuleDataMapper mapper = new AccountingTagRuleDataMapper();
             final String taggedAccountsSchema = "Select " + mapper.taggedAccountSchema() + " where rule.id = ? and tag.acc_type_enum=?";
-            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[] { creditOrDebitAccount, transactionType }); // NOSONAR
+            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[]{creditOrDebitAccount, transactionType}); // NOSONAR
         }
 
     }
 
     @Override
     public List<AccountingRuleData> retrieveAllAccountingRules(final String hierarchySearchString,
-            final boolean isAssociationParametersExists) {
+                                                               final boolean isAssociationParametersExists) {
         final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
                 this.glAccountReadPlatformService, isAssociationParametersExists);
-        Object[] arguments = new Object[] {};
+        Object[] arguments = new Object[]{};
         String sql = "select " + resultSetExtractor.schema() + " and system_defined=false ";
         if (hierarchySearchString != null) {
             sql = sql + " and office.hierarchy like ?";
-            arguments = new Object[] { hierarchySearchString };
+            arguments = new Object[]{hierarchySearchString};
         }
         sql = sql + " order by rule.id asc";
         final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments); // NOSONAR
@@ -171,7 +172,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             final String sql = "select " + resultSetExtractor.schema() + " and rule.id = ?";
 
             final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, // NOSONAR
-                    new Object[] { accountingRuleId });
+                    new Object[]{accountingRuleId});
             final AccountingRuleData accountingRuleData = extractedData.get(accountingRuleId);
             if (accountingRuleData == null) {
                 throw new AccountingRuleNotFoundException(accountingRuleId);

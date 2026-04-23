@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
 // Temporary solution until spring-batch fixes the concurrency issue
 // https://github.com/spring-projects/spring-batch/issues/4774
 // Mostly copy from spring-batch
-@SuppressWarnings({ "HideUtilityClassConstructor" })
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class JobSynchronizationManager {
 
     private static final SynchronizationManagerSupport<JobExecution, JobContext> manager = new SynchronizationManagerSupport<>() {
@@ -53,8 +53,8 @@ public class JobSynchronizationManager {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(JobExecution.class);
         enhancer.setCallback(new TenantAwareEqualsHashCodeAdvice(jobExecution));
-        return manager.register((JobExecution) enhancer.create(new Class[] { JobInstance.class, Long.class, JobParameters.class },
-                new Object[] { jobExecution.getJobInstance(), jobExecution.getId(), jobExecution.getJobParameters() }));
+        return manager.register((JobExecution) enhancer.create(new Class[]{JobInstance.class, Long.class, JobParameters.class},
+                new Object[]{jobExecution.getJobInstance(), jobExecution.getId(), jobExecution.getJobParameters()}));
     }
 
     public static void close() {

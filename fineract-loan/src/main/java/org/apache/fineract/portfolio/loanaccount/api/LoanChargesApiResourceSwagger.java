@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,16 +28,19 @@ import java.util.Set;
  */
 final class LoanChargesApiResourceSwagger {
 
-    private LoanChargesApiResourceSwagger() {}
+    private LoanChargesApiResourceSwagger() {
+    }
 
     @Schema(description = "GetLoansLoanIdChargesChargeIdResponse")
     public static final class GetLoansLoanIdChargesChargeIdResponse {
 
-        private GetLoansLoanIdChargesChargeIdResponse() {}
+        private GetLoansLoanIdChargesChargeIdResponse() {
+        }
 
         static final class GetLoanChargeTimeType {
 
-            private GetLoanChargeTimeType() {}
+            private GetLoanChargeTimeType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -48,7 +52,8 @@ final class LoanChargesApiResourceSwagger {
 
         static final class GetLoanChargeCalculationType {
 
-            private GetLoanChargeCalculationType() {}
+            private GetLoanChargeCalculationType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -60,7 +65,8 @@ final class LoanChargesApiResourceSwagger {
 
         static final class GetLoanChargeCurrency {
 
-            private GetLoanChargeCurrency() {}
+            private GetLoanChargeCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -114,15 +120,18 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = "GetLoansLoanIdChargesTemplateResponse")
     public static final class GetLoansLoanIdChargesTemplateResponse {
 
-        private GetLoansLoanIdChargesTemplateResponse() {}
+        private GetLoansLoanIdChargesTemplateResponse() {
+        }
 
         static final class GetLoanChargeTemplateChargeOptions {
 
-            private GetLoanChargeTemplateChargeOptions() {}
+            private GetLoanChargeTemplateChargeOptions() {
+            }
 
             static final class GetLoanChargeTemplateChargeTimeType {
 
-                private GetLoanChargeTemplateChargeTimeType() {}
+                private GetLoanChargeTemplateChargeTimeType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -134,7 +143,8 @@ final class LoanChargesApiResourceSwagger {
 
             static final class GetLoanChargeTemplateChargeAppliesTo {
 
-                private GetLoanChargeTemplateChargeAppliesTo() {}
+                private GetLoanChargeTemplateChargeAppliesTo() {
+                }
 
                 @Schema(example = "1  ")
                 public Long id;
@@ -174,7 +184,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = " PostLoansLoanIdChargesRequest")
     public static final class PostLoansLoanIdChargesRequest {
 
-        private PostLoansLoanIdChargesRequest() {}
+        private PostLoansLoanIdChargesRequest() {
+        }
 
         @Schema(example = "2")
         public Long chargeId;
@@ -193,7 +204,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = " PostLoansLoanIdChargesResponse")
     public static final class PostLoansLoanIdChargesResponse {
 
-        private PostLoansLoanIdChargesResponse() {}
+        private PostLoansLoanIdChargesResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -210,7 +222,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = " PutLoansLoanIdChargesChargeIdRequest")
     public static final class PutLoansLoanIdChargesChargeIdRequest {
 
-        private PutLoansLoanIdChargesChargeIdRequest() {}
+        private PutLoansLoanIdChargesChargeIdRequest() {
+        }
 
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -225,7 +238,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = "PutLoansLoanIdChargesChargeIdResponse")
     public static final class PutLoansLoanIdChargesChargeIdResponse {
 
-        private PutLoansLoanIdChargesChargeIdResponse() {}
+        private PutLoansLoanIdChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -243,7 +257,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = "PostLoansLoanIdChargesChargeIdRequest")
     public static final class PostLoansLoanIdChargesChargeIdRequest {
 
-        private PostLoansLoanIdChargesChargeIdRequest() {}
+        private PostLoansLoanIdChargesChargeIdRequest() {
+        }
 
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -280,7 +295,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = "PostLoansLoanIdChargesChargeIdResponse")
     public static final class PostLoansLoanIdChargesChargeIdResponse {
 
-        private PostLoansLoanIdChargesChargeIdResponse() {}
+        private PostLoansLoanIdChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -337,7 +353,8 @@ final class LoanChargesApiResourceSwagger {
     @Schema(description = "DeleteLoansLoanIdChargesChargeIdResponse")
     public static final class DeleteLoansLoanIdChargesChargeIdResponse {
 
-        private DeleteLoansLoanIdChargesChargeIdResponse() {}
+        private DeleteLoansLoanIdChargesChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

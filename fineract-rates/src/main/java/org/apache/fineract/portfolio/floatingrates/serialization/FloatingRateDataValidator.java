@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.floatingrates.serialization;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -113,7 +115,7 @@ public class FloatingRateDataValidator {
     }
 
     private void validateRatePeriods(DataValidatorBuilder baseDataValidator, JsonElement element, boolean isBaseLendingRate,
-            boolean isBLRModifiedAsNonBLR) {
+                                     boolean isBLRModifiedAsNonBLR) {
         if (this.fromApiJsonHelper.parameterExists(RATE_PERIODS, element)) {
             final JsonArray ratePeriods = this.fromApiJsonHelper.extractJsonArrayNamed(RATE_PERIODS, element);
             baseDataValidator.reset().parameter(RATE_PERIODS).value(ratePeriods).notBlank().jsonArrayNotEmpty();

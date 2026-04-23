@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,12 +21,14 @@ package org.apache.fineract.portfolio.loanproduct.calc.data;
 import static org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper.isInPeriod;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,8 +41,8 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.util.Memo;
 
-@ToString(exclude = { "previous" })
-@EqualsAndHashCode(exclude = { "previous" })
+@ToString(exclude = {"previous"})
+@EqualsAndHashCode(exclude = {"previous"})
 public class RepaymentPeriod {
 
     @JsonExclude
@@ -113,9 +115,9 @@ public class RepaymentPeriod {
     private Money fixedInterest;
 
     protected RepaymentPeriod(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, List<InterestPeriod> interestPeriods,
-            Money emi, Money originalEmi, Money paidPrincipal, Money paidInterest, Money futureUnrecognizedInterest, MathContext mc,
-            ILoanConfigurationDetails loanProductRelatedDetail, boolean isInterestMovedDownward, boolean reAged,
-            boolean reAgedEarlyRepaymentHolder, Money fixedInterest) {
+                              Money emi, Money originalEmi, Money paidPrincipal, Money paidInterest, Money futureUnrecognizedInterest, MathContext mc,
+                              ILoanConfigurationDetails loanProductRelatedDetail, boolean isInterestMovedDownward, boolean reAged,
+                              boolean reAgedEarlyRepaymentHolder, Money fixedInterest) {
         this.previous = previous;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
@@ -141,7 +143,7 @@ public class RepaymentPeriod {
     }
 
     public static RepaymentPeriod create(RepaymentPeriod previous, LocalDate fromDate, LocalDate dueDate, Money emi, MathContext mc,
-            ILoanConfigurationDetails loanProductRelatedDetail) {
+                                         ILoanConfigurationDetails loanProductRelatedDetail) {
         final Money zero = emi.zero();
         final RepaymentPeriod newRepaymentPeriod = new RepaymentPeriod(previous, fromDate, dueDate, new ArrayList<>(), emi, emi, zero, zero,
                 zero, mc, loanProductRelatedDetail, false, false, false, zero);
@@ -226,8 +228,8 @@ public class RepaymentPeriod {
     public Money getCalculatedDueInterest() {
         if (calculatedDueInterestCalculation == null) {
             calculatedDueInterestCalculation = Memo.of(this::calculateCalculatedDueInterest,
-                    () -> new Object[] { previous, interestPeriods, futureUnrecognizedInterest, isInterestMovedUpward,
-                            isInterestMovedDownward, totalDisbursedAmount, fixedInterest, reAged });
+                    () -> new Object[]{previous, interestPeriods, futureUnrecognizedInterest, isInterestMovedUpward,
+                            isInterestMovedDownward, totalDisbursedAmount, fixedInterest, reAged});
         }
         return calculatedDueInterestCalculation.get();
     }
@@ -277,10 +279,10 @@ public class RepaymentPeriod {
             // Due interest might be the maximum paid if there is pay-off or early repayment
             dueInterestCalculation = Memo.of(
                     () -> MathUtil.max(getPaidPrincipal().isGreaterThan(getCalculatedDuePrincipal()) ? getPaidInterest()
-                            : MathUtil.min(getCalculatedDueInterest(), getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest(), false),
+                                    : MathUtil.min(getCalculatedDueInterest(), getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest(), false),
                             getPaidInterest(), false),
-                    () -> new Object[] { paidPrincipal, paidInterest, interestPeriods, futureUnrecognizedInterest, totalDisbursedAmount,
-                            fixedInterest, reAged, emi, interestPaymentGrace });
+                    () -> new Object[]{paidPrincipal, paidInterest, interestPeriods, futureUnrecognizedInterest, totalDisbursedAmount,
+                            fixedInterest, reAged, emi, interestPaymentGrace});
         }
         return dueInterestCalculation.get();
     }
@@ -345,7 +347,7 @@ public class RepaymentPeriod {
     public Money getDuePrincipal() {
         // Due principal might be the maximum paid if there is pay-off or early repayment
         return MathUtil.max(MathUtil
-                .negativeToZero(getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().minus(getDueInterest(), getMc()), getMc()),
+                        .negativeToZero(getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest().minus(getDueInterest(), getMc()), getMc()),
                 getPaidPrincipal(), false);
     }
 
@@ -397,7 +399,7 @@ public class RepaymentPeriod {
                         .plus(getPaidPrincipal(), getMc()) //
                         .minus(getDuePrincipal(), getMc()); //
                 return MathUtil.negativeToZero(calculatedOutStandingLoanBalance, getMc());
-            }, () -> new Object[] { paidPrincipal, paidInterest, interestPeriods, totalDisbursedAmount });
+            }, () -> new Object[]{paidPrincipal, paidInterest, interestPeriods, totalDisbursedAmount});
         }
         return outstandingBalanceCalculation.get();
     }

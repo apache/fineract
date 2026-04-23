@@ -28,32 +28,32 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="delinquency_range_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="loan_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="installment_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="addedon_date" type="DATE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="first_overdue_date" type="DATE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="outstanding_amount" type="DECIMAL(19, 6)">
                 <constraints nullable="false"/>
             </column>
-            <column defaultValueComputed="NULL" name="liftedon_date" type="DATE" />
+            <column defaultValueComputed="NULL" name="liftedon_date" type="DATE"/>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
@@ -78,7 +78,8 @@
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="4">
-        <addForeignKeyConstraint baseColumnNames="delinquency_range_id" baseTableName="m_loan_installment_delinquency_tag_history"
+        <addForeignKeyConstraint baseColumnNames="delinquency_range_id"
+                                 baseTableName="m_loan_installment_delinquency_tag_history"
                                  constraintName="FK_m_delinquency_installment_tags_range" deferrable="false"
                                  initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
                                  referencedColumnNames="id" referencedTableName="m_delinquency_range" validate="true"/>
@@ -86,9 +87,11 @@
                                  constraintName="FK_m_delinquency_installment_tags_loan" deferrable="false"
                                  initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
                                  referencedColumnNames="id" referencedTableName="m_loan" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="installment_id" baseTableName="m_loan_installment_delinquency_tag_history"
+        <addForeignKeyConstraint baseColumnNames="installment_id"
+                                 baseTableName="m_loan_installment_delinquency_tag_history"
                                  constraintName="FK_m_delinquency_installment_tags_installment" deferrable="false"
                                  initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-                                 referencedColumnNames="id" referencedTableName="m_loan_repayment_schedule" validate="true"/>
+                                 referencedColumnNames="id" referencedTableName="m_loan_repayment_schedule"
+                                 validate="true"/>
     </changeSet>
 </databaseChangeLog>

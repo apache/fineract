@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.s3;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
@@ -49,7 +50,7 @@ public class AmazonS3Config {
 
     @Bean("s3Client")
     public S3Client s3Client(DefaultCredentialsProvider awsCredentialsProvider, AwsRegionProvider awsRegionProvider,
-            List<S3ClientCustomizer> customizers) {
+                             List<S3ClientCustomizer> customizers) {
         S3ClientBuilder builder = S3Client.builder().credentialsProvider(awsCredentialsProvider).region(awsRegionProvider.getRegion());
         customizers.forEach(customizer -> customizer.customize(builder));
         return builder.build();
@@ -58,7 +59,7 @@ public class AmazonS3Config {
     @Bean
     @ConditionalOnBean(S3Client.class)
     public S3DatatableReportExportServiceImpl s3DatatableReportExportServiceImpl(ReadReportingService reportServiceImpl,
-            ConfigurationDomainService configurationDomainService, S3Client s3Client, FineractProperties fineractProperties) {
+                                                                                 ConfigurationDomainService configurationDomainService, S3Client s3Client, FineractProperties fineractProperties) {
         return new S3DatatableReportExportServiceImpl(reportServiceImpl, configurationDomainService, s3Client, fineractProperties);
     }
 

@@ -43,7 +43,7 @@ class SubversionService {
         this.client.eventHandler = new ISVNEventHandler() {
             @Override
             void handleEvent(SVNEvent event, double progress) throws SVNException {
-                println ">>> PROGRESS: ${progress>0?:'-'}"
+                println ">>> PROGRESS: ${progress > 0 ?: '-'}"
             }
 
             @Override

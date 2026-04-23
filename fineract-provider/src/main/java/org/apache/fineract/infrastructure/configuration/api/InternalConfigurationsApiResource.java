@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -64,8 +64,8 @@ public class InternalConfigurationsApiResource implements InitializingBean {
 
     @PUT
     @Path("name/{configName}/value/{configValue}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Update internal global configuration", operationId = "updateInternalGlobalConfiguration")
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public Response updateGlobalConfiguration(@PathParam("configName") String configName, @PathParam("configValue") Long configValue) {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.workingcapitalloan.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
@@ -34,12 +36,14 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.api.WorkingCapita
  */
 public final class WorkingCapitalLoanApiResourceSwagger {
 
-    private WorkingCapitalLoanApiResourceSwagger() {}
+    private WorkingCapitalLoanApiResourceSwagger() {
+    }
 
     @Schema(description = "Template: loan details (prefilled when productId/clientId provided) plus dropdown options.")
     public static final class GetWorkingCapitalLoansTemplateResponse {
 
-        private GetWorkingCapitalLoansTemplateResponse() {}
+        private GetWorkingCapitalLoansTemplateResponse() {
+        }
 
         @Schema(description = "Loan details (product, fundId, currency, client, etc.).")
         public GetWorkingCapitalLoansLoanIdResponse loanData;
@@ -55,7 +59,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetWorkingCapitalLoansClient")
     public static final class GetWorkingCapitalLoansClient {
 
-        private GetWorkingCapitalLoansClient() {}
+        private GetWorkingCapitalLoansClient() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -66,7 +71,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetWorkingCapitalLoansPagedResponse (content, totalElements, totalPages, number, size, first, last)")
     public static final class GetWorkingCapitalLoansPagedResponse {
 
-        private GetWorkingCapitalLoansPagedResponse() {}
+        private GetWorkingCapitalLoansPagedResponse() {
+        }
 
         public List<GetWorkingCapitalLoansLoanIdResponse> content;
         @Schema(example = "100")
@@ -84,7 +90,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetWorkingCapitalLoansLoanIdStatus")
     static final class GetWorkingCapitalLoansLoanIdStatus {
 
-        private GetWorkingCapitalLoansLoanIdStatus() {}
+        private GetWorkingCapitalLoansLoanIdStatus() {
+        }
 
         @Schema(example = "100")
         public Long id;
@@ -113,7 +120,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetWorkingCapitalLoansLoanIdTimeline")
     static final class GetWorkingCapitalLoansLoanIdTimeline {
 
-        private GetWorkingCapitalLoansLoanIdTimeline() {}
+        private GetWorkingCapitalLoansLoanIdTimeline() {
+        }
 
         @Schema(example = "[2024, 1, 15]")
         public LocalDate submittedOnDate;
@@ -160,7 +168,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetWorkingCapitalLoansLoanIdResponse")
     public static final class GetWorkingCapitalLoansLoanIdResponse {
 
-        private GetWorkingCapitalLoansLoanIdResponse() {}
+        private GetWorkingCapitalLoansLoanIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -217,7 +226,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "Working capital loan running balances")
     public static final class GetBalance {
 
-        private GetBalance() {}
+        private GetBalance() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -238,7 +248,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "Single disbursement detail (expected and actual)")
     public static final class GetDisbursementDetail {
 
-        private GetDisbursementDetail() {}
+        private GetDisbursementDetail() {
+        }
 
         public Long id;
         public LocalDate expectedDisbursementDate;
@@ -254,7 +265,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetPaymentAllocation")
     public static final class GetPaymentAllocation {
 
-        private GetPaymentAllocation() {}
+        private GetPaymentAllocation() {
+        }
 
         @Schema(example = "DEFAULT")
         public String transactionType;
@@ -277,7 +289,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "GetPaymentAllocationOrder")
     public static final class GetPaymentAllocationOrder {
 
-        private GetPaymentAllocationOrder() {}
+        private GetPaymentAllocationOrder() {
+        }
 
         @Schema(example = "PENALTY")
         public String paymentAllocationRule;
@@ -288,7 +301,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "PostWorkingCapitalLoansRequest")
     public static final class PostWorkingCapitalLoansRequest {
 
-        private PostWorkingCapitalLoansRequest() {}
+        private PostWorkingCapitalLoansRequest() {
+        }
 
         @Schema(example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
         public Long clientId;
@@ -315,7 +329,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
-        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        @Schema(example = "DAYS", allowableValues = {"DAYS", "MONTHS", "YEARS"})
         public String repaymentFrequencyType;
         @Schema(example = "0.0")
         public BigDecimal discount;
@@ -339,7 +353,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(description = "PostPaymentAllocationRule")
         public static final class PostPaymentAllocationRule {
 
-            private PostPaymentAllocationRule() {}
+            private PostPaymentAllocationRule() {
+            }
 
             @Schema(example = "DEFAULT")
             public String transactionType;
@@ -349,7 +364,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(description = "PostPaymentAllocationOrder")
         public static final class PostPaymentAllocationOrder {
 
-            private PostPaymentAllocationOrder() {}
+            private PostPaymentAllocationOrder() {
+            }
 
             @Schema(example = "PENALTY")
             public String paymentAllocationRule;
@@ -361,7 +377,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "PostWorkingCapitalLoansResponse")
     public static final class PostWorkingCapitalLoansResponse {
 
-        private PostWorkingCapitalLoansResponse() {}
+        private PostWorkingCapitalLoansResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -395,7 +412,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "PutWorkingCapitalLoansLoanIdRequest")
     public static final class PutWorkingCapitalLoansLoanIdRequest {
 
-        private PutWorkingCapitalLoansLoanIdRequest() {}
+        private PutWorkingCapitalLoansLoanIdRequest() {
+        }
 
         @Schema(example = "1")
         public Long clientId;
@@ -422,7 +440,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal periodPaymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
-        @Schema(example = "DAYS", allowableValues = { "DAYS", "MONTHS", "YEARS" })
+        @Schema(example = "DAYS", allowableValues = {"DAYS", "MONTHS", "YEARS"})
         public String repaymentFrequencyType;
         @Schema(example = "0.0")
         public BigDecimal discount;
@@ -447,7 +465,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "PutWorkingCapitalLoansLoanIdResponse")
     public static final class PutWorkingCapitalLoansLoanIdResponse {
 
-        private PutWorkingCapitalLoansLoanIdResponse() {}
+        private PutWorkingCapitalLoansLoanIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -457,7 +476,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "DeleteWorkingCapitalLoansLoanIdResponse")
     public static final class DeleteWorkingCapitalLoansLoanIdResponse {
 
-        private DeleteWorkingCapitalLoansLoanIdResponse() {}
+        private DeleteWorkingCapitalLoansLoanIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -466,7 +486,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "PostWorkingCapitalLoansLoanIdResponse")
     public static final class PostWorkingCapitalLoansLoanIdResponse {
 
-        private PostWorkingCapitalLoansLoanIdResponse() {}
+        private PostWorkingCapitalLoansLoanIdResponse() {
+        }
 
         @Schema(example = "2")
         public Long officeId;
@@ -484,7 +505,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
     @Schema(description = "Request for state transition: approve, reject, undoapproval, disburse, undodisbursal")
     public static final class PostWorkingCapitalLoansLoanIdRequest {
 
-        private PostWorkingCapitalLoansLoanIdRequest() {}
+        private PostWorkingCapitalLoansLoanIdRequest() {
+        }
 
         @Schema(example = "15 January 2024", description = "Date of approval")
         public String approvedOnDate;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.floatingrates.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Set;
 
 /**
@@ -26,16 +27,19 @@ import java.util.Set;
  */
 final class FloatingRatesApiResourceSwagger {
 
-    private FloatingRatesApiResourceSwagger() {}
+    private FloatingRatesApiResourceSwagger() {
+    }
 
     @Schema(description = "PostFloatingRatesRequest")
     public static final class PostFloatingRatesRequest {
 
-        private PostFloatingRatesRequest() {}
+        private PostFloatingRatesRequest() {
+        }
 
         static final class PostFloatingRatesRatePeriods {
 
-            private PostFloatingRatesRatePeriods() {}
+            private PostFloatingRatesRatePeriods() {
+            }
 
             @Schema(example = "19 November 2015")
             public String fromDate;
@@ -59,7 +63,8 @@ final class FloatingRatesApiResourceSwagger {
     @Schema(description = "PostFloatingRatesResponse")
     public static final class PostFloatingRatesResponse {
 
-        private PostFloatingRatesResponse() {}
+        private PostFloatingRatesResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -68,7 +73,8 @@ final class FloatingRatesApiResourceSwagger {
     @Schema(description = "GetFloatingRatesResponse")
     public static final class GetFloatingRatesResponse {
 
-        private GetFloatingRatesResponse() {}
+        private GetFloatingRatesResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -91,11 +97,13 @@ final class FloatingRatesApiResourceSwagger {
     @Schema(description = "PutFloatingRatesFloatingRateIdResponse")
     public static final class PutFloatingRatesFloatingRateIdResponse {
 
-        private PutFloatingRatesFloatingRateIdResponse() {}
+        private PutFloatingRatesFloatingRateIdResponse() {
+        }
 
         static final class PutFloatingRatesChanges {
 
-            private PutFloatingRatesChanges() {}
+            private PutFloatingRatesChanges() {
+            }
 
             public Set<PostFloatingRatesRequest.PostFloatingRatesRatePeriods> ratePeriods;
         }

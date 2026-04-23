@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -128,7 +130,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, getDisbursementParameters(isAccountTransfer));
 
         Validator.validateOrThrow("loan.disbursement", baseDataValidator -> {
@@ -276,7 +279,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
                 final Integer installmentId = this.fromApiJsonHelper.extractIntegerNamed("installmentId", postDatedCheck, locale);
                 final List<LoanRepaymentScheduleInstallment> installmentList = loanRepaymentScheduleInstallment.stream().filter(
-                        repayment -> repayment.getInstallmentNumber().equals(installmentId) && repayment.getLoan().getId().equals(loanId))
+                                repayment -> repayment.getInstallmentNumber().equals(installmentId) && repayment.getLoan().getId().equals(loanId))
                         .collect(Collectors.toList());
                 if (installmentList.size() > 1) {
                     throw new PlatformDataIntegrityException("error.repayment.redundancy", "Multiple installment data found",
@@ -295,7 +298,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     protected void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance,
-            Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
+                                                           Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
         if (null != calendarInstance) {
             final Calendar calendar = calendarInstance.getCalendar();
             if (!calendar.isValidRecurringDate(actualDisbursementDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
@@ -312,7 +315,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     public void validateUndoChargeOff(final String json) {
         if (!StringUtils.isBlank(json)) {
             final Set<String> transactionParameters = new HashSet<>(Arrays.asList(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME));
-            final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+            final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+            }.getType();
             this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -339,7 +343,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
         final Set<String> transactionParameters = getTransactionParametersForEdit();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -381,7 +386,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
                 LoanApiConstants.localeParameterName, LoanApiConstants.externalIdParameterName, LoanApiConstants.noteParameterName,
                 LoanApiConstants.PAYMENT_TYPE_PARAMNAME));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -414,7 +420,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
         final Set<String> disbursementParameters = getNoAmountTransactionParameters();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -446,7 +453,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         final Set<String> chargeOffParameters = new HashSet<>(
                 Arrays.asList("transactionDate", "note", "locale", "dateFormat", "chargeOffReasonId", "externalId"));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, chargeOffParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -477,7 +485,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         final Set<String> disbursementParameters = new HashSet<>(
                 Arrays.asList("assignmentDate", "fromLoanOfficerId", "toLoanOfficerId", "locale", "dateFormat"));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -508,7 +517,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         final Set<String> supportedParameters = new HashSet<>(
                 Arrays.asList("assignmentDate", "fromLoanOfficerId", "toLoanOfficerId", "loans", "locale", "dateFormat"));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -535,7 +545,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         }
         Set<String> transactionParameters = new HashSet<>(Arrays.asList(LoanApiConstants.FRAUD_ATTRIBUTE_NAME));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -562,7 +573,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
                 LoanApiConstants.updatedDisbursementDateParameterName, LoanApiConstants.updatedDisbursementPrincipalParameterName,
                 LoanApiConstants.expectedDisbursementDateParameterName));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -600,7 +612,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         final Set<String> transactionParameters = new HashSet<>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note",
                 "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -633,7 +646,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
         final Set<String> foreclosureParameters = new HashSet<>(
                 Arrays.asList("transactionDate", "note", "locale", "dateFormat", "externalId"));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, foreclosureParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -687,7 +701,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     protected void validateLoanHasNoLaterChargeRefundTransactionToReverseOrCreateATransaction(Loan loan, LocalDate transactionDate,
-            String reversedOrCreated) {
+                                                                                              String reversedOrCreated) {
         for (LoanTransaction txn : loan.getLoanTransactions()) {
             if (txn.isChargeRefund() && DateUtils.isBefore(transactionDate, txn.getTransactionDate())) {
                 final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
@@ -770,7 +784,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateRepaymentDateIsOnNonWorkingDay(final LocalDate repaymentDate, final WorkingDays workingDays,
-            final boolean allowTransactionsOnNonWorkingDay) {
+                                                       final boolean allowTransactionsOnNonWorkingDay) {
         if (!allowTransactionsOnNonWorkingDay && !WorkingDaysUtil.isWorkingDay(workingDays, repaymentDate)) {
             final String errorMessage = "Repayment date cannot be on a non working day";
             throw new LoanApplicationDateException("repayment.date.on.non.working.day", errorMessage, repaymentDate);
@@ -779,7 +793,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateRepaymentDateIsOnHoliday(final LocalDate repaymentDate, final boolean allowTransactionsOnHoliday,
-            final List<Holiday> holidays) {
+                                                 final List<Holiday> holidays) {
         if (!allowTransactionsOnHoliday && HolidayUtil.isHoliday(repaymentDate, holidays)) {
             final String errorMessage = "Repayment date cannot be on a holiday";
             throw new LoanApplicationDateException("repayment.date.on.holiday", errorMessage, repaymentDate);
@@ -844,7 +858,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateRefund(final Loan loan, LoanTransactionType loanTransactionType, final LocalDate transactionDate,
-            ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                               ScheduleGeneratorDTO scheduleGeneratorDTO) {
         checkClientOrGroupActive(loan);
         validateLoanNotClosedOrOverpaidForTransactions(loan, loanTransactionType);
         loanDownPaymentTransactionValidator.validateLoanStatusIsActiveOrFullyPaidOrOverpaid(loan);
@@ -860,7 +874,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     protected void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final Loan loan, final LoanTransactionType loanTransactionType,
-            final LocalDate transactionDate) {
+                                                                          final LocalDate transactionDate) {
         if (loanTransactionType.isRepaymentType() && !loanTransactionType.isChargeRefund()) {
             for (LoanTransaction txn : loan.getLoanTransactions()) {
                 if (txn.isChargeRefund() && DateUtils.isBefore(transactionDate, txn.getTransactionDate())) {
@@ -983,7 +997,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
         final Set<String> transactionParameters = getRepaymentParameters();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -1049,7 +1064,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
     }
 
     private void validateTransactionNotBeforeLastTransactionDate(final Loan loan, LoanTransactionType loanTransactionType,
-            final LocalDate transactionDate) {
+                                                                 final LocalDate transactionDate) {
         if (!((LoanScheduleType.CUMULATIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())
                 && loan.isInterestBearingAndInterestRecalculationEnabled()) || loan.getLoanProduct().isHoldGuaranteeFunds())) {
             return;
@@ -1137,7 +1152,8 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
                 Arrays.asList("transactionAmount", "externalId", "note", "locale", "dateFormat", "paymentTypeId", "accountNumber",
                         "checkNumber", "routingCode", "receiptNumber", "bankNumber", "loanId", "numberOfRepayments"));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -1160,7 +1176,7 @@ public class LoanTransactionValidatorImpl implements LoanTransactionValidator {
 
     @Override
     public void validateClassificationCodeValue(final String codeName, final Long transactionClassificationId,
-            DataValidatorBuilder baseDataValidator) {
+                                                DataValidatorBuilder baseDataValidator) {
         baseDataValidator.reset().parameter(LoanTransactionApiConstants.TRANSACTION_CLASSIFICATIONID_PARAMNAME)
                 .value(transactionClassificationId).ignoreIfNull().positiveAmount();
         if (transactionClassificationId != null) {

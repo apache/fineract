@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.account.data;
 
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 
 public class StandingInstructionDTO {
@@ -33,8 +34,8 @@ public class StandingInstructionDTO {
     final LocalDate endDateRange;
 
     public StandingInstructionDTO(final SearchParameters searchParameters, final Integer transferType, final String clientName,
-            final Long clientId, final Long fromAccount, final Integer fromAccountType, final LocalDate startDateRange,
-            final LocalDate endDateRange) {
+                                  final Long clientId, final Long fromAccount, final Integer fromAccountType, final LocalDate startDateRange,
+                                  final LocalDate endDateRange) {
         this.searchParameters = searchParameters;
         this.transferType = transferType;
         this.clientName = clientName;

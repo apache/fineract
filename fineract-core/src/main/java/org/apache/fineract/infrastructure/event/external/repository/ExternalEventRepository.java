@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.event.external.repository;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventView;
@@ -38,7 +39,7 @@ public interface ExternalEventRepository extends JpaRepository<ExternalEvent, Lo
     @Modifying(flushAutomatically = true)
     @Query("delete from ExternalEvent e where e.status = :status and e.businessDate <= :dateForPurgeCriteria")
     void deleteOlderEventsWithSentStatus(@Param("status") ExternalEventStatus status,
-            @Param("dateForPurgeCriteria") LocalDate dateForPurgeCriteria);
+                                         @Param("dateForPurgeCriteria") LocalDate dateForPurgeCriteria);
 
     @Modifying
     @Query("UPDATE ExternalEvent e SET e.status = org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus.SENT, e.sentAt = :sentAt WHERE e.id IN :ids")

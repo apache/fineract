@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -59,33 +60,33 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     @Override
     public PortfolioAccountData retrieveOne(final Long accountId, final Integer accountTypeId, final String currencyCode) {
 
-        Object[] sqlParams = new Object[] { accountId };
+        Object[] sqlParams = new Object[]{accountId};
         PortfolioAccountData accountData = null;
         try {
             String sql = null;
             final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
             switch (accountType) {
                 case INVALID:
-                break;
+                    break;
                 case LOAN:
 
                     sql = "select " + this.loanAccountMapper.schema() + " where la.id = ?";
                     if (currencyCode != null) {
                         sql += " and la.currency_code = ?";
-                        sqlParams = new Object[] { accountId, currencyCode };
+                        sqlParams = new Object[]{accountId, currencyCode};
                     }
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.loanAccountMapper, sqlParams);
-                break;
+                    break;
                 case SAVINGS:
                     sql = "select " + this.savingsAccountMapper.schema() + " where sa.id = ?";
                     if (currencyCode != null) {
                         sql += " and sa.currency_code = ?";
-                        sqlParams = new Object[] { accountId, currencyCode };
+                        sqlParams = new Object[]{accountId, currencyCode};
                     }
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
-                break;
+                    break;
             }
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(accountId, e);
@@ -108,7 +109,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         final PortfolioAccountType accountType = PortfolioAccountType.fromInt(portfolioAccountDTO.getAccountTypeId());
         switch (accountType) {
             case INVALID:
-            break;
+                break;
             case LOAN:
                 sql = "select " + this.loanAccountMapper.schema() + " where ";
                 if (portfolioAccountDTO.getClientId() != null) {
@@ -125,7 +126,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray()); // NOSONAR
-            break;
+                break;
             case SAVINGS:
                 sql = "select " + this.savingsAccountMapper.schema() + " where ";
                 if (portfolioAccountDTO.getClientId() != null) {
@@ -156,7 +157,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray()); // NOSONAR
-            break;
+                break;
         }
 
         return accounts;
@@ -371,7 +372,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {
         // TODO Auto-generated method stub
-        Object[] sqlParams = new Object[] { accountId, accountId };
+        Object[] sqlParams = new Object[]{accountId, accountId};
         PortfolioAccountData accountData = null;
         // String currencyCode = null;
         try {

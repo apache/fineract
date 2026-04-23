@@ -35,18 +35,21 @@
         </addColumn>
     </changeSet>
     <changeSet id="portfolio_command_source-2" author="fineract">
-        <dropNotNullConstraint tableName="m_portfolio_command_source" columnName="made_on_date" columnDataType="datetime"/>
+        <dropNotNullConstraint tableName="m_portfolio_command_source" columnName="made_on_date"
+                               columnDataType="datetime"/>
     </changeSet>
     <changeSet id="portfolio_command_source-3" author="fineract" context="mysql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_portfolio_command_source</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_portfolio_command_source" columnName="made_on_date_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_portfolio_command_source" columnName="made_on_date_utc"
+                              columnDataType="DATETIME"/>
     </changeSet>
     <changeSet id="portfolio_command_source-3" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_portfolio_command_source</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_portfolio_command_source" columnName="made_on_date_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_portfolio_command_source" columnName="made_on_date_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
     </changeSet>
 </databaseChangeLog>

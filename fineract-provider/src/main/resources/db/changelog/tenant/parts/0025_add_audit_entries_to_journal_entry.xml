@@ -38,19 +38,24 @@
 
     <changeSet id="journal-entry-2" author="fineract">
         <dropNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_date" columnDataType="datetime"/>
-        <dropNotNullConstraint tableName="acc_gl_journal_entry" columnName="lastmodified_date" columnDataType="datetime"/>
+        <dropNotNullConstraint tableName="acc_gl_journal_entry" columnName="lastmodified_date"
+                               columnDataType="datetime"/>
     </changeSet>
     <changeSet id="journal-entry-3" author="fineract">
-        <renameColumn tableName="acc_gl_journal_entry" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="acc_gl_journal_entry" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="acc_gl_journal_entry" oldColumnName="createdby_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
+        <renameColumn tableName="acc_gl_journal_entry" oldColumnName="lastmodifiedby_id"
+                      newColumnName="last_modified_by" columnDataType="BIGINT"/>
     </changeSet>
     <changeSet author="fineract" id="journal-entry-4">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="acc_gl_journal_entry"
-                                 constraintName="FK_journal_entry_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_journal_entry_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="acc_gl_journal_entry"
-                                 constraintName="FK_journal_entry_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_journal_entry_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -59,14 +64,17 @@
             <sqlCheck expectedResult="0">select count(*) from acc_gl_journal_entry</sqlCheck>
         </preConditions>
         <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_on_utc" columnDataType="DATETIME"/>
-        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="last_modified_on_utc"
+                              columnDataType="DATETIME"/>
     </changeSet>
     <changeSet id="journal-entry-5" author="fineract" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from acc_gl_journal_entry</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
-        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
     </changeSet>
     <changeSet id="journal-entry-6" author="fineract">
         <addColumn tableName="acc_gl_journal_entry">

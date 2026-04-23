@@ -23,8 +23,11 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
-        <preConditions onFail="HALT" onFailMessage="Loan COB check failed: There should not be any soft locks for loan account.">
-            <sqlCheck expectedResult="0">select count(*) from m_loan_account_locks where lock_owner = 'LOAN_COB_PARTITIONING'</sqlCheck>
+        <preConditions onFail="HALT"
+                       onFailMessage="Loan COB check failed: There should not be any soft locks for loan account.">
+            <sqlCheck expectedResult="0">select count(*) from m_loan_account_locks where lock_owner =
+                'LOAN_COB_PARTITIONING'
+            </sqlCheck>
         </preConditions>
     </changeSet>
 </databaseChangeLog>

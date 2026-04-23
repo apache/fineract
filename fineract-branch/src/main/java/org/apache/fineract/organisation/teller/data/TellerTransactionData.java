@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -72,7 +73,7 @@ public final class TellerTransactionData implements Serializable {
      * @return the new created {@code TellerTransactionData}
      */
     public static TellerTransactionData instance(final Long id, final Long officeId, final Long tellerId, final Long cashierId,
-            final Long clientId, final EnumOptionData type, final Double amount, final LocalDate postingDate) {
+                                                 final Long clientId, final EnumOptionData type, final Double amount, final LocalDate postingDate) {
         return new TellerTransactionData().setId(id).setOfficeId(officeId).setTellerId(tellerId).setCashierId(cashierId)
                 .setClientId(clientId).setType(type).setAmount(amount).setPostingDate(postingDate);
     }

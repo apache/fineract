@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,11 +27,13 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -51,7 +53,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Tests loan schedule change based on group meeting changes and loan rescheduling
  **/
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class DisbursalAndRepaymentScheduleTest {
 
@@ -159,12 +161,12 @@ public class DisbursalAndRepaymentScheduleTest {
 
         CalendarHelper.updateMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, this.groupCalendarId.toString(),
                 groupMeetingNewStartDate, "2", "2", "2"); // New
-                                                          // meeting
-                                                          // dates
-                                                          // will be
-                                                          // the
-                                                          // tuesday
-                                                          // after the
+        // meeting
+        // dates
+        // will be
+        // the
+        // tuesday
+        // after the
         // coming
         // monday
 
@@ -231,7 +233,7 @@ public class DisbursalAndRepaymentScheduleTest {
         final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
 
         final String disbursalDate = groupMeetingDate; // first meeting date
-                                                       // after group creation
+        // after group creation
 
         final String loanType = "jlg";
         groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
@@ -286,14 +288,14 @@ public class DisbursalAndRepaymentScheduleTest {
 
         CalendarHelper.updateMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, this.groupCalendarId.toString(),
                 groupMeetingNewStartDate, "2", "2", "2"); // New
-                                                          // meeting
-                                                          // dates
-                                                          // will be
-                                                          // the
-                                                          // tuesday
-                                                          // after the
-                                                          // coming
-                                                          // monday
+        // meeting
+        // dates
+        // will be
+        // the
+        // tuesday
+        // after the
+        // coming
+        // monday
 
         Calendar expectedMaturityCalendar = Calendar.getInstance();
         expectedMaturityCalendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -334,7 +336,7 @@ public class DisbursalAndRepaymentScheduleTest {
     }
 
     private void createGroupEntityWithCalendar(final String frequency, final String interval, final String repeatsOnDay,
-            final String groupActivationDate) {
+                                               final String groupActivationDate) {
         this.groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, groupActivationDate);
         GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, this.groupId);
 

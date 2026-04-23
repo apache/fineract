@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -54,10 +54,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -102,9 +104,9 @@ public class ImagesApiResource {
     // FINERACT-1265: Do NOT specify @Produces(TEXT_PLAIN) here - it may actually not (if it calls the next methods it's
     // octet-stream)
     public Response retrieveImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
-            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @QueryParam(IMAGE_API_PARAM_MAX_WIDTH) final Integer maxWidth,
-            @QueryParam(IMAGE_API_PARAM_MAX_HEIGHT) final Integer maxHeight, @QueryParam(IMAGE_API_PARAM_OUTPUT) String output,
-            @HeaderParam(ACCEPT) String acceptHeader) {
+                                  @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @QueryParam(IMAGE_API_PARAM_MAX_WIDTH) final Integer maxWidth,
+                                  @QueryParam(IMAGE_API_PARAM_MAX_HEIGHT) final Integer maxHeight, @QueryParam(IMAGE_API_PARAM_OUTPUT) String output,
+                                  @HeaderParam(ACCEPT) String acceptHeader) {
 
         // TODO: pass resize information here and do all the processing in the service
         final var content = imageReadPlatformService.retrieveImage(entityName, entityId);
@@ -154,14 +156,14 @@ public class ImagesApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.MULTIPART_FORM_DATA})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiResponse(responseCode = "200", description = "Not Shown (multi-part form data)")
     public ImageCreateResponse createImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
-            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
-            @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream is,
-            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
-            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart filePart) {
+                                           @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
+                                           @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream is,
+                                           @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
+                                           @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart filePart) {
 
         fileUploadValidator.validate(fileSize, is, fileDetails, filePart);
 
@@ -177,9 +179,9 @@ public class ImagesApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public ImageCreateResponse createImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
-            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, final InputStream body) {
+                                           @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, final InputStream body) {
 
         requireNonNull(body, "Missing input stream");
 
@@ -197,25 +199,25 @@ public class ImagesApiResource {
     @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Update image", content = {
-            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @io.swagger.v3.oas.annotations.media.Schema(type = "object")) })
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @io.swagger.v3.oas.annotations.media.Schema(type = "object"))})
     public ImageCreateResponse updateImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
-            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
-            @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream inputStream,
-            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
-            @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart bodyPart) {
+                                           @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, @HeaderParam(CONTENT_LENGTH) final Long fileSize,
+                                           @FormDataParam(DOCUMENT_API_PARAM_FILE) final InputStream inputStream,
+                                           @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
+                                           @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart bodyPart) {
         return createImage(entityName, entityId, fileSize, inputStream, fileDetails, bodyPart);
     }
 
     @PUT
-    @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     public ImageCreateResponse updateImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityName,
-            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, final InputStream body) {
+                                           @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId, final InputStream body) {
         return createImage(entityName, entityId, body);
     }
 
     @DELETE
     public ImageDeleteResponse deleteImage(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
-            @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId) {
+                                           @PathParam(DOCUMENT_API_PARAM_ENTITY_ID) final Long entityId) {
 
         final var command = new ImageDeleteCommand();
 

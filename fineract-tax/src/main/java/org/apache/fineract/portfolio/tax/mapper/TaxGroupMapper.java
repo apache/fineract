@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,13 +19,14 @@
 package org.apache.fineract.portfolio.tax.mapper;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(config = MapstructMapperConfig.class, uses = { TaxGroupMappingsMapper.class })
+@Mapper(config = MapstructMapperConfig.class, uses = {TaxGroupMappingsMapper.class})
 public interface TaxGroupMapper {
 
     @Mapping(target = "taxAssociations", source = "taxGroup.taxGroupMappings")

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -48,7 +50,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 @Entity
-@Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
+@Table(name = "m_client_transaction", uniqueConstraints = {@UniqueConstraint(columnNames = {"external_id"}, name = "external_id")})
 public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne(optional = false)
@@ -96,17 +98,18 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Lo
     @Transient
     private OrganisationCurrency currency;
 
-    protected ClientTransaction() {}
+    protected ClientTransaction() {
+    }
 
     public static ClientTransaction payCharge(final Client client, final Office office, PaymentDetail paymentDetail,
-            final LocalDate transactionDate, final Money amount, final String currencyCode, final ExternalId externalId) {
+                                              final LocalDate transactionDate, final Money amount, final String currencyCode, final ExternalId externalId) {
         final boolean isReversed = false;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), transactionDate, amount,
                 isReversed, externalId, currencyCode);
     }
 
     public static ClientTransaction waiver(final Client client, final Office office, final LocalDate transactionDate, final Money amount,
-            final String currencyCode) {
+                                           final String currencyCode) {
         final boolean isReversed = false;
         final ExternalId externalId = ExternalId.empty();
         final PaymentDetail paymentDetail = null;
@@ -115,7 +118,7 @@ public class ClientTransaction extends AbstractAuditableWithUTCDateTimeCustom<Lo
     }
 
     public ClientTransaction(Client client, Office office, PaymentDetail paymentDetail, Integer typeOf, LocalDate transactionDate,
-            Money amount, boolean reversed, ExternalId externalId, String currencyCode) {
+                             Money amount, boolean reversed, ExternalId externalId, String currencyCode) {
 
         this.client = client;
         this.office = office;

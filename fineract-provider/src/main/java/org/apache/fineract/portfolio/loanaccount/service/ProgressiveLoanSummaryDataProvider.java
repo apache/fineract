@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -56,14 +57,14 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
     @Override
     @Transactional(readOnly = true)
     public LoanSummaryData withTransactionAmountsSummary(Long loanId, LoanSummaryData defaultSummaryData,
-            LoanScheduleData repaymentSchedule, Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
+                                                         LoanScheduleData repaymentSchedule, Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
         final Loan loan = loanRepository.findOneWithNotFoundDetection(loanId, true);
         return super.withTransactionAmountsSummary(loan, defaultSummaryData, repaymentSchedule, loanTransactionBalances);
     }
 
     @Override
     public LoanSummaryData withTransactionAmountsSummary(Loan loan, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
+                                                         Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
         return super.withTransactionAmountsSummary(loan, defaultSummaryData, repaymentSchedule, loanTransactionBalances);
     }
 
@@ -74,8 +75,8 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
 
     @Override
     public BigDecimal computeTotalUnpaidPayableNotDueInterestAmountOnActualPeriod(final Loan loan,
-            final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency,
-            BigDecimal totalUnpaidPayableDueInterest) {
+                                                                                  final Collection<LoanSchedulePeriodData> periods, final LocalDate businessDate, final CurrencyData currency,
+                                                                                  BigDecimal totalUnpaidPayableDueInterest) {
         if (loan.isMatured(businessDate) || !loan.isInterestBearing()) {
             return BigDecimal.ZERO;
         }

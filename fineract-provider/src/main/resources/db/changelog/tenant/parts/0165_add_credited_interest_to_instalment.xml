@@ -24,7 +24,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
         <addColumn tableName="m_loan_repayment_schedule">
-            <column name="credited_interest"  type="DECIMAL(19, 6)">
+            <column name="credited_interest" type="DECIMAL(19, 6)">
                 <constraints nullable="true"/>
             </column>
         </addColumn>

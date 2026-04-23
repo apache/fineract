@@ -105,7 +105,7 @@ spec:
                   key: password
           livenessProbe:
             exec:
-              command: ["sh","-c","mariadb -uroot -p${MARIADB_ROOT_PASSWORD} -e 'SELECT 1'"]
+              command: [ "sh","-c","mariadb -uroot -p${MARIADB_ROOT_PASSWORD} -e 'SELECT 1'" ]
             failureThreshold: 10
             timeoutSeconds: 10
           readinessProbe:

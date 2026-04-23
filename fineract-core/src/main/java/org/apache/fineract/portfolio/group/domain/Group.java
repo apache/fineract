@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -144,8 +146,8 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
-            final String externalId, final boolean active, final LocalDate activationDate, final Set<Client> clientMembers,
-            final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser, final String accountNo) {
+                                 final String externalId, final boolean active, final LocalDate activationDate, final Set<Client> clientMembers,
+                                 final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser, final String accountNo) {
 
         // By default new group is created in PENDING status, unless explicitly
         // status is set to active
@@ -161,8 +163,8 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     private Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
-            final String externalId, final GroupingTypeStatus status, final LocalDate activationDate, final Set<Client> clientMembers,
-            final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser, final String accountNo) {
+                  final String externalId, final GroupingTypeStatus status, final LocalDate activationDate, final Set<Client> clientMembers,
+                  final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser, final String accountNo) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -216,7 +218,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     private void setStatus(final LocalDate activationDate, final AppUser loginUser, final GroupingTypeStatus status,
-            final List<ApiParameterError> dataValidationErrors) {
+                           final List<ApiParameterError> dataValidationErrors) {
 
         if (status.isActive()) {
             activate(loginUser, activationDate, dataValidationErrors);
@@ -227,7 +229,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     private void activate(final AppUser currentUser, final LocalDate activationLocalDate,
-            final List<ApiParameterError> dataValidationErrors) {
+                          final List<ApiParameterError> dataValidationErrors) {
 
         validateStatusNotEqualToActiveAndLogError(dataValidationErrors);
         if (dataValidationErrors.isEmpty()) {
@@ -250,7 +252,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     private void setActivationDate(final LocalDate activationDate, final AppUser loginUser,
-            final List<ApiParameterError> dataValidationErrors) {
+                                   final List<ApiParameterError> dataValidationErrors) {
 
         if (activationDate != null) {
             this.activationDate = activationDate;

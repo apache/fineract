@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -57,8 +58,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
     @Override
     public SavingsAccountData postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
+                                           final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                                           final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
         Money interestPostedToDate = Money.zero(savingsAccountData.getCurrency());
         LocalDate startInterestDate = getStartInterestCalculationDate(savingsAccountData);
 
@@ -187,7 +188,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     protected SavingsAccountTransactionData findTransactionFor(final LocalDate postingDate,
-            final List<SavingsAccountTransactionData> transactions) {
+                                                               final List<SavingsAccountTransactionData> transactions) {
         SavingsAccountTransactionData transaction = null;
         for (final SavingsAccountTransactionData savingsAccountTransaction : transactions) {
             if (savingsAccountTransaction.occursOn(postingDate)) {
@@ -199,13 +200,13 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private Money appendPostingPeriodIfAny(final LocalDateInterval periodInterval, Money periodStartingBalance,
-            final List<SavingsAccountTransactionData> txs, final MonetaryCurrency monetaryCurrency,
-            final SavingsCompoundingInterestPeriodType compoundingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final BigDecimal interestRateAsFraction, final int daysInYear, final LocalDate upToInterestCalculationDate,
-            final Collection<Long> interestPostTransactions, final boolean isInterestTransfer, final Money minBalanceForInterestCalculation,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
-            final Money minOverdraftForInterestCalculation, final boolean isUserPosting, final Integer financialYearBeginningMonth,
-            final boolean allowOverdraft, final List<PostingPeriod> allPostingPeriods, Boolean isOverdraftTransacction) {
+                                           final List<SavingsAccountTransactionData> txs, final MonetaryCurrency monetaryCurrency,
+                                           final SavingsCompoundingInterestPeriodType compoundingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                           final BigDecimal interestRateAsFraction, final int daysInYear, final LocalDate upToInterestCalculationDate,
+                                           final Collection<Long> interestPostTransactions, final boolean isInterestTransfer, final Money minBalanceForInterestCalculation,
+                                           final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
+                                           final Money minOverdraftForInterestCalculation, final boolean isUserPosting, final Integer financialYearBeginningMonth,
+                                           final boolean allowOverdraft, final List<PostingPeriod> allPostingPeriods, Boolean isOverdraftTransacction) {
 
         if (txs == null || txs.isEmpty()) {
             return periodStartingBalance;
@@ -229,8 +230,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate,
-            boolean isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
+                                                      boolean isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                                                      final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
 
         // no openingBalance concept supported yet but probably will to allow
         // for migrations.
@@ -360,7 +361,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private List<SavingsAccountTransactionData> listForOverdraft(final SavingsAccountData savingsAccountData,
-            final LocalDateInterval periodInterval) {
+                                                                 final LocalDateInterval periodInterval) {
         List<SavingsAccountTransactionData> overdraftTransactionsInPeriod = new ArrayList<>();
         for (SavingsAccountTransactionData lists : retreiveOrderedNonInterestPostingTransactions(savingsAccountData)) {
             if (MathUtil.isLessThanZero(lists.getRunningBalance()) && periodInterval.startDate().getMonth() == lists.getDate().getMonth()) {
@@ -373,7 +374,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private List<SavingsAccountTransactionData> listForInterestPosting(final SavingsAccountData savingsAccountData,
-            final LocalDateInterval periodInterval, final MonetaryCurrency currency) {
+                                                                       final LocalDateInterval periodInterval, final MonetaryCurrency currency) {
 
         final List<SavingsAccountTransactionData> nonOverdraftTransactions = new ArrayList<>();
 
@@ -390,7 +391,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private Boolean isOverdraftAccount(final SavingsAccountData savingsAccountData, final LocalDateInterval periodInterval,
-            final MonetaryCurrency currency) {
+                                       final MonetaryCurrency currency) {
 
         for (SavingsAccountTransactionData tx : retreiveOrderedNonInterestPostingTransactions(savingsAccountData)) {
             if (MathUtil.isLessThanZero(tx.getRunningBalance()) && periodInterval.startDate().getMonth() == tx.getDate().getMonth()) {
@@ -446,7 +447,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
     @SuppressWarnings("unused")
     private BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate,
-            final SavingsAccountData savingsAccountData) {
+                                                          final SavingsAccountData savingsAccountData) {
         return savingsAccountData.getNominalAnnualInterestRate().divide(BigDecimal.valueOf(100L), mc);
     }
 
@@ -496,7 +497,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     protected void recalculateDailyBalances(final Money openingAccountBalance, final LocalDate interestPostingUpToDate,
-            final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
+                                            final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
 
         Money runningBalance = openingAccountBalance.copy();
 
@@ -605,7 +606,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     protected SavingsAccountTransactionData findInterestPostingTransactionFor(final LocalDate postingDate,
-            final SavingsAccountData savingsAccountData) {
+                                                                              final SavingsAccountData savingsAccountData) {
         SavingsAccountTransactionData postingTransation = null;
         List<SavingsAccountTransactionData> trans = savingsAccountData.getSavingsAccountTransactionData();
         for (final SavingsAccountTransactionData transaction : trans) {
@@ -619,7 +620,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     protected SavingsAccountTransactionData findInterestPostingTransactionForInterest(final LocalDate postingDate,
-            final SavingsAccountData savingsAccountData, boolean isOverdraft) {
+                                                                                      final SavingsAccountData savingsAccountData, boolean isOverdraft) {
         SavingsAccountTransactionData postingTransation = null;
         List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
         postingTransation = transactions.stream().filter(t -> {
@@ -631,7 +632,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     protected void resetAccountTransactionsEndOfDayBalances(final List<SavingsAccountTransactionData> accountTransactionsSorted,
-            final LocalDate interestPostingUpToDate, final SavingsAccountData savingsAccountData) {
+                                                            final LocalDate interestPostingUpToDate, final SavingsAccountData savingsAccountData) {
         // loop over transactions in reverse
         LocalDate endOfBalanceDate = interestPostingUpToDate;
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {

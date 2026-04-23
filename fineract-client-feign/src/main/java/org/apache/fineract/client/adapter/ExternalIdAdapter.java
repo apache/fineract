@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,9 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import java.io.IOException;
+
 import org.apache.fineract.client.models.ExternalId;
 
 /**
@@ -34,7 +36,8 @@ import org.apache.fineract.client.models.ExternalId;
  */
 public final class ExternalIdAdapter {
 
-    private ExternalIdAdapter() {}
+    private ExternalIdAdapter() {
+    }
 
     /**
      * Jackson Serializer for ExternalId. Serializes an ExternalId object to its string value, or null if the ExternalId

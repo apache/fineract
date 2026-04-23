@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,10 +24,12 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesP
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 
 import jakarta.persistence.PersistenceException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -178,16 +180,16 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             msgCode += ".duplicate.name";
             msg = "Savings product with name `" + name + "` already exists";
             param = "name";
-            msgArgs = new Object[] { name, dae };
+            msgArgs = new Object[]{name, dae};
         } else if (checkEx.getMessage().contains("sp_unq_short_name")) {
             final String shortName = command.stringValueOfParameterNamed("shortName");
             msgCode += ".duplicate.short.name";
             msg = "Savings product with short name `" + shortName + "` already exists";
             param = "shortName";
-            msgArgs = new Object[] { shortName, dae };
+            msgArgs = new Object[]{shortName, dae};
         } else {
             msgCode += ".unknown.data.integrity.issue";
-            msgArgs = new Object[] { dae };
+            msgArgs = new Object[]{dae};
         }
         log.error("Error occured.", dae);
         throw ErrorHandler.getMappable(dae, msgCode, msg, param, msgArgs);

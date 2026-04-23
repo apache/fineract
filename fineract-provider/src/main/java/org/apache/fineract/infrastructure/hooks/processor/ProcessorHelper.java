@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +49,16 @@ public final class ProcessorHelper {
     private static final X509TrustManager insecureX509TrustManager = new X509TrustManager() {
 
         @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}// NOSONAR
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        }// NOSONAR
 
         @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}// NOSONAR
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        }// NOSONAR
 
         @Override
         public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[] {};
+            return new X509Certificate[]{};
         }
     };
 
@@ -92,7 +95,7 @@ public final class ProcessorHelper {
     private SSLContext createInsecureSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext insecureSSLContext = SSLContext.getInstance("TLS"); // TODO "TLS" or "SSL" as in
         // FineractClient.Builder?
-        insecureSSLContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
+        insecureSSLContext.init(null, new TrustManager[]{insecureX509TrustManager}, new SecureRandom());
         return insecureSSLContext;
     }
 

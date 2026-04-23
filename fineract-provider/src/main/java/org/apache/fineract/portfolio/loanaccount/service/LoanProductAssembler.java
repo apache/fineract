@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,12 +20,14 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -75,9 +77,9 @@ public class LoanProductAssembler {
     private final LoanProductGuaranteeDetailsAssembler guaranteeDetailsAssembler;
 
     public LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy, final List<Charge> productCharges,
-            final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate, final List<Rate> productRates,
-            List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules,
-            List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules) {
+                                        final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate, final List<Rate> productRates,
+                                        List<LoanProductPaymentAllocationRule> loanProductPaymentAllocationRules,
+                                        List<LoanProductCreditAllocationRule> loanProductCreditAllocationRules) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.SHORT_NAME);
@@ -361,7 +363,7 @@ public class LoanProductAssembler {
     }
 
     private void populateBorrowerCycleVariations(final JsonCommand command,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
+                                                 final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assemblePrincipalVariations(command, loanProductBorrowerCycleVariations);
 
         assembleRepaymentVariations(command, loanProductBorrowerCycleVariations);
@@ -370,28 +372,28 @@ public class LoanProductAssembler {
     }
 
     private void assembleInterestRateVariations(final JsonCommand command,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
+                                                final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assembleVariations(command, loanProductBorrowerCycleVariations, LoanProductParamType.INTERESTRATE.getValue(),
                 LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
 
     }
 
     private void assembleRepaymentVariations(final JsonCommand command,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
+                                             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assembleVariations(command, loanProductBorrowerCycleVariations, LoanProductParamType.REPAYMENT.getValue(),
                 LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
 
     }
 
     private void assemblePrincipalVariations(final JsonCommand command,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
+                                             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assembleVariations(command, loanProductBorrowerCycleVariations, LoanProductParamType.PRINCIPAL.getValue(),
                 LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
     }
 
     private void assembleVariations(final JsonCommand command,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, Integer paramType,
-            String variationParameterName) {
+                                    final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, Integer paramType,
+                                    String variationParameterName) {
         if (command.parameterExists(variationParameterName)) {
             final JsonArray variationArray = command.arrayOfParameterNamed(variationParameterName);
             if (variationArray != null && variationArray.size() > 0) {

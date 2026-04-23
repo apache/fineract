@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.savings.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -91,7 +93,7 @@ public final class SavingsAccountSummary {
     }
 
     public void updateSummary(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
-            final List<SavingsAccountTransaction> transactions) {
+                              final List<SavingsAccountTransaction> transactions) {
 
         this.totalDeposits = wrapper.calculateTotalDeposits(currency, transactions);
         this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, transactions);
@@ -113,7 +115,7 @@ public final class SavingsAccountSummary {
     }
 
     public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
-            final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
+                                             final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
 
         if (transaction != null) {
             if (transaction.isReversalTransaction()) {
@@ -126,27 +128,27 @@ public final class SavingsAccountSummary {
                         this.totalDeposits = Money.of(currency, this.totalDeposits).plus(transactionAmount).getAmount();
                         this.accountBalance = Money.of(currency, this.accountBalance).plus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 case WITHDRAWAL:
                     if (transaction.isWithdrawal() && transaction.isNotReversed()) {
                         this.totalWithdrawals = Money.of(currency, this.totalWithdrawals).plus(transactionAmount).getAmount();
                         this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 case WITHDRAWAL_FEE:
                     if (transaction.isWithdrawalFeeAndNotReversed() && transaction.isNotReversed()) {
                         this.totalWithdrawalFees = Money.of(currency, this.totalWithdrawalFees).plus(transactionAmount).getAmount();
                         this.totalFeeCharge = Money.of(currency, this.totalFeeCharge).plus(transactionAmount).getAmount();
                         this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 case ANNUAL_FEE:
                     if (transaction.isAnnualFeeAndNotReversed() && transaction.isNotReversed()) {
                         this.totalAnnualFees = Money.of(currency, this.totalAnnualFees).plus(transactionAmount).getAmount();
                         this.totalFeeCharge = Money.of(currency, this.totalFeeCharge).plus(transactionAmount).getAmount();
                         this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 case WAIVE_CHARGES:
                     if (transaction.isWaiveFeeChargeAndNotReversed()) {
                         this.totalFeeChargesWaived = Money.of(currency, this.totalFeeChargesWaived).plus(transactionAmount.getAmount())
@@ -155,7 +157,7 @@ public final class SavingsAccountSummary {
                         this.totalPenaltyChargesWaived = Money.of(currency, this.totalPenaltyChargesWaived)
                                 .plus(transactionAmount.getAmount()).getAmount();
                     }
-                break;
+                    break;
                 case PAY_CHARGE:
                     if (transaction.isFeeChargeAndNotReversed()) {
                         this.totalFeeCharge = Money.of(currency, this.totalFeeCharge).plus(transactionAmount).getAmount();
@@ -165,22 +167,22 @@ public final class SavingsAccountSummary {
                     if (transaction.isFeeChargeAndNotReversed() || transaction.isPenaltyChargeAndNotReversed()) {
                         this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 case OVERDRAFT_INTEREST:
                     if (transaction.isOverdraftInterestAndNotReversed()) {
                         this.totalOverdraftInterestDerived = Money.of(currency, this.totalOverdraftInterestDerived).plus(transactionAmount)
                                 .getAmount();
                         this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 case WITHHOLD_TAX:
                     if (transaction.isWithHoldTaxAndNotReversed()) {
                         this.totalWithholdTax = Money.of(currency, this.totalWithholdTax).plus(transactionAmount).getAmount();
                         this.accountBalance = Money.of(currency, this.accountBalance).minus(transactionAmount).getAmount();
                     }
-                break;
+                    break;
                 default:
-                break;
+                    break;
             }
         } else {
             // INTEREST_POSTING
@@ -208,8 +210,8 @@ public final class SavingsAccountSummary {
 
     @SuppressWarnings("unchecked")
     private HashMap<String, Money> updateRunningBalanceAndPivotDate(final boolean backdatedTxnsAllowedTill,
-            final List<SavingsAccountTransaction> savingsAccountTransactions, Money interestTotal, Money overdraftInterestTotal,
-            Money withHoldTaxTotal, MonetaryCurrency currency) {
+                                                                    final List<SavingsAccountTransaction> savingsAccountTransactions, Money interestTotal, Money overdraftInterestTotal,
+                                                                    Money withHoldTaxTotal, MonetaryCurrency currency) {
         boolean isUpdated = false;
         HashMap<String, Money> map = new HashMap<>();
         for (int i = savingsAccountTransactions.size() - 1; i >= 0; i--) {

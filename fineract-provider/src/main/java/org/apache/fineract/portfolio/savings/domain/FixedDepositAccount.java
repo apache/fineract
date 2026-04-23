@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -89,15 +91,15 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public static FixedDepositAccount createNewApplicationForSubmittal(final Client client, final Group group, final SavingsProduct product,
-            final Staff fieldOfficer, final String accountNo, final ExternalId externalId, final AccountType accountType,
-            final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final DepositAccountTermAndPreClosure accountTermAndPreClosure, final DepositAccountInterestRateChart chart,
-            boolean withHoldTax) {
+                                                                       final Staff fieldOfficer, final String accountNo, final ExternalId externalId, final AccountType accountType,
+                                                                       final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal interestRate,
+                                                                       final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                                                       final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                                                       final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+                                                                       final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+                                                                       final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
+                                                                       final DepositAccountTermAndPreClosure accountTermAndPreClosure, final DepositAccountInterestRateChart chart,
+                                                                       boolean withHoldTax) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         final boolean allowOverdraft = false;
@@ -112,15 +114,15 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     private FixedDepositAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
-            final String accountNo, final ExternalId externalId, final SavingsAccountStatusType status, final AccountType accountType,
-            final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal nominalAnnualInterestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final DepositAccountTermAndPreClosure accountTermAndPreClosure, DepositAccountInterestRateChart chart,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit, boolean withHoldTax) {
+                                final String accountNo, final ExternalId externalId, final SavingsAccountStatusType status, final AccountType accountType,
+                                final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal nominalAnnualInterestRate,
+                                final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+                                final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+                                final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
+                                final DepositAccountTermAndPreClosure accountTermAndPreClosure, DepositAccountInterestRateChart chart,
+                                final boolean allowOverdraft, final BigDecimal overdraftLimit, boolean withHoldTax) {
 
         super(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
                 nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
@@ -156,7 +158,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate,
-            final boolean isPreMatureClosure) {
+                                                            final boolean isPreMatureClosure) {
 
         // default it to nominalAnnualInterst rate. interest chart overrrides
         // this value.
@@ -193,7 +195,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void updateMaturityDateAndAmountBeforeAccountActivation(final MathContext mc, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+                                                                   final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
         List<SavingsAccountTransaction> allTransactions = new ArrayList<>();
         String refNo = null;
         final Money transactionAmountMoney = Money.of(getCurrency(), this.accountTermAndPreClosure.depositAmount());
@@ -207,14 +209,14 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void updateMaturityDateAndAmount(final MathContext mc, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+                                            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
         updateMaturityDateAndAmount(mc, retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure,
                 isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
     }
 
     public void updateMaturityDateAndAmount(final MathContext mc, final List<SavingsAccountTransaction> transactions,
-            final boolean isPreMatureClosure, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final Integer financialYearBeginningMonth) {
+                                            final boolean isPreMatureClosure, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                            final Integer financialYearBeginningMonth) {
         final LocalDate maturityDate = calculateMaturityDate();
         final LocalDate interestCalculationUpto = maturityDate.minusDays(1);
 
@@ -266,26 +268,26 @@ public class FixedDepositAccount extends SavingsAccount {
         switch (this.accountTermAndPreClosure.depositPeriodFrequencyType()) {
             case DAYS:
                 maturityDate = startDate.plusDays(depositPeriod);
-            break;
+                break;
             case WEEKS:
                 maturityDate = startDate.plusWeeks(depositPeriod);
-            break;
+                break;
             case MONTHS:
                 maturityDate = startDate.plusMonths(depositPeriod);
-            break;
+                break;
             case YEARS:
                 maturityDate = startDate.plusYears(depositPeriod);
-            break;
+                break;
             case INVALID:
-            break;
+                break;
         }
 
         return maturityDate;
     }
 
     private List<PostingPeriod> calculateInterestPayable(final MathContext mc, final LocalDate maturityDate,
-            final List<SavingsAccountTransaction> transactions, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+                                                         final List<SavingsAccountTransaction> transactions, final boolean isPreMatureClosure,
+                                                         final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
 
         final SavingsPostingInterestPeriodType postingPeriodType = SavingsPostingInterestPeriodType.fromInt(this.interestPostingPeriodType);
 
@@ -565,7 +567,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void postPreMaturityInterest(final LocalDate accountCloseDate, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+                                        final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
 
         Money interestPostedToDate = totalInterestPosted();
         // calculate interest before one day of closure date
@@ -599,7 +601,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public BigDecimal calculatePreMatureAmount(final LocalDate preMatureDate, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+                                               final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
 
         final Money interestPostedToDate = totalInterestPosted().copy();
 
@@ -613,8 +615,8 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     private Money calculatePreMatureInterest(final LocalDate preMatureDate, final List<SavingsAccountTransaction> transactions,
-            final boolean isPreMatureClosure, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final Integer financialYearBeginningMonth) {
+                                             final boolean isPreMatureClosure, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                             final Integer financialYearBeginningMonth) {
         final MathContext mc = MathContext.DECIMAL64;
         final List<PostingPeriod> postingPeriods = calculateInterestPayable(mc, preMatureDate, transactions, isPreMatureClosure,
                 isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
@@ -630,8 +632,8 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void postInterest(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill) {
+                             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                             final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         boolean postReversals = false;
         super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -640,8 +642,8 @@ public class FixedDepositAccount extends SavingsAccount {
 
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postAsInterestOn, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
+                                                      final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                                                      final LocalDate postAsInterestOn, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         return super.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth, postAsInterestOn, backdatedTxnsAllowedTill, postReversals);

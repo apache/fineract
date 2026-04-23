@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,6 +36,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -57,7 +59,7 @@ import org.apache.fineract.organisation.holiday.api.HolidayApiConstants;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
-@Table(name = "m_holiday", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "holiday_name") })
+@Table(name = "m_holiday", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "holiday_name")})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -106,7 +108,7 @@ public class Holiday extends AbstractPersistableCustom<Long> {
         }
         final Integer status = HolidayStatusType.PENDING_FOR_ACTIVATION.getValue();
         final boolean processed = false;// default it to false. Only batch job
-                                        // should update this field.
+        // should update this field.
         final String description = command.stringValueOfParameterNamed(HolidayApiConstants.descriptionParamName);
 
         return new Holiday().setName(StringUtils.trim(name)).setFromDate(fromDate).setToDate(toDate)

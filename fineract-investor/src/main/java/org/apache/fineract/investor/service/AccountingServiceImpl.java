@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
@@ -59,7 +60,7 @@ public class AccountingServiceImpl implements AccountingService {
 
     @Override
     public void createJournalEntriesForSaleAssetTransfer(final Loan loan, final ExternalAssetOwnerTransfer transfer,
-            final ExternalAssetOwner previousOwner) {
+                                                         final ExternalAssetOwner previousOwner) {
 
         final ExternalAssetOwner newOwner = transfer.getOwner();
         List<JournalEntry> journalEntryList = createJournalEntries(loan, transfer, true);
@@ -99,7 +100,7 @@ public class AccountingServiceImpl implements AccountingService {
 
     @NonNull
     private List<JournalEntry> createJournalEntries(final Loan loan, final ExternalAssetOwnerTransfer transfer,
-            final boolean isReversalOrder) {
+                                                    final boolean isReversalOrder) {
         this.helper.checkForBranchClosures(loan.getOffice().getId(), transfer.getSettlementDate());
         // transaction properties
         final Long transactionId = transfer.getId();
@@ -133,7 +134,7 @@ public class AccountingServiceImpl implements AccountingService {
     }
 
     private ExternalAssetOwner determineOwnerForSale(final JournalEntry journalEntry, final Loan loan,
-            final ExternalAssetOwner previousOwner, final ExternalAssetOwner newOwner) {
+                                                     final ExternalAssetOwner previousOwner, final ExternalAssetOwner newOwner) {
         final boolean isOverpaid = LoanStatus.OVERPAID.equals(loan.getStatus());
 
         if (isOverpaid) {
@@ -156,7 +157,7 @@ public class AccountingServiceImpl implements AccountingService {
     }
 
     private ExternalAssetOwner determineOwnerForBuyback(final JournalEntry journalEntry, final Loan loan,
-            final ExternalAssetOwner previousOwner) {
+                                                        final ExternalAssetOwner previousOwner) {
         final boolean isOverpaid = LoanStatus.OVERPAID.equals(loan.getStatus());
         if (isOverpaid && journalEntry.isDebitEntry()) {
             return previousOwner;
@@ -179,8 +180,8 @@ public class AccountingServiceImpl implements AccountingService {
     }
 
     private List<JournalEntry> createJournalEntries(final Loan loan, final Long transactionId, final LocalDate transactionDate,
-            final BigDecimal principalAmount, final BigDecimal interestAmount, final BigDecimal feesAmount,
-            final BigDecimal penaltiesAmount, final BigDecimal overPaymentAmount, final boolean isReversalOrder) {
+                                                    final BigDecimal principalAmount, final BigDecimal interestAmount, final BigDecimal feesAmount,
+                                                    final BigDecimal penaltiesAmount, final BigDecimal overPaymentAmount, final boolean isReversalOrder) {
         final Long loanProductId = loan.productId();
         final Long loanId = loan.getId();
         final Office office = loan.getOffice();

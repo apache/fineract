@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,9 +21,11 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import com.google.common.base.Enums;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -37,7 +39,7 @@ public class CreditAllocationsJsonParser {
     public final CreditAllocationsValidator creditAllocationsValidator;
 
     public List<LoanProductCreditAllocationRule> assembleLoanProductCreditAllocationRules(final JsonCommand command,
-            String loanTransactionProcessingStrategyCode) {
+                                                                                          String loanTransactionProcessingStrategyCode) {
         JsonArray creditAllocation = command.arrayOfParameterNamed("creditAllocation");
         List<LoanProductCreditAllocationRule> productCreditAllocationRules = null;
         if (creditAllocation != null) {

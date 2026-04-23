@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,10 +26,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -94,15 +96,16 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
     /**
      * LoanRescheduleRequest constructor
      **/
-    protected LoanRescheduleRequest() {}
+    protected LoanRescheduleRequest() {
+    }
 
     /**
      * LoanRescheduleRequest constructor
      **/
     private LoanRescheduleRequest(final Loan loan, final Integer statusEnum, final Integer rescheduleFromInstallment,
-            final LocalDate rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
-            final String rescheduleReasonComment, final LocalDate submittedOnDate, final AppUser submittedByUser,
-            final LocalDate approvedOnDate, final AppUser approvedByUser, final LocalDate rejectedOnDate, AppUser rejectedByUser) {
+                                  final LocalDate rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
+                                  final String rescheduleReasonComment, final LocalDate submittedOnDate, final AppUser submittedByUser,
+                                  final LocalDate approvedOnDate, final AppUser approvedByUser, final LocalDate rejectedOnDate, AppUser rejectedByUser) {
         this.loan = loan;
         this.statusEnum = statusEnum;
         this.rescheduleFromInstallment = rescheduleFromInstallment;
@@ -122,9 +125,9 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
      * @return a new instance of the LoanRescheduleRequest class
      **/
     public static LoanRescheduleRequest instance(final Loan loan, final Integer statusEnum, final Integer rescheduleFromInstallment,
-            final LocalDate rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
-            final String rescheduleReasonComment, final LocalDate submittedOnDate, final AppUser submittedByUser,
-            final LocalDate approvedOnDate, final AppUser approvedByUser, final LocalDate rejectedOnDate, AppUser rejectedByUser) {
+                                                 final LocalDate rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
+                                                 final String rescheduleReasonComment, final LocalDate submittedOnDate, final AppUser submittedByUser,
+                                                 final LocalDate approvedOnDate, final AppUser approvedByUser, final LocalDate rejectedOnDate, AppUser rejectedByUser) {
 
         return new LoanRescheduleRequest(loan, statusEnum, rescheduleFromInstallment, rescheduleFromDate, recalculateInterest,
                 rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate, submittedByUser, approvedOnDate, approvedByUser,

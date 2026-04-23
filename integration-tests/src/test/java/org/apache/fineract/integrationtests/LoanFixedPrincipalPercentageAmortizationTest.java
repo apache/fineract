@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,11 +25,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -45,7 +47,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanFixedPrincipalPercentageAmortizationTest {
 
@@ -118,7 +120,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
                 .withInterestCalculationPeriodTypeAsDays().withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualPrincipalPayment() // This is required to fix the principal
                 .withPrinciplePercentagePerInstallment("5.00") // This fixes the principal at a fixed value till the
-                                                               // second last EMI
+                // second last EMI
                 .withInterestTypeAsDecliningBalance() //
                 .withAccounting(accountingRule, accounts);
 
@@ -127,7 +129,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal) {
+                                            final String savingsId, String principal) {
 
         List<HashMap> collaterals = new ArrayList<>();
 
@@ -150,7 +152,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withAmortizationTypeAsEqualPrincipalPayments() // This is required to fix the principal
                 .withPrinciplePercentagePerInstallment("5.00") // This fixes the principal at a fixed value till the
-                                                               // second last EMI
+                // second last EMI
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate("20 September 2011") //
@@ -171,7 +173,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
     }
 
     private Integer applyForLoanApplicationWithPrincipalGrace(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal) {
+                                                              final String savingsId, String principal) {
         List<HashMap> collaterals = new ArrayList<>();
 
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
@@ -192,7 +194,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withAmortizationTypeAsEqualPrincipalPayments() // This is required to fix the principal
                 .withPrinciplePercentagePerInstallment("5.00") // This fixes the principal at a fixed value till the
-                                                               // second last EMI
+                // second last EMI
                 .withPrincipalGrace("6").withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate("20 September 2011") //
@@ -283,7 +285,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
                 .withInterestCalculationPeriodTypeAsDays().withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualPrincipalPayment() // This is required to fix the principal
                 .withPrinciplePercentagePerInstallment("5.00") // This fixes the principal at a fixed value till the
-                                                               // second last EMI
+                // second last EMI
                 .withInterestTypeAsFlat() //
                 .withAccounting(accountingRule, accounts);
 
@@ -292,7 +294,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
     }
 
     private Integer applyForLoanApplicationWithFlatInterest(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal) {
+                                                            final String savingsId, String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -305,7 +307,7 @@ public class LoanFixedPrincipalPercentageAmortizationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withAmortizationTypeAsEqualPrincipalPayments() // This is required to fix the principal
                 .withPrinciplePercentagePerInstallment("5.00") // This fixes the principal at a fixed value till the
-                                                               // second last EMI
+                // second last EMI
                 .withInterestTypeAsFlatBalance() //
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate("20 September 2011") //

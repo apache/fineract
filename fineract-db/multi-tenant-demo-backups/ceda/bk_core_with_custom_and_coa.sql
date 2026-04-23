@@ -41,20 +41,21 @@
 DROP TABLE IF EXISTS `acc_gl_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `acc_gl_account` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `parent_id` BIGINT DEFAULT NULL,
-  `gl_code` varchar(45) NOT NULL,
-  `disabled` tinyint NOT NULL DEFAULT '0',
-  `manual_journal_entries_allowed` tinyint NOT NULL DEFAULT '1',
-  `account_usage` tinyint NOT NULL DEFAULT '2',
-  `classification_enum` SMALLINT NOT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `acc_gl_code` (`gl_code`),
-  KEY `FK_ACC_0000000001` (`parent_id`),
-  CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
+CREATE TABLE `acc_gl_account`
+(
+    `id`                             BIGINT      NOT NULL AUTO_INCREMENT,
+    `name`                           varchar(45) NOT NULL,
+    `parent_id`                      BIGINT               DEFAULT NULL,
+    `gl_code`                        varchar(45) NOT NULL,
+    `disabled`                       tinyint     NOT NULL DEFAULT '0',
+    `manual_journal_entries_allowed` tinyint     NOT NULL DEFAULT '1',
+    `account_usage`                  tinyint     NOT NULL DEFAULT '2',
+    `classification_enum`            SMALLINT    NOT NULL,
+    `description`                    varchar(500)         DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `acc_gl_code` (`gl_code`),
+    KEY                              `FK_ACC_0000000001` (`parent_id`),
+    CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -62,11 +63,110 @@ CREATE TABLE `acc_gl_account` (
 -- Dumping data for table `acc_gl_account`
 --
 
-LOCK TABLES `acc_gl_account` WRITE;
+LOCK
+TABLES `acc_gl_account` WRITE;
 /*!40000 ALTER TABLE `acc_gl_account` DISABLE KEYS */;
-INSERT INTO `acc_gl_account` VALUES (1,'Petty Cash Balances',NULL,'11100',0,1,2,1,NULL),(2,'Cash in Valut 1',NULL,'11101',0,1,1,1,NULL),(3,'Bank Balances',NULL,'11200',0,1,2,1,NULL),(4,'Centenary Opening Account',NULL,'11201',0,1,1,1,NULL),(5,'Centenary Expense Account',NULL,'11202',0,1,1,1,NULL),(6,'Centenary USD Account',NULL,'11203',0,1,1,1,NULL),(7,'Loans and Advances',NULL,'13100',0,1,2,1,NULL),(8,'Loans to Clients',NULL,'13101',0,1,1,1,NULL),(9,'Outstanding Interest',NULL,'13102',0,1,1,1,NULL),(10,'Outstanding Late Payment Interest',NULL,'13103',0,1,1,1,NULL),(11,'Outstanding Bank Fees to be collected',NULL,'13104',0,1,1,1,NULL),(12,'WriteOff Accounts',NULL,'13200',0,1,2,1,NULL),(13,'Write-offs (use for funds coming in)',NULL,'13201',0,1,1,1,NULL),(14,'Write-offs outstanding principal',NULL,'13202',0,1,1,1,NULL),(15,'Write-offs outstanding interest',NULL,'13203',0,1,1,1,NULL),(16,'Write-offs collected bank fees',NULL,'13204',0,1,1,1,NULL),(17,'Write-offs hardware/furniture',NULL,'13205',0,1,1,1,NULL),(18,'Fixed Assets',NULL,'14100',0,1,2,1,NULL),(19,'Office Equipment',NULL,'14101',0,1,1,1,NULL),(20,'Suspense Items (unidentified deposits)',NULL,'15000',0,1,2,1,NULL),(21,'Assets',NULL,'10000',0,1,2,1,NULL),(22,'Liabilities',NULL,'20000',0,1,2,2,NULL),(23,'Shares Account',NULL,'26100',0,1,2,2,NULL),(24,'Shares Captial',NULL,'26101',0,1,1,2,NULL),(25,'Donated Equity',NULL,'26300',0,1,2,2,NULL),(26,'Donated Equity Ameropa Foundation',NULL,'26301',0,1,1,2,NULL),(27,'Donated Equity e.h',NULL,'26302',0,1,1,2,NULL),(28,'Overpaid Amounts',NULL,'27000',0,1,2,2,NULL),(29,'Loss Provision',NULL,'28000',0,1,2,2,NULL),(30,'Provision Outstanding Principal',NULL,'28001',0,1,1,2,NULL),(31,'Provision Oustanding Interest',NULL,'28002',0,1,1,2,NULL),(32,'Income',NULL,'30000',0,1,2,4,NULL),(33,'Interest Income from Loans',NULL,'31100',0,1,2,4,NULL),(34,'Interest on Loans',NULL,'31101',0,1,1,4,NULL),(35,'Late Payment Interest',NULL,'31102',0,1,1,4,NULL),(36,'Income from Micro credit & Lending Activities',NULL,'31300',0,1,2,4,NULL),(37,'Collected Bank Fees Receivable',NULL,'6201',0,1,1,4,NULL),(38,'Deposits from Loans Write Off',NULL,'31400',0,1,2,4,NULL),(39,'Expenditure',NULL,'40000',0,1,2,5,NULL),(40,'Office Expenditure Account',NULL,'42100',0,1,2,5,NULL),(41,'Water Charges',NULL,'42102',0,1,1,5,NULL),(42,'Electricity Charges',NULL,'42103',0,1,1,5,NULL),(43,'Printing and Stationary',NULL,'42105',0,1,1,5,NULL),(44,'Office Rent',NULL,'42107',0,1,1,5,NULL),(45,'Marketing Expense',NULL,'42109',0,1,1,5,NULL),(46,'Office utilities',NULL,'42112',0,1,1,5,'(supplies, toiletries, kitchen)'),(47,'Furniture',NULL,'42113',0,1,1,5,NULL),(48,'CEDA Meeting Expense',NULL,'42114',0,1,1,5,NULL),(49,'Employee Personal Expsense Account',NULL,'42200',0,1,2,5,NULL),(50,'Salary Alice',NULL,'42201',0,1,1,5,NULL),(51,'Salary Irene',NULL,'42202',0,1,1,5,NULL),(52,'Salary Richard',NULL,'42203',0,1,1,5,NULL),(53,'Salary Loan Officer TBA',NULL,'42204',0,1,1,5,NULL),(54,'Medical Insurance Alice & Family',NULL,'42205',0,1,1,5,NULL),(55,'Medical Insurance Irene',NULL,'42206',0,1,1,5,NULL),(56,'Medical Insurance Richard',NULL,'42207',0,1,1,5,NULL),(57,'Medical Insurance Loan Officer TBA',NULL,'42208',0,1,1,5,NULL),(58,'PAYE all employees',NULL,'42209',0,1,1,5,NULL),(59,'NSSF all employees',NULL,'42210',0,1,1,5,NULL),(60,'Lunch Allowances all employees',NULL,'42211',0,1,1,5,NULL),(61,'IT software and maintenance',NULL,'42300',0,1,2,5,NULL),(62,'Mifos maintenance contract 12 months',NULL,'42301',0,1,1,5,NULL),(63,'VPS Contract 12 months',NULL,'42302',0,1,1,5,NULL),(64,'Bulk SMS Service',NULL,'42303',0,1,1,5,NULL),(65,'Support Accounting Software',NULL,'42304',0,1,1,5,NULL),(66,'Mifos Instance Setup',NULL,'42305',0,1,1,5,NULL),(67,'Misc support expense',NULL,'42306',0,1,1,5,NULL),(68,'Warid Mobile Line',NULL,'42307',0,1,1,5,NULL),(69,'Landline',NULL,'42308',0,1,1,5,NULL),(70,'Modem Alice',NULL,'42309',0,1,1,5,NULL),(71,'Modem Irene',NULL,'42310',0,1,1,5,NULL),(72,'Modem Richard',NULL,'42311',0,1,1,5,NULL),(73,'Repairs',NULL,'42312',0,1,1,5,NULL),(74,'Airtime Expenses',NULL,'42400',0,1,2,5,NULL),(75,'Airtime Alice',NULL,'42401',0,1,1,5,NULL),(76,'Airtime Richard',NULL,'42402',0,1,1,5,NULL),(77,'Airtime Loan Office TBA',NULL,'42403',0,1,1,5,NULL),(78,'Special Airtime Alice',NULL,'42404',0,1,1,5,NULL),(79,'Transportation',NULL,'42500',0,1,2,5,NULL),(80,'Flat monthly transportation cost',NULL,'42501',0,1,1,5,NULL),(81,'Faciliation cost for Richard',NULL,'42502',0,1,1,5,NULL),(82,'Faciliation cost for Loan Officer TBA',NULL,'42503',0,1,1,5,NULL),(83,'Consultancy Expenses',NULL,'42600',0,1,2,5,NULL),(84,'Audit Fees',NULL,'42601',0,1,1,5,NULL),(85,'Legal Fees',NULL,'42602',0,1,1,5,NULL),(86,'Miscellaneous Expenses Account',NULL,'42700',0,1,2,5,NULL),(87,'MFI License',NULL,'42703',0,1,1,5,NULL),(88,'Sundy Expenses',NULL,'42704',0,1,1,5,NULL),(89,'Bank Fees',NULL,'42800',0,1,2,5,NULL),(90,'Bank Charges Operating Account',NULL,'42801',0,1,1,5,NULL),(91,'Bank Charges Expense Account',NULL,'42802',0,1,1,5,NULL),(92,'E.H Account',NULL,'42900',0,1,2,5,NULL),(93,'Airtime',NULL,'42901',0,1,1,5,NULL),(94,'Modem',NULL,'42902',0,1,1,5,NULL),(95,'Meals',NULL,'42903',0,1,1,5,NULL),(96,'Transportation',NULL,'42904',0,1,1,5,NULL),(97,'Miscellaneous',NULL,'42905',0,1,1,5,NULL);
+INSERT INTO `acc_gl_account`
+VALUES (1, 'Petty Cash Balances', NULL, '11100', 0, 1, 2, 1, NULL),
+       (2, 'Cash in Valut 1', NULL, '11101', 0, 1, 1, 1, NULL),
+       (3, 'Bank Balances', NULL, '11200', 0, 1, 2, 1, NULL),
+       (4, 'Centenary Opening Account', NULL, '11201', 0, 1, 1, 1, NULL),
+       (5, 'Centenary Expense Account', NULL, '11202', 0, 1, 1, 1, NULL),
+       (6, 'Centenary USD Account', NULL, '11203', 0, 1, 1, 1, NULL),
+       (7, 'Loans and Advances', NULL, '13100', 0, 1, 2, 1, NULL),
+       (8, 'Loans to Clients', NULL, '13101', 0, 1, 1, 1, NULL),
+       (9, 'Outstanding Interest', NULL, '13102', 0, 1, 1, 1, NULL),
+       (10, 'Outstanding Late Payment Interest', NULL, '13103', 0, 1, 1, 1, NULL),
+       (11, 'Outstanding Bank Fees to be collected', NULL, '13104', 0, 1, 1, 1, NULL),
+       (12, 'WriteOff Accounts', NULL, '13200', 0, 1, 2, 1, NULL),
+       (13, 'Write-offs (use for funds coming in)', NULL, '13201', 0, 1, 1, 1, NULL),
+       (14, 'Write-offs outstanding principal', NULL, '13202', 0, 1, 1, 1, NULL),
+       (15, 'Write-offs outstanding interest', NULL, '13203', 0, 1, 1, 1, NULL),
+       (16, 'Write-offs collected bank fees', NULL, '13204', 0, 1, 1, 1, NULL),
+       (17, 'Write-offs hardware/furniture', NULL, '13205', 0, 1, 1, 1, NULL),
+       (18, 'Fixed Assets', NULL, '14100', 0, 1, 2, 1, NULL),
+       (19, 'Office Equipment', NULL, '14101', 0, 1, 1, 1, NULL),
+       (20, 'Suspense Items (unidentified deposits)', NULL, '15000', 0, 1, 2, 1, NULL),
+       (21, 'Assets', NULL, '10000', 0, 1, 2, 1, NULL),
+       (22, 'Liabilities', NULL, '20000', 0, 1, 2, 2, NULL),
+       (23, 'Shares Account', NULL, '26100', 0, 1, 2, 2, NULL),
+       (24, 'Shares Captial', NULL, '26101', 0, 1, 1, 2, NULL),
+       (25, 'Donated Equity', NULL, '26300', 0, 1, 2, 2, NULL),
+       (26, 'Donated Equity Ameropa Foundation', NULL, '26301', 0, 1, 1, 2, NULL),
+       (27, 'Donated Equity e.h', NULL, '26302', 0, 1, 1, 2, NULL),
+       (28, 'Overpaid Amounts', NULL, '27000', 0, 1, 2, 2, NULL),
+       (29, 'Loss Provision', NULL, '28000', 0, 1, 2, 2, NULL),
+       (30, 'Provision Outstanding Principal', NULL, '28001', 0, 1, 1, 2, NULL),
+       (31, 'Provision Oustanding Interest', NULL, '28002', 0, 1, 1, 2, NULL),
+       (32, 'Income', NULL, '30000', 0, 1, 2, 4, NULL),
+       (33, 'Interest Income from Loans', NULL, '31100', 0, 1, 2, 4, NULL),
+       (34, 'Interest on Loans', NULL, '31101', 0, 1, 1, 4, NULL),
+       (35, 'Late Payment Interest', NULL, '31102', 0, 1, 1, 4, NULL),
+       (36, 'Income from Micro credit & Lending Activities', NULL, '31300', 0, 1, 2, 4, NULL),
+       (37, 'Collected Bank Fees Receivable', NULL, '6201', 0, 1, 1, 4, NULL),
+       (38, 'Deposits from Loans Write Off', NULL, '31400', 0, 1, 2, 4, NULL),
+       (39, 'Expenditure', NULL, '40000', 0, 1, 2, 5, NULL),
+       (40, 'Office Expenditure Account', NULL, '42100', 0, 1, 2, 5, NULL),
+       (41, 'Water Charges', NULL, '42102', 0, 1, 1, 5, NULL),
+       (42, 'Electricity Charges', NULL, '42103', 0, 1, 1, 5, NULL),
+       (43, 'Printing and Stationary', NULL, '42105', 0, 1, 1, 5, NULL),
+       (44, 'Office Rent', NULL, '42107', 0, 1, 1, 5, NULL),
+       (45, 'Marketing Expense', NULL, '42109', 0, 1, 1, 5, NULL),
+       (46, 'Office utilities', NULL, '42112', 0, 1, 1, 5, '(supplies, toiletries, kitchen)'),
+       (47, 'Furniture', NULL, '42113', 0, 1, 1, 5, NULL),
+       (48, 'CEDA Meeting Expense', NULL, '42114', 0, 1, 1, 5, NULL),
+       (49, 'Employee Personal Expsense Account', NULL, '42200', 0, 1, 2, 5, NULL),
+       (50, 'Salary Alice', NULL, '42201', 0, 1, 1, 5, NULL),
+       (51, 'Salary Irene', NULL, '42202', 0, 1, 1, 5, NULL),
+       (52, 'Salary Richard', NULL, '42203', 0, 1, 1, 5, NULL),
+       (53, 'Salary Loan Officer TBA', NULL, '42204', 0, 1, 1, 5, NULL),
+       (54, 'Medical Insurance Alice & Family', NULL, '42205', 0, 1, 1, 5, NULL),
+       (55, 'Medical Insurance Irene', NULL, '42206', 0, 1, 1, 5, NULL),
+       (56, 'Medical Insurance Richard', NULL, '42207', 0, 1, 1, 5, NULL),
+       (57, 'Medical Insurance Loan Officer TBA', NULL, '42208', 0, 1, 1, 5, NULL),
+       (58, 'PAYE all employees', NULL, '42209', 0, 1, 1, 5, NULL),
+       (59, 'NSSF all employees', NULL, '42210', 0, 1, 1, 5, NULL),
+       (60, 'Lunch Allowances all employees', NULL, '42211', 0, 1, 1, 5, NULL),
+       (61, 'IT software and maintenance', NULL, '42300', 0, 1, 2, 5, NULL),
+       (62, 'Mifos maintenance contract 12 months', NULL, '42301', 0, 1, 1, 5, NULL),
+       (63, 'VPS Contract 12 months', NULL, '42302', 0, 1, 1, 5, NULL),
+       (64, 'Bulk SMS Service', NULL, '42303', 0, 1, 1, 5, NULL),
+       (65, 'Support Accounting Software', NULL, '42304', 0, 1, 1, 5, NULL),
+       (66, 'Mifos Instance Setup', NULL, '42305', 0, 1, 1, 5, NULL),
+       (67, 'Misc support expense', NULL, '42306', 0, 1, 1, 5, NULL),
+       (68, 'Warid Mobile Line', NULL, '42307', 0, 1, 1, 5, NULL),
+       (69, 'Landline', NULL, '42308', 0, 1, 1, 5, NULL),
+       (70, 'Modem Alice', NULL, '42309', 0, 1, 1, 5, NULL),
+       (71, 'Modem Irene', NULL, '42310', 0, 1, 1, 5, NULL),
+       (72, 'Modem Richard', NULL, '42311', 0, 1, 1, 5, NULL),
+       (73, 'Repairs', NULL, '42312', 0, 1, 1, 5, NULL),
+       (74, 'Airtime Expenses', NULL, '42400', 0, 1, 2, 5, NULL),
+       (75, 'Airtime Alice', NULL, '42401', 0, 1, 1, 5, NULL),
+       (76, 'Airtime Richard', NULL, '42402', 0, 1, 1, 5, NULL),
+       (77, 'Airtime Loan Office TBA', NULL, '42403', 0, 1, 1, 5, NULL),
+       (78, 'Special Airtime Alice', NULL, '42404', 0, 1, 1, 5, NULL),
+       (79, 'Transportation', NULL, '42500', 0, 1, 2, 5, NULL),
+       (80, 'Flat monthly transportation cost', NULL, '42501', 0, 1, 1, 5, NULL),
+       (81, 'Faciliation cost for Richard', NULL, '42502', 0, 1, 1, 5, NULL),
+       (82, 'Faciliation cost for Loan Officer TBA', NULL, '42503', 0, 1, 1, 5, NULL),
+       (83, 'Consultancy Expenses', NULL, '42600', 0, 1, 2, 5, NULL),
+       (84, 'Audit Fees', NULL, '42601', 0, 1, 1, 5, NULL),
+       (85, 'Legal Fees', NULL, '42602', 0, 1, 1, 5, NULL),
+       (86, 'Miscellaneous Expenses Account', NULL, '42700', 0, 1, 2, 5, NULL),
+       (87, 'MFI License', NULL, '42703', 0, 1, 1, 5, NULL),
+       (88, 'Sundy Expenses', NULL, '42704', 0, 1, 1, 5, NULL),
+       (89, 'Bank Fees', NULL, '42800', 0, 1, 2, 5, NULL),
+       (90, 'Bank Charges Operating Account', NULL, '42801', 0, 1, 1, 5, NULL),
+       (91, 'Bank Charges Expense Account', NULL, '42802', 0, 1, 1, 5, NULL),
+       (92, 'E.H Account', NULL, '42900', 0, 1, 2, 5, NULL),
+       (93, 'Airtime', NULL, '42901', 0, 1, 1, 5, NULL),
+       (94, 'Modem', NULL, '42902', 0, 1, 1, 5, NULL),
+       (95, 'Meals', NULL, '42903', 0, 1, 1, 5, NULL),
+       (96, 'Transportation', NULL, '42904', 0, 1, 1, 5, NULL),
+       (97, 'Miscellaneous', NULL, '42905', 0, 1, 1, 5, NULL);
 /*!40000 ALTER TABLE `acc_gl_account` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `acc_gl_closure`
@@ -75,24 +175,25 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `acc_gl_closure`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `acc_gl_closure` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `office_id` BIGINT NOT NULL,
-  `closing_date` date NOT NULL,
-  `is_deleted` INT NOT NULL DEFAULT '0',
-  `createdby_id` BIGINT DEFAULT NULL,
-  `lastmodifiedby_id` BIGINT DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `comments` varchar(500) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `office_id_closing_date` (`office_id`,`closing_date`),
-  KEY `FK_acc_gl_closure_m_office` (`office_id`),
-  KEY `FK_acc_gl_closure_m_appuser` (`createdby_id`),
-  KEY `FK_acc_gl_closure_m_appuser_2` (`lastmodifiedby_id`),
-  CONSTRAINT `FK_acc_gl_closure_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_acc_gl_closure_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+CREATE TABLE `acc_gl_closure`
+(
+    `id`                BIGINT NOT NULL AUTO_INCREMENT,
+    `office_id`         BIGINT NOT NULL,
+    `closing_date`      date   NOT NULL,
+    `is_deleted`        INT    NOT NULL DEFAULT '0',
+    `createdby_id`      BIGINT          DEFAULT NULL,
+    `lastmodifiedby_id` BIGINT          DEFAULT NULL,
+    `created_date`      datetime        DEFAULT NULL,
+    `lastmodified_date` datetime        DEFAULT NULL,
+    `comments`          varchar(500)    DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `office_id_closing_date` (`office_id`,`closing_date`),
+    KEY                 `FK_acc_gl_closure_m_office` (`office_id`),
+    KEY                 `FK_acc_gl_closure_m_appuser` (`createdby_id`),
+    KEY                 `FK_acc_gl_closure_m_appuser_2` (`lastmodifiedby_id`),
+    CONSTRAINT `FK_acc_gl_closure_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `FK_acc_gl_closure_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -100,10 +201,12 @@ CREATE TABLE `acc_gl_closure` (
 -- Dumping data for table `acc_gl_closure`
 --
 
-LOCK TABLES `acc_gl_closure` WRITE;
+LOCK
+TABLES `acc_gl_closure` WRITE;
 /*!40000 ALTER TABLE `acc_gl_closure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_closure` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `acc_gl_journal_entry`
@@ -112,35 +215,36 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `acc_gl_journal_entry`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `acc_gl_journal_entry` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `account_id` BIGINT NOT NULL,
-  `office_id` BIGINT NOT NULL,
-  `reversal_id` BIGINT DEFAULT NULL,
-  `transaction_id` varchar(50) NOT NULL,
-  `reversed` tinyint NOT NULL DEFAULT '0',
-  `manual_entry` tinyint NOT NULL DEFAULT '0',
-  `entry_date` date NOT NULL,
-  `type_enum` SMALLINT NOT NULL,
-  `amount` decimal(19,6) NOT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  `entity_type_enum` SMALLINT DEFAULT NULL,
-  `entity_id` BIGINT DEFAULT NULL,
-  `createdby_id` BIGINT NOT NULL,
-  `lastmodifiedby_id` BIGINT NOT NULL,
-  `created_date` datetime NOT NULL,
-  `lastmodified_date` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_acc_gl_journal_entry_m_office` (`office_id`),
-  KEY `FK_acc_gl_journal_entry_m_appuser` (`createdby_id`),
-  KEY `FK_acc_gl_journal_entry_m_appuser_2` (`lastmodifiedby_id`),
-  KEY `FK_acc_gl_journal_entry_acc_gl_journal_entry` (`reversal_id`),
-  KEY `FK_acc_gl_journal_entry_acc_gl_account` (`account_id`),
-  CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_account` FOREIGN KEY (`account_id`) REFERENCES `acc_gl_account` (`id`),
-  CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_journal_entry` FOREIGN KEY (`reversal_id`) REFERENCES `acc_gl_journal_entry` (`id`),
-  CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_acc_gl_journal_entry_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_acc_gl_journal_entry_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+CREATE TABLE `acc_gl_journal_entry`
+(
+    `id`                BIGINT         NOT NULL AUTO_INCREMENT,
+    `account_id`        BIGINT         NOT NULL,
+    `office_id`         BIGINT         NOT NULL,
+    `reversal_id`       BIGINT                  DEFAULT NULL,
+    `transaction_id`    varchar(50)    NOT NULL,
+    `reversed`          tinyint        NOT NULL DEFAULT '0',
+    `manual_entry`      tinyint        NOT NULL DEFAULT '0',
+    `entry_date`        date           NOT NULL,
+    `type_enum`         SMALLINT       NOT NULL,
+    `amount`            decimal(19, 6) NOT NULL,
+    `description`       varchar(500)            DEFAULT NULL,
+    `entity_type_enum`  SMALLINT                DEFAULT NULL,
+    `entity_id`         BIGINT                  DEFAULT NULL,
+    `createdby_id`      BIGINT         NOT NULL,
+    `lastmodifiedby_id` BIGINT         NOT NULL,
+    `created_date`      datetime       NOT NULL,
+    `lastmodified_date` datetime       NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY                 `FK_acc_gl_journal_entry_m_office` (`office_id`),
+    KEY                 `FK_acc_gl_journal_entry_m_appuser` (`createdby_id`),
+    KEY                 `FK_acc_gl_journal_entry_m_appuser_2` (`lastmodifiedby_id`),
+    KEY                 `FK_acc_gl_journal_entry_acc_gl_journal_entry` (`reversal_id`),
+    KEY                 `FK_acc_gl_journal_entry_acc_gl_account` (`account_id`),
+    CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_account` FOREIGN KEY (`account_id`) REFERENCES `acc_gl_account` (`id`),
+    CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_journal_entry` FOREIGN KEY (`reversal_id`) REFERENCES `acc_gl_journal_entry` (`id`),
+    CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `FK_acc_gl_journal_entry_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `FK_acc_gl_journal_entry_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -148,10 +252,12 @@ CREATE TABLE `acc_gl_journal_entry` (
 -- Dumping data for table `acc_gl_journal_entry`
 --
 
-LOCK TABLES `acc_gl_journal_entry` WRITE;
+LOCK
+TABLES `acc_gl_journal_entry` WRITE;
 /*!40000 ALTER TABLE `acc_gl_journal_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_journal_entry` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `acc_product_mapping`
@@ -160,13 +266,14 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `acc_product_mapping`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `acc_product_mapping` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `gl_account_id` BIGINT DEFAULT NULL,
-  `product_id` BIGINT DEFAULT NULL,
-  `product_type` SMALLINT DEFAULT NULL,
-  `financial_account_type` SMALLINT DEFAULT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE `acc_product_mapping`
+(
+    `id`                     BIGINT NOT NULL AUTO_INCREMENT,
+    `gl_account_id`          BIGINT   DEFAULT NULL,
+    `product_id`             BIGINT   DEFAULT NULL,
+    `product_type`           SMALLINT DEFAULT NULL,
+    `financial_account_type` SMALLINT DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -174,11 +281,19 @@ CREATE TABLE `acc_product_mapping` (
 -- Dumping data for table `acc_product_mapping`
 --
 
-LOCK TABLES `acc_product_mapping` WRITE;
+LOCK
+TABLES `acc_product_mapping` WRITE;
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
-INSERT INTO `acc_product_mapping` VALUES (1,4,1,1,1),(2,8,1,1,2),(3,34,1,1,3),(4,37,1,1,4),(5,35,1,1,5),(6,97,1,1,6);
+INSERT INTO `acc_product_mapping`
+VALUES (1, 4, 1, 1, 1),
+       (2, 8, 1, 1, 2),
+       (3, 34, 1, 1, 3),
+       (4, 37, 1, 1, 4),
+       (5, 35, 1, 1, 5),
+       (6, 97, 1, 1, 6);
 /*!40000 ALTER TABLE `acc_product_mapping` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `c_configuration`
@@ -187,11 +302,12 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `c_configuration`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `c_configuration` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) DEFAULT NULL,
-  `enabled` tinyint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+CREATE TABLE `c_configuration`
+(
+    `id`      BIGINT  NOT NULL AUTO_INCREMENT,
+    `name`    varchar(50)      DEFAULT NULL,
+    `enabled` tinyint NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -199,11 +315,14 @@ CREATE TABLE `c_configuration` (
 -- Dumping data for table `c_configuration`
 --
 
-LOCK TABLES `c_configuration` WRITE;
+LOCK
+TABLES `c_configuration` WRITE;
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
-INSERT INTO `c_configuration` VALUES (1,'maker-checker',0);
+INSERT INTO `c_configuration`
+VALUES (1, 'maker-checker', 0);
 /*!40000 ALTER TABLE `c_configuration` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `client additional data`
@@ -212,47 +331,48 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `client additional data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `client additional data` (
-  `client_id` BIGINT NOT NULL,
-  `Gender_cd` INT NOT NULL,
-  `Date of Birth` date NOT NULL,
-  `Home address` text NOT NULL,
-  `Telephone number` varchar(20) NOT NULL,
-  `Telephone number (2nd)` varchar(20) NOT NULL,
-  `Email address` varchar(50) NOT NULL,
-  `EducationLevel_cd` INT NOT NULL,
-  `MaritalStatus_cd` INT NOT NULL,
-  `Number of children` INT NOT NULL,
-  `Citizenship` varchar(50) NOT NULL,
-  `PovertyStatus_cd` INT NOT NULL,
-  `YesNo_cd_Employed` INT NOT NULL,
-  `FieldOfEmployment_cd_Field of employment` INT DEFAULT NULL,
-  `Employer name` varchar(50) DEFAULT NULL,
-  `Number of years` INT DEFAULT NULL,
-  `Monthly salary` decimal(19,6) DEFAULT NULL,
-  `YesNo_cd_Self employed` INT NOT NULL,
-  `FieldOfEmployment_cd_Field of self-employment` INT DEFAULT NULL,
-  `Business address` text,
-  `Number of employees` INT DEFAULT NULL,
-  `Monthly salaries paid` decimal(19,6) DEFAULT NULL,
-  `Monthly net income of business activity` decimal(19,6) DEFAULT NULL,
-  `Monthly rent` decimal(19,6) DEFAULT NULL,
-  `Other income generating activities` varchar(100) DEFAULT NULL,
-  `YesNo_cd_Bookkeeping` INT DEFAULT NULL,
-  `YesNo_cd_Loans with other institutions` INT NOT NULL,
-  `From whom` varchar(100) DEFAULT NULL,
-  `Amount` decimal(19,6) DEFAULT NULL,
-  `Interest rate pa` decimal(19,6) DEFAULT NULL,
-  `Number of people depending on overal income` INT NOT NULL,
-  `YesNo_cd_Bank account` INT NOT NULL,
-  `YesNo_cd_Business plan provided` INT NOT NULL,
-  `YesNo_cd_Access to internet` INT DEFAULT NULL,
-  `Introduced by` varchar(100) DEFAULT NULL,
-  `Known to introducer since` varchar(100) NOT NULL,
-  `Last visited by` varchar(100) DEFAULT NULL,
-  `Last visited on` date NOT NULL,
-  PRIMARY KEY (`client_id`),
-  CONSTRAINT `FK_client_additional_data` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+CREATE TABLE `client additional data`
+(
+    `client_id`                                     BIGINT       NOT NULL,
+    `Gender_cd`                                     INT          NOT NULL,
+    `Date of Birth`                                 date         NOT NULL,
+    `Home address`                                  text         NOT NULL,
+    `Telephone number`                              varchar(20)  NOT NULL,
+    `Telephone number (2nd)`                        varchar(20)  NOT NULL,
+    `Email address`                                 varchar(50)  NOT NULL,
+    `EducationLevel_cd`                             INT          NOT NULL,
+    `MaritalStatus_cd`                              INT          NOT NULL,
+    `Number of children`                            INT          NOT NULL,
+    `Citizenship`                                   varchar(50)  NOT NULL,
+    `PovertyStatus_cd`                              INT          NOT NULL,
+    `YesNo_cd_Employed`                             INT          NOT NULL,
+    `FieldOfEmployment_cd_Field of employment`      INT            DEFAULT NULL,
+    `Employer name`                                 varchar(50)    DEFAULT NULL,
+    `Number of years`                               INT            DEFAULT NULL,
+    `Monthly salary`                                decimal(19, 6) DEFAULT NULL,
+    `YesNo_cd_Self employed`                        INT          NOT NULL,
+    `FieldOfEmployment_cd_Field of self-employment` INT            DEFAULT NULL,
+    `Business address`                              text,
+    `Number of employees`                           INT            DEFAULT NULL,
+    `Monthly salaries paid`                         decimal(19, 6) DEFAULT NULL,
+    `Monthly net income of business activity`       decimal(19, 6) DEFAULT NULL,
+    `Monthly rent`                                  decimal(19, 6) DEFAULT NULL,
+    `Other income generating activities`            varchar(100)   DEFAULT NULL,
+    `YesNo_cd_Bookkeeping`                          INT            DEFAULT NULL,
+    `YesNo_cd_Loans with other institutions`        INT          NOT NULL,
+    `From whom`                                     varchar(100)   DEFAULT NULL,
+    `Amount`                                        decimal(19, 6) DEFAULT NULL,
+    `Interest rate pa`                              decimal(19, 6) DEFAULT NULL,
+    `Number of people depending on overal income`   INT          NOT NULL,
+    `YesNo_cd_Bank account`                         INT          NOT NULL,
+    `YesNo_cd_Business plan provided`               INT          NOT NULL,
+    `YesNo_cd_Access to internet`                   INT            DEFAULT NULL,
+    `Introduced by`                                 varchar(100)   DEFAULT NULL,
+    `Known to introducer since`                     varchar(100) NOT NULL,
+    `Last visited by`                               varchar(100)   DEFAULT NULL,
+    `Last visited on`                               date         NOT NULL,
+    PRIMARY KEY (`client_id`),
+    CONSTRAINT `FK_client_additional_data` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -260,10 +380,12 @@ CREATE TABLE `client additional data` (
 -- Dumping data for table `client additional data`
 --
 
-LOCK TABLES `client additional data` WRITE;
+LOCK
+TABLES `client additional data` WRITE;
 /*!40000 ALTER TABLE `client additional data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `client additional data` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `impact measurement`
@@ -272,17 +394,18 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `impact measurement`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `impact measurement` (
-  `loan_id` BIGINT NOT NULL,
-  `YesNo_cd_RepaidOnSchedule` INT NOT NULL,
-  `ReasonNotRepaidOnSchedule` text,
-  `How was Loan Amount Invested` text NOT NULL,
-  `Additional Income Generated` decimal(19,6) NOT NULL,
-  `Additional Income Used For` text NOT NULL,
-  `YesNo_cd_NewJobsCreated` INT NOT NULL,
-  `Number of Jobs Created` BIGINT DEFAULT NULL,
-  PRIMARY KEY (`loan_id`),
-  CONSTRAINT `FK_impact measurement` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+CREATE TABLE `impact measurement`
+(
+    `loan_id`                      BIGINT         NOT NULL,
+    `YesNo_cd_RepaidOnSchedule`    INT            NOT NULL,
+    `ReasonNotRepaidOnSchedule`    text,
+    `How was Loan Amount Invested` text           NOT NULL,
+    `Additional Income Generated`  decimal(19, 6) NOT NULL,
+    `Additional Income Used For`   text           NOT NULL,
+    `YesNo_cd_NewJobsCreated`      INT            NOT NULL,
+    `Number of Jobs Created`       BIGINT DEFAULT NULL,
+    PRIMARY KEY (`loan_id`),
+    CONSTRAINT `FK_impact measurement` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -290,10 +413,12 @@ CREATE TABLE `impact measurement` (
 -- Dumping data for table `impact measurement`
 --
 
-LOCK TABLES `impact measurement` WRITE;
+LOCK
+TABLES `impact measurement` WRITE;
 /*!40000 ALTER TABLE `impact measurement` DISABLE KEYS */;
 /*!40000 ALTER TABLE `impact measurement` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `loan additional data`
@@ -302,18 +427,19 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `loan additional data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `loan additional data` (
-  `loan_id` BIGINT NOT NULL,
-  `PurposeOfLoan_cd` INT NOT NULL,
-  `CollateralType_cd` INT NOT NULL,
-  `Collateral notes` text NOT NULL,
-  `YesNo_cd_Guarantor` INT NOT NULL,
-  `Guarantor name` varchar(100) DEFAULT NULL,
-  `Guarantor relation` varchar(100) DEFAULT NULL,
-  `Guarantor address` varchar(100) DEFAULT NULL,
-  `Guarantor telephone number` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`loan_id`),
-  CONSTRAINT `FK_loan_additional_data` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+CREATE TABLE `loan additional data`
+(
+    `loan_id`                    BIGINT NOT NULL,
+    `PurposeOfLoan_cd`           INT    NOT NULL,
+    `CollateralType_cd`          INT    NOT NULL,
+    `Collateral notes`           text   NOT NULL,
+    `YesNo_cd_Guarantor`         INT    NOT NULL,
+    `Guarantor name`             varchar(100) DEFAULT NULL,
+    `Guarantor relation`         varchar(100) DEFAULT NULL,
+    `Guarantor address`          varchar(100) DEFAULT NULL,
+    `Guarantor telephone number` varchar(20)  DEFAULT NULL,
+    PRIMARY KEY (`loan_id`),
+    CONSTRAINT `FK_loan_additional_data` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -321,10 +447,12 @@ CREATE TABLE `loan additional data` (
 -- Dumping data for table `loan additional data`
 --
 
-LOCK TABLES `loan additional data` WRITE;
+LOCK
+TABLES `loan additional data` WRITE;
 /*!40000 ALTER TABLE `loan additional data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `loan additional data` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_appuser`
@@ -333,24 +461,25 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_appuser`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_appuser` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `is_deleted` tinyint NOT NULL DEFAULT '0',
-  `office_id` BIGINT DEFAULT NULL,
-  `username` varchar(100) NOT NULL,
-  `firstname` varchar(100) NOT NULL,
-  `lastname` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `firsttime_login_remaining` bit(1) NOT NULL,
-  `nonexpired` bit(1) NOT NULL,
-  `nonlocked` bit(1) NOT NULL,
-  `nonexpired_credentials` bit(1) NOT NULL,
-  `enabled` bit(1) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `username_org` (`username`),
-  KEY `FKB3D587CE0DD567A` (`office_id`),
-  CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+CREATE TABLE `m_appuser`
+(
+    `id`                        BIGINT       NOT NULL AUTO_INCREMENT,
+    `is_deleted`                tinyint      NOT NULL DEFAULT '0',
+    `office_id`                 BIGINT                DEFAULT NULL,
+    `username`                  varchar(100) NOT NULL,
+    `firstname`                 varchar(100) NOT NULL,
+    `lastname`                  varchar(100) NOT NULL,
+    `password`                  varchar(255) NOT NULL,
+    `email`                     varchar(100) NOT NULL,
+    `firsttime_login_remaining` bit(1)       NOT NULL,
+    `nonexpired`                bit(1)       NOT NULL,
+    `nonlocked`                 bit(1)       NOT NULL,
+    `nonexpired_credentials`    bit(1)       NOT NULL,
+    `enabled`                   bit(1)       NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `username_org` (`username`),
+    KEY                         `FKB3D587CE0DD567A` (`office_id`),
+    CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -358,11 +487,18 @@ CREATE TABLE `m_appuser` (
 -- Dumping data for table `m_appuser`
 --
 
-LOCK TABLES `m_appuser` WRITE;
+LOCK
+TABLES `m_appuser` WRITE;
 /*!40000 ALTER TABLE `m_appuser` DISABLE KEYS */;
-INSERT INTO `m_appuser` VALUES (1,0,1,'admin','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','',''),(2,0,1,'keithwoodlock','Keith','Woodlock','4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3','keithwoodlock@gmail.com','\0','','','','');
+INSERT INTO `m_appuser`
+VALUES (1, 0, 1, 'admin', 'App', 'Administrator', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a',
+        'demomfi@mifos.org', '\0', '', '', '', ''),
+       (2, 0, 1, 'keithwoodlock', 'Keith', 'Woodlock',
+        '4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3', 'keithwoodlock@gmail.com', '\0', '', '',
+        '', '');
 /*!40000 ALTER TABLE `m_appuser` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_appuser_role`
@@ -371,14 +507,15 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_appuser_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_appuser_role` (
-  `appuser_id` BIGINT NOT NULL,
-  `role_id` BIGINT NOT NULL,
-  PRIMARY KEY (`appuser_id`,`role_id`),
-  KEY `FK7662CE59B4100309` (`appuser_id`),
-  KEY `FK7662CE5915CEC7AB` (`role_id`),
-  CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
-  CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
+CREATE TABLE `m_appuser_role`
+(
+    `appuser_id` BIGINT NOT NULL,
+    `role_id`    BIGINT NOT NULL,
+    PRIMARY KEY (`appuser_id`, `role_id`),
+    KEY          `FK7662CE59B4100309` (`appuser_id`),
+    KEY          `FK7662CE5915CEC7AB` (`role_id`),
+    CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
+    CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -386,11 +523,15 @@ CREATE TABLE `m_appuser_role` (
 -- Dumping data for table `m_appuser_role`
 --
 
-LOCK TABLES `m_appuser_role` WRITE;
+LOCK
+TABLES `m_appuser_role` WRITE;
 /*!40000 ALTER TABLE `m_appuser_role` DISABLE KEYS */;
-INSERT INTO `m_appuser_role` VALUES (1,1),(2,1);
+INSERT INTO `m_appuser_role`
+VALUES (1, 1),
+       (2, 1);
 /*!40000 ALTER TABLE `m_appuser_role` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_calendar`
@@ -399,25 +540,26 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_calendar`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_calendar` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `title` varchar(50) NOT NULL,
-  `description` varchar(100) DEFAULT NULL,
-  `location` varchar(50) DEFAULT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date DEFAULT NULL,
-  `duration` SMALLINT DEFAULT NULL,
-  `calendar_type_enum` SMALLINT NOT NULL,
-  `repeating` tinyint NOT NULL DEFAULT '0',
-  `recurrence` varchar(100) DEFAULT NULL,
-  `remind_by_enum` SMALLINT DEFAULT NULL,
-  `first_reminder` smallint DEFAULT NULL,
-  `second_reminder` smallint DEFAULT NULL,
-  `createdby_id` BIGINT DEFAULT NULL,
-  `lastmodifiedby_id` BIGINT DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE `m_calendar`
+(
+    `id`                 BIGINT      NOT NULL AUTO_INCREMENT,
+    `title`              varchar(50) NOT NULL,
+    `description`        varchar(100)         DEFAULT NULL,
+    `location`           varchar(50)          DEFAULT NULL,
+    `start_date`         date        NOT NULL,
+    `end_date`           date                 DEFAULT NULL,
+    `duration`           SMALLINT             DEFAULT NULL,
+    `calendar_type_enum` SMALLINT    NOT NULL,
+    `repeating`          tinyint     NOT NULL DEFAULT '0',
+    `recurrence`         varchar(100)         DEFAULT NULL,
+    `remind_by_enum`     SMALLINT             DEFAULT NULL,
+    `first_reminder`     smallint             DEFAULT NULL,
+    `second_reminder`    smallint             DEFAULT NULL,
+    `createdby_id`       BIGINT               DEFAULT NULL,
+    `lastmodifiedby_id`  BIGINT               DEFAULT NULL,
+    `created_date`       datetime             DEFAULT NULL,
+    `lastmodified_date`  datetime             DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -425,10 +567,12 @@ CREATE TABLE `m_calendar` (
 -- Dumping data for table `m_calendar`
 --
 
-LOCK TABLES `m_calendar` WRITE;
+LOCK
+TABLES `m_calendar` WRITE;
 /*!40000 ALTER TABLE `m_calendar` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_calendar_instance`
@@ -437,14 +581,15 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_calendar_instance`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_calendar_instance` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `calendar_id` BIGINT NOT NULL,
-  `entity_id` BIGINT NOT NULL,
-  `entity_type_enum` SMALLINT NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_m_calendar_m_calendar_instance` (`calendar_id`),
-  CONSTRAINT `FK_m_calendar_m_calendar_instance` FOREIGN KEY (`calendar_id`) REFERENCES `m_calendar` (`id`)
+CREATE TABLE `m_calendar_instance`
+(
+    `id`               BIGINT   NOT NULL AUTO_INCREMENT,
+    `calendar_id`      BIGINT   NOT NULL,
+    `entity_id`        BIGINT   NOT NULL,
+    `entity_type_enum` SMALLINT NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY                `FK_m_calendar_m_calendar_instance` (`calendar_id`),
+    CONSTRAINT `FK_m_calendar_m_calendar_instance` FOREIGN KEY (`calendar_id`) REFERENCES `m_calendar` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -452,10 +597,12 @@ CREATE TABLE `m_calendar_instance` (
 -- Dumping data for table `m_calendar_instance`
 --
 
-LOCK TABLES `m_calendar_instance` WRITE;
+LOCK
+TABLES `m_calendar_instance` WRITE;
 /*!40000 ALTER TABLE `m_calendar_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar_instance` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_charge`
@@ -464,19 +611,20 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_charge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_charge` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT NULL,
-  `currency_code` varchar(3) NOT NULL,
-  `charge_applies_to_enum` SMALLINT NOT NULL,
-  `charge_time_enum` SMALLINT NOT NULL,
-  `charge_calculation_enum` SMALLINT NOT NULL,
-  `amount` decimal(19,6) NOT NULL,
-  `is_penalty` tinyint NOT NULL DEFAULT '0',
-  `is_active` tinyint NOT NULL,
-  `is_deleted` tinyint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+CREATE TABLE `m_charge`
+(
+    `id`                      BIGINT         NOT NULL AUTO_INCREMENT,
+    `name`                    varchar(100)            DEFAULT NULL,
+    `currency_code`           varchar(3)     NOT NULL,
+    `charge_applies_to_enum`  SMALLINT       NOT NULL,
+    `charge_time_enum`        SMALLINT       NOT NULL,
+    `charge_calculation_enum` SMALLINT       NOT NULL,
+    `amount`                  decimal(19, 6) NOT NULL,
+    `is_penalty`              tinyint        NOT NULL DEFAULT '0',
+    `is_active`               tinyint        NOT NULL,
+    `is_deleted`              tinyint        NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -484,11 +632,14 @@ CREATE TABLE `m_charge` (
 -- Dumping data for table `m_charge`
 --
 
-LOCK TABLES `m_charge` WRITE;
+LOCK
+TABLES `m_charge` WRITE;
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
-INSERT INTO `m_charge` VALUES (1,'Bank Fee (per installment)','UGX',1,2,1,'1500.000000',0,1,0);
+INSERT INTO `m_charge`
+VALUES (1, 'Bank Fee (per installment)', 'UGX', 1, 2, 1, '1500.000000', 0, 1, 0);
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_client`
@@ -497,24 +648,25 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_client`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_client` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `account_no` varchar(20) NOT NULL,
-  `office_id` BIGINT NOT NULL,
-  `external_id` varchar(100) DEFAULT NULL,
-  `firstname` varchar(50) DEFAULT NULL,
-  `middlename` varchar(50) DEFAULT NULL,
-  `lastname` varchar(50) DEFAULT NULL,
-  `fullname` varchar(100) DEFAULT NULL,
-  `display_name` varchar(100) NOT NULL,
-  `image_key` varchar(500) DEFAULT NULL,
-  `joined_date` date DEFAULT NULL,
-  `is_deleted` tinyint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `account_no_UNIQUE` (`account_no`),
-  UNIQUE KEY `external_id` (`external_id`),
-  KEY `FKCE00CAB3E0DD567A` (`office_id`),
-  CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+CREATE TABLE `m_client`
+(
+    `id`           BIGINT       NOT NULL AUTO_INCREMENT,
+    `account_no`   varchar(20)  NOT NULL,
+    `office_id`    BIGINT       NOT NULL,
+    `external_id`  varchar(100)          DEFAULT NULL,
+    `firstname`    varchar(50)           DEFAULT NULL,
+    `middlename`   varchar(50)           DEFAULT NULL,
+    `lastname`     varchar(50)           DEFAULT NULL,
+    `fullname`     varchar(100)          DEFAULT NULL,
+    `display_name` varchar(100) NOT NULL,
+    `image_key`    varchar(500)          DEFAULT NULL,
+    `joined_date`  date                  DEFAULT NULL,
+    `is_deleted`   tinyint      NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `account_no_UNIQUE` (`account_no`),
+    UNIQUE KEY `external_id` (`external_id`),
+    KEY            `FKCE00CAB3E0DD567A` (`office_id`),
+    CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -522,11 +674,14 @@ CREATE TABLE `m_client` (
 -- Dumping data for table `m_client`
 --
 
-LOCK TABLES `m_client` WRITE;
+LOCK
+TABLES `m_client` WRITE;
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
-INSERT INTO `m_client` VALUES (1,'000000001',2,NULL,'Test',NULL,'One',NULL,'Test One',NULL,'2011-02-01',0);
+INSERT INTO `m_client`
+VALUES (1, '000000001', 2, NULL, 'Test', NULL, 'One', NULL, 'Test One', NULL, '2011-02-01', 0);
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_client_identifier`
@@ -535,23 +690,24 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_client_identifier`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_client_identifier` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `client_id` BIGINT NOT NULL,
-  `document_type_id` INT NOT NULL,
-  `document_key` varchar(50) NOT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  `createdby_id` BIGINT DEFAULT NULL,
-  `lastmodifiedby_id` BIGINT DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_identifier_key` (`document_type_id`,`document_key`),
-  UNIQUE KEY `unique_client_identifier` (`client_id`,`document_type_id`),
-  KEY `FK_m_client_document_m_client` (`client_id`),
-  KEY `FK_m_client_document_m_code_value` (`document_type_id`),
-  CONSTRAINT `FK_m_client_document_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
-  CONSTRAINT `FK_m_client_document_m_code_value` FOREIGN KEY (`document_type_id`) REFERENCES `m_code_value` (`id`)
+CREATE TABLE `m_client_identifier`
+(
+    `id`                BIGINT      NOT NULL AUTO_INCREMENT,
+    `client_id`         BIGINT      NOT NULL,
+    `document_type_id`  INT         NOT NULL,
+    `document_key`      varchar(50) NOT NULL,
+    `description`       varchar(500) DEFAULT NULL,
+    `createdby_id`      BIGINT       DEFAULT NULL,
+    `lastmodifiedby_id` BIGINT       DEFAULT NULL,
+    `created_date`      datetime     DEFAULT NULL,
+    `lastmodified_date` datetime     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_identifier_key` (`document_type_id`,`document_key`),
+    UNIQUE KEY `unique_client_identifier` (`client_id`,`document_type_id`),
+    KEY                 `FK_m_client_document_m_client` (`client_id`),
+    KEY                 `FK_m_client_document_m_code_value` (`document_type_id`),
+    CONSTRAINT `FK_m_client_document_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+    CONSTRAINT `FK_m_client_document_m_code_value` FOREIGN KEY (`document_type_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -559,10 +715,12 @@ CREATE TABLE `m_client_identifier` (
 -- Dumping data for table `m_client_identifier`
 --
 
-LOCK TABLES `m_client_identifier` WRITE;
+LOCK
+TABLES `m_client_identifier` WRITE;
 /*!40000 ALTER TABLE `m_client_identifier` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_identifier` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_code`
@@ -571,12 +729,13 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_code`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_code` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `code_name` varchar(100) DEFAULT NULL,
-  `is_system_defined` tinyint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code_name` (`code_name`)
+CREATE TABLE `m_code`
+(
+    `id`                INT     NOT NULL AUTO_INCREMENT,
+    `code_name`         varchar(100)     DEFAULT NULL,
+    `is_system_defined` tinyint NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `code_name` (`code_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -584,11 +743,23 @@ CREATE TABLE `m_code` (
 -- Dumping data for table `m_code`
 --
 
-LOCK TABLES `m_code` WRITE;
+LOCK
+TABLES `m_code` WRITE;
 /*!40000 ALTER TABLE `m_code` DISABLE KEYS */;
-INSERT INTO `m_code` VALUES (1,'Customer Identifier',1),(2,'LoanCollateral',1),(3,'LoanPurpose',1),(4,'Gender',1),(5,'YesNo',1),(6,'GuarantorRelationship',1),(7,'FieldOfEmployment',0),(8,'EducationLevel',0),(9,'MaritalStatus',0),(10,'PovertyStatus',0);
+INSERT INTO `m_code`
+VALUES (1, 'Customer Identifier', 1),
+       (2, 'LoanCollateral', 1),
+       (3, 'LoanPurpose', 1),
+       (4, 'Gender', 1),
+       (5, 'YesNo', 1),
+       (6, 'GuarantorRelationship', 1),
+       (7, 'FieldOfEmployment', 0),
+       (8, 'EducationLevel', 0),
+       (9, 'MaritalStatus', 0),
+       (10, 'PovertyStatus', 0);
 /*!40000 ALTER TABLE `m_code` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_code_value`
@@ -597,15 +768,16 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_code_value`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_code_value` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `code_id` INT NOT NULL,
-  `code_value` varchar(100) DEFAULT NULL,
-  `order_position` INT NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code_value` (`code_id`,`code_value`),
-  KEY `FKCFCEA42640BE071Z` (`code_id`),
-  CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
+CREATE TABLE `m_code_value`
+(
+    `id`             INT NOT NULL AUTO_INCREMENT,
+    `code_id`        INT NOT NULL,
+    `code_value`     varchar(100) DEFAULT NULL,
+    `order_position` INT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `code_value` (`code_id`,`code_value`),
+    KEY              `FKCFCEA42640BE071Z` (`code_id`),
+    CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -613,11 +785,44 @@ CREATE TABLE `m_code_value` (
 -- Dumping data for table `m_code_value`
 --
 
-LOCK TABLES `m_code_value` WRITE;
+LOCK
+TABLES `m_code_value` WRITE;
 /*!40000 ALTER TABLE `m_code_value` DISABLE KEYS */;
-INSERT INTO `m_code_value` VALUES (1,1,'Passport',1),(2,1,'Id',2),(3,1,'Drivers License',3),(4,1,'Any Other Id Type',4),(5,6,'Spouse',0),(6,6,'Parent',0),(7,6,'Sibling',0),(8,6,'Business Associate',0),(9,6,'Other',0),(10,7,'option.Banker',1),(11,7,'option.SoftwareDeveloper',10),(12,8,'option.University',1),(13,8,'option.Secondary',12),(14,8,'option.Primary',13),(15,9,'option.Married',1),(16,9,'option.Single',15),(17,9,'option.Divorced',16),(18,9,'option.Widow',17),(19,10,'option.PovertyStatus.Band1',1),(20,10,'option.PovertyStatus.Band2',19),(21,10,'option.PovertyStatus.Band3',20),(22,2,'option.House',1),(23,2,'option.Television',22),(24,2,'option.Gold',23),(25,3,'option.Agriculture',1),(26,3,'option.Manufacturing',25),(27,3,'option.HousingImprovement',26),(28,4,'option.Male',1),(29,4,'option.Female',28),(30,5,'option.Yes',1),(31,5,'option.No',30);
+INSERT INTO `m_code_value`
+VALUES (1, 1, 'Passport', 1),
+       (2, 1, 'Id', 2),
+       (3, 1, 'Drivers License', 3),
+       (4, 1, 'Any Other Id Type', 4),
+       (5, 6, 'Spouse', 0),
+       (6, 6, 'Parent', 0),
+       (7, 6, 'Sibling', 0),
+       (8, 6, 'Business Associate', 0),
+       (9, 6, 'Other', 0),
+       (10, 7, 'option.Banker', 1),
+       (11, 7, 'option.SoftwareDeveloper', 10),
+       (12, 8, 'option.University', 1),
+       (13, 8, 'option.Secondary', 12),
+       (14, 8, 'option.Primary', 13),
+       (15, 9, 'option.Married', 1),
+       (16, 9, 'option.Single', 15),
+       (17, 9, 'option.Divorced', 16),
+       (18, 9, 'option.Widow', 17),
+       (19, 10, 'option.PovertyStatus.Band1', 1),
+       (20, 10, 'option.PovertyStatus.Band2', 19),
+       (21, 10, 'option.PovertyStatus.Band3', 20),
+       (22, 2, 'option.House', 1),
+       (23, 2, 'option.Television', 22),
+       (24, 2, 'option.Gold', 23),
+       (25, 3, 'option.Agriculture', 1),
+       (26, 3, 'option.Manufacturing', 25),
+       (27, 3, 'option.HousingImprovement', 26),
+       (28, 4, 'option.Male', 1),
+       (29, 4, 'option.Female', 28),
+       (30, 5, 'option.Yes', 1),
+       (31, 5, 'option.No', 30);
 /*!40000 ALTER TABLE `m_code_value` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_currency`
@@ -626,15 +831,16 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_currency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_currency` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `code` varchar(3) NOT NULL,
-  `decimal_places` SMALLINT NOT NULL,
-  `display_symbol` varchar(10) DEFAULT NULL,
-  `name` varchar(50) NOT NULL,
-  `internationalized_name_code` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code` (`code`)
+CREATE TABLE `m_currency`
+(
+    `id`                          BIGINT      NOT NULL AUTO_INCREMENT,
+    `code`                        varchar(3)  NOT NULL,
+    `decimal_places`              SMALLINT    NOT NULL,
+    `display_symbol`              varchar(10) DEFAULT NULL,
+    `name`                        varchar(50) NOT NULL,
+    `internationalized_name_code` varchar(50) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -642,9 +848,151 @@ CREATE TABLE `m_currency` (
 -- Dumping data for table `m_currency`
 --
 
-LOCK TABLES `m_currency` WRITE;
+LOCK
+TABLES `m_currency` WRITE;
 /*!40000 ALTER TABLE `m_currency` DISABLE KEYS */;
-INSERT INTO `m_currency` VALUES (1,'AED',2,NULL,'UAE Dirham','currency.AED'),(2,'AFN',2,NULL,'Afghanistan Afghani','currency.AFN'),(3,'ALL',2,NULL,'Albanian Lek','currency.ALL'),(4,'AMD',2,NULL,'Armenian Dram','currency.AMD'),(5,'ANG',2,NULL,'Netherlands Antillian Guilder','currency.ANG'),(6,'AOA',2,NULL,'Angolan Kwanza','currency.AOA'),(7,'ARS',2,'$','Argentine Peso','currency.ARS'),(8,'AUD',2,'A$','Australian Dollar','currency.AUD'),(9,'AWG',2,NULL,'Aruban Guilder','currency.AWG'),(10,'AZM',2,NULL,'Azerbaijanian Manat','currency.AZM'),(11,'BAM',2,NULL,'Bosnia and Herzegovina Convertible Marks','currency.BAM'),(12,'BBD',2,NULL,'Barbados Dollar','currency.BBD'),(13,'BDT',2,NULL,'Bangladesh Taka','currency.BDT'),(14,'BGN',2,NULL,'Bulgarian Lev','currency.BGN'),(15,'BHD',3,NULL,'Bahraini Dinar','currency.BHD'),(16,'BIF',0,NULL,'Burundi Franc','currency.BIF'),(17,'BMD',2,NULL,'Bermudian Dollar','currency.BMD'),(18,'BND',2,'B$','Brunei Dollar','currency.BND'),(19,'BOB',2,'Bs.','Bolivian Boliviano','currency.BOB'),(20,'BRL',2,'R$','Brazilian Real','currency.BRL'),(21,'BSD',2,NULL,'Bahamian Dollar','currency.BSD'),(22,'BTN',2,NULL,'Bhutan Ngultrum','currency.BTN'),(23,'BWP',2,NULL,'Botswana Pula','currency.BWP'),(24,'BYR',0,NULL,'Belarussian Ruble','currency.BYR'),(25,'BZD',2,'BZ$','Belize Dollar','currency.BZD'),(26,'CAD',2,NULL,'Canadian Dollar','currency.CAD'),(27,'CDF',2,NULL,'Franc Congolais','currency.CDF'),(28,'CHF',2,NULL,'Swiss Franc','currency.CHF'),(29,'CLP',0,'$','Chilean Peso','currency.CLP'),(30,'CNY',2,NULL,'Chinese Yuan Renminbi','currency.CNY'),(31,'COP',2,'$','Colombian Peso','currency.COP'),(32,'CRC',2,'₡','Costa Rican Colon','currency.CRC'),(33,'CSD',2,NULL,'Serbian Dinar','currency.CSD'),(34,'CUP',2,'$MN','Cuban Peso','currency.CUP'),(35,'CVE',2,NULL,'Cape Verde Escudo','currency.CVE'),(36,'CYP',2,NULL,'Cyprus Pound','currency.CYP'),(37,'CZK',2,NULL,'Czech Koruna','currency.CZK'),(38,'DJF',0,NULL,'Djibouti Franc','currency.DJF'),(39,'DKK',2,NULL,'Danish Krone','currency.DKK'),(40,'DOP',2,'RD$','Dominican Peso','currency.DOP'),(41,'DZD',2,NULL,'Algerian Dinar','currency.DZD'),(42,'EEK',2,NULL,'Estonian Kroon','currency.EEK'),(43,'EGP',2,NULL,'Egyptian Pound','currency.EGP'),(44,'ERN',2,NULL,'Eritrea Nafka','currency.ERN'),(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),(46,'EUR',2,'€','Euro','currency.EUR'),(47,'FJD',2,NULL,'Fiji Dollar','currency.FJD'),(48,'FKP',2,NULL,'Falkland Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP'),(50,'GEL',2,NULL,'Georgian Lari','currency.GEL'),(51,'GHC',2,'GHc','Ghana Cedi','currency.GHC'),(52,'GIP',2,NULL,'Gibraltar Pound','currency.GIP'),(53,'GMD',2,NULL,'Gambian Dalasi','currency.GMD'),(54,'GNF',0,NULL,'Guinea Franc','currency.GNF'),(55,'GTQ',2,'Q','Guatemala Quetzal','currency.GTQ'),(56,'GYD',2,NULL,'Guyana Dollar','currency.GYD'),(57,'HKD',2,NULL,'Hong Kong Dollar','currency.HKD'),(58,'HNL',2,'L','Honduras Lempira','currency.HNL'),(59,'HRK',2,NULL,'Croatian Kuna','currency.HRK'),(60,'HTG',2,'G','Haiti Gourde','currency.HTG'),(61,'HUF',2,NULL,'Hungarian Forint','currency.HUF'),(62,'IDR',2,NULL,'Indonesian Rupiah','currency.IDR'),(63,'ILS',2,NULL,'New Israeli Shekel','currency.ILS'),(64,'INR',2,'₹','Indian Rupee','currency.INR'),(65,'IQD',3,NULL,'Iraqi Dinar','currency.IQD'),(66,'IRR',2,NULL,'Iranian Rial','currency.IRR'),(67,'ISK',0,NULL,'Iceland Krona','currency.ISK'),(68,'JMD',2,NULL,'Jamaican Dollar','currency.JMD'),(69,'JOD',3,NULL,'Jordanian Dinar','currency.JOD'),(70,'JPY',0,NULL,'Japanese Yen','currency.JPY'),(71,'KES',2,'KSh','Kenyan Shilling','currency.KES'),(72,'KGS',2,NULL,'Kyrgyzstan Som','currency.KGS'),(73,'KHR',2,NULL,'Cambodia Riel','currency.KHR'),(74,'KMF',0,NULL,'Comoro Franc','currency.KMF'),(75,'KPW',2,NULL,'North Korean Won','currency.KPW'),(76,'KRW',0,NULL,'Korean Won','currency.KRW'),(77,'KWD',3,NULL,'Kuwaiti Dinar','currency.KWD'),(78,'KYD',2,NULL,'Cayman Islands Dollar','currency.KYD'),(79,'KZT',2,NULL,'Kazakhstan Tenge','currency.KZT'),(80,'LAK',2,NULL,'Lao Kip','currency.LAK'),(81,'LBP',2,'L£','Lebanese Pound','currency.LBP'),(82,'LKR',2,NULL,'Sri Lanka Rupee','currency.LKR'),(83,'LRD',2,NULL,'Liberian Dollar','currency.LRD'),(84,'LSL',2,NULL,'Lesotho Loti','currency.LSL'),(85,'LTL',2,NULL,'Lithuanian Litas','currency.LTL'),(86,'LVL',2,NULL,'Latvian Lats','currency.LVL'),(87,'LYD',3,NULL,'Libyan Dinar','currency.LYD'),(88,'MAD',2,NULL,'Moroccan Dirham','currency.MAD'),(89,'MDL',2,NULL,'Moldovan Leu','currency.MDL'),(90,'MGA',2,NULL,'Malagasy Ariary','currency.MGA'),(91,'MKD',2,NULL,'Macedonian Denar','currency.MKD'),(92,'MMK',2,'K','Myanmar Kyat','currency.MMK'),(93,'MNT',2,NULL,'Mongolian Tugrik','currency.MNT'),(94,'MOP',2,NULL,'Macau Pataca','currency.MOP'),(95,'MRO',2,NULL,'Mauritania Ouguiya','currency.MRO'),(96,'MTL',2,NULL,'Maltese Lira','currency.MTL'),(97,'MUR',2,NULL,'Mauritius Rupee','currency.MUR'),(98,'MVR',2,NULL,'Maldives Rufiyaa','currency.MVR'),(99,'MWK',2,NULL,'Malawi Kwacha','currency.MWK'),(100,'MXN',2,'$','Mexican Peso','currency.MXN'),(101,'MYR',2,NULL,'Malaysian Ringgit','currency.MYR'),(102,'MZM',2,NULL,'Mozambique Metical','currency.MZM'),(103,'NAD',2,NULL,'Namibia Dollar','currency.NAD'),(104,'NGN',2,NULL,'Nigerian Naira','currency.NGN'),(105,'NIO',2,'C$','Nicaragua Cordoba Oro','currency.NIO'),(106,'NOK',2,NULL,'Norwegian Krone','currency.NOK'),(107,'NPR',2,NULL,'Nepalese Rupee','currency.NPR'),(108,'NZD',2,NULL,'New Zealand Dollar','currency.NZD'),(109,'OMR',3,NULL,'Rial Omani','currency.OMR'),(110,'PAB',2,'B/.','Panama Balboa','currency.PAB'),(111,'PEN',2,'S/.','Peruvian Nuevo Sol','currency.PEN'),(112,'PGK',2,NULL,'Papua New Guinea Kina','currency.PGK'),(113,'PHP',2,NULL,'Philippine Peso','currency.PHP'),(114,'PKR',2,NULL,'Pakistan Rupee','currency.PKR'),(115,'PLN',2,NULL,'Polish Zloty','currency.PLN'),(116,'PYG',0,'₲','Paraguayan Guarani','currency.PYG'),(117,'QAR',2,NULL,'Qatari Rial','currency.QAR'),(118,'RON',2,NULL,'Romanian Leu','currency.RON'),(119,'RUB',2,NULL,'Russian Ruble','currency.RUB'),(120,'RWF',0,NULL,'Rwanda Franc','currency.RWF'),(121,'SAR',2,NULL,'Saudi Riyal','currency.SAR'),(122,'SBD',2,NULL,'Solomon Islands Dollar','currency.SBD'),(123,'SCR',2,NULL,'Seychelles Rupee','currency.SCR'),(124,'SDD',2,NULL,'Sudanese Dinar','currency.SDD'),(125,'SEK',2,NULL,'Swedish Krona','currency.SEK'),(126,'SGD',2,NULL,'Singapore Dollar','currency.SGD'),(127,'SHP',2,NULL,'St Helena Pound','currency.SHP'),(128,'SIT',2,NULL,'Slovenian Tolar','currency.SIT'),(129,'SKK',2,NULL,'Slovak Koruna','currency.SKK'),(130,'SLL',2,NULL,'Sierra Leone Leone','currency.SLL'),(131,'SOS',2,NULL,'Somali Shilling','currency.SOS'),(132,'SRD',2,NULL,'Surinam Dollar','currency.SRD'),(133,'STD',2,NULL,'Sao Tome and Principe Dobra','currency.STD'),(134,'SVC',2,NULL,'El Salvador Colon','currency.SVC'),(135,'SYP',2,NULL,'Syrian Pound','currency.SYP'),(136,'SZL',2,NULL,'Swaziland Lilangeni','currency.SZL'),(137,'THB',2,NULL,'Thai Baht','currency.THB'),(138,'TJS',2,NULL,'Tajik Somoni','currency.TJS'),(139,'TMM',2,NULL,'Turkmenistan Manat','currency.TMM'),(140,'TND',3,'DT','Tunisian Dinar','currency.TND'),(141,'TOP',2,NULL,'Tonga Pa\'anga','currency.TOP'),(142,'TRY',2,NULL,'Turkish Lira','currency.TRY'),(143,'TTD',2,NULL,'Trinidad and Tobago Dollar','currency.TTD'),(144,'TWD',2,NULL,'New Taiwan Dollar','currency.TWD'),(145,'TZS',2,NULL,'Tanzanian Shilling','currency.TZS'),(146,'UAH',2,NULL,'Ukraine Hryvnia','currency.UAH'),(147,'UGX',2,'USh','Uganda Shilling','currency.UGX'),(148,'USD',2,'$','US Dollar','currency.USD'),(149,'UYU',2,'$U','Peso Uruguayo','currency.UYU'),(150,'UZS',2,NULL,'Uzbekistan Sum','currency.UZS'),(151,'VEB',2,'Bs.F.','Venezuelan Bolivar','currency.VEB'),(152,'VND',2,NULL,'Vietnamese Dong','currency.VND'),(153,'VUV',0,NULL,'Vanuatu Vatu','currency.VUV'),(154,'WST',2,NULL,'Samoa Tala','currency.WST'),(155,'XAF',0,NULL,'CFA Franc BEAC','currency.XAF'),(156,'XCD',2,NULL,'East Caribbean Dollar','currency.XCD'),(157,'XDR',5,NULL,'SDR (Special Drawing Rights)','currency.XDR'),(158,'XOF',0,'CFA','CFA Franc BCEAO','currency.XOF'),(159,'XPF',0,NULL,'CFP Franc','currency.XPF'),(160,'YER',2,NULL,'Yemeni Rial','currency.YER'),(161,'ZAR',2,'R','South African Rand','currency.ZAR'),(162,'ZMK',2,NULL,'Zambian Kwacha','currency.ZMK'),(163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
+INSERT INTO `m_currency`
+VALUES (1, 'AED', 2, NULL, 'UAE Dirham', 'currency.AED'),
+       (2, 'AFN', 2, NULL, 'Afghanistan Afghani', 'currency.AFN'),
+       (3, 'ALL', 2, NULL, 'Albanian Lek', 'currency.ALL'),
+       (4, 'AMD', 2, NULL, 'Armenian Dram', 'currency.AMD'),
+       (5, 'ANG', 2, NULL, 'Netherlands Antillian Guilder', 'currency.ANG'),
+       (6, 'AOA', 2, NULL, 'Angolan Kwanza', 'currency.AOA'),
+       (7, 'ARS', 2, '$', 'Argentine Peso', 'currency.ARS'),
+       (8, 'AUD', 2, 'A$', 'Australian Dollar', 'currency.AUD'),
+       (9, 'AWG', 2, NULL, 'Aruban Guilder', 'currency.AWG'),
+       (10, 'AZM', 2, NULL, 'Azerbaijanian Manat', 'currency.AZM'),
+       (11, 'BAM', 2, NULL, 'Bosnia and Herzegovina Convertible Marks', 'currency.BAM'),
+       (12, 'BBD', 2, NULL, 'Barbados Dollar', 'currency.BBD'),
+       (13, 'BDT', 2, NULL, 'Bangladesh Taka', 'currency.BDT'),
+       (14, 'BGN', 2, NULL, 'Bulgarian Lev', 'currency.BGN'),
+       (15, 'BHD', 3, NULL, 'Bahraini Dinar', 'currency.BHD'),
+       (16, 'BIF', 0, NULL, 'Burundi Franc', 'currency.BIF'),
+       (17, 'BMD', 2, NULL, 'Bermudian Dollar', 'currency.BMD'),
+       (18, 'BND', 2, 'B$', 'Brunei Dollar', 'currency.BND'),
+       (19, 'BOB', 2, 'Bs.', 'Bolivian Boliviano', 'currency.BOB'),
+       (20, 'BRL', 2, 'R$', 'Brazilian Real', 'currency.BRL'),
+       (21, 'BSD', 2, NULL, 'Bahamian Dollar', 'currency.BSD'),
+       (22, 'BTN', 2, NULL, 'Bhutan Ngultrum', 'currency.BTN'),
+       (23, 'BWP', 2, NULL, 'Botswana Pula', 'currency.BWP'),
+       (24, 'BYR', 0, NULL, 'Belarussian Ruble', 'currency.BYR'),
+       (25, 'BZD', 2, 'BZ$', 'Belize Dollar', 'currency.BZD'),
+       (26, 'CAD', 2, NULL, 'Canadian Dollar', 'currency.CAD'),
+       (27, 'CDF', 2, NULL, 'Franc Congolais', 'currency.CDF'),
+       (28, 'CHF', 2, NULL, 'Swiss Franc', 'currency.CHF'),
+       (29, 'CLP', 0, '$', 'Chilean Peso', 'currency.CLP'),
+       (30, 'CNY', 2, NULL, 'Chinese Yuan Renminbi', 'currency.CNY'),
+       (31, 'COP', 2, '$', 'Colombian Peso', 'currency.COP'),
+       (32, 'CRC', 2, '₡', 'Costa Rican Colon', 'currency.CRC'),
+       (33, 'CSD', 2, NULL, 'Serbian Dinar', 'currency.CSD'),
+       (34, 'CUP', 2, '$MN', 'Cuban Peso', 'currency.CUP'),
+       (35, 'CVE', 2, NULL, 'Cape Verde Escudo', 'currency.CVE'),
+       (36, 'CYP', 2, NULL, 'Cyprus Pound', 'currency.CYP'),
+       (37, 'CZK', 2, NULL, 'Czech Koruna', 'currency.CZK'),
+       (38, 'DJF', 0, NULL, 'Djibouti Franc', 'currency.DJF'),
+       (39, 'DKK', 2, NULL, 'Danish Krone', 'currency.DKK'),
+       (40, 'DOP', 2, 'RD$', 'Dominican Peso', 'currency.DOP'),
+       (41, 'DZD', 2, NULL, 'Algerian Dinar', 'currency.DZD'),
+       (42, 'EEK', 2, NULL, 'Estonian Kroon', 'currency.EEK'),
+       (43, 'EGP', 2, NULL, 'Egyptian Pound', 'currency.EGP'),
+       (44, 'ERN', 2, NULL, 'Eritrea Nafka', 'currency.ERN'),
+       (45, 'ETB', 2, NULL, 'Ethiopian Birr', 'currency.ETB'),
+       (46, 'EUR', 2, '€', 'Euro', 'currency.EUR'),
+       (47, 'FJD', 2, NULL, 'Fiji Dollar', 'currency.FJD'),
+       (48, 'FKP', 2, NULL, 'Falkland Islands Pound', 'currency.FKP'),
+       (49, 'GBP', 2, NULL, 'Pound Sterling', 'currency.GBP'),
+       (50, 'GEL', 2, NULL, 'Georgian Lari', 'currency.GEL'),
+       (51, 'GHC', 2, 'GHc', 'Ghana Cedi', 'currency.GHC'),
+       (52, 'GIP', 2, NULL, 'Gibraltar Pound', 'currency.GIP'),
+       (53, 'GMD', 2, NULL, 'Gambian Dalasi', 'currency.GMD'),
+       (54, 'GNF', 0, NULL, 'Guinea Franc', 'currency.GNF'),
+       (55, 'GTQ', 2, 'Q', 'Guatemala Quetzal', 'currency.GTQ'),
+       (56, 'GYD', 2, NULL, 'Guyana Dollar', 'currency.GYD'),
+       (57, 'HKD', 2, NULL, 'Hong Kong Dollar', 'currency.HKD'),
+       (58, 'HNL', 2, 'L', 'Honduras Lempira', 'currency.HNL'),
+       (59, 'HRK', 2, NULL, 'Croatian Kuna', 'currency.HRK'),
+       (60, 'HTG', 2, 'G', 'Haiti Gourde', 'currency.HTG'),
+       (61, 'HUF', 2, NULL, 'Hungarian Forint', 'currency.HUF'),
+       (62, 'IDR', 2, NULL, 'Indonesian Rupiah', 'currency.IDR'),
+       (63, 'ILS', 2, NULL, 'New Israeli Shekel', 'currency.ILS'),
+       (64, 'INR', 2, '₹', 'Indian Rupee', 'currency.INR'),
+       (65, 'IQD', 3, NULL, 'Iraqi Dinar', 'currency.IQD'),
+       (66, 'IRR', 2, NULL, 'Iranian Rial', 'currency.IRR'),
+       (67, 'ISK', 0, NULL, 'Iceland Krona', 'currency.ISK'),
+       (68, 'JMD', 2, NULL, 'Jamaican Dollar', 'currency.JMD'),
+       (69, 'JOD', 3, NULL, 'Jordanian Dinar', 'currency.JOD'),
+       (70, 'JPY', 0, NULL, 'Japanese Yen', 'currency.JPY'),
+       (71, 'KES', 2, 'KSh', 'Kenyan Shilling', 'currency.KES'),
+       (72, 'KGS', 2, NULL, 'Kyrgyzstan Som', 'currency.KGS'),
+       (73, 'KHR', 2, NULL, 'Cambodia Riel', 'currency.KHR'),
+       (74, 'KMF', 0, NULL, 'Comoro Franc', 'currency.KMF'),
+       (75, 'KPW', 2, NULL, 'North Korean Won', 'currency.KPW'),
+       (76, 'KRW', 0, NULL, 'Korean Won', 'currency.KRW'),
+       (77, 'KWD', 3, NULL, 'Kuwaiti Dinar', 'currency.KWD'),
+       (78, 'KYD', 2, NULL, 'Cayman Islands Dollar', 'currency.KYD'),
+       (79, 'KZT', 2, NULL, 'Kazakhstan Tenge', 'currency.KZT'),
+       (80, 'LAK', 2, NULL, 'Lao Kip', 'currency.LAK'),
+       (81, 'LBP', 2, 'L£', 'Lebanese Pound', 'currency.LBP'),
+       (82, 'LKR', 2, NULL, 'Sri Lanka Rupee', 'currency.LKR'),
+       (83, 'LRD', 2, NULL, 'Liberian Dollar', 'currency.LRD'),
+       (84, 'LSL', 2, NULL, 'Lesotho Loti', 'currency.LSL'),
+       (85, 'LTL', 2, NULL, 'Lithuanian Litas', 'currency.LTL'),
+       (86, 'LVL', 2, NULL, 'Latvian Lats', 'currency.LVL'),
+       (87, 'LYD', 3, NULL, 'Libyan Dinar', 'currency.LYD'),
+       (88, 'MAD', 2, NULL, 'Moroccan Dirham', 'currency.MAD'),
+       (89, 'MDL', 2, NULL, 'Moldovan Leu', 'currency.MDL'),
+       (90, 'MGA', 2, NULL, 'Malagasy Ariary', 'currency.MGA'),
+       (91, 'MKD', 2, NULL, 'Macedonian Denar', 'currency.MKD'),
+       (92, 'MMK', 2, 'K', 'Myanmar Kyat', 'currency.MMK'),
+       (93, 'MNT', 2, NULL, 'Mongolian Tugrik', 'currency.MNT'),
+       (94, 'MOP', 2, NULL, 'Macau Pataca', 'currency.MOP'),
+       (95, 'MRO', 2, NULL, 'Mauritania Ouguiya', 'currency.MRO'),
+       (96, 'MTL', 2, NULL, 'Maltese Lira', 'currency.MTL'),
+       (97, 'MUR', 2, NULL, 'Mauritius Rupee', 'currency.MUR'),
+       (98, 'MVR', 2, NULL, 'Maldives Rufiyaa', 'currency.MVR'),
+       (99, 'MWK', 2, NULL, 'Malawi Kwacha', 'currency.MWK'),
+       (100, 'MXN', 2, '$', 'Mexican Peso', 'currency.MXN'),
+       (101, 'MYR', 2, NULL, 'Malaysian Ringgit', 'currency.MYR'),
+       (102, 'MZM', 2, NULL, 'Mozambique Metical', 'currency.MZM'),
+       (103, 'NAD', 2, NULL, 'Namibia Dollar', 'currency.NAD'),
+       (104, 'NGN', 2, NULL, 'Nigerian Naira', 'currency.NGN'),
+       (105, 'NIO', 2, 'C$', 'Nicaragua Cordoba Oro', 'currency.NIO'),
+       (106, 'NOK', 2, NULL, 'Norwegian Krone', 'currency.NOK'),
+       (107, 'NPR', 2, NULL, 'Nepalese Rupee', 'currency.NPR'),
+       (108, 'NZD', 2, NULL, 'New Zealand Dollar', 'currency.NZD'),
+       (109, 'OMR', 3, NULL, 'Rial Omani', 'currency.OMR'),
+       (110, 'PAB', 2, 'B/.', 'Panama Balboa', 'currency.PAB'),
+       (111, 'PEN', 2, 'S/.', 'Peruvian Nuevo Sol', 'currency.PEN'),
+       (112, 'PGK', 2, NULL, 'Papua New Guinea Kina', 'currency.PGK'),
+       (113, 'PHP', 2, NULL, 'Philippine Peso', 'currency.PHP'),
+       (114, 'PKR', 2, NULL, 'Pakistan Rupee', 'currency.PKR'),
+       (115, 'PLN', 2, NULL, 'Polish Zloty', 'currency.PLN'),
+       (116, 'PYG', 0, '₲', 'Paraguayan Guarani', 'currency.PYG'),
+       (117, 'QAR', 2, NULL, 'Qatari Rial', 'currency.QAR'),
+       (118, 'RON', 2, NULL, 'Romanian Leu', 'currency.RON'),
+       (119, 'RUB', 2, NULL, 'Russian Ruble', 'currency.RUB'),
+       (120, 'RWF', 0, NULL, 'Rwanda Franc', 'currency.RWF'),
+       (121, 'SAR', 2, NULL, 'Saudi Riyal', 'currency.SAR'),
+       (122, 'SBD', 2, NULL, 'Solomon Islands Dollar', 'currency.SBD'),
+       (123, 'SCR', 2, NULL, 'Seychelles Rupee', 'currency.SCR'),
+       (124, 'SDD', 2, NULL, 'Sudanese Dinar', 'currency.SDD'),
+       (125, 'SEK', 2, NULL, 'Swedish Krona', 'currency.SEK'),
+       (126, 'SGD', 2, NULL, 'Singapore Dollar', 'currency.SGD'),
+       (127, 'SHP', 2, NULL, 'St Helena Pound', 'currency.SHP'),
+       (128, 'SIT', 2, NULL, 'Slovenian Tolar', 'currency.SIT'),
+       (129, 'SKK', 2, NULL, 'Slovak Koruna', 'currency.SKK'),
+       (130, 'SLL', 2, NULL, 'Sierra Leone Leone', 'currency.SLL'),
+       (131, 'SOS', 2, NULL, 'Somali Shilling', 'currency.SOS'),
+       (132, 'SRD', 2, NULL, 'Surinam Dollar', 'currency.SRD'),
+       (133, 'STD', 2, NULL, 'Sao Tome and Principe Dobra', 'currency.STD'),
+       (134, 'SVC', 2, NULL, 'El Salvador Colon', 'currency.SVC'),
+       (135, 'SYP', 2, NULL, 'Syrian Pound', 'currency.SYP'),
+       (136, 'SZL', 2, NULL, 'Swaziland Lilangeni', 'currency.SZL'),
+       (137, 'THB', 2, NULL, 'Thai Baht', 'currency.THB'),
+       (138, 'TJS', 2, NULL, 'Tajik Somoni', 'currency.TJS'),
+       (139, 'TMM', 2, NULL, 'Turkmenistan Manat', 'currency.TMM'),
+       (140, 'TND', 3, 'DT', 'Tunisian Dinar', 'currency.TND'),
+       (141, 'TOP', 2, NULL, 'Tonga Pa\'anga','currency.TOP'),(142,'TRY',2,NULL,'Turkish Lira','currency.TRY'),(143,'TTD',2,NULL,'Trinidad and Tobago Dollar','currency.TTD'),(144,'TWD',2,NULL,'New Taiwan Dollar','currency.TWD'),(145,'TZS',2,NULL,'Tanzanian Shilling','currency.TZS'),(146,'UAH',2,NULL,'Ukraine Hryvnia','currency.UAH'),(147,'UGX',2,'USh','Uganda Shilling','currency.UGX'),(148,'USD',2,'$','US Dollar','currency.USD'),(149,'UYU',2,'$U','Peso Uruguayo','currency.UYU'),(150,'UZS',2,NULL,'Uzbekistan Sum','currency.UZS'),(151,'VEB',2,'Bs.F.','Venezuelan Bolivar','currency.VEB'),(152,'VND',2,NULL,'Vietnamese Dong','currency.VND'),(153,'VUV',0,NULL,'Vanuatu Vatu','currency.VUV'),(154,'WST',2,NULL,'Samoa Tala','currency.WST'),(155,'XAF',0,NULL,'CFA Franc BEAC','currency.XAF'),(156,'XCD',2,NULL,'East Caribbean Dollar','currency.XCD'),(157,'XDR',5,NULL,'SDR (Special Drawing Rights)','currency.XDR'),(158,'XOF',0,'CFA','CFA Franc BCEAO','currency.XOF'),(159,'XPF',0,NULL,'CFP Franc','currency.XPF'),(160,'YER',2,NULL,'Yemeni Rial','currency.YER'),(161,'ZAR',2,'R','South African Rand','currency.ZAR'),(162,'ZMK',2,NULL,'Zambian Kwacha','currency.ZMK'),(163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
 /*!40000 ALTER TABLE `m_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1399,7 +1747,8 @@ LOCK TABLES `m_portfolio_command_source` WRITE;
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
 INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','CLIENT',2,NULL,1,NULL,NULL,'/clients/template',1,NULL,'{\"officeId\":\"2\",\"firstname\":\"Test\",\"middlename\":\"\",\"lastname\":\"One\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2011-02-01\"}',1,'2013-04-05 12:38:05',NULL,NULL,1),(2,'CREATE','LOAN',2,NULL,1,1,NULL,'/loans',1,NULL,'{\"clientId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"2\",\"submittedOnDate\":\"2011-04-01\",\"loanPurposeId\":\"25\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"expectedDisbursementDate\":\"2011-04-01\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"transactionProcessingStrategy\":\"heavensfamily-strategy\",\"repaymentsStartingFromDate\":\"\",\"interestChargedFromDate\":\"\",\"charges\":[{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-05-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-06-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-07-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-08-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-09-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-10-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-11-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-12-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-01-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-02-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-03-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-04-01\"}],\"collateral\":[{\"id\":\"\",\"type\":\"23\",\"description\":\" small description.\",\"value\":\"\"}]}',1,'2013-04-05 12:41:57',NULL,NULL,1),(3,'APPROVE','LOAN',2,NULL,1,1,NULL,'/loans/1',1,NULL,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\",\"pendingApproval\":false,\"waitingForDisbursal\":true,\"active\":false,\"closedObligationsMet\":false,\"closedWrittenOff\":false,\"closedRescheduled\":false,\"closed\":false,\"overpaid\":false},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2011-04-01\"}',1,'2013-04-05 12:42:09',NULL,NULL,1);
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_product_loan`
@@ -1408,32 +1757,33 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_product_loan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_product_loan` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `currency_code` varchar(3) NOT NULL,
-  `currency_digits` SMALLINT NOT NULL,
-  `principal_amount` decimal(19,6) NOT NULL,
-  `min_principal_amount` decimal(19,6) NOT NULL,
-  `max_principal_amount` decimal(19,6) NOT NULL,
-  `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
-  `name` varchar(100) NOT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  `fund_id` BIGINT DEFAULT NULL,
-  `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
-  `interest_period_frequency_enum` SMALLINT NOT NULL,
-  `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
-  `interest_method_enum` SMALLINT NOT NULL,
-  `interest_calculated_in_period_enum` SMALLINT NOT NULL DEFAULT '1',
-  `repay_every` SMALLINT NOT NULL,
-  `repayment_period_frequency_enum` SMALLINT NOT NULL,
-  `number_of_repayments` SMALLINT NOT NULL,
-  `amortization_method_enum` SMALLINT NOT NULL,
-  `accounting_type` SMALLINT NOT NULL,
-  `loan_transaction_strategy_id` BIGINT DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_name` (`name`),
-  KEY `FKA6A8A7D77240145` (`fund_id`),
-  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`)
+CREATE TABLE `m_product_loan`
+(
+    `id`                                 BIGINT         NOT NULL AUTO_INCREMENT,
+    `currency_code`                      varchar(3)     NOT NULL,
+    `currency_digits`                    SMALLINT       NOT NULL,
+    `principal_amount`                   decimal(19, 6) NOT NULL,
+    `min_principal_amount`               decimal(19, 6) NOT NULL,
+    `max_principal_amount`               decimal(19, 6) NOT NULL,
+    `arrearstolerance_amount`            decimal(19, 6)          DEFAULT NULL,
+    `name`                               varchar(100)   NOT NULL,
+    `description`                        varchar(500)            DEFAULT NULL,
+    `fund_id`                            BIGINT                  DEFAULT NULL,
+    `nominal_interest_rate_per_period`   decimal(19, 6) NOT NULL,
+    `interest_period_frequency_enum`     SMALLINT       NOT NULL,
+    `annual_nominal_interest_rate`       decimal(19, 6) NOT NULL,
+    `interest_method_enum`               SMALLINT       NOT NULL,
+    `interest_calculated_in_period_enum` SMALLINT       NOT NULL DEFAULT '1',
+    `repay_every`                        SMALLINT       NOT NULL,
+    `repayment_period_frequency_enum`    SMALLINT       NOT NULL,
+    `number_of_repayments`               SMALLINT       NOT NULL,
+    `amortization_method_enum`           SMALLINT       NOT NULL,
+    `accounting_type`                    SMALLINT       NOT NULL,
+    `loan_transaction_strategy_id`       BIGINT                  DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unq_name` (`name`),
+    KEY                                  `FKA6A8A7D77240145` (`fund_id`),
+    CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1441,11 +1791,17 @@ CREATE TABLE `m_product_loan` (
 -- Dumping data for table `m_product_loan`
 --
 
-LOCK TABLES `m_product_loan` WRITE;
+LOCK
+TABLES `m_product_loan` WRITE;
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
-INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000','0.000000','1000000000000.000000',NULL,'Kampala Product (with cash accounting)','Typical Kampala loan product with cash accounting enabled for testing.',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,2,2);
+INSERT INTO `m_product_loan`
+VALUES (1, 'UGX', 2, '1000000.000000', '0.000000', '1000000000000.000000', NULL,
+        'Kampala Product (with cash accounting)',
+        'Typical Kampala loan product with cash accounting enabled for testing.', NULL, '24.000000', 3, '24.000000', 1,
+        1, 1, 2, 12, 1, 2, 2);
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_product_loan_charge`
@@ -1454,13 +1810,14 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_product_loan_charge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_product_loan_charge` (
-  `product_loan_id` BIGINT NOT NULL,
-  `charge_id` BIGINT NOT NULL,
-  PRIMARY KEY (`product_loan_id`,`charge_id`),
-  KEY `charge_id` (`charge_id`),
-  CONSTRAINT `m_product_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
-  CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
+CREATE TABLE `m_product_loan_charge`
+(
+    `product_loan_id` BIGINT NOT NULL,
+    `charge_id`       BIGINT NOT NULL,
+    PRIMARY KEY (`product_loan_id`, `charge_id`),
+    KEY               `charge_id` (`charge_id`),
+    CONSTRAINT `m_product_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+    CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1468,10 +1825,12 @@ CREATE TABLE `m_product_loan_charge` (
 -- Dumping data for table `m_product_loan_charge`
 --
 
-LOCK TABLES `m_product_loan_charge` WRITE;
+LOCK
+TABLES `m_product_loan_charge` WRITE;
 /*!40000 ALTER TABLE `m_product_loan_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_charge` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_role`
@@ -1480,12 +1839,13 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_role` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `description` varchar(500) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_name` (`name`)
+CREATE TABLE `m_role`
+(
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `name`        varchar(100) NOT NULL,
+    `description` varchar(500) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unq_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1493,11 +1853,14 @@ CREATE TABLE `m_role` (
 -- Dumping data for table `m_role`
 --
 
-LOCK TABLES `m_role` WRITE;
+LOCK
+TABLES `m_role` WRITE;
 /*!40000 ALTER TABLE `m_role` DISABLE KEYS */;
-INSERT INTO `m_role` VALUES (1,'Super user','This role provides all application permissions.');
+INSERT INTO `m_role`
+VALUES (1, 'Super user', 'This role provides all application permissions.');
 /*!40000 ALTER TABLE `m_role` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_role_permission`
@@ -1506,14 +1869,15 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_role_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_role_permission` (
-  `role_id` BIGINT NOT NULL,
-  `permission_id` BIGINT NOT NULL,
-  PRIMARY KEY (`role_id`,`permission_id`),
-  KEY `FK8DEDB04815CEC7AB` (`role_id`),
-  KEY `FK8DEDB048103B544B` (`permission_id`),
-  CONSTRAINT `FK8DEDB048103B544B` FOREIGN KEY (`permission_id`) REFERENCES `m_permission` (`id`),
-  CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
+CREATE TABLE `m_role_permission`
+(
+    `role_id`       BIGINT NOT NULL,
+    `permission_id` BIGINT NOT NULL,
+    PRIMARY KEY (`role_id`, `permission_id`),
+    KEY             `FK8DEDB04815CEC7AB` (`role_id`),
+    KEY             `FK8DEDB048103B544B` (`permission_id`),
+    CONSTRAINT `FK8DEDB048103B544B` FOREIGN KEY (`permission_id`) REFERENCES `m_permission` (`id`),
+    CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1521,11 +1885,14 @@ CREATE TABLE `m_role_permission` (
 -- Dumping data for table `m_role_permission`
 --
 
-LOCK TABLES `m_role_permission` WRITE;
+LOCK
+TABLES `m_role_permission` WRITE;
 /*!40000 ALTER TABLE `m_role_permission` DISABLE KEYS */;
-INSERT INTO `m_role_permission` VALUES (1,1);
+INSERT INTO `m_role_permission`
+VALUES (1, 1);
 /*!40000 ALTER TABLE `m_role_permission` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_savings_account`
@@ -1534,39 +1901,40 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_savings_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_savings_account` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `account_no` varchar(20) NOT NULL,
-  `external_id` varchar(100) DEFAULT NULL,
-  `client_id` BIGINT DEFAULT NULL,
-  `group_id` BIGINT DEFAULT NULL,
-  `product_id` BIGINT DEFAULT NULL,
-  `status_enum` SMALLINT NOT NULL DEFAULT '300',
-  `activation_date` date DEFAULT NULL,
-  `currency_code` varchar(3) NOT NULL,
-  `currency_digits` SMALLINT NOT NULL,
-  `nominal_annual_interest_rate` decimal(19,6) NOT NULL,
-  `interest_compounding_period_enum` SMALLINT NOT NULL,
-  `interest_calculation_type_enum` SMALLINT NOT NULL,
-  `interest_calculation_days_in_year_type_enum` SMALLINT NOT NULL,
-  `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency_enum` SMALLINT DEFAULT NULL,
-  `lockedin_until_date_derived` date DEFAULT NULL,
-  `total_deposits_derived` decimal(19,6) DEFAULT NULL,
-  `total_withdrawals_derived` decimal(19,6) DEFAULT NULL,
-  `total_interest_earned_derived` decimal(19,6) DEFAULT NULL,
-  `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,
-  `account_balance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `sa_account_no_UNIQUE` (`account_no`),
-  UNIQUE KEY `sa_externalid_UNIQUE` (`external_id`),
-  KEY `FKSA00000000000001` (`client_id`),
-  KEY `FKSA00000000000002` (`group_id`),
-  KEY `FKSA00000000000003` (`product_id`),
-  CONSTRAINT `FKSA00000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
-  CONSTRAINT `FKSA00000000000002` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
-  CONSTRAINT `FKSA00000000000003` FOREIGN KEY (`product_id`) REFERENCES `m_savings_product` (`id`)
+CREATE TABLE `m_savings_account`
+(
+    `id`                                          BIGINT         NOT NULL AUTO_INCREMENT,
+    `account_no`                                  varchar(20)    NOT NULL,
+    `external_id`                                 varchar(100)            DEFAULT NULL,
+    `client_id`                                   BIGINT                  DEFAULT NULL,
+    `group_id`                                    BIGINT                  DEFAULT NULL,
+    `product_id`                                  BIGINT                  DEFAULT NULL,
+    `status_enum`                                 SMALLINT       NOT NULL DEFAULT '300',
+    `activation_date`                             date                    DEFAULT NULL,
+    `currency_code`                               varchar(3)     NOT NULL,
+    `currency_digits`                             SMALLINT       NOT NULL,
+    `nominal_annual_interest_rate`                decimal(19, 6) NOT NULL,
+    `interest_compounding_period_enum`            SMALLINT       NOT NULL,
+    `interest_calculation_type_enum`              SMALLINT       NOT NULL,
+    `interest_calculation_days_in_year_type_enum` SMALLINT       NOT NULL,
+    `min_required_opening_balance`                decimal(19, 6)          DEFAULT NULL,
+    `lockin_period_frequency`                     decimal(19, 6)          DEFAULT NULL,
+    `lockin_period_frequency_enum`                SMALLINT                DEFAULT NULL,
+    `lockedin_until_date_derived`                 date                    DEFAULT NULL,
+    `total_deposits_derived`                      decimal(19, 6)          DEFAULT NULL,
+    `total_withdrawals_derived`                   decimal(19, 6)          DEFAULT NULL,
+    `total_interest_earned_derived`               decimal(19, 6)          DEFAULT NULL,
+    `total_interest_posted_derived`               decimal(19, 6)          DEFAULT NULL,
+    `account_balance_derived`                     decimal(19, 6) NOT NULL DEFAULT '0.000000',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `sa_account_no_UNIQUE` (`account_no`),
+    UNIQUE KEY `sa_externalid_UNIQUE` (`external_id`),
+    KEY                                           `FKSA00000000000001` (`client_id`),
+    KEY                                           `FKSA00000000000002` (`group_id`),
+    KEY                                           `FKSA00000000000003` (`product_id`),
+    CONSTRAINT `FKSA00000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+    CONSTRAINT `FKSA00000000000002` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
+    CONSTRAINT `FKSA00000000000003` FOREIGN KEY (`product_id`) REFERENCES `m_savings_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1574,10 +1942,12 @@ CREATE TABLE `m_savings_account` (
 -- Dumping data for table `m_savings_account`
 --
 
-LOCK TABLES `m_savings_account` WRITE;
+LOCK
+TABLES `m_savings_account` WRITE;
 /*!40000 ALTER TABLE `m_savings_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_savings_account_transaction`
@@ -1586,20 +1956,21 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_savings_account_transaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_savings_account_transaction` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `savings_account_id` BIGINT NOT NULL,
-  `transaction_type_enum` SMALLINT NOT NULL,
-  `transaction_date` date NOT NULL,
-  `amount` decimal(19,6) NOT NULL,
-  `is_reversed` tinyint NOT NULL,
-  `running_balance_derived` decimal(19,6) DEFAULT NULL,
-  `balance_number_of_days_derived` INT DEFAULT NULL,
-  `balance_end_date_derived` date DEFAULT NULL,
-  `cumulative_balance_derived` decimal(19,6) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FKSAT0000000001` (`savings_account_id`),
-  CONSTRAINT `FKSAT0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
+CREATE TABLE `m_savings_account_transaction`
+(
+    `id`                             BIGINT         NOT NULL AUTO_INCREMENT,
+    `savings_account_id`             BIGINT         NOT NULL,
+    `transaction_type_enum`          SMALLINT       NOT NULL,
+    `transaction_date`               date           NOT NULL,
+    `amount`                         decimal(19, 6) NOT NULL,
+    `is_reversed`                    tinyint        NOT NULL,
+    `running_balance_derived`        decimal(19, 6) DEFAULT NULL,
+    `balance_number_of_days_derived` INT            DEFAULT NULL,
+    `balance_end_date_derived`       date           DEFAULT NULL,
+    `cumulative_balance_derived`     decimal(19, 6) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY                              `FKSAT0000000001` (`savings_account_id`),
+    CONSTRAINT `FKSAT0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1607,10 +1978,12 @@ CREATE TABLE `m_savings_account_transaction` (
 -- Dumping data for table `m_savings_account_transaction`
 --
 
-LOCK TABLES `m_savings_account_transaction` WRITE;
+LOCK
+TABLES `m_savings_account_transaction` WRITE;
 /*!40000 ALTER TABLE `m_savings_account_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_transaction` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_savings_product`
@@ -1619,21 +1992,22 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_savings_product`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_savings_product` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `description` varchar(500) NOT NULL,
-  `currency_code` varchar(3) NOT NULL,
-  `currency_digits` SMALLINT NOT NULL,
-  `nominal_annual_interest_rate` decimal(19,6) NOT NULL,
-  `interest_compounding_period_enum` SMALLINT NOT NULL,
-  `interest_calculation_type_enum` SMALLINT NOT NULL,
-  `interest_calculation_days_in_year_type_enum` SMALLINT NOT NULL,
-  `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency_enum` SMALLINT DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `sp_unq_name` (`name`)
+CREATE TABLE `m_savings_product`
+(
+    `id`                                          BIGINT         NOT NULL AUTO_INCREMENT,
+    `name`                                        varchar(100)   NOT NULL,
+    `description`                                 varchar(500)   NOT NULL,
+    `currency_code`                               varchar(3)     NOT NULL,
+    `currency_digits`                             SMALLINT       NOT NULL,
+    `nominal_annual_interest_rate`                decimal(19, 6) NOT NULL,
+    `interest_compounding_period_enum`            SMALLINT       NOT NULL,
+    `interest_calculation_type_enum`              SMALLINT       NOT NULL,
+    `interest_calculation_days_in_year_type_enum` SMALLINT       NOT NULL,
+    `min_required_opening_balance`                decimal(19, 6) DEFAULT NULL,
+    `lockin_period_frequency`                     decimal(19, 6) DEFAULT NULL,
+    `lockin_period_frequency_enum`                SMALLINT       DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `sp_unq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1641,10 +2015,12 @@ CREATE TABLE `m_savings_product` (
 -- Dumping data for table `m_savings_product`
 --
 
-LOCK TABLES `m_savings_product` WRITE;
+LOCK
+TABLES `m_savings_product` WRITE;
 /*!40000 ALTER TABLE `m_savings_product` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_product` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `m_staff`
@@ -1653,17 +2029,18 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `m_staff`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `m_staff` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `is_loan_officer` tinyint NOT NULL DEFAULT '0',
-  `office_id` BIGINT DEFAULT NULL,
-  `firstname` varchar(50) DEFAULT NULL,
-  `lastname` varchar(50) DEFAULT NULL,
-  `display_name` varchar(100) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `display_name` (`display_name`),
-  KEY `FK_m_staff_m_office` (`office_id`),
-  CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+CREATE TABLE `m_staff`
+(
+    `id`              BIGINT       NOT NULL AUTO_INCREMENT,
+    `is_loan_officer` tinyint      NOT NULL DEFAULT '0',
+    `office_id`       BIGINT                DEFAULT NULL,
+    `firstname`       varchar(50)           DEFAULT NULL,
+    `lastname`        varchar(50)           DEFAULT NULL,
+    `display_name`    varchar(100) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `display_name` (`display_name`),
+    KEY               `FK_m_staff_m_office` (`office_id`),
+    CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1671,11 +2048,15 @@ CREATE TABLE `m_staff` (
 -- Dumping data for table `m_staff`
 --
 
-LOCK TABLES `m_staff` WRITE;
+LOCK
+TABLES `m_staff` WRITE;
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
-INSERT INTO `m_staff` VALUES (1,1,1,'CEDA HO','LoanOfficer','LoanOfficer, CEDA HO'),(2,1,2,'Kampala','LoanOfficer','LoanOfficer, Kampala');
+INSERT INTO `m_staff`
+VALUES (1, 1, 1, 'CEDA HO', 'LoanOfficer', 'LoanOfficer, CEDA HO'),
+       (2, 1, 2, 'Kampala', 'LoanOfficer', 'LoanOfficer, Kampala');
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `r_enum_value`
@@ -1684,14 +2065,15 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `r_enum_value`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `r_enum_value` (
-  `enum_name` varchar(100) NOT NULL,
-  `enum_id` INT NOT NULL,
-  `enum_message_property` varchar(100) NOT NULL,
-  `enum_value` varchar(100) NOT NULL,
-  PRIMARY KEY (`enum_name`,`enum_id`),
-  UNIQUE KEY `enum_message_property` (`enum_name`,`enum_message_property`),
-  UNIQUE KEY `enum_value` (`enum_name`,`enum_value`)
+CREATE TABLE `r_enum_value`
+(
+    `enum_name`             varchar(100) NOT NULL,
+    `enum_id`               INT          NOT NULL,
+    `enum_message_property` varchar(100) NOT NULL,
+    `enum_value`            varchar(100) NOT NULL,
+    PRIMARY KEY (`enum_name`, `enum_id`),
+    UNIQUE KEY `enum_message_property` (`enum_name`,`enum_message_property`),
+    UNIQUE KEY `enum_value` (`enum_name`,`enum_value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1699,11 +2081,56 @@ CREATE TABLE `r_enum_value` (
 -- Dumping data for table `r_enum_value`
 --
 
-LOCK TABLES `r_enum_value` WRITE;
+LOCK
+TABLES `r_enum_value` WRITE;
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
-INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',601,'Written-Off','Written-Off'),('loan_status_id',602,'Rescheduled','Rescheduled'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('status',0,'invalid','Invalid'),('status',1,'processed','Processed'),('status',2,'awaiting.approval','Awaiting Approval'),('status',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years'),('transaction_type_enum',1,'Disbursement','Disbursement'),('transaction_type_enum',2,'Repayment','Repayment'),('transaction_type_enum',3,'Contra','Contra'),('transaction_type_enum',4,'Waive Interest','Waive Interest'),('transaction_type_enum',5,'Repayment At Disbursement','Repayment At Disbursement'),('transaction_type_enum',6,'Write-Off','Write-Off'),('transaction_type_enum',7,'Marked for Rescheduling','Marked for Rescheduling'),('transaction_type_enum',8,'Recovery Repayment','Recovery Repayment'),('transaction_type_enum',9,'Waive Charges','Waive Charges'),('transaction_type_enum',10,'Apply Charges','Apply Charges'),('transaction_type_enum',11,'Apply Interest','Apply Interest');
+INSERT INTO `r_enum_value`
+VALUES ('amortization_method_enum', 0, 'Equal principle payments', 'Equal principle payments'),
+       ('amortization_method_enum', 1, 'Equal installments', 'Equal installments'),
+       ('interest_calculated_in_period_enum', 0, 'Daily', 'Daily'),
+       ('interest_calculated_in_period_enum', 1, 'Same as repayment period', 'Same as repayment period'),
+       ('interest_method_enum', 0, 'Declining Balance', 'Declining Balance'),
+       ('interest_method_enum', 1, 'Flat', 'Flat'),
+       ('interest_period_frequency_enum', 2, 'Per month', 'Per month'),
+       ('interest_period_frequency_enum', 3, 'Per year', 'Per year'),
+       ('loan_status_id', 100, 'Submitted and awaiting approval', 'Submitted and awaiting approval'),
+       ('loan_status_id', 200, 'Approved', 'Approved'),
+       ('loan_status_id', 300, 'Active', 'Active'),
+       ('loan_status_id', 400, 'Withdrawn by client', 'Withdrawn by client'),
+       ('loan_status_id', 500, 'Rejected', 'Rejected'),
+       ('loan_status_id', 600, 'Closed', 'Closed'),
+       ('loan_status_id', 601, 'Written-Off', 'Written-Off'),
+       ('loan_status_id', 602, 'Rescheduled', 'Rescheduled'),
+       ('loan_status_id', 700, 'Overpaid', 'Overpaid'),
+       ('loan_transaction_strategy_id', 1, 'mifos-standard-strategy', 'Mifos style'),
+       ('loan_transaction_strategy_id', 2, 'heavensfamily-strategy', 'Heavensfamily'),
+       ('loan_transaction_strategy_id', 3, 'creocore-strategy', 'Creocore'),
+       ('loan_transaction_strategy_id', 4, 'rbi-india-strategy', 'RBI (India)'),
+       ('status', 0, 'invalid', 'Invalid'),
+       ('status', 1, 'processed', 'Processed'),
+       ('status', 2, 'awaiting.approval', 'Awaiting Approval'),
+       ('status', 3, 'rejected', 'Rejected'),
+       ('repayment_period_frequency_enum', 0, 'Days', 'Days'),
+       ('repayment_period_frequency_enum', 1, 'Weeks', 'Weeks'),
+       ('repayment_period_frequency_enum', 2, 'Months', 'Months'),
+       ('term_period_frequency_enum', 0, 'Days', 'Days'),
+       ('term_period_frequency_enum', 1, 'Weeks', 'Weeks'),
+       ('term_period_frequency_enum', 2, 'Months', 'Months'),
+       ('term_period_frequency_enum', 3, 'Years', 'Years'),
+       ('transaction_type_enum', 1, 'Disbursement', 'Disbursement'),
+       ('transaction_type_enum', 2, 'Repayment', 'Repayment'),
+       ('transaction_type_enum', 3, 'Contra', 'Contra'),
+       ('transaction_type_enum', 4, 'Waive Interest', 'Waive Interest'),
+       ('transaction_type_enum', 5, 'Repayment At Disbursement', 'Repayment At Disbursement'),
+       ('transaction_type_enum', 6, 'Write-Off', 'Write-Off'),
+       ('transaction_type_enum', 7, 'Marked for Rescheduling', 'Marked for Rescheduling'),
+       ('transaction_type_enum', 8, 'Recovery Repayment', 'Recovery Repayment'),
+       ('transaction_type_enum', 9, 'Waive Charges', 'Waive Charges'),
+       ('transaction_type_enum', 10, 'Apply Charges', 'Apply Charges'),
+       ('transaction_type_enum', 11, 'Apply Interest', 'Apply Interest');
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `rpt_sequence`
@@ -1712,9 +2139,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `rpt_sequence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `rpt_sequence` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`id`)
+CREATE TABLE `rpt_sequence`
+(
+    `id` INT NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1722,10 +2150,12 @@ CREATE TABLE `rpt_sequence` (
 -- Dumping data for table `rpt_sequence`
 --
 
-LOCK TABLES `rpt_sequence` WRITE;
+LOCK
+TABLES `rpt_sequence` WRITE;
 /*!40000 ALTER TABLE `rpt_sequence` DISABLE KEYS */;
 /*!40000 ALTER TABLE `rpt_sequence` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `schema_version`
@@ -1734,22 +2164,23 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `schema_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `schema_version` (
-  `version_rank` INT NOT NULL,
-  `installed_rank` INT NOT NULL,
-  `version` varchar(50) NOT NULL,
-  `description` varchar(200) NOT NULL,
-  `type` varchar(20) NOT NULL,
-  `script` varchar(1000) NOT NULL,
-  `checksum` INT DEFAULT NULL,
-  `installed_by` varchar(100) NOT NULL,
-  `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `execution_time` INT NOT NULL,
-  `success` tinyint NOT NULL,
-  PRIMARY KEY (`version`),
-  KEY `schema_version_vr_idx` (`version_rank`),
-  KEY `schema_version_ir_idx` (`installed_rank`),
-  KEY `schema_version_s_idx` (`success`)
+CREATE TABLE `schema_version`
+(
+    `version_rank`   INT           NOT NULL,
+    `installed_rank` INT           NOT NULL,
+    `version`        varchar(50)   NOT NULL,
+    `description`    varchar(200)  NOT NULL,
+    `type`           varchar(20)   NOT NULL,
+    `script`         varchar(1000) NOT NULL,
+    `checksum`       INT                    DEFAULT NULL,
+    `installed_by`   varchar(100)  NOT NULL,
+    `installed_on`   timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `execution_time` INT           NOT NULL,
+    `success`        tinyint       NOT NULL,
+    PRIMARY KEY (`version`),
+    KEY              `schema_version_vr_idx` (`version_rank`),
+    KEY              `schema_version_ir_idx` (`installed_rank`),
+    KEY              `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1757,11 +2188,29 @@ CREATE TABLE `schema_version` (
 -- Dumping data for table `schema_version`
 --
 
-LOCK TABLES `schema_version` WRITE;
+LOCK
+TABLES `schema_version` WRITE;
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
-INSERT INTO `schema_version` VALUES (1,1,'1','mifosplatform-core-ddl-latest','SQL','V1__mifosplatform-core-ddl-latest.sql',-1957145051,'root','2013-04-05 11:23:24',365,1),(2,2,'2','mifosx-base-reference-data-utf8','SQL','V2__mifosx-base-reference-data-utf8.sql',1316484475,'root','2013-04-05 11:23:24',26,1),(3,3,'3','mifosx-permissions-and-authorisation-utf8','SQL','V3__mifosx-permissions-and-authorisation-utf8.sql',1922951887,'root','2013-04-05 11:23:24',26,1),(4,4,'4','mifosx-core-reports-utf8','SQL','V4__mifosx-core-reports-utf8.sql',-934709187,'root','2013-04-05 11:23:24',52,1),(5,5,'5','update-savings-product-and-account-tables','SQL','V5__update-savings-product-and-account-tables.sql',1171300485,'root','2013-04-05 11:23:24',22,1),(6,6,'6','add min max principal column to loan','SQL','V6__add_min_max_principal_column_to_loan.sql',21414779,'root','2013-04-05 11:23:24',25,1),(7,7,'7','remove read makerchecker permission','SQL','V7__remove_read_makerchecker_permission.sql',-335430825,'root','2013-04-05 11:23:24',3,1),(8,8,'8','deposit-transaction-permissions-if-they-exist','SQL','V8__deposit-transaction-permissions-if-they-exist.sql',-1507997551,'root','2013-04-05 11:23:24',2,1);
+INSERT INTO `schema_version`
+VALUES (1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', -1957145051, 'root',
+        '2013-04-05 11:23:24', 365, 1),
+       (2, 2, '2', 'mifosx-base-reference-data-utf8', 'SQL', 'V2__mifosx-base-reference-data-utf8.sql', 1316484475,
+        'root', '2013-04-05 11:23:24', 26, 1),
+       (3, 3, '3', 'mifosx-permissions-and-authorisation-utf8', 'SQL',
+        'V3__mifosx-permissions-and-authorisation-utf8.sql', 1922951887, 'root', '2013-04-05 11:23:24', 26, 1),
+       (4, 4, '4', 'mifosx-core-reports-utf8', 'SQL', 'V4__mifosx-core-reports-utf8.sql', -934709187, 'root',
+        '2013-04-05 11:23:24', 52, 1),
+       (5, 5, '5', 'update-savings-product-and-account-tables', 'SQL',
+        'V5__update-savings-product-and-account-tables.sql', 1171300485, 'root', '2013-04-05 11:23:24', 22, 1),
+       (6, 6, '6', 'add min max principal column to loan', 'SQL', 'V6__add_min_max_principal_column_to_loan.sql',
+        21414779, 'root', '2013-04-05 11:23:24', 25, 1),
+       (7, 7, '7', 'remove read makerchecker permission', 'SQL', 'V7__remove_read_makerchecker_permission.sql',
+        -335430825, 'root', '2013-04-05 11:23:24', 3, 1),
+       (8, 8, '8', 'deposit-transaction-permissions-if-they-exist', 'SQL',
+        'V8__deposit-transaction-permissions-if-they-exist.sql', -1507997551, 'root', '2013-04-05 11:23:24', 2, 1);
 /*!40000 ALTER TABLE `schema_version` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `stretchy_parameter`
@@ -1770,23 +2219,24 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `stretchy_parameter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `stretchy_parameter` (
-  `parameter_id` INT NOT NULL AUTO_INCREMENT,
-  `parameter_name` varchar(45) NOT NULL,
-  `parameter_variable` varchar(45) DEFAULT NULL,
-  `parameter_label` varchar(45) NOT NULL,
-  `parameter_displayType` varchar(45) NOT NULL,
-  `parameter_FormatType` varchar(10) NOT NULL,
-  `parameter_default` varchar(45) NOT NULL,
-  `special` varchar(1) DEFAULT NULL,
-  `selectOne` varchar(1) DEFAULT NULL,
-  `selectAll` varchar(1) DEFAULT NULL,
-  `parameter_sql` text,
-  `parent_parameter_id` INT DEFAULT NULL,
-  PRIMARY KEY (`parameter_id`),
-  UNIQUE KEY `name_UNIQUE` (`parameter_name`),
-  KEY `fk_stretchy_parameter_0001_idx` (`parent_parameter_id`),
-  CONSTRAINT `fk_stretchy_parameter_0001` FOREIGN KEY (`parent_parameter_id`) REFERENCES `stretchy_parameter` (`parameter_id`)
+CREATE TABLE `stretchy_parameter`
+(
+    `parameter_id`          INT         NOT NULL AUTO_INCREMENT,
+    `parameter_name`        varchar(45) NOT NULL,
+    `parameter_variable`    varchar(45) DEFAULT NULL,
+    `parameter_label`       varchar(45) NOT NULL,
+    `parameter_displayType` varchar(45) NOT NULL,
+    `parameter_FormatType`  varchar(10) NOT NULL,
+    `parameter_default`     varchar(45) NOT NULL,
+    `special`               varchar(1)  DEFAULT NULL,
+    `selectOne`             varchar(1)  DEFAULT NULL,
+    `selectAll`             varchar(1)  DEFAULT NULL,
+    `parameter_sql`         text,
+    `parent_parameter_id`   INT         DEFAULT NULL,
+    PRIMARY KEY (`parameter_id`),
+    UNIQUE KEY `name_UNIQUE` (`parameter_name`),
+    KEY                     `fk_stretchy_parameter_0001_idx` (`parent_parameter_id`),
+    CONSTRAINT `fk_stretchy_parameter_0001` FOREIGN KEY (`parent_parameter_id`) REFERENCES `stretchy_parameter` (`parameter_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1004 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1794,11 +2244,46 @@ CREATE TABLE `stretchy_parameter` (
 -- Dumping data for table `stretchy_parameter`
 --
 
-LOCK TABLES `stretchy_parameter` WRITE;
+LOCK
+TABLES `stretchy_parameter` WRITE;
 /*!40000 ALTER TABLE `stretchy_parameter` DISABLE KEYS */;
-INSERT INTO `stretchy_parameter` VALUES (1,'startDateSelect','startDate','startDate','date','date','today',NULL,NULL,NULL,NULL,NULL),(2,'endDateSelect','endDate','endDate','date','date','today',NULL,NULL,NULL,NULL,NULL),(3,'obligDateTypeSelect','obligDateType','obligDateType','select','number','0',NULL,NULL,NULL,'select * from\r\n(select 1 as id, \"Closed\" as `name` union all\r\nselect 2, \"Disbursal\" ) x\r\norder by x.`id`',NULL),(5,'OfficeIdSelectOne','officeId','Office','select','number','0',NULL,'Y',NULL,'select id, \r\nconcat(substring(\"........................................\", 1, \r\n   \n\n((LENGTH(`hierarchy`) - LENGTH(REPLACE(`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   `name`) as tc\r\nfrom m_office\r\nwhere hierarchy like concat\n\n(\'${currentUserHierarchy}\', \'%\')\r\norder by hierarchy',NULL),(6,'loanOfficerIdSelectAll','loanOfficerId','Loan Officer','select','number','0',NULL,NULL,'Y','(select lo.id, lo.display_name as `Name` \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\njoin m_staff lo on lo.office_id = ounder.id\r\nwhere lo.is_loan_officer = true\r\nand o.id = ${officeId})\r\nunion all\r\n(select -10, \'-\')\r\norder by 2',5),(10,'currencyIdSelectAll','currencyId','Currency','select','number','0',NULL,NULL,'Y','select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`',NULL),(20,'fundIdSelectAll','fundId','Fund','select','number','0',NULL,NULL,'Y','(select id, `name`\r\nfrom m_fund)\r\nunion all\r\n(select -10, \'-\')\r\norder by 2',NULL),(25,'loanProductIdSelectAll','loanProductId','Product','select','number','0',NULL,NULL,'Y','select p.id, p.`name`\r\nfrom m_product_loan p\r\nwhere p.currency_code = \'$\{currencyId}\'\r\norder by 2',10),(26,'loanPurposeIdSelectAll','loanPurposeId','Loan Purpose','select','number','0',NULL,NULL,'Y','select -10 as id, \'-\' as code_value\r\nunion all\r\nselect * from (select v.id, v.code_value\r\nfrom m_code c\r\njoin m_code_value v on v.code_id = c.id\r\nwhere c.code_name = \"loanPurpose\"\r\norder by v.order_position)  x',NULL),(100,'parTypeSelect','parType','parType','select','number','0',NULL,NULL,NULL,'select * from\r\n(select 1 as id, \"Principal Only\" as `name` union all\r\nselect 2, \"Principal + Interest\" union all\r\nselect 3, \"Principal + Interest + Fees\" union all\r\nselect 4, \"Principal + Interest + Fees + Penalties\") x\r\norder by x.`id`',NULL),(1001,'FullReportList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r\n  \n\nrp.parameter_id, rp.report_parameter_name, p.parameter_name\r\n  from stretchy_report r\r\n  left join stretchy_report_parameter rp on rp.report_id = r.report_id\r\n  \n\nleft join stretchy_parameter p on p.parameter_id = rp.parameter_id\r\n  where r.use_report is true\r\n  and exists\r\n  (\r\n select \'f\'\r\n  from m_appuser_role ur \n\n\r\n  join m_role r on r.id = ur.role_id\r\n  join m_role_permission rp on rp.role_id = r.id\r\n  join m_permission p on p.id = rp.permission_id\r\n  where \n\nur.appuser_id = ${currentUserId}\r\n  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r\n )\r\n  order by \n\nr.report_category, r.report_name, rp.parameter_id',NULL),(1002,'FullParameterList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select sp.parameter_name, sp.parameter_variable, sp.parameter_label, sp.parameter_displayType, \r\nsp.parameter_FormatType, sp.parameter_default, sp.selectOne,  sp.selectAll, spp.parameter_name as parentParameterName\r\nfrom stretchy_parameter sp\r\nleft join stretchy_parameter spp on spp.parameter_id = sp.parent_parameter_id\r\nwhere sp.special is null\r\nand exists \r\n	(select \'f\' \r\n	from stretchy_report sr\r\n	join stretchy_report_parameter srp on srp.report_id = sr.report_id\r\n	where sr.report_name in(${reportListing})\r\n	and srp.parameter_id = sp.parameter_id\r\n	)\r\norder by sp.parameter_id',NULL),(1003,'reportCategoryList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, \n\nr.report_category,\r\n  rp.parameter_id, rp.report_parameter_name, p.parameter_name\r\n  from stretchy_report r\r\n  left join stretchy_report_parameter rp on \n\nrp.report_id = r.report_id\r\n  left join stretchy_parameter p on p.parameter_id = rp.parameter_id\r\n  where r.report_category = \'${reportCategory}\'\r\n  and \n\nr.use_report is true\r\n  and exists\r\n  (\r\n select \'f\'\r\n  from m_appuser_role ur \r\n  join m_role r on r.id = ur.role_id\r\n  join m_role_permission rp on \n\nrp.role_id = r.id\r\n  join m_permission p on p.id = rp.permission_id\r\n  where ur.appuser_id = ${currentUserId}\r\n  and (p.code in (\'ALL_FUNCTIONS_READ\', \n\n\'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r\n )\r\n  order by r.report_category, r.report_name, rp.parameter_id',NULL);
+INSERT INTO `stretchy_parameter`
+VALUES (1, 'startDateSelect', 'startDate', 'startDate', 'date', 'date', 'today', NULL, NULL, NULL, NULL, NULL),
+       (2, 'endDateSelect', 'endDate', 'endDate', 'date', 'date', 'today', NULL, NULL, NULL, NULL, NULL),
+       (3, 'obligDateTypeSelect', 'obligDateType', 'obligDateType', 'select', 'number', '0', NULL, NULL, NULL,
+        'select * from\r\n(select 1 as id, \"Closed\" as `name` union all\r\nselect 2, \"Disbursal\" ) x\r\norder by x.`id`',
+        NULL),
+       (5, 'OfficeIdSelectOne', 'officeId', 'Office', 'select', 'number', '0', NULL, 'Y', NULL,
+        'select id, \r\nconcat(substring(\"........................................\", 1, \r\n   \n\n((LENGTH(`hierarchy`) - LENGTH(REPLACE(`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   `name`) as tc\r\nfrom m_office\r\nwhere hierarchy like concat\n\n(\'${currentUserHierarchy}\', \'%\')\r\norder by hierarchy',
+        NULL),
+       (6, 'loanOfficerIdSelectAll', 'loanOfficerId', 'Loan Officer', 'select', 'number', '0', NULL, NULL, 'Y',
+        '(select lo.id, lo.display_name as `Name` \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\njoin m_staff lo on lo.office_id = ounder.id\r\nwhere lo.is_loan_officer = true\r\nand o.id = ${officeId})\r\nunion all\r\n(select -10, \'-\')\r\norder by 2',
+        5),
+       (10, 'currencyIdSelectAll', 'currencyId', 'Currency', 'select', 'number', '0', NULL, NULL, 'Y',
+        'select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`', NULL),
+       (20, 'fundIdSelectAll', 'fundId', 'Fund', 'select', 'number', '0', NULL, NULL, 'Y',
+        '(select id, `name`\r\nfrom m_fund)\r\nunion all\r\n(select -10, \' -\')\r\norder by 2', NULL),
+       (25, 'loanProductIdSelectAll', 'loanProductId', 'Product', 'select', 'number', '0', NULL, NULL, 'Y',
+        'select p.id, p.`name`\r\nfrom m_product_loan p\r\nwhere p.currency_code = \'$\{currencyId}\'\r\norder by 2',
+        10),
+       (26, 'loanPurposeIdSelectAll', 'loanPurposeId', 'Loan Purpose', 'select', 'number', '0', NULL, NULL, 'Y',
+        'select -10 as id, \' -\' as code_value\r\nunion all\r\nselect * from (select v.id, v.code_value\r\nfrom m_code c\r\njoin m_code_value v on v.code_id = c.id\r\nwhere c.code_name = \"loanPurpose\"\r\norder by v.order_position)  x',
+        NULL),
+       (100, 'parTypeSelect', 'parType', 'parType', 'select', 'number', '0', NULL, NULL, NULL,
+        'select * from\r\n(select 1 as id, \"Principal Only\" as `name` union all\r\nselect 2, \"Principal + Interest\" union all\r\nselect 3, \"Principal + Interest + Fees\" union all\r\nselect 4, \"Principal + Interest + Fees + Penalties\") x\r\norder by x.`id`',
+        NULL),
+       (1001, 'FullReportList', NULL, 'n/a', 'n/a', 'n/a', 'n/a', 'Y', NULL, NULL,
+        'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r\n  \n\nrp.parameter_id, rp.report_parameter_name, p.parameter_name\r\n  from stretchy_report r\r\n  left join stretchy_report_parameter rp on rp.report_id = r.report_id\r\n  \n\nleft join stretchy_parameter p on p.parameter_id = rp.parameter_id\r\n  where r.use_report is true\r\n  and exists\r\n  (\r\n select \'f\'\r\n  from m_appuser_role ur \n\n\r\n  join m_role r on r.id = ur.role_id\r\n  join m_role_permission rp on rp.role_id = r.id\r\n  join m_permission p on p.id = rp.permission_id\r\n  where \n\nur.appuser_id = ${currentUserId}\r\n  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r\n )\r\n  order by \n\nr.report_category, r.report_name, rp.parameter_id',
+        NULL),
+       (1002, 'FullParameterList', NULL, 'n/a', 'n/a', 'n/a', 'n/a', 'Y', NULL, NULL,
+        'select sp.parameter_name, sp.parameter_variable, sp.parameter_label, sp.parameter_displayType, \r\nsp.parameter_FormatType, sp.parameter_default, sp.selectOne,  sp.selectAll, spp.parameter_name as parentParameterName\r\nfrom stretchy_parameter sp\r\nleft join stretchy_parameter spp on spp.parameter_id = sp.parent_parameter_id\r\nwhere sp.special is null\r\nand exists \r\n	(select \'f\' \r\n	from stretchy_report sr\r\n	join stretchy_report_parameter srp on srp.report_id = sr.report_id\r\n	where sr.report_name in(${reportListing})\r\n	and srp.parameter_id = sp.parameter_id\r\n	)\r\norder by sp.parameter_id',
+        NULL),
+       (1003, 'reportCategoryList', NULL, 'n/a', 'n/a', 'n/a', 'n/a', 'Y', NULL, NULL,
+        'select  r.report_id, r.report_name, r.report_type, r.report_subtype, \n\nr.report_category,\r\n  rp.parameter_id, rp.report_parameter_name, p.parameter_name\r\n  from stretchy_report r\r\n  left join stretchy_report_parameter rp on \n\nrp.report_id = r.report_id\r\n  left join stretchy_parameter p on p.parameter_id = rp.parameter_id\r\n  where r.report_category = \'${reportCategory}\'\r\n  and \n\nr.use_report is true\r\n  and exists\r\n  (\r\n select \'f\'\r\n  from m_appuser_role ur \r\n  join m_role r on r.id = ur.role_id\r\n  join m_role_permission rp on \n\nrp.role_id = r.id\r\n  join m_permission p on p.id = rp.permission_id\r\n  where ur.appuser_id = ${currentUserId}\r\n  and (p.code in (\'ALL_FUNCTIONS_READ\', \n\n\'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r\n )\r\n  order by r.report_category, r.report_name, rp.parameter_id',
+        NULL);
 /*!40000 ALTER TABLE `stretchy_parameter` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `stretchy_report`
@@ -1807,18 +2292,19 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `stretchy_report`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `stretchy_report` (
-  `report_id` INT NOT NULL AUTO_INCREMENT,
-  `report_name` varchar(100) NOT NULL,
-  `report_type` varchar(20) NOT NULL,
-  `report_subtype` varchar(20) DEFAULT NULL,
-  `report_category` varchar(45) DEFAULT NULL,
-  `report_sql` text,
-  `description` text,
-  `core_report` tinyint DEFAULT '0',
-  `use_report` tinyint DEFAULT '0',
-  PRIMARY KEY (`report_id`),
-  UNIQUE KEY `report_name_UNIQUE` (`report_name`)
+CREATE TABLE `stretchy_report`
+(
+    `report_id`       INT          NOT NULL AUTO_INCREMENT,
+    `report_name`     varchar(100) NOT NULL,
+    `report_type`     varchar(20)  NOT NULL,
+    `report_subtype`  varchar(20) DEFAULT NULL,
+    `report_category` varchar(45) DEFAULT NULL,
+    `report_sql`      text,
+    `description`     text,
+    `core_report`     tinyint     DEFAULT '0',
+    `use_report`      tinyint     DEFAULT '0',
+    PRIMARY KEY (`report_id`),
+    UNIQUE KEY `report_name_UNIQUE` (`report_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1826,11 +2312,87 @@ CREATE TABLE `stretchy_report` (
 -- Dumping data for table `stretchy_report`
 --
 
-LOCK TABLES `stretchy_report` WRITE;
+LOCK
+TABLES `stretchy_report` WRITE;
 /*!40000 ALTER TABLE `stretchy_report` DISABLE KEYS */;
-INSERT INTO `stretchy_report` VALUES (1,'Client Listing','Table',NULL,'Client','select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\n c.account_no as \"Client Account No.\",  \r\nc.display_name as \"Name\",  \n\nc.joined_date as \"Joined\", c.external_id as \"External Id\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand \n\nounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\nwhere o.id = ${officeId}\r\nand c.is_deleted=0\r\n\n\norder by ounder.hierarchy, c.account_no','Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).',1,1),(2,'Client Loans Listing','Table',NULL,'Client','select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nc.account_no as \"Client \n\nAccount No.\", \r\nc.display_name as \"Name\", \r\nlo.display_name as \"Loan Officer\", l.account_no as \"Loan Account No.\", l.external_id as \"External Id\", \r\n\n\np.name as Loan, st.enum_message_property as \"Status\",  \r\nf.`name` as Fund, purp.code_value as \"Loan Purpose\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount,\n\n\r\nl.arrearstolerance_amount as \"Arrears Tolerance Amount\",\r\nl.number_of_repayments as \"Expected No. Repayments\",\r\nl.annual_nominal_interest_rate as \" Annual \n\nNominal Interest Rate\", \r\nl.nominal_interest_rate_per_period as \"Nominal Interest Rate Per Period\",\r\n\r\nipf.enum_message_property as \"Interest Rate Frequency\n\n\",\r\nim.enum_message_property as \"Interest Method\",\r\nicp.enum_message_property as \"Interest Calculated in Period\",\r\nl.term_frequency as \"Term Frequency\",\n\n\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.repay_every as \"Repayment Frequency\",\r\nrf.enum_message_property as \"Repayment Frequency Period\",\n\n\r\nam.enum_message_property as \"Amortization\",\r\n\r\nl.total_charges_due_at_disbursement_derived as \"Total Charges Due At Disbursement\",\r\n\r\ndate( \n\nl.submittedon_date) as Submitted, date(l.approvedon_date) Approved, l.expected_disbursedon_date As \"Expected Disbursal\",\r\ndate(l.expected_firstrepaymenton_date) as \n\n\"Expected First Repayment\", date(l.interest_calculated_from_date) as \"Interest Calculated From\" ,\r\ndate(l.disbursedon_date) as Disbursed, date\n\n(l.expected_maturedon_date) \"Expected Maturity\",\r\ndate(l.maturedon_date) as \"Matured On\", date(l.closedon_date) as Closed,\r\ndate(l.rejectedon_date) as \n\nRejected, date(l.rescheduledon_date) as Rescheduled, \r\ndate(l.withdrawnon_date) as Withdrawn, date(l.writtenoffon_date) \"Written Off\"\r\nfrom m_office o \r\njoin \n\nm_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on \n\nc.office_id = ounder.id\r\nleft join m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_product_loan p on p.id = \n\nl.product_id\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join r_enum_value st on st.enum_name = \"loan_status_id\" and st.enum_id = l.loan_status_id\r\nleft join \n\nr_enum_value ipf on ipf.enum_name = \"interest_period_frequency_enum\" and ipf.enum_id = l.interest_period_frequency_enum\r\nleft join r_enum_value im on im.enum_name \n\n= \"interest_method_enum\" and im.enum_id = l.interest_method_enum\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = \n\nl.term_period_frequency_enum\r\nleft join r_enum_value icp on icp.enum_name = \"interest_calculated_in_period_enum\" and icp.enum_id = \n\nl.interest_calculated_in_period_enum\r\nleft join r_enum_value rf on rf.enum_name = \"repayment_period_frequency_enum\" and rf.enum_id = \n\nl.repayment_period_frequency_enum\r\nleft join r_enum_value am on am.enum_name = \"amortization_method_enum\" and am.enum_id = l.amortization_method_enum\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\n\r\nleft \n\njoin m_currency cur on cur.code = l.currency_code\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand \n\n(l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \n\n\"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\norder by ounder.hierarchy, 2 , l.id','Individual Client Report\r\n\r\nPretty \n\nwide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  \n\nThere is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).',1,1),(5,'Loans Awaiting Disbursal','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nc.account_no as \"Client Account No\", c.display_name as \"Name\", l.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund, ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount as Principal,  \r\nl.term_frequency as \"Term Frequency\",\n\n\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\",\r\ndate(l.approvedon_date) \"Approved\",\r\ndatediff(l.expected_disbursedon_date, curdate()) as \"Days to Disbursal\",\r\ndate(l.expected_disbursedon_date) \"Expected Disbursal\",\r\npurp.code_value as \"Loan Purpose\",\r\n lo.display_name as \"Loan Officer\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\norder by ounder.hierarchy, datediff(l.expected_disbursedon_date, curdate()),  c.account_no','Individual Client Report',1,1),(6,'Loans Awaiting Disbursal Summary','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\npl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  f.`name` as Fund,\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`\r\norder by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`','Individual Client Report',1,1),(7,'Loans Awaiting Disbursal Summary by Month','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\npl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nyear(l.expected_disbursedon_date) as \"Year\", \r\nmonthname(l.expected_disbursedon_date) as \"Month\",\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)\r\norder by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)','Individual Client Report',1,1),(8,'Loans Pending Approval','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nc.account_no as \"Client Account No.\", c.display_name as \"Client Name\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  pl.`name` as \"Product\", \r\nl.account_no as \"Loan Account No.\", \r\nl.principal_amount as \"Loan Amount\", \r\nl.term_frequency as \"Term Frequency\",\n\n\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.annual_nominal_interest_rate as \" Annual \n\nNominal Interest Rate\", \r\ndatediff(curdate(), l.submittedon_date) \"Days Pending Approval\", \r\npurp.code_value as \"Loan Purpose\",\r\nlo.display_name as \"Loan Officer\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 100 /*Submitted and awaiting approval */\r\norder by ounder.hierarchy, l.submittedon_date,  l.account_no','Individual Client Report',1,1),(11,'Active Loans - Summary','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\", x.currency as Currency,\r\n x.client_count as \"No. of Clients\", x.active_loan_count as \"No. Active Loans\", x. loans_in_arrears_count as \"No. of Loans in Arrears\",\r\nx.principal as \"Total Loans Disbursed\", x.principal_repaid as \"Principal Repaid\", x.principal_outstanding as \"Principal Outstanding\", x.principal_overdue as \"Principal Overdue\",\r\nx.interest as \"Total Interest\", x.interest_repaid as \"Interest Repaid\", x.interest_outstanding as \"Interest Outstanding\", x.interest_overdue as \"Interest Overdue\",\r\nx.fees as \"Total Fees\", x.fees_repaid as \"Fees Repaid\", x.fees_outstanding as \"Fees Outstanding\", x.fees_overdue as \"Fees Overdue\",\r\nx.penalties as \"Total Penalties\", x.penalties_repaid as \"Penalties Repaid\", x.penalties_outstanding as \"Penalties Outstanding\", x.penalties_overdue as \"Penalties Overdue\",\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(if(laa.loan_id is not null,  l.id, null)  )) as loans_in_arrears_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(laa.principal_overdue_derived) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(laa.interest_overdue_derived) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(laa.fee_charges_overdue_derived) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(laa.penalty_charges_overdue_derived) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency',NULL,1,1),(12,'Active Loans - Details','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", \r\nc.display_name as \"Client\", l.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed Date\", \r\ndate(l.expected_maturedon_date) as \"Expected Matured On\",\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.principal_outstanding_derived as \"Principal Outstanding\",\r\nlaa.principal_overdue_derived as \"Principal Overdue\",\r\n\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.interest_outstanding_derived as \"Interest Outstanding\",\r\nlaa.interest_overdue_derived as \"Interest Overdue\",\r\n\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.fee_charges_outstanding_derived  as \"Fees Outstanding\",\r\nlaa.fee_charges_overdue_derived as \"Fees Overdue\",\r\n\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nl.penalty_charges_outstanding_derived as \"Penalties Outstanding\",\r\npenalty_charges_overdue_derived as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no','Individual Client \n\nReport',1,1),(13,'Obligation Met Loans Details','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as \"Client Account No.\", c.display_name as \"Client\",\r\nl.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Amount\", \r\nl.total_repayment_derived  as \"Total Repaid\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed\", \r\ndate(l.closedon_date) as \"Closed\",\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nlo.display_name as \"Loan Officer\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n	when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n	when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n	else 1 = 1\r\n	end)\r\nand l.loan_status_id = 600\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no','Individual Client \n\nReport',1,1),(14,'Obligation Met Loans Summary','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\ncount(distinct(c.id)) as \"No. of Clients\",\r\ncount(distinct(l.id)) as \"No. of Loans\",\r\nsum(l.principal_amount) as \"Total Loan Amount\", \r\nsum(l.principal_repaid_derived) as \"Total Principal Repaid\",\r\nsum(l.interest_repaid_derived) as \"Total Interest Repaid\",\r\nsum(l.fee_charges_repaid_derived) as \"Total Fees Repaid\",\r\nsum(l.penalty_charges_repaid_derived) as \"Total Penalties Repaid\",\r\nsum(l.interest_waived_derived) as \"Total Interest Waived\",\r\nsum(l.fee_charges_waived_derived) as \"Total Fees Waived\",\r\nsum(l.penalty_charges_waived_derived) as \"Total Penalties Waived\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n	when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n	when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n	else 1 = 1\r\n	end)\r\nand l.loan_status_id = 600\r\ngroup by ounder.hierarchy, l.currency_code\r\norder by ounder.hierarchy, l.currency_code','Individual Client \n\nReport',1,1),(15,'Portfolio at Risk','Table',NULL,'Loan','select x.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from \r\n(select  ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(l.principal_outstanding_derived) as \"Principal Outstanding\",\r\nsum(laa.principal_overdue_derived) as \"Principal Overdue\",\r\n\r\nsum(l.interest_outstanding_derived) as \"Interest Outstanding\",\r\nsum(laa.interest_overdue_derived) as \"Interest Overdue\",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as \"Fees Outstanding\",\r\nsum(laa.fee_charges_overdue_derived) as \"Fees Overdue\",\r\n\r\nsum(penalty_charges_outstanding_derived) as \"Penalties Outstanding\",\r\nsum(laa.penalty_charges_overdue_derived) as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.currency_code\r\norder by l.currency_code) x','Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)',1,1),(16,'Portfolio at Risk by Branch','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\",\r\nx.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select  ounder.id as \"branch\", ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\n\r\nsum(l.principal_outstanding_derived) as \"Principal Outstanding\",\r\nsum(laa.principal_overdue_derived) as \"Principal Overdue\",\r\n\r\nsum(l.interest_outstanding_derived) as \"Interest Outstanding\",\r\nsum(laa.interest_overdue_derived) as \"Interest Overdue\",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as \"Fees Outstanding\",\r\nsum(laa.fee_charges_overdue_derived) as \"Fees Overdue\",\r\n\r\nsum(penalty_charges_outstanding_derived) as \"Penalties Outstanding\",\r\nsum(laa.penalty_charges_overdue_derived) as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency','Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)',1,1),(20,'Funds Disbursed Between Dates Summary','Table',NULL,'Fund','select ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, \r\nround(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office ounder \r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\ngroup by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',NULL,1,1),(21,'Funds Disbursed Between Dates Summary by Office','Table',NULL,'Fund','select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\n \n\nifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office o\r\n\n\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c \n\non c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\n\n\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand o.id = ${officeId}\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand \n\n(l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\ngroup by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, \n\nl.currency_code)\r\norder by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',NULL,1,1),(48,'Balance Sheet','Pentaho',NULL,'Accounting',NULL,'Balance Sheet',1,1),(49,'Income Statement','Pentaho',NULL,'Accounting',NULL,'Profit and Loss Statement',1,1),(50,'Trial Balance','Pentaho',NULL,'Accounting',NULL,'Trial Balance Report',1,1),(51,'Written-Off Loans','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as \"Client Account No.\",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as \"Loan Amount\",\r\nifnull(lt.principal_portion_derived, 0) AS \'Written-Off Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Written-Off Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Written-Off Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Written-Off Penalties\',\r\nn.note AS \'Reason For Write-Off\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 6 /*write-off */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=601\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\") \r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no','Individual Lending Report. Written Off Loans',1,1),(52,'Aging Detail','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nmc.account_no as \"Client Account No.\",\r\n 	mc.display_name AS \"Client Name\",\r\n 	ml.account_no AS \"Account Number\",\r\n 	ml.principal_amount AS \"Loan Amount\",\r\n ml.principal_disbursed_derived AS \"Original Principal\",\r\n ml.interest_charged_derived AS \"Original Interest\",\r\n ml.principal_repaid_derived AS \"Principal Paid\",\r\n ml.interest_repaid_derived AS \"Interest Paid\",\r\n laa.principal_overdue_derived AS \"Principal Overdue\",\r\n laa.interest_overdue_derived AS \"Interest Overdue\",\r\nDATEDIFF(CURDATE(), laa.overdue_since_date_derived) as \"Days in Arrears\",\r\n\r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<7, \'<1\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<8, \' 1\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<15,  \'2\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<22, \' 3\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<29, \' 4\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<36, \' 5\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<43, \' 6\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<50, \' 7\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<57, \' 8\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<64, \' 9\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<71, \'10\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<78, \'11\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<85, \'12\', \'12+\')))))))))))) )AS \"Weeks In Arrears Band\",\r\n\r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<31, \'0 - 30\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<61, \'30 - 60\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<91, \'60 - 90\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<181, \'90 - 180\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<361, \'180 - 360\', \r\n				 \'> 360\'))))) AS \"Days in Arrears Band\"\r\n\r\n	FROM m_office mo \r\n    JOIN m_office ounder ON ounder.hierarchy like concat(mo.hierarchy, \'%\')\r\n	        AND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n	    INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n	    INNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id\r\n    INNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\n    left join m_currency cur on cur.code = ml.currency_code\r\n	WHERE ml.loan_status_id=300\r\n    AND mo.id=${officeId}\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no','Loan arrears aging (Weeks)',1,1),(53,'Aging Summary (Arrears in Weeks)','Table',NULL,'Loan','SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Weeks In Arrears (Up To)\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n	/* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n	(SELECT \'On Schedule\' period_no,1 pid UNION\r\n		SELECT \'1\',2 UNION\r\n		SELECT \'2\',3 UNION\r\n		SELECT \'3\',4 UNION\r\n		SELECT \'4\',5 UNION\r\n		SELECT \'5\',6 UNION\r\n		SELECT \'6\',7 UNION\r\n		SELECT \'7\',8 UNION\r\n		SELECT \'8\',9 UNION\r\n		SELECT \'9\',10 UNION\r\n		SELECT \'10\',11 UNION\r\n		SELECT \'11\',12 UNION\r\n		SELECT \'12\',13 UNION\r\n		SELECT \'12+\',14) pers,\r\n	(SELECT distinctrow moc.code, moc.name\r\n  	FROM m_office mo2\r\n   	INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n				LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   	INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n   	INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n	INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n	WHERE ml2.loan_status_id=300 /* active */\r\n	AND mo2.id=${officeId}\r\nAND (ml2.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n  	z.currency, z.arrPeriod, \r\n	COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n	SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n	SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n	/*derived table just used to get arrPeriod value (was much slower to\r\n	duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n	(SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<8, \'1\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<15, \'2\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<22, \'3\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<29, \'4\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<36, \'5\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<43, \'6\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<50, \'7\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<57, \'8\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<64, \'9\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<71, \'10\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<78, \'11\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<85, \'12\',\r\n				 \'12+\'))))))))))))) AS arrPeriod\r\n\r\n	FROM /* get the individual loan details */\r\n		(SELECT ml.id AS loanId, ml.currency_code as currency,\r\n   			ml.principal_disbursed_derived as principal, \r\n			   ml.interest_charged_derived as interest, \r\n   			ml.principal_repaid_derived as prinPaid, \r\n			   ml.interest_repaid_derived intPaid,\r\n\r\n			   laa.principal_overdue_derived as prinOverdue,\r\n			   laa.interest_overdue_derived as intOverdue,\r\n\r\n			   IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n			  \r\n  		FROM m_office mo\r\n   		INNER JOIN m_office ounder ON ounder.hierarchy \r\n				LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   		INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n   		INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n		   LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n		WHERE ml.loan_status_id=300 /* active */\r\n     		AND mo.id=${officeId}\r\n     AND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\n  		GROUP BY ml.id) x\r\n	) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid','Loan amount in arrears by branch',1,1),(54,'Rescheduled Loans','Table',NULL,'Loan','SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as \"Client Account No.\",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as \"Loan Amount\",\r\nifnull(lt.principal_portion_derived, 0) AS \'Rescheduled Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Rescheduled Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Rescheduled Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Rescheduled Penalties\',\r\nn.note AS \'Reason For Rescheduling\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 7 /*marked for rescheduling */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=602\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no','Individual Lending Report. Rescheduled Loans.  The ability to reschedule (or mark that you have rescheduled the loan elsewhere) is a legacy of the older Mifos product.  Needed for migration.',1,1),(55,'Active Loans Passed Final Maturity','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", \r\nc.display_name as \"Client\", l.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed Date\", \r\ndate(l.expected_maturedon_date) as \"Expected Matured On\",\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.principal_outstanding_derived as \"Principal Outstanding\",\r\nlaa.principal_overdue_derived as \"Principal Overdue\",\r\n\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.interest_outstanding_derived as \"Interest Outstanding\",\r\nlaa.interest_overdue_derived as \"Interest Overdue\",\r\n\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.fee_charges_outstanding_derived  as \"Fees Outstanding\",\r\nlaa.fee_charges_overdue_derived as \"Fees Overdue\",\r\n\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nl.penalty_charges_outstanding_derived as \"Penalties Outstanding\",\r\nlaa.penalty_charges_overdue_derived as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no','Individual Client \n\nReport',1,1),(56,'Active Loans Passed Final Maturity Summary','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\", x.currency as Currency,\r\n x.client_count as \"No. of Clients\", x.active_loan_count as \"No. Active Loans\", x. arrears_loan_count as \"No. of Loans in Arrears\",\r\nx.principal as \"Total Loans Disbursed\", x.principal_repaid as \"Principal Repaid\", x.principal_outstanding as \"Principal Outstanding\", x.principal_overdue as \"Principal Overdue\",\r\nx.interest as \"Total Interest\", x.interest_repaid as \"Interest Repaid\", x.interest_outstanding as \"Interest Outstanding\", x.interest_overdue as \"Interest Overdue\",\r\nx.fees as \"Total Fees\", x.fees_repaid as \"Fees Repaid\", x.fees_outstanding as \"Fees Outstanding\", x.fees_overdue as \"Fees Overdue\",\r\nx.penalties as \"Total Penalties\", x.penalties_repaid as \"Penalties Repaid\", x.penalties_outstanding as \"Penalties Outstanding\", x.penalties_overdue as \"Penalties Overdue\",\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency',NULL,1,1),(57,'Active Loans in last installment','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(lastInstallment.`hierarchy`) - LENGTH(REPLACE(lastInstallment.`hierarchy`, \'.\', \'\')) - 1))), lastInstallment.branch) as \"Office/Branch\",\r\nlastInstallment.Currency,\r\nlastInstallment.`Loan Officer`, \r\nlastInstallment.`Client Account No`, lastInstallment.`Client`, \r\nlastInstallment.`Loan Account No`, lastInstallment.`Product`, \r\nlastInstallment.`Fund`,  lastInstallment.`Loan Amount`, \r\nlastInstallment.`Annual Nominal Interest Rate`, \r\nlastInstallment.`Disbursed`, lastInstallment.`Expected Matured On` ,\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.principal_outstanding_derived as \"Principal Outstanding\",\r\nlaa.principal_overdue_derived as \"Principal Overdue\",\r\n\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.interest_outstanding_derived as \"Interest Outstanding\",\r\nlaa.interest_overdue_derived as \"Interest Overdue\",\r\n\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.fee_charges_outstanding_derived  as \"Fees Outstanding\",\r\nlaa.fee_charges_overdue_derived as \"Fees Overdue\",\r\n\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nl.penalty_charges_outstanding_derived as \"Penalties Outstanding\",\r\nlaa.penalty_charges_overdue_derived as \"Penalties Overdue\"\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", c.account_no as \"Client Account No\",\r\nc.display_name as \"Client\", l.account_no as \"Loan Account No\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  l.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \"Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed\", date(l.expected_maturedon_date) as \"Expected Matured On\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\norder by lastInstallment.hierarchy, lastInstallment.Currency, lastInstallment.`Client Account No`, lastInstallment.`Loan Account No`','Individual Client \n\nReport',1,1),(58,'Active Loans in last installment Summary','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\", x.currency as Currency,\r\n x.client_count as \"No. of Clients\", x.active_loan_count as \"No. Active Loans\", x. arrears_loan_count as \"No. of Loans in Arrears\",\r\nx.principal as \"Total Loans Disbursed\", x.principal_repaid as \"Principal Repaid\", x.principal_outstanding as \"Principal Outstanding\", x.principal_overdue as \"Principal Overdue\",\r\nx.interest as \"Total Interest\", x.interest_repaid as \"Interest Repaid\", x.interest_outstanding as \"Interest Outstanding\", x.interest_overdue as \"Interest Overdue\",\r\nx.fees as \"Total Fees\", x.fees_repaid as \"Fees Repaid\", x.fees_outstanding as \"Fees Outstanding\", x.fees_overdue as \"Fees Overdue\",\r\nx.penalties as \"Total Penalties\", x.penalties_repaid as \"Penalties Repaid\", x.penalties_outstanding as \"Penalties Outstanding\", x.penalties_overdue as \"Penalties Overdue\",\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select lastInstallment.branchId as branchId,\r\nlastInstallment.Currency,\r\ncount(distinct(lastInstallment.clientId)) as client_count, \r\ncount(distinct(lastInstallment.loanId)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id as branchId, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", c.id as clientId, c.account_no as \"Client Account No\",\r\nc.display_name as \"Client\", l.account_no as \"Loan Account No\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  l.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \"Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed\", date(l.expected_maturedon_date) as \"Expected Matured On\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\ngroup by lastInstallment.branchId) x on x.branchId = mo.id\r\norder by mo.hierarchy, x.Currency','Individual Client \n\nReport',1,1),(59,'Active Loans by Disbursal Period','Table',NULL,'Loan','select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as \"Client Account No\", c.display_name as \"Client\", l.account_no as \"Loan Account No\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Principal Amount\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed Date\", \r\n\r\nl.total_expected_repayment_derived as \"Total Loan (P+I+F+Pen)\",\r\nl.total_repayment_derived as \"Total Repaid (P+I+F+Pen)\",\r\nlo.display_name as \"Loan Officer\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no','Individual Client \n\nReport',1,1),(61,'Aging Summary (Arrears in Months)','Table',NULL,'Loan','SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Days In Arrears\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n	/* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n	(SELECT \'On Schedule\' period_no,1 pid UNION\r\n		SELECT \'0 - 30\',2 UNION\r\n		SELECT \'30 - 60\',3 UNION\r\n		SELECT \'60 - 90\',4 UNION\r\n		SELECT \'90 - 180\',5 UNION\r\n		SELECT \'180 - 360\',6 UNION\r\n		SELECT \'> 360\',7 ) pers,\r\n	(SELECT distinctrow moc.code, moc.name\r\n  	FROM m_office mo2\r\n   	INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n				LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   	INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n   	INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n	INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n	WHERE ml2.loan_status_id=300 /* active */\r\n	AND mo2.id=${officeId}\r\nAND (ml2.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n  	z.currency, z.arrPeriod, \r\n	COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n	SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n	SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n	/*derived table just used to get arrPeriod value (was much slower to\r\n	duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n	(SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<31, \'0 - 30\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<61, \'30 - 60\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<91, \'60 - 90\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<181, \'90 - 180\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<361, \'180 - 360\', \r\n				 \'> 360\')))))) AS arrPeriod\r\n\r\n	FROM /* get the individual loan details */\r\n		(SELECT ml.id AS loanId, ml.currency_code as currency,\r\n   			ml.principal_disbursed_derived as principal, \r\n			   ml.interest_charged_derived as interest, \r\n   			ml.principal_repaid_derived as prinPaid, \r\n			   ml.interest_repaid_derived intPaid,\r\n\r\n			   laa.principal_overdue_derived as prinOverdue,\r\n			   laa.interest_overdue_derived as intOverdue,\r\n\r\n			   IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n			  \r\n  		FROM m_office mo\r\n   		INNER JOIN m_office ounder ON ounder.hierarchy \r\n				LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   		INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n   		INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n		   LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n		WHERE ml.loan_status_id=300 /* active */\r\n     		AND mo.id=${officeId}\r\n     AND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\n  		GROUP BY ml.id) x\r\n	) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid','Loan amount in arrears by branch',1,1),(91,'Loan Account Schedule','Pentaho',NULL,'Loan',NULL,NULL,1,0),(92,'Branch Expected Cash Flow','Pentaho',NULL,'Loan',NULL,NULL,1,1),(93,'Expected Payments By Date - Basic','Table',NULL,'Loan','SELECT \r\n      ounder.name \'Office\', \r\n      IFNULL(ms.display_name,\'-\') \'Loan Officer\',\r\n	  mc.account_no \'Client Account Number\',\r\n	  mc.display_name \'Name\',\r\n	  mp.name \'Product\',\r\n	  ml.account_no \'Loan Account Number\',\r\n	  mr.duedate \'Due Date\',\r\n	  mr.installment \'Installment\',\r\n	  cu.display_symbol \'Currency\',\r\n	  mr.principal_amount- IFNULL(mr.principal_completed_derived,0) \'Principal Due\',\r\n	  mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0) \'Interest Due\', \r\n	  IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0) \'Fees Due\', \r\n	  IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0) \'Penalty Due\',\r\n      (mr.principal_amount- IFNULL(mr.principal_completed_derived,0)) +\r\n       (mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0)) + \r\n       (IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0)) + \r\n       (IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0)) \'Total Due\', \r\n     mlaa.total_overdue_derived \'Total Overdue\'\r\n										 \r\n FROM m_office mo\r\n  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\n  \r\n  AND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n	\r\n  LEFT JOIN m_client mc ON mc.office_id=ounder.id\r\n  LEFT JOIN m_loan ml ON ml.client_id=mc.id AND ml.loan_status_id=300\r\n  LEFT JOIN m_loan_arrears_aging mlaa ON mlaa.loan_id=ml.id\r\n  LEFT JOIN m_loan_repayment_schedule mr ON mr.loan_id=ml.id AND mr.completed_derived=0\r\n  LEFT JOIN m_product_loan mp ON mp.id=ml.product_id\r\n  LEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\n  LEFT JOIN m_currency cu ON cu.code=ml.currency_code\r\n WHERE mo.id=${officeId}\r\n AND (IFNULL(ml.loan_officer_id, -10) = \"${loanOfficerId}\" OR \"-1\" = \"${loanOfficerId}\")\r\n AND mr.duedate BETWEEN \'${startDate}\' AND \'${endDate}\'\r\n ORDER BY ounder.id,mr.duedate,ml.account_no','Test',1,1),(94,'Expected Payments By Date - Formatted','Pentaho',NULL,'Loan',NULL,NULL,1,1);
+INSERT INTO `stretchy_report`
+VALUES (1, 'Client Listing', 'Table', NULL, 'Client',
+        'select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\n c.account_no as \"Client Account No.\",  \r\nc.display_name as \"Name\",  \n\nc.joined_date as \"Joined\", c.external_id as \"External Id\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand \n\nounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\nwhere o.id = ${officeId}\r\nand c.is_deleted=0\r\n\n\norder by ounder.hierarchy, c.account_no',
+        'Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed,
+        there is probably is
+        a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).',1,1),
+        (2, 'Client Loans Listing', 'Table', NULL, 'Client',
+         'select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nc.account_no as \"Client \n\nAccount No.\", \r\nc.display_name as \"Name\", \r\nlo.display_name as \"Loan Officer\", l.account_no as \"Loan Account No.\", l.external_id as \"External Id\", \r\n\n\np.name as Loan, st.enum_message_property as \"Status\",  \r\nf.`name` as Fund, purp.code_value as \"Loan Purpose\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount,\n\n\r\nl.arrearstolerance_amount as \"Arrears Tolerance Amount\",\r\nl.number_of_repayments as \"Expected No. Repayments\",\r\nl.annual_nominal_interest_rate as \" Annual \n\nNominal Interest Rate\", \r\nl.nominal_interest_rate_per_period as \"Nominal Interest Rate Per Period\",\r\n\r\nipf.enum_message_property as \"Interest Rate Frequency\n\n\",\r\nim.enum_message_property as \"Interest Method\",\r\nicp.enum_message_property as \"Interest Calculated in Period\",\r\nl.term_frequency as \"Term Frequency\",\n\n\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.repay_every as \"Repayment Frequency\",\r\nrf.enum_message_property as \"Repayment Frequency Period\",\n\n\r\nam.enum_message_property as \"Amortization\",\r\n\r\nl.total_charges_due_at_disbursement_derived as \"Total Charges Due At Disbursement\",\r\n\r\ndate( \n\nl.submittedon_date) as Submitted, date(l.approvedon_date) Approved, l.expected_disbursedon_date As \"Expected Disbursal\",\r\ndate(l.expected_firstrepaymenton_date) as \n\n\"Expected First Repayment\", date(l.interest_calculated_from_date) as \"Interest Calculated From\" ,\r\ndate(l.disbursedon_date) as Disbursed, date\n\n(l.expected_maturedon_date) \"Expected Maturity\",\r\ndate(l.maturedon_date) as \"Matured On\", date(l.closedon_date) as Closed,\r\ndate(l.rejectedon_date) as \n\nRejected, date(l.rescheduledon_date) as Rescheduled, \r\ndate(l.withdrawnon_date) as Withdrawn, date(l.writtenoffon_date) \"Written Off\"\r\nfrom m_office o \r\njoin \n\nm_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on \n\nc.office_id = ounder.id\r\nleft join m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_product_loan p on p.id = \n\nl.product_id\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join r_enum_value st on st.enum_name = \"loan_status_id\" and st.enum_id = l.loan_status_id\r\nleft join \n\nr_enum_value ipf on ipf.enum_name = \"interest_period_frequency_enum\" and ipf.enum_id = l.interest_period_frequency_enum\r\nleft join r_enum_value im on im.enum_name \n\n= \"interest_method_enum\" and im.enum_id = l.interest_method_enum\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = \n\nl.term_period_frequency_enum\r\nleft join r_enum_value icp on icp.enum_name = \"interest_calculated_in_period_enum\" and icp.enum_id = \n\nl.interest_calculated_in_period_enum\r\nleft join r_enum_value rf on rf.enum_name = \"repayment_period_frequency_enum\" and rf.enum_id = \n\nl.repayment_period_frequency_enum\r\nleft join r_enum_value am on am.enum_name = \"amortization_method_enum\" and am.enum_id = l.amortization_method_enum\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\n\r\nleft \n\njoin m_currency cur on cur.code = l.currency_code\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand \n\n(l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \n\n\"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\norder by ounder.hierarchy, 2 , l.id',
+         'Individual Client Report\r\n\r\nPretty \n\nwide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  \n\nThere is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).',1,1),
+         (5, 'Loans Awaiting Disbursal', 'Table', NULL, 'Loan',
+          'SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nc.account_no as \"Client Account No\", c.display_name as \"Name\", l.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund, ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount as Principal,  \r\nl.term_frequency as \"Term Frequency\",\n\n\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\",\r\ndate(l.approvedon_date) \"Approved\",\r\ndatediff(l.expected_disbursedon_date, curdate()) as \"Days to Disbursal\",\r\ndate(l.expected_disbursedon_date) \"Expected Disbursal\",\r\npurp.code_value as \"Loan Purpose\",\r\n lo.display_name as \"Loan Officer\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\norder by ounder.hierarchy, datediff(l.expected_disbursedon_date, curdate()),  c.account_no',
+          'Individual Client Report', 1, 1), (6, 'Loans Awaiting Disbursal Summary', 'Table', NULL, 'Loan',
+                                              'SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\npl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  f.`name` as Fund,\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`\r\norder by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`',
+                                              'Individual Client Report', 1, 1),
+         (7, 'Loans Awaiting Disbursal Summary by Month', 'Table', NULL, 'Loan',
+          'SELECT \r\nconcat(repeat(\"..\",   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\npl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nyear(l.expected_disbursedon_date) as \"Year\", \r\nmonthname(l.expected_disbursedon_date) as \"Month\",\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)\r\norder by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)',
+          'Individual Client Report', 1, 1), (8, 'Loans Pending Approval', 'Table', NULL, 'Loan',
+                                              'SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nc.account_no as \"Client Account No.\", c.display_name as \"Client Name\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  pl.`name` as \"Product\", \r\nl.account_no as \"Loan Account No.\", \r\nl.principal_amount as \"Loan Amount\", \r\nl.term_frequency as \"Term Frequency\",\n\n\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.annual_nominal_interest_rate as \" Annual \n\nNominal Interest Rate\", \r\ndatediff(curdate(), l.submittedon_date) \"Days Pending Approval\", \r\npurp.code_value as \"Loan Purpose\",\r\nlo.display_name as \"Loan Officer\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 100 /*Submitted and awaiting approval */\r\norder by ounder.hierarchy, l.submittedon_date,  l.account_no',
+                                              'Individual Client Report', 1, 1),
+         (11, 'Active Loans - Summary', 'Table', NULL, 'Loan',
+          'select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\", x.currency as Currency,\r\n x.client_count as \"No. of Clients\", x.active_loan_count as \"No. Active Loans\", x. loans_in_arrears_count as \"No. of Loans in Arrears\",\r\nx.principal as \"Total Loans Disbursed\", x.principal_repaid as \"Principal Repaid\", x.principal_outstanding as \"Principal Outstanding\", x.principal_overdue as \"Principal Overdue\",\r\nx.interest as \"Total Interest\", x.interest_repaid as \"Interest Repaid\", x.interest_outstanding as \"Interest Outstanding\", x.interest_overdue as \"Interest Overdue\",\r\nx.fees as \"Total Fees\", x.fees_repaid as \"Fees Repaid\", x.fees_outstanding as \"Fees Outstanding\", x.fees_overdue as \"Fees Overdue\",\r\nx.penalties as \"Total Penalties\", x.penalties_repaid as \"Penalties Repaid\", x.penalties_outstanding as \"Penalties Outstanding\", x.penalties_overdue as \"Penalties Overdue\",\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(if(laa.loan_id is not null,  l.id, null)  )) as loans_in_arrears_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(laa.principal_overdue_derived) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(laa.interest_overdue_derived) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(laa.fee_charges_overdue_derived) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(laa.penalty_charges_overdue_derived) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency',
+          NULL, 1, 1), (12, 'Active Loans - Details', 'Table', NULL, 'Loan',
+                        'select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", \r\nc.display_name as \"Client\", l.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed Date\", \r\ndate(l.expected_maturedon_date) as \"Expected Matured On\",\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.principal_outstanding_derived as \"Principal Outstanding\",\r\nlaa.principal_overdue_derived as \"Principal Overdue\",\r\n\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.interest_outstanding_derived as \"Interest Outstanding\",\r\nlaa.interest_overdue_derived as \"Interest Overdue\",\r\n\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.fee_charges_outstanding_derived  as \"Fees Outstanding\",\r\nlaa.fee_charges_overdue_derived as \"Fees Overdue\",\r\n\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nl.penalty_charges_outstanding_derived as \"Penalties Outstanding\",\r\npenalty_charges_overdue_derived as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no',
+                        'Individual Client \n\nReport', 1, 1),
+         (13, 'Obligation Met Loans Details', 'Table', NULL, 'Loan',
+          'select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as \"Client Account No.\", c.display_name as \"Client\",\r\nl.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Amount\", \r\nl.total_repayment_derived  as \"Total Repaid\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed\", \r\ndate(l.closedon_date) as \"Closed\",\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nlo.display_name as \"Loan Officer\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n	when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n	when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n	else 1 = 1\r\n	end)\r\nand l.loan_status_id = 600\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no',
+          'Individual Client \n\nReport', 1, 1), (14, 'Obligation Met Loans Summary', 'Table', NULL, 'Loan',
+                                                  'select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\ncount(distinct(c.id)) as \"No. of Clients\",\r\ncount(distinct(l.id)) as \"No. of Loans\",\r\nsum(l.principal_amount) as \"Total Loan Amount\", \r\nsum(l.principal_repaid_derived) as \"Total Principal Repaid\",\r\nsum(l.interest_repaid_derived) as \"Total Interest Repaid\",\r\nsum(l.fee_charges_repaid_derived) as \"Total Fees Repaid\",\r\nsum(l.penalty_charges_repaid_derived) as \"Total Penalties Repaid\",\r\nsum(l.interest_waived_derived) as \"Total Interest Waived\",\r\nsum(l.fee_charges_waived_derived) as \"Total Fees Waived\",\r\nsum(l.penalty_charges_waived_derived) as \"Total Penalties Waived\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n	when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n	when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n	else 1 = 1\r\n	end)\r\nand l.loan_status_id = 600\r\ngroup by ounder.hierarchy, l.currency_code\r\norder by ounder.hierarchy, l.currency_code',
+                                                  'Individual Client \n\nReport', 1, 1),
+         (15, 'Portfolio at Risk', 'Table', NULL, 'Loan',
+          'select x.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from \r\n(select  ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(l.principal_outstanding_derived) as \"Principal Outstanding\",\r\nsum(laa.principal_overdue_derived) as \"Principal Overdue\",\r\n\r\nsum(l.interest_outstanding_derived) as \"Interest Outstanding\",\r\nsum(laa.interest_overdue_derived) as \"Interest Overdue\",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as \"Fees Outstanding\",\r\nsum(laa.fee_charges_overdue_derived) as \"Fees Overdue\",\r\n\r\nsum(penalty_charges_outstanding_derived) as \"Penalties Outstanding\",\r\nsum(laa.penalty_charges_overdue_derived) as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.currency_code\r\norder by l.currency_code) x',
+          'Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)',
+          1, 1), (16, 'Portfolio at Risk by Branch', 'Table', NULL, 'Loan',
+                  'select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\",\r\nx.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select  ounder.id as \"branch\", ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\n\r\nsum(l.principal_outstanding_derived) as \"Principal Outstanding\",\r\nsum(laa.principal_overdue_derived) as \"Principal Overdue\",\r\n\r\nsum(l.interest_outstanding_derived) as \"Interest Outstanding\",\r\nsum(laa.interest_overdue_derived) as \"Interest Overdue\",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as \"Fees Outstanding\",\r\nsum(laa.fee_charges_overdue_derived) as \"Fees Overdue\",\r\n\r\nsum(penalty_charges_outstanding_derived) as \"Penalties Outstanding\",\r\nsum(laa.penalty_charges_overdue_derived) as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency',
+                  'Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)',
+                  1, 1), (20, 'Funds Disbursed Between Dates Summary', 'Table', NULL, 'Fund',
+                          'select ifnull(f.`name`, \' -\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, \r\nround(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office ounder \r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \' ${startDate}\' and \'${endDate}\'\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\ngroup by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',
+                          NULL, 1, 1), (21, 'Funds Disbursed Between Dates Summary by Office', 'Table', NULL, 'Fund',
+                                        'select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\n \n\nifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office o\r\n\n\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c \n\non c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\n\n\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand o.id = ${officeId}\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand \n\n(l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\ngroup by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, \n\nl.currency_code)\r\norder by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',
+                                        NULL, 1, 1),
+         (48, 'Balance Sheet', 'Pentaho', NULL, 'Accounting', NULL, 'Balance Sheet', 1, 1),
+         (49, 'Income Statement', 'Pentaho', NULL, 'Accounting', NULL, 'Profit and Loss Statement', 1, 1),
+         (50, 'Trial Balance', 'Pentaho', NULL, 'Accounting', NULL, 'Trial Balance Report', 1, 1),
+         (51, 'Written-Off Loans', 'Table', NULL, 'Loan',
+          'SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as \"Client Account No.\",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as \"Loan Amount\",\r\nifnull(lt.principal_portion_derived, 0) AS \'Written-Off Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Written-Off Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Written-Off Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Written-Off Penalties\',\r\nn.note AS \'Reason For Write-Off\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 6 /*write-off */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=601\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\") \r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no',
+          'Individual Lending Report. Written Off Loans', 1, 1), (52, 'Aging Detail', 'Table', NULL, 'Loan',
+                                                                  'SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nmc.account_no as \"Client Account No.\",\r\n 	mc.display_name AS \"Client Name\",\r\n 	ml.account_no AS \"Account Number\",\r\n 	ml.principal_amount AS \"Loan Amount\",\r\n ml.principal_disbursed_derived AS \"Original Principal\",\r\n ml.interest_charged_derived AS \"Original Interest\",\r\n ml.principal_repaid_derived AS \"Principal Paid\",\r\n ml.interest_repaid_derived AS \"Interest Paid\",\r\n laa.principal_overdue_derived AS \"Principal Overdue\",\r\n laa.interest_overdue_derived AS \"Interest Overdue\",\r\nDATEDIFF(CURDATE(), laa.overdue_since_date_derived) as \"Days in Arrears\",\r\n\r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<7, \'<1\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<8, \' 1\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<15,  \'2\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<22, \' 3\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<29, \' 4\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<36, \' 5\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<43, \' 6\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<50, \' 7\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<57, \' 8\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<64, \' 9\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<71, \'10\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<78, \'11\', \r\n 	IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<85, \'12\', \'12+\')))))))))))) )AS \"Weeks In Arrears Band\",\r\n\r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<31, \'0 - 30\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<61, \'30 - 60\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<91, \'60 - 90\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<181, \'90 - 180\', \r\n		IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<361, \'180 - 360\', \r\n				 \'> 360\'))))) AS \"Days in Arrears Band\"\r\n\r\n	FROM m_office mo \r\n    JOIN m_office ounder ON ounder.hierarchy like concat(mo.hierarchy, \'%\')\r\n	        AND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n	    INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n	    INNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id\r\n    INNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\n    left join m_currency cur on cur.code = ml.currency_code\r\n	WHERE ml.loan_status_id=300\r\n    AND mo.id=${officeId}\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no',
+                                                                  'Loan arrears aging (Weeks)', 1, 1),
+         (53, 'Aging Summary (Arrears in Weeks)', 'Table', NULL, 'Loan',
+          'SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Weeks In Arrears (Up To)\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n	/* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n	(SELECT \'On Schedule\' period_no,1 pid UNION\r\n		SELECT \'1\',2 UNION\r\n		SELECT \'2\',3 UNION\r\n		SELECT \'3\',4 UNION\r\n		SELECT \'4\',5 UNION\r\n		SELECT \'5\',6 UNION\r\n		SELECT \'6\',7 UNION\r\n		SELECT \'7\',8 UNION\r\n		SELECT \'8\',9 UNION\r\n		SELECT \'9\',10 UNION\r\n		SELECT \'10\',11 UNION\r\n		SELECT \'11\',12 UNION\r\n		SELECT \'12\',13 UNION\r\n		SELECT \'12+\',14) pers,\r\n	(SELECT distinctrow moc.code, moc.name\r\n  	FROM m_office mo2\r\n   	INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n				LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   	INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n   	INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n	INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n	WHERE ml2.loan_status_id=300 /* active */\r\n	AND mo2.id=${officeId}\r\nAND (ml2.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n  	z.currency, z.arrPeriod, \r\n	COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n	SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n	SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n	/*derived table just used to get arrPeriod value (was much slower to\r\n	duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n	(SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<8, \'1\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<15, \'2\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<22, \'3\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<29, \'4\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<36, \'5\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<43, \'6\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<50, \'7\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<57, \'8\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<64, \'9\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<71, \'10\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<78, \'11\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<85, \'12\',\r\n				 \'12+\'))))))))))))) AS arrPeriod\r\n\r\n	FROM /* get the individual loan details */\r\n		(SELECT ml.id AS loanId, ml.currency_code as currency,\r\n   			ml.principal_disbursed_derived as principal, \r\n			   ml.interest_charged_derived as interest, \r\n   			ml.principal_repaid_derived as prinPaid, \r\n			   ml.interest_repaid_derived intPaid,\r\n\r\n			   laa.principal_overdue_derived as prinOverdue,\r\n			   laa.interest_overdue_derived as intOverdue,\r\n\r\n			   IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n			  \r\n  		FROM m_office mo\r\n   		INNER JOIN m_office ounder ON ounder.hierarchy \r\n				LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   		INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n   		INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n		   LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n		WHERE ml.loan_status_id=300 /* active */\r\n     		AND mo.id=${officeId}\r\n     AND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\n  		GROUP BY ml.id) x\r\n	) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid',
+          'Loan amount in arrears by branch', 1, 1), (54, 'Rescheduled Loans', 'Table', NULL, 'Loan',
+                                                      'SELECT \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as \"Client Account No.\",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as \"Loan Amount\",\r\nifnull(lt.principal_portion_derived, 0) AS \'Rescheduled Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Rescheduled Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Rescheduled Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Rescheduled Penalties\',\r\nn.note AS \'Reason For Rescheduling\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 7 /*marked for rescheduling */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=602\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no',
+                                                      'Individual Lending Report. Rescheduled Loans.  The ability to reschedule (or mark that you have rescheduled the loan elsewhere) is a legacy of the older Mifos product.  Needed for migration.',
+                                                      1, 1),
+         (55, 'Active Loans Passed Final Maturity', 'Table', NULL, 'Loan',
+          'select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", \r\nc.display_name as \"Client\", l.account_no as \"Loan Account No.\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed Date\", \r\ndate(l.expected_maturedon_date) as \"Expected Matured On\",\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.principal_outstanding_derived as \"Principal Outstanding\",\r\nlaa.principal_overdue_derived as \"Principal Overdue\",\r\n\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.interest_outstanding_derived as \"Interest Outstanding\",\r\nlaa.interest_overdue_derived as \"Interest Overdue\",\r\n\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.fee_charges_outstanding_derived  as \"Fees Outstanding\",\r\nlaa.fee_charges_overdue_derived as \"Fees Overdue\",\r\n\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nl.penalty_charges_outstanding_derived as \"Penalties Outstanding\",\r\nlaa.penalty_charges_overdue_derived as \"Penalties Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no',
+          'Individual Client \n\nReport', 1, 1),
+         (56, 'Active Loans Passed Final Maturity Summary', 'Table', NULL, 'Loan',
+          'select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\", x.currency as Currency,\r\n x.client_count as \"No. of Clients\", x.active_loan_count as \"No. Active Loans\", x. arrears_loan_count as \"No. of Loans in Arrears\",\r\nx.principal as \"Total Loans Disbursed\", x.principal_repaid as \"Principal Repaid\", x.principal_outstanding as \"Principal Outstanding\", x.principal_overdue as \"Principal Overdue\",\r\nx.interest as \"Total Interest\", x.interest_repaid as \"Interest Repaid\", x.interest_outstanding as \"Interest Outstanding\", x.interest_overdue as \"Interest Overdue\",\r\nx.fees as \"Total Fees\", x.fees_repaid as \"Fees Repaid\", x.fees_outstanding as \"Fees Outstanding\", x.fees_overdue as \"Fees Overdue\",\r\nx.penalties as \"Total Penalties\", x.penalties_repaid as \"Penalties Repaid\", x.penalties_outstanding as \"Penalties Outstanding\", x.penalties_overdue as \"Penalties Overdue\",\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency',
+          NULL, 1, 1), (57, 'Active Loans in last installment', 'Table', NULL, 'Loan',
+                        'select concat(repeat(\"..\",   \r\n   ((LENGTH(lastInstallment.`hierarchy`) - LENGTH(REPLACE(lastInstallment.`hierarchy`, \'.\', \'\')) - 1))), lastInstallment.branch) as \"Office/Branch\",\r\nlastInstallment.Currency,\r\nlastInstallment.`Loan Officer`, \r\nlastInstallment.`Client Account No`, lastInstallment.`Client`, \r\nlastInstallment.`Loan Account No`, lastInstallment.`Product`, \r\nlastInstallment.`Fund`,  lastInstallment.`Loan Amount`, \r\nlastInstallment.`Annual Nominal Interest Rate`, \r\nlastInstallment.`Disbursed`, lastInstallment.`Expected Matured On` ,\r\n\r\nl.principal_repaid_derived as \"Principal Repaid\",\r\nl.principal_outstanding_derived as \"Principal Outstanding\",\r\nlaa.principal_overdue_derived as \"Principal Overdue\",\r\n\r\nl.interest_repaid_derived as \"Interest Repaid\",\r\nl.interest_outstanding_derived as \"Interest Outstanding\",\r\nlaa.interest_overdue_derived as \"Interest Overdue\",\r\n\r\nl.fee_charges_repaid_derived as \"Fees Repaid\",\r\nl.fee_charges_outstanding_derived  as \"Fees Outstanding\",\r\nlaa.fee_charges_overdue_derived as \"Fees Overdue\",\r\n\r\nl.penalty_charges_repaid_derived as \"Penalties Repaid\",\r\nl.penalty_charges_outstanding_derived as \"Penalties Outstanding\",\r\nlaa.penalty_charges_overdue_derived as \"Penalties Overdue\"\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", c.account_no as \"Client Account No\",\r\nc.display_name as \"Client\", l.account_no as \"Loan Account No\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  l.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \"Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed\", date(l.expected_maturedon_date) as \"Expected Matured On\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\norder by lastInstallment.hierarchy, lastInstallment.Currency, lastInstallment.`Client Account No`, lastInstallment.`Loan Account No`',
+                        'Individual Client \n\nReport', 1, 1),
+         (58, 'Active Loans in last installment Summary', 'Table', NULL, 'Loan',
+          'select concat(repeat(\"..\",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as \"Office/Branch\", x.currency as Currency,\r\n x.client_count as \"No. of Clients\", x.active_loan_count as \"No. Active Loans\", x. arrears_loan_count as \"No. of Loans in Arrears\",\r\nx.principal as \"Total Loans Disbursed\", x.principal_repaid as \"Principal Repaid\", x.principal_outstanding as \"Principal Outstanding\", x.principal_overdue as \"Principal Overdue\",\r\nx.interest as \"Total Interest\", x.interest_repaid as \"Interest Repaid\", x.interest_outstanding as \"Interest Outstanding\", x.interest_overdue as \"Interest Overdue\",\r\nx.fees as \"Total Fees\", x.fees_repaid as \"Fees Repaid\", x.fees_outstanding as \"Fees Outstanding\", x.fees_overdue as \"Fees Overdue\",\r\nx.penalties as \"Total Penalties\", x.penalties_repaid as \"Penalties Repaid\", x.penalties_outstanding as \"Penalties Outstanding\", x.penalties_overdue as \"Penalties Overdue\",\r\n\r\n	(case\r\n	when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n	when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n	when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n	when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n	else \"invalid PAR Type\"\r\n	end) as \"Portfolio at Risk %\"\r\n from m_office mo\r\njoin \r\n(select lastInstallment.branchId as branchId,\r\nlastInstallment.Currency,\r\ncount(distinct(lastInstallment.clientId)) as client_count, \r\ncount(distinct(lastInstallment.loanId)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id as branchId, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as \"Loan Officer\", c.id as clientId, c.account_no as \"Client Account No\",\r\nc.display_name as \"Client\", l.account_no as \"Loan Account No\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  l.principal_amount as \"Loan Amount\", \r\nl.annual_nominal_interest_rate as \"Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed\", date(l.expected_maturedon_date) as \"Expected Matured On\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\ngroup by lastInstallment.branchId) x on x.branchId = mo.id\r\norder by mo.hierarchy, x.Currency',
+          'Individual Client \n\nReport', 1, 1), (59, 'Active Loans by Disbursal Period', 'Table', NULL, 'Loan',
+                                                  'select concat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as \"Client Account No\", c.display_name as \"Client\", l.account_no as \"Loan Account No\", pl.`name` as \"Product\", \r\nf.`name` as Fund,  \r\nl.principal_amount as \"Loan Principal Amount\", \r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\ndate(l.disbursedon_date) as \"Disbursed Date\", \r\n\r\nl.total_expected_repayment_derived as \"Total Loan (P+I+F+Pen)\",\r\nl.total_repayment_derived as \"Total Repaid (P+I+F+Pen)\",\r\nlo.display_name as \"Loan Officer\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no',
+                                                  'Individual Client \n\nReport', 1, 1),
+         (61, 'Aging Summary (Arrears in Months)', 'Table', NULL, 'Loan',
+          'SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Days In Arrears\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n	/* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n	(SELECT \'On Schedule\' period_no,1 pid UNION\r\n		SELECT \'0 - 30\',2 UNION\r\n		SELECT \'30 - 60\',3 UNION\r\n		SELECT \'60 - 90\',4 UNION\r\n		SELECT \'90 - 180\',5 UNION\r\n		SELECT \'180 - 360\',6 UNION\r\n		SELECT \'> 360\',7 ) pers,\r\n	(SELECT distinctrow moc.code, moc.name\r\n  	FROM m_office mo2\r\n   	INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n				LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   	INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n   	INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n	INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n	WHERE ml2.loan_status_id=300 /* active */\r\n	AND mo2.id=${officeId}\r\nAND (ml2.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n  	z.currency, z.arrPeriod, \r\n	COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n	SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n	SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n	/*derived table just used to get arrPeriod value (was much slower to\r\n	duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n	(SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<31, \'0 - 30\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<61, \'30 - 60\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<91, \'60 - 90\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<181, \'90 - 180\', \r\n		IF(DATEDIFF(CURDATE(), minOverdueDate)<361, \'180 - 360\', \r\n				 \'> 360\')))))) AS arrPeriod\r\n\r\n	FROM /* get the individual loan details */\r\n		(SELECT ml.id AS loanId, ml.currency_code as currency,\r\n   			ml.principal_disbursed_derived as principal, \r\n			   ml.interest_charged_derived as interest, \r\n   			ml.principal_repaid_derived as prinPaid, \r\n			   ml.interest_repaid_derived intPaid,\r\n\r\n			   laa.principal_overdue_derived as prinOverdue,\r\n			   laa.interest_overdue_derived as intOverdue,\r\n\r\n			   IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n			  \r\n  		FROM m_office mo\r\n   		INNER JOIN m_office ounder ON ounder.hierarchy \r\n				LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n   		INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n   		INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n		   LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n		WHERE ml.loan_status_id=300 /* active */\r\n     		AND mo.id=${officeId}\r\n     AND (ml.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\n  		GROUP BY ml.id) x\r\n	) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid',
+          'Loan amount in arrears by branch', 1, 1),
+         (91, 'Loan Account Schedule', 'Pentaho', NULL, 'Loan', NULL, NULL, 1, 0),
+         (92, 'Branch Expected Cash Flow', 'Pentaho', NULL, 'Loan', NULL, NULL, 1, 1),
+         (93, 'Expected Payments By Date - Basic', 'Table', NULL, 'Loan',
+          'SELECT \r\n      ounder.name \'Office\', \r\n      IFNULL(ms.display_name,\'-\') \'Loan Officer\',\r\n	  mc.account_no \'Client Account Number\',\r\n	  mc.display_name \'Name\',\r\n	  mp.name \'Product\',\r\n	  ml.account_no \'Loan Account Number\',\r\n	  mr.duedate \'Due Date\',\r\n	  mr.installment \'Installment\',\r\n	  cu.display_symbol \'Currency\',\r\n	  mr.principal_amount- IFNULL(mr.principal_completed_derived,0) \'Principal Due\',\r\n	  mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0) \'Interest Due\', \r\n	  IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0) \'Fees Due\', \r\n	  IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0) \'Penalty Due\',\r\n      (mr.principal_amount- IFNULL(mr.principal_completed_derived,0)) +\r\n       (mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0)) + \r\n       (IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0)) + \r\n       (IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0)) \'Total Due\', \r\n     mlaa.total_overdue_derived \'Total Overdue\'\r\n										 \r\n FROM m_office mo\r\n  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\n  \r\n  AND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n	\r\n  LEFT JOIN m_client mc ON mc.office_id=ounder.id\r\n  LEFT JOIN m_loan ml ON ml.client_id=mc.id AND ml.loan_status_id=300\r\n  LEFT JOIN m_loan_arrears_aging mlaa ON mlaa.loan_id=ml.id\r\n  LEFT JOIN m_loan_repayment_schedule mr ON mr.loan_id=ml.id AND mr.completed_derived=0\r\n  LEFT JOIN m_product_loan mp ON mp.id=ml.product_id\r\n  LEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\n  LEFT JOIN m_currency cu ON cu.code=ml.currency_code\r\n WHERE mo.id=${officeId}\r\n AND (IFNULL(ml.loan_officer_id, -10) = \"${loanOfficerId}\" OR \"-1\" = \"${loanOfficerId}\")\r\n AND mr.duedate BETWEEN \'${startDate}\' AND \'${endDate}\'\r\n ORDER BY ounder.id,mr.duedate,ml.account_no',
+          'Test', 1, 1), (94, 'Expected Payments By Date - Formatted', 'Pentaho', NULL, 'Loan', NULL, NULL, 1, 1);
 /*!40000 ALTER TABLE `stretchy_report` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `stretchy_report_parameter`
@@ -1839,12 +2401,13 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `stretchy_report_parameter` (
-  `report_id` INT NOT NULL,
-  `parameter_id` INT NOT NULL,
-  `report_parameter_name` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`report_id`,`parameter_id`),
-  UNIQUE KEY `report_id_name_UNIQUE` (`report_id`,`report_parameter_name`)
+CREATE TABLE `stretchy_report_parameter`
+(
+    `report_id`             INT NOT NULL,
+    `parameter_id`          INT NOT NULL,
+    `report_parameter_name` varchar(45) DEFAULT NULL,
+    PRIMARY KEY (`report_id`, `parameter_id`),
+    UNIQUE KEY `report_id_name_UNIQUE` (`report_id`,`report_parameter_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1852,11 +2415,165 @@ CREATE TABLE `stretchy_report_parameter` (
 -- Dumping data for table `stretchy_report_parameter`
 --
 
-LOCK TABLES `stretchy_report_parameter` WRITE;
+LOCK
+TABLES `stretchy_report_parameter` WRITE;
 /*!40000 ALTER TABLE `stretchy_report_parameter` DISABLE KEYS */;
-INSERT INTO `stretchy_report_parameter` VALUES (1,5,NULL),(2,5,NULL),(2,6,NULL),(2,10,NULL),(2,20,NULL),(2,25,NULL),(2,26,NULL),(5,5,NULL),(5,6,NULL),(5,10,NULL),(5,20,NULL),(5,25,NULL),(5,26,NULL),(6,5,NULL),(6,6,NULL),(6,10,NULL),(6,20,NULL),(6,25,NULL),(6,26,NULL),(7,5,NULL),(7,6,NULL),(7,10,NULL),(7,20,NULL),(7,25,NULL),(7,26,NULL),(8,5,NULL),(8,6,NULL),(8,10,NULL),(8,25,NULL),(8,26,NULL),(11,5,NULL),(11,6,NULL),(11,10,NULL),(11,20,NULL),(11,25,NULL),(11,26,NULL),(11,100,NULL),(12,5,NULL),(12,6,NULL),(12,10,NULL),(12,20,NULL),(12,25,NULL),(12,26,NULL),(13,1,NULL),(13,2,NULL),(13,3,NULL),(13,5,NULL),(13,6,NULL),(13,10,NULL),(13,20,NULL),(13,25,NULL),(13,26,NULL),(14,1,NULL),(14,2,NULL),(14,3,NULL),(14,5,NULL),(14,6,NULL),(14,10,NULL),(14,20,NULL),(14,25,NULL),(14,26,NULL),(15,5,NULL),(15,6,NULL),(15,10,NULL),(15,20,NULL),(15,25,NULL),(15,26,NULL),(15,100,NULL),(16,5,NULL),(16,6,NULL),(16,10,NULL),(16,20,NULL),(16,25,NULL),(16,26,NULL),(16,100,NULL),(20,1,NULL),(20,2,NULL),(20,10,NULL),(20,20,NULL),(21,1,NULL),(21,2,NULL),(21,5,NULL),(21,10,NULL),(21,20,NULL),(48,5,'branch'),(48,2,'date'),(49,5,'branch'),(49,1,'fromDate'),(49,2,'toDate'),(50,5,'branch'),(50,1,'fromDate'),(50,2,'toDate'),(51,1,NULL),(51,2,NULL),(51,5,NULL),(51,10,NULL),(51,25,NULL),(52,5,NULL),(53,5,NULL),(53,10,NULL),(54,1,NULL),(54,2,NULL),(54,5,NULL),(54,10,NULL),(54,25,NULL),(55,5,NULL),(55,6,NULL),(55,10,NULL),(55,20,NULL),(55,25,NULL),(55,26,NULL),(56,5,NULL),(56,6,NULL),(56,10,NULL),(56,20,NULL),(56,25,NULL),(56,26,NULL),(56,100,NULL),(57,5,NULL),(57,6,NULL),(57,10,NULL),(57,20,NULL),(57,25,NULL),(57,26,NULL),(58,5,NULL),(58,6,NULL),(58,10,NULL),(58,20,NULL),(58,25,NULL),(58,26,NULL),(58,100,NULL),(59,1,NULL),(59,2,NULL),(59,5,NULL),(59,6,NULL),(59,10,NULL),(59,20,NULL),(59,25,NULL),(59,26,NULL),(61,5,NULL),(61,10,NULL),(92,1,'fromDate'),(92,5,'selectOffice'),(92,2,'toDate'),(93,1,NULL),(93,2,NULL),(93,5,NULL),(93,6,NULL),(94,2,'endDate'),(94,6,'loanOfficerId'),(94,5,'officeId'),(94,1,'startDate');
+INSERT INTO `stretchy_report_parameter`
+VALUES (1, 5, NULL),
+       (2, 5, NULL),
+       (2, 6, NULL),
+       (2, 10, NULL),
+       (2, 20, NULL),
+       (2, 25, NULL),
+       (2, 26, NULL),
+       (5, 5, NULL),
+       (5, 6, NULL),
+       (5, 10, NULL),
+       (5, 20, NULL),
+       (5, 25, NULL),
+       (5, 26, NULL),
+       (6, 5, NULL),
+       (6, 6, NULL),
+       (6, 10, NULL),
+       (6, 20, NULL),
+       (6, 25, NULL),
+       (6, 26, NULL),
+       (7, 5, NULL),
+       (7, 6, NULL),
+       (7, 10, NULL),
+       (7, 20, NULL),
+       (7, 25, NULL),
+       (7, 26, NULL),
+       (8, 5, NULL),
+       (8, 6, NULL),
+       (8, 10, NULL),
+       (8, 25, NULL),
+       (8, 26, NULL),
+       (11, 5, NULL),
+       (11, 6, NULL),
+       (11, 10, NULL),
+       (11, 20, NULL),
+       (11, 25, NULL),
+       (11, 26, NULL),
+       (11, 100, NULL),
+       (12, 5, NULL),
+       (12, 6, NULL),
+       (12, 10, NULL),
+       (12, 20, NULL),
+       (12, 25, NULL),
+       (12, 26, NULL),
+       (13, 1, NULL),
+       (13, 2, NULL),
+       (13, 3, NULL),
+       (13, 5, NULL),
+       (13, 6, NULL),
+       (13, 10, NULL),
+       (13, 20, NULL),
+       (13, 25, NULL),
+       (13, 26, NULL),
+       (14, 1, NULL),
+       (14, 2, NULL),
+       (14, 3, NULL),
+       (14, 5, NULL),
+       (14, 6, NULL),
+       (14, 10, NULL),
+       (14, 20, NULL),
+       (14, 25, NULL),
+       (14, 26, NULL),
+       (15, 5, NULL),
+       (15, 6, NULL),
+       (15, 10, NULL),
+       (15, 20, NULL),
+       (15, 25, NULL),
+       (15, 26, NULL),
+       (15, 100, NULL),
+       (16, 5, NULL),
+       (16, 6, NULL),
+       (16, 10, NULL),
+       (16, 20, NULL),
+       (16, 25, NULL),
+       (16, 26, NULL),
+       (16, 100, NULL),
+       (20, 1, NULL),
+       (20, 2, NULL),
+       (20, 10, NULL),
+       (20, 20, NULL),
+       (21, 1, NULL),
+       (21, 2, NULL),
+       (21, 5, NULL),
+       (21, 10, NULL),
+       (21, 20, NULL),
+       (48, 5, 'branch'),
+       (48, 2, 'date'),
+       (49, 5, 'branch'),
+       (49, 1, 'fromDate'),
+       (49, 2, 'toDate'),
+       (50, 5, 'branch'),
+       (50, 1, 'fromDate'),
+       (50, 2, 'toDate'),
+       (51, 1, NULL),
+       (51, 2, NULL),
+       (51, 5, NULL),
+       (51, 10, NULL),
+       (51, 25, NULL),
+       (52, 5, NULL),
+       (53, 5, NULL),
+       (53, 10, NULL),
+       (54, 1, NULL),
+       (54, 2, NULL),
+       (54, 5, NULL),
+       (54, 10, NULL),
+       (54, 25, NULL),
+       (55, 5, NULL),
+       (55, 6, NULL),
+       (55, 10, NULL),
+       (55, 20, NULL),
+       (55, 25, NULL),
+       (55, 26, NULL),
+       (56, 5, NULL),
+       (56, 6, NULL),
+       (56, 10, NULL),
+       (56, 20, NULL),
+       (56, 25, NULL),
+       (56, 26, NULL),
+       (56, 100, NULL),
+       (57, 5, NULL),
+       (57, 6, NULL),
+       (57, 10, NULL),
+       (57, 20, NULL),
+       (57, 25, NULL),
+       (57, 26, NULL),
+       (58, 5, NULL),
+       (58, 6, NULL),
+       (58, 10, NULL),
+       (58, 20, NULL),
+       (58, 25, NULL),
+       (58, 26, NULL),
+       (58, 100, NULL),
+       (59, 1, NULL),
+       (59, 2, NULL),
+       (59, 5, NULL),
+       (59, 6, NULL),
+       (59, 10, NULL),
+       (59, 20, NULL),
+       (59, 25, NULL),
+       (59, 26, NULL),
+       (61, 5, NULL),
+       (61, 10, NULL),
+       (92, 1, 'fromDate'),
+       (92, 5, 'selectOffice'),
+       (92, 2, 'toDate'),
+       (93, 1, NULL),
+       (93, 2, NULL),
+       (93, 5, NULL),
+       (93, 6, NULL),
+       (94, 2, 'endDate'),
+       (94, 6, 'loanOfficerId'),
+       (94, 5, 'officeId'),
+       (94, 1, 'startDate');
 /*!40000 ALTER TABLE `stretchy_report_parameter` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 
 --
 -- Table structure for table `x_registered_table`
@@ -1865,10 +2582,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `x_registered_table`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `x_registered_table` (
-  `registered_table_name` varchar(50) NOT NULL,
-  `application_table_name` varchar(50) NOT NULL,
-  PRIMARY KEY (`registered_table_name`)
+CREATE TABLE `x_registered_table`
+(
+    `registered_table_name`  varchar(50) NOT NULL,
+    `application_table_name` varchar(50) NOT NULL,
+    PRIMARY KEY (`registered_table_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1876,11 +2594,16 @@ CREATE TABLE `x_registered_table` (
 -- Dumping data for table `x_registered_table`
 --
 
-LOCK TABLES `x_registered_table` WRITE;
+LOCK
+TABLES `x_registered_table` WRITE;
 /*!40000 ALTER TABLE `x_registered_table` DISABLE KEYS */;
-INSERT INTO `x_registered_table` VALUES ('client additional data','m_client'),('impact measurement','m_loan'),('loan additional data','m_loan');
+INSERT INTO `x_registered_table`
+VALUES ('client additional data', 'm_client'),
+       ('impact measurement', 'm_loan'),
+       ('loan additional data', 'm_loan');
 /*!40000 ALTER TABLE `x_registered_table` ENABLE KEYS */;
-UNLOCK TABLES;
+UNLOCK
+TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

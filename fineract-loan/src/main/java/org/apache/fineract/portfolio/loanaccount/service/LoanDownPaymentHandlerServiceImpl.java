@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.loanaccount.domain.Loan.ACTUAL_DISBU
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
@@ -67,7 +68,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
 
     @Override
     public LoanTransaction handleDownPayment(ScheduleGeneratorDTO scheduleGeneratorDTO, JsonCommand command,
-            LoanTransaction disbursementTransaction, Loan loan) {
+                                             LoanTransaction disbursementTransaction, Loan loan) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionDownPaymentPreBusinessEvent(loan));
         LoanTransaction downPaymentTransaction = handleDownPayment(loan, disbursementTransaction, command, scheduleGeneratorDTO);
         if (downPaymentTransaction != null) {
@@ -80,7 +81,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
 
     @Override
     public void handleRepaymentOrRecoveryOrWaiverTransaction(final Loan loan, final LoanTransaction loanTransaction,
-            final LoanTransaction adjustedTransaction, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                                                             final LoanTransaction adjustedTransaction, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         if (loanTransaction.isRecoveryRepayment()) {
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, loan);
         }
@@ -185,7 +186,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
     }
 
     private LoanTransaction handleDownPayment(final Loan loan, final LoanTransaction disbursementTransaction, final JsonCommand command,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+                                              final ScheduleGeneratorDTO scheduleGeneratorDTO) {
         final LocalDate disbursedOn = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
         final BigDecimal disbursedAmountPercentageForDownPayment = loan.getLoanRepaymentScheduleDetail()
                 .getDisbursedAmountPercentageForDownPayment();
@@ -215,7 +216,7 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
             // For Progressive loan: Disbursement transaction portion balances are enough to see whether the overpayment
             // amount was more than the calculated down-payment amount
             case PROGRESSIVE ->
-                MathUtil.negativeToZero(downPaymentMoney.minus(disbursementTransaction.getOverPaymentPortion(loan.getCurrency())));
+                    MathUtil.negativeToZero(downPaymentMoney.minus(disbursementTransaction.getOverPaymentPortion(loan.getCurrency())));
         };
 
         if (adjustedDownPaymentMoney.isGreaterThanZero()) {

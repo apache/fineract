@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,9 +25,11 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.princip
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.tenureInMonthsParamName;
 
 import com.google.gson.JsonElement;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.HashMap;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -63,7 +65,7 @@ public class FixedDepositAccountInterestCalculationServiceImpl implements FixedD
     }
 
     public BigDecimal calculateInterestInternal(BigDecimal principalAmount, BigDecimal annualInterestRate, Long tenureInMonths,
-            Long interestCompoundingPeriodInMonths) {
+                                                Long interestCompoundingPeriodInMonths) {
         BigDecimal numberOfCompoundingsPerAnnum = BigDecimal.valueOf(12).divide(BigDecimal.valueOf(interestCompoundingPeriodInMonths));
         Long totalNumberOfCompoundings = tenureInMonths / interestCompoundingPeriodInMonths;
         MathContext mc = MoneyHelper.getMathContext();

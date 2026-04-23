@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.entityaccess.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -55,7 +56,7 @@ public class FineractEntityToEntityMappingData implements Serializable {
     private String toEntity;
 
     public static FineractEntityToEntityMappingData getRelatedEntities(final Long mapId, final Long relationId, final Long fromId,
-            final Long toId, final LocalDate startDate, final LocalDate endDate, final String fromEntity, final String toEntity) {
+                                                                       final Long toId, final LocalDate startDate, final LocalDate endDate, final String fromEntity, final String toEntity) {
 
         return new FineractEntityToEntityMappingData().setMapId(mapId).setRelationId(relationId).setFromId(fromId).setToId(toId)
                 .setStartDate(startDate).setEndDate(endDate).setFromEntity(fromEntity).setToEntity(toEntity);
@@ -63,7 +64,7 @@ public class FineractEntityToEntityMappingData implements Serializable {
     }
 
     public static FineractEntityToEntityMappingData getRelatedEntities(final Long relationId, final Long fromId, final Long toId,
-            final LocalDate startDate, final LocalDate endDate) {
+                                                                       final LocalDate startDate, final LocalDate endDate) {
         final Long mapId = null;
         final String fromEntity = null;
         final String toEntity = null;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.codes.service;
 
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.codes.domain.Code;
 import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -55,8 +56,8 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
     @Autowired
     public CodeValueWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final CodeValueRepository codeValueRepository,
-            final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+                                                          final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final CodeValueRepository codeValueRepository,
+                                                          final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.codeRepository = codeRepository;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
@@ -97,7 +98,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleCodeValueDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final NonTransientDataAccessException dve) {
+                                                    final NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("code_value")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label",

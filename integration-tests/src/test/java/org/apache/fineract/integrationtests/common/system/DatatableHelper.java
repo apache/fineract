@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import com.google.gson.JsonElement;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryData;
 import org.apache.fineract.client.models.PostDataTablesAppTableIdResponse;
@@ -109,7 +111,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String generatedDatatableName) {
+                                                      final String generatedDatatableName) {
         LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
         final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec,
                 DATATABLE_URL + "/" + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
@@ -125,7 +127,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public String runDatatableQuery(final String datatableName, final String columnFilter, final String valueFilter,
-            final String resultColumns) {
+                                    final String resultColumns) {
         return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/query" + "?columnFilter="
                 + columnFilter + "&valueFilter=" + valueFilter + "&resultColumns=" + resultColumns + "&" + Utils.TENANT_IDENTIFIER);
     }
@@ -167,7 +169,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public <T> T createDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
-            final String json) {
+                                      final String json) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
                 + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
@@ -177,7 +179,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
-            final boolean genericResultSet, final String dateFormat, final String jsonAttributeToGetBack) {
+                                        final boolean genericResultSet, final String dateFormat, final String jsonAttributeToGetBack) {
         return Utils.performServerPost(
                 this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet="
                         + Boolean.toString(genericResultSet) + "&" + Utils.TENANT_IDENTIFIER,
@@ -189,7 +191,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public PostDataTablesAppTableIdResponse addDatatableEntry(final String datatableName, final Integer apptableId,
-            final boolean genericResultSet, final String json) {
+                                                              final boolean genericResultSet, final String json) {
         final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
                 + apptableId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json);
         return GSON.fromJson(response, PostDataTablesAppTableIdResponse.class);
@@ -209,7 +211,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public <T> T readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset,
-            final Integer datatableResourceId, final String jsonAttributeToGetBack) {
+                                    final Integer datatableResourceId, final String jsonAttributeToGetBack) {
         if (datatableResourceId == null) {
             return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
                     + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
@@ -226,9 +228,9 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Date readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset, final int position,
-            final String jsonAttributeToGetBack) {
+                                   final String jsonAttributeToGetBack) {
         final JsonElement jsonElement = Utils.performServerGetArray(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName
-                + "/" + resourceId + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, position,
+                        + "/" + resourceId + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, position,
                 jsonAttributeToGetBack);
         return Utils.convertJsonElementAsDate(jsonElement);
     }
@@ -238,7 +240,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
-            final String json) {
+                                      final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
                 + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
@@ -248,7 +250,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final Integer entryId,
-            final boolean genericResultSet, final String json) {
+                                      final boolean genericResultSet, final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/"
                 + entryId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
     }
@@ -258,7 +260,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
-            final Integer entryId, final String json) {
+                                                                           final Integer entryId, final String json) {
         final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
                 + apptableId + "/" + entryId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
         return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
@@ -269,7 +271,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
-            final String json) {
+                                                                           final String json) {
         final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
                 DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
         return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
@@ -290,7 +292,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getTestDatatableAsJSON(final String apptableName, final String datatableName, final String codeName,
-            final boolean multiRow) {
+                                                final boolean multiRow) {
         final HashMap<String, Object> map = new HashMap<>();
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
         map.put("datatableName",
@@ -359,7 +361,7 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, Object> addDatatableColumn(List<HashMap<String, Object>> datatableColumnsList, String columnName,
-            String columnType, boolean isMandatory, Integer length, String codeName) {
+                                                             String columnType, boolean isMandatory, Integer length, String codeName) {
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
 
         datatableColumnMap.put("name", columnName);
@@ -383,8 +385,8 @@ public class DatatableHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<HashMap<String, Object>> addDatatableColumnWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
-            String columnName, String columnType, boolean isMandatory, Integer length, String codeName, boolean isUnique,
-            boolean isIndexed) {
+                                                                                     String columnName, String columnType, boolean isMandatory, Integer length, String codeName, boolean isUnique,
+                                                                                     boolean isIndexed) {
 
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
 

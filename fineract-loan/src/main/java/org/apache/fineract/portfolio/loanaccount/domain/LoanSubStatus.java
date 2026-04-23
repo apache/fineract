@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,10 +36,10 @@ public enum LoanSubStatus {
         switch (statusValue) {
             case 100:
                 enumeration = LoanSubStatus.FORECLOSED;
-            break;
+                break;
             case 900:
                 enumeration = LoanSubStatus.CONTRACT_TERMINATION;
-            break;
+                break;
         }
         return enumeration;
     }
@@ -80,14 +80,14 @@ public enum LoanSubStatus {
             case FORECLOSED:
                 optionData = new EnumOptionData(LoanSubStatus.FORECLOSED.getValue().longValue(),
                         codePrefix + LoanSubStatus.FORECLOSED.getCode(), "Foreclosed");
-            break;
+                break;
             case CONTRACT_TERMINATION:
                 optionData = new EnumOptionData(LoanSubStatus.CONTRACT_TERMINATION.getValue().longValue(),
                         codePrefix + LoanSubStatus.CONTRACT_TERMINATION.getCode(), "Contract Termination");
-            break;
+                break;
             default:
                 optionData = new EnumOptionData(LoanSubStatus.INVALID.getValue().longValue(), LoanSubStatus.INVALID.getCode(), "Invalid");
-            break;
+                break;
         }
         return optionData;
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DateFormat;
@@ -129,7 +131,7 @@ public class JsonParserHelper {
     }
 
     public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element,
-            final Set<String> modifiedParameters) {
+                                                       final Set<String> modifiedParameters) {
         BigDecimal value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -140,7 +142,7 @@ public class JsonParserHelper {
     }
 
     public BigDecimal extractBigDecimalNamed(final String parameterName, final JsonObject element, final Locale locale,
-            final Set<String> modifiedParameters) {
+                                             final Set<String> modifiedParameters) {
         BigDecimal value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -163,7 +165,7 @@ public class JsonParserHelper {
     }
 
     public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element,
-            final Set<String> modifiedParameters) {
+                                                 final Set<String> modifiedParameters) {
         Integer value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -174,7 +176,7 @@ public class JsonParserHelper {
     }
 
     public Integer extractIntegerNamed(final String parameterName, final JsonElement element, final Locale locale,
-            final Set<String> modifiedParameters) {
+                                       final Set<String> modifiedParameters) {
         Integer value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -202,7 +204,7 @@ public class JsonParserHelper {
      * @return
      */
     public Integer extractIntegerSansLocaleNamed(final String parameterName, final JsonElement element,
-            final Set<String> parametersPassedInRequest) {
+                                                 final Set<String> parametersPassedInRequest) {
         Integer intValue = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -322,7 +324,7 @@ public class JsonParserHelper {
      * Used with the local date is in array format
      */
     public LocalDate extractLocalDateAsArrayNamed(final String parameterName, final JsonElement element,
-            final Set<String> parametersPassedInCommand) {
+                                                  final Set<String> parametersPassedInCommand) {
         LocalDate value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -355,7 +357,7 @@ public class JsonParserHelper {
     }
 
     public MonthDay extractMonthDayNamed(final String parameterName, final JsonObject element, String dateFormat,
-            final Locale clientApplicationLocale) {
+                                         final Locale clientApplicationLocale) {
         MonthDay value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -388,7 +390,7 @@ public class JsonParserHelper {
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,
-            final Set<String> parametersPassedInCommand) {
+                                           final Set<String> parametersPassedInCommand) {
 
         LocalDate value = null;
 
@@ -403,7 +405,7 @@ public class JsonParserHelper {
     }
 
     public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element,
-            final Set<String> parametersPassedInCommand) {
+                                           final Set<String> parametersPassedInCommand) {
 
         LocalTime value = null;
 
@@ -415,7 +417,7 @@ public class JsonParserHelper {
     }
 
     public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element,
-            final Set<String> parametersPassedInCommand) {
+                                                   final Set<String> parametersPassedInCommand) {
 
         LocalDateTime value = null;
 
@@ -427,7 +429,7 @@ public class JsonParserHelper {
     }
 
     public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
-            final Set<String> parametersPassedInCommand) {
+                                           final Set<String> parametersPassedInCommand) {
 
         LocalTime value = null;
 
@@ -440,7 +442,7 @@ public class JsonParserHelper {
     }
 
     public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
-            final Set<String> parametersPassedInCommand) {
+                                                   final Set<String> parametersPassedInCommand) {
 
         LocalDateTime value = null;
 
@@ -453,7 +455,7 @@ public class JsonParserHelper {
     }
 
     public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
-            final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
+                                           final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalTime value = null;
         String timeValueAsString = null;
         if (element.isJsonObject()) {
@@ -485,7 +487,7 @@ public class JsonParserHelper {
     }
 
     public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
-            final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
+                                                   final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDateTime value = null;
         String timeValueAsString;
         if (element.isJsonObject()) {
@@ -521,7 +523,7 @@ public class JsonParserHelper {
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
-            final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
+                                           final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDate value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -542,13 +544,13 @@ public class JsonParserHelper {
     }
 
     public static LocalDate convertFrom(final String dateAsString, final String parameterName, final String dateFormat,
-            final Locale clientApplicationLocale) {
+                                        final Locale clientApplicationLocale) {
 
         return convertDateTimeFrom(dateAsString, parameterName, dateFormat, clientApplicationLocale).toLocalDate();
     }
 
     public static LocalDate convertFrom(final String dateAsString, final String parameterName, final DateFormat dateFormat,
-            final Locale clientApplicationLocale) {
+                                        final Locale clientApplicationLocale) {
 
         String rawDateFormat = Objects.isNull(dateFormat) ? null : dateFormat.getDateFormat();
 
@@ -556,7 +558,7 @@ public class JsonParserHelper {
     }
 
     public static LocalDateTime convertDateTimeFrom(final String dateTimeAsString, final String parameterName, String dateTimeFormat,
-            final Locale clientApplicationLocale) {
+                                                    final Locale clientApplicationLocale) {
 
         validateDateFormatAndLocale(parameterName, dateTimeFormat, clientApplicationLocale);
         LocalDateTime eventLocalDateTime = null;
@@ -587,7 +589,7 @@ public class JsonParserHelper {
     }
 
     private static void validateDateFormatAndLocale(final String parameterName, final String dateFormat,
-            final Locale clientApplicationLocale) {
+                                                    final Locale clientApplicationLocale) {
         if (StringUtils.isBlank(dateFormat) || clientApplicationLocale == null) {
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -612,7 +614,7 @@ public class JsonParserHelper {
     }
 
     public Integer convertToInteger(final String numericalValueFormatted, final String parameterName,
-            final Locale clientApplicationLocale) {
+                                    final Locale clientApplicationLocale) {
 
         if (clientApplicationLocale == null) {
 

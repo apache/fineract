@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,8 +33,8 @@ public class OverdueLoanScheduleData {
     private final Integer periodNumber;
 
     public OverdueLoanScheduleData(final Long loanId, final Long chargeId, final String dueDate, final BigDecimal amount,
-            final String dateFormat, final String locale, final BigDecimal principalOverdue, final BigDecimal interestOverdue,
-            final Integer periodNumber) {
+                                   final String dateFormat, final String locale, final BigDecimal principalOverdue, final BigDecimal interestOverdue,
+                                   final Integer periodNumber) {
         this.loanId = loanId;
         this.chargeId = chargeId;
         this.dueDate = dueDate;

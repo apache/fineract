@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
@@ -325,11 +327,11 @@ public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy, final Account[] accounts,
-            final boolean isMultiTrancheLoan, final Integer recalculationRestFrequencyOnDayType,
-            final Integer recalculationRestFrequencyDayOfWeekType) {
+                                                               final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                               final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
+                                                               final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy, final Account[] accounts,
+                                                               final boolean isMultiTrancheLoan, final Integer recalculationRestFrequencyOnDayType,
+                                                               final Integer recalculationRestFrequencyDayOfWeekType) {
         final String recalculationCompoundingFrequencyType = null;
         final String recalculationCompoundingFrequencyInterval = null;
         final String recalculationCompoundingFrequencyDate = null;
@@ -344,14 +346,14 @@ public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
-            final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
-            final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
-            boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan,
-            final Integer recalculationCompoundingFrequencyOnDayType, final Integer recalculationCompoundingFrequencyDayOfWeekType,
-            final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
+                                                               final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                               final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
+                                                               final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
+                                                               final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
+                                                               final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
+                                                               boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan,
+                                                               final Integer recalculationCompoundingFrequencyOnDayType, final Integer recalculationCompoundingFrequencyDayOfWeekType,
+                                                               final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12")
                 .withRepaymentAfterEvery("2").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
@@ -379,8 +381,8 @@ public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
 
     @SuppressWarnings("rawtypes")
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, Integer groupId, Integer calendarId,
-            final Integer loanProductID, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
-            final List<HashMap> charges, List<HashMap> tranches, List<HashMap> collaterals) {
+                                                                    final Integer loanProductID, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
+                                                                    final List<HashMap> charges, List<HashMap> tranches, List<HashMap> collaterals) {
         final String graceOnInterestPayment = null;
         final String compoundingStartDate = null;
         final String graceOnPrincipalPayment = null;
@@ -389,11 +391,11 @@ public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
                 collaterals);
     }
 
-    @SuppressWarnings({ "rawtypes", "unused" })
+    @SuppressWarnings({"rawtypes", "unused"})
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, Integer groupId, Integer calendarId,
-            final Integer loanProductID, final String disbursementDate, final String restStartDate, final String compoundingStartDate,
-            final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
-            final String graceOnPrincipalPayment, List<HashMap> tranches, List<HashMap> collaterals) {
+                                                                    final Integer loanProductID, final String disbursementDate, final String restStartDate, final String compoundingStartDate,
+                                                                    final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
+                                                                    final String graceOnPrincipalPayment, List<HashMap> tranches, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000.00") //

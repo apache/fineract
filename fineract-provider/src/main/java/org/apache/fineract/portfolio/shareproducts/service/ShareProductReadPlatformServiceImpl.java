@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
@@ -80,7 +81,7 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
             sqlBuilder.append(" offset ").append(offSet);
         }
 
-        Object[] whereClauseItemsitems = new Object[] {};
+        Object[] whereClauseItemsitems = new Object[]{};
         return this.shareProductDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), whereClauseItemsitems, mapper);
     }
 
@@ -91,11 +92,11 @@ public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlat
         try {
             final String sql1 = "select " + marketRowMapper.schema() + " where marketData.product_id = ?";
             final Collection<ShareProductMarketPriceData> shareMarketCollection = this.jdbcTemplate.query(sql1, marketRowMapper, // NOSONAR
-                    new Object[] { productId });
+                    new Object[]{productId});
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveShareProductCharges(productId);
             ShareProductRowMapper mapper = new ShareProductRowMapper(shareMarketCollection, charges);
             final String sql = "select " + mapper.schema() + " where shareproduct.id = ?";
-            ShareProductData data = (ShareProductData) this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId }); // NOSONAR
+            ShareProductData data = (ShareProductData) this.jdbcTemplate.queryForObject(sql, mapper, new Object[]{productId}); // NOSONAR
 
             if (data.hasAccountingEnabled()) {
                 final Map<String, Object> accountingMappings = this.accountMappingReadPlatformService

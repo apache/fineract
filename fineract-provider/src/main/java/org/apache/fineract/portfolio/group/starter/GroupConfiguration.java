@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -71,10 +71,10 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(CenterReadPlatformService.class)
     public CenterReadPlatformService centerReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            StaffReadService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
-            ConfigurationDomainService configurationDomainService, ColumnValidator columnValidator, PaginationHelper paginationHelper,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationParametersDataValidator paginationParametersDataValidator) {
+                                                               ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
+                                                               StaffReadService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
+                                                               ConfigurationDomainService configurationDomainService, ColumnValidator columnValidator, PaginationHelper paginationHelper,
+                                                               DatabaseSpecificSQLGenerator sqlGenerator, PaginationParametersDataValidator paginationParametersDataValidator) {
         return new CenterReadPlatformServiceImpl(jdbcTemplate, context, clientReadPlatformService, officeReadPlatformService,
                 staffReadPlatformService, codeValueReadPlatformService, configurationDomainService, columnValidator, paginationHelper,
                 sqlGenerator, paginationParametersDataValidator);
@@ -83,15 +83,15 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(GroupingTypesWritePlatformService.class)
     public GroupingTypesWritePlatformService groupingTypesWritePlatformService(PlatformSecurityContext context,
-            GroupRepositoryWrapper groupRepository, ClientRepositoryWrapper clientRepositoryWrapper,
-            OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepositoryWrapper staffRepository, NoteRepository noteRepository,
-            GroupLevelRepository groupLevelRepository, GroupingTypesDataValidator fromApiJsonDeserializer,
-            LoanRepositoryWrapper loanRepositoryWrapper, CodeValueRepositoryWrapper codeValueRepository,
-            CommandProcessingService commandProcessingService, CalendarInstanceRepository calendarInstanceRepository,
-            ConfigurationDomainService configurationDomainService, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, AccountNumberGenerator accountNumberGenerator,
-            EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            BusinessEventNotifierService businessEventNotifierService, LoanOfficerService loanOfficerService
+                                                                               GroupRepositoryWrapper groupRepository, ClientRepositoryWrapper clientRepositoryWrapper,
+                                                                               OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepositoryWrapper staffRepository, NoteRepository noteRepository,
+                                                                               GroupLevelRepository groupLevelRepository, GroupingTypesDataValidator fromApiJsonDeserializer,
+                                                                               LoanRepositoryWrapper loanRepositoryWrapper, CodeValueRepositoryWrapper codeValueRepository,
+                                                                               CommandProcessingService commandProcessingService, CalendarInstanceRepository calendarInstanceRepository,
+                                                                               ConfigurationDomainService configurationDomainService, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+                                                                               AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, AccountNumberGenerator accountNumberGenerator,
+                                                                               EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+                                                                               BusinessEventNotifierService businessEventNotifierService, LoanOfficerService loanOfficerService
 
     ) {
         return new GroupingTypesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, clientRepositoryWrapper,
@@ -112,11 +112,11 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(GroupReadPlatformService.class)
     public GroupReadPlatformService groupReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
-            CenterReadPlatformService centerReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
-            PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator,
-            ClientReadPlatformService clientReadPlatformService) {
+                                                             OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
+                                                             CenterReadPlatformService centerReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
+                                                             PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
+                                                             PaginationParametersDataValidator paginationParametersDataValidator, ColumnValidator columnValidator,
+                                                             ClientReadPlatformService clientReadPlatformService) {
         return new GroupReadPlatformServiceImpl(jdbcTemplate, context, officeReadPlatformService, staffReadPlatformService,
                 centerReadPlatformService, codeValueReadPlatformService, paginationHelper, sqlGenerator, paginationParametersDataValidator,
                 columnValidator, clientReadPlatformService);
@@ -131,9 +131,9 @@ public class GroupConfiguration {
     @Bean
     @ConditionalOnMissingBean(GroupRolesWritePlatformService.class)
     public GroupRolesWritePlatformService groupRolesWritePlatformService(PlatformSecurityContext context,
-            GroupRepositoryWrapper groupRepository, GroupRolesDataValidator fromApiJsonDeserializer,
-            CodeValueRepositoryWrapper codeValueRepository, ClientRepositoryWrapper clientRepository,
-            GroupRoleRepositoryWrapper groupRoleRepository) {
+                                                                         GroupRepositoryWrapper groupRepository, GroupRolesDataValidator fromApiJsonDeserializer,
+                                                                         CodeValueRepositoryWrapper codeValueRepository, ClientRepositoryWrapper clientRepository,
+                                                                         GroupRoleRepositoryWrapper groupRoleRepository) {
         return new GroupRolesWritePlatformServiceJpaRepositoryImpl(context, groupRepository, fromApiJsonDeserializer, codeValueRepository,
                 clientRepository, groupRoleRepository);
     }

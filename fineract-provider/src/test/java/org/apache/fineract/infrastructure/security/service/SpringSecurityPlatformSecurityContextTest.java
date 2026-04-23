@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -84,9 +84,9 @@ class SpringSecurityPlatformSecurityContextTest {
         when(authentication.getPrincipal()).thenReturn("anonymousUser");
 
         assertThrows(UnAuthenticatedUserException.class,
-                     () -> securityContextProvider.authenticatedUser(),
-                     "authenticatedUser() should throw UnAuthenticatedUserException when "
-                             + "Principal is not AppUser");
+                () -> securityContextProvider.authenticatedUser(),
+                "authenticatedUser() should throw UnAuthenticatedUserException when "
+                        + "Principal is not AppUser");
     }
 
     @Test
@@ -94,9 +94,9 @@ class SpringSecurityPlatformSecurityContextTest {
         when(securityContext.getAuthentication()).thenReturn(null);
 
         assertThrows(UnAuthenticatedUserException.class,
-                     () -> securityContextProvider.authenticatedUser(),
-                     "authenticatedUser() should throw UnAuthenticatedUserException when "
-                             + "Authentication is null");
+                () -> securityContextProvider.authenticatedUser(),
+                "authenticatedUser() should throw UnAuthenticatedUserException when "
+                        + "Authentication is null");
     }
 
     @Test
@@ -107,8 +107,8 @@ class SpringSecurityPlatformSecurityContextTest {
         doReturn(true).when(spyContextProvider).doesPasswordHasToBeRenewed(appUser);
 
         assertThrows(ResetPasswordException.class,
-                     spyContextProvider::authenticatedUser,
-                     "authenticatedUser() should throw ResetPasswordException when password needs"
-                             + " to be reset");
+                spyContextProvider::authenticatedUser,
+                "authenticatedUser() should throw ResetPasswordException when password needs"
+                        + " to be reset");
     }
 }

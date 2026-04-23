@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -69,9 +70,9 @@ public final class ClientChargeData {
     private final Collection<ClientTransactionData> clientTransactionDatas;
 
     public static ClientChargeData instance(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType,
-            LocalDate dueDate, EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid,
-            BigDecimal amountWaived, BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid,
-            Boolean isWaived, Boolean isActive, LocalDate inactivationDate, Collection<ChargeData> chargeOptions) {
+                                            LocalDate dueDate, EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid,
+                                            BigDecimal amountWaived, BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid,
+                                            Boolean isWaived, Boolean isActive, LocalDate inactivationDate, Collection<ChargeData> chargeOptions) {
         Collection<ClientTransactionData> clientTransactionDatas = null;
         return new ClientChargeData(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
                 amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isWaived, isActive, inactivationDate,
@@ -79,7 +80,7 @@ public final class ClientChargeData {
     }
 
     public static ClientChargeData addAssociations(ClientChargeData clientChargeData,
-            Collection<ClientTransactionData> clientTransactionDatas) {
+                                                   Collection<ClientTransactionData> clientTransactionDatas) {
         return new ClientChargeData(clientChargeData.id, clientChargeData.clientId, clientChargeData.chargeId, clientChargeData.name,
                 clientChargeData.chargeTimeType, clientChargeData.dueDate, clientChargeData.chargeCalculationType,
                 clientChargeData.currency, clientChargeData.amount, clientChargeData.amountPaid, clientChargeData.amountWaived,
@@ -115,9 +116,9 @@ public final class ClientChargeData {
     }
 
     private ClientChargeData(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType, LocalDate dueDate,
-            EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid, BigDecimal amountWaived,
-            BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid, Boolean isWaived, Boolean isActive,
-            LocalDate inactivationDate, Collection<ChargeData> chargeOptions, Collection<ClientTransactionData> clientTransactionDatas) {
+                             EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid, BigDecimal amountWaived,
+                             BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid, Boolean isWaived, Boolean isActive,
+                             LocalDate inactivationDate, Collection<ChargeData> chargeOptions, Collection<ClientTransactionData> clientTransactionDatas) {
 
         this.id = id;
         this.clientId = clientId;

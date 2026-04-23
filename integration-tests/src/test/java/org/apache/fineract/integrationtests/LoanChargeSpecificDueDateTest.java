@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,11 +27,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -791,14 +793,14 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId) {
+                                                               final Long delinquencyBucketId) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }
 
     private GetLoanProductsProductIdResponse createLoanProductWithPeriodicAccrual(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId) {
+                                                                                  final Long delinquencyBucketId) {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
@@ -806,7 +808,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
 
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withMultiDisburse()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withInterestTypeAsDecliningBalance()
-                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                .withAccountingRulePeriodicAccrual(new Account[]{assetAccount, incomeAccount, expenseAccount, overpaymentAccount})
                 .withDisallowExpectedDisbursements(true) //
                 .build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
@@ -814,7 +816,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String repayments, final String interestRate) {
+                                      final String operationDate, final String repayments, final String interestRate) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency(repayments)
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments(repayments).withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths() //

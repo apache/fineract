@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,9 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -460,13 +462,13 @@ public class SavingsProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                               final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
     @Deprecated(forRemoval = true)
     public static Integer updateSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, Integer productId) {
+                                               final ResponseSpecification responseSpec, Integer productId) {
         return Utils.performServerPut(requestSpec, responseSpec, urlSavingsUpdate(productId) + "?" + Utils.TENANT_IDENTIFIER,
                 savingsProductJSON, "resourceId");
     }
@@ -476,7 +478,7 @@ public class SavingsProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedProductID) {
+                                                           final Integer generatedProductID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
@@ -496,7 +498,7 @@ public class SavingsProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static GetSavingsProductsProductIdResponse getSavingsProductById(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer productId) {
+                                                                            final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVING SAVINGS DEPOSIT PRODUCT BY ID --------------------------");
         final String GET_PRODUCT_BY_ID_URL = SAVINGS_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_BY_ID_URL);

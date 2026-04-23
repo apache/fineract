@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -37,6 +37,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -71,7 +73,7 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
     }
 
     public static InterestRateChart createNew(InterestRateChartFields chartFields,
-            Collection<InterestRateChartSlab> interestRateChartSlabs) {
+                                              Collection<InterestRateChartSlab> interestRateChartSlabs) {
 
         return new InterestRateChart(chartFields, new HashSet<>(interestRateChartSlabs));
     }
@@ -213,7 +215,7 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
     }
 
     public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final Set<InterestRateChart> existingCharts, String currencyCode) {
+                       final Set<InterestRateChart> existingCharts, String currencyCode) {
 
         this.chartFields.update(command, actualChanges, baseDataValidator);
 
@@ -238,7 +240,7 @@ public class InterestRateChart extends AbstractPersistableCustom<Long> {
     }
 
     public void updateChartSlabs(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            String currencyCode) {
+                                 String currencyCode) {
 
         final Map<String, Object> deleteChartSlabs = new HashMap<>();
         final Map<String, Object> chartSlabsChanges = new HashMap<>();

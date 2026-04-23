@@ -36,9 +36,11 @@
     <changeSet author="fineract" id="wclp-0007-2-drop-flat-percentage-amount-overridable">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan_product_configurable_attributes"/>
-            <columnExists tableName="m_wc_loan_product_configurable_attributes" columnName="flat_percentage_amount_overridable"/>
+            <columnExists tableName="m_wc_loan_product_configurable_attributes"
+                          columnName="flat_percentage_amount_overridable"/>
         </preConditions>
-        <dropColumn tableName="m_wc_loan_product_configurable_attributes" columnName="flat_percentage_amount_overridable"/>
+        <dropColumn tableName="m_wc_loan_product_configurable_attributes"
+                    columnName="flat_percentage_amount_overridable"/>
     </changeSet>
 
 </databaseChangeLog>

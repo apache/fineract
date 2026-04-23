@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -84,15 +85,15 @@ public class GuarantorData implements IGuarantor {
     private String locale;
 
     public static GuarantorData importInstance(Integer guarantorTypeId, Integer clientRelationshipTypeId, Long entityId, String firstname,
-            String lastname, String addressLine1, String addressLine2, String city, LocalDate dob, String zip, Integer savingsId,
-            BigDecimal amount, Integer rowIndex, Long accountId, String locale, String dateFormat) {
+                                               String lastname, String addressLine1, String addressLine2, String city, LocalDate dob, String zip, Integer savingsId,
+                                               BigDecimal amount, Integer rowIndex, Long accountId, String locale, String dateFormat) {
         return new GuarantorData(guarantorTypeId, clientRelationshipTypeId, entityId, firstname, lastname, addressLine1, addressLine2, city,
                 dob, zip, savingsId, amount, rowIndex, accountId, locale, dateFormat);
     }
 
     private GuarantorData(Integer guarantorTypeId, Integer clientRelationshipTypeId, Long entityId, String firstname, String lastname,
-            String addressLine1, String addressLine2, String city, LocalDate dob, String zip, Integer savingsId, BigDecimal amount,
-            Integer rowIndex, Long accountId, String locale, String dateFormat) {
+                          String addressLine1, String addressLine2, String city, LocalDate dob, String zip, Integer savingsId, BigDecimal amount,
+                          Integer rowIndex, Long accountId, String locale, String dateFormat) {
         this.rowIndex = rowIndex;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -129,7 +130,7 @@ public class GuarantorData implements IGuarantor {
     }
 
     public static GuarantorData template(final List<EnumOptionData> guarantorTypeOptions,
-            final Collection<CodeValueData> allowedClientRelationshipTypes, Collection<PortfolioAccountData> accountLinkingOptions) {
+                                         final Collection<CodeValueData> allowedClientRelationshipTypes, Collection<PortfolioAccountData> accountLinkingOptions) {
         final Collection<GuarantorFundingData> guarantorFundingDetails = null;
         final boolean status = false;
         return new GuarantorData(null, null, null, null, GuarantorEnumerations.guarantorType(GuarantorType.CUSTOMER), null, null, null,
@@ -138,7 +139,7 @@ public class GuarantorData implements IGuarantor {
     }
 
     public static GuarantorData templateOnTop(final GuarantorData guarantorData, final List<EnumOptionData> guarantorTypeOptions,
-            final Collection<CodeValueData> allowedClientRelationshipTypes, Collection<PortfolioAccountData> accountLinkingOptions) {
+                                              final Collection<CodeValueData> allowedClientRelationshipTypes, Collection<PortfolioAccountData> accountLinkingOptions) {
         return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
                 guarantorData.guarantorType, guarantorData.firstname, guarantorData.lastname, guarantorData.dob, guarantorData.addressLine1,
                 guarantorData.addressLine2, guarantorData.city, guarantorData.state, guarantorData.zip, guarantorData.country,
@@ -163,12 +164,12 @@ public class GuarantorData implements IGuarantor {
     }
 
     public GuarantorData(final Long id, final Long loanId, final CodeValueData clientRelationshipType, final Long entityId,
-            final EnumOptionData guarantorType, final String firstname, final String lastname, final LocalDate dob,
-            final String addressLine1, final String addressLine2, final String city, final String state, final String zip,
-            final String country, final String mobileNumber, final String housePhoneNumber, final String comment, final String officeName,
-            final LocalDate joinedDate, final String externalId, final boolean status,
-            Collection<GuarantorFundingData> guarantorFundingDetails, final List<EnumOptionData> guarantorTypeOptions,
-            final Collection<CodeValueData> allowedClientRelationshipTypes, final Collection<PortfolioAccountData> accountLinkingOptions) {
+                         final EnumOptionData guarantorType, final String firstname, final String lastname, final LocalDate dob,
+                         final String addressLine1, final String addressLine2, final String city, final String state, final String zip,
+                         final String country, final String mobileNumber, final String housePhoneNumber, final String comment, final String officeName,
+                         final LocalDate joinedDate, final String externalId, final boolean status,
+                         Collection<GuarantorFundingData> guarantorFundingDetails, final List<EnumOptionData> guarantorTypeOptions,
+                         final Collection<CodeValueData> allowedClientRelationshipTypes, final Collection<PortfolioAccountData> accountLinkingOptions) {
         this.id = id;
         this.loanId = loanId;
         this.clientRelationshipType = clientRelationshipType;

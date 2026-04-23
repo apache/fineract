@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.HttpMethod;
+
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -104,7 +106,8 @@ public final class BatchHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static List<BatchResponse> fromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<List<BatchResponse>>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<List<BatchResponse>>() {
+        }.getType());
     }
 
     /**
@@ -121,7 +124,7 @@ public final class BatchHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<BatchResponse> postBatchRequestsWithoutEnclosingTransaction(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
+                                                                                   final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_WITHOUT_ENCLOSING_URL_EXT,
                 jsonifiedBatchRequests, null);
         LOG.info("BatchHelper Response {}", response);
@@ -133,7 +136,7 @@ public final class BatchHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ErrorResponse postBatchRequestsWithoutEnclosingTransactionError(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
+                                                                                  final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_WITHOUT_ENCLOSING_URL_EXT,
                 jsonifiedBatchRequests, null);
         LOG.info("BatchHelper Response {}", response);
@@ -154,7 +157,7 @@ public final class BatchHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<BatchResponse> postBatchRequestsWithEnclosingTransaction(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
+                                                                                final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_URL_EXT, jsonifiedBatchRequests, null);
         return BatchHelper.fromJsonString(response);
     }
@@ -170,7 +173,7 @@ public final class BatchHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<BatchResponse> postWithSingleRequest(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final BatchRequest br) {
+                                                            final ResponseSpecification responseSpec, final BatchRequest br) {
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
         batchRequests.add(br);
@@ -282,7 +285,7 @@ public final class BatchHelper {
      * @return BatchRequest the batch request
      */
     public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, final Integer productId,
-            final Integer clientCollateralId) {
+                                                final Integer clientCollateralId) {
         return applyLoanRequest(requestId, reference, productId, clientCollateralId, LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10),
                 "10,000.00");
     }
@@ -304,7 +307,7 @@ public final class BatchHelper {
      * @return BatchRequest the batch request
      */
     public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, final Integer productId,
-            final Integer clientCollateralId, final LocalDate date, final String loanAmount) {
+                                                final Integer clientCollateralId, final LocalDate date, final String loanAmount) {
 
         final BatchRequest br = new BatchRequest();
 
@@ -364,7 +367,7 @@ public final class BatchHelper {
      * @return {@link BatchRequest}
      */
     public static BatchRequest applyLoanRequestWithClientIdAndExternalId(final Long requestId, final Integer clientId,
-            final Integer productId, final String externalId) {
+                                                                         final Integer productId, final String externalId) {
 
         final BatchRequest br = new BatchRequest();
 
@@ -457,7 +460,7 @@ public final class BatchHelper {
      * @return BatchRequest
      */
     private static BatchRequest createChargeRequest(final Long requestId, final Long reference, final String relativeUrl,
-            final Integer chargeId) {
+                                                    final Integer chargeId) {
 
         final BatchRequest br = new BatchRequest();
         br.setRequestId(requestId);
@@ -514,7 +517,7 @@ public final class BatchHelper {
      * @return BatchRequest
      */
     public static BatchRequest adjustChargeByExternalIdRequest(final Long requestId, final Long reference, final String loanExternalId,
-            final String chargeExternalId) {
+                                                               final String chargeExternalId) {
 
         final BatchRequest br = new BatchRequest();
         br.setRequestId(requestId);
@@ -629,7 +632,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getChargeByLoanExternalIdChargeExternalId(final Long requestId, final Long reference,
-            final String loanExternalId, final String chargeExternalId) {
+                                                                         final String loanExternalId, final String chargeExternalId) {
         return getChargeById(requestId, reference,
                 String.format("v1/loans/external-id/%s/charges/external-id/%s", loanExternalId, chargeExternalId));
     }
@@ -785,7 +788,7 @@ public final class BatchHelper {
      * @return BatchRequest the batch request
      */
     public static BatchRequest transitionLoanStateByExternalId(final Long requestId, final Long reference, final LocalDate date,
-            final String command) {
+                                                               final String command) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -819,12 +822,12 @@ public final class BatchHelper {
     }
 
     public static BatchRequest repayLoanRequestWithGivenLoanId(final Long requestId, final Integer loanId, final String amount,
-            final LocalDate date) {
+                                                               final LocalDate date) {
         return createTransactionRequestWithGivenLoanId(requestId, loanId, "repayment", amount, date);
     }
 
     public static BatchRequest oldRepayLoanRequestWithGivenLoanId(final Long requestId, final Integer loanId, final String amount,
-            final LocalDate date) {
+                                                                  final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -852,7 +855,7 @@ public final class BatchHelper {
      * @return BatchRequest the batch request
      */
     public static BatchRequest createTransactionRequest(final Long requestId, final Long reference, final String transactionCommand,
-            final String amount, final LocalDate date) {
+                                                        final String amount, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -867,7 +870,7 @@ public final class BatchHelper {
     }
 
     public static BatchRequest createTransactionRequestWithGivenLoanId(final Long requestId, final Integer loanId,
-            final String transactionCommand, final String amount, final LocalDate date) {
+                                                                       final String transactionCommand, final String amount, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -897,7 +900,7 @@ public final class BatchHelper {
      * @return BatchRequest the batch request
      */
     public static BatchRequest createTransactionRequestByLoanExternalId(final Long requestId, final Long reference,
-            final String transactionCommand, final String amount, final LocalDate date) {
+                                                                        final String transactionCommand, final String amount, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -1032,7 +1035,7 @@ public final class BatchHelper {
      * @return BatchRequest the created {@link BatchRequest}
      */
     public static BatchRequest createRescheduleLoanRequest(final Long requestId, final Long reference, final LocalDate rescheduleFromDate,
-            final Integer rescheduleReasonId) {
+                                                           final Integer rescheduleReasonId) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -1045,7 +1048,7 @@ public final class BatchHelper {
         final String rescheduleFromDateString = rescheduleFromDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         final String adjustedDueDateString = adjustedDueDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                + "\"submittedOnDate\": \"%s\",  \"rescheduleFromDate\": \"%s\", \"rescheduleReasonId\": %d, \"adjustedDueDate\": \"%s\", \"loanId\": \"$.loanId\"}",
+                        + "\"submittedOnDate\": \"%s\",  \"rescheduleFromDate\": \"%s\", \"rescheduleReasonId\": %d, \"adjustedDueDate\": \"%s\", \"loanId\": \"$.loanId\"}",
                 submittedOnDate, rescheduleFromDateString, rescheduleReasonId, adjustedDueDateString));
 
         return br;
@@ -1085,7 +1088,7 @@ public final class BatchHelper {
      * @param externalId
      */
     public static void verifyClientNotCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String externalId) {
+                                                      final String externalId) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String CLIENT_URL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
         final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
@@ -1133,7 +1136,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getTransactionByExternalIdRequest(final Long requestId, final Long reference, final String loanExternalId,
-            final Boolean subResourceExternalId) {
+                                                                 final Boolean subResourceExternalId) {
 
         final BatchRequest br = new BatchRequest();
         String relativeUrl;
@@ -1239,7 +1242,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getLoanByIdRequest(final Long loanId, final Long requestId, final Long referenceId,
-            final String queryParameter) {
+                                                  final String queryParameter) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("v1/loans/%s", loanId);
         if (queryParameter != null) {
@@ -1269,7 +1272,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getDatatableByIdRequest(final Long loanId, final String datatableName, final String queryParameter,
-            final Long referenceId) {
+                                                       final Long referenceId) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("v1/datatables/%s/%s", datatableName, loanId);
         if (queryParameter != null) {
@@ -1301,7 +1304,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getDatatableEntryByIdRequest(final Long loanId, final String datatableName, final String appTableId,
-            final String queryParameter, final Long referenceId) {
+                                                            final String queryParameter, final Long referenceId) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("v1/datatables/%s/%s/%s", datatableName, loanId, appTableId);
         if (queryParameter != null) {
@@ -1329,7 +1332,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest createDatatableEntryRequest(final String entityId, final String datatableName,
-            final List<String> columnNames) {
+                                                           final List<String> columnNames) {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = String.format("v1/datatables/%s/%s", datatableName, entityId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
@@ -1359,7 +1362,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest updateDatatableEntryByEntryIdRequest(final Long loanId, final String datatableName,
-            final Long datatableEntryId, final List<String> columnNames) {
+                                                                    final Long datatableEntryId, final List<String> columnNames) {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = String.format("v1/datatables/%s/%s/%s", datatableName, loanId, datatableEntryId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
@@ -1377,7 +1380,7 @@ public final class BatchHelper {
     }
 
     public static BatchRequest deleteDatatableEntryRequest(final String entityId, final String datatableName,
-            final String datatableEntryId) {
+                                                           final String datatableEntryId) {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = datatableEntryId == null ? String.format("v1/datatables/%s/%s", datatableName, entityId)
                 : String.format("v1/datatables/%s/%s/%s", datatableName, entityId, datatableEntryId);
@@ -1402,7 +1405,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest createAdjustTransactionRequest(final Long requestId, final Long reference, final String amount,
-            final LocalDate date) {
+                                                              final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -1435,7 +1438,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest createAdjustTransactionByExternalIdRequest(final Long requestId, final Long reference,
-            final String loanExternalId, final String transactionExternalId, final String amount, final LocalDate date) {
+                                                                          final String loanExternalId, final String transactionExternalId, final String amount, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
@@ -1529,7 +1532,7 @@ public final class BatchHelper {
      * @return
      */
     public static BatchRequest queryDatatableEntries(final String datatableName, final String columnName, final String columnValue,
-            final String columnResult) {
+                                                     final String columnResult) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("v1/datatables/%s/query", datatableName);
         relativeUrl += "?columnFilter=" + columnName + "&" + "valueFilter=" + columnValue + "&" + "resultColumns=" + columnResult;
@@ -1552,7 +1555,7 @@ public final class BatchHelper {
      * @return
      */
     public static BatchRequest updateDatatableEntry(final String datatableName, final String resourceId, final String columnName,
-            final String columnValue) {
+                                                    final String columnValue) {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = String.format("v1/datatables/%s/%s", datatableName, resourceId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
@@ -1580,7 +1583,7 @@ public final class BatchHelper {
      * @return
      */
     public static BatchRequest updateDatatableEntry(final String datatableName, final String resourceId, final String subResourceId,
-            final String columnName, final String columnValue) {
+                                                    final String columnName, final String columnValue) {
         final BatchRequest br = new BatchRequest();
         final String relativeUrl = String.format("v1/datatables/%s/%s/%s", datatableName, resourceId, subResourceId);
         final Map<String, Object> datatableEntryMap = new HashMap<>();
@@ -1609,7 +1612,7 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getSavingAccount(final Long requestId, final Long accountId, final String queryParameter,
-            final Long referenceId) {
+                                                final Long referenceId) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("v1/savingsaccounts/%s", accountId);
         if (queryParameter != null) {
@@ -1678,7 +1681,7 @@ public final class BatchHelper {
     }
 
     public static BatchRequest commandSavingAccount(Long requestId, Long savingsId, SavingsTransactionData transactionData,
-            String command) {
+                                                    String command) {
         String json = transactionData.getJson();
         return commandSavingAccount(requestId, savingsId, null, json, command);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -63,7 +64,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
         final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
         try {
-            return this.jdbcTemplate.query(sql, mapper, new Object[] { loanId, associationType }); // NOSONAR
+            return this.jdbcTemplate.query(sql, mapper, new Object[]{loanId, associationType}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -77,7 +78,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? and aa.association_type_enum = ?";
         try {
             final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, // NOSONAR
-                    new Object[] { savingsId, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue() });
+                    new Object[]{savingsId, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue()});
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }

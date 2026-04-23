@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.time.LocalDate;
 import java.util.Collection;
+
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 
@@ -44,15 +45,15 @@ public final class BulkTransferLoanOfficerData {
     private final StaffAccountSummaryCollectionData accountSummaryCollection;
 
     public static BulkTransferLoanOfficerData templateForBulk(final Long officeId, final Long fromLoanOfficerId,
-            final LocalDate assignmentDate, final Collection<OfficeData> officeOptions, final Collection<StaffData> loanOfficerOptions,
-            final StaffAccountSummaryCollectionData accountSummaryCollection) {
+                                                              final LocalDate assignmentDate, final Collection<OfficeData> officeOptions, final Collection<StaffData> loanOfficerOptions,
+                                                              final StaffAccountSummaryCollectionData accountSummaryCollection) {
         return new BulkTransferLoanOfficerData(officeId, fromLoanOfficerId, assignmentDate, officeOptions, loanOfficerOptions,
                 accountSummaryCollection);
     }
 
     private BulkTransferLoanOfficerData(final Long officeId, final Long fromLoanOfficerId, final LocalDate assignmentDate,
-            final Collection<OfficeData> officeOptions, final Collection<StaffData> loanOfficerOptions,
-            final StaffAccountSummaryCollectionData accountSummaryCollection) {
+                                        final Collection<OfficeData> officeOptions, final Collection<StaffData> loanOfficerOptions,
+                                        final StaffAccountSummaryCollectionData accountSummaryCollection) {
         this.officeId = officeId;
         this.fromLoanOfficerId = fromLoanOfficerId;
         this.assignmentDate = assignmentDate;

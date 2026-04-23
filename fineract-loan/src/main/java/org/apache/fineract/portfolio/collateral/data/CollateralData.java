@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.collateral.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -39,7 +40,7 @@ public final class CollateralData {
     private final CurrencyData currency;
 
     public static CollateralData instance(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData) {
+                                          final CurrencyData currencyData) {
         return new CollateralData(id, type, value, description, currencyData);
     }
 
@@ -48,7 +49,7 @@ public final class CollateralData {
     }
 
     private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData) {
+                           final CurrencyData currencyData) {
         this.id = id;
         this.type = type;
         this.value = value;
@@ -58,7 +59,7 @@ public final class CollateralData {
     }
 
     private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData, final Collection<CodeValueData> allowedCollateralTypes) {
+                           final CurrencyData currencyData, final Collection<CodeValueData> allowedCollateralTypes) {
         this.id = id;
         this.type = type;
         this.value = value;

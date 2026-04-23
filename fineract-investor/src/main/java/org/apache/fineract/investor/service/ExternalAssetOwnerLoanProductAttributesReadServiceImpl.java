@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,10 @@
 package org.apache.fineract.investor.service;
 
 import jakarta.persistence.criteria.Predicate;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -48,7 +50,7 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceImpl implements E
     @Override
     @Cacheable(cacheNames = "externalAssetOwnerLoanProductAttributes", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#loanProductId.toString() + #attributeKey)", unless = "#attributeKey == null")
     public Page<ExternalTransferLoanProductAttributesData> retrieveAllLoanProductAttributesByLoanProductId(final Long loanProductId,
-            final String attributeKey) {
+                                                                                                           final String attributeKey) {
         validateLoanProduct(loanProductId);
 
         PageRequest pageRequest = PageRequest.of(0, 100, Sort.by("id"));

@@ -78,7 +78,8 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="wc_loan_id" type="BIGINT">
-                <constraints nullable="false" unique="true" foreignKeyName="FK_m_wc_loan_balance_loan" referencedTableName="m_wc_loan" referencedColumnNames="id"/>
+                <constraints nullable="false" unique="true" foreignKeyName="FK_m_wc_loan_balance_loan"
+                             referencedTableName="m_wc_loan" referencedColumnNames="id"/>
             </column>
             <column name="principal_outstanding" type="DECIMAL(19, 6)">
                 <constraints nullable="false"/>
@@ -164,7 +165,8 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="wc_loan_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="m_wc_loan_payment_allocation_rule_loan_fk" referencedTableName="m_wc_loan" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="m_wc_loan_payment_allocation_rule_loan_fk"
+                             referencedTableName="m_wc_loan" referencedColumnNames="id"/>
             </column>
             <column name="transaction_type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -229,7 +231,8 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="wc_loan_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="FK_m_wc_loan_note_loan" referencedTableName="m_wc_loan" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="FK_m_wc_loan_note_loan" referencedTableName="m_wc_loan"
+                             referencedColumnNames="id"/>
             </column>
             <column name="note" type="VARCHAR(1000)"/>
             <column name="created_by" type="BIGINT">
@@ -286,11 +289,13 @@
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_wc_loan_note"
-                                 constraintName="FK_m_wc_loan_note_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_m_wc_loan_note_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_wc_loan_note"
-                                 constraintName="FK_m_wc_loan_note_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_m_wc_loan_note_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -333,11 +338,13 @@
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_wc_loan"
-                                 constraintName="FK_m_wc_loan_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_m_wc_loan_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="delinquency_bucket_classification_id" baseTableName="m_wc_loan"
-                                 constraintName="FK_m_wc_loan_delinquency_bucket" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_m_wc_loan_delinquency_bucket" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_delinquency_bucket" validate="true"/>
     </changeSet>
@@ -351,11 +358,13 @@
             </not>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_wc_loan_payment_allocation_rule"
-                                 constraintName="FK_m_wc_loan_par_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_m_wc_loan_par_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_wc_loan_payment_allocation_rule"
-                                 constraintName="FK_m_wc_loan_par_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_m_wc_loan_par_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -365,10 +374,13 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan_payment_allocation_rule"/>
             <not>
-                <indexExists tableName="m_wc_loan_payment_allocation_rule" indexName="uq_m_wc_loan_payment_allocation_rule"/>
+                <indexExists tableName="m_wc_loan_payment_allocation_rule"
+                             indexName="uq_m_wc_loan_payment_allocation_rule"/>
             </not>
         </preConditions>
-        <addUniqueConstraint columnNames="wc_loan_id, transaction_type" constraintName="uq_m_wc_loan_payment_allocation_rule" tableName="m_wc_loan_payment_allocation_rule"/>
+        <addUniqueConstraint columnNames="wc_loan_id, transaction_type"
+                             constraintName="uq_m_wc_loan_payment_allocation_rule"
+                             tableName="m_wc_loan_payment_allocation_rule"/>
     </changeSet>
 
     <!-- Indexes -->
@@ -389,7 +401,8 @@
         <createIndex tableName="m_wc_loan" indexName="IND_m_wc_loan_loan_status_id">
             <column name="loan_status_id"/>
         </createIndex>
-        <createIndex tableName="m_wc_loan_payment_allocation_rule" indexName="IND_m_wc_loan_payment_allocation_rule_loan_id">
+        <createIndex tableName="m_wc_loan_payment_allocation_rule"
+                     indexName="IND_m_wc_loan_payment_allocation_rule_loan_id">
             <column name="wc_loan_id"/>
         </createIndex>
     </changeSet>
@@ -397,7 +410,8 @@
     <!-- Permissions for Working Capital Loan (account) -->
     <changeSet id="wcl-0005-11" author="fineract">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'READ_WORKINGCAPITALLOAN'</sqlCheck>
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'READ_WORKINGCAPITALLOAN'
+            </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="organisation"/>

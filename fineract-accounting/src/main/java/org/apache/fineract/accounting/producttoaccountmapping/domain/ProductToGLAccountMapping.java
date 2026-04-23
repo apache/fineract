@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,8 +39,8 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Entity
-@Table(name = "acc_product_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "product_type",
-        "financial_account_type", "payment_type" }, name = "financial_action") })
+@Table(name = "acc_product_mapping", uniqueConstraints = {@UniqueConstraint(columnNames = {"product_id", "product_type",
+        "financial_account_type", "payment_type"}, name = "financial_action")})
 public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = true)
@@ -81,8 +81,8 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     private CodeValue buydownFeeClassification;
 
     public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final CodeValue chargeOffReason, final CodeValue capitalizedIncomeClassification,
-            final CodeValue buydownFeeClassification) {
+                                                      final int financialAccountType, final CodeValue chargeOffReason, final CodeValue capitalizedIncomeClassification,
+                                                      final CodeValue buydownFeeClassification) {
 
         return new ProductToGLAccountMapping().setGlAccount(glAccount).setProductId(productId).setProductType(productType)
                 .setFinancialAccountType(financialAccountType).setChargeOffReason(chargeOffReason)

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,12 +27,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -51,7 +53,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 @Accessors(chain = true)
 @Entity
 @Table(name = "acc_accounting_rule", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "name" }, name = "accounting_rule_name_unique") })
+        @UniqueConstraint(columnNames = {"name"}, name = "accounting_rule_name_unique")})
 public class AccountingRule extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false, length = 500)
@@ -85,7 +87,7 @@ public class AccountingRule extends AbstractPersistableCustom<Long> {
     private boolean allowMultipleDebitEntries;
 
     public static AccountingRule fromJson(final Office office, final GLAccount accountToDebit, final GLAccount accountToCredit,
-            final JsonCommand command, final boolean allowMultipleCreditEntries, final boolean allowMultipleDebitEntries) {
+                                          final JsonCommand command, final boolean allowMultipleCreditEntries, final boolean allowMultipleDebitEntries) {
         final String name = command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue());
         final String description = command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.DESCRIPTION.getValue());
         final boolean systemDefined = false;
@@ -113,7 +115,7 @@ public class AccountingRule extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final String propertyToBeUpdated) {
+                                      final String propertyToBeUpdated) {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -127,7 +129,7 @@ public class AccountingRule extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final boolean propertyToBeUpdated) {
+                                      final boolean propertyToBeUpdated) {
         if (command.isChangeInBooleanParameterNamed(paramName, propertyToBeUpdated)) {
             final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -146,7 +148,7 @@ public class AccountingRule extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final Long propertyToBeUpdated) {
+                                      final Long propertyToBeUpdated) {
         if (command.isChangeInLongParameterNamed(paramName, propertyToBeUpdated)) {
             final Long newValue = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);

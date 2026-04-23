@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,27 +33,29 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACT
 
 import com.google.gson.JsonObject;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 
 public class InteropTransactionRequestData extends InteropRequestData {
 
-    static final String[] PARAMS = { PARAM_TRANSACTION_CODE, PARAM_REQUEST_CODE, PARAM_ACCOUNT_ID, PARAM_AMOUNT, PARAM_TRANSACTION_ROLE,
-            PARAM_TRANSACTION_TYPE, PARAM_NOTE, PARAM_GEO_CODE, PARAM_EXPIRATION, PARAM_EXTENSION_LIST, PARAM_LOCALE, PARAM_DATE_FORMAT };
+    static final String[] PARAMS = {PARAM_TRANSACTION_CODE, PARAM_REQUEST_CODE, PARAM_ACCOUNT_ID, PARAM_AMOUNT, PARAM_TRANSACTION_ROLE,
+            PARAM_TRANSACTION_TYPE, PARAM_NOTE, PARAM_GEO_CODE, PARAM_EXPIRATION, PARAM_EXTENSION_LIST, PARAM_LOCALE, PARAM_DATE_FORMAT};
 
     public InteropTransactionRequestData(@NotNull String transactionCode, @NotNull String requestCode, @NotNull String accountId,
-            @NotNull MoneyData amount, @NotNull InteropTransactionTypeData transactionType, String note, GeoCodeData geoCode,
-            LocalDateTime expiration, List<ExtensionData> extensionList) {
+                                         @NotNull MoneyData amount, @NotNull InteropTransactionTypeData transactionType, String note, GeoCodeData geoCode,
+                                         LocalDateTime expiration, List<ExtensionData> extensionList) {
         super(transactionCode, requestCode, accountId, amount, InteropTransactionRole.PAYER, transactionType, note, geoCode, expiration,
                 extensionList);
     }
 
     public InteropTransactionRequestData(@NotNull String transactionCode, @NotNull String requestCode, @NotNull String accountId,
-            @NotNull MoneyData amount, @NotNull InteropTransactionTypeData transactionType) {
+                                         @NotNull MoneyData amount, @NotNull InteropTransactionTypeData transactionType) {
         this(transactionCode, requestCode, accountId, amount, transactionType, null, null, null, null);
     }
 
@@ -63,7 +65,7 @@ public class InteropTransactionRequestData extends InteropRequestData {
     }
 
     public static InteropTransactionRequestData validateAndParse(final DataValidatorBuilder dataValidator, JsonObject element,
-            FromJsonHelper jsonHelper) {
+                                                                 FromJsonHelper jsonHelper) {
         if (element == null) {
             return null;
         }

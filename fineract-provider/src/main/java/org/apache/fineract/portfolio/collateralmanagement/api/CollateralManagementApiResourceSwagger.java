@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,12 +23,14 @@ import org.apache.fineract.portfolio.collateralmanagement.data.CollateralProduct
 
 final class CollateralManagementApiResourceSwagger {
 
-    private CollateralManagementApiResourceSwagger() {}
+    private CollateralManagementApiResourceSwagger() {
+    }
 
     @Schema(description = "PostCollateralManagementProductResponse")
     public static final class PostCollateralManagementProductResponse {
 
-        private PostCollateralManagementProductResponse() {}
+        private PostCollateralManagementProductResponse() {
+        }
 
         @Schema(example = "14")
         public Long resourceId;
@@ -37,7 +39,8 @@ final class CollateralManagementApiResourceSwagger {
     @Schema(description = "PutCollateralProductResponse")
     public static final class PutCollateralProductResponse {
 
-        private PutCollateralProductResponse() {}
+        private PutCollateralProductResponse() {
+        }
 
         @Schema(example = "12")
         public Long resourceId;
@@ -47,7 +50,8 @@ final class CollateralManagementApiResourceSwagger {
     @Schema(description = "DeleteCollateralProductResponse")
     public static final class DeleteCollateralProductResponse {
 
-        private DeleteCollateralProductResponse() {}
+        private DeleteCollateralProductResponse() {
+        }
 
         @Schema(example = "12")
         public Long resourceId;

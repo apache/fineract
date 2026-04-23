@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,7 +22,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -40,7 +42,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     private boolean allowSessionCreation = true;
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-    public CustomAuthenticationFailureHandler() {}
+    public CustomAuthenticationFailureHandler() {
+    }
 
     /**
      * Performs the redirect or forward to the {@code defaultFailureUrl} if set, otherwise returns a 401 error code.
@@ -50,7 +53,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
      */
     @Override
     public void onAuthenticationFailure(final HttpServletRequest request, final HttpServletResponse response,
-            final AuthenticationException exception) throws IOException, ServletException {
+                                        final AuthenticationException exception) throws IOException, ServletException {
 
         if (this.defaultFailureUrl == null) {
             log.debug("No failure URL set, sending 401 Unauthorized error");

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,10 @@
 package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableChecksData;
@@ -39,7 +41,8 @@ final class EntityDatatableChecksApiResourceSwagger {
     @Schema(description = "GetEntityDatatableChecksResponse")
     public static final class GetEntityDatatableChecksResponse {
 
-        private GetEntityDatatableChecksResponse() {}
+        private GetEntityDatatableChecksResponse() {
+        }
 
         public long id;
         public String entity;
@@ -54,7 +57,8 @@ final class EntityDatatableChecksApiResourceSwagger {
     @Schema(description = "GetEntityDatatableChecksTemplateResponse")
     public static final class GetEntityDatatableChecksTemplateResponse {
 
-        private GetEntityDatatableChecksTemplateResponse() {}
+        private GetEntityDatatableChecksTemplateResponse() {
+        }
 
         public List<String> entities;
         public List<DatatableCheckStatusData> statusClient;

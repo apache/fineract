@@ -1,6 +1,6 @@
 name: Fineract Cargo & Unit- & Integration tests - PostgreSQL
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 permissions:
   contents: read
@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: [test-core-1, test-core-2, test-core-3, test-core-4, test-core-5]
+        task: [ test-core-1, test-core-2, test-core-3, test-core-4, test-core-5 ]
 
     services:
       postgresql:

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,7 +19,9 @@
 package org.apache.fineract.portfolio.client.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.util.Map;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
@@ -58,9 +60,9 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
     @Autowired
     public ClientIdentifierWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepositoryWrapper clientRepository, final ClientIdentifierRepository clientIdentifierRepository,
-            final CodeValueRepositoryWrapper codeValueRepository,
-            final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer) {
+                                                                 final ClientRepositoryWrapper clientRepository, final ClientIdentifierRepository clientIdentifierRepository,
+                                                                 final CodeValueRepositoryWrapper codeValueRepository,
+                                                                 final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
@@ -191,7 +193,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     }
 
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
-            final String documentKey, final Throwable cause, final Exception dve) {
+                                                              final String documentKey, final Throwable cause, final Exception dve) {
         if (cause.getMessage().contains("unique_active_client_identifier")) {
             throw new DuplicateClientIdentifierException(documentTypeLabel);
         } else if (cause.getMessage().contains("unique_identifier_key")) {

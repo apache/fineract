@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.portfolio.loanproduct.api.LoanProductsApiResourceSwagger.GetLoanProductsChargeOffReasonOptions;
 import org.springframework.data.domain.Page;
 
@@ -30,11 +32,13 @@ import org.springframework.data.domain.Page;
  */
 final class LoanTransactionsApiResourceSwagger {
 
-    private LoanTransactionsApiResourceSwagger() {}
+    private LoanTransactionsApiResourceSwagger() {
+    }
 
     static final class GetCodeValuesDataResponse {
 
-        private GetCodeValuesDataResponse() {}
+        private GetCodeValuesDataResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -49,11 +53,13 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "GetLoansLoanIdTransactionsTemplateResponse")
     public static final class GetLoansLoanIdTransactionsTemplateResponse {
 
-        private GetLoansLoanIdTransactionsTemplateResponse() {}
+        private GetLoansLoanIdTransactionsTemplateResponse() {
+        }
 
         static final class GetLoansTransactionType {
 
-            private GetLoansTransactionType() {}
+            private GetLoansTransactionType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -65,7 +71,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class GetLoansTotal {
 
-            private GetLoansTotal() {}
+            private GetLoansTotal() {
+            }
 
             @Schema(example = "XOF")
             public String currencyCode;
@@ -91,7 +98,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class GetPaymentTypeOptions {
 
-            private GetPaymentTypeOptions() {}
+            private GetPaymentTypeOptions() {
+            }
 
             @Schema(example = "10")
             public Long id;
@@ -130,7 +138,8 @@ final class LoanTransactionsApiResourceSwagger {
 
     public static final class GetLoanCurrency {
 
-        private GetLoanCurrency() {}
+        private GetLoanCurrency() {
+        }
 
         @Schema(example = "UGX")
         public String code;
@@ -149,11 +158,13 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "GetLoansLoanIdTransactionsTransactionIdResponse")
     public static final class GetLoansLoanIdTransactionsTransactionIdResponse {
 
-        private GetLoansLoanIdTransactionsTransactionIdResponse() {}
+        private GetLoansLoanIdTransactionsTransactionIdResponse() {
+        }
 
         static final class GetLoansType {
 
-            private GetLoansType() {}
+            private GetLoansType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -187,7 +198,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class GetLoansCurrency {
 
-            private GetLoansCurrency() {}
+            private GetLoansCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -205,7 +217,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class GetLoanTransactionRelation {
 
-            private GetLoanTransactionRelation() {}
+            private GetLoanTransactionRelation() {
+            }
 
             @Schema(example = "1")
             public Long fromLoanTransaction;
@@ -224,7 +237,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class GetLoansLoanIdLoanChargePaidByData {
 
-            private GetLoansLoanIdLoanChargePaidByData() {}
+            private GetLoansLoanIdLoanChargePaidByData() {
+            }
 
             @Schema(example = "11")
             public Long id;
@@ -283,7 +297,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class PaymentDetailData {
 
-            private PaymentDetailData() {}
+            private PaymentDetailData() {
+            }
 
             @Schema(example = "62")
             public Long id;
@@ -302,7 +317,8 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class PaymentType {
 
-            private PaymentType() {}
+            private PaymentType() {
+            }
 
             @Schema(example = "11")
             public Long id;
@@ -316,13 +332,15 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "GetLoansLoanIdTransactionsResponse")
     public abstract static class GetLoansLoanIdTransactionsResponse implements Page<GetLoansLoanIdTransactionsTransactionIdResponse> {
 
-        private GetLoansLoanIdTransactionsResponse() {}
+        private GetLoansLoanIdTransactionsResponse() {
+        }
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")
     public static final class PostLoansLoanIdTransactionsRequest {
 
-        private PostLoansLoanIdTransactionsRequest() {}
+        private PostLoansLoanIdTransactionsRequest() {
+        }
 
         @Schema(example = "en_GB")
         public String locale;
@@ -385,7 +403,8 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "PostLoansLoanIdTransactionsResponse")
     public static final class PostLoansLoanIdTransactionsResponse {
 
-        private PostLoansLoanIdTransactionsResponse() {}
+        private PostLoansLoanIdTransactionsResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -427,7 +446,8 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "PostLoansLoanIdTransactionsTransactionIdRequest")
     public static final class PostLoansLoanIdTransactionsTransactionIdRequest {
 
-        private PostLoansLoanIdTransactionsTransactionIdRequest() {}
+        private PostLoansLoanIdTransactionsTransactionIdRequest() {
+        }
 
         @Schema(example = "en_GB")
         public String locale;
@@ -450,7 +470,8 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "PutChargeTransactionChangesResponse")
     public static final class PutChargeTransactionChangesResponse {
 
-        private PutChargeTransactionChangesResponse() {}
+        private PutChargeTransactionChangesResponse() {
+        }
 
         static final class PutChargeTransactionChangesResponseChanges {
 
@@ -496,7 +517,8 @@ final class LoanTransactionsApiResourceSwagger {
     @Schema(description = "PutChargeTransactionChangesRequest")
     public static final class PutChargeTransactionChangesRequest {
 
-        private PutChargeTransactionChangesRequest() {}
+        private PutChargeTransactionChangesRequest() {
+        }
 
         @Schema(example = "1")
         public Long id;

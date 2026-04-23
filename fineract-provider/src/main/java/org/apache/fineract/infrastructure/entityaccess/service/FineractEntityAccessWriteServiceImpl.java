@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,10 @@
 package org.apache.fineract.infrastructure.entityaccess.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.time.LocalDate;
 import java.util.Map;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -59,10 +61,10 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
     @Autowired
     public FineractEntityAccessWriteServiceImpl(final FineractEntityAccessRepository entityAccessRepository,
-            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
-            final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository,
-            final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper,
-            FineractEntityDataValidator fromApiJsonDeserializer) {
+                                                final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
+                                                final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository,
+                                                final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper,
+                                                FineractEntityDataValidator fromApiJsonDeserializer) {
         this.entityAccessRepository = entityAccessRepository;
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -79,7 +81,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     @Override
     @Transactional
     public void addNewEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
-            final Long secondEntityId) {
+                                   final Long secondEntityId) {
         FineractEntityAccess entityAccess = FineractEntityAccess.createNew(entityType, entityId, accessType, secondEntityType,
                 secondEntityId);
         entityAccessRepository.save(entityAccess);

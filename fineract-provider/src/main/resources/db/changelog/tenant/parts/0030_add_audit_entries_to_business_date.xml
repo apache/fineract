@@ -40,16 +40,20 @@
         <dropNotNullConstraint tableName="m_business_date" columnName="lastmodified_date" columnDataType="datetime"/>
     </changeSet>
     <changeSet id="business_date-3" author="fineract">
-        <renameColumn tableName="m_business_date" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_business_date" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_business_date" oldColumnName="createdby_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
+        <renameColumn tableName="m_business_date" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by"
+                      columnDataType="BIGINT"/>
     </changeSet>
     <changeSet author="fineract" id="business_date-4">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_business_date"
-                                 constraintName="FK_business_date_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_business_date_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_business_date"
-                                 constraintName="FK_business_date_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_business_date_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -64,8 +68,10 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from m_business_date</sqlCheck>
         </preConditions>
-        <addNotNullConstraint tableName="m_business_date" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
-        <addNotNullConstraint tableName="m_business_date" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_business_date" columnName="created_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_business_date" columnName="last_modified_on_utc"
+                              columnDataType="TIMESTAMP WITH TIME ZONE"/>
     </changeSet>
     <changeSet id="business_date-6" author="fineract">
         <addNotNullConstraint tableName="m_business_date" columnName="created_by" columnDataType="BIGINT"/>

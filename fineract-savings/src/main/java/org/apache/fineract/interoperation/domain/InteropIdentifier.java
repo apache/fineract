@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,8 +27,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,8 +43,8 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 @Getter
 @NoArgsConstructor
 @Table(name = "interop_identifier", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_hathor_identifier_account", columnNames = { "account_id", "type" }),
-        @UniqueConstraint(name = "uk_hathor_identifier_value", columnNames = { "type", "a_value", "sub_value_or_type" }) })
+        @UniqueConstraint(name = "uk_hathor_identifier_account", columnNames = {"account_id", "type"}),
+        @UniqueConstraint(name = "uk_hathor_identifier_value", columnNames = {"type", "a_value", "sub_value_or_type"})})
 public class InteropIdentifier extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
@@ -72,7 +74,7 @@ public class InteropIdentifier extends AbstractPersistableCustom<Long> {
     private LocalDateTime modifiedOn;
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value, String subType,
-            @NotNull String createdBy) {
+                             @NotNull String createdBy) {
         this.account = account;
         this.type = type;
         this.value = value;

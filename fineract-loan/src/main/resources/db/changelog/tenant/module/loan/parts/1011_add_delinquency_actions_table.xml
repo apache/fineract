@@ -28,7 +28,7 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="loan_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="action" type="VARCHAR(128)">
                 <constraints nullable="false"/>
@@ -38,10 +38,10 @@
             </column>
             <column name="end_date" type="date"/>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>

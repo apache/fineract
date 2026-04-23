@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.accountnumberformat.data.AccountNumberFormatData;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations;
@@ -58,7 +59,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
                 anf.id as id, anf.account_type_enum as accountTypeEnum, anf.prefix_type_enum as prefixTypeEnum, anf.prefix_character as prefixCharacter
                 from c_account_number_format anf\s""";
 
-        AccountNumberFormatMapper() {}
+        AccountNumberFormatMapper() {
+        }
 
         public String schema() {
             return ACCOUNT_NUMBER_FORMAT_SCHEMA;
@@ -93,7 +95,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             final String sql = "select " + this.accountNumberFormatMapper.schema() + " where anf.id = ?";
 
             final AccountNumberFormatData accountNumberFormatData = this.jdbcTemplate.queryForObject(sql, this.accountNumberFormatMapper, // NOSONAR
-                    new Object[] { id });
+                    new Object[]{id});
             return accountNumberFormatData;
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountNumberFormatNotFoundException(id, e);
@@ -121,30 +123,30 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
     }
 
     public void determinePrefixTypesForAccounts(Map<String, List<EnumOptionData>> accountNumberPrefixTypeOptions,
-            EntityAccountType entityAccountType) {
+                                                EntityAccountType entityAccountType) {
         Set<AccountNumberPrefixType> accountNumberPrefixTypesSet = new HashSet<>();
         switch (entityAccountType) {
             case CLIENT:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
-            break;
+                break;
             case LOAN:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
-            break;
+                break;
             case SAVINGS:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
-            break;
+                break;
             case CENTER:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
-            break;
+                break;
             case GROUP:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
-            break;
+                break;
             case SHARES:
-            // SHARES has no prefix
-            break;
+                // SHARES has no prefix
+                break;
             case WORKING_CAPITAL_LOAN:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForWorkingCapitalLoanAccounts;
-            break;
+                break;
         }
 
         Object[] array = accountNumberPrefixTypesSet.toArray();

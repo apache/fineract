@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +21,9 @@ package org.apache.fineract.integrationtests.common.organisation;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
+
 import org.apache.fineract.client.models.PostEntityDatatableChecksTemplateResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -52,7 +54,7 @@ public class EntityDatatableChecksHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer createEntityDatatableCheck(final String apptableName, final String datatableName, final int status,
-            final Integer productId) {
+                                              final Integer productId) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER,
                 getTestEdcAsJSON(apptableName, datatableName, status, productId), "resourceId");
     }
@@ -62,7 +64,7 @@ public class EntityDatatableChecksHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public PostEntityDatatableChecksTemplateResponse addEntityDatatableCheck(final String apptableName, final String datatableName,
-            final int status, final Integer productId) {
+                                                                             final int status, final Integer productId) {
         final String response = Utils.performServerPost(this.requestSpec, this.responseSpec,
                 DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER, getTestEdcAsJSON(apptableName, datatableName, status, productId),
                 null);
@@ -91,7 +93,7 @@ public class EntityDatatableChecksHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getTestEdcAsJSON(final String apptableName, final String datatableName, final int status,
-            final Integer productId) {
+                                          final Integer productId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("entity", apptableName);
         map.put("status", status);

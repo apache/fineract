@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,23 +41,23 @@ public final class AccountEnumerations {
         switch (type) {
             case INVALID:
                 optionData = new EnumOptionData(AccountType.INVALID.getValue().longValue(), AccountType.INVALID.getCode(), "Invalid");
-            break;
+                break;
             case INDIVIDUAL:
                 optionData = new EnumOptionData(AccountType.INDIVIDUAL.getValue().longValue(), AccountType.INDIVIDUAL.getCode(),
                         "Individual");
-            break;
+                break;
             case GROUP:
                 optionData = new EnumOptionData(AccountType.GROUP.getValue().longValue(), AccountType.GROUP.getCode(), "Group");
-            break;
+                break;
             case JLG:
                 optionData = new EnumOptionData(AccountType.JLG.getValue().longValue(), AccountType.JLG.getCode(), "JLG");
-            break;
+                break;
             case GLIM:
                 optionData = new EnumOptionData(AccountType.GLIM.getValue().longValue(), AccountType.GLIM.getCode(), "GLIM");
-            break;
+                break;
             case GSIM:
                 optionData = new EnumOptionData(AccountType.GSIM.getValue().longValue(), AccountType.GSIM.getCode(), "GSIM");
-            break;
+                break;
         }
 
         return optionData;

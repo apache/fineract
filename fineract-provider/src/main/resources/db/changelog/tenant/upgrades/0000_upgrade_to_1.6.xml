@@ -25,14 +25,16 @@
     <!-- V366_remove_leading_or_trailing_spaces_in_reportnames.sql -->
     <changeSet author="fineract" id="366">
         <sql>
-            UPDATE stretchy_report SET report_name = TRIM(report_name) WHERE id IN (SELECT id FROM (SELECT id FROM stretchy_report WHERE CHAR_LENGTH(report_name) != CHAR_LENGTH(TRIM(report_name)))Y);
+            UPDATE stretchy_report SET report_name = TRIM(report_name) WHERE id IN (SELECT id FROM (SELECT id FROM
+            stretchy_report WHERE CHAR_LENGTH(report_name) != CHAR_LENGTH(TRIM(report_name)))Y);
         </sql>
     </changeSet>
     <!-- V367__reports_for_email_campaigns.sql -->
     <changeSet author="fineract" id="367">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM stretchy_report WHERE report_name IN ('Loan Approved - Email','Loan Rejected - Email','Loan Repayment - Email');
+                SELECT COUNT(*) FROM stretchy_report WHERE report_name IN ('Loan Approved - Email','Loan Rejected -
+                Email','Loan Repayment - Email');
             </sqlCheck>
         </preConditions>
         <insert tableName="stretchy_report">
@@ -71,7 +73,8 @@
             <column name="use_report" valueBoolean="true"/>
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
-        <modifyDataType tableName="scheduled_email_campaign" columnName="email_attachment_file_format" newDataType="VARCHAR(10) NULL"/>
+        <modifyDataType tableName="scheduled_email_campaign" columnName="email_attachment_file_format"
+                        newDataType="VARCHAR(10) NULL"/>
         <modifyDataType tableName="scheduled_email_campaign" columnName="stretchy_report_id" newDataType="INT NULL"/>
     </changeSet>
     <!-- V368__collateral_management.sql -->
@@ -138,29 +141,29 @@
             <column defaultValueComputed="NULL" name="transaction_id"/>
         </createIndex>
         <addForeignKeyConstraint baseColumnNames="collateral_id" baseTableName="m_client_collateral_management"
-                constraintName="fkCollateral" deferrable="false" initiallyDeferred="false"
-                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
-                referencedTableName="m_collateral_management" validate="true"/>
+                                 constraintName="fkCollateral" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                                 referencedTableName="m_collateral_management" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="currency" baseTableName="m_collateral_management"
-                constraintName="fkCurrencyCode" deferrable="false" initiallyDeferred="false"
-                onDelete="CASCADE" onUpdate="RESTRICT" referencedColumnNames="id"
-                referencedTableName="m_currency" validate="true"/>
+                                 constraintName="fkCurrencyCode" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_currency" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="m_client_collateral_management"
-                constraintName="fkClient" deferrable="false" initiallyDeferred="false"
-                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
-                referencedTableName="m_client" validate="true"/>
+                                 constraintName="fkClient" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                                 referencedTableName="m_client" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="client_collateral_id" baseTableName="m_loan_collateral_management"
-                constraintName="fkClientCollateral" deferrable="false" initiallyDeferred="false"
-                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
-                referencedTableName="m_client_collateral_management" validate="true"/>
+                                 constraintName="fkClientCollateral" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                                 referencedTableName="m_client_collateral_management" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_collateral_management"
-                constraintName="fkLoan" deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
-                onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="m_loan"
-                validate="true"/>
+                                 constraintName="fkLoan" deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+                                 onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="m_loan"
+                                 validate="true"/>
         <addForeignKeyConstraint baseColumnNames="transaction_id" baseTableName="m_loan_collateral_management"
-                constraintName="fkTransaction" deferrable="false" initiallyDeferred="false"
-                onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
-                referencedTableName="m_loan_transaction" validate="true"/>
+                                 constraintName="fkTransaction" deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id"
+                                 referencedTableName="m_loan_transaction" validate="true"/>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio"/>
             <column name="code" value="CREATE_CLIENT_COLLATERAL_PRODUCT"/>
@@ -291,35 +294,35 @@
     <changeSet author="fineract" id="371">
         <addColumn tableName="m_loan">
             <column name="net_disbursal_amount"
-                type="DECIMAL(19, 6)">
-                <constraints nullable="false" />
+                    type="DECIMAL(19, 6)">
+                <constraints nullable="false"/>
             </column>
         </addColumn>
         <addColumn tableName="m_loan_disbursement_detail">
             <column name="net_disbursal_amount"
-                type="DECIMAL(19, 6)" defaultValueComputed="NULL" />
+                    type="DECIMAL(19, 6)" defaultValueComputed="NULL"/>
         </addColumn>
     </changeSet>
     <!-- V372__fixed_principal_percentage.sql -->
     <changeSet author="fineract" id="372">
         <addColumn tableName="m_product_loan">
             <column name="fixed_principal_percentage_per_installment"
-                type="DECIMAL(5, 2)" defaultValueComputed="NULL" />
+                    type="DECIMAL(5, 2)" defaultValueComputed="NULL"/>
         </addColumn>
         <addColumn tableName="m_loan">
             <column name="fixed_principal_percentage_per_installment"
-                type="DECIMAL(5, 2)" defaultValueComputed="NULL" />
+                    type="DECIMAL(5, 2)" defaultValueComputed="NULL"/>
         </addColumn>
     </changeSet>
     <!-- V373__node_aware_scheduler_jobs.sql -->
     <changeSet author="fineract" id="373">
         <addColumn tableName="job">
             <column name="node_id"
-                type="INT" defaultValueComputed="1" />
+                    type="INT" defaultValueComputed="1"/>
         </addColumn>
         <addColumn tableName="job">
             <column name="is_mismatched_job"
-                type="boolean" defaultValueBoolean="true" />
+                    type="boolean" defaultValueBoolean="true"/>
         </addColumn>
         <insert tableName="job">
             <column name="id" valueNumeric="31"/>
@@ -345,7 +348,7 @@
     <changeSet author="fineract" id="374">
         <addColumn tableName="c_configuration">
             <column name="string_value"
-                type="VARCHAR(100)" defaultValueComputed="NULL" position="5"/>
+                    type="VARCHAR(100)" defaultValueComputed="NULL" position="5"/>
         </addColumn>
         <insert tableName="c_configuration">
             <column name="id" valueNumeric="35"/>
@@ -387,7 +390,7 @@
     <changeSet author="fineract" id="376">
         <addColumn tableName="m_savings_account">
             <column name="interest_posted_till_date"
-                type="date" defaultValueComputed="NULL" />
+                    type="date" defaultValueComputed="NULL"/>
         </addColumn>
         <insert tableName="c_configuration">
             <column name="id" valueNumeric="38"/>

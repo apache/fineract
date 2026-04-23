@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,11 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -64,7 +66,7 @@ public class LoanProductUpdateUtil {
     private final LoanProductGuaranteeDetailsUpdateUtil guaranteeDetailsUpdateUtil;
 
     public Map<String, Object> update(final LoanProduct loanProduct, final JsonCommand command, final AprCalculator aprCalculator,
-            FloatingRate floatingRate) {
+                                      FloatingRate floatingRate) {
         final Map<String, Object> actualChanges = detailUpdateUtil.updateLoanRepaymentSchedule(loanProduct.getLoanProductRelatedDetail(),
                 command, aprCalculator);
         actualChanges.putAll(minMaxConstraintsUpdateUtil.update(loanProduct.loanProductMinMaxConstraints(), command));
@@ -564,7 +566,7 @@ public class LoanProductUpdateUtil {
     }
 
     private void updateBorrowerCycleVariations(final LoanProduct loanProduct, final JsonCommand command, Integer paramType,
-            String variationParameterName, final Map<String, Object> actualChanges, List<Long> variationIds) {
+                                               String variationParameterName, final Map<String, Object> actualChanges, List<Long> variationIds) {
         if (command.parameterExists(variationParameterName)) {
             final JsonArray variationArray = command.arrayOfParameterNamed(variationParameterName);
             if (variationArray != null && variationArray.size() > 0) {
@@ -602,7 +604,7 @@ public class LoanProductUpdateUtil {
                     }
                     if (jsonObject.has(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME)
                             && jsonObject.get(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).isJsonPrimitive() && StringUtils
-                                    .isNotBlank(jsonObject.get(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).getAsString())) {
+                            .isNotBlank(jsonObject.get(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).getAsString())) {
                         id = jsonObject.getAsJsonPrimitive(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).getAsLong();
                     }
                     LoanProductBorrowerCycleVariations borrowerCycleVariations = new LoanProductBorrowerCycleVariations(cycleNumber,

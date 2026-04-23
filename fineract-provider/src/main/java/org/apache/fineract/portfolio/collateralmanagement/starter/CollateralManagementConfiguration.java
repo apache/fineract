@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -51,8 +51,8 @@ public class CollateralManagementConfiguration {
     @Bean
     @ConditionalOnMissingBean(ClientCollateralManagementReadPlatformService.class)
     public ClientCollateralManagementReadPlatformService clientCollateralManagementReadPlatformService(PlatformSecurityContext context,
-            ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
-            LoanTransactionRepository loanTransactionRepository) {
+                                                                                                       ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
+                                                                                                       LoanTransactionRepository loanTransactionRepository) {
         return new ClientCollateralManagementReadPlatformServiceImpl(context, clientCollateralManagementRepositoryWrapper,
                 loanTransactionRepository);
     }
@@ -69,7 +69,7 @@ public class CollateralManagementConfiguration {
     @Bean
     @ConditionalOnMissingBean(CollateralManagementReadPlatformService.class)
     public CollateralManagementReadPlatformService collateralManagementReadPlatformService(PlatformSecurityContext context,
-            CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper) {
+                                                                                           CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper) {
         return new CollateralManagementReadPlatformServiceImpl(context, collateralManagementRepositoryWrapper);
     }
 
@@ -85,8 +85,8 @@ public class CollateralManagementConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanCollateralAssembler.class)
     public LoanCollateralAssembler loanCollateralAssembler(FromJsonHelper fromApiJsonHelper, CodeValueRepositoryWrapper codeValueRepository,
-            LoanCollateralManagementRepository loanCollateralRepository,
-            ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper) {
+                                                           LoanCollateralManagementRepository loanCollateralRepository,
+                                                           ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper) {
         return new LoanCollateralAssembler(fromApiJsonHelper, codeValueRepository, loanCollateralRepository,
                 clientCollateralManagementRepositoryWrapper);
     }
@@ -94,7 +94,7 @@ public class CollateralManagementConfiguration {
     @Bean
     @ConditionalOnMissingBean(LoanCollateralManagementReadPlatformService.class)
     public LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService(PlatformSecurityContext context,
-            LoanCollateralManagementRepository loanCollateralManagementRepository, LoanRepository loanRepository) {
+                                                                                                   LoanCollateralManagementRepository loanCollateralManagementRepository, LoanRepository loanRepository) {
         return new LoanCollateralManagementReadPlatformServiceImpl(context, loanCollateralManagementRepository, loanRepository);
     }
 

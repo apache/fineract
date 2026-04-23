@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -541,8 +542,8 @@ public class LoanProductTest extends BaseLoanIntegrationTest {
             String expenseAccountId = buyDownExpenseAccount.getAccountID().toString();
 
             Long loanProductId = loanProductHelper.createLoanProduct(
-                    create4IProgressive().addWriteOffReasonsToExpenseMappingsItem(new PostWriteOffReasonToExpenseAccountMappings()
-                            .expenseAccountId(expenseAccountId).writeOffReasonCodeValueId(reasonCodeId)))
+                            create4IProgressive().addWriteOffReasonsToExpenseMappingsItem(new PostWriteOffReasonToExpenseAccountMappings()
+                                    .expenseAccountId(expenseAccountId).writeOffReasonCodeValueId(reasonCodeId)))
                     .getResourceId();
 
             // Verify that get loan product API has the corresponding fields

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -48,8 +48,8 @@ public class CalendarCommand {
     private final Integer secondReminder;
 
     public CalendarCommand(final String title, final String description, final String location, final LocalDate startDate,
-            final LocalDate endDate, final LocalDate createdDate, final Integer duration, final Integer typeId, final Boolean repeating,
-            final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
+                           final LocalDate endDate, final LocalDate createdDate, final Integer duration, final Integer typeId, final Boolean repeating,
+                           final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
         this.title = title;
         this.description = description;
         this.location = location;

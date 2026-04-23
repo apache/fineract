@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,7 +36,7 @@ public class SavingsProductAccountingDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
 
     public void evaluateProductAccountingData(final Integer accountingRuleType, final boolean isDormancyActive, final JsonElement element,
-            DataValidatorBuilder baseDataValidator, final DepositAccountType accountType, boolean ignoreExistenceValidation) {
+                                              DataValidatorBuilder baseDataValidator, final DepositAccountType accountType, boolean ignoreExistenceValidation) {
         // GL Accounts for Cash or Accrual Periodic
         if (AccountingValidations.isCashBasedAccounting(accountingRuleType)
                 || AccountingValidations.isAccrualPeriodicBasedAccounting(accountingRuleType)) {
@@ -183,7 +183,7 @@ public class SavingsProductAccountingDataValidator {
     }
 
     private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final boolean isPenalty) {
+                                                       final boolean isPenalty) {
         String parameterName;
         if (isPenalty) {
             parameterName = SavingProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();

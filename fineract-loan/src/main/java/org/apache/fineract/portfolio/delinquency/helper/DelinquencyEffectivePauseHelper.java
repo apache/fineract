@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.delinquency.helper;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 
@@ -30,5 +31,5 @@ public interface DelinquencyEffectivePauseHelper {
     Long getPausedDaysBeforeDate(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate date);
 
     Long getPausedDaysWithinRange(List<LoanDelinquencyActionData> effectiveDelinquencyList, LocalDate startInclusive,
-            LocalDate endExclusive);
+                                  LocalDate endExclusive);
 }

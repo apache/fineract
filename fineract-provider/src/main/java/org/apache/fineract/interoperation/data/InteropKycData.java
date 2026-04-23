@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -42,8 +42,8 @@ public class InteropKycData implements Serializable {
     private String displayName;
 
     public InteropKycData(String nationality, String dateOfBirth, String contactPhone, String gender, String email, String idType,
-            String idNo, String description, String country, String addressLine1, String addressLine2, String city, String stateProvince,
-            String postalCode, String firstName, String middleName, String lastName, String displayName) {
+                          String idNo, String description, String country, String addressLine1, String addressLine2, String city, String stateProvince,
+                          String postalCode, String firstName, String middleName, String lastName, String displayName) {
         this.nationality = nationality;
         this.dateOfBirth = dateOfBirth;
         this.contactPhone = contactPhone;
@@ -65,8 +65,8 @@ public class InteropKycData implements Serializable {
     }
 
     public static InteropKycData instance(String nationality, String dateOfBirth, String contactPhone, String gender, String email,
-            String idType, String idNo, String description, String country, String address_line_1, String address_line_2, String city,
-            String stateProvince, String postalCode, String firstName, String middleName, String lastName, String displayName) {
+                                          String idType, String idNo, String description, String country, String address_line_1, String address_line_2, String city,
+                                          String stateProvince, String postalCode, String firstName, String middleName, String lastName, String displayName) {
         return new InteropKycData(nationality, dateOfBirth, contactPhone, gender, email, idType, idNo, description, country, address_line_1,
                 address_line_2, city, stateProvince, postalCode, firstName, middleName, lastName, displayName);
     }

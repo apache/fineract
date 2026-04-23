@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +31,8 @@ public class ExternalEventConfigurationHelper {
     private static final String EXTERNAL_EVENT_CONFIGURATION = "externalEventConfiguration";
     private static final String EXTERNAL_EVENT_CONFIGURATION_RESPONSE = "externalEventConfigurations";
 
-    protected ExternalEventConfigurationHelper() {}
+    protected ExternalEventConfigurationHelper() {
+    }
 
     private static final String EXTERNAL_EVENT_CONFIGURATION_URL = "/fineract-provider/api/v1/externalevents/configuration?"
             + Utils.TENANT_IDENTIFIER;
@@ -41,7 +43,7 @@ public class ExternalEventConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<Map<String, Object>> getAllExternalEventConfigurations(RequestSpecification requestSpec,
-            ResponseSpecification responseSpec) {
+                                                                                   ResponseSpecification responseSpec) {
         Map<String, ArrayList<Map<String, Object>>> response = Utils.performServerGet(requestSpec, responseSpec,
                 EXTERNAL_EVENT_CONFIGURATION_URL, "");
         return response.get(EXTERNAL_EVENT_CONFIGURATION);
@@ -723,7 +725,7 @@ public class ExternalEventConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Boolean> updateExternalEventConfigurations(RequestSpecification requestSpec,
-            ResponseSpecification responseSpec, String json) {
+                                                                         ResponseSpecification responseSpec, String json) {
         Map<String, Map<String, Boolean>> response = Utils.performServerPut(requestSpec, responseSpec, EXTERNAL_EVENT_CONFIGURATION_URL,
                 json, "changes");
         return response.get(EXTERNAL_EVENT_CONFIGURATION_RESPONSE);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.services.ExternalAssetOwnerLoanProductAttributesApi;
@@ -326,13 +328,13 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
 
         content.forEach(e -> {
             assertThat(e.getTransferExternalId()).as(ErrorMessageHelper
-                    .wrongDataInAssetExternalizationTransferExternalId(e.getTransferExternalId(), transferExternalIdExpected))
+                            .wrongDataInAssetExternalizationTransferExternalId(e.getTransferExternalId(), transferExternalIdExpected))
                     .isEqualTo(transferExternalIdExpected);
         });
     }
 
     private void checkExternalAssetDetails(Long loanId, String loanExternalId, PageExternalTransferData response, int numberOfElements,
-            DataTable table) {
+                                           DataTable table) {
         Integer numberOfElementsActual = response.getNumberOfElements();
         List<ExternalTransferData> content = response.getContent();
 
@@ -364,7 +366,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
             } else { // in case transfer has previous intermediarySale or owner-to-owner transfer
                 if (transactionType.equalsIgnoreCase(TRANSACTION_TYPE_SALE)
                         && (status.equals(ExternalTransferData.StatusEnum.ACTIVE.getValue())
-                                || status.equals(ExternalTransferData.StatusEnum.PENDING.getValue()))) {
+                        || status.equals(ExternalTransferData.StatusEnum.PENDING.getValue()))) {
                     ownerExternalId = ownerExternalIdStored;
                     previousAssetOwner = intermediarySaleAssetOwner;
                     transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
@@ -377,7 +379,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                     transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_SALES_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
                 } else if (transactionType.equalsIgnoreCase(TRANSACTION_TYPE_BUYBACK)
                         && (status.equals(ExternalTransferData.StatusEnum.BUYBACK.getValue())
-                                || status.equals(ExternalTransferData.StatusEnum.BUYBACK_INTERMEDIATE.getValue()))) {
+                        || status.equals(ExternalTransferData.StatusEnum.BUYBACK_INTERMEDIATE.getValue()))) {
                     ownerExternalId = ownerExternalIdStored;
                     previousAssetOwner = ownerExternalIdStored;
                     transferExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_BUYBACK_TRANSFER_EXTERNAL_ID_FROM_RESPONSE);
@@ -827,7 +829,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
     }
 
     private void checkExternalAssetDetailsIgnoreTransferExternalId(Long loanId, String loanExternalId, PageExternalTransferData response,
-            int numberOfElements, DataTable table) {
+                                                                   int numberOfElements, DataTable table) {
         Integer numberOfElementsActual = response.getNumberOfElements();
         List<ExternalTransferData> content = response.getContent();
 
@@ -892,7 +894,7 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
 
     @When("Admin set external asset owner loan product attribute {string} value {string} for loan product {string}")
     public void setAExternalAssetOwnerLoanProductAttribute(String externalAssetOwnerLoanProductAttributeKey,
-            String externalAssetOwnerLoanProductAttributeValue, String loanProductName) throws IOException {
+                                                           String externalAssetOwnerLoanProductAttributeValue, String loanProductName) throws IOException {
         List<GetLoanProductsResponse> loanProducts = loanProductsApi().retrieveAllLoanProducts(Map.of());
         long loanProductId = loanProducts.stream().filter(loanProduct -> loanProduct.getName().equals(loanProductName)).findFirst()
                 .orElseThrow(() -> new RuntimeException("No loan product is found!")).getId();

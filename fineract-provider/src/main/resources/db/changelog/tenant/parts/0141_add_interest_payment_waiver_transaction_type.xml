@@ -24,11 +24,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
         <insert tableName="m_permission">
-            <column name="grouping" value="transaction_loan" />
-            <column name="code" value="INTERESTPAYMENTWAIVER_LOAN" />
-            <column name="entity_name" value="LOAN" />
-            <column name="action_name" value="INTERESTPAYMENTWAIVER" />
-            <column name="can_maker_checker" valueBoolean="false" />
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="INTERESTPAYMENTWAIVER_LOAN"/>
+            <column name="entity_name" value="LOAN"/>
+            <column name="action_name" value="INTERESTPAYMENTWAIVER"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
         <insert tableName="m_external_event_configuration">
             <column name="type" value="LoanTransactionInterestPaymentWaiverPostBusinessEvent"/>

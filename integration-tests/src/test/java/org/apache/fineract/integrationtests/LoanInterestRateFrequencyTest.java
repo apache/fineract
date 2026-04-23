@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.loanaccount.domain.transactionproces
 
 import java.math.BigDecimal;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -39,7 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@ExtendWith({ LoanTestLifecycleExtension.class })
+@ExtendWith({LoanTestLifecycleExtension.class})
 public class LoanInterestRateFrequencyTest extends BaseLoanIntegrationTest {
 
     @Test
@@ -67,7 +68,7 @@ public class LoanInterestRateFrequencyTest extends BaseLoanIntegrationTest {
     }
 
     private Long applyAndApproveLoanApplication(Long clientId, Long productId, String disbursementDate, double amount,
-            int numberOfRepayments) {
+                                                int numberOfRepayments) {
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId).productId(productId)
                 .expectedDisbursementDate(disbursementDate).dateFormat(DATETIME_PATTERN) //
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY) //

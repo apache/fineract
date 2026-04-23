@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixData;
@@ -44,7 +45,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
     @Autowired
     public ProductMixReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final LoanProductReadPlatformService loanProductReadPlatformService) {
+                                             final LoanProductReadPlatformService loanProductReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.loanProductReadPlatformService = loanProductReadPlatformService;

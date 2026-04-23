@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,9 +27,11 @@ import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveA
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.common.domain.ConditionType;
@@ -63,15 +65,15 @@ public class InterestIncentivesFields {
     }
 
     public static InterestIncentivesFields createNew(final Integer entityType, final Integer attributeName, final Integer conditionType,
-            final String attributeValue, final Integer incentiveType, final BigDecimal amount,
-            final DataValidatorBuilder baseDataValidator) {
+                                                     final String attributeValue, final Integer incentiveType, final BigDecimal amount,
+                                                     final DataValidatorBuilder baseDataValidator) {
         return new InterestIncentivesFields(entityType, attributeName, conditionType, attributeValue, incentiveType, amount,
                 baseDataValidator);
     }
 
     private InterestIncentivesFields(final Integer entityType, final Integer attributeName, final Integer conditionType,
-            final String attributeValue, final Integer incentiveType, final BigDecimal amount,
-            final DataValidatorBuilder baseDataValidator) {
+                                     final String attributeValue, final Integer incentiveType, final BigDecimal amount,
+                                     final DataValidatorBuilder baseDataValidator) {
         this.entityType = entityType;
         this.attributeName = attributeName;
         this.attributeValue = attributeValue;
@@ -106,7 +108,7 @@ public class InterestIncentivesFields {
     }
 
     public void update(final JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final Locale locale) {
+                       final Locale locale) {
         if (command.isChangeInIntegerParameterNamed(entityTypeParamName, this.entityType, locale)) {
             final Integer newValue = command.integerValueOfParameterNamed(entityTypeParamName, locale);
             actualChanges.put(entityTypeParamName, newValue);
@@ -154,12 +156,12 @@ public class InterestIncentivesFields {
                 baseDataValidator.reset().parameter(attributeValueParamName).value(this.attributeValue).longGreaterThanZero();
                 baseDataValidator.reset().parameter(conditionTypeParamName).value(this.conditionType)
                         .isOneOfTheseValues(ConditionType.EQUAL.getValue(), ConditionType.NOT_EQUAL.getValue());
-            break;
+                break;
             case AGE:
                 baseDataValidator.reset().parameter(attributeValueParamName).value(this.attributeValue).longGreaterThanZero();
-            break;
+                break;
             default:
-            break;
+                break;
         }
     }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -55,7 +56,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
     @Autowired
     public LoanRescheduleRequestReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, LoanRepositoryWrapper loanRepositoryWrapper,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+                                                        final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.jdbcTemplate = jdbcTemplate;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
@@ -235,9 +236,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final String sql = "select " + LOAN_RESCHEDULE_REQUEST_ROW_MAPPER.schema() + " where lr.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, LOAN_RESCHEDULE_REQUEST_ROW_MAPPER, requestId); // NOSONAR
-        }
-
-        catch (final EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             return null;
         }
     }

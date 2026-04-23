@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.apache.fineract.integrationtests.datatable.DatatableEntity.LOA
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.GetDataTablesResponse;
@@ -297,8 +298,8 @@ public class DatatableUniqueAndIndexColumnTest {
         @org.mapstruct.Mapper
         public interface Mapper {
 
-            @Mappings({ @Mapping(target = "name", source = "columnName"), @Mapping(target = "unique", source = "isColumnUnique"),
-                    @Mapping(target = "indexed", source = "isColumnIndexed") })
+            @Mappings({@Mapping(target = "name", source = "columnName"), @Mapping(target = "unique", source = "isColumnUnique"),
+                    @Mapping(target = "indexed", source = "isColumnIndexed")})
             NameUniqueIndexedHeaderData map(ResultsetColumnHeaderData source);
 
             List<NameUniqueIndexedHeaderData> map(List<ResultsetColumnHeaderData> source);

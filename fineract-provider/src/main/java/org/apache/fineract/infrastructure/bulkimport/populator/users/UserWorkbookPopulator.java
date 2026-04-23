@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.users;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.UserConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -45,7 +46,7 @@ public class UserWorkbookPopulator extends AbstractWorkbookPopulator {
     private final RoleSheetPopulator roleSheetPopulator;
 
     public UserWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
-            RoleSheetPopulator roleSheetPopulator) {
+                                 RoleSheetPopulator roleSheetPopulator) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.personnelSheetPopulator = personnelSheetPopulator;
         this.roleSheetPopulator = roleSheetPopulator;
@@ -78,7 +79,7 @@ public class UserWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint staffNameConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$A1))");
-        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation staffValidation = validationHelper.createValidation(staffNameConstraint, staffNameRange);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,12 +21,14 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
+@SuppressWarnings({"unused", "rawtypes", "unchecked"})
 public class StandingInstructionsHelper {
 
     private static final String STANDING_INSTRUCTIONS_URL = "/fineract-provider/api/v1/standinginstructions";
@@ -71,7 +73,7 @@ public class StandingInstructionsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public String build(final String clientId, final String fromAccountId, final String toAccountId, final String fromAccountType,
-            final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
+                        final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
 
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", Utils.uniqueRandomStringGenerator("STANDING_INSTRUCTION_", 5));
@@ -107,7 +109,7 @@ public class StandingInstructionsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer createStandingInstruction(final String clientId, final String fromAccountId, final String toAccountId,
-            final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
+                                             final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
         log.info("-------------------------------- CREATE STANDING INSTRUCTIONS --------------------------------");
         final String standingInstructionAsJSON = new StandingInstructionsHelper(this.requestSpec, this.responseSpec).build(clientId,
                 fromAccountId, toAccountId, fromAccountType, toAccountType, validFrom, validTo, monthDay);
@@ -132,7 +134,7 @@ public class StandingInstructionsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId,
-            Integer transferType) {
+                                                       Integer transferType) {
         final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUN_HISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
                 + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId + "&transferType="
                 + transferType;

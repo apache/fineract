@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package org.apache.fineract.integrationtests.common.organisation;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,7 @@ public final class StaffHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer transferStaffToGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer groupId, final Integer staffToTransfer, final String note) {
+                                               final Integer groupId, final Integer staffToTransfer, final String note) {
         final String url = TRANSFER_STAFF_URL + "/" + groupId + "?command=transferStaff&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, transferStaffToGroupAsJSON(staffToTransfer, note), GROUP_ID);
     }
@@ -85,7 +87,7 @@ public final class StaffHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Object> createStaffWithJson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String json) {
+                                                          final String json) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, json, "");
     }
@@ -95,7 +97,7 @@ public final class StaffHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Object> getStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer staffId) {
+                                               final Integer staffId) {
         final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
@@ -114,7 +116,7 @@ public final class StaffHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<Map<String, Object>> getStaffListWithState(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String status) {
+                                                                  final ResponseSpecification responseSpec, final String status) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&status=" + status;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
@@ -124,7 +126,7 @@ public final class StaffHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<Map<String, Object>> getStaffListWithLoanOfficerStatus(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String loanOfficerStatus) {
+                                                                              final ResponseSpecification responseSpec, final String loanOfficerStatus) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&loanOfficersOnly=" + loanOfficerStatus;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
@@ -134,7 +136,7 @@ public final class StaffHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Object> updateStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer staffId, final Map<String, Object> changes) {
+                                                  final Integer staffId, final Map<String, Object> changes) {
         final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
         final String json = new Gson().toJson(changes);
         return Utils.performServerPut(requestSpec, responseSpec, url, json, "");

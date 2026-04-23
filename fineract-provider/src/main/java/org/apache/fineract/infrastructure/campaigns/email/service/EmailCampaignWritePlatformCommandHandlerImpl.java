@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import com.github.mustachejava.MustacheFactory;
 import com.google.gson.Gson;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
@@ -195,7 +197,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
     @Override
     public void insertDirectCampaignIntoEmailOutboundTable(final Loan loan, final EmailCampaign emailCampaign,
-            HashMap<String, String> campaignParams) {
+                                                           HashMap<String, String> campaignParams) {
         try {
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     campaignParams);
@@ -220,13 +222,15 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     private void insertDirectCampaignIntoEmailOutboundTable(final String emailParams, final String emailSubject,
-            final String messageTemplate, final String campaignName, final Long campaignId) {
+                                                            final String messageTemplate, final String campaignName, final Long campaignId) {
         try {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailParams,
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
 
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(emailParams,
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
 
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);
@@ -341,7 +345,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     private String compileEmailTemplate(final String textMessageTemplate, final String campaignName,
-            final Map<String, Object> emailParams) {
+                                        final Map<String, Object> emailParams) {
         final MustacheFactory mf = new DefaultMustacheFactory();
         final Mustache mustache = mf.compile(new StringReader(textMessageTemplate), campaignName);
 
@@ -351,7 +355,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         return stringWriter.toString();
     }
 
-    @SuppressWarnings({ "unused", "rawtypes" })
+    @SuppressWarnings({"unused", "rawtypes"})
     @Override
     public List<HashMap<String, Object>> getRunReportByServiceImpl(final String reportName, final Map<String, String> queryParams)
             throws IOException {
@@ -361,11 +365,12 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final GenericResultsetData results = this.readReportingService.retrieveGenericResultSetForSmsEmailCampaign(reportName, reportType,
                 queryParams);
         final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
-        resultList = new ObjectMapper().readValue(response, new TypeReference<>() {});
+        resultList = new ObjectMapper().readValue(response, new TypeReference<>() {
+        });
         // loop changes array date to string date
-        for (Iterator<HashMap<String, Object>> it = resultList.iterator(); it.hasNext();) {
+        for (Iterator<HashMap<String, Object>> it = resultList.iterator(); it.hasNext(); ) {
             HashMap<String, Object> entry = it.next();
-            for (Iterator<Map.Entry<String, Object>> iter = entry.entrySet().iterator(); iter.hasNext();) {
+            for (Iterator<Map.Entry<String, Object>> iter = entry.entrySet().iterator(); iter.hasNext(); ) {
                 Map.Entry<String, Object> map = iter.next();
                 String key = map.getKey();
                 Object ob = map.getValue();
@@ -389,10 +394,12 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         try {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailParams,
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
 
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(emailParams,
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
 
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);
@@ -459,7 +466,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final Throwable realCause,
-            final NonTransientDataAccessException dve) {
+                                           final NonTransientDataAccessException dve) {
         throw ErrorHandler.getMappable(dve, "error.msg.email.campaign.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -83,9 +84,9 @@ public final class ProjectedAmortizationScheduleModel {
     private List<ProjectedPayment> payments;
 
     private ProjectedAmortizationScheduleModel(final Money originationFeeAmount, final Money netDisbursementAmount,
-            final Money totalPaymentValue, final BigDecimal periodPaymentRate, final int npvDayCount,
-            final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final int loanTerm,
-            final BigDecimal effectiveInterestRate, final MathContext mc, final MonetaryCurrency currency) {
+                                               final Money totalPaymentValue, final BigDecimal periodPaymentRate, final int npvDayCount,
+                                               final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final int loanTerm,
+                                               final BigDecimal effectiveInterestRate, final MathContext mc, final MonetaryCurrency currency) {
         this.originationFeeAmount = originationFeeAmount;
         this.netDisbursementAmount = netDisbursementAmount;
         this.totalPaymentValue = totalPaymentValue;
@@ -130,8 +131,8 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     public static ProjectedAmortizationScheduleModel generate(final BigDecimal originationFeeAmount, final BigDecimal netDisbursementAmount,
-            final BigDecimal totalPaymentValue, final BigDecimal periodPaymentRate, final int npvDayCount,
-            final LocalDate expectedDisbursementDate, final MathContext mc, final MonetaryCurrency currency) {
+                                                              final BigDecimal totalPaymentValue, final BigDecimal periodPaymentRate, final int npvDayCount,
+                                                              final LocalDate expectedDisbursementDate, final MathContext mc, final MonetaryCurrency currency) {
 
         Objects.requireNonNull(originationFeeAmount, "originationFeeAmount");
         Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
@@ -207,7 +208,7 @@ public final class ProjectedAmortizationScheduleModel {
 
     /** Creates a new model with updated parameters, preserving applied payments. */
     public ProjectedAmortizationScheduleModel regenerate(final BigDecimal newDiscountAmount, final BigDecimal newNetAmount,
-            final LocalDate newStartDate) {
+                                                         final LocalDate newStartDate) {
         final ProjectedAmortizationScheduleModel newModel = generate(newDiscountAmount, newNetAmount, totalPaymentValue.getAmount(),
                 periodPaymentRate, npvDayCount, newStartDate, mc, currency);
         newModel.appliedPayments.addAll(appliedPayments);
@@ -385,7 +386,7 @@ public final class ProjectedAmortizationScheduleModel {
 
     /** Cursor-based: each payment consumes {@code actualPayment/expectedPayment} periods of expected amortization. */
     private List<BigDecimal> computeActualAmortizations(final List<BigDecimal> expectedAmortizations, final List<BigDecimal> payments,
-            final int appliedCount) {
+                                                        final int appliedCount) {
         final BigDecimal expectedPayment = expectedPaymentAmount.getAmount();
         final List<BigDecimal> result = new ArrayList<>(appliedCount);
         BigDecimal cursor = BigDecimal.ZERO;
@@ -398,7 +399,7 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     private BigDecimal consumeExpectedAmortization(final List<BigDecimal> expectedAmortizations, final BigDecimal startPos,
-            final BigDecimal count) {
+                                                   final BigDecimal count) {
         if (count.signum() <= 0) {
             return BigDecimal.ZERO;
         }
@@ -434,7 +435,7 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     private BigDecimal buildTailPeriodsAndComputeNpv(final List<ProjectedPayment> tailPayments, final BigDecimal shortfall,
-            final int appliedCount) {
+                                                     final int appliedCount) {
         final BigDecimal expectedPayment = expectedPaymentAmount.getAmount();
         BigDecimal tailNpv = BigDecimal.ZERO;
         BigDecimal remaining = shortfall;
@@ -459,7 +460,7 @@ public final class ProjectedAmortizationScheduleModel {
 
     /** {@code totalNetAmortization = -netDisbursementAmount + sum(npvSource × DF) + tailNpv} */
     private BigDecimal computeTotalNetAmortization(final List<BigDecimal> payments, final List<BigDecimal> runningExpected,
-            final int appliedCount, final BigDecimal tailNpv) {
+                                                   final int appliedCount, final BigDecimal tailNpv) {
         BigDecimal total = netDisbursementAmount.getAmount().negate();
         for (int i = 0; i < loanTerm; i++) {
             final BigDecimal npvSource = payments.get(i) != null ? payments.get(i) : runningExpected.get(i);

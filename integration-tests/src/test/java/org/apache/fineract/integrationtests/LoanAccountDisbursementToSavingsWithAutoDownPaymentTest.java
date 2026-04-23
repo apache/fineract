@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetSavingsAccountTransactionsPageItem;
@@ -153,7 +154,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
     }
 
     private Long createLoanWithLinkedAccountAndStandingInstructions(final Integer clientID, final Long loanProductID,
-            final Integer savingsId, final String externalId) {
+                                                                    final Integer savingsId, final String externalId) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("45")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("3").withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays()
@@ -168,7 +169,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
     }
 
     private Integer createApproveActivateSavingsAccountDailyPosting(final Integer clientID, final String startDate,
-            final SavingsAccountHelper savingsAccountHelper) {
+                                                                    final SavingsAccountHelper savingsAccountHelper) {
         final Integer savingsProductID = createSavingsProductDailyPosting();
         assertNotNull(savingsProductID);
         return savingsAccountHelper.createApproveActivateSavingsAccount(clientID, savingsProductID, startDate);
@@ -208,7 +209,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
     }
 
     private void verifyTransactionIsAccountTransfer(final LocalDate transactionDate, final Float transactionAmount, final Integer loanID,
-            final String transactionOfType) {
+                                                    final String transactionOfType) {
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {

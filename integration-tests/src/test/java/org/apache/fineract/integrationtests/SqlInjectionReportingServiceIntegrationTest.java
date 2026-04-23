@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,6 +31,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -308,7 +310,7 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
      * whitelist implementation for report types
      */
     @ParameterizedTest(name = "Report Type Validation: {0}")
-    @ValueSource(strings = { "report", "parameter" })
+    @ValueSource(strings = {"report", "parameter"})
     void uc3_testValidReportTypes(String validType) {
         log.info("Testing valid report type: {}", validType);
 
@@ -330,7 +332,7 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
      * UC4: Test invalid report types that should be rejected by whitelist
      */
     @ParameterizedTest(name = "Invalid Report Type: {0}")
-    @ValueSource(strings = { "table", "view", "procedure", "function", "schema", "database", "admin", "user", "system", "config" })
+    @ValueSource(strings = {"table", "view", "procedure", "function", "schema", "database", "admin", "user", "system", "config"})
     void uc4_testInvalidReportTypes(String invalidType) {
         log.info("Testing invalid report type: {}", invalidType);
 
@@ -506,8 +508,8 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
      * UC9: Test legitimate reports with various parameter types
      */
     @ParameterizedTest(name = "Parameter Type: {0}")
-    @CsvSource(delimiterString = " | ", value = { "R_officeId | 1 | Numeric parameter", "R_startDate | 2023-01-01 | Date parameter",
-            "R_endDate | 2023-12-31 | Date parameter", "R_currencyId | USD | String parameter", "R_loanProductId | 1 | Numeric parameter" })
+    @CsvSource(delimiterString = " | ", value = {"R_officeId | 1 | Numeric parameter", "R_startDate | 2023-01-01 | Date parameter",
+            "R_endDate | 2023-12-31 | Date parameter", "R_currencyId | USD | String parameter", "R_loanProductId | 1 | Numeric parameter"})
     void uc9_testLegitimateParameterTypes(String paramName, String paramValue, String description) {
         log.info("Testing legitimate parameter: {} = {} ({})", paramName, paramValue, description);
 

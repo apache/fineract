@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -58,7 +60,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsInterestPostingTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingTest.class);
@@ -564,7 +566,7 @@ public class SavingsInterestPostingTest {
     }
 
     public Integer createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(final String interestPayableAccount,
-            final String savingsControlAccount, final String interestReceivableAccount, final Account... accounts) {
+                                                                                    final String savingsControlAccount, final String interestReceivableAccount, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITHOUT OVERDRAFT ---------------------------------------");
         this.productHelper = new SavingsProductHelper().withOverDraftRate("100000", "21")
                 .withAccountInterestReceivables(interestReceivableAccount).withSavingsControlAccountId(savingsControlAccount)
@@ -596,7 +598,7 @@ public class SavingsInterestPostingTest {
 
     @SuppressWarnings("unchecked")
     private LocalDate coerceToLocalDate(HashMap tx) {
-        String[] candidateKeys = new String[] { "date", "transactionDate", "submittedOnDate", "createdDate" };
+        String[] candidateKeys = new String[]{"date", "transactionDate", "submittedOnDate", "createdDate"};
 
         for (String key : candidateKeys) {
             Object v = tx.get(key);
@@ -616,8 +618,8 @@ public class SavingsInterestPostingTest {
 
             if (v instanceof String) {
                 String s = (String) v;
-                DateTimeFormatter[] fmts = new DateTimeFormatter[] { DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US),
-                        DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.US), DateTimeFormatter.ofPattern("yyyy-MM-dd") };
+                DateTimeFormatter[] fmts = new DateTimeFormatter[]{DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US),
+                        DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.US), DateTimeFormatter.ofPattern("yyyy-MM-dd")};
                 for (DateTimeFormatter f : fmts) {
                     try {
                         return LocalDate.parse(s, f);
@@ -653,7 +655,7 @@ public class SavingsInterestPostingTest {
                 .filter(SavingsAccountTransactionType::isOverDraftInterestPosting).count();
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes"})
     private boolean isReversed(HashMap tx) {
         Object v = tx.get("reversed");
         if (v instanceof Boolean) {

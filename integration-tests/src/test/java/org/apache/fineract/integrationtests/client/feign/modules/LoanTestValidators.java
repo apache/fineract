@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
+
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
@@ -34,10 +35,11 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public final class LoanTestValidators {
 
-    private LoanTestValidators() {}
+    private LoanTestValidators() {
+    }
 
     public static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
+                                               double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
         assertEquals(dueDate, period.getDueDate());
@@ -49,7 +51,7 @@ public final class LoanTestValidators {
     }
 
     public static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue, double principalPaid,
-            double principalOutstanding, double paidInAdvance, double paidLate) {
+                                               double principalOutstanding, double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
         assertEquals(principalDue, Utils.getDoubleValue(period.getPrincipalDue()));
@@ -60,43 +62,43 @@ public final class LoanTestValidators {
     }
 
     public static void validateFullyUnpaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue) {
+                                                          double principalDue, double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index,
                 LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN, Locale.ENGLISH)), principalDue, 0,
                 principalDue, feeDue, 0, feeDue, penaltyDue, 0, penaltyDue, interestDue, 0, interestDue, 0, 0);
     }
 
     public static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue) {
+                                                        double principalDue, double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index,
                 LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN, Locale.ENGLISH)), principalDue,
                 principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, 0, 0);
     }
 
     public static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate) {
+                                                        double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate) {
         validateRepaymentPeriod(loanDetails, index,
                 LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN, Locale.ENGLISH)), principalDue,
                 principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, 0, paidLate);
     }
 
     public static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate, double paidInAdvance) {
+                                                        double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate, double paidInAdvance) {
         validateRepaymentPeriod(loanDetails, index,
                 LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN, Locale.ENGLISH)), principalDue,
                 principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, paidInAdvance, paidLate);
     }
 
     public static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double feeDue, double penaltyDue, double interestDue) {
+                                               double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index, dueDate, principalDue, 0, principalDue, feeDue, 0, feeDue, penaltyDue, 0, penaltyDue,
                 interestDue, 0, interestDue, 0, 0);
     }
 
     public static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
-            double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
-            double paidInAdvance, double paidLate) {
+                                               double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
+                                               double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
+                                               double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
         assertEquals(dueDate, period.getDueDate());

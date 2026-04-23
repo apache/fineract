@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -48,9 +48,9 @@ public final class CreditBureauLoanProductMappingData {
     private boolean active;
 
     public static CreditBureauLoanProductMappingData instance(final long creditbureauLoanProductMappingId,
-            final long organisationCreditBureauId, final String alias, final String creditbureauSummary, final String loanProductName,
-            final long loanProductId, final boolean isCreditCheckMandatory, final boolean skipCrediCheckInFailure, final long stalePeriod,
-            final boolean active) {
+                                                              final long organisationCreditBureauId, final String alias, final String creditbureauSummary, final String loanProductName,
+                                                              final long loanProductId, final boolean isCreditCheckMandatory, final boolean skipCrediCheckInFailure, final long stalePeriod,
+                                                              final boolean active) {
         return new CreditBureauLoanProductMappingData().setCreditbureauLoanProductMappingId(creditbureauLoanProductMappingId)
                 .setOrganisationCreditBureauId(organisationCreditBureauId).setAlias(alias).setCreditbureauSummary(creditbureauSummary)
                 .setLoanProductName(loanProductName).setLoanProductId(loanProductId).setCreditCheckMandatory(isCreditCheckMandatory)

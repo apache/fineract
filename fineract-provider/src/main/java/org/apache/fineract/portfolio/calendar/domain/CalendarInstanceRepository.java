@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -67,7 +68,7 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
     @Cacheable(key = "'groupId_' + #groupId + '_clientId_' + #clientId + '_statuses_' + T(org.springframework.util.StringUtils).collectionToCommaDelimitedString(#loanStatuses)")
     @Query("select ci from CalendarInstance ci where ci.entityId in (select loan.id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and loan.loanStatus in :loanStatuses) and ci.entityTypeId = 3")
     List<CalendarInstance> findCalendarInstancesForLoansByGroupIdAndClientIdAndStatuses(@Param("groupId") Long groupId,
-            @Param("clientId") Long clientId, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+                                                                                        @Param("clientId") Long clientId, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     /**
      * EntityType = 3 is for loan
@@ -75,7 +76,7 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
     @Cacheable(key = "'countLoans_calendarId_' + #calendarId + '_statuses_' + T(org.springframework.util.StringUtils).collectionToCommaDelimitedString(#loanStatuses)")
     @Query("SELECT COUNT(ci.id) FROM CalendarInstance ci, Loan loan WHERE loan.id = ci.entityId AND ci.entityTypeId = 3 AND ci.calendar.id = :calendarId AND loan.loanStatus IN :loanStatuses ")
     Integer countOfLoansSyncedWithCalendar(@Param("calendarId") Long calendarId,
-            @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+                                           @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     // Override JpaRepository methods to add cache eviction
     @Override

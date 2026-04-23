@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,8 +23,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createClientCollateral(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String clientId, final Integer collateralId) {
+                                                 final String clientId, final Integer collateralId) {
         LOG.info("---------------------------------CREATING A CLIENT_COLLATERAL---------------------------------------------");
         final String CLIENT_COLLATERAL_URL = "/fineract-provider/api/v1/clients/" + clientId + "/collaterals" + "?"
                 + Utils.TENANT_IDENTIFIER;
@@ -61,7 +63,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object getClientCollateralData(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer collateralId, final String clientId) {
+                                                 final Integer collateralId, final String clientId) {
         final String CLIENT_COLLATERAL_URL = "/fineract-provider/api/v1/clients" + clientId + "/collaterals/" + collateralId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, CLIENT_COLLATERAL_URL, "quantity");
@@ -98,7 +100,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String collateralProductAsJson(final String name, final String currency, final String unitType, final String quality,
-            final BigDecimal pctToBase, final BigDecimal baseAmount, final String locale) {
+                                                 final BigDecimal pctToBase, final BigDecimal baseAmount, final String locale) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
         map.put("currency", currency);
@@ -116,7 +118,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateCollateralProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer collateralId) {
+                                                  final Integer collateralId) {
         LOG.info("---------------------------------UPDATING A COLLATERAL_PRODUCT---------------------------------------------");
         final String COLLATERAL_PRODUCT_URL = "/fineract-provider/api/v1/collateral-management/" + collateralId + "?"
                 + Utils.TENANT_IDENTIFIER;
@@ -131,7 +133,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String updateCollateralProductAsString(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer collateralId) {
+                                                         final Integer collateralId) {
 
         Object updateCollateralObject = updateCollateralProduct(requestSpec, responseSpec, collateralId);
         // Convert the Object to String and fetch updated value
@@ -148,7 +150,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String updateCollateralProductAsJson(final String name, final String currency, final String unitType,
-            final String quality, final BigDecimal pctToBase, final BigDecimal baseAmount, final String locale) {
+                                                       final String quality, final BigDecimal pctToBase, final BigDecimal baseAmount, final String locale) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
         map.put("currency", currency);
@@ -165,7 +167,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap updateClientCollateral(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer collateralId) {
+                                                 final Integer collateralId) {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
         LOG.info("---------------------------------UPDATING A CLIENT COLLATERAL---------------------------------------------");
@@ -180,7 +182,7 @@ public class CollateralManagementHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String updateClientCollateralAsString(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer collateralId) {
+                                                        final Integer collateralId) {
 
         Object clientCollateralObject = updateClientCollateral(requestSpec, responseSpec, collateralId);
         // Convert the Object to String and fetch updated value

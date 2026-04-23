@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,7 +27,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,7 +42,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 
 @Entity
 @Table(name = "m_wc_loan_payment_allocation_rule", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "wc_loan_id", "transaction_type" }, name = "uq_m_wc_loan_payment_allocation_rule") })
+        @UniqueConstraint(columnNames = {"wc_loan_id", "transaction_type"}, name = "uq_m_wc_loan_payment_allocation_rule")})
 @Getter
 @Setter
 @AllArgsConstructor

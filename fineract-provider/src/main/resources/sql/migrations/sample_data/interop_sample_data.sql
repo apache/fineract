@@ -21,10 +21,13 @@
 -- !both tn03, tn04 tenants
 
 -- saving product, account
-SET @last_saving_prod_id = -1;
-SELECT COALESCE(max(id), 1) from m_savings_product into @last_saving_prod_id;
+SET
+@last_saving_prod_id = -1;
+SELECT COALESCE(max(id), 1)
+from m_savings_product into @last_saving_prod_id;
 
-SET @saving_prod_name = concat('Saving Product', @last_saving_prod_id);
+SET
+@saving_prod_name = concat('Saving Product', @last_saving_prod_id);
 
 INSERT INTO `m_savings_product`
 (`name`, `short_name`, `description`, `deposit_type_enum`, `currency_code`, `currency_digits`,
@@ -34,10 +37,13 @@ INSERT INTO `m_savings_product`
  `withdrawal_fee_for_transfer`, `allow_overdraft`, `min_required_balance`, `enforce_min_required_balance`,
  `min_balance_for_interest_calculation`, `withhold_tax`, `tax_group_id`, `is_dormancy_tracking_active`)
 VALUES (@saving_prod_name, concat('SP', @last_saving_prod_id), 'Saving Product', 100, 'TZS', 2, NULL, 0.000000, 1,
-                           4, 1, 360, NULL, 2, NULL, NULL, 0, 0, 0.000000, 1, NULL, 0, NULL, 0);
+        4, 1, 360, NULL, 2, NULL, NULL, 0, 0, 0.000000, 1, NULL, 0, NULL, 0);
 
-SET @saving_prod_id = -1;
-SELECT id FROM m_savings_product WHERE name = @saving_prod_name INTO @saving_prod_id;
+SET
+@saving_prod_id = -1;
+SELECT id
+FROM m_savings_product
+WHERE name = @saving_prod_name INTO @saving_prod_id;
 
 -- interop_identifier
 
@@ -45,38 +51,61 @@ SELECT id FROM m_savings_product WHERE name = @saving_prod_name INTO @saving_pro
 -- gl_account, mappings
 -- ASSET-1, LIABILITY-2, EQUITY-3, INCOME-4, EXPENSE-5
 
-SET @payment_type_id = -1;
-SELECT id FROM m_payment_type WHERE value = 'Money Transfer' INTO @payment_type_id;
+SET
+@payment_type_id = -1;
+SELECT id
+FROM m_payment_type
+WHERE value = 'Money Transfer' INTO @payment_type_id;
 
-SET @saving_gl_name = 'Interoperation Saving';
-INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`, `account_usage`, `classification_enum`, `description`)
-VALUES (@saving_gl_name, NULL, NULL, 'Interop_Saving', 0, 1, 1, 1, 'Interoperation Saving Asset'); -- account_usage: DETAIL, classification_enum: ASSET
+SET
+@saving_gl_name = 'Interoperation Saving';
+INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`,
+                              `account_usage`, `classification_enum`, `description`)
+VALUES (@saving_gl_name, NULL, NULL, 'Interop_Saving', 0, 1, 1, 1,
+        'Interoperation Saving Asset'); -- account_usage: DETAIL, classification_enum: ASSET
 
-INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`, `financial_account_type`)
-VALUES ((SELECT id FROM acc_gl_account WHERE name = @saving_gl_name), @saving_prod_id, 2, @payment_type_id, NULL, 1); -- product_type: SAVING, financial_account_type: ASSET
+INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`,
+                                   `financial_account_type`)
+VALUES ((SELECT id FROM acc_gl_account WHERE name = @saving_gl_name), @saving_prod_id, 2, @payment_type_id, NULL,
+        1); -- product_type: SAVING, financial_account_type: ASSET
 
-SET @nostro_gl_name = 'Interoperation NOSTRO';
-INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`, `account_usage`, `classification_enum`, `description`)
-VALUES (@nostro_gl_name, NULL, NULL, 'Interop_Nostro', 0, 0, 1, 2, 'Interoperation NOSTRO Liability'); -- account_usage: DETAIL, classification_enum: LIABILITY
+SET
+@nostro_gl_name = 'Interoperation NOSTRO';
+INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`,
+                              `account_usage`, `classification_enum`, `description`)
+VALUES (@nostro_gl_name, NULL, NULL, 'Interop_Nostro', 0, 0, 1, 2,
+        'Interoperation NOSTRO Liability'); -- account_usage: DETAIL, classification_enum: LIABILITY
 
-INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`, `financial_account_type`)
-VALUES ((SELECT id FROM acc_gl_account WHERE name = @nostro_gl_name), @saving_prod_id, 2, NULL, NULL, 2); -- product_type: SAVING, financial_account_type: LIABILITY
+INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`,
+                                   `financial_account_type`)
+VALUES ((SELECT id FROM acc_gl_account WHERE name = @nostro_gl_name), @saving_prod_id, 2, NULL, NULL,
+        2); -- product_type: SAVING, financial_account_type: LIABILITY
 
-SET @fee_gl_name = 'Interoperation Fee';
-INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`, `account_usage`, `classification_enum`, `description`)
-VALUES (@fee_gl_name, NULL, NULL, 'Interop_Fee', 0, 0, 1, 4, 'Interoperation Fee Income'); -- account_usage: DETAIL, classification_enum: INCOME
+SET
+@fee_gl_name = 'Interoperation Fee';
+INSERT INTO `acc_gl_account` (`name`, `parent_id`, `hierarchy`, `gl_code`, `disabled`, `manual_journal_entries_allowed`,
+                              `account_usage`, `classification_enum`, `description`)
+VALUES (@fee_gl_name, NULL, NULL, 'Interop_Fee', 0, 0, 1, 4,
+        'Interoperation Fee Income'); -- account_usage: DETAIL, classification_enum: INCOME
 
-SET @fee_gl_id = -1;
-SELECT id FROM acc_gl_account WHERE name = @fee_gl_name INTO @fee_gl_id;
+SET
+@fee_gl_id = -1;
+SELECT id
+FROM acc_gl_account
+WHERE name = @fee_gl_name INTO @fee_gl_id;
 
-INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`, `financial_account_type`)
+INSERT INTO `acc_product_mapping` (`gl_account_id`, `product_id`, `product_type`, `payment_type`, `charge_id`,
+                                   `financial_account_type`)
 VALUES (@fee_gl_id, @saving_prod_id, 2, NULL, NULL, 4); -- product_type: SAVING, financial_account_type: INCOME
 
-SET @charge_name = 'Interoperation Withdraw Fee';
+SET
+@charge_name = 'Interoperation Withdraw Fee';
 INSERT INTO `m_charge`
-(`name`,`currency_code`,`charge_applies_to_enum`,`charge_time_enum`,`charge_calculation_enum`,`charge_payment_mode_enum`,
- `amount`,`fee_on_day`,`fee_interval`,`fee_on_month`,`is_penalty`,`is_active`,`is_deleted`,`min_cap`,`max_cap`,`fee_frequency`,
- `income_or_liability_account_id`,`tax_group_id`)
+(`name`, `currency_code`, `charge_applies_to_enum`, `charge_time_enum`, `charge_calculation_enum`,
+ `charge_payment_mode_enum`,
+ `amount`, `fee_on_day`, `fee_interval`, `fee_on_month`, `is_penalty`, `is_active`, `is_deleted`, `min_cap`, `max_cap`,
+ `fee_frequency`,
+ `income_or_liability_account_id`, `tax_group_id`)
 VALUES (@charge_name, 'TZS', 2, 5, 1, NULL, 1.000000, NULL, NULL, NULL, 0, 0, 0, NULL, NULL, NULL, @fee_gl_id, NULL);
 
 -- loan product

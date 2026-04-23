@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -58,7 +60,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 @Setter
 @Getter
 @Entity
-@Table(name = "m_loan_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
+@Table(name = "m_loan_charge", uniqueConstraints = {@UniqueConstraint(columnNames = {"external_id"}, name = "external_id")})
 public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @ManyToOne(optional = false)
@@ -495,7 +497,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
             if (loanChargePerInstallment.isPending() && (unpaidChargePerInstallment == null
                     || DateUtils.isAfter(unpaidChargePerInstallment.getRepaymentInstallment().getDueDate(),
-                            loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+                    loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 unpaidChargePerInstallment = loanChargePerInstallment;
             }
         }
@@ -666,7 +668,7 @@ public class LoanCharge extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                     && outstanding.isLessThan(loanChargePerInstallment.getAmount(currency));
             if ((partiallyPaid || loanChargePerInstallment.isPaid()) && (paidChargePerInstallment == null
                     || DateUtils.isBefore(paidChargePerInstallment.getRepaymentInstallment().getDueDate(),
-                            loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+                    loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 paidChargePerInstallment = loanChargePerInstallment;
             }
         }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.interestratechart.incentive;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.portfolio.common.domain.ConditionType;
 
 public abstract class AttributeIncentiveCalculation {
@@ -31,19 +32,19 @@ public abstract class AttributeIncentiveCalculation {
         switch (conditionType) {
             case LESSTHAN:
                 applyIncentive = compareVal < 0;
-            break;
+                break;
             case EQUAL:
                 applyIncentive = compareVal == 0;
-            break;
+                break;
             case NOT_EQUAL:
                 applyIncentive = compareVal != 0;
-            break;
+                break;
             case GREATERTHAN:
                 applyIncentive = compareVal > 0;
-            break;
+                break;
             default:
                 applyIncentive = false;
-            break;
+                break;
         }
         return applyIncentive;
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,7 +27,9 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.toOff
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
 
 import com.google.gson.JsonElement;
+
 import java.util.Locale;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -52,8 +54,8 @@ public class AccountTransferDetailAssembler {
 
     @Autowired
     public AccountTransferDetailAssembler(final ClientRepositoryWrapper clientRepository,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
-            final FromJsonHelper fromApiJsonHelper, final LoanAssembler loanAccountAssembler) {
+                                          final OfficeRepositoryWrapper officeRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
+                                          final FromJsonHelper fromApiJsonHelper, final LoanAssembler loanAccountAssembler) {
         this.clientRepository = clientRepository;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.savingsAccountAssembler = savingsAccountAssembler;
@@ -99,7 +101,7 @@ public class AccountTransferDetailAssembler {
     }
 
     public AccountTransferDetails assembleSavingsToSavingsTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
-            final SavingsAccount toSavingsAccount) {
+                                                                   final SavingsAccount toSavingsAccount) {
 
         final JsonElement element = command.parsedJson();
 
@@ -123,7 +125,7 @@ public class AccountTransferDetailAssembler {
     }
 
     public AccountTransferDetails assembleSavingsToLoanTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
-            final Loan toLoanAccount) {
+                                                                final Loan toLoanAccount) {
 
         final JsonElement element = command.parsedJson();
 
@@ -147,7 +149,7 @@ public class AccountTransferDetailAssembler {
     }
 
     public AccountTransferDetails assembleLoanToSavingsTransfer(final JsonCommand command, final Loan fromLoanAccount,
-            final SavingsAccount toSavingsAccount) {
+                                                                final SavingsAccount toSavingsAccount) {
 
         final JsonElement element = command.parsedJson();
 
@@ -169,7 +171,7 @@ public class AccountTransferDetailAssembler {
     }
 
     public AccountTransferDetails assembleSavingsToLoanTransfer(final SavingsAccount fromSavingsAccount, final Loan toLoanAccount,
-            Integer transferType) {
+                                                                Integer transferType) {
         final Office fromOffice = fromSavingsAccount.office();
         final Client fromClient = fromSavingsAccount.getClient();
         final Office toOffice = toLoanAccount.getOffice();
@@ -181,7 +183,7 @@ public class AccountTransferDetailAssembler {
     }
 
     public AccountTransferDetails assembleSavingsToSavingsTransfer(final SavingsAccount fromSavingsAccount,
-            final SavingsAccount toSavingsAccount, Integer transferType) {
+                                                                   final SavingsAccount toSavingsAccount, Integer transferType) {
         final Office fromOffice = fromSavingsAccount.office();
         final Client fromClient = fromSavingsAccount.getClient();
         final Office toOffice = toSavingsAccount.office();
@@ -192,7 +194,7 @@ public class AccountTransferDetailAssembler {
     }
 
     public AccountTransferDetails assembleLoanToSavingsTransfer(final Loan fromLoanAccount, final SavingsAccount toSavingsAccount,
-            Integer transferType) {
+                                                                Integer transferType) {
         final Office fromOffice = fromLoanAccount.getOffice();
         final Client fromClient = fromLoanAccount.client();
         final Office toOffice = toSavingsAccount.office();

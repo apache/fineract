@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurri
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
 import jakarta.persistence.PersistenceException;
+
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
@@ -32,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -136,16 +138,16 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             msgCode += ".duplicate.accountNo";
             msg = "Savings account with accountNo " + accountNo + " already exists";
             param = "accountNo";
-            msgArgs = new Object[] { accountNo, dve };
+            msgArgs = new Object[]{accountNo, dve};
         } else if (checkEx.getMessage().contains("sa_external_id_UNIQUE")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             msgCode += ".duplicate.externalId";
             msg = "Savings account with externalId " + externalId + " already exists";
             param = "externalId";
-            msgArgs = new Object[] { externalId, dve };
+            msgArgs = new Object[]{externalId, dve};
         } else {
             msgCode += ".unknown.data.integrity.issue";
-            msgArgs = new Object[] { dve };
+            msgArgs = new Object[]{dve};
         }
         log.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, msgCode, msg, param, msgArgs);
@@ -591,7 +593,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Transactional
     @Override
     public CommandProcessingResult approveApplication(final Long savingsId, final JsonCommand command,
-            final DepositAccountType depositAccountType) {
+                                                      final DepositAccountType depositAccountType) {
 
         final AppUser currentUser = this.context.authenticatedUser();
 
@@ -626,7 +628,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Transactional
     @Override
     public CommandProcessingResult undoApplicationApproval(final Long savingsId, final JsonCommand command,
-            final DepositAccountType depositAccountType) {
+                                                           final DepositAccountType depositAccountType) {
 
         this.context.authenticatedUser();
 
@@ -661,7 +663,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Transactional
     @Override
     public CommandProcessingResult rejectApplication(final Long savingsId, final JsonCommand command,
-            final DepositAccountType depositAccountType) {
+                                                     final DepositAccountType depositAccountType) {
 
         final AppUser currentUser = this.context.authenticatedUser();
 
@@ -696,7 +698,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Transactional
     @Override
     public CommandProcessingResult applicantWithdrawsFromApplication(final Long savingsId, final JsonCommand command,
-            final DepositAccountType depositAccountType) {
+                                                                     final DepositAccountType depositAccountType) {
         final AppUser currentUser = this.context.authenticatedUser();
 
         this.savingsAccountApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());

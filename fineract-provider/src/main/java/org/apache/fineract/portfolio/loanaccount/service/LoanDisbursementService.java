@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -123,7 +125,7 @@ public class LoanDisbursementService {
     }
 
     public Money adjustDisburseAmount(final Loan loan, @NonNull final JsonCommand command,
-            @NonNull final LocalDate actualDisbursementDate) {
+                                      @NonNull final LocalDate actualDisbursementDate) {
         Money disburseAmount = loan.getLoanRepaymentScheduleDetail().getPrincipal().zero();
         final BigDecimal principalDisbursed = command.bigDecimalValueOfParameterNamed(LoanApiConstants.principalDisbursedParameterName);
         if (loan.getActualDisbursementDate() == null || DateUtils.isBefore(actualDisbursementDate, loan.getActualDisbursementDate())) {
@@ -283,7 +285,7 @@ public class LoanDisbursementService {
     }
 
     private void createOrUpdateDisbursementDetails(final Loan loan, final Long disbursementID, final Map<String, Object> actualChanges,
-            final LocalDate expectedDisbursementDate, final BigDecimal principal, final List<Long> existingDisbursementList) {
+                                                   final LocalDate expectedDisbursementDate, final BigDecimal principal, final List<Long> existingDisbursementList) {
         if (disbursementID != null) {
             LoanDisbursementDetails loanDisbursementDetail = loan.fetchLoanDisbursementsById(disbursementID);
             existingDisbursementList.remove(disbursementID);
@@ -322,7 +324,7 @@ public class LoanDisbursementService {
     }
 
     private void removeDisbursementAndAssociatedCharges(final Loan loan, final Map<String, Object> actualChanges,
-            final List<Long> disbursementList, final List<Long> loanChargeIds, final int chargeIdLength, final boolean removeAllCharges) {
+                                                        final List<Long> disbursementList, final List<Long> loanChargeIds, final int chargeIdLength, final boolean removeAllCharges) {
         if (removeAllCharges) {
             final LoanCharge[] tempCharges = new LoanCharge[loan.getCharges().size()];
             loan.getCharges().toArray(tempCharges);
@@ -424,7 +426,7 @@ public class LoanDisbursementService {
     }
 
     private boolean hasMultipleOrPreDefinedDisbursementDetails(final Loan loan,
-            final Collection<LoanDisbursementDetails> undisbursedDetails) {
+                                                               final Collection<LoanDisbursementDetails> undisbursedDetails) {
         Collection<LoanDisbursementDetails> allDisbursementDetails = loan.getDisbursementDetails();
 
         if (undisbursedDetails.size() > 1) {
@@ -473,7 +475,7 @@ public class LoanDisbursementService {
     }
 
     public static boolean hasMultipleTranchesOnSameDateWithSameExpectedDate(Collection<LoanDisbursementDetails> disbursementDetails,
-            LocalDate actualDisbursementDate) {
+                                                                            LocalDate actualDisbursementDate) {
         if (disbursementDetails == null || disbursementDetails.size() <= 1 || actualDisbursementDate == null) {
             return false;
         }

@@ -171,14 +171,20 @@
         <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation</class>
         <class>org.apache.fineract.portfolio.workingcapitalloannearbreach.domain.WorkingCapitalNearBreach</class>
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct</class>
-        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes</class>
-        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule</class>
-        <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationTypeListConverter</class>
+        <class>
+            org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes
+        </class>
+        <class>
+            org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule
+        </class>
+        <class>
+            org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationTypeListConverter
+        </class>
 
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <properties>
-            <property name="eclipselink.weaving" value="static" />
+            <property name="eclipselink.weaving" value="static"/>
             <property name="eclipselink.weaving.internal" value="false"/>
         </properties>
     </persistence-unit>

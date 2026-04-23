@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,8 +22,10 @@ import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.security.SecureRandom;
 import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public final class WorkingDaysHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
+                                                              final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDayWithWrongRecur(),
@@ -74,7 +76,7 @@ public final class WorkingDaysHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+            "DMI_RANDOM_USED_ONLY_ONCE"}, justification = "False positive for random object created and used only once")
     public static String updateWorkingWeekDaysDaysAsJson() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR");
@@ -90,7 +92,7 @@ public final class WorkingDaysHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+            "DMI_RANDOM_USED_ONLY_ONCE"}, justification = "False positive for random object created and used only once")
     public static String updateWorkingDaysAsJson() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
@@ -106,7 +108,7 @@ public final class WorkingDaysHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+            "DMI_RANDOM_USED_ONLY_ONCE"}, justification = "False positive for random object created and used only once")
     public static String updateWorkingDayWithWrongRecur() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH");
@@ -131,7 +133,7 @@ public final class WorkingDaysHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                            final ResponseSpecification responseSpec) {
 
         return Utils.performServerGet(requestSpec, responseSpec, WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 

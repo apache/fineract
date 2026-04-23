@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,15 +23,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Created by Chirag Gupta on 01/12/18.
  */
-@SuppressWarnings({ "MemberName" })
+@SuppressWarnings({"MemberName"})
 final class ClientAddressApiResourcesSwagger {
 
-    private ClientAddressApiResourcesSwagger() {}
+    private ClientAddressApiResourcesSwagger() {
+    }
 
     @Schema(description = "PostClientClientIdAddressesResponse")
     public static final class PostClientClientIdAddressesResponse {
 
-        private PostClientClientIdAddressesResponse() {}
+        private PostClientClientIdAddressesResponse() {
+        }
 
         @Schema(example = "15")
         public Long resourceId;
@@ -40,7 +42,8 @@ final class ClientAddressApiResourcesSwagger {
     @Schema(description = "PutClientClientIdAddressesResponse")
     public static final class PutClientClientIdAddressesResponse {
 
-        private PutClientClientIdAddressesResponse() {}
+        private PutClientClientIdAddressesResponse() {
+        }
 
         @Schema(example = "67")
         public Long resourceId;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,9 +22,11 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accounti
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
 
 import com.google.gson.JsonElement;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForSavings;
@@ -73,7 +75,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
         switch (accountingRuleType) {
             case NONE:
-            break;
+                break;
             case CASH_BASED:
                 // asset or liability
                 this.loanProductToGLAccountMappingHelper.saveLoanToAssetOrLiabilityAccountMapping(element,
@@ -145,7 +147,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
                         loanProductId, null);
-            break;
+                break;
             case ACCRUAL_UPFRONT:
                 // Fall Through
             case ACCRUAL_PERIODIC:
@@ -243,12 +245,12 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveCapitalizedIncomeClassificationToIncomeAccountMappings(command, element,
                         loanProductId, null);
-            break;
+                break;
         }
     }
 
     private void saveSavingsBaseAccountMapping(final Long savingProductId, final DepositAccountType accountType, final JsonCommand command,
-            final JsonElement element) {
+                                               final JsonElement element) {
         // asset
         this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                 SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingProductId,
@@ -309,7 +311,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     @Transactional
     public void createSavingProductToGLAccountMapping(final Long savingProductId, final JsonCommand command,
-            DepositAccountType accountType) {
+                                                      DepositAccountType accountType) {
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element,
                 Locale.getDefault());
@@ -317,10 +319,10 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
         switch (accountingRuleType) {
             case NONE:
-            break;
+                break;
             case CASH_BASED:
                 saveSavingsBaseAccountMapping(savingProductId, accountType, command, element);
-            break;
+                break;
 
             case ACCRUAL_PERIODIC:
                 saveSavingsBaseAccountMapping(savingProductId, accountType, command, element);
@@ -341,9 +343,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                         SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), savingProductId,
                         AccrualAccountsForSavings.INTEREST_PAYABLE.getValue());
-            break;
+                break;
             default:
-            break;
+                break;
         }
 
     }
@@ -360,7 +362,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
         switch (accountingRuleType) {
             case NONE:
-            break;
+                break;
             case CASH_BASED:
                 // asset
                 this.shareProductToGLAccountMappingHelper.saveSharesToAssetAccountMapping(element,
@@ -385,9 +387,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 // advanced accounting mappings
                 this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, shareProductId, null);
                 this.savingsProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, shareProductId, null);
-            break;
+                break;
             default:
-            break;
+                break;
         }
 
     }
@@ -395,8 +397,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     @Transactional
     public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
-            final boolean accountingRuleChanged, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
-            final boolean enableBuyDownFee, final boolean merchantBuyDownFee) {
+                                                                   final boolean accountingRuleChanged, final AccountingRuleType accountingRuleType, final boolean enableIncomeCapitalization,
+                                                                   final boolean enableBuyDownFee, final boolean merchantBuyDownFee) {
         /***
          * Variable tracks all accounting mapping properties that have been updated
          ***/
@@ -434,7 +436,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     @Transactional
     public Map<String, Object> updateSavingsProductToGLAccountMapping(final Long savingsProductId, final JsonCommand command,
-            final boolean accountingRuleChanged, final int accountingRuleTypeId, final DepositAccountType accountType) {
+                                                                      final boolean accountingRuleChanged, final int accountingRuleTypeId, final DepositAccountType accountType) {
         /***
          * Variable tracks all accounting mapping properties that have been updated
          ***/
@@ -466,7 +468,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     @Transactional
     public Map<String, Object> updateShareProductToGLAccountMapping(final Long shareProductId, final JsonCommand command,
-            final boolean accountingRuleChanged, final int accountingRuleTypeId) {
+                                                                    final boolean accountingRuleChanged, final int accountingRuleTypeId) {
         /***
          * Variable tracks all accounting mapping properties that have been updated
          ***/

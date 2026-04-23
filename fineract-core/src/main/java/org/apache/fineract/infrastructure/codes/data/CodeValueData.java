@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.codes.data;
 
 import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,7 +44,7 @@ public class CodeValueData implements Serializable {
     private Boolean mandatory;
 
     public static CodeValueData instance(final Long id, final String name, final String description, final Integer position,
-            final boolean isActive, final boolean mandatory) {
+                                         final boolean isActive, final boolean mandatory) {
         return new CodeValueData().setId(id).setName(name).setPosition(position).setDescription(description).setActive(isActive)
                 .setMandatory(mandatory);
     }
@@ -67,7 +68,7 @@ public class CodeValueData implements Serializable {
     }
 
     public static CodeValueData instance(final Long id, final String name, final Integer position, final String description,
-            final boolean isActive, final boolean mandatory) {
+                                         final boolean isActive, final boolean mandatory) {
         return new CodeValueData().setId(id).setName(name).setPosition(position).setDescription(description).setActive(isActive)
                 .setMandatory(mandatory);
     }

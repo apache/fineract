@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.teller.data;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -88,8 +89,8 @@ public final class TellerData implements Serializable {
      * @return the new created {@code TellerData}
      */
     public static TellerData instance(final Long id, final Long officeId, final Long debitAccountId, final Long creditAccountId,
-            final String name, final String description, final LocalDate startDate, final LocalDate endDate, final TellerStatus status,
-            final String officeName, final Boolean hasTransactions, final Boolean hasMappedCashiers) {
+                                      final String name, final String description, final LocalDate startDate, final LocalDate endDate, final TellerStatus status,
+                                      final String officeName, final Boolean hasTransactions, final Boolean hasMappedCashiers) {
         return new TellerData().setId(id).setOfficeId(officeId).setDebitAccountId(debitAccountId).setCreditAccountId(creditAccountId)
                 .setName(name).setDescription(description).setStartDate(startDate).setEndDate(endDate).setStatus(status)
                 .setOfficeName(officeName).setHasTransactions(hasTransactions).setHasMappedCashiers(hasMappedCashiers);

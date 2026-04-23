@@ -32,16 +32,19 @@
             <column name="string_value" value="ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD"/>
             <column name="enabled" valueBoolean="true"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value=" Available options: Any combination from LoanStatus enum separated by comma."/>
+            <column name="description"
+                    value=" Available options: Any combination from LoanStatus enum separated by comma."/>
         </insert>
         <insert tableName="c_configuration">
             <column name="name" value="allowed-loan-statuses-of-delayed-settlement-for-external-asset-transfer"/>
             <column name="value"/>
             <column name="date_value"/>
-            <column name="string_value" value="ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD,OVERPAID,CLOSED_OBLIGATIONS_MET"/>
+            <column name="string_value"
+                    value="ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD,OVERPAID,CLOSED_OBLIGATIONS_MET"/>
             <column name="enabled" valueBoolean="true"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value=" Available options: Any combination from LoanStatus enum separated by comma."/>
+            <column name="description"
+                    value=" Available options: Any combination from LoanStatus enum separated by comma."/>
         </insert>
     </changeSet>
 </databaseChangeLog>

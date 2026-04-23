@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.useradministration.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -100,7 +102,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         throw ErrorHandler.getMappable(dve, "error.msg.role.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    @Caching(evict = {@CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true)})
     @Transactional
     @Override
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
@@ -136,7 +138,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         }
     }
 
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    @Caching(evict = {@CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true)})
     @Transactional
     @Override
     public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {

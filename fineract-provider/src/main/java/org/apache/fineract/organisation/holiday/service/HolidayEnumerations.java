@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,19 +38,19 @@ public final class HolidayEnumerations {
             case INVALID:
                 optionData = new EnumOptionData(HolidayStatusType.INVALID.getValue().longValue(), HolidayStatusType.INVALID.getCode(),
                         "Invalid");
-            break;
+                break;
             case PENDING_FOR_ACTIVATION:
                 optionData = new EnumOptionData(HolidayStatusType.PENDING_FOR_ACTIVATION.getValue().longValue(),
                         HolidayStatusType.PENDING_FOR_ACTIVATION.getCode(), "Pending for activation");
-            break;
+                break;
             case ACTIVE:
                 optionData = new EnumOptionData(HolidayStatusType.ACTIVE.getValue().longValue(), HolidayStatusType.ACTIVE.getCode(),
                         "Active");
-            break;
+                break;
             case DELETED:
                 optionData = new EnumOptionData(HolidayStatusType.DELETED.getValue().longValue(), HolidayStatusType.DELETED.getCode(),
                         "Deleted");
-            break;
+                break;
         }
         return optionData;
     }
@@ -65,15 +65,15 @@ public final class HolidayEnumerations {
             case RESCHEDULETONEXTREPAYMENTDATE:
                 optionData = new EnumOptionData(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE.getValue().longValue(),
                         RescheduleType.RESCHEDULETONEXTREPAYMENTDATE.getCode(), "Reschedule to next repayment date");
-            break;
+                break;
             case RESCHEDULETOSPECIFICDATE:
                 optionData = new EnumOptionData(RescheduleType.RESCHEDULETOSPECIFICDATE.getValue().longValue(),
                         RescheduleType.RESCHEDULETOSPECIFICDATE.getCode(), "Reschedule to specified date");
-            break;
+                break;
 
             default:
                 optionData = new EnumOptionData(RescheduleType.INVALID.getValue().longValue(), RescheduleType.INVALID.getCode(), "Invalid");
-            break;
+                break;
         }
         return optionData;
     }

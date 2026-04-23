@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -50,14 +50,14 @@ public class LoanInterestRecalculationData {
     private Boolean disallowInterestCalculationOnPastDue;
 
     public LoanInterestRecalculationData(final Long id, final Long loanId, final EnumOptionData interestRecalculationCompoundingType,
-            final EnumOptionData rescheduleStrategyType, final CalendarData calendarData,
-            final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
-            final EnumOptionData recalculationRestFrequencyNthDay, final EnumOptionData recalculationRestFrequencyWeekday,
-            final Integer recalculationRestFrequencyOnDay, final CalendarData compoundingCalendarData,
-            final EnumOptionData recalculationCompoundingFrequencyType, final Integer recalculationCompoundingFrequencyInterval,
-            final EnumOptionData recalculationCompoundingFrequencyNthDay, final EnumOptionData recalculationCompoundingFrequencyWeekday,
-            final Integer recalculationCompoundingFrequencyOnDay, final Boolean isCompoundingToBePostedAsTransaction,
-            final Boolean allowCompoundingOnEod, final Boolean disallowInterestCalculationOnPastDue) {
+                                         final EnumOptionData rescheduleStrategyType, final CalendarData calendarData,
+                                         final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
+                                         final EnumOptionData recalculationRestFrequencyNthDay, final EnumOptionData recalculationRestFrequencyWeekday,
+                                         final Integer recalculationRestFrequencyOnDay, final CalendarData compoundingCalendarData,
+                                         final EnumOptionData recalculationCompoundingFrequencyType, final Integer recalculationCompoundingFrequencyInterval,
+                                         final EnumOptionData recalculationCompoundingFrequencyNthDay, final EnumOptionData recalculationCompoundingFrequencyWeekday,
+                                         final Integer recalculationCompoundingFrequencyOnDay, final Boolean isCompoundingToBePostedAsTransaction,
+                                         final Boolean allowCompoundingOnEod, final Boolean disallowInterestCalculationOnPastDue) {
         this.id = id;
         this.loanId = loanId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;

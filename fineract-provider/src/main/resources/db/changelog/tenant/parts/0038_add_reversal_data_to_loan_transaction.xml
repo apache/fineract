@@ -19,10 +19,12 @@
     under the License.
 
 -->
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
         <addColumn tableName="m_loan_transaction">
-            <column defaultValueComputed="NULL" name="reversal_external_id" type="VARCHAR(100)" />
+            <column defaultValueComputed="NULL" name="reversal_external_id" type="VARCHAR(100)"/>
         </addColumn>
         <addColumn tableName="m_loan_transaction">
             <column defaultValueComputed="NULL" name="reversed_on_date" type="date"/>

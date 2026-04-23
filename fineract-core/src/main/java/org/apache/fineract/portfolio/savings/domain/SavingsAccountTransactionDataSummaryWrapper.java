@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -112,7 +113,7 @@ public final class SavingsAccountTransactionDataSummaryWrapper {
     }
 
     public BigDecimal calculateTotalPenaltyChargeWaived(final CurrencyData currency,
-            final List<SavingsAccountTransactionData> transactions) {
+                                                        final List<SavingsAccountTransactionData> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransactionData transaction : transactions) {
             if (transaction.isWaivePenaltyChargeAndNotReversed() && !transaction.isReversalTransaction()) {

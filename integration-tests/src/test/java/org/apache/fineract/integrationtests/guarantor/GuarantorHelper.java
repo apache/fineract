@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,8 +20,10 @@ package org.apache.fineract.integrationtests.guarantor;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -56,7 +58,7 @@ public class GuarantorHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object createGuarantorWithError(final Integer loanId, final String guarantorJSON, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                           final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, guarantorJSON,
                 CommonConstants.RESPONSE_ERROR);
     }

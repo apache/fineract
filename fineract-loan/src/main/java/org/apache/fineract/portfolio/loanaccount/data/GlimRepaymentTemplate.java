@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -42,8 +42,8 @@ public final class GlimRepaymentTemplate {
     private final BigDecimal childPrincipalAmount;
 
     private GlimRepaymentTemplate(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId, final String clientName,
-            final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
-            final String childLoanAccountNo, final BigDecimal childPrincipalAmount) {
+                                  final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
+                                  final String childLoanAccountNo, final BigDecimal childPrincipalAmount) {
         this.glimId = glimId;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -56,8 +56,8 @@ public final class GlimRepaymentTemplate {
     }
 
     public static GlimRepaymentTemplate getInstance(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId,
-            final String clientName, final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
-            final String childLoanAccountNo, final BigDecimal childPrincipalAmount) {
+                                                    final String clientName, final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
+                                                    final String childLoanAccountNo, final BigDecimal childPrincipalAmount) {
         return new GlimRepaymentTemplate(glimId, groupId, clientId, clientName, childLoanId, parentAccountNo, parentPrincipalAmount,
                 childLoanAccountNo, childPrincipalAmount);
     }

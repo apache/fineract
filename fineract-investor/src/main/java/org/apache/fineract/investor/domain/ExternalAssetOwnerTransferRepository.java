@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.investor.domain;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +50,7 @@ public interface ExternalAssetOwnerTransferRepository
 
     @Query("SELECT t FROM ExternalAssetOwnerTransfer t WHERE t.loanId = :loanId AND t.effectiveDateTo > :effectiveDate order by t.id desc")
     List<ExternalAssetOwnerTransfer> findEffectiveTransfersOrderByIdDesc(@Param("loanId") Long loanId,
-            @Param("effectiveDate") LocalDate effectiveDate);
+                                                                         @Param("effectiveDate") LocalDate effectiveDate);
 
     Optional<ExternalAssetOwnerTransfer> findFirstByExternalIdOrderByIdAsc(ExternalId externalTransferId);
 

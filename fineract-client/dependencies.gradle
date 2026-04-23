@@ -33,7 +33,7 @@ dependencies {
             'com.github.spotbugs:spotbugs-annotations',
             'com.squareup.okhttp3:okhttp',
             'com.squareup.okhttp3:logging-interceptor',
-            )
+    )
 
     testImplementation 'org.assertj:assertj-core'
 }

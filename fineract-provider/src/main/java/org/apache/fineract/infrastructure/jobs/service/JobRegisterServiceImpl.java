@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 import com.google.common.base.Splitter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -320,7 +322,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setSchedulerName(name);
         schedulerFactoryBean.setGlobalJobListeners(jobListeners);
-        final TriggerListener[] globalTriggerListeners = { globalSchedulerTriggerListener };
+        final TriggerListener[] globalTriggerListeners = {globalSchedulerTriggerListener};
         schedulerFactoryBean.setGlobalTriggerListeners(globalTriggerListeners);
         final Properties quartzProperties = new Properties();
         quartzProperties.put(SchedulerFactoryBean.PROP_THREAD_COUNT, Integer.toString(noOfThreads));

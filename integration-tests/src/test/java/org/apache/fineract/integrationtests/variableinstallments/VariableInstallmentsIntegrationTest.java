@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,11 +23,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -41,7 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class VariableInstallmentsIntegrationTest {
 
@@ -111,15 +113,15 @@ public class VariableInstallmentsIntegrationTest {
         HashMap modifiedReschdule = transactionHelper.validateVariations(toDeletedata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsDecliningBalanceHelper.constructVerifyData(
-                new String[] { "20 November 2011", "20 December 2011", "20 January 2012" },
-                new String[] { "34675.47", "34675.47", "36756.26" });
+                new String[]{"20 November 2011", "20 December 2011", "20 January 2012"},
+                new String[]{"34675.47", "34675.47", "36756.26"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(toDeletedata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
 
     }
@@ -179,15 +181,15 @@ public class VariableInstallmentsIntegrationTest {
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsDecliningBalanceHelper.constructVerifyData(
-                new String[] { "20 October 2011", "31 October 2011", "20 November 2011", "20 December 2011", "20 January 2012" },
-                new String[] { "21215.84", "5000.0", "26477.31", "26477.31", "25947.7" });
+                new String[]{"20 October 2011", "31 October 2011", "20 November 2011", "20 December 2011", "20 January 2012"},
+                new String[]{"21215.84", "5000.0", "26477.31", "26477.31", "25947.7"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -220,22 +222,22 @@ public class VariableInstallmentsIntegrationTest {
         Map repaymentSchedule = (Map) list.get("repaymentSchedule");
         ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
         String addVariationsjsondata = VariableInstallmentsDecliningBalanceHelper.createModifiyVariations((Map) periods.get(1)); // 0th
-                                                                                                                                 // position
-                                                                                                                                 // will
-                                                                                                                                 // have
-                                                                                                                                 // disbursement
+        // position
+        // will
+        // have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsDecliningBalanceHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "20 December 2011", "20 January 2012" },
-                new String[] { "30000.0", "24966.34", "24966.34", "24966.33" });
+                new String[]{"20 October 2011", "20 November 2011", "20 December 2011", "20 January 2012"},
+                new String[]{"30000.0", "24966.34", "24966.34", "24966.33"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
 
     }
@@ -270,22 +272,22 @@ public class VariableInstallmentsIntegrationTest {
         ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
 
         String addVariationsjsondata = VariableInstallmentsDecliningBalanceHelper.createAllVariations(); // 0th
-                                                                                                         // position
-                                                                                                         // will
-                                                                                                         // have
-                                                                                                         // disbursement
+        // position
+        // will
+        // have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsDecliningBalanceHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "25 December 2011", "20 January 2012" },
-                new String[] { "26262.38", "30000.0", "5000.0", "44077.0" });
+                new String[]{"20 October 2011", "20 November 2011", "25 December 2011", "20 January 2012"},
+                new String[]{"26262.38", "30000.0", "5000.0", "44077.0"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -320,22 +322,22 @@ public class VariableInstallmentsIntegrationTest {
         ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
 
         String addVariationsjsondata = VariableInstallmentsDecliningBalanceHelper.createAllVariationsWithEqualPrincipal(); // 0th
-                                                                                                                           // position
-                                                                                                                           // will
-                                                                                                                           // have
-                                                                                                                           // disbursement
+        // position
+        // will
+        // have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsDecliningBalanceHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "25 December 2011", "20 January 2012" },
-                new String[] { "27000.0", "31500.0", "6045.16", "40670.97" });
+                new String[]{"20 October 2011", "20 November 2011", "25 December 2011", "20 January 2012"},
+                new String[]{"27000.0", "31500.0", "6045.16", "40670.97"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -371,21 +373,21 @@ public class VariableInstallmentsIntegrationTest {
         //
         //
         String addVariationsjsondata = VariableInstallmentsDecliningBalanceHelper.createModifiyDateVariations(
-                new String[] { "20 December 2011", "20 January 2012" }, new String[] { "04 January 2012", "08 February 2012" },
-                new String[] { "20000" }); // 0th position will have
-                                           // disbursement
+                new String[]{"20 December 2011", "20 January 2012"}, new String[]{"04 January 2012", "08 February 2012"},
+                new String[]{"20000"}); // 0th position will have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsDecliningBalanceHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "04 January 2012", "08 February 2012" },
-                new String[] { "26262.38", "26262.38", "20000.0", "33242.97" });
+                new String[]{"20 October 2011", "20 November 2011", "04 January 2012", "08 February 2012"},
+                new String[]{"26262.38", "26262.38", "20000.0", "33242.97"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -419,15 +421,15 @@ public class VariableInstallmentsIntegrationTest {
         HashMap modifiedReschdule = transactionHelper.validateVariations(toDeletedata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsFlatHelper.constructVerifyData(
-                new String[] { "20 November 2011", "20 December 2011", "20 January 2012" },
-                new String[] { "36000.0", "36000.0", "36000.0" });
+                new String[]{"20 November 2011", "20 December 2011", "20 January 2012"},
+                new String[]{"36000.0", "36000.0", "36000.0"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(toDeletedata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -463,15 +465,15 @@ public class VariableInstallmentsIntegrationTest {
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsFlatHelper.constructVerifyData(
-                new String[] { "20 October 2011", "31 October 2011", "20 November 2011", "20 December 2011", "20 January 2012" },
-                new String[] { "21600.0", "6600.0", "26600.0", "26600.0", "26600.0" });
+                new String[]{"20 October 2011", "31 October 2011", "20 November 2011", "20 December 2011", "20 January 2012"},
+                new String[]{"21600.0", "6600.0", "26600.0", "26600.0", "26600.0"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -502,22 +504,22 @@ public class VariableInstallmentsIntegrationTest {
         Map repaymentSchedule = (Map) list.get("repaymentSchedule");
         ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
         String addVariationsjsondata = VariableInstallmentsFlatHelper.createModifiyVariations((Map) periods.get(1)); // 0th
-                                                                                                                     // position
-                                                                                                                     // will
-                                                                                                                     // have
-                                                                                                                     // disbursement
+        // position
+        // will
+        // have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsFlatHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "20 December 2011", "20 January 2012" },
-                new String[] { "32000.0", "25333.33", "25333.33", "25333.34" });
+                new String[]{"20 October 2011", "20 November 2011", "20 December 2011", "20 January 2012"},
+                new String[]{"32000.0", "25333.33", "25333.33", "25333.34"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -551,22 +553,22 @@ public class VariableInstallmentsIntegrationTest {
         ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
 
         String addVariationsjsondata = VariableInstallmentsFlatHelper.createAllVariations(); // 0th
-                                                                                             // position
-                                                                                             // will
-                                                                                             // have
-                                                                                             // disbursement
+        // position
+        // will
+        // have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsFlatHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "25 December 2011", "20 January 2012" },
-                new String[] { "27000.0", "32000.0", "7000.0", "42000.0" });
+                new String[]{"20 October 2011", "20 November 2011", "25 December 2011", "20 January 2012"},
+                new String[]{"27000.0", "32000.0", "7000.0", "42000.0"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 
@@ -602,21 +604,21 @@ public class VariableInstallmentsIntegrationTest {
         //
         //
         String addVariationsjsondata = VariableInstallmentsFlatHelper.createModifiyDateVariations(
-                new String[] { "20 December 2011", "20 January 2012" }, new String[] { "04 January 2012", "08 February 2012" },
-                new String[] { "20000" }); // 0th position will have
-                                           // disbursement
+                new String[]{"20 December 2011", "20 January 2012"}, new String[]{"04 January 2012", "08 February 2012"},
+                new String[]{"20000"}); // 0th position will have
+        // disbursement
         HashMap modifiedReschdule = transactionHelper.validateVariations(addVariationsjsondata, loanID);
         ArrayList newperiods = (ArrayList) modifiedReschdule.get("periods");
         ArrayList toVerifyData = VariableInstallmentsFlatHelper.constructVerifyData(
-                new String[] { "20 October 2011", "20 November 2011", "04 January 2012", "08 February 2012" },
-                new String[] { "27306.45", "27306.45", "22306.45", "32306.46" });
+                new String[]{"20 October 2011", "20 November 2011", "04 January 2012", "08 February 2012"},
+                new String[]{"27306.45", "27306.45", "22306.45", "32306.46"});
         assertAfterSubmit(newperiods, toVerifyData);
         transactionHelper.submitVariations(addVariationsjsondata, loanID);
         list = transactionHelper.retrieveSchedule(loanID);
         repaymentSchedule = (Map) list.get("repaymentSchedule");
         periods = (ArrayList) repaymentSchedule.get("periods");
         periods.remove(0); // Repayments Schedule includes disbursement also. So
-                           // remove this.
+        // remove this.
         assertAfterSubmit(periods, toVerifyData);
     }
 }

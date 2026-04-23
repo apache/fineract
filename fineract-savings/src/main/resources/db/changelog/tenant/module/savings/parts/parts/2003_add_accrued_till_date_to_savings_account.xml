@@ -24,7 +24,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
         <addColumn tableName="m_savings_account">
-            <column name="accrued_till_date" type="DATE" defaultValueComputed="NULL" />
+            <column name="accrued_till_date" type="DATE" defaultValueComputed="NULL"/>
         </addColumn>
     </changeSet>
 

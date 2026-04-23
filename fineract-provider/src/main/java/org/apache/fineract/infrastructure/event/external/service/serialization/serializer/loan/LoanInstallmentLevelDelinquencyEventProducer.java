@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.avro.loan.v1.DelinquencyRangeDataV1;
 import org.apache.fineract.avro.loan.v1.LoanAmountDataV1;
@@ -85,12 +86,12 @@ public class LoanInstallmentLevelDelinquencyEventProducer {
 
                     // get list of charges for installments in same range
                     List<LoanCharge> chargesForInstallmentsInSameRange = loan.getLoanCharges().stream().filter(loanCharge -> !loanCharge
-                            .isPaid()
-                            && delinquentInstallmentsInSameRange.stream().anyMatch(installmentForCharge -> (DateUtils
+                                    .isPaid()
+                                    && delinquentInstallmentsInSameRange.stream().anyMatch(installmentForCharge -> (DateUtils
                                     .isAfter(loanCharge.getEffectiveDueDate(), installmentForCharge.getFromDate())
                                     || DateUtils.isEqual(loanCharge.getEffectiveDueDate(), installmentForCharge.getFromDate()))
                                     && (DateUtils.isBefore(loanCharge.getEffectiveDueDate(), installmentForCharge.getDueDate())
-                                            || DateUtils.isEqual(loanCharge.getEffectiveDueDate(), installmentForCharge.getDueDate()))))
+                                    || DateUtils.isEqual(loanCharge.getEffectiveDueDate(), installmentForCharge.getDueDate()))))
                             .toList();
 
                     List<LoanChargeDataRangeViewV1> charges = new ArrayList<>();

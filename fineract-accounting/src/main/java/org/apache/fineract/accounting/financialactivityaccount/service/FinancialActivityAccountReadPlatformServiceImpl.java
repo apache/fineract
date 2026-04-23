@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
@@ -46,7 +47,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
     @Override
     public List<FinancialActivityAccountData> retrieveAll() {
         String sql = "select " + financialActivityAccountMapper.schema();
-        return this.jdbcTemplate.query(sql, financialActivityAccountMapper, new Object[] {}); // NOSONAR
+        return this.jdbcTemplate.query(sql, financialActivityAccountMapper, new Object[]{}); // NOSONAR
     }
 
     @Override
@@ -57,7 +58,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
             sqlBuilder.append(this.financialActivityAccountMapper.schema());
             sqlBuilder.append(" where faa.id=?");
             return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), this.financialActivityAccountMapper,
-                    new Object[] { financialActivityAccountId });
+                    new Object[]{financialActivityAccountId});
         } catch (final EmptyResultDataAccessException e) {
             throw new FinancialActivityAccountNotFoundException(financialActivityAccountId, e);
         }

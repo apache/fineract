@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,8 +26,10 @@ import static org.mockito.Mockito.verify;
 
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.UriInfo;
+
 import java.util.List;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -110,7 +112,7 @@ public class GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategyTest {
      * @return the {@link BatchRequest}
      */
     private BatchRequest getBatchRequest(final Long loanId, final Long datatableId, final String queryParameter,
-            final String datatableName) {
+                                         final String datatableName) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("datatables/%s/%s/%s", datatableName, loanId, datatableId);
         if (queryParameter != null) {

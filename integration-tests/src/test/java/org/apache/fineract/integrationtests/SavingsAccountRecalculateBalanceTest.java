@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,8 +26,10 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -50,9 +52,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Client Savings Integration Test for checking Savings Application.
  */
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 @Order(2)
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsAccountRecalculateBalanceTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountRecalculateBalanceTest.class);
@@ -198,8 +200,8 @@ public class SavingsAccountRecalculateBalanceTest {
 
     // LienAtProductLevel
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
-            final boolean allowOverDraft, final boolean lienAllowed, BigDecimal interestRate) {
+                                         final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
+                                         final boolean allowOverDraft, final boolean lienAllowed, BigDecimal interestRate) {
 
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH LIEN---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();

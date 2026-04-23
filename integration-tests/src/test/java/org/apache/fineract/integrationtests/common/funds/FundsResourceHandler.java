@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,9 +22,11 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.fineract.integrationtests.common.Utils;
 
 public final class FundsResourceHandler {
@@ -37,7 +39,7 @@ public final class FundsResourceHandler {
     private static final String CREATE_FUNDS_URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer createFund(final String fundJSON, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                     final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_FUNDS_URL, fundJSON, "resourceId");
     }
 
@@ -50,7 +52,8 @@ public final class FundsResourceHandler {
         final String URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
         List<HashMap<String, Object>> list = Utils.performServerGet(requestSpec, responseSpec, URL, "");
         final String jsonData = new Gson().toJson(list);
-        return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>() {}.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>() {
+        }.getType());
     }
 
     public static String retrieveFund(final Long fundID, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
@@ -60,7 +63,7 @@ public final class FundsResourceHandler {
     }
 
     public static FundsHelper updateFund(final Long fundID, final String newName, final String newExternalId,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                         final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         FundsHelper fh = FundsHelper.create(newName).externalId(newExternalId).build();
         String updateJSON = new Gson().toJson(fh);
 

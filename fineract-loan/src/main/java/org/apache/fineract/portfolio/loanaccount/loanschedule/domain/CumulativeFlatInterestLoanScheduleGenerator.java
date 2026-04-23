@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.mapper.CurrencyMapper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -37,8 +38,8 @@ public class CumulativeFlatInterestLoanScheduleGenerator extends AbstractCumulat
     private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
 
     public CumulativeFlatInterestLoanScheduleGenerator(final ScheduledDateGenerator scheduledDateGenerator,
-            final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
-            final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper) {
+                                                       final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator,
+                                                       final LoanTransactionRepository loanTransactionRepository, final CurrencyMapper currencyMapper) {
         super(loanTransactionRepository, currencyMapper);
         this.scheduledDateGenerator = scheduledDateGenerator;
         this.paymentPeriodsInOneYearCalculator = paymentPeriodsInOneYearCalculator;
@@ -56,12 +57,12 @@ public class CumulativeFlatInterestLoanScheduleGenerator extends AbstractCumulat
 
     @Override
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
-            final BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
-            Money totalCumulativeInterest, Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
-            @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,
-            @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
-            @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
+                                                                           final BigDecimal interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
+                                                                           Money totalCumulativeInterest, Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
+                                                                           final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
+                                                                           @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,
+                                                                           @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
+                                                                           @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,

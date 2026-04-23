@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,9 +27,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
+
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -223,7 +225,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     @ParameterizedTest
     @MethodSource("externalAssetOwnerLoanProductAttributeApiRequestDataValidationErrors")
     public void testExternalAssetOwnerLoanProductAttributeRequestWithApiDataValidationErrors(String testName, String attributeKey,
-            String attributeValue, String expectedErrorString) {
+                                                                                             String attributeValue, String expectedErrorString) {
         TestContext testContext = new TestContext();
         final JsonElement jsonCommandElement = testContext.fromJsonHelper.parse(testContext.jsonCommandString);
         final JsonCommand command = createJsonCommand(testContext.jsonCommandString, testContext.loanProductId, null);
@@ -328,7 +330,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
     }
 
     private void assertLoanProductAttributeValues(final TestContext testContext,
-            final ExternalAssetOwnerLoanProductAttributes loanProductAttribute) {
+                                                  final ExternalAssetOwnerLoanProductAttributes loanProductAttribute) {
         Assertions.assertEquals(testContext.loanProductId, loanProductAttribute.getLoanProductId());
         Assertions.assertEquals(testContext.attributeKey, loanProductAttribute.getAttributeKey());
         Assertions.assertEquals(testContext.attributeValue, loanProductAttribute.getAttributeValue());
@@ -348,7 +350,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImplTest {
                 null, null, null, null);
     }
 
-    @SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+    @SuppressFBWarnings({"VA_FORMAT_STRING_USES_NEWLINE"})
     static class TestContext {
 
         @Mock

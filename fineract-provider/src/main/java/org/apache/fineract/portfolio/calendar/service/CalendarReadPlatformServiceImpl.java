@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -122,7 +123,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " and c.id = ? and ci.entity_id = ? and ci.entity_type_enum = ? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[]{calendarId, entityId, entityTypeId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CalendarNotFoundException(calendarId, e);
         }
@@ -130,7 +131,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
     @Override
     public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId,
-            final List<Integer> calendarTypeOptions) {
+                                                              final List<Integer> calendarTypeOptions) {
         final CalendarDataMapper rm = new CalendarDataMapper();
 
         Collection<CalendarData> result = null;
@@ -139,12 +140,12 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         if (calendarTypeOptions == null || calendarTypeOptions.isEmpty()) {
             sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
-            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+            result = this.jdbcTemplate.query(sql, rm, new Object[]{entityId, entityTypeId});
         } else if (!calendarTypeOptions.isEmpty()) {
             final String sqlCalendarTypeOptions = CalendarUtils.getSqlCalendarTypeOptionsInString(calendarTypeOptions);
             sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in ( " + sqlCalendarTypeOptions
                     + " ) order by c.start_date ";
-            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+            result = this.jdbcTemplate.query(sql, rm, new Object[]{entityId, entityTypeId});
         }
         return result;
     }
@@ -156,7 +157,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final String sql = rm.schema()
                 + " and ci.entity_id = ? and ci.entity_type_enum = ? and calendar_type_enum = ? order by c.start_date ";
         final List<CalendarData> result = this.jdbcTemplate.query(sql, rm, // NOSONAR
-                new Object[] { entityId, entityTypeId, CalendarType.COLLECTION.getValue() });
+                new Object[]{entityId, entityTypeId, CalendarType.COLLECTION.getValue()});
 
         if (!result.isEmpty() && result.size() > 0) {
             return result.get(0);
@@ -167,7 +168,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
     @Override
     public Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId,
-            final List<Integer> calendarTypeOptions) {
+                                                                    final List<Integer> calendarTypeOptions) {
 
         final CalendarDataMapper rm = new CalendarDataMapper();
         Collection<CalendarData> result = null;
@@ -179,12 +180,12 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         // support more parent entity types.
         if (calendarTypeOptions == null || calendarTypeOptions.isEmpty()) {
             sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? order by c.start_date ";
-            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
+            result = this.jdbcTemplate.query(sql, rm, new Object[]{entityId, CalendarEntityType.CENTERS.getValue()});
         } else {
             final String sqlCalendarTypeOptions = CalendarUtils.getSqlCalendarTypeOptionsInString(calendarTypeOptions);
             sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? and c.calendar_type_enum in ("
                     + sqlCalendarTypeOptions + ") order by c.start_date ";
-            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
+            result = this.jdbcTemplate.query(sql, rm, new Object[]{entityId, CalendarEntityType.CENTERS.getValue()});
         }
         return result;
     }
@@ -206,7 +207,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
     @Override
     public Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory,
-            final LocalDate tillDate) {
+                                                        final LocalDate tillDate) {
         final LocalDate fromDate = null;
         Collection<LocalDate> recurringDates = generateRecurringDate(calendarData, fromDate, tillDate, -1);
 
@@ -227,7 +228,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     private Collection<LocalDate> generateRecurringDate(final CalendarData calendarData, final LocalDate fromDate, final LocalDate tillDate,
-            final int maxCount) {
+                                                        final int maxCount) {
 
         if (!calendarData.isRepeating()) {
             return null;
@@ -378,7 +379,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
         CalendarData calendarData = null;
         final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, // NOSONAR
-                new Object[] { loanId, CalendarEntityType.LOANS.getValue() });
+                new Object[]{loanId, CalendarEntityType.LOANS.getValue()});
 
         if (!CollectionUtils.isEmpty(calendars)) {
             for (final CalendarData calendar : calendars) {
@@ -399,20 +400,20 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 // hierarchy?
                 conditionSql = " and ci.entity_id in (select gc.group_id from m_client c join m_group_client gc "
                         + " on c.id=gc.client_id where c.id = ? ) ";
-            break;
+                break;
 
             case GROUPS:
                 // TODO : AA: add parent hierarchy for groups
                 conditionSql = " and ci.entity_id in (select g.parent_id from m_group g where g.id = ? ) ";
-            break;
+                break;
 
             case LOANS:
                 // TODO : AA: do we need parent hierarchy calendars for loans?
                 conditionSql = " and ci.entity_id = ?  ";
-            break;
+                break;
 
             default:
-            break;
+                break;
         }
 
         return conditionSql;
@@ -437,7 +438,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " where c.calendar_id = ? ";
 
-            final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { calendarId }); // NOSONAR
+            final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[]{calendarId}); // NOSONAR
             return calendars;
         } catch (final EmptyResultDataAccessException e) {
             return null;

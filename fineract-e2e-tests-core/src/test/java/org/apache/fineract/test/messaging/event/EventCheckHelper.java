@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.math.MathContext;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.client.v1.ClientDataV1;
@@ -232,7 +233,7 @@ public class EventCheckHelper {
     }
 
     public GetLoansLoanIdTransactions getNthTransactionType(String nthItemStr, String transactionType, String transactionDate,
-            List<GetLoansLoanIdTransactions> transactions) {
+                                                            List<GetLoansLoanIdTransactions> transactions) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         int nthItem = Integer.parseInt(nthItemStr) - 1;
         GetLoansLoanIdTransactions targetTransaction = transactions//
@@ -386,7 +387,8 @@ public class EventCheckHelper {
             case REFUND_BY_CASH -> LoanRefundPostBusinessEvent.class;
             case INTEREST_PAYMENT_WAIVER -> LoanTransactionInterestPaymentWaiverPostEvent.class;
             case INTEREST_REFUND -> LoanTransactionInterestRefundPostEvent.class;
-            default -> throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
+            default ->
+                    throw new IllegalStateException(String.format("transaction type %s cannot be found", transactionType.getValue()));
         };
 
         EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> eventBuilder = eventAssertion.assertEvent(eventClass, transactionId);
@@ -429,7 +431,7 @@ public class EventCheckHelper {
     }
 
     public void loanOwnershipTransferBusinessEventWithStatusCheck(Long loanId, Long transferId, String transferStatus,
-            String transferStatusReason) {
+                                                                  String transferStatusReason) {
         PageExternalTransferData response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
         List<ExternalTransferData> content = response.getContent();
 
@@ -475,7 +477,7 @@ public class EventCheckHelper {
     }
 
     public void loanOwnershipTransferBusinessEventWithTypeCheck(Long loanId, ExternalTransferData transferData, String transferType,
-            String previousAssetOwner) {
+                                                                String previousAssetOwner) {
         PageExternalTransferData response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
         List<ExternalTransferData> content = response.getContent();
         Long transferId = transferData.getTransferId();

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,8 +21,10 @@ package org.apache.fineract.integrationtests.common.charges;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
@@ -35,7 +37,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class ChargesHelper {
 
     public ChargesHelper() {
@@ -298,7 +300,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, boolean penalty,
-            String currencyCode) {
+                                                     String currencyCode) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR, currencyCode);
     }
 
@@ -307,7 +309,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
-            final Integer paymentMode) {
+                                                     final Integer paymentMode) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, paymentMode, ChargesHelper.CURRENCY_CODE);
     }
 
@@ -316,7 +318,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
-            final Integer paymentMode, final String currencyCode) {
+                                                     final Integer paymentMode, final String currencyCode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
         map.put("chargePaymentMode", paymentMode);
@@ -352,7 +354,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanSpecifiedDueDateWithAccountTransferJSON(final Integer chargeCalculationType, final String amount,
-            boolean penalty) {
+                                                                        boolean penalty) {
         return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
@@ -392,7 +394,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
-            final Integer paymentMode) {
+                                                final Integer paymentMode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_INSTALLMENT_FEE);
         map.put("chargePaymentMode", paymentMode);
@@ -410,7 +412,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanInstallmentWithAccountTransferJSON(final Integer chargeCalculationType, final String amount,
-            boolean penalty) {
+                                                                   boolean penalty) {
         return getLoanInstallmentJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
@@ -493,7 +495,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanOverdueFeeJSONWithCalculationTypePercentageWithFeeInterval(String penaltyPercentageAmount,
-            Integer feeFrequency, int feeInterval) {
+                                                                                           Integer feeFrequency, int feeInterval) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("penalty", ChargesHelper.PENALTY);
         map.put("amount", penaltyPercentageAmount);
@@ -598,7 +600,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String request) {
+                                        final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");
     }
 
@@ -607,7 +609,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static PostChargesResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String payload) {
+                                                       final String payload) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload, null);
         return GSON.fromJson(response, PostChargesResponse.class);
     }
@@ -625,7 +627,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap getChargeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId) {
+                                        final Integer chargeId) {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
@@ -634,7 +636,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap getChargeChanges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId) {
+                                           final Integer chargeId) {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -644,7 +646,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap updateCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId, final String request) {
+                                        final Integer chargeId, final String request) {
         return Utils.performServerPut(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, request,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -654,7 +656,7 @@ public final class ChargesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer deleteCharge(final ResponseSpecification responseSpec, final RequestSpecification requestSpec,
-            final Integer chargeId) {
+                                       final Integer chargeId) {
         return Utils.performServerDelete(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -52,8 +53,8 @@ public class LoanRepaymentScheduleService {
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     public LoanScheduleData findLoanScheduleData(final Long loanId, final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-            Collection<DisbursementData> disbursementData, Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData,
-            boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType) {
+                                                 Collection<DisbursementData> disbursementData, Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData,
+                                                 boolean isInterestRecalculationEnabled, LoanScheduleType loanScheduleType) {
         final List<LoanRepaymentScheduleInstallment> installments = this.loanRepaymentScheduleInstallmentRepository.findByLoanId(loanId);
 
         return extractLoanScheduleData(installments, repaymentScheduleRelatedLoanData, disbursementData, capitalizedIncomeData,
@@ -66,9 +67,9 @@ public class LoanRepaymentScheduleService {
     }
 
     public LoanScheduleData extractLoanScheduleData(final List<LoanRepaymentScheduleInstallment> installments,
-            final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
-            Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,
-            LoanScheduleType loanScheduleType) {
+                                                    final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
+                                                    Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,
+                                                    LoanScheduleType loanScheduleType) {
 
         final CurrencyData currency = repaymentScheduleRelatedLoanData.getCurrency();
         final DisbursementData disbursement = repaymentScheduleRelatedLoanData.disbursementData();
@@ -268,8 +269,8 @@ public class LoanRepaymentScheduleService {
     }
 
     private List<LoanSchedulePeriodDataWrapper> collectEligibleDisbursementData(LoanScheduleType loanScheduleType,
-            Collection<DisbursementData> disbursementData, LocalDate fromDate, LocalDate dueDate, Set<Long> disbursementPeriodIds,
-            DisbursementData mainDisbursement, boolean excludePastUnDisbursed) {
+                                                                                Collection<DisbursementData> disbursementData, LocalDate fromDate, LocalDate dueDate, Set<Long> disbursementPeriodIds,
+                                                                                DisbursementData mainDisbursement, boolean excludePastUnDisbursed) {
         List<LoanSchedulePeriodDataWrapper> disbursementDataList = new ArrayList<>();
 
         boolean hasMultipleTranchesOnSameDate = hasMultipleTranchesOnSameDate(disbursementData);
@@ -357,8 +358,8 @@ public class LoanRepaymentScheduleService {
     }
 
     private BigDecimal fillLoanSchedulePeriodData(List<LoanSchedulePeriodData> periods,
-            List<LoanSchedulePeriodDataWrapper> combinedDataList, BigDecimal disbursementChargeAmount, BigDecimal waivedChargeAmount,
-            BigDecimal outstandingLoanPrincipalBalance) {
+                                                  List<LoanSchedulePeriodDataWrapper> combinedDataList, BigDecimal disbursementChargeAmount, BigDecimal waivedChargeAmount,
+                                                  BigDecimal outstandingLoanPrincipalBalance) {
         // Process all collected data in chronological order
         for (LoanSchedulePeriodDataWrapper dataItem : combinedDataList) {
             LoanSchedulePeriodData periodData;
@@ -405,7 +406,7 @@ public class LoanRepaymentScheduleService {
     }
 
     private LoanSchedulePeriodData createLoanSchedulePeriodData(final DisbursementData data, BigDecimal disbursementChargeAmount,
-            BigDecimal waivedChargeAmount) {
+                                                                BigDecimal waivedChargeAmount) {
         BigDecimal chargeAmount = data.getChargeAmount() == null ? disbursementChargeAmount
                 : disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount);
         return LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(), chargeAmount,

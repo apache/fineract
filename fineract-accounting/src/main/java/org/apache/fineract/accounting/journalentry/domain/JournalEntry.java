@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,8 +24,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -111,9 +113,9 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     protected JournalEntry(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount, final String currencyCode,
-            final String transactionId, final boolean manualEntry, final LocalDate transactionDate, final Integer type,
-            final BigDecimal amount, final String description, final Integer entityType, final Long entityId, final String referenceNumber,
-            final Long loanTransactionId, final Long savingsTransactionId, final Long clientTransactionId, final Long shareTransactionId) {
+                           final String transactionId, final boolean manualEntry, final LocalDate transactionDate, final Integer type,
+                           final BigDecimal amount, final String description, final Integer entityType, final Long entityId, final String referenceNumber,
+                           final Long loanTransactionId, final Long savingsTransactionId, final Long clientTransactionId, final Long shareTransactionId) {
         this.office = office;
         this.glAccount = glAccount;
         this.reversalJournalEntry = null;
@@ -137,10 +139,10 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public static JournalEntry createNew(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount,
-            final String currencyCode, final String transactionId, final boolean manualEntry, final LocalDate transactionDate,
-            final JournalEntryType journalEntryType, final BigDecimal amount, final String description, final Integer entityType,
-            final Long entityId, final String referenceNumber, final Long loanTransaction, final Long savingsTransaction,
-            final Long clientTransaction, Long shareTransactionId) {
+                                         final String currencyCode, final String transactionId, final boolean manualEntry, final LocalDate transactionDate,
+                                         final JournalEntryType journalEntryType, final BigDecimal amount, final String description, final Integer entityType,
+                                         final Long entityId, final String referenceNumber, final Long loanTransaction, final Long savingsTransaction,
+                                         final Long clientTransaction, Long shareTransactionId) {
         return new JournalEntry(office, paymentDetail, glAccount, currencyCode, transactionId, manualEntry, transactionDate,
                 journalEntryType.getValue(), amount, description, entityType, entityId, referenceNumber, loanTransaction,
                 savingsTransaction, clientTransaction, shareTransactionId);

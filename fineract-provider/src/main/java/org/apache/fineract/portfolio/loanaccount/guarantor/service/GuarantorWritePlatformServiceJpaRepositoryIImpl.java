@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -82,11 +83,11 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     @Autowired
     public GuarantorWritePlatformServiceJpaRepositoryIImpl(final LoanRepositoryWrapper loanRepositoryWrapper,
-            final GuarantorRepository guarantorRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final StaffRepositoryWrapper staffRepositoryWrapper, final GroupRepositoryWrapper groupRepositoryWrapper,
-            final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
-            final AccountAssociationsRepository accountAssociationsRepository, final GuarantorDomainService guarantorDomainService) {
+                                                           final GuarantorRepository guarantorRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
+                                                           final StaffRepositoryWrapper staffRepositoryWrapper, final GroupRepositoryWrapper groupRepositoryWrapper,
+                                                           final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+                                                           final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
+                                                           final AccountAssociationsRepository accountAssociationsRepository, final GuarantorDomainService guarantorDomainService) {
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.groupRepositoryWrapper = groupRepositoryWrapper;
@@ -109,7 +110,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     }
 
     private CommandProcessingResult createGuarantor(final Loan loan, final JsonCommand command, final GuarantorCommand guarantorCommand,
-            final Collection<Guarantor> existGuarantorList) {
+                                                    final Collection<Guarantor> existGuarantorList) {
         try {
             guarantorCommand.validateForCreate();
             validateLoanStatus(loan);
@@ -196,7 +197,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     }
 
     private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan,
-            final SavingsAccount savingsAccount) {
+                                                                                      final SavingsAccount savingsAccount) {
         if (DateUtils.isBefore(loan.getSubmittedOnDate(), savingsAccount.getActivationDate())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
@@ -327,7 +328,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     }
 
     private void removeguarantorFundDetails(final Guarantor guarantorForDelete, final DataValidatorBuilder baseDataValidator,
-            GuarantorFundingDetails guarantorFundingDetails) {
+                                            GuarantorFundingDetails guarantorFundingDetails) {
         if (!guarantorFundingDetails.getStatus().isActive()) {
             baseDataValidator.failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_NOT_ACTIVE_ERROR);
         }

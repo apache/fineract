@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -123,7 +124,7 @@ public class SavingsAccountRepositoryWrapper {
 
     @Transactional
     public List<SavingsAccountTransaction> findTransactionsAfterPivotDate(@Param("savingsAccount") SavingsAccount savingsAccount,
-            @Param("date") LocalDate transactionDate) {
+                                                                          @Param("date") LocalDate transactionDate) {
         return this.savingsAccountTransactionRepository.findTransactionsAfterPivotDate(savingsAccount, transactionDate);
     }
 
@@ -174,7 +175,7 @@ public class SavingsAccountRepositoryWrapper {
 
     @Transactional(readOnly = true)
     public List<SavingsAccrualData> findAccrualData(final LocalDate tillDate, final Long savingsId, final Integer status,
-            final Integer accountingRule) {
+                                                    final Integer accountingRule) {
         return this.repository.findAccrualData(tillDate, savingsId, status, accountingRule);
     }
 

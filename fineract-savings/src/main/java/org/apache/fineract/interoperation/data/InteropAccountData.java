@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,11 +19,13 @@
 package org.apache.fineract.interoperation.data;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
@@ -54,10 +56,10 @@ public class InteropAccountData extends CommandProcessingResult {
     private final SavingsAccountSubStatusEnum subStatus;
 
     private final AccountType accountType; // differentiate Individual, JLG or
-                                           // Group account
+    // Group account
     private final DepositAccountType depositType; // differentiate deposit
-                                                  // accounts Savings, FD and RD
-                                                  // accounts
+    // accounts Savings, FD and RD
+    // accounts
     @NotNull
     private final LocalDate activatedOn;
     private final LocalDate statusUpdateOn;
@@ -67,10 +69,10 @@ public class InteropAccountData extends CommandProcessingResult {
     private List<InteropIdentifierData> identifiers;
 
     InteropAccountData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, String accountId, String productId,
-            String productName, String shortProductName, String currency, BigDecimal accountBalance, BigDecimal availableBalance,
-            SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus, AccountType accountType, DepositAccountType depositType,
-            LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn, LocalDate balanceOn,
-            List<InteropIdentifierData> identifiers, long clientId) {
+                       String productName, String shortProductName, String currency, BigDecimal accountBalance, BigDecimal availableBalance,
+                       SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus, AccountType accountType, DepositAccountType depositType,
+                       LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn, LocalDate balanceOn,
+                       List<InteropIdentifierData> identifiers, long clientId) {
         super(resourceId, officeId, commandId, changesOnly, clientId);
         this.accountId = accountId;
         this.savingProductId = productId;
@@ -91,9 +93,9 @@ public class InteropAccountData extends CommandProcessingResult {
     }
 
     InteropAccountData(String accountId, String productId, String productName, String shortProductName, String currency,
-            BigDecimal accountBalance, BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
-            AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn,
-            LocalDate balanceOn, List<InteropIdentifierData> identifiers, long clientId) {
+                       BigDecimal accountBalance, BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
+                       AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn, LocalDate withdrawnOn,
+                       LocalDate balanceOn, List<InteropIdentifierData> identifiers, long clientId) {
         this(null, null, null, null, accountId, productId, productName, shortProductName, currency, accountBalance, availableBalance,
                 status, subStatus, accountType, depositType, activatedOn, statusUpdateOn, withdrawnOn, balanceOn, identifiers, clientId);
     }

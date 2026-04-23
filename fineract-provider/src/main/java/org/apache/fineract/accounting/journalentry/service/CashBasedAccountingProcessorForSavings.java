@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
@@ -136,9 +137,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                             CashAccountsForSavings.SAVINGS_CONTROL.getValue(), CashAccountsForSavings.SAVINGS_REFERENCE.getValue(),
                             savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
                 }
-            }
-
-            else if (savingsTransactionDTO.getTransactionType().isEscheat()) {
+            } else if (savingsTransactionDTO.getTransactionType().isEscheat()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         CashAccountsForSavings.SAVINGS_CONTROL.getValue(), CashAccountsForSavings.ESCHEAT_LIABILITY.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
@@ -162,9 +161,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                                 amount.subtract(overdraftAmount), isReversal);
                     }
                 }
-            }
-
-            else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
+            } else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
                 // Post journal entry if earned interest amount is greater than
                 // zero
                 if (savingsTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) > 0) {
@@ -172,9 +169,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                             CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue(), CashAccountsForSavings.SAVINGS_CONTROL.getValue(),
                             savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
                 }
-            }
-
-            else if (savingsTransactionDTO.getTransactionType().isWithholdTax()) {
+            } else if (savingsTransactionDTO.getTransactionType().isWithholdTax()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavingsTax(office, currencyCode,
                         CashAccountsForSavings.SAVINGS_CONTROL, CashAccountsForSavings.SAVINGS_REFERENCE, savingsProductId, paymentTypeId,
                         savingsId, transactionId, transactionDate, amount, isReversal, savingsTransactionDTO.getTaxPayments());
@@ -206,9 +201,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                                 feePayments);
                     }
                 }
-            }
-
-            else if (savingsTransactionDTO.getTransactionType().isFeeDeduction()) {
+            } else if (savingsTransactionDTO.getTransactionType().isFeeDeduction()) {
                 // Is the Charge a penalty?
                 if (penaltyPayments.size() > 0) {
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,

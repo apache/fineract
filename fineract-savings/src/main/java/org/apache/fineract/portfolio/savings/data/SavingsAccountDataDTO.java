@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -34,7 +35,7 @@ public class SavingsAccountDataDTO {
     private final DateTimeFormatter fmt;
 
     public SavingsAccountDataDTO(final Client client, final Group group, final Long savingsProductId, final LocalDate applicationDate,
-            final AppUser appliedBy, final DateTimeFormatter fmt) {
+                                 final AppUser appliedBy, final DateTimeFormatter fmt) {
         this.client = client;
         this.group = group;
         this.savingsProductId = savingsProductId;

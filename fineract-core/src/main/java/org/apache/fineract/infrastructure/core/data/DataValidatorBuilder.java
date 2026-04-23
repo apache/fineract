@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.data;
 
 import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import lombok.Getter;
 import net.fortuna.ical4j.model.property.RRule;
 import net.fortuna.ical4j.validate.ValidationException;
@@ -1160,7 +1162,7 @@ public class DataValidatorBuilder {
     }
 
     public static ApiParameterError buildValidationParameterApiError(final String resource, final String parameterName,
-            final String errorCode, final String errorMessage, final Object... defaultUserMessageArgs) {
+                                                                     final String errorCode, final String errorMessage, final Object... defaultUserMessageArgs) {
         final String validationErrorCode = "validation.msg." + resource + "." + parameterName + errorCode;
         String defaultEnglishMessage = "The parameter `" + parameterName + "` " + errorMessage;
         return ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, parameterName, defaultUserMessageArgs);

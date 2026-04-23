@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
@@ -32,22 +33,22 @@ public class AprCalculator {
     private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator;
 
     public BigDecimal calculateFrom(final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal interestRatePerPeriod,
-            final Integer numberOfRepayments, final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
-            final DaysInYearType daysInYearType) {
+                                    final Integer numberOfRepayments, final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
+                                    final DaysInYearType daysInYearType) {
         BigDecimal defaultAnnualNominalInterestRate = BigDecimal.ZERO;
         switch (interestPeriodFrequencyType) {
             case DAYS:
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(getDaysInYear(daysInYearType)));
-            break;
+                break;
             case WEEKS:
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(52));
-            break;
+                break;
             case MONTHS:
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(12));
-            break;
+                break;
             case YEARS:
                 defaultAnnualNominalInterestRate = interestRatePerPeriod.multiply(BigDecimal.valueOf(1));
-            break;
+                break;
             case WHOLE_TERM:
                 final BigDecimal ratePerPeriod = interestRatePerPeriod.divide(BigDecimal.valueOf(numberOfRepayments * repaymentEvery), 8,
                         MoneyHelper.getRoundingMode());
@@ -55,24 +56,24 @@ public class AprCalculator {
                 switch (repaymentPeriodFrequencyType) {
                     case DAYS:
                         defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(getDaysInYear(daysInYearType)));
-                    break;
+                        break;
                     case WEEKS:
                         defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(52));
-                    break;
+                        break;
                     case MONTHS:
                         defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(12));
-                    break;
+                        break;
                     case YEARS:
                         defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(1));
-                    break;
+                        break;
                     case WHOLE_TERM:
-                    break;
+                        break;
                     case INVALID:
-                    break;
+                        break;
                 }
-            break;
+                break;
             case INVALID:
-            break;
+                break;
         }
 
         return defaultAnnualNominalInterestRate;

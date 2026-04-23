@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.data;
 
 import java.io.Serializable;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -52,10 +53,10 @@ public class CommandProcessingResult implements Serializable {
     private final ExternalId loanExternalId;
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
-            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
-            final Map<String, Object> changes, final Long productId, final Long gsimId, final Long glimId,
-            final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
+                                    final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
+                                    final Map<String, Object> changes, final Long productId, final Long gsimId, final Long glimId,
+                                    final Map<String, Object> creditBureauReportData, Boolean rollbackTransaction, final Long subResourceId,
+                                    final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -78,7 +79,7 @@ public class CommandProcessingResult implements Serializable {
     }
 
     protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changes,
-            Long clientId) {
+                                      Long clientId) {
         this(commandId, officeId, null, clientId, null, null, resourceId == null ? null : resourceId.toString(), resourceId, null, changes,
                 null, null, null, null, null, null, ExternalId.empty(), ExternalId.empty(), ExternalId.empty());
     }
@@ -104,10 +105,10 @@ public class CommandProcessingResult implements Serializable {
     }
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
-            final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final Long gsimId,
-            final Long glimId, final Map<String, Object> creditBureauReportData, final String transactionId,
-            final Map<String, Object> changes, final Long productId, final Boolean rollbackTransaction, final Long subResourceId,
-            final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
+                                                      final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final Long gsimId,
+                                                      final Long glimId, final Map<String, Object> creditBureauReportData, final String transactionId,
+                                                      final Map<String, Object> changes, final Long productId, final Boolean rollbackTransaction, final Long subResourceId,
+                                                      final ExternalId resourceExternalId, final ExternalId subResourceExternalId, final ExternalId loanExternalId) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
                 transactionId, changes, productId, gsimId, glimId, creditBureauReportData, rollbackTransaction, subResourceId,
                 resourceExternalId, subResourceExternalId, loanExternalId);

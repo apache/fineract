@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,10 +25,12 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
@@ -485,7 +487,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
     }
 
     private Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+                                      LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         log.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
@@ -500,8 +502,8 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends BaseL
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final Long principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)

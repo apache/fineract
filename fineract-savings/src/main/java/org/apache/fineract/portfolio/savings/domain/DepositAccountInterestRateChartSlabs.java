@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,8 +26,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlab;
@@ -52,8 +54,8 @@ public class DepositAccountInterestRateChartSlabs extends AbstractPersistableCus
     }
 
     private DepositAccountInterestRateChartSlabs(InterestRateChartSlabFields slabFields,
-            DepositAccountInterestRateChart depositAccountInterestRateChart,
-            final Set<DepositAccountInterestIncentives> interestIncentives) {
+                                                 DepositAccountInterestRateChart depositAccountInterestRateChart,
+                                                 final Set<DepositAccountInterestIncentives> interestIncentives) {
         this.slabFields = slabFields;
         this.depositAccountInterestRateChart = depositAccountInterestRateChart;
         this.interestIncentives = interestIncentives;
@@ -72,7 +74,7 @@ public class DepositAccountInterestRateChartSlabs extends AbstractPersistableCus
     }
 
     public static DepositAccountInterestRateChartSlabs from(InterestRateChartSlab interestRateChartSlab,
-            DepositAccountInterestRateChart depositAccountInterestRateChart) {
+                                                            DepositAccountInterestRateChart depositAccountInterestRateChart) {
         InterestRateChartSlabFields slabFields = interestRateChartSlab.slabFields();
         Set<DepositAccountInterestIncentives> depositInterestIncentives = new HashSet<>();
         Set<InterestIncentives> incentives = interestRateChartSlab.setOfInterestIncentives();

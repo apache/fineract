@@ -127,7 +127,7 @@ class FineractPluginExtension {
         String query
         List<JiraService.JiraIssue> result = new ArrayList<>()
         int pageOffset = 0
-        int pageSize= 50
+        int pageSize = 50
         int total = 1000
         List<String> includes = ["summary", "status", "assignee", "fixVersions"]
     }

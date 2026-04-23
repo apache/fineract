@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
@@ -52,7 +53,7 @@ public class LoanAdjustTransactionBusinessEvent extends BusinessEvent {
 
     // minimum data for checking if transaction was adjusted
     public LoanAdjustTransactionBusinessEvent(String type, String businessDate, String transactionTypeCode, String transactionDate,
-            Double oldAmount, Double newAmount) {
+                                              Double oldAmount, Double newAmount) {
         super(type, businessDate);
         this.transactionTypeCode = transactionTypeCode;
         this.transactionDate = transactionDate;
@@ -61,8 +62,8 @@ public class LoanAdjustTransactionBusinessEvent extends BusinessEvent {
     }
 
     public LoanAdjustTransactionBusinessEvent(String type, String businessDate, String transactionTypeCode, String transactionDate,
-            Double oldAmount, Double newAmount, Double oldPrincipalPortion, Double newPrincipalPortion, Double oldInterestPortion,
-            Double newInterestPortion, Double oldFeePortion, Double newFeePortion, Double oldPenaltyPortion, Double newPenaltyPortion) {
+                                              Double oldAmount, Double newAmount, Double oldPrincipalPortion, Double newPrincipalPortion, Double oldInterestPortion,
+                                              Double newInterestPortion, Double oldFeePortion, Double newFeePortion, Double oldPenaltyPortion, Double newPenaltyPortion) {
         super(type, businessDate);
         this.transactionTypeCode = transactionTypeCode;
         this.transactionDate = transactionDate;

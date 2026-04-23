@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,6 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -275,9 +277,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
-            final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
-            Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,
-            LoanScheduleType loanScheduleType) {
+                                                      final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
+                                                      Collection<LoanTransactionRepaymentPeriodData> capitalizedIncomeData, boolean isInterestRecalculationEnabled,
+                                                      LoanScheduleType loanScheduleType) {
         this.context.authenticatedUser();
         return loanRepaymentScheduleService.findLoanScheduleData(loanId, repaymentScheduleRelatedLoanData, disbursementData,
                 capitalizedIncomeData, isInterestRecalculationEnabled, loanScheduleType);
@@ -309,7 +311,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                     .fetchLoanChargesPaidByDataTransactionId(loanIds);
             for (LoanTransactionData loanTransaction : loanTransactionData) {
                 loanTransaction.setTransactionRelations(loanTransactionRelationDatas.stream().filter(
-                        loanTransactionRelationData -> loanTransactionRelationData.getFromLoanTransaction().equals(loanTransaction.getId()))
+                                loanTransactionRelationData -> loanTransactionRelationData.getFromLoanTransaction().equals(loanTransaction.getId()))
                         .toList());
                 loanTransaction.setLoanChargePaidByList(loanChargePaidByDatas.stream()
                         .filter(loanChargePaidByData -> loanChargePaidByData.getTransactionId().equals(loanTransaction.getId())).toList());
@@ -370,8 +372,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             }
 
             if (StringUtils.isNotBlank(searchParameters.getAccountNo())) {
-                sqlBuilder.append(" and l.account_no = ?");
-                extraCriterias.add(searchParameters.getAccountNo());
+                sqlBuilder.append(" and l.account_no LIKE ?");
+                extraCriterias.add("%" + searchParameters.getAccountNo() + "%");
                 arrayPos = arrayPos + 1;
             }
 
@@ -477,7 +479,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public LoanTransactionData retrieveLoanTransactionTemplate(final Long loanId, final LoanTransactionType transactionType,
-            final Long transactionId) {
+                                                               final Long transactionId) {
 
         LoanTransactionData loanTransactionData = null;
         Collection<PaymentTypeData> paymentOptions = null;
@@ -501,7 +503,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
                         LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
                         paymentOptions, retriveLoanCurrencyData(loanId), classificationOptions);
-            break;
+                break;
             case BUY_DOWN_FEE:
                 paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
                 classificationOptions = this.codeValueReadPlatformService
@@ -509,18 +511,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
                         LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
                         paymentOptions, retriveLoanCurrencyData(loanId), classificationOptions);
-            break;
+                break;
             case CAPITALIZED_INCOME_ADJUSTMENT:
                 final LoanCapitalizedIncomeBalance loanCapitalizedIncomeBalance = loanCapitalizedIncomeBalanceRepository
                         .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, transactionId);
 
                 transactionAmount = (loanCapitalizedIncomeBalance == null) ? BigDecimal.ZERO
                         : loanCapitalizedIncomeBalance.getAmount()
-                                .subtract(MathUtil.nullToZero(loanCapitalizedIncomeBalance.getAmountAdjustment()));
+                        .subtract(MathUtil.nullToZero(loanCapitalizedIncomeBalance.getAmountAdjustment()));
                 loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
                         LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
                         paymentOptions, retriveLoanCurrencyData(loanId), classificationOptions);
-            break;
+                break;
             case BUY_DOWN_FEE_ADJUSTMENT:
                 final LoanBuyDownFeeBalance loanBuyDownFeeBalance = loanBuyDownFeeBalanceRepository
                         .findByLoanIdAndLoanTransactionIdAndDeletedFalseAndClosedFalse(loanId, transactionId);
@@ -530,11 +532,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 loanTransactionData = LoanTransactionData.loanTransactionDataForCreditTemplate(
                         LoanEnumerations.transactionType(transactionType), DateUtils.getBusinessLocalDate(), transactionAmount,
                         paymentOptions, retriveLoanCurrencyData(loanId), classificationOptions);
-            break;
+                break;
             default:
                 loanTransactionData = LoanTransactionData.templateOnTop(retrieveLoanTransactionTemplate(loanId),
                         LoanEnumerations.transactionType(transactionType));
-            break;
+                break;
         }
 
         return loanTransactionData;
@@ -553,7 +555,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public LoanTransactionData retrieveLoanPrePaymentTemplate(final LoanTransactionType repaymentTransactionType, final Long loanId,
-            LocalDate onDate) {
+                                                              LocalDate onDate) {
 
         this.context.authenticatedUser();
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType);
@@ -718,7 +720,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                         final List<LoanTransactionType> excludedTransactionTypeValues = excludedTransactionTypes.stream().toList();
                         predicates.add(builder.not(root.get("typeOf").in(excludedTransactionTypeValues)));
                     }
-                    return builder.and(predicates.toArray(new Predicate[] {}));
+                    return builder.and(predicates.toArray(new Predicate[]{}));
                 }, pageable);
 
         return transactionPage.map(loanTransactionMapper::mapLoanTransaction);
@@ -1489,10 +1491,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
+                    new ChargeTimeType[]{ChargeTimeType.OVERDUE_INSTALLMENT});
         } else {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
+                    new ChargeTimeType[]{ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT});
         }
 
         Integer loanCycleCounter = null;
@@ -1566,7 +1568,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
 
     @Override
     public Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(final Long penaltyWaitPeriod,
-            final Boolean backdatePenalties) {
+                                                                                       final Boolean backdatePenalties) {
         final MusoniOverdueLoanScheduleMapper rm = new MusoniOverdueLoanScheduleMapper();
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -1632,14 +1634,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     @Override
     public Integer retriveLoanCounter(final Long groupId, final Integer loanType, Long productId) {
         final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
-        return this.jdbcTemplate.queryForObject(sql, new Object[] { groupId, loanType, productId }, Integer.class);
+        return this.jdbcTemplate.queryForObject(sql, new Object[]{groupId, loanType, productId}, Integer.class);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long clientId, Long productId) {
         final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.client_id = ? and l.product_id=?";
-        return this.jdbcTemplate.queryForObject(sql, new Object[] { clientId, productId }, Integer.class);
+        return this.jdbcTemplate.queryForObject(sql, new Object[]{clientId, productId}, Integer.class);
     }
 
     @Override
@@ -1984,8 +1986,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     private LoanTransactionData retrieveRefundTemplate(Long loanId, LoanTransactionType loanTransactionType,
-            Collection<PaymentTypeData> paymentOptions, MonetaryCurrency currency, BigDecimal transactionAmount, BigDecimal netDisbursal,
-            ExternalId externalLoanId) {
+                                                       Collection<PaymentTypeData> paymentOptions, MonetaryCurrency currency, BigDecimal transactionAmount, BigDecimal netDisbursal,
+                                                       ExternalId externalLoanId) {
 
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
@@ -2059,7 +2061,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 and adddet.effective_date is not null  and trans.transaction_date is null
                 and adddet.effective_date < ?\s""";
         try {
-            return this.jdbcTemplate.queryForList(sql, Long.class, new Object[] { currentdate });
+            return this.jdbcTemplate.queryForList(sql, Long.class, new Object[]{currentdate});
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

@@ -73,11 +73,13 @@
     </changeSet>
     <changeSet author="fineract" id="5">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_term_variations"
-                                 constraintName="FK_loan_term_variations_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_term_variations_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_term_variations"
-                                 constraintName="FK_loan_term_variations_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_term_variations_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>

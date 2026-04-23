@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,7 +34,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+
 import java.util.HashSet;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -63,8 +65,8 @@ public class LoanScheduleApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Calculate loan repayment schedule based on Loan term variations | Updates loan repayment schedule based on Loan term variations | Updates loan repayment schedule by removing Loan term variations", description = "Calculate loan repayment schedule based on Loan term variations:\n\n"
             + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule based on Loan term variations:\n\n"
             + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule by removing Loan term variations:\n\n"
@@ -73,8 +75,8 @@ public class LoanScheduleApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleResponse.class)))
     public String calculateLoanScheduleOrSubmitVariableSchedule(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
-            @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+                                                                @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo,
+                                                                @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         CommandWrapper commandRequest = null;
         if (is(commandParam, "calculateLoanSchedule")) {

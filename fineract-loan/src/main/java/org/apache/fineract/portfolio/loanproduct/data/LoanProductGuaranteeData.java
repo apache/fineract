@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanproduct.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +35,7 @@ public final class LoanProductGuaranteeData implements Serializable {
     private final BigDecimal minimumGuaranteeFromGuarantor;
 
     public static LoanProductGuaranteeData instance(final Long id, final Long productId, final BigDecimal mandatoryGuarantee,
-            final BigDecimal minimumGuaranteeFromOwnFunds, final BigDecimal minimumGuaranteeFromGuarantor) {
+                                                    final BigDecimal minimumGuaranteeFromOwnFunds, final BigDecimal minimumGuaranteeFromGuarantor) {
         return new LoanProductGuaranteeData(id, productId, mandatoryGuarantee, minimumGuaranteeFromOwnFunds, minimumGuaranteeFromGuarantor);
     }
 

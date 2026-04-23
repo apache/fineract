@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -47,7 +48,7 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
 
     @Override
     public Page<DepositAccountOnHoldTransactionData> retriveAll(Long savingsId, Long guarantorFundingId,
-            SearchParameters searchParameters) {
+                                                                SearchParameters searchParameters) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         List<Long> paramObj = new ArrayList<>(2);
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");

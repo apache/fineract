@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,10 +25,12 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -47,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * Client Loan Integration Test for checking Loan Application Repayments Schedule, loan charges, penalties, loan
  * repayments and verifying accounting transactions
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class ClientLoanMultipleDisbursementsIntegrationTest {
 
@@ -87,7 +89,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, final String savingsId,
-            String principal, List<HashMap> tranches, String submitDate) {
+                                                        String principal, List<HashMap> tranches, String submitDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //

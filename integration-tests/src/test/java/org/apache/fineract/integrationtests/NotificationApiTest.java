@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.List;
+
 import org.apache.fineract.client.models.GetNotification;
 import org.apache.fineract.client.models.GetNotificationsResponse;
 import org.apache.fineract.client.models.GetOfficesResponse;
@@ -62,7 +64,7 @@ public class NotificationApiTest {
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         String username = Utils.uniqueRandomStringGenerator("NotificationUser", 4);
         String password = Utils.randomStringGenerator("A1b2c3d4e5f$", 1); // prefix is to conform with the password
-                                                                          // rules
+        // rules
         PostUsersRequest createUserRequest = new PostUsersRequest().username(username).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("whatever@mifos.org").password(password).repeatPassword(password)
                 .sendPasswordToEmail(false).roles(List.of(SUPER_USER_ROLE_ID)).officeId(headOffice.getId());

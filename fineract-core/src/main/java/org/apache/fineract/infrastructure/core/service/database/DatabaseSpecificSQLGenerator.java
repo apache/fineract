@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
@@ -228,7 +229,7 @@ public class DatabaseSpecificSQLGenerator {
     }
 
     public String buildJoin(@NonNull String definition, String alias, @NonNull String fkCol, String refAlias, @NonNull String refCol,
-            String joinType) {
+                            String joinType) {
         String join = Strings.isEmpty(joinType) ? "JOIN" : (joinType + " JOIN");
         alias = Strings.isEmpty(alias) ? "" : (" " + alias);
         return format("%s %s%s ON %s = %s", join, escape(definition), alias, alias(escape(fkCol), alias), alias(escape(refCol), refAlias));
@@ -354,7 +355,7 @@ public class DatabaseSpecificSQLGenerator {
         return switch (getDialect()) {
             case POSTGRESQL -> {
                 try {
-                    yield new Object[] { DataSourceUtils.getConnection(dataSource).createArrayOf("bigint", ids.toArray(new Long[0])) };
+                    yield new Object[]{DataSourceUtils.getConnection(dataSource).createArrayOf("bigint", ids.toArray(new Long[0]))};
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.loanproduct.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.codes.api.CodeValuesApiResourceSwagger.GetCodeValuesDataResponse;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -34,12 +36,14 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
  */
 public final class LoanProductsApiResourceSwagger {
 
-    private LoanProductsApiResourceSwagger() {}
+    private LoanProductsApiResourceSwagger() {
+    }
 
     @Schema(description = "LoanProductChargeData")
     public static final class LoanProductChargeData {
 
-        private LoanProductChargeData() {}
+        private LoanProductChargeData() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -50,7 +54,8 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "LoanProductChargeToGLAccountMapper")
     public static final class LoanProductChargeToGLAccountMapper {
 
-        private LoanProductChargeToGLAccountMapper() {}
+        private LoanProductChargeToGLAccountMapper() {
+        }
 
         public LoanProductChargeData charge;
         public GLAccountData incomeAccount;
@@ -60,7 +65,8 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "PostLoanProductsRequest")
     public static final class PostLoanProductsRequest {
 
-        private PostLoanProductsRequest() {}
+        private PostLoanProductsRequest() {
+        }
 
         @Schema(example = "LP Accrual Accounting")
         public String name;
@@ -204,7 +210,7 @@ public final class LoanProductsApiResourceSwagger {
         public String capitalizedIncomeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
         public String capitalizedIncomeStrategy;
-        @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
+        @Schema(example = "FEE", allowableValues = {"FEE", "INTEREST"})
         public String capitalizedIncomeType;
         @Schema(example = "false")
         public Boolean enableBuyDownFee;
@@ -212,7 +218,7 @@ public final class LoanProductsApiResourceSwagger {
         public String buyDownFeeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
         public String buyDownFeeStrategy;
-        @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
+        @Schema(example = "FEE", allowableValues = {"FEE", "INTEREST"})
         public String buyDownFeeIncomeType;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
@@ -335,7 +341,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class AllowAttributeOverrides {
 
-            private AllowAttributeOverrides() {}
+            private AllowAttributeOverrides() {
+            }
 
             @Schema(example = "true")
             public boolean amortizationType;
@@ -357,7 +364,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class RateData {
 
-            private RateData() {}
+            private RateData() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -377,7 +385,8 @@ public final class LoanProductsApiResourceSwagger {
 
         public static final class PostChargeOffReasonToExpenseAccountMappings {
 
-            private PostChargeOffReasonToExpenseAccountMappings() {}
+            private PostChargeOffReasonToExpenseAccountMappings() {
+            }
 
             @Schema(example = "1")
             public Long chargeOffReasonCodeValueId;
@@ -388,7 +397,8 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(description = "PostWriteOffReasonToExpenseAccountMappings")
         public static final class PostWriteOffReasonToExpenseAccountMappings {
 
-            private PostWriteOffReasonToExpenseAccountMappings() {}
+            private PostWriteOffReasonToExpenseAccountMappings() {
+            }
 
             @Schema(example = "1")
             public String writeOffReasonCodeValueId;
@@ -398,7 +408,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class PostClassificationToIncomeAccountMappings {
 
-            private PostClassificationToIncomeAccountMappings() {}
+            private PostClassificationToIncomeAccountMappings() {
+            }
 
             @Schema(example = "1")
             public Long classificationCodeValueId;
@@ -410,7 +421,8 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "PostLoanProductsResponse")
     public static final class PostLoanProductsResponse {
 
-        private PostLoanProductsResponse() {}
+        private PostLoanProductsResponse() {
+        }
 
         @Schema(example = "3")
         public Long resourceId;
@@ -418,7 +430,8 @@ public final class LoanProductsApiResourceSwagger {
 
     public static final class GetLoanProductsDaysInMonthType {
 
-        private GetLoanProductsDaysInMonthType() {}
+        private GetLoanProductsDaysInMonthType() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -430,7 +443,8 @@ public final class LoanProductsApiResourceSwagger {
 
     public static final class GetLoanProductsDaysInYearType {
 
-        private GetLoanProductsDaysInYearType() {}
+        private GetLoanProductsDaysInYearType() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -443,11 +457,13 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "GetLoanProductsResponse")
     public static final class GetLoanProductsResponse {
 
-        private GetLoanProductsResponse() {}
+        private GetLoanProductsResponse() {
+        }
 
         static final class GetLoanProductsCurrency {
 
-            private GetLoanProductsCurrency() {}
+            private GetLoanProductsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -467,7 +483,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsRepaymentFrequencyType {
 
-            private GetLoanProductsRepaymentFrequencyType() {}
+            private GetLoanProductsRepaymentFrequencyType() {
+            }
 
             @Schema(example = "0")
             public Long id;
@@ -479,7 +496,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsInterestRateFrequencyType {
 
-            private GetLoanProductsInterestRateFrequencyType() {}
+            private GetLoanProductsInterestRateFrequencyType() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -491,7 +509,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsAmortizationType {
 
-            private GetLoanProductsAmortizationType() {}
+            private GetLoanProductsAmortizationType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -503,7 +522,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsInterestType {
 
-            private GetLoanProductsInterestType() {}
+            private GetLoanProductsInterestType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -515,7 +535,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoansProductsInterestCalculationPeriodType {
 
-            private GetLoansProductsInterestCalculationPeriodType() {}
+            private GetLoansProductsInterestCalculationPeriodType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -527,7 +548,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsDaysInYearCustomStrategy {
 
-            private GetLoanProductsDaysInYearCustomStrategy() {}
+            private GetLoanProductsDaysInYearCustomStrategy() {
+            }
 
             @Schema(example = "FULL_LEAP_YEAR")
             public String id;
@@ -539,7 +561,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsRepaymentStartDateType {
 
-            private GetLoanProductsRepaymentStartDateType() {}
+            private GetLoanProductsRepaymentStartDateType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -551,11 +574,13 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsInterestRecalculationData {
 
-            private GetLoanProductsInterestRecalculationData() {}
+            private GetLoanProductsInterestRecalculationData() {
+            }
 
             static final class GetLoanProductsInterestRecalculationCompoundingType {
 
-                private GetLoanProductsInterestRecalculationCompoundingType() {}
+                private GetLoanProductsInterestRecalculationCompoundingType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -567,7 +592,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsInterestRecalculationCompoundingFrequencyType {
 
-                private GetLoanProductsInterestRecalculationCompoundingFrequencyType() {}
+                private GetLoanProductsInterestRecalculationCompoundingFrequencyType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -579,7 +605,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsRescheduleStrategyType {
 
-                private GetLoanProductsRescheduleStrategyType() {}
+                private GetLoanProductsRescheduleStrategyType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -591,7 +618,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsPreClosureInterestCalculationStrategy {
 
-                private GetLoanProductsPreClosureInterestCalculationStrategy() {}
+                private GetLoanProductsPreClosureInterestCalculationStrategy() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -628,7 +656,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsAccountingRule {
 
-            private GetLoanProductsAccountingRule() {}
+            private GetLoanProductsAccountingRule() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -729,11 +758,13 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "GetLoanProductsTemplateResponse")
     public static final class GetLoanProductsTemplateResponse {
 
-        private GetLoanProductsTemplateResponse() {}
+        private GetLoanProductsTemplateResponse() {
+        }
 
         static final class GetLoanProductsTemplateCurrency {
 
-            private GetLoanProductsTemplateCurrency() {}
+            private GetLoanProductsTemplateCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -753,7 +784,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsRepaymentTemplateFrequencyType {
 
-            private GetLoanProductsRepaymentTemplateFrequencyType() {}
+            private GetLoanProductsRepaymentTemplateFrequencyType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -765,7 +797,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsInterestRateTemplateFrequencyType {
 
-            private GetLoanProductsInterestRateTemplateFrequencyType() {}
+            private GetLoanProductsInterestRateTemplateFrequencyType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -777,7 +810,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsInterestTemplateType {
 
-            private GetLoanProductsInterestTemplateType() {}
+            private GetLoanProductsInterestTemplateType() {
+            }
 
             @Schema(example = "0")
             public Long id;
@@ -789,7 +823,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsAccountingRule {
 
-            private GetLoanProductsAccountingRule() {}
+            private GetLoanProductsAccountingRule() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -801,11 +836,13 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsInterestRecalculationTemplateData {
 
-            private GetLoanProductsInterestRecalculationTemplateData() {}
+            private GetLoanProductsInterestRecalculationTemplateData() {
+            }
 
             static final class GetLoanProductsInterestRecalculationCompoundingType {
 
-                private GetLoanProductsInterestRecalculationCompoundingType() {}
+                private GetLoanProductsInterestRecalculationCompoundingType() {
+                }
 
                 @Schema(example = "0")
                 public Long id;
@@ -817,7 +854,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsRescheduleStrategyType {
 
-                private GetLoanProductsRescheduleStrategyType() {}
+                private GetLoanProductsRescheduleStrategyType() {
+                }
 
                 @Schema(example = "3")
                 public Long id;
@@ -834,7 +872,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsPaymentTypeOptions {
 
-            private GetLoanProductsPaymentTypeOptions() {}
+            private GetLoanProductsPaymentTypeOptions() {
+            }
 
             @Schema(example = "10")
             public Long id;
@@ -846,7 +885,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsCurrencyOptions {
 
-            private GetLoanProductsCurrencyOptions() {}
+            private GetLoanProductsCurrencyOptions() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -864,7 +904,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsTransactionProcessingStrategyOptions {
 
-            private GetLoanProductsTransactionProcessingStrategyOptions() {}
+            private GetLoanProductsTransactionProcessingStrategyOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -876,11 +917,13 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsChargeOptions {
 
-            private GetLoanProductsChargeOptions() {}
+            private GetLoanProductsChargeOptions() {
+            }
 
             static final class GetLoanChargeTimeType {
 
-                private GetLoanChargeTimeType() {}
+                private GetLoanChargeTimeType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -892,7 +935,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsChargeAppliesTo {
 
-                private GetLoanProductsChargeAppliesTo() {}
+                private GetLoanProductsChargeAppliesTo() {
+                }
 
                 @Schema(example = "1  ")
                 public Long id;
@@ -904,7 +948,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanChargeCalculationType {
 
-                private GetLoanChargeCalculationType() {}
+                private GetLoanChargeCalculationType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -916,7 +961,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoansChargePaymentMode {
 
-                private GetLoansChargePaymentMode() {}
+                private GetLoansChargePaymentMode() {
+                }
 
                 @Schema(example = "0")
                 public Long id;
@@ -945,15 +991,18 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsAccountingMappingOptions {
 
-            private GetLoanProductsAccountingMappingOptions() {}
+            private GetLoanProductsAccountingMappingOptions() {
+            }
 
             static final class GetLoanProductsLiabilityAccountOptions {
 
-                private GetLoanProductsLiabilityAccountOptions() {}
+                private GetLoanProductsLiabilityAccountOptions() {
+                }
 
                 static final class GetLoanProductsLiabilityType {
 
-                    private GetLoanProductsLiabilityType() {}
+                    private GetLoanProductsLiabilityType() {
+                    }
 
                     @Schema(example = "2")
                     public Long id;
@@ -965,7 +1014,8 @@ public final class LoanProductsApiResourceSwagger {
 
                 static final class GetLoanProductsLiabilityUsage {
 
-                    private GetLoanProductsLiabilityUsage() {}
+                    private GetLoanProductsLiabilityUsage() {
+                    }
 
                     @Schema(example = "1")
                     public Long id;
@@ -977,7 +1027,8 @@ public final class LoanProductsApiResourceSwagger {
 
                 static final class GetLoanProductsLiabilityTagId {
 
-                    private GetLoanProductsLiabilityTagId() {}
+                    private GetLoanProductsLiabilityTagId() {
+                    }
 
                     @Schema(example = "0")
                     public Long id;
@@ -1004,7 +1055,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsAssetAccountOptions {
 
-                private GetLoanProductsAssetAccountOptions() {}
+                private GetLoanProductsAssetAccountOptions() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -1027,11 +1079,13 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsExpenseAccountOptions {
 
-                private GetLoanProductsExpenseAccountOptions() {}
+                private GetLoanProductsExpenseAccountOptions() {
+                }
 
                 static final class GetLoanProductsExpenseType {
 
-                    private GetLoanProductsExpenseType() {}
+                    private GetLoanProductsExpenseType() {
+                    }
 
                     @Schema(example = "5")
                     public Long id;
@@ -1062,11 +1116,13 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsIncomeAccountOptions {
 
-                private GetLoanProductsIncomeAccountOptions() {}
+                private GetLoanProductsIncomeAccountOptions() {
+                }
 
                 static final class GetLoanProductsIncomeType {
 
-                    private GetLoanProductsIncomeType() {}
+                    private GetLoanProductsIncomeType() {
+                    }
 
                     @Schema(example = "4")
                     public Long id;
@@ -1103,7 +1159,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsValueConditionTypeOptions {
 
-            private GetLoanProductsValueConditionTypeOptions() {}
+            private GetLoanProductsValueConditionTypeOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -1203,11 +1260,13 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "GetLoanProductsProductIdResponse")
     public static final class GetLoanProductsProductIdResponse {
 
-        private GetLoanProductsProductIdResponse() {}
+        private GetLoanProductsProductIdResponse() {
+        }
 
         static final class GetLoanProductsInterestRateFrequencyType {
 
-            private GetLoanProductsInterestRateFrequencyType() {}
+            private GetLoanProductsInterestRateFrequencyType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -1219,7 +1278,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsRepaymentStartDateType {
 
-            private GetLoanProductsRepaymentStartDateType() {}
+            private GetLoanProductsRepaymentStartDateType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -1231,11 +1291,13 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanProductsPrincipalVariationsForBorrowerCycle {
 
-            private GetLoanProductsPrincipalVariationsForBorrowerCycle() {}
+            private GetLoanProductsPrincipalVariationsForBorrowerCycle() {
+            }
 
             static final class GetLoanProductsParamType {
 
-                private GetLoanProductsParamType() {}
+                private GetLoanProductsParamType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -1247,7 +1309,8 @@ public final class LoanProductsApiResourceSwagger {
 
             static final class GetLoanProductsValueConditionType {
 
-                private GetLoanProductsValueConditionType() {}
+                private GetLoanProductsValueConditionType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -1273,11 +1336,13 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanAccountingMappings {
 
-            private GetLoanAccountingMappings() {}
+            private GetLoanAccountingMappings() {
+            }
 
             static final class GetGlAccountMapping {
 
-                private GetGlAccountMapping() {}
+                private GetGlAccountMapping() {
+                }
 
                 @Schema(example = "10")
                 public Long id;
@@ -1316,7 +1381,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanPaymentChannelToFundSourceMappings {
 
-            private GetLoanPaymentChannelToFundSourceMappings() {}
+            private GetLoanPaymentChannelToFundSourceMappings() {
+            }
 
             @Schema(example = "10")
             public Long paymentTypeId;
@@ -1326,7 +1392,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetGLAccountData {
 
-            private GetGLAccountData() {}
+            private GetGLAccountData() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -1338,7 +1405,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetClassificationToIncomeAccountMappings {
 
-            private GetClassificationToIncomeAccountMappings() {}
+            private GetClassificationToIncomeAccountMappings() {
+            }
 
             public GetCodeValuesDataResponse classificationCodeValue;
             public GetGLAccountData incomeAccount;
@@ -1346,7 +1414,8 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetChargeOffReasonToExpenseAccountMappings {
 
-            private GetChargeOffReasonToExpenseAccountMappings() {}
+            private GetChargeOffReasonToExpenseAccountMappings() {
+            }
 
             public GetCodeValuesDataResponse reasonCodeValue;
             public GetGLAccountData expenseAccount;
@@ -1355,11 +1424,13 @@ public final class LoanProductsApiResourceSwagger {
 
         static final class GetLoanFeeToIncomeAccountMappings {
 
-            private GetLoanFeeToIncomeAccountMappings() {}
+            private GetLoanFeeToIncomeAccountMappings() {
+            }
 
             static final class GetLoanCharge {
 
-                private GetLoanCharge() {}
+                private GetLoanCharge() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -1382,7 +1453,8 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(description = "GetWriteOffReasonToExpenseAccountMappings")
         public static final class GetWriteOffReasonToExpenseAccountMappings {
 
-            private GetWriteOffReasonToExpenseAccountMappings() {}
+            private GetWriteOffReasonToExpenseAccountMappings() {
+            }
 
             @Schema(example = "1")
             public String writeOffReasonCodeValueId;
@@ -1563,7 +1635,8 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "PutLoanProductsProductIdRequest")
     public static final class PutLoanProductsProductIdRequest {
 
-        private PutLoanProductsProductIdRequest() {}
+        private PutLoanProductsProductIdRequest() {
+        }
 
         @Schema(example = "LP Accrual Accounting")
         public String name;
@@ -1832,7 +1905,7 @@ public final class LoanProductsApiResourceSwagger {
         public String capitalizedIncomeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
         public String capitalizedIncomeStrategy;
-        @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
+        @Schema(example = "FEE", allowableValues = {"FEE", "INTEREST"})
         public String capitalizedIncomeType;
         @Schema(example = "false")
         public Boolean enableBuyDownFee;
@@ -1840,7 +1913,7 @@ public final class LoanProductsApiResourceSwagger {
         public String buyDownFeeCalculationType;
         @Schema(example = "EQUAL_AMORTIZATION", allowableValues = "EQUAL_AMORTIZATION")
         public String buyDownFeeStrategy;
-        @Schema(example = "FEE", allowableValues = { "FEE", "INTEREST" })
+        @Schema(example = "FEE", allowableValues = {"FEE", "INTEREST"})
         public String buyDownFeeIncomeType;
         @Schema(example = "false")
         public Boolean merchantBuyDownFee;
@@ -1886,11 +1959,13 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "PutLoanProductsProductIdResponse")
     public static final class PutLoanProductsProductIdResponse {
 
-        private PutLoanProductsProductIdResponse() {}
+        private PutLoanProductsProductIdResponse() {
+        }
 
         static final class PutLoanChanges {
 
-            private PutLoanChanges() {}
+            private PutLoanChanges() {
+            }
 
             @Schema(example = "70,000.00")
             public Double principal;
@@ -1906,7 +1981,8 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "GetLoanProductsChargeOffReasonOptions")
     public static final class GetLoanProductsChargeOffReasonOptions {
 
-        private GetLoanProductsChargeOffReasonOptions() {}
+        private GetLoanProductsChargeOffReasonOptions() {
+        }
 
         @Schema(example = "2")
         public Long id;
@@ -1925,7 +2001,8 @@ public final class LoanProductsApiResourceSwagger {
     @Schema(description = "GetLoanProductsWriteOffReasonOptions")
     public static final class GetLoanProductsWriteOffReasonOptions {
 
-        private GetLoanProductsWriteOffReasonOptions() {}
+        private GetLoanProductsWriteOffReasonOptions() {
+        }
 
         @Schema(example = "2")
         public Long id;

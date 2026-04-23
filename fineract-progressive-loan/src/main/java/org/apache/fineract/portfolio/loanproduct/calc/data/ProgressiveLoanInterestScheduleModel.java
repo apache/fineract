@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestSc
 import static org.apache.fineract.portfolio.loanproduct.calc.data.LoanInterestScheduleModelModifiers.INTEREST_RECALCULATION_ENABLED;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -40,6 +41,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Setter;
@@ -72,7 +74,7 @@ public class ProgressiveLoanInterestScheduleModel {
     private List<OverdueBalanceCorrection> overdueCorrections = new ArrayList<>();
 
     public ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods,
-            final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
+                                                final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc) {
         this.repaymentPeriods = new ArrayList<>(repaymentPeriods);
         this.interestRates = new TreeSet<>(Collections.reverseOrder());
         this.loanProductRelatedDetail = loanProductRelatedDetail;
@@ -87,8 +89,8 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private ProgressiveLoanInterestScheduleModel(final List<RepaymentPeriod> repaymentPeriods, final TreeSet<InterestRate> interestRates,
-            final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc,
-            final boolean isCopiedForCalculation) {
+                                                 final ILoanConfigurationDetails loanProductRelatedDetail, final Integer installmentAmountInMultiplesOf, final MathContext mc,
+                                                 final boolean isCopiedForCalculation) {
         this.mc = mc;
         this.repaymentPeriods = copyRepaymentPeriods(repaymentPeriods,
                 (previousPeriod, repaymentPeriod) -> RepaymentPeriod.copy(previousPeriod, repaymentPeriod, mc));
@@ -142,7 +144,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private List<RepaymentPeriod> copyRepaymentPeriods(final List<RepaymentPeriod> repaymentPeriods,
-            final BiFunction<RepaymentPeriod, RepaymentPeriod, RepaymentPeriod> repaymentCopyFunction) {
+                                                       final BiFunction<RepaymentPeriod, RepaymentPeriod, RepaymentPeriod> repaymentCopyFunction) {
         final List<RepaymentPeriod> repaymentCopies = new ArrayList<>(repaymentPeriods.size());
         RepaymentPeriod previousPeriod = null;
         for (RepaymentPeriod repaymentPeriod : repaymentPeriods) {
@@ -170,7 +172,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     public Optional<RepaymentPeriod> findRepaymentPeriodByFromAndDueDate(final LocalDate repaymentPeriodFromDate,
-            final LocalDate repaymentPeriodDueDate) {
+                                                                         final LocalDate repaymentPeriodDueDate) {
         if (repaymentPeriodDueDate == null) {
             return Optional.empty();
         }
@@ -215,7 +217,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     public Optional<RepaymentPeriod> changeOutstandingBalanceAndUpdateInterestPeriods(final LocalDate balanceChangeDate,
-            final Money disbursedAmount, final Money correctionAmount, final Money capitalizedIncomePrincipal) {
+                                                                                      final Money disbursedAmount, final Money correctionAmount, final Money capitalizedIncomePrincipal) {
         return findRepaymentPeriodForBalanceChange(balanceChangeDate).stream()//
                 .peek(updateInterestPeriodOnRepaymentPeriod(balanceChangeDate, disbursedAmount, correctionAmount,
                         capitalizedIncomePrincipal))//
@@ -245,7 +247,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private Consumer<RepaymentPeriod> updateInterestPeriodOnRepaymentPeriod(final LocalDate balanceChangeDate, final Money disbursedAmount,
-            final Money correctionAmount, final Money capitalizedIncomePrincipal) {
+                                                                            final Money correctionAmount, final Money capitalizedIncomePrincipal) {
         return repaymentPeriod -> {
             final boolean isChangeOnMaturityDate = isLastRepaymentPeriod(repaymentPeriod)
                     && balanceChangeDate.isEqual(repaymentPeriod.getDueDate());
@@ -262,7 +264,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private Optional<InterestPeriod> findInterestPeriodForBalanceChange(final RepaymentPeriod repaymentPeriod,
-            final LocalDate balanceChangeDate, final boolean isChangeOnMaturityDate) {
+                                                                        final LocalDate balanceChangeDate, final boolean isChangeOnMaturityDate) {
         if (repaymentPeriod == null || balanceChangeDate == null) {
             return Optional.empty();
         }
@@ -278,7 +280,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     void insertInterestPeriod(final RepaymentPeriod repaymentPeriod, final LocalDate balanceChangeDate, final Money disbursedAmount,
-            final Money correctionAmount, Money capitalizedIncomePrincipal) {
+                              final Money correctionAmount, Money capitalizedIncomePrincipal) {
         final InterestPeriod previousInterestPeriod = findPreviousInterestPeriod(repaymentPeriod, balanceChangeDate);
         final LocalDate originalDueDate = previousInterestPeriod.getDueDate();
         final LocalDate newDueDate = calculateNewDueDate(previousInterestPeriod, balanceChangeDate);
@@ -296,7 +298,7 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     private void insertInterestPausePeriodsByAdjustedDates(final RepaymentPeriod repaymentPeriod, final LocalDate pauseStart,
-            final LocalDate pauseEnd) {
+                                                           final LocalDate pauseEnd) {
         boolean hasStartInterestPeriod = repaymentPeriod.getInterestPeriods().stream().filter(ip -> ip.getFromDate().isEqual(pauseStart))
                 .findFirst().isPresent();
         if (!hasStartInterestPeriod) {
@@ -418,7 +420,7 @@ public class ProgressiveLoanInterestScheduleModel {
      *            Consumer to copy attributes. Params: (from, to)
      */
     public void copyPeriodsFrom(final LocalDate periodFromDueDate, List<RepaymentPeriod> copyFromPeriods,
-            BiConsumer<RepaymentPeriod, RepaymentPeriod> copyConsumer) {
+                                BiConsumer<RepaymentPeriod, RepaymentPeriod> copyConsumer) {
         if (copyFromPeriods.isEmpty()) {
             return;
         }

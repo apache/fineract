@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -138,8 +138,8 @@ public class LoanInlineCOBConfig {
     @Bean
     public ExecutionContextPromotionListener inlineCobPromotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { LoanCOBConstant.COB_PARAMETER, LoanCOBConstant.BUSINESS_STEPS,
-                LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
+        listener.setKeys(new String[]{LoanCOBConstant.COB_PARAMETER, LoanCOBConstant.BUSINESS_STEPS,
+                LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME});
         return listener;
     }
 }

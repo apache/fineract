@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import static org.apache.http.HttpStatus.SC_OK;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.resilience4j.retry.Retry;
+
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorInfo;
@@ -100,7 +102,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     @Override
     public CommandProcessingResult executeCommand(final CommandWrapper wrapper, final JsonCommand command,
-            final boolean isApprovedByChecker) {
+                                                  final boolean isApprovedByChecker) {
         return retryWrapper(() -> {
             // Do not store the idempotency key because of the exception handling
             setIdempotencyKeyStoreFlag(false);
@@ -142,7 +144,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     private CommandProcessingResult executeCommand(final CommandWrapper wrapper, final JsonCommand command,
-            final boolean isApprovedByChecker, CommandSource commandSource, AppUser user, boolean isEnclosingTransaction) {
+                                                   final boolean isApprovedByChecker, CommandSource commandSource, AppUser user, boolean isEnclosingTransaction) {
 
         final CommandProcessingResult result;
         try {

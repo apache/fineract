@@ -50,16 +50,16 @@ tasks.register('buildJavaSdk', org.openapitools.generator.gradle.plugin.tasks.Ge
     generateApiTests = false
     ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
     configOptions = [
-            dateLibrary                : 'java8',
-            library                    : 'feign',
-            feignVersion               : '13.6',
-            feignApacheHttpClient      : 'true',
-            useFeign13                 : 'true',
-            useFeignApacheHttpClient   : 'true',
-            hideGenerationTimestamp    : 'true',
-            containerDefaultToNull     : 'true',
-            oauth2Implementation       : 'none',
-            useJakartaEe               : 'true'
+            dateLibrary             : 'java8',
+            library                 : 'feign',
+            feignVersion            : '13.6',
+            feignApacheHttpClient   : 'true',
+            useFeign13              : 'true',
+            useFeignApacheHttpClient: 'true',
+            hideGenerationTimestamp : 'true',
+            containerDefaultToNull  : 'true',
+            oauth2Implementation    : 'none',
+            useJakartaEe            : 'true'
 
     ]
     dependsOn(':fineract-provider:resolve')
@@ -69,8 +69,8 @@ sourceSets {
     main {
         java {
             srcDirs = [
-                new File(buildDir, "generated/java/src/main/java"),
-                "$projectDir/src/main/java"
+                    new File(buildDir, "generated/java/src/main/java"),
+                    "$projectDir/src/main/java"
             ]
             destinationDirectory = layout.buildDirectory.dir('classes/java/main').get().asFile
         }
@@ -101,9 +101,9 @@ task cleanupGeneratedJavaFiles() {
             into targetDir
             filter { line ->
                 line
-                    .replaceAll(", \\)", ")")
-                    .replaceAll(", , @HeaderMap", ", @HeaderMap")
-                    .replaceAll("\\(, ", "(")
+                        .replaceAll(", \\)", ")")
+                        .replaceAll(", , @HeaderMap", ", @HeaderMap")
+                        .replaceAll("\\(, ", "(")
             }
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
@@ -180,10 +180,10 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                '**/build/generated/**',
-                '**/org/apache/fineract/client/models/**',
-                '**/org/apache/fineract/client/services/**Api.class',
-                '**/org/apache/fineract/client/auth/**'
+                    '**/build/generated/**',
+                    '**/org/apache/fineract/client/models/**',
+                    '**/org/apache/fineract/client/services/**Api.class',
+                    '**/org/apache/fineract/client/auth/**'
             ])
         }))
     }

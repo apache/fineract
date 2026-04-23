@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,11 +21,13 @@ package org.apache.fineract.infrastructure.event.external.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -77,7 +79,7 @@ public class InternalExternalEventService {
         try {
             return convertToReadableFormat(externalEvents);
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException
-                | JsonProcessingException e) {
+                 | JsonProcessingException e) {
             throw new RuntimeException("Error while converting external events to readable format", e);
         }
     }
@@ -148,7 +150,8 @@ public class InternalExternalEventService {
     }
 
     private Map<String, Object> toJsonMap(String json) throws JsonProcessingException {
-        return mapper.readValue(json, new TypeReference<>() {});
+        return mapper.readValue(json, new TypeReference<>() {
+        });
     }
 
 }

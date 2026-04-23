@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
 import java.util.List;
+
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -43,9 +44,9 @@ public class LoanChargeOffBusinessEventSerializer extends LoanTransactionBusines
     private final LoanTransactionRepository loanTransactionRepository;
 
     public LoanChargeOffBusinessEventSerializer(LoanReadPlatformService loanReadPlatformService,
-            LoanTransactionDataMapper loanTransactionMapper, LoanChargePaidByReadService loanChargePaidByReadService,
-            UnpaidChargeDataMapper unpaidChargeDataMapper, LoanTransactionRepository loanTransactionRepository,
-            List<ExternalEventCustomDataSerializer<LoanTransactionBusinessEvent>> externalEventCustomDataSerializers) {
+                                                LoanTransactionDataMapper loanTransactionMapper, LoanChargePaidByReadService loanChargePaidByReadService,
+                                                UnpaidChargeDataMapper unpaidChargeDataMapper, LoanTransactionRepository loanTransactionRepository,
+                                                List<ExternalEventCustomDataSerializer<LoanTransactionBusinessEvent>> externalEventCustomDataSerializers) {
         super(loanReadPlatformService, loanTransactionMapper, loanChargePaidByReadService, externalEventCustomDataSerializers);
         this.unpaidChargeDataMapper = unpaidChargeDataMapper;
         this.loanTransactionRepository = loanTransactionRepository;

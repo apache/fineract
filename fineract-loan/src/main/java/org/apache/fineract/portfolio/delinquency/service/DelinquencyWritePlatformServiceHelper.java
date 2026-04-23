@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -144,7 +145,7 @@ public class DelinquencyWritePlatformServiceHelper {
     }
 
     public void applyDelinquencyForLoanInstallments(final Loan loan, final DelinquencyBucket delinquencyBucket,
-            final Map<Long, CollectionData> installmentsCollectionData) {
+                                                    final Map<Long, CollectionData> installmentsCollectionData) {
         boolean isDelinquencyRangeChangedForAnyOfInstallment = false;
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             if (installmentsCollectionData.containsKey(installment.getId())) {
@@ -176,7 +177,7 @@ public class DelinquencyWritePlatformServiceHelper {
     }
 
     private boolean setInstallmentDelinquencyDetails(final Loan loan, final LoanRepaymentScheduleInstallment installment,
-            final DelinquencyBucket delinquencyBucket, final CollectionData installmentDelinquencyData) {
+                                                     final DelinquencyBucket delinquencyBucket, final CollectionData installmentDelinquencyData) {
         DelinquencyRange delinquencyRangeForInstallment = getInstallmentDelinquencyRange(delinquencyBucket,
                 installmentDelinquencyData.getDelinquentDays());
         return setDelinquencyDetailsForInstallment(loan, installment, installmentDelinquencyData, delinquencyRangeForInstallment);
@@ -206,7 +207,7 @@ public class DelinquencyWritePlatformServiceHelper {
     }
 
     private boolean setDelinquencyDetailsForInstallment(final Loan loan, final LoanRepaymentScheduleInstallment installment,
-            CollectionData installmentDelinquencyData, final DelinquencyRange delinquencyRangeForInstallment) {
+                                                        CollectionData installmentDelinquencyData, final DelinquencyRange delinquencyRangeForInstallment) {
         List<LoanInstallmentDelinquencyTag> installmentDelinquencyTags = new ArrayList<>();
         LocalDate delinquencyCalculationDate = DateUtils.getBusinessLocalDate();
         boolean isDelinquencyRangeChanged = false;

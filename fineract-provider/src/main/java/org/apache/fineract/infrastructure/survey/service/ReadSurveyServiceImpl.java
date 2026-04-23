@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.survey.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
@@ -96,7 +97,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
         SurveyDataTableData datatableData = null;
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), surveyName }); // NOSONAR
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, new Object[]{this.context.authenticatedUser().getId(), surveyName}); // NOSONAR
         if (rs.next()) {
             final String appTableName = rs.getString("application_table_name");
             final String registeredDatatableName = rs.getString("registered_table_name");
@@ -122,7 +123,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                 + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ? ";
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql,
-                new Object[] { surveyName, surveyName, LikelihoodStatus.ENABLED, clientId });
+                new Object[]{surveyName, surveyName, LikelihoodStatus.ENABLED, clientId});
 
         List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 

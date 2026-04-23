@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -40,7 +40,7 @@ public final class PostDatedChecksData {
     private final Integer status;
 
     private PostDatedChecksData(final LocalDate installmentDate, final Long id, final Integer installmentId, final Long accountNo,
-            final BigDecimal amount, final String name, final Long checkNo, final Integer status) {
+                                final BigDecimal amount, final String name, final Long checkNo, final Integer status) {
         this.accountNo = accountNo;
         this.amount = amount;
         this.name = name;
@@ -52,7 +52,7 @@ public final class PostDatedChecksData {
     }
 
     public static PostDatedChecksData from(final LocalDate installmentDate, final Long id, final Integer installmentId,
-            final Long accountNo, final BigDecimal amount, final String name, final Long checkNo, final Integer status) {
+                                           final Long accountNo, final BigDecimal amount, final String name, final Long checkNo, final Integer status) {
         return new PostDatedChecksData(installmentDate, id, installmentId, accountNo, amount, name, checkNo, status);
     }
 

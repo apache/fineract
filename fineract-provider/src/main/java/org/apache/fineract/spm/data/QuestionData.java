@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -35,7 +35,7 @@ public class QuestionData {
     }
 
     public QuestionData(final Long id, final List<ResponseData> responseDatas, final String componentKey, final String key,
-            final String text, final String description, final Integer sequenceNo) {
+                        final String text, final String description, final Integer sequenceNo) {
 
         this.id = id;
         this.responseDatas = responseDatas;

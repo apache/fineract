@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 
 /**
@@ -41,7 +43,7 @@ public class DepositProductAmountDetails {
     private BigDecimal depositAmount;
 
     public static DepositProductAmountDetails createFrom(final BigDecimal minDepositAmount, final BigDecimal depositAmount,
-            final BigDecimal maxDepositAmount) {
+                                                         final BigDecimal maxDepositAmount) {
 
         return new DepositProductAmountDetails(minDepositAmount, depositAmount, maxDepositAmount);
     }
@@ -51,7 +53,7 @@ public class DepositProductAmountDetails {
     }
 
     public DepositProductAmountDetails(final BigDecimal minDepositAmount, final BigDecimal depositAmount,
-            final BigDecimal maxDepositAmount) {
+                                       final BigDecimal maxDepositAmount) {
         this.minDepositAmount = minDepositAmount;
         this.depositAmount = depositAmount;
         this.maxDepositAmount = maxDepositAmount;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -73,10 +74,10 @@ public class SavingsAccountSummaryData {
     private final EnumOptionData depositType;
 
     public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String productName, final String shortProductName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
-            final BigDecimal accountBalance, final BigDecimal onHoldFunds, final BigDecimal savingsAmountOnHold,
-            final BigDecimal availableBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline,
-            final EnumOptionData depositType, final SavingsAccountSubStatusEnumData subStatus, final LocalDate lastActiveTransactionDate) {
+                                     final String productName, final String shortProductName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
+                                     final BigDecimal accountBalance, final BigDecimal onHoldFunds, final BigDecimal savingsAmountOnHold,
+                                     final BigDecimal availableBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline,
+                                     final EnumOptionData depositType, final SavingsAccountSubStatusEnumData subStatus, final LocalDate lastActiveTransactionDate) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
+
 import org.apache.fineract.infrastructure.core.auditing.JpaAuditingHandlerRegistrar;
 import org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl;
 import org.apache.fineract.infrastructure.core.persistence.DatabaseSelectingPersistenceUnitPostProcessor;
@@ -58,7 +59,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 @EnableJpaAuditing
-@EnableJpaRepositories(basePackages = { "org.apache.fineract.**.domain", "org.apache.fineract.**.repository" })
+@EnableJpaRepositories(basePackages = {"org.apache.fineract.**.domain", "org.apache.fineract.**.repository"})
 @EnableConfigurationProperties(JpaProperties.class)
 @Import(JpaAuditingHandlerRegistrar.class)
 public class JPAConfig extends JpaBaseConfiguration {
@@ -67,7 +68,7 @@ public class JPAConfig extends JpaBaseConfiguration {
     private final Collection<EntityManagerFactoryCustomizer> emFactoryCustomizers;
 
     public JPAConfig(RoutingDataSource dataSource, JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager,
-            DatabaseTypeResolver databaseTypeResolver, Collection<EntityManagerFactoryCustomizer> customizers) {
+                     DatabaseTypeResolver databaseTypeResolver, Collection<EntityManagerFactoryCustomizer> customizers) {
         super(dataSource, properties, jtaTransactionManager);
         this.databaseTypeResolver = databaseTypeResolver;
         this.emFactoryCustomizers = customizers;
@@ -78,7 +79,7 @@ public class JPAConfig extends JpaBaseConfiguration {
     @Primary
     @DependsOn("tenantDatabaseUpgradeService")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder,
-            PersistenceManagedTypes persistenceManagedTypes) {
+                                                                       PersistenceManagedTypes persistenceManagedTypes) {
         Map<String, Object> vendorProperties = getVendorProperties(getDataSource());
         String[] packagesToScan = getPackagesToScan();
         return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu").packages(packagesToScan)
@@ -104,8 +105,8 @@ public class JPAConfig extends JpaBaseConfiguration {
 
     @Override
     public EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaVendorAdapter jpaVendorAdapter,
-            ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
-            ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {
+                                                                   ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
+                                                                   ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {
         EntityManagerFactoryBuilder builder = super.entityManagerFactoryBuilder(jpaVendorAdapter, persistenceUnitManager, customizers);
         builder.setPersistenceUnitPostProcessors(getPersistenceUnitPostProcessors());
         return builder;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -89,5 +89,6 @@ public final class GlobalConfigurationConstants {
     public static final String ALLOW_CASH_AND_NON_CASH_ACCRUAL = "allow-cash-and-non-cash-accrual";
     public static final String BLOCK_TRANSACTIONS_ON_CLOSED_OVERPAID_LOANS = "block-transactions-on-closed-overpaid-loans";
 
-    private GlobalConfigurationConstants() {}
+    private GlobalConfigurationConstants() {
+    }
 }

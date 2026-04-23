@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -49,6 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -100,7 +102,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Order(1)
 @TestMethodOrder(MethodName.class)
 @ExtendWith(LoanTestLifecycleExtension.class)
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class SchedulerJobsTestResults extends IntegrationTest {
 
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
@@ -619,8 +621,8 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liabilityAccountInitialEntry = {new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liabilityAccountInitialEntry);
 
@@ -1353,7 +1355,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                    .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                    .withAccountingRulePeriodicAccrual(new Account[]{assetAccount, incomeAccount, expenseAccount, overpaymentAccount})
                     .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
                     .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(null);
             final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
@@ -1388,7 +1390,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpeningBalance) {
+                                         final String minOpeningBalance) {
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
                 .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
@@ -1427,7 +1429,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                .withAccountingRulePeriodicAccrual(new Account[]{assetAccount, incomeAccount, expenseAccount, overpaymentAccount})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(chargeId);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
@@ -1464,7 +1466,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
     }
 
     private Integer applyForLoanApplicationNoInterest(final String clientID, final String loanProductID, final String savingsID,
-            final String date) {
+                                                      final String date) {
 
         List<HashMap> collaterals = new ArrayList<>();
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
@@ -1489,7 +1491,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final String penalInterestType, String savingsId) {
+                                                    final String penalInterestType, String savingsId) {
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)
                 .withLockinPeriodFrequency("1", FixedDepositAccountHelper.DAYS).build(clientID, productID, penalInterestType);

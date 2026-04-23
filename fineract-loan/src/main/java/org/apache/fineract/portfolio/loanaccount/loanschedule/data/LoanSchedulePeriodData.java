@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -80,7 +81,7 @@ public final class LoanSchedulePeriodData {
     private final boolean downPaymentPeriod;
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
-            final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
+                                                                final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
         return builder().dueDate(disbursementDate) //
                 .principalDisbursed(principalDisbursed) //
                 .principalLoanBalanceOutstanding(principalDisbursed) //
@@ -97,8 +98,8 @@ public final class LoanSchedulePeriodData {
     }
 
     public static LoanSchedulePeriodData repaymentOnlyPeriod(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final BigDecimal principalDue, final BigDecimal outstandingLoanBalance, final BigDecimal interestDue, final BigDecimal feeDue,
-            final BigDecimal penaltyDue) {
+                                                             final BigDecimal principalDue, final BigDecimal outstandingLoanBalance, final BigDecimal interestDue, final BigDecimal feeDue,
+                                                             final BigDecimal penaltyDue) {
 
         BigDecimal totalDue = MathUtil.add(principalDue, interestDue, feeDue, penaltyDue);
         BigDecimal totalActualCostOfLoanForPeriod = MathUtil.add(interestDue, feeDue, penaltyDue);
@@ -129,7 +130,7 @@ public final class LoanSchedulePeriodData {
     }
 
     public static LoanSchedulePeriodData downPaymentOnlyPeriod(final Integer periodNumber, final LocalDate periodDate,
-            final BigDecimal principalDue, final BigDecimal outstandingLoanBalance) {
+                                                               final BigDecimal principalDue, final BigDecimal outstandingLoanBalance) {
         return builder().period(periodNumber) //
                 .fromDate(periodDate) //
                 .dueDate(periodDate) //
@@ -147,16 +148,16 @@ public final class LoanSchedulePeriodData {
     }
 
     public static LoanSchedulePeriodData periodWithPayments(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final LocalDate obligationsMetOnDate, final boolean complete, final BigDecimal principalOriginalDue,
-            final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
-            final BigDecimal outstandingPrincipalBalanceOfLoan, final BigDecimal interestDue, final BigDecimal interestPaid,
-            final BigDecimal interestWaived, final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding,
-            final BigDecimal feeChargesDue, final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived,
-            final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding, final BigDecimal penaltyChargesDue,
-            final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff,
-            final BigDecimal penaltyChargesOutstanding, final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod,
-            final BigDecimal totalPaidLateForPeriod, final BigDecimal totalWaived, final BigDecimal totalWrittenOff,
-            final BigDecimal totalCredits, final boolean isDownPayment, final BigDecimal totalAccruedInterest) {
+                                                            final LocalDate obligationsMetOnDate, final boolean complete, final BigDecimal principalOriginalDue,
+                                                            final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
+                                                            final BigDecimal outstandingPrincipalBalanceOfLoan, final BigDecimal interestDue, final BigDecimal interestPaid,
+                                                            final BigDecimal interestWaived, final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding,
+                                                            final BigDecimal feeChargesDue, final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived,
+                                                            final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding, final BigDecimal penaltyChargesDue,
+                                                            final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff,
+                                                            final BigDecimal penaltyChargesOutstanding, final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod,
+                                                            final BigDecimal totalPaidLateForPeriod, final BigDecimal totalWaived, final BigDecimal totalWrittenOff,
+                                                            final BigDecimal totalCredits, final boolean isDownPayment, final BigDecimal totalAccruedInterest) {
 
         final MathContext mc = MoneyHelper.getMathContext();
 
@@ -212,8 +213,8 @@ public final class LoanSchedulePeriodData {
     }
 
     public static LoanSchedulePeriodData withPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
-            final BigDecimal principalPaid, final BigDecimal interestPaid, final BigDecimal feeChargesPaid,
-            final BigDecimal penaltyChargesPaid) {
+                                                        final BigDecimal principalPaid, final BigDecimal interestPaid, final BigDecimal feeChargesPaid,
+                                                        final BigDecimal penaltyChargesPaid) {
         BigDecimal totalOutstanding = MathUtil.subtract(loanSchedulePeriodData.totalDueForPeriod, principalPaid, interestPaid,
                 feeChargesPaid, penaltyChargesPaid);
 

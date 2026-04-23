@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.integrationtests.ConfigProperties;
 
@@ -28,7 +29,8 @@ public final class FineractFeignClientHelper {
     private static final FineractFeignClient DEFAULT_FINERACT_FEIGN_CLIENT = createNewFineractFeignClient(ConfigProperties.Backend.USERNAME,
             ConfigProperties.Backend.PASSWORD);
 
-    private FineractFeignClientHelper() {}
+    private FineractFeignClientHelper() {
+    }
 
     public static FineractFeignClient getFineractFeignClient() {
         return DEFAULT_FINERACT_FEIGN_CLIENT;
@@ -43,7 +45,7 @@ public final class FineractFeignClientHelper {
     }
 
     public static FineractFeignClient createNewFineractFeignClient(String username, String password,
-            Consumer<FineractFeignClient.Builder> customizer) {
+                                                                   Consumer<FineractFeignClient.Builder> customizer) {
         String url = System.getProperty("fineract.it.url", buildURI());
         FineractFeignClient.Builder builder = FineractFeignClient.builder().baseUrl(url).credentials(username, password)
                 .disableSslVerification(true);

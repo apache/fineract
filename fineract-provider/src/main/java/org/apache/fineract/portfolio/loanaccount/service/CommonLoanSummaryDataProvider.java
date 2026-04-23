@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
@@ -35,7 +36,7 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
 
     @Override
     public LoanSummaryData withTransactionAmountsSummary(Loan loan, LoanSummaryData defaultSummaryData, LoanScheduleData repaymentSchedule,
-            Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
+                                                         Collection<? extends LoanTransactionBalance> loanTransactionBalances) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
         BigDecimal totalMerchantRefund = BigDecimal.ZERO;
@@ -140,7 +141,7 @@ public abstract class CommonLoanSummaryDataProvider implements LoanSummaryDataPr
     }
 
     private static BigDecimal fetchLoanTransactionBalanceByType(final Collection<? extends LoanTransactionBalance> loanTransactionBalances,
-            final LoanTransactionType transactionType) {
+                                                                final LoanTransactionType transactionType) {
         final Optional<? extends LoanTransactionBalance> optLoanTransactionBalance = loanTransactionBalances.stream()
                 .filter(balance -> balance.getTransactionType().equals(transactionType) && !balance.isReversed()).findFirst();
         return optLoanTransactionBalance.isPresent() ? optLoanTransactionBalance.get().getAmount() : BigDecimal.ZERO;

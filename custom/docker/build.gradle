@@ -27,7 +27,7 @@ jib {
         image = 'azul/zulu-openjdk-alpine:21'
         platforms {
             platform {
-                architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"
+                architecture = System.getProperty("os.arch").equals("aarch64") ? "arm64" : "amd64"
                 os = 'linux'
             }
         }
@@ -36,8 +36,8 @@ jib {
     to {
         image = 'fineract-custom'
         tags = [
-            "${project.version}",
-            'latest'
+                "${project.version}",
+                'latest'
         ]
     }
 
@@ -45,10 +45,10 @@ jib {
         creationTime = 'USE_CURRENT_TIMESTAMP'
         mainClass = 'org.apache.fineract.ServerApplication'
         args = [
-            '-Duser.home=/tmp',
-            '-Dfile.encoding=UTF-8',
-            '-Duser.timezone=UTC',
-            '-Djava.security.egd=file:/dev/./urandom'
+                '-Duser.home=/tmp',
+                '-Dfile.encoding=UTF-8',
+                '-Duser.timezone=UTC',
+                '-Djava.security.egd=file:/dev/./urandom'
         ]
         ports = ['8080/tcp', '8443/tcp']
         labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
@@ -62,11 +62,11 @@ jib {
         implementation project(':fineract-provider')
         // NOTE: dynamically load all custom modules
         file("${rootDir}/custom").eachDir { companyDir ->
-            if('build' != companyDir.name && 'docker' != companyDir.name) {
+            if ('build' != companyDir.name && 'docker' != companyDir.name) {
                 file("${rootDir}/custom/${companyDir.name}").eachDir { categoryDir ->
-                    if('build' != categoryDir.name) {
+                    if ('build' != categoryDir.name) {
                         file("${rootDir}/custom/${companyDir.name}/${categoryDir.name}").eachDir { moduleDir ->
-                            if('build' != moduleDir.name) {
+                            if ('build' != moduleDir.name) {
                                 implementation project(":custom:${companyDir.name}:${categoryDir.name}:${moduleDir.name}")
                             }
                         }

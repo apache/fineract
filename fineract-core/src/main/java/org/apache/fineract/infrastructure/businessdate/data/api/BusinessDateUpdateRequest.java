@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,8 +21,10 @@ package org.apache.fineract.infrastructure.businessdate.data.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import java.io.Serial;
 import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,7 +48,7 @@ public class BusinessDateUpdateRequest implements Serializable {
     @NotBlank(message = "{org.apache.fineract.businessdate.date-format.not-blank}")
     @DateFormat
     private String dateFormat;
-    @Schema(description = "Type of business date", example = "BUSINESS_DATE", allowableValues = { "BUSINESS_DATE", "COB_DATE" })
+    @Schema(description = "Type of business date", example = "BUSINESS_DATE", allowableValues = {"BUSINESS_DATE", "COB_DATE"})
     @EnumValue(enumClass = BusinessDateType.class, message = "{org.apache.fineract.businessdate.type.invalid}")
     @NotNull(message = "{org.apache.fineract.businessdate.type.not-blank}")
     private String type;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -51,14 +51,14 @@ public class InlineJobApiResource {
 
     @POST
     @Path("{jobName}/inline")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Starts an inline Job", description = "Starts an inline Job")
     @RequestBody(content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class)))
     @ApiResponse(responseCode = "400", description = "Request body item size validation error")
     public String executeInlineJob(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
-            @Parameter(hidden = true) final String jsonRequestBody) {
+                                   @Parameter(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().executeInlineJob(jobName).withJson(jsonRequestBody).build();
         CommandProcessingResult result = commandWritePlatformService.logCommandSource(commandRequest);

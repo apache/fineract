@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.im
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -54,7 +55,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     public static final String STRATEGY_NAME = "Overdue/Due Fee/Int,Principal";
 
     public RBILoanRepaymentScheduleTransactionProcessor(final ExternalIdFactory externalIdFactory,
-            final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
+                                                        final LoanChargeValidator loanChargeValidator, final LoanBalanceService loanBalanceService) {
         super(externalIdFactory, loanChargeValidator, loanBalanceService);
     }
 
@@ -74,8 +75,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
-            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+                                                                         final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction, final Money paymentInAdvance,
+                                                                         List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance, transactionMappings,
                 charges);
@@ -86,9 +87,9 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
      */
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
-            Set<LoanCharge> charges) {
+                                                                       final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
+                                                                       final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings,
+                                                                       Set<LoanCharge> charges) {
 
         // pay of overdue and current interest due given transaction date
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
@@ -132,7 +133,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                 if ((installment.isInterestDue(currency) || installment.getFeeChargesOutstanding(currency).isGreaterThanZero()
                         || installment.getPenaltyChargesOutstanding(currency).isGreaterThanZero())
                         && (installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber()
-                                .equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
+                        .equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
                     penaltyChargesPortion = installment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
@@ -182,7 +183,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     }
 
     private LoanRepaymentScheduleInstallment nearestInstallment(final LocalDate transactionDate,
-            final List<LoanRepaymentScheduleInstallment> installments) {
+                                                                final List<LoanRepaymentScheduleInstallment> installments) {
         LoanRepaymentScheduleInstallment nearest = installments.get(0); // installments must be sorted by dates
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             if (DateUtils.isBefore(transactionDate, installment.getDueDate())) {
@@ -198,8 +199,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
      */
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
+                                                                      final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
+                                                                      final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings, Set<LoanCharge> charges) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
@@ -260,8 +261,8 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
 
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
-            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
+                                                                final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
+                                                                final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         // final MonetaryCurrency currency =

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,7 +22,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public final class SmsMessageEnumerations {
 
-    private SmsMessageEnumerations() {}
+    private SmsMessageEnumerations() {
+    }
 
     public static EnumOptionData status(final Integer statusId) {
         return status(SmsMessageStatusType.fromInt(statusId));
@@ -35,27 +36,27 @@ public final class SmsMessageEnumerations {
             case INVALID:
                 optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(), SmsMessageStatusType.INVALID.getCode(),
                         "Invalid");
-            break;
+                break;
             case PENDING:
                 optionData = new EnumOptionData(SmsMessageStatusType.PENDING.getValue().longValue(), SmsMessageStatusType.PENDING.getCode(),
                         "Pending");
-            break;
+                break;
             case WAITING_FOR_DELIVERY_REPORT:
                 optionData = new EnumOptionData(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue().longValue(),
                         SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getCode(), "Waiting");
-            break;
+                break;
             case SENT:
                 optionData = new EnumOptionData(SmsMessageStatusType.SENT.getValue().longValue(), SmsMessageStatusType.SENT.getCode(),
                         "Sent");
-            break;
+                break;
             case DELIVERED:
                 optionData = new EnumOptionData(SmsMessageStatusType.DELIVERED.getValue().longValue(),
                         SmsMessageStatusType.DELIVERED.getCode(), "Delivered");
-            break;
+                break;
             case FAILED:
                 optionData = new EnumOptionData(SmsMessageStatusType.FAILED.getValue().longValue(), SmsMessageStatusType.FAILED.getCode(),
                         "Failed");
-            break;
+                break;
 
         }
 

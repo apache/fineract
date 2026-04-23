@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,10 +23,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -87,22 +89,22 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
     private boolean isNotification;
 
     public static SmsMessage pendingSms(final String externalId, final Group group, final Client client, final Staff staff,
-            final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
+                                        final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
         return new SmsMessage().setExternalId(externalId).setGroup(group).setClient(client).setStaff(staff)
                 .setStatusType(SmsMessageStatusType.PENDING.getValue()).setMessage(message).setMobileNo(mobileNo)
                 .setSmsCampaign(smsCampaign).setNotification(isNotification).setSubmittedOnDate(DateUtils.getBusinessLocalDate());
     }
 
     public static SmsMessage sentSms(final String externalId, final Group group, final Client client, final Staff staff,
-            final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
+                                     final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
         return new SmsMessage().setExternalId(externalId).setGroup(group).setClient(client).setStaff(staff)
                 .setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue()).setMessage(message).setMobileNo(mobileNo)
                 .setSmsCampaign(smsCampaign).setNotification(isNotification).setSubmittedOnDate(DateUtils.getBusinessLocalDate());
     }
 
     public static SmsMessage instance(String externalId, final Group group, final Client client, final Staff staff,
-            final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign,
-            final boolean isNotification) {
+                                      final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign,
+                                      final boolean isNotification) {
 
         return new SmsMessage().setExternalId(externalId).setGroup(group).setClient(client).setStaff(staff)
                 .setStatusType(statusType.getValue()).setMessage(message).setMobileNo(mobileNo).setSmsCampaign(smsCampaign)

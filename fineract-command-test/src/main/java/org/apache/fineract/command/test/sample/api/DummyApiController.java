@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandDispatcher;
@@ -40,15 +41,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(value = "/test/dummy", consumes = APPLICATION_JSON_VALUE, produces = { APPLICATION_JSON_VALUE,
-        APPLICATION_PROBLEM_JSON_VALUE })
+@RequestMapping(value = "/test/dummy", consumes = APPLICATION_JSON_VALUE, produces = {APPLICATION_JSON_VALUE,
+        APPLICATION_PROBLEM_JSON_VALUE})
 class DummyApiController {
 
     private final CommandDispatcher pipeline;
 
     @PostMapping("/sync")
     DummyResponse dummySync(@RequestHeader(value = COMMAND_HTTP_HEADER_TENANT_ID, required = false) String tenantId,
-            @RequestBody DummyRequest request) {
+                            @RequestBody DummyRequest request) {
         var command = new DummyCommand();
         command.setPayload(request);
 
@@ -62,7 +63,7 @@ class DummyApiController {
     @Async
     @PostMapping("/async")
     CompletableFuture<DummyResponse> dummyAsync(@RequestHeader(value = COMMAND_HTTP_HEADER_TENANT_ID, required = false) String tenantId,
-            @RequestBody DummyRequest request) {
+                                                @RequestBody DummyRequest request) {
         var command = new DummyCommand();
         command.setPayload(request);
 

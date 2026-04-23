@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -102,15 +103,15 @@ public final class LoanScheduleParams {
     private final MathContext mc;
 
     private LoanScheduleParams(final int periodNumber, final int instalmentNumber, int loanTermInDays, LocalDate periodStartDate,
-            final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal, final Money totalCumulativeInterest,
-            final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged, final Money totalRepaymentExpected,
-            Money totalOutstandingInterestPaymentDueToGrace, final Money reducePrincipal, final Map<LocalDate, Money> principalPortionMap,
-            final Map<LocalDate, Money> latePaymentMap, final Map<LocalDate, Money> compoundingMap, final Money unCompoundedAmount,
-            final Map<LocalDate, Money> disburseDetailMap, Money principalToBeScheduled, final Money outstandingBalance,
-            final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
-            final Collection<RecalculationDetail> recalculationDetails,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final boolean partialUpdate, final CurrencyData currency, final boolean applyInterestRecalculation, final MathContext mc) {
+                               final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal, final Money totalCumulativeInterest,
+                               final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged, final Money totalRepaymentExpected,
+                               Money totalOutstandingInterestPaymentDueToGrace, final Money reducePrincipal, final Map<LocalDate, Money> principalPortionMap,
+                               final Map<LocalDate, Money> latePaymentMap, final Map<LocalDate, Money> compoundingMap, final Money unCompoundedAmount,
+                               final Map<LocalDate, Money> disburseDetailMap, Money principalToBeScheduled, final Money outstandingBalance,
+                               final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
+                               final Collection<RecalculationDetail> recalculationDetails,
+                               final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
+                               final boolean partialUpdate, final CurrencyData currency, final boolean applyInterestRecalculation, final MathContext mc) {
         this.periodNumber = periodNumber;
         this.instalmentNumber = instalmentNumber;
         this.loanTermInDays = loanTermInDays;
@@ -145,15 +146,15 @@ public final class LoanScheduleParams {
     }
 
     public static LoanScheduleParams createLoanScheduleParamsForPartialUpdate(final int periodNumber, final int instalmentNumber,
-            int loanTermInDays, LocalDate periodStartDate, final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal,
-            final Money totalCumulativeInterest, final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged,
-            final Money totalRepaymentExpected, Money totalOutstandingInterestPaymentDueToGrace, final Money reducePrincipal,
-            final Map<LocalDate, Money> principalPortionMap, final Map<LocalDate, Money> latePaymentMap,
-            final Map<LocalDate, Money> compoundingMap, Money unCompoundedAmount, final Map<LocalDate, Money> disburseDetailMap,
-            final Money principalToBeScheduled, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
-            final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final CurrencyData currency, final boolean applyInterestRecalculation, final MathContext mc) {
+                                                                              int loanTermInDays, LocalDate periodStartDate, final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal,
+                                                                              final Money totalCumulativeInterest, final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged,
+                                                                              final Money totalRepaymentExpected, Money totalOutstandingInterestPaymentDueToGrace, final Money reducePrincipal,
+                                                                              final Map<LocalDate, Money> principalPortionMap, final Map<LocalDate, Money> latePaymentMap,
+                                                                              final Map<LocalDate, Money> compoundingMap, Money unCompoundedAmount, final Map<LocalDate, Money> disburseDetailMap,
+                                                                              final Money principalToBeScheduled, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
+                                                                              final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
+                                                                              final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
+                                                                              final CurrencyData currency, final boolean applyInterestRecalculation, final MathContext mc) {
         final boolean partialUpdate = true;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
@@ -164,8 +165,8 @@ public final class LoanScheduleParams {
     }
 
     public static LoanScheduleParams createLoanScheduleParamsForCompleteUpdate(final Collection<RecalculationDetail> recalculationDetails,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
-            final boolean applyInterestRecalculation, MathContext mc) {
+                                                                               final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
+                                                                               final boolean applyInterestRecalculation, MathContext mc) {
         final int periodNumber = 1;
         final int instalmentNumber = 1;
         final LocalDate periodStartDate = null;
@@ -198,7 +199,7 @@ public final class LoanScheduleParams {
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final CurrencyData currency, final Money chargesDueAtTimeOfDisbursement,
-            final LocalDate periodStartDate, final Money principalToBeScheduled, final MathContext mc) {
+                                                              final LocalDate periodStartDate, final Money principalToBeScheduled, final MathContext mc) {
         final int loanTermInDays = 0;
         final int periodNumber = 1;
         final int instalmentNumber = 1;
@@ -232,8 +233,8 @@ public final class LoanScheduleParams {
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final CurrencyData currency, final Money chargesDueAtTimeOfDisbursement,
-            final LocalDate periodStartDate, final Money principalToBeScheduled, final LoanScheduleParams loanScheduleParams,
-            MathContext mc) {
+                                                              final LocalDate periodStartDate, final Money principalToBeScheduled, final LoanScheduleParams loanScheduleParams,
+                                                              MathContext mc) {
         final int loanTermInDays = 0;
         final int periodNumber = 1;
         final int instalmentNumber = 1;

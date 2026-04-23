@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,7 +28,7 @@ public interface ClientAddressRepository extends JpaRepository<ClientAddress, Lo
 
     @Query("SELECT clientAddress FROM ClientAddress clientAddress WHERE clientAddress.client.id = :clientId AND clientAddress.addressType = :addressType AND clientAddress.isActive = :isActive ")
     ClientAddress findByClientIdAndAddressTypeAndIsActive(@Param("clientId") long clientId, @Param("addressType") CodeValue addressType,
-            @Param("isActive") boolean isActive);
+                                                          @Param("isActive") boolean isActive);
 
     @Query("SELECT clientAddress FROM ClientAddress clientAddress WHERE clientAddress.client.id = :clientId AND clientAddress.address.id = :addressId ")
     ClientAddress findByClientIdAndAddressId(@Param("clientId") long clientId, @Param("addressId") long addressId);

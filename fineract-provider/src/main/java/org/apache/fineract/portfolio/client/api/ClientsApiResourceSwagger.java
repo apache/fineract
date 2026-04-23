@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
 
 /**
@@ -30,16 +32,19 @@ import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
  */
 final class ClientsApiResourceSwagger {
 
-    private ClientsApiResourceSwagger() {}
+    private ClientsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetClientsTemplateResponse")
     public static final class GetClientsTemplateResponse {
 
-        private GetClientsTemplateResponse() {}
+        private GetClientsTemplateResponse() {
+        }
 
         static final class GetClientsOfficeOptions {
 
-            private GetClientsOfficeOptions() {}
+            private GetClientsOfficeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -51,7 +56,8 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsStaffOptions {
 
-            private GetClientsStaffOptions() {}
+            private GetClientsStaffOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -73,7 +79,8 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsSavingProductOptions {
 
-            private GetClientsSavingProductOptions() {}
+            private GetClientsSavingProductOptions() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -87,11 +94,13 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsDataTables {
 
-            private GetClientsDataTables() {}
+            private GetClientsDataTables() {
+            }
 
             static final class GetClientsColumnHeaderData {
 
-                private GetClientsColumnHeaderData() {}
+                private GetClientsColumnHeaderData() {
+                }
 
                 @Schema(example = "client_id")
                 public String columnName;
@@ -129,15 +138,18 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "GetClientsResponse")
     public static final class GetClientsResponse {
 
-        private GetClientsResponse() {}
+        private GetClientsResponse() {
+        }
 
         static final class GetClientsPageItemsResponse {
 
-            private GetClientsPageItemsResponse() {}
+            private GetClientsPageItemsResponse() {
+            }
 
             static final class GetClientStatus {
 
-                private GetClientStatus() {}
+                private GetClientStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -174,11 +186,13 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "GetClientsClientIdResponse")
     public static final class GetClientsClientIdResponse {
 
-        private GetClientsClientIdResponse() {}
+        private GetClientsClientIdResponse() {
+        }
 
         static final class GetClientsClientIdStatus {
 
-            private GetClientsClientIdStatus() {}
+            private GetClientsClientIdStatus() {
+            }
 
             @Schema(example = "300")
             public Long id;
@@ -190,7 +204,8 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsTimeline {
 
-            private GetClientsTimeline() {}
+            private GetClientsTimeline() {
+            }
 
             @Schema(example = "[2013, 1, 1]")
             public LocalDate submittedOnDate;
@@ -213,7 +228,8 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsGroups {
 
-            private GetClientsGroups() {}
+            private GetClientsGroups() {
+            }
 
             @Schema(example = "000000001")
             public Long id;
@@ -260,11 +276,13 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "PostClientsRequest")
     public static final class PostClientsRequest {
 
-        private PostClientsRequest() {}
+        private PostClientsRequest() {
+        }
 
         static final class PostClientsDatatable {
 
-            private PostClientsDatatable() {}
+            private PostClientsDatatable() {
+            }
 
             @Schema(example = "Client Beneficiary information")
             public String registeredTableName;
@@ -336,7 +354,8 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "PostClientsResponse")
     public static final class PostClientsResponse {
 
-        private PostClientsResponse() {}
+        private PostClientsResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -353,7 +372,8 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "PutClientsClientIdRequest")
     public static final class PutClientsClientIdRequest {
 
-        private PutClientsClientIdRequest() {}
+        private PutClientsClientIdRequest() {
+        }
 
         @Schema(example = "786444UUUYYH7")
         public String externalId;
@@ -364,7 +384,8 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "PutClientsClientIdResponse")
     public static final class PutClientsClientIdResponse {
 
-        private PutClientsClientIdResponse() {}
+        private PutClientsClientIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -380,13 +401,15 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "DeleteClientsClientIdRequest")
     public static final class DeleteClientsClientIdRequest {
 
-        private DeleteClientsClientIdRequest() {}
+        private DeleteClientsClientIdRequest() {
+        }
     }
 
     @Schema(description = "DeleteClientsClientIdResponse")
     public static final class DeleteClientsClientIdResponse {
 
-        private DeleteClientsClientIdResponse() {}
+        private DeleteClientsClientIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -401,7 +424,8 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "PostClientsClientIdRequest")
     public static final class PostClientsClientIdRequest {
 
-        private PostClientsClientIdRequest() {}
+        private PostClientsClientIdRequest() {
+        }
 
         @Schema(example = "03 August 2021")
         public String activationDate;
@@ -424,7 +448,8 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "PostClientsClientIdResponse")
     public static final class PostClientsClientIdResponse {
 
-        private PostClientsClientIdResponse() {}
+        private PostClientsClientIdResponse() {
+        }
 
         @Schema(example = "2")
         public Long officeId;
@@ -448,7 +473,8 @@ final class ClientsApiResourceSwagger {
 
         static final class GetObligeeData {
 
-            private GetObligeeData() {}
+            private GetObligeeData() {
+            }
 
             @Schema(example = "John")
             public String firstName;
@@ -475,15 +501,18 @@ final class ClientsApiResourceSwagger {
     @Schema(description = "GetClientsClientIdAccountsResponse")
     public static final class GetClientsClientIdAccountsResponse {
 
-        private GetClientsClientIdAccountsResponse() {}
+        private GetClientsClientIdAccountsResponse() {
+        }
 
         static final class GetClientsLoanAccounts {
 
-            private GetClientsLoanAccounts() {}
+            private GetClientsLoanAccounts() {
+            }
 
             static final class GetClientsLoansAccountsCurrency {
 
-                private GetClientsLoansAccountsCurrency() {}
+                private GetClientsLoansAccountsCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -501,7 +530,8 @@ final class ClientsApiResourceSwagger {
 
             static final class GetClientsLoanAccountsStatus {
 
-                private GetClientsLoanAccountsStatus() {}
+                private GetClientsLoanAccountsStatus() {
+                }
 
                 @Schema(example = "300")
                 public Long id;
@@ -529,7 +559,8 @@ final class ClientsApiResourceSwagger {
 
             static final class GetClientsLoanAccountsType {
 
-                private GetClientsLoanAccountsType() {}
+                private GetClientsLoanAccountsType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -558,11 +589,13 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsSavingsAccounts {
 
-            private GetClientsSavingsAccounts() {}
+            private GetClientsSavingsAccounts() {
+            }
 
             static final class GetClientsSavingsAccountsCurrency {
 
-                private GetClientsSavingsAccountsCurrency() {}
+                private GetClientsSavingsAccountsCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -580,7 +613,8 @@ final class ClientsApiResourceSwagger {
 
             static final class GetClientsSavingsAccountsStatus {
 
-                private GetClientsSavingsAccountsStatus() {}
+                private GetClientsSavingsAccountsStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -612,7 +646,8 @@ final class ClientsApiResourceSwagger {
 
             static final class GetClientsSavingsAccountsDepositType {
 
-                private GetClientsSavingsAccountsDepositType() {}
+                private GetClientsSavingsAccountsDepositType() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -639,11 +674,13 @@ final class ClientsApiResourceSwagger {
 
         static final class GetClientsWorkingCapitalLoanAccounts {
 
-            private GetClientsWorkingCapitalLoanAccounts() {}
+            private GetClientsWorkingCapitalLoanAccounts() {
+            }
 
             static final class GetClientsWorkingCapitalLoanAccountsStatus {
 
-                private GetClientsWorkingCapitalLoanAccountsStatus() {}
+                private GetClientsWorkingCapitalLoanAccountsStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -655,7 +692,8 @@ final class ClientsApiResourceSwagger {
 
             static final class GetClientsWorkingCapitalLoanAccountsCurrency {
 
-                private GetClientsWorkingCapitalLoanAccountsCurrency() {}
+                private GetClientsWorkingCapitalLoanAccountsCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -40,6 +41,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -71,9 +73,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Client Savings Integration Test for checking Savings Application.
  */
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 @Order(2)
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class ClientSavingsIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientSavingsIntegrationTest.class);
@@ -2040,8 +2042,8 @@ public class ClientSavingsIntegrationTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
-            String enforceMinRequiredBalance, final boolean allowOverdraft) {
+                                         final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
+                                         String enforceMinRequiredBalance, final boolean allowOverdraft) {
         final String taxGroupId = null;
         return createSavingsProduct(requestSpec, responseSpec, minOpenningBalance, minBalanceForInterestCalculation, minRequiredBalance,
                 enforceMinRequiredBalance, allowOverdraft, taxGroupId, false);
@@ -2049,8 +2051,8 @@ public class ClientSavingsIntegrationTest {
 
     // LienAtProductLevel
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
-            final boolean allowOverDraft, final boolean lienAllowed) {
+                                         final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
+                                         final boolean allowOverDraft, final boolean lienAllowed) {
 
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH LIEN---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
@@ -2082,8 +2084,8 @@ public class ClientSavingsIntegrationTest {
 
     // LienAtProductlevel with Overdraft Limit > Lien Limit
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
-            final boolean allowOverDraft, final String overDraftLimit, final boolean lienAllowed, final String lienAllowedLimit) {
+                                         final String minOpenningBalance, String minBalanceForInterestCalculation, final boolean enforceMinRequiredBalance,
+                                         final boolean allowOverDraft, final String overDraftLimit, final boolean lienAllowed, final String lienAllowedLimit) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH LIEN---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         if (lienAllowed) {
@@ -2110,8 +2112,8 @@ public class ClientSavingsIntegrationTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
-            String enforceMinRequiredBalance, final boolean allowOverdraft, final String taxGroupId, boolean withDormancy) {
+                                         final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
+                                         String enforceMinRequiredBalance, final boolean allowOverdraft, final String taxGroupId, boolean withDormancy) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         if (allowOverdraft) {
@@ -2507,15 +2509,15 @@ public class ClientSavingsIntegrationTest {
         assertEquals(balance, summary.get("availableBalance"), "Verifying available Balance is -500");
 
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "2000", // available
-                                                                                                                      // to
-                                                                                                                      // use
-                                                                                                                      // 1100
-                                                                                                                      // and
-                                                                                                                      // another
-                                                                                                                      // 1000
-                                                                                                                      // on
-                                                                                                                      // transactional
-                                                                                                                      // hold
+                // to
+                // use
+                // 1100
+                // and
+                // another
+                // 1000
+                // on
+                // transactional
+                // hold
 
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
@@ -2524,7 +2526,7 @@ public class ClientSavingsIntegrationTest {
 
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
                 "1600", TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);// can not withdraw: amount on transactional
-                                                                          // hold
+        // hold
 
         assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));

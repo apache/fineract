@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanRepaymentConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -57,7 +58,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
     private Map<Long, String> clientIdToClientExternalId;
 
     public LoanRepaymentWorkbookPopulator(List<LoanAccountData> loans, OfficeSheetPopulator officeSheetPopulator,
-            ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
+                                          ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
         this.allloans = loans;
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
@@ -188,7 +189,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         for (int i = 0; i < allloans.size(); i++) {
             if (!Objects.equals(clientName, allloans.get(i).getClientName())) {
                 endIndex = i + 1;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
                 startIndex = i + 2;
                 clientName = allloans.get(i).getClientName();
                 clientId = String.valueOf(allloans.get(i).getClientId());
@@ -199,7 +200,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
             }
             if (i == allloans.size() - 1) {
                 endIndex = i + 2;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
             }
         }
 

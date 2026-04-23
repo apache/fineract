@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
@@ -44,7 +45,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
     @Autowired
     public ConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper) {
+                                                final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.configurationRepositoryWrapper = configurationRepositoryWrapper;
@@ -67,7 +68,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         sql += "  order by c.id";
         final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm,
-                survey ? new Object[] { DataTableApiConstant.CATEGORY_PPI } : new Object[] {});
+                survey ? new Object[]{DataTableApiConstant.CATEGORY_PPI} : new Object[]{});
 
         return new GlobalConfigurationData().setGlobalConfiguration(globalConfiguration);
     }

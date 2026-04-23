@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,11 +20,13 @@ package org.apache.fineract.accounting.rule.serialization;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.rule.api.AccountingRuleJsonInputParams;
@@ -53,7 +55,8 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -102,7 +105,7 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
             final StringBuilder defaultUserMessage = new StringBuilder("The parameter ").append(creditAccount).append(" or")
                     .append(creditTag).append(" required");
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultUserMessage.toString(),
-                    creditAccount + "," + creditTag, new Object[] { creditAccount, creditTag });
+                    creditAccount + "," + creditTag, new Object[]{creditAccount, creditTag});
             dataValidationErrors.add(error);
         }
 
@@ -114,7 +117,7 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
             final StringBuilder defaultUserMessage = new StringBuilder("The parameter ").append(debitAccount).append(" or").append(debitTag)
                     .append(" required");
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultUserMessage.toString(),
-                    debitAccount + "," + debitTag, new Object[] { debitAccount, debitTag });
+                    debitAccount + "," + debitTag, new Object[]{debitAccount, debitTag});
             dataValidationErrors.add(error);
         }
 
@@ -145,7 +148,7 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
     }
 
     public void validateCreditOrDebitTagArray(final String[] creditOrDebitTagArray, final DataValidatorBuilder baseDataValidator,
-            final String parameter) {
+                                              final String parameter) {
         if (creditOrDebitTagArray != null && !ObjectUtils.isEmpty(creditOrDebitTagArray)) {
             for (final String tag : creditOrDebitTagArray) {
                 baseDataValidator.reset().parameter(parameter).value(tag).ignoreIfNull().notBlank().longGreaterThanZero();
@@ -159,7 +162,8 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

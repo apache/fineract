@@ -28,28 +28,28 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="from_loan_transaction_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="to_loan_transaction_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="relation_type_enum" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
@@ -59,28 +59,28 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="from_loan_transaction_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="to_loan_transaction_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="relation_type_enum" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static java.lang.String.format;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -42,7 +43,7 @@ public enum SqlOperator {
 
         @Override
         public String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-                String... values) {
+                                 String... values) {
             return format("%s %s %s", definition, getSymbol(), sqlGenerator.formatValue(columnType, "%" + values[0] + "%"));
         }
 
@@ -55,7 +56,7 @@ public enum SqlOperator {
 
         @Override
         public String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-                String... values) {
+                                 String... values) {
             return format("%s %s %s", definition, getSymbol(), sqlGenerator.formatValue(columnType, "%" + values[0] + "%"));
         }
 
@@ -68,7 +69,7 @@ public enum SqlOperator {
 
         @Override
         public String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-                String... values) {
+                                 String... values) {
             return format("%s %s %s AND %s", definition, getSymbol(), sqlGenerator.formatValue(columnType, values[0]),
                     sqlGenerator.formatValue(columnType, values[1]));
         }
@@ -82,7 +83,7 @@ public enum SqlOperator {
 
         @Override
         public String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-                String... values) {
+                                 String... values) {
             return format("%s %s %s AND %s", definition, getSymbol(), sqlGenerator.formatValue(columnType, values[0]),
                     sqlGenerator.formatValue(columnType, values[1]));
         }
@@ -96,7 +97,7 @@ public enum SqlOperator {
 
         @Override
         public String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-                String... values) {
+                                 String... values) {
             return format("%s %s (%s)", definition, getSymbol(),
                     Arrays.stream(values).map(e -> sqlGenerator.formatValue(columnType, e)).collect(Collectors.joining(", ")));
         }
@@ -115,7 +116,7 @@ public enum SqlOperator {
 
         @Override
         public String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-                String... values) {
+                                 String... values) {
             return format("%s %s (%s)", definition, getSymbol(),
                     Arrays.stream(values).map(e -> sqlGenerator.formatValue(columnType, e)).collect(Collectors.joining(", ")));
         }
@@ -154,18 +155,18 @@ public enum SqlOperator {
     }
 
     public String formatSql(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition, String alias,
-            List<String> values) {
+                            List<String> values) {
         return formatSql(sqlGenerator, columnType, definition, alias, values == null ? null : values.toArray(String[]::new));
     }
 
     public String formatSql(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition, String alias,
-            String... values) {
+                            String... values) {
         validateValues(values);
         return formatImpl(sqlGenerator, columnType, sqlGenerator.alias(sqlGenerator.escape(definition), alias), values);
     }
 
     protected String formatImpl(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, JdbcJavaType columnType, String definition,
-            String... values) {
+                                String... values) {
         return paramCount == 0 ? format("%s %s", definition, symbol)
                 : format("%s %s %s", definition, symbol, sqlGenerator.formatValue(columnType, values[0]));
     }
@@ -188,7 +189,7 @@ public enum SqlOperator {
     }
 
     public String formatPlaceholder(@NonNull DatabaseSpecificSQLGenerator sqlGenerator, String definition, int paramCount, String alias,
-            String placeholder) {
+                                    String placeholder) {
         validateParamCount(paramCount);
         return formatPlaceholderImpl(sqlGenerator.alias(sqlGenerator.escape(definition), alias), paramCount, placeholder);
     }

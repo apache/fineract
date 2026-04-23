@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -63,12 +64,12 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
+                                          final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+                                          final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
+                                          final JournalEntryWritePlatformService journalEntryWritePlatformService,
+                                          final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
+                                          final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+                                          final BusinessEventNotifierService businessEventNotifierService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -82,8 +83,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Transactional
     @Override
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill) {
+                                                      final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+                                                      final SavingsTransactionBooleanValues transactionBooleanValues, final boolean backdatedTxnsAllowedTill) {
         context.authenticatedUser();
         account.validateForAccountBlock();
         account.validateForDebitBlock();
@@ -154,17 +155,17 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Transactional
     @Override
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final boolean isAccountTransfer, final boolean isRegularTransaction, final boolean backdatedTxnsAllowedTill) {
+                                                   final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+                                                   final boolean isAccountTransfer, final boolean isRegularTransaction, final boolean backdatedTxnsAllowedTill) {
         final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.DEPOSIT;
         return handleDeposit(account, fmt, transactionDate, transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction,
                 savingsAccountTransactionType, backdatedTxnsAllowedTill);
     }
 
     private SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final boolean isAccountTransfer, final boolean isRegularTransaction,
-            final SavingsAccountTransactionType savingsAccountTransactionType, final boolean backdatedTxnsAllowedTill) {
+                                                    final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+                                                    final boolean isAccountTransfer, final boolean isRegularTransaction,
+                                                    final SavingsAccountTransactionType savingsAccountTransactionType, final boolean backdatedTxnsAllowedTill) {
         context.authenticatedUser();
         account.validateForAccountBlock();
         account.validateForCreditBlock();
@@ -223,14 +224,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Transactional
     @Override
     public SavingsAccountTransaction handleHold(final SavingsAccount account, BigDecimal amount, LocalDate transactionDate,
-            Boolean lienAllowed) {
+                                                Boolean lienAllowed) {
         return SavingsAccountTransaction.holdAmount(account, account.office(), null, transactionDate,
                 Money.of(account.getCurrency(), amount), lienAllowed);
     }
 
     @Override
     public SavingsAccountTransaction handleDividendPayout(final SavingsAccount account, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, final boolean backdatedTxnsAllowedTill) {
+                                                          final BigDecimal transactionAmount, final boolean backdatedTxnsAllowedTill) {
         final DateTimeFormatter fmt = null;
         final PaymentDetail paymentDetail = null;
         final boolean isAccountTransfer = false;
@@ -241,7 +242,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     }
 
     private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
+                                                   Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(account.findExistingReversedTransactionIds());
     }
@@ -256,13 +257,13 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     }
 
     private void updateTransactionDetailsWithPivotConfig(final SavingsAccount account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
+                                                         Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
         existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());
     }
 
     private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
-            final Set<Long> existingReversedTransactionIds, boolean isAccountTransfer, final boolean backdatedTxnsAllowedTill) {
+                                    final Set<Long> existingReversedTransactionIds, boolean isAccountTransfer, final boolean backdatedTxnsAllowedTill) {
 
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(savingsAccount.getCurrency().getCode(),
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
@@ -272,7 +273,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Transactional
     @Override
     public void postJournalEntries(final SavingsAccount account, final Set<Long> existingTransactionIds,
-            final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill) {
+                                   final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill) {
 
         final boolean isAccountTransfer = false;
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
@@ -280,7 +281,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
     @Override
     public SavingsAccountTransaction handleReversal(SavingsAccount account, List<SavingsAccountTransaction> savingsAccountTransactions,
-            boolean backdatedTxnsAllowedTill) {
+                                                    boolean backdatedTxnsAllowedTill) {
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -117,9 +118,9 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
         if (!MathUtil.isZero(totalAmortizationAmount)) {
             LoanTransaction transaction = MathUtil.isGreaterThanZero(totalAmortizationAmount)
                     ? LoanTransaction.buyDownFeeAmortization(loan, loan.getOffice(), tillDate, totalAmortizationAmount,
-                            externalIdFactory.create())
+                    externalIdFactory.create())
                     : LoanTransaction.buyDownFeeAmortizationAdjustment(loan,
-                            Money.of(loan.getCurrency(), MathUtil.negate(totalAmortizationAmount)), tillDate, externalIdFactory.create());
+                    Money.of(loan.getCurrency(), MathUtil.negate(totalAmortizationAmount)), tillDate, externalIdFactory.create());
             loan.addLoanTransaction(transaction);
 
             transaction = loanTransactionRepository.saveAndFlush(transaction);
@@ -162,7 +163,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
     @Override
     @Transactional
     public void processBuyDownFeeAmortizationOnLoanChargeOff(@NonNull final Loan loan,
-            @NonNull final LoanTransaction chargeOffTransaction) {
+                                                             @NonNull final LoanTransaction chargeOffTransaction) {
         LocalDate transactionDate = loan.getChargedOffOnDate();
         if (transactionDate == null) {
             transactionDate = DateUtils.getBusinessLocalDate();
@@ -190,8 +191,8 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
         loan.getLoanTransactions().stream().filter(LoanTransaction::isBuyDownFeeAmortization)
                 .filter(transaction -> transaction.getTransactionDate().equals(loanTransaction.getTransactionDate())
                         && transaction.getLoanTransactionRelations().stream()
-                                .anyMatch(rel -> LoanTransactionRelationTypeEnum.RELATED.equals(rel.getRelationType())
-                                        && rel.getToTransaction().equals(loanTransaction)))
+                        .anyMatch(rel -> LoanTransactionRelationTypeEnum.RELATED.equals(rel.getRelationType())
+                                && rel.getToTransaction().equals(loanTransaction)))
                 .forEach(transaction -> {
                     transaction.reverse();
                     journalEntryPoster.postJournalEntriesForLoanTransaction(transaction, false, false);
@@ -206,7 +207,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
     }
 
     private Optional<LoanTransaction> createBuyDownFeeAmortizationTransaction(final Loan loan, final LocalDate transactionDate,
-            final boolean isChargeOff, final LoanTransaction chargeOffTransaction) {
+                                                                              final boolean isChargeOff, final LoanTransaction chargeOffTransaction) {
         final ExternalId externalId = externalIdFactory.create();
 
         final List<LoanBuyDownFeeBalance> balances = loanBuyDownFeeBalanceRepository.findAllByLoanIdAndClosedFalse(loan.getId());
@@ -262,7 +263,7 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
         final LoanTransaction amortizationTransaction = MathUtil.isGreaterThanZero(totalUnrecognizedAmount)
                 ? LoanTransaction.buyDownFeeAmortization(loan, loan.getOffice(), transactionDate, totalUnrecognizedAmount, externalId)
                 : LoanTransaction.buyDownFeeAmortizationAdjustment(loan,
-                        Money.of(loan.getCurrency(), MathUtil.negate(totalUnrecognizedAmount)), transactionDate, externalId);
+                Money.of(loan.getCurrency(), MathUtil.negate(totalUnrecognizedAmount)), transactionDate, externalId);
         if (isChargeOff) {
             amortizationTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(amortizationTransaction,
                     chargeOffTransaction, LoanTransactionRelationTypeEnum.RELATED));

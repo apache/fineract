@@ -20,8 +20,8 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
         <insert tableName="stretchy_report">
             <column name="report_name" value="Transaction Summary Report with Asset Owner"/>
@@ -39,13 +39,17 @@
 
     <changeSet author="fineract" id="2">
         <insert tableName="stretchy_report_parameter">
-            <column name="report_id" valueComputed="(select id from stretchy_report where report_name = 'Transaction Summary Report with Asset Owner')"/>
-            <column name="parameter_id" valueComputed="(select id from stretchy_parameter where parameter_variable  = 'endDate')"/>
+            <column name="report_id"
+                    valueComputed="(select id from stretchy_report where report_name = 'Transaction Summary Report with Asset Owner')"/>
+            <column name="parameter_id"
+                    valueComputed="(select id from stretchy_parameter where parameter_variable  = 'endDate')"/>
             <column name="report_parameter_name" value="officeId"/>
         </insert>
         <insert tableName="stretchy_report_parameter">
-            <column name="report_id" valueComputed="(select id from stretchy_report where report_name = 'Transaction Summary Report with Asset Owner')"/>
-            <column name="parameter_id" valueComputed="(select id from stretchy_parameter where parameter_variable  = 'officeId')"/>
+            <column name="report_id"
+                    valueComputed="(select id from stretchy_report where report_name = 'Transaction Summary Report with Asset Owner')"/>
+            <column name="parameter_id"
+                    valueComputed="(select id from stretchy_parameter where parameter_variable  = 'officeId')"/>
             <column name="report_parameter_name" value="endDate"/>
         </insert>
     </changeSet>

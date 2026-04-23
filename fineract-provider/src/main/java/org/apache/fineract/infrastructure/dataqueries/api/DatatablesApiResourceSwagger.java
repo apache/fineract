@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,15 +19,17 @@
 package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 
 /**
  * Created by sanyam on 31/7/17.
  */
-@SuppressWarnings({ "MemberName" })
+@SuppressWarnings({"MemberName"})
 final class DatatablesApiResourceSwagger {
 
     private DatatablesApiResourceSwagger() {
@@ -51,11 +53,13 @@ final class DatatablesApiResourceSwagger {
     @Schema(description = "PostDataTablesRequest")
     public static final class PostDataTablesRequest {
 
-        private PostDataTablesRequest() {}
+        private PostDataTablesRequest() {
+        }
 
         static final class PostColumnHeaderData {
 
-            private PostColumnHeaderData() {}
+            private PostColumnHeaderData() {
+            }
 
             @Schema(required = true, example = "DOB")
             public String name;
@@ -105,7 +109,8 @@ final class DatatablesApiResourceSwagger {
 
         static final class PutDataTablesRequestDropColumns {
 
-            private PutDataTablesRequestDropColumns() {}
+            private PutDataTablesRequestDropColumns() {
+            }
 
             @Schema(example = "Gender_cd_Question")
             public String name;
@@ -113,7 +118,8 @@ final class DatatablesApiResourceSwagger {
 
         static final class PutDataTablesRequestAddColumns {
 
-            private PutDataTablesRequestAddColumns() {}
+            private PutDataTablesRequestAddColumns() {
+            }
 
             @Schema(example = "Question")
             public String name;
@@ -131,7 +137,8 @@ final class DatatablesApiResourceSwagger {
 
         static final class PutDataTablesRequestChangeColumns {
 
-            private PutDataTablesRequestChangeColumns() {}
+            private PutDataTablesRequestChangeColumns() {
+            }
 
             @Schema(example = "Question")
             public String name;
@@ -181,7 +188,8 @@ final class DatatablesApiResourceSwagger {
     @Schema(description = "PostDataTablesRegisterDatatableAppTable")
     public static final class PostDataTablesRegisterDatatableAppTable {
 
-        private PostDataTablesRegisterDatatableAppTable() {}
+        private PostDataTablesRegisterDatatableAppTable() {
+        }
     }
 
     @Schema(description = "PostDataTablesAppTableIdRequest")

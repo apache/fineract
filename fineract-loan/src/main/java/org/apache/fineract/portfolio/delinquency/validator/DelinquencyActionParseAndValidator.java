@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,8 +23,10 @@ import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyAct
 import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.START_DATE;
 
 import com.google.gson.JsonElement;
+
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -49,7 +51,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     private final DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
     public LoanDelinquencyAction validateAndParseUpdate(@NonNull final JsonCommand command, Loan loan,
-            List<LoanDelinquencyAction> savedDelinquencyActions, LocalDate businessDate) {
+                                                        List<LoanDelinquencyAction> savedDelinquencyActions, LocalDate businessDate) {
         List<LoanDelinquencyActionData> effectiveDelinquencyList = delinquencyEffectivePauseHelper
                 .calculateEffectiveDelinquencyList(savedDelinquencyActions);
         LoanDelinquencyAction parsedDelinquencyAction = parseCommand(command);
@@ -79,7 +81,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     }
 
     private void validateResumeShouldBeOnActivePause(LoanDelinquencyAction parsedDelinquencyAction,
-            List<LoanDelinquencyActionData> savedDelinquencyActions) {
+                                                     List<LoanDelinquencyActionData> savedDelinquencyActions) {
         boolean match = savedDelinquencyActions.stream()
                 .anyMatch(lda -> !DateUtils.isBefore(parsedDelinquencyAction.getStartDate(), lda.getStartDate())
                         && !DateUtils.isAfter(parsedDelinquencyAction.getStartDate(), lda.getEndDate()));
@@ -90,7 +92,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     }
 
     private void validateResumeDoesNotExist(LoanDelinquencyAction parsedDelinquencyAction,
-            List<LoanDelinquencyAction> savedDelinquencyActions) {
+                                            List<LoanDelinquencyAction> savedDelinquencyActions) {
         boolean match = savedDelinquencyActions.stream() //
                 .filter(action -> DelinquencyAction.RESUME.equals(action.getAction())) //
                 .anyMatch(action -> parsedDelinquencyAction.getStartDate().isEqual(action.getStartDate()));
@@ -126,7 +128,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     }
 
     private void validatePauseStartDateNotBeforeDisbursementDate(LoanDelinquencyAction parsedDelinquencyAction,
-            LocalDate firstDisbursalDate) {
+                                                                 LocalDate firstDisbursalDate) {
         if (firstDisbursalDate.isAfter(parsedDelinquencyAction.getStartDate())) {
             raiseValidationError("loan-delinquency-action-invalid-start-date",
                     "Start date of pause period must be after first disbursal date", START_DATE);
@@ -140,7 +142,7 @@ public class DelinquencyActionParseAndValidator extends ParseAndValidator {
     }
 
     private void validatePauseShallNotOverlap(LoanDelinquencyAction parsedDelinquencyAction,
-            List<LoanDelinquencyActionData> delinquencyActions) {
+                                              List<LoanDelinquencyActionData> delinquencyActions) {
         if (delinquencyActions.stream().filter(lda -> lda.getAction().equals(DelinquencyAction.PAUSE))
                 .anyMatch(lda -> isOverlapping(parsedDelinquencyAction, lda))) {
             raiseValidationError("loan-delinquency-action-overlapping",

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelinquency;
@@ -224,8 +225,8 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
     }
 
     private void verifyDelinquency(Long loanId, Integer loanLevelDelinquentDays, String loanLevelDelinquentAmount,
-            String expectedLastRepaymentDate, String expectedLastRepaymentAmount,
-            InstallmentLevelDelinquencyAPIIntegrationTests.DelinquencyData... expectedInstallmentLevelDelinquencyData) {
+                                   String expectedLastRepaymentDate, String expectedLastRepaymentAmount,
+                                   InstallmentLevelDelinquencyAPIIntegrationTests.DelinquencyData... expectedInstallmentLevelDelinquencyData) {
         GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
         assertThat(loan.getDelinquent()).isNotNull();
         List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency = loan.getDelinquent()
@@ -267,7 +268,7 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
     }
 
     private static InstallmentLevelDelinquencyAPIIntegrationTests.DelinquencyData delinquency(Integer minAgeDays, Integer maxAgeDays,
-            String delinquentAmount) {
+                                                                                              String delinquentAmount) {
         return new InstallmentLevelDelinquencyAPIIntegrationTests.DelinquencyData(minAgeDays, maxAgeDays, new BigDecimal(delinquentAmount));
     }
 }

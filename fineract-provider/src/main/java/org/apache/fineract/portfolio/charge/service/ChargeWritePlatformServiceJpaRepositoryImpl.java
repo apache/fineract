@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,10 @@
 package org.apache.fineract.portfolio.charge.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.util.Collection;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -260,25 +262,25 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
     private boolean isAnyLoansAssociateWithThisCharge(final Long chargeId) {
         final String sql = "select (CASE WHEN exists (select 1 from m_loan_charge lc where lc.charge_id = ? and lc.is_active = true) THEN 'true' ELSE 'false' END)";
-        final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
+        final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[]{chargeId});
         return Boolean.valueOf(isLoansUsingCharge);
     }
 
     private boolean isAnySavingsAssociateWithThisCharge(final Long chargeId) {
         final String sql = "select (CASE WHEN exists (select 1 from m_savings_account_charge sc where sc.charge_id = ? and sc.is_active = true) THEN 'true' ELSE 'false' END)";
-        final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
+        final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[]{chargeId});
         return Boolean.valueOf(isSavingsUsingCharge);
     }
 
     private boolean isAnyLoanProductsAssociateWithThisCharge(final Long chargeId) {
         final String sql = "select (CASE WHEN exists (select 1 from m_product_loan_charge lc where lc.charge_id = ?) THEN 'true' ELSE 'false' END)";
-        final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
+        final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[]{chargeId});
         return Boolean.valueOf(isLoansUsingCharge);
     }
 
     private boolean isAnySavingsProductsAssociateWithThisCharge(final Long chargeId) {
         final String sql = "select (CASE WHEN (exists (select 1 from m_savings_product_charge sc where sc.charge_id = ?)) = 1 THEN 'true' ELSE 'false' END)";
-        final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
+        final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[]{chargeId});
         return Boolean.valueOf(isSavingsUsingCharge);
     }
 }

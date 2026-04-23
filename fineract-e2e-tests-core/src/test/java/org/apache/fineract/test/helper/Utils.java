@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -44,7 +44,8 @@ public final class Utils {
             "Sanchez", "Scott", "Smith", "Stewart", "Taylor", "Thomas", "Thompson", "Torres", "Turner", "Walker", "Ward", "Watson", "White",
             "Williams", "Wilson", "Wood", "Wright", "Young", "Zhang");
 
-    private Utils() {}
+    private Utils() {
+    }
 
     public static String randomStringGenerator(final String prefix, final int len, final String sourceSetString) {
         final int lengthOfSource = sourceSetString.length();

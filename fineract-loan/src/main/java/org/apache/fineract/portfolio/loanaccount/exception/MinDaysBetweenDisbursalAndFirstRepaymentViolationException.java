@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.exception;
 
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
@@ -29,7 +30,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class MinDaysBetweenDisbursalAndFirstRepaymentViolationException extends AbstractPlatformDomainRuleException {
 
     public MinDaysBetweenDisbursalAndFirstRepaymentViolationException(final LocalDate disbursalDate, final LocalDate firstRepaymentDate,
-            Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
+                                                                      Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
         super("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed",
                 "Number of days between loan disbursal  (" + disbursalDate + ") and first repayment (" + firstRepaymentDate
                         + ") can't be less than (" + minimumDaysBetweenDisbursalAndFirstRepayment + ").",

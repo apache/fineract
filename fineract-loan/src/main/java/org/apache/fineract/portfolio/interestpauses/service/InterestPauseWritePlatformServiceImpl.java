@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -61,7 +62,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
     @Override
     public CommandProcessingResult createInterestPause(final ExternalId loanExternalId, final String startDateString,
-            final String endDateString, final String dateFormat, final String locale) {
+                                                       final String endDateString, final String dateFormat, final String locale) {
         final LocalDate startDate = parseDate(startDateString, dateFormat, locale);
         final LocalDate endDate = parseDate(endDateString, dateFormat, locale);
         final Loan loan = loanAssembler.assembleFrom(loanExternalId, false);
@@ -71,7 +72,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
     @Override
     public CommandProcessingResult createInterestPause(final Long loanId, final String startDateString, final String endDateString,
-            final String dateFormat, final String locale) {
+                                                       final String dateFormat, final String locale) {
         final LocalDate startDate = parseDate(startDateString, dateFormat, locale);
         final LocalDate endDate = parseDate(endDateString, dateFormat, locale);
         final Loan loan = loanAssembler.assembleFrom(loanId, false);
@@ -91,14 +92,14 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
 
     @Override
     public CommandProcessingResult updateInterestPause(ExternalId loanExternalId, Long variationId, String startDateString,
-            String endDateString, String dateFormat, String locale) {
+                                                       String endDateString, String dateFormat, String locale) {
         return processUpdateInterestPause(loanRepositoryWrapper.findOneWithNotFoundDetection(loanExternalId), variationId, startDateString,
                 endDateString, dateFormat, locale);
     }
 
     @Override
     public CommandProcessingResult updateInterestPause(Long loanId, Long variationId, String startDateString, String endDateString,
-            String dateFormat, String locale) {
+                                                       String dateFormat, String locale) {
         return processUpdateInterestPause(loanRepositoryWrapper.findOneWithNotFoundDetection(loanId), variationId, startDateString,
                 endDateString, dateFormat, locale);
     }
@@ -125,7 +126,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     }
 
     private CommandProcessingResult processUpdateInterestPause(Loan loan, Long variationId, String startDateString, String endDateString,
-            String dateFormat, String locale) {
+                                                               String dateFormat, String locale) {
         LocalDate startDate = parseDate(startDateString, dateFormat, locale);
         LocalDate endDate = parseDate(endDateString, dateFormat, locale);
 
@@ -155,7 +156,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     }
 
     private CommandProcessingResult processInterestPause(final Loan loan, final LocalDate startDate, final LocalDate endDate,
-            String dateFormat, String locale) {
+                                                         String dateFormat, String locale) {
         validateActiveLoan(loan);
         validateInterestPauseDates(loan, startDate, endDate, dateFormat, locale, null);
 
@@ -176,7 +177,7 @@ public class InterestPauseWritePlatformServiceImpl implements InterestPauseWrite
     }
 
     private void validateInterestPauseDates(Loan loan, LocalDate startDate, LocalDate endDate, String dateFormat, String locale,
-            Long currentVariationId) {
+                                            Long currentVariationId) {
 
         Validator.validateOrThrow("InterestPause", baseDataValidator -> {
             baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();

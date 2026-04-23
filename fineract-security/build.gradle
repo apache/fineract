@@ -48,9 +48,9 @@ apply from: 'dependencies.gradle'
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
     ignoreClassNamePatterns = [
-        '.*AbstractPersistableCustom',
-        '.*EntityTables',
-        '.*domain.*'
+            '.*AbstractPersistableCustom',
+            '.*EntityTables',
+            '.*domain.*'
     ]
 }
 
@@ -62,7 +62,7 @@ if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
 
 eclipse {
     project {
-        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
+        buildCommand([LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch"], 'org.eclipse.ui.externaltools.ExternalToolBuilder')
     }
 }
 

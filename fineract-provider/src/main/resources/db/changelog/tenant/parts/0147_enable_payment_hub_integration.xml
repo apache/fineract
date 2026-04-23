@@ -36,7 +36,8 @@
             <column name="string_value" value="enable payment hub integration"/>
             <column name="enabled" valueBoolean="false"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="Use payment hub api's for account withdrawal and loan disbursement to linked interop account"/>
+            <column name="description"
+                    value="Use payment hub api's for account withdrawal and loan disbursement to linked interop account"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

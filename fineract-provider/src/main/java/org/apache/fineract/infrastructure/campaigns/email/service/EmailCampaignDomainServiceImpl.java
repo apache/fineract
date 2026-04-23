@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,9 +21,11 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
@@ -98,7 +100,8 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         List<EmailCampaign> campaigns = this.retrieveEmailCampaigns(paramValue);
         for (EmailCampaign emailCampaign : campaigns) {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             campaignParams.put("loanId", loanTransaction.getLoan().getId().toString());
             campaignParams.put("loanTransactionId", loanTransaction.getId().toString());
             this.emailCampaignWritePlatformService.insertDirectCampaignIntoEmailOutboundTable(loanTransaction.getLoan(), emailCampaign,
@@ -110,7 +113,8 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         List<EmailCampaign> campaigns = this.retrieveEmailCampaigns(paramValue);
         for (EmailCampaign emailCampaign : campaigns) {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             campaignParams.put("loanId", loan.getId().toString());
             this.emailCampaignWritePlatformService.insertDirectCampaignIntoEmailOutboundTable(loan, emailCampaign, campaignParams);
         }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.provisioning.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -44,7 +45,7 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
     private Collection<GLAccountData> glAccounts;
 
     private ProvisioningCriteriaData(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
-            Collection<ProvisioningCriteriaDefinitionData> definitions, Collection<GLAccountData> glAccounts, final String createdBy) {
+                                     Collection<ProvisioningCriteriaDefinitionData> definitions, Collection<GLAccountData> glAccounts, final String createdBy) {
         this.criteriaId = criteriaId;
         this.criteriaName = criteriaName;
         this.loanProducts = loanProducts;
@@ -54,7 +55,7 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
     }
 
     private ProvisioningCriteriaData(ProvisioningCriteriaData data, final Collection<LoanProductData> loanProducts,
-            Collection<GLAccountData> glAccounts) {
+                                     Collection<GLAccountData> glAccounts) {
         this.criteriaId = data.criteriaId;
         this.criteriaName = data.criteriaName;
         this.selectedLoanProducts = data.loanProducts;
@@ -66,7 +67,7 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
     }
 
     public static ProvisioningCriteriaData toLookup(final Long criteriaId, final String criteriaName,
-            final Collection<LoanProductData> loanProducts, final List<ProvisioningCriteriaDefinitionData> definitions) {
+                                                    final Collection<LoanProductData> loanProducts, final List<ProvisioningCriteriaDefinitionData> definitions) {
         Collection<GLAccountData> glAccounts = null;
         String createdBy = null;
         return new ProvisioningCriteriaData().setCriteriaId(criteriaId).setCriteriaName(criteriaName).setLoanProducts(loanProducts)
@@ -82,7 +83,7 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
     }
 
     public static ProvisioningCriteriaData toTemplate(final Collection<ProvisioningCriteriaDefinitionData> definitions,
-            final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts) {
+                                                      final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts) {
         Long criteriaId = null;
         String criteriaName = null;
         String createdBy = null;
@@ -91,8 +92,8 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
     }
 
     public static ProvisioningCriteriaData toTemplate(final ProvisioningCriteriaData data,
-            final Collection<ProvisioningCriteriaDefinitionData> definitions, final Collection<LoanProductData> loanProducts,
-            final Collection<GLAccountData> glAccounts) {
+                                                      final Collection<ProvisioningCriteriaDefinitionData> definitions, final Collection<LoanProductData> loanProducts,
+                                                      final Collection<GLAccountData> glAccounts) {
         return new ProvisioningCriteriaData(data, loanProducts, glAccounts);
     }
 

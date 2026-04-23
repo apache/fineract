@@ -30,6 +30,6 @@
     </changeSet>
     <!-- V6__add_unique_tenant_identifier.sql -->
     <changeSet author="fineract" id="6">
-        <addUniqueConstraint tableName="tenants" columnNames="identifier" />
+        <addUniqueConstraint tableName="tenants" columnNames="identifier"/>
     </changeSet>
 </databaseChangeLog>

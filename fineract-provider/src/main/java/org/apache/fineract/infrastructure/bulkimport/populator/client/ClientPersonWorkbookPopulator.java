@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.client;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.ClientPersonConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -53,9 +54,9 @@ public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
     private final List<CodeValueData> countryCodeValues;
 
     public ClientPersonWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
-            List<CodeValueData> clientTypeCodeValues, List<CodeValueData> genderCodeValues, List<CodeValueData> clientClassification,
-            List<CodeValueData> addressTypesCodeValues, List<CodeValueData> stateProvinceCodeValues,
-            List<CodeValueData> countryCodeValues) {
+                                         List<CodeValueData> clientTypeCodeValues, List<CodeValueData> genderCodeValues, List<CodeValueData> clientClassification,
+                                         List<CodeValueData> addressTypesCodeValues, List<CodeValueData> stateProvinceCodeValues,
+                                         List<CodeValueData> countryCodeValues) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.personnelSheetPopulator = personnelSheetPopulator;
         this.clientTypeCodeValues = clientTypeCodeValues;
@@ -282,16 +283,16 @@ public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
                 .createDateConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$H1", null, dateformat);
         DataValidationConstraint dobDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=TODAY()", null, dateformat);
-        DataValidationConstraint activeConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint activeConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
         DataValidationConstraint clientTypesConstraint = validationHelper.createFormulaListConstraint("ClientTypes");
-        DataValidationConstraint isStaffConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint isStaffConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
         DataValidationConstraint genderConstraint = validationHelper.createFormulaListConstraint("Gender");
         DataValidationConstraint clientClassificationConstraint = validationHelper.createFormulaListConstraint("ClientClassification");
-        DataValidationConstraint enabledAddressConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint enabledAddressConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
         DataValidationConstraint addressTypeConstraint = validationHelper.createFormulaListConstraint("AddressType");
         DataValidationConstraint stateProvinceConstraint = validationHelper.createFormulaListConstraint("StateProvince");
         DataValidationConstraint countryConstraint = validationHelper.createFormulaListConstraint("Country");
-        DataValidationConstraint activeAddressConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint activeAddressConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation staffValidation = validationHelper.createValidation(staffNameConstraint, staffNameRange);

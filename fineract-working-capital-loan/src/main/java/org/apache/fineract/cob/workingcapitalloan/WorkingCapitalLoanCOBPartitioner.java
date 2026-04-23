@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBCo
 
 import java.util.Map;
 import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CommonPartitioner;
@@ -42,8 +43,8 @@ public class WorkingCapitalLoanCOBPartitioner extends CommonPartitioner implemen
     private final PropertyService propertyService;
 
     public WorkingCapitalLoanCOBPartitioner(JobOperator jobOperator, StepExecution stepExecution, Long numberOfDays,
-            WorkingCapitalLoanRetrieveIdService retrieveIdService, COBBusinessStepService cobBusinessStepService,
-            PropertyService propertyService) {
+                                            WorkingCapitalLoanRetrieveIdService retrieveIdService, COBBusinessStepService cobBusinessStepService,
+                                            PropertyService propertyService) {
         super(jobOperator, stepExecution, numberOfDays, retrieveIdService);
         this.cobBusinessStepService = cobBusinessStepService;
         this.propertyService = propertyService;

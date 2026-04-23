@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -32,6 +32,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import io.github.resilience4j.retry.annotation.Retry;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -47,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -232,7 +234,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public void processPostActiveActions(final SavingsAccount account, final DateTimeFormatter fmt, final Set<Long> existingTransactionIds,
-            final Set<Long> existingReversedTransactionIds) {
+                                         final Set<Long> existingReversedTransactionIds) {
         getAppUserIfPresent();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
@@ -579,7 +581,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public void postInterest(final SavingsAccount account, final boolean postInterestAs, final LocalDate transactionDate,
-            final boolean backdatedTxnsAllowedTill) {
+                             final boolean backdatedTxnsAllowedTill) {
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -629,7 +631,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     @Retry(name = "postInterest", fallbackMethod = "fallbackPostInterest")
     public SavingsAccountData postInterest(SavingsAccountData savingsAccountData, final boolean postInterestAs,
-            final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill) {
+                                           final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill) {
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -687,7 +689,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public CommandProcessingResult reverseTransaction(final Long savingsId, final Long transactionId,
-            final boolean allowAccountTransferModification, final JsonCommand command) {
+                                                      final boolean allowAccountTransferModification, final JsonCommand command) {
 
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final boolean isBulk = command.booleanPrimitiveValueOfParameterNamed("isBulk");
@@ -737,7 +739,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
-            final boolean allowAccountTransferModification) {
+                                                   final boolean allowAccountTransferModification) {
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -1129,7 +1131,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public SavingsAccountTransaction acceptSavingsTransfer(final SavingsAccount savingsAccount, final LocalDate transferDate,
-            final Office acceptedInOffice, final Staff fieldOfficer) {
+                                                           final Office acceptedInOffice, final Staff fieldOfficer) {
         getAppUserIfPresent();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
@@ -1358,7 +1360,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public CommandProcessingResult deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId,
-            @SuppressWarnings("unused") final JsonCommand command) {
+                                                              @SuppressWarnings("unused") final JsonCommand command) {
         this.context.authenticatedUser();
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId, false);
@@ -1453,7 +1455,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @SuppressWarnings("unused")
     public SavingsAccountData fallbackPostInterest(SavingsAccountData savingsAccountData, boolean postInterestAs, LocalDate transactionDate,
-            boolean backdatedTxnsAllowedTill, Throwable t) {
+                                                   boolean backdatedTxnsAllowedTill, Throwable t) {
         // NOTE: allow caller to catch the exceptions
         // NOTE: wrap throwable only if really necessary
         throw errorHandler.getMappable(t, null, null, "savings.postinterest");
@@ -1461,7 +1463,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     private SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate,
-            final BigDecimal amountPaid, final DateTimeFormatter formatter, final boolean backdatedTxnsAllowedTill) {
+                                                final BigDecimal amountPaid, final DateTimeFormatter formatter, final boolean backdatedTxnsAllowedTill) {
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -1514,25 +1516,25 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
+                                                   Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findExistingTransactionIds());
         existingReversedTransactionIds.addAll(account.findExistingReversedTransactionIds());
     }
 
     private void updateExistingTransactionsDetails(SavingsAccountData account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
+                                                   Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
         existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());
     }
 
     private void updateSavingsTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
+                                                  Set<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(account.findCurrentTransactionIdsWithPivotDateConfig());
         existingReversedTransactionIds.addAll(account.findCurrentReversedTransactionIdsWithPivotDateConfig());
     }
 
     private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
-            final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill) {
+                                    final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill) {
 
         boolean isAccountTransfer = false;
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(savingsAccount.getCurrency().getCode(),

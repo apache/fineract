@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -54,8 +55,8 @@ public final class DepositAccountInterestRateChartData {
     private final Collection<CodeValueData> clientClassificationOptions;
 
     public static DepositAccountInterestRateChartData instance(Long id, String name, String description, LocalDate fromDate,
-            LocalDate endDate, boolean isPrimaryGroupingByAmount, Long accountId, String accountNumber,
-            Collection<DepositAccountInterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes) {
+                                                               LocalDate endDate, boolean isPrimaryGroupingByAmount, Long accountId, String accountNumber,
+                                                               Collection<DepositAccountInterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes) {
 
         final Collection<EnumOptionData> entityTypeOptions = null;
         final Collection<EnumOptionData> attributeNameOptions = null;
@@ -89,7 +90,7 @@ public final class DepositAccountInterestRateChartData {
     }
 
     public static DepositAccountInterestRateChartData withSlabs(DepositAccountInterestRateChartData interestRateChartData,
-            Collection<DepositAccountInterestRateChartSlabData> chartSlabs) {
+                                                                Collection<DepositAccountInterestRateChartSlabData> chartSlabs) {
         return new DepositAccountInterestRateChartData(interestRateChartData.id, interestRateChartData.name,
                 interestRateChartData.description, interestRateChartData.fromDate, interestRateChartData.endDate,
                 interestRateChartData.isPrimaryGroupingByAmount, interestRateChartData.accountId, interestRateChartData.accountNumber,
@@ -100,10 +101,10 @@ public final class DepositAccountInterestRateChartData {
     }
 
     public static DepositAccountInterestRateChartData withTemplate(DepositAccountInterestRateChartData interestRateChartData,
-            Collection<EnumOptionData> periodTypes, final Collection<EnumOptionData> entityTypeOptions,
-            final Collection<EnumOptionData> attributeNameOptions, final Collection<EnumOptionData> conditionTypeOptions,
-            final Collection<EnumOptionData> incentiveTypeOptions, final Collection<CodeValueData> genderOptions,
-            final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions) {
+                                                                   Collection<EnumOptionData> periodTypes, final Collection<EnumOptionData> entityTypeOptions,
+                                                                   final Collection<EnumOptionData> attributeNameOptions, final Collection<EnumOptionData> conditionTypeOptions,
+                                                                   final Collection<EnumOptionData> incentiveTypeOptions, final Collection<CodeValueData> genderOptions,
+                                                                   final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions) {
         return new DepositAccountInterestRateChartData(interestRateChartData.id, interestRateChartData.name,
                 interestRateChartData.description, interestRateChartData.fromDate, interestRateChartData.endDate,
                 interestRateChartData.isPrimaryGroupingByAmount, interestRateChartData.accountId, interestRateChartData.accountNumber,
@@ -112,10 +113,10 @@ public final class DepositAccountInterestRateChartData {
     }
 
     public static DepositAccountInterestRateChartData template(Collection<EnumOptionData> periodTypes,
-            final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
-            final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
-            final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
-            final Collection<CodeValueData> clientClassificationOptions) {
+                                                               final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
+                                                               final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
+                                                               final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
+                                                               final Collection<CodeValueData> clientClassificationOptions) {
         final Long id = null;
         final String name = null;
         final String description = null;
@@ -131,12 +132,12 @@ public final class DepositAccountInterestRateChartData {
     }
 
     private DepositAccountInterestRateChartData(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            final boolean isPrimaryGroupingByAmount, Long accountId, String accountNumber,
-            Collection<DepositAccountInterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes,
-            final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
-            final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
-            final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
-            final Collection<CodeValueData> clientClassificationOptions) {
+                                                final boolean isPrimaryGroupingByAmount, Long accountId, String accountNumber,
+                                                Collection<DepositAccountInterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes,
+                                                final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
+                                                final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
+                                                final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
+                                                final Collection<CodeValueData> clientClassificationOptions) {
         this.id = id;
         this.name = name;
         this.description = description;

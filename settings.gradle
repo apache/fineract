@@ -46,7 +46,7 @@ buildCache {
     }
 }
 
-rootProject.name='fineract'
+rootProject.name = 'fineract'
 include ':fineract-core'
 include ':fineract-security'
 include ':fineract-cob'
@@ -87,11 +87,11 @@ include 'fineract-working-capital-loan'
 include ':custom:docker'
 // NOTE: dynamically load custom modules with pattern "custom -> company -> category -> module"
 file("${rootDir}/custom").eachDir { companyDir ->
-    if('build' != companyDir.name && 'docker' != companyDir.name) {
+    if ('build' != companyDir.name && 'docker' != companyDir.name) {
         file("${rootDir}/custom/${companyDir.name}").eachDir { categoryDir ->
-            if('build' != categoryDir.name) {
+            if ('build' != categoryDir.name) {
                 file("${rootDir}/custom/${companyDir.name}/${categoryDir.name}").eachDir { moduleDir ->
-                    if('build' != moduleDir.name) {
+                    if ('build' != moduleDir.name) {
                         include ":custom:${companyDir.name}:${categoryDir.name}:${moduleDir.name}"
                     }
                 }

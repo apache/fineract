@@ -29,7 +29,8 @@
             <column name="value" valueNumeric="0"/>
             <column name="enabled" valueBoolean="false"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="If enabled, allows withdrawals to put the account into negative balance up to the configured limit."/>
+            <column name="description"
+                    value="If enabled, allows withdrawals to put the account into negative balance up to the configured limit."/>
         </insert>
 
         <insert tableName="c_configuration">

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -50,8 +51,8 @@ public final class GuarantorFundingData implements Serializable {
     private final Collection<GuarantorTransactionData> guarantorTransactions;
 
     private GuarantorFundingData(final Long id, final EnumOptionData status, final PortfolioAccountData savingsAccount,
-            final BigDecimal amount, final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
-            final Collection<GuarantorTransactionData> guarantorTransactions) {
+                                 final BigDecimal amount, final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
+                                 final Collection<GuarantorTransactionData> guarantorTransactions) {
         this.id = id;
         this.status = status;
         this.savingsAccount = savingsAccount;
@@ -63,8 +64,8 @@ public final class GuarantorFundingData implements Serializable {
     }
 
     public static GuarantorFundingData instance(final Long id, final EnumOptionData status, final PortfolioAccountData savingsAccount,
-            final BigDecimal amount, final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
-            final Collection<GuarantorTransactionData> guarantorTransactions) {
+                                                final BigDecimal amount, final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
+                                                final Collection<GuarantorTransactionData> guarantorTransactions) {
         return new GuarantorFundingData(id, status, savingsAccount, amount, amountReleased, amountRemaining, amountTransfered,
                 guarantorTransactions);
     }

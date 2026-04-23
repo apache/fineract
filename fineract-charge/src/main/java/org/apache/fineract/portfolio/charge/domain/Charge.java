@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.math.BigDecimal;
 import java.time.MonthDay;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -58,7 +60,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 
 @Entity
-@Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
+@Table(name = "m_charge", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "name")})
 public class Charge extends AbstractPersistableCustom<Long> {
 
     public static final String CHARGE_TIME_PARAM_NAME = "chargeTimeType";
@@ -162,7 +164,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
     private TaxGroup taxGroup;
 
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup,
-            final PaymentType paymentType) {
+                                  final PaymentType paymentType) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
@@ -206,14 +208,15 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType);
     }
 
-    protected Charge() {}
+    protected Charge() {
+    }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
-            final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
-            final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
-            final Integer freeWithdrawalFrequency, final Integer restartFrequency, final PeriodFrequencyType restartFrequencyEnum,
-            final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType) {
+                   final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
+                   final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
+                   final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
+                   final Integer freeWithdrawalFrequency, final Integer restartFrequency, final PeriodFrequencyType restartFrequencyEnum,
+                   final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;

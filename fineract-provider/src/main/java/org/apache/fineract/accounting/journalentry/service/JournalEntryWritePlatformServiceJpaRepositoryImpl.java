@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -244,7 +245,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void validateDebitOrCreditArrayForExistingGLAccount(final GLAccount glaccount,
-            final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
+                                                                final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
         /**
          * If a glaccount is assigned for a rule the credits or debits array should have only one entry and it must be
          * same as existing account
@@ -261,7 +262,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @SuppressWarnings("null")
     private void checkDebitOrCreditAccountsAreValid(final AccountingRule accountingRule, final SingleDebitOrCreditEntryCommand[] credits,
-            final SingleDebitOrCreditEntryCommand[] debits) {
+                                                    final SingleDebitOrCreditEntryCommand[] debits) {
         // Validate the debit and credit arrays are appropriate accounts
         List<GLAccountDataForLookup> allowedCreditGLAccounts;
         List<GLAccountDataForLookup> allowedDebitGLAccounts;
@@ -300,7 +301,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void checkDebitAndCreditAmounts(final SingleDebitOrCreditEntryCommand[] credits,
-            final SingleDebitOrCreditEntryCommand[] debits) {
+                                            final SingleDebitOrCreditEntryCommand[] debits) {
         // sum of all debits must be = sum of all credits
         BigDecimal creditsSum = BigDecimal.ZERO;
         BigDecimal debitsSum = BigDecimal.ZERO;
@@ -353,7 +354,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Override
     public void createJournalEntryForReversedLoanTransaction(final LocalDate transactionDate, final String loanTransactionId,
-            final Long officeId) {
+                                                             final Long officeId) {
         final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(officeId);
         this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
         final String transactionId = AccountingProcessorHelper.LOAN_TRANSACTION_IDENTIFIER + loanTransactionId;
@@ -507,7 +508,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void createJournalEntry(LocalDate transactionDate, Long entryId, Office office, String currencyCode,
-            Map<GLAccount, BigDecimal> liabilityMap, Map<GLAccount, BigDecimal> expenseMap) {
+                                    Map<GLAccount, BigDecimal> liabilityMap, Map<GLAccount, BigDecimal> expenseMap) {
         for (Map.Entry<GLAccount, BigDecimal> entry : liabilityMap.entrySet()) {
             this.helper.createProvisioningCreditJournalEntry(transactionDate, entryId, office, currencyCode, entry.getKey(),
                     entry.getValue());
@@ -648,9 +649,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final PaymentDetail paymentDetail,
-            final String currencyCode, final LocalDate transactionDate,
-            final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
-            final JournalEntryType type, final String referenceNumber, final ExternalAssetOwner externalAssetOwner) {
+                                             final String currencyCode, final LocalDate transactionDate,
+                                             final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
+                                             final JournalEntryType type, final String referenceNumber, final ExternalAssetOwner externalAssetOwner) {
         final boolean manualEntry = true;
 
         /** Validate current code is appropriate **/
@@ -688,7 +689,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final Throwable realCause,
-            final NonTransientDataAccessException dve) {
+                                                                                 final NonTransientDataAccessException dve) {
         log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());
@@ -753,9 +754,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void saveAllDebitOrCreditOpeningBalanceEntries(final JournalEntryCommand command, final Office office,
-            final String currencyCode, final LocalDate transactionDate,
-            final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
-            final JournalEntryType type, final Long contraAccountId) {
+                                                           final String currencyCode, final LocalDate transactionDate,
+                                                           final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
+                                                           final JournalEntryType type, final Long contraAccountId) {
 
         final boolean manualEntry = true;
         final GLAccount contraAccount = this.glAccountRepository.findById(contraAccountId)
@@ -820,7 +821,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     @Transactional
     @Override
     public void createJournalEntriesForLoanTransaction(final LoanTransaction loanTransaction, final boolean isAccountTransfer,
-            final boolean isLoanToLoanTransfer) {
+                                                       final boolean isLoanToLoanTransfer) {
         final Loan loan = loanTransaction.getLoan();
 
         // Check if accounting is enabled for this loan
@@ -842,7 +843,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     @Transactional
     @Override
     public void createJournalEntriesForExternalOwnerTransfer(final Loan loan, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer,
-            final ExternalAssetOwner previousOwner) {
+                                                             final ExternalAssetOwner previousOwner) {
         final boolean isBuyback = externalAssetOwnerTransfer.getStatus().name().contains("BUYBACK");
 
         if (isBuyback) {
@@ -857,7 +858,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
      * expected by existing journal entry logic
      */
     private AccountingBridgeDataDTO createAccountingBridgeDataForSingleTransaction(final LoanTransaction loanTransaction,
-            final boolean isAccountTransfer) {
+                                                                                   final boolean isAccountTransfer) {
         final Loan loan = loanTransaction.getLoan();
         final String currencyCode = loan.getCurrencyCode();
 

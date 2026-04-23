@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -44,8 +44,8 @@ public class OrganisationOfficeConfiguration {
     @Bean
     @ConditionalOnMissingBean(OfficeReadPlatformService.class)
     public OfficeReadPlatformService officeReadPlatformService(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
-            PlatformSecurityContext context, CurrencyReadPlatformService currencyReadPlatformService, ColumnValidator columnValidator,
-            OfficeRepository officeRepository, OfficeDataMapper officeDataMapper) {
+                                                               PlatformSecurityContext context, CurrencyReadPlatformService currencyReadPlatformService, ColumnValidator columnValidator,
+                                                               OfficeRepository officeRepository, OfficeDataMapper officeDataMapper) {
         return new OfficeReadPlatformServiceImpl(jdbcTemplate, sqlGenerator, context, currencyReadPlatformService, columnValidator,
                 officeRepository, officeDataMapper);
     }
@@ -53,10 +53,10 @@ public class OrganisationOfficeConfiguration {
     @Bean
     @ConditionalOnMissingBean(OfficeWritePlatformService.class)
     public OfficeWritePlatformService officeWritePlatformService(PlatformSecurityContext context,
-            OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
-            OfficeRepositoryWrapper officeRepositoryWrapper, OfficeTransactionRepository officeTransactionRepository,
-            ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
+                                                                 OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+                                                                 OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
+                                                                 OfficeRepositoryWrapper officeRepositoryWrapper, OfficeTransactionRepository officeTransactionRepository,
+                                                                 ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
         return new OfficeWritePlatformServiceJpaRepositoryImpl(context, fromApiJsonDeserializer,
                 moneyTransferCommandFromApiJsonDeserializer, officeRepositoryWrapper, officeTransactionRepository,
                 applicationCurrencyRepository);

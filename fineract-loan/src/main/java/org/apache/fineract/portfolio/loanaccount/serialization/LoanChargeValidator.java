@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.serialization;
 
 import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
@@ -57,7 +58,7 @@ public final class LoanChargeValidator {
     }
 
     public void validateChargeHasValidSpecifiedDateIfApplicable(final Loan loan, final LoanCharge loanCharge,
-            final LocalDate disbursementDate) {
+                                                                final LocalDate disbursementDate) {
         if (loanCharge.isSpecifiedDueDate() && DateUtils.isBefore(loanCharge.getDueLocalDate(), disbursementDate)) {
             final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
@@ -84,7 +85,7 @@ public final class LoanChargeValidator {
     }
 
     public void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final Loan loan, final LoanTransaction repaymentTransaction,
-            final String reversedOrCreated) {
+                                                                       final String reversedOrCreated) {
         if (repaymentTransaction.isRepaymentLikeType() && !repaymentTransaction.isChargeRefund()) {
             final boolean existsChargeRefund = loanTransactionRepository.existsNonReversedByLoanAndTypeAndAfterDate(loan,
                     LoanTransactionType.CHARGE_REFUND, repaymentTransaction.getTransactionDate());

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -63,8 +63,8 @@ public class UserAdministrationConfiguration {
     @Bean
     @ConditionalOnMissingBean(AppUserReadPlatformService.class)
     public AppUserReadPlatformService appUserReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
-            OfficeReadPlatformService officeReadPlatformService, RoleReadPlatformService roleReadPlatformService,
-            AppUserRepository appUserRepository, StaffReadService staffReadPlatformService) {
+                                                                 OfficeReadPlatformService officeReadPlatformService, RoleReadPlatformService roleReadPlatformService,
+                                                                 AppUserRepository appUserRepository, StaffReadService staffReadPlatformService) {
         return new AppUserReadPlatformServiceImpl(context, jdbcTemplate, officeReadPlatformService, roleReadPlatformService,
                 appUserRepository, staffReadPlatformService);
     }
@@ -72,10 +72,10 @@ public class UserAdministrationConfiguration {
     @Bean
     @ConditionalOnMissingBean(AppUserWritePlatformService.class)
     public AppUserWritePlatformService appUserWritePlatformService(PlatformSecurityContext context, UserDomainService userDomainService,
-            PlatformPasswordEncoder platformPasswordEncoder, AppUserRepository appUserRepository,
-            OfficeRepositoryWrapper officeRepositoryWrapper, RoleRepository roleRepository, UserDataValidator fromApiJsonDeserializer,
-            AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, StaffRepository staffRepository,
-            ConfigurationDomainService configurationDomainService) {
+                                                                   PlatformPasswordEncoder platformPasswordEncoder, AppUserRepository appUserRepository,
+                                                                   OfficeRepositoryWrapper officeRepositoryWrapper, RoleRepository roleRepository, UserDataValidator fromApiJsonDeserializer,
+                                                                   AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, StaffRepository staffRepository,
+                                                                   ConfigurationDomainService configurationDomainService) {
         return new AppUserWritePlatformServiceJpaRepositoryImpl(context, userDomainService, platformPasswordEncoder, appUserRepository,
                 officeRepositoryWrapper, roleRepository, fromApiJsonDeserializer, appUserPreviewPasswordRepository, staffRepository,
                 configurationDomainService);
@@ -91,21 +91,21 @@ public class UserAdministrationConfiguration {
     @Bean
     @ConditionalOnMissingBean(PasswordValidationPolicyReadPlatformService.class)
     public PasswordValidationPolicyReadPlatformService passwordValidationPolicyReadPlatformService(JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                                                   DatabaseSpecificSQLGenerator sqlGenerator) {
         return new PasswordValidationPolicyReadPlatformServiceImpl(jdbcTemplate, sqlGenerator);
     }
 
     @Bean
     @ConditionalOnMissingBean(PermissionReadPlatformService.class)
     public PermissionReadPlatformService permissionReadPlatformService(PlatformSecurityContext context, JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                       DatabaseSpecificSQLGenerator sqlGenerator) {
         return new PermissionReadPlatformServiceImpl(context, jdbcTemplate, sqlGenerator);
     }
 
     @Bean
     @ConditionalOnMissingBean(PermissionWritePlatformService.class)
     public PermissionWritePlatformService permissionWritePlatformService(PlatformSecurityContext context,
-            PermissionRepository permissionRepository, PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+                                                                         PermissionRepository permissionRepository, PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         return new PermissionWritePlatformServiceJpaRepositoryImpl(context, permissionRepository, fromApiJsonDeserializer);
     }
 
@@ -118,8 +118,8 @@ public class UserAdministrationConfiguration {
     @Bean
     @ConditionalOnMissingBean(RoleWritePlatformService.class)
     public RoleWritePlatformService roleWritePlatformService(PlatformSecurityContext context, RoleRepository roleRepository,
-            PermissionRepository permissionRepository, RoleDataValidator roleCommandFromApiJsonDeserializer,
-            PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer) {
+                                                             PermissionRepository permissionRepository, RoleDataValidator roleCommandFromApiJsonDeserializer,
+                                                             PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer) {
         return new RoleWritePlatformServiceJpaRepositoryImpl(context, roleRepository, permissionRepository,
                 roleCommandFromApiJsonDeserializer, permissionsFromApiJsonDeserializer);
     }

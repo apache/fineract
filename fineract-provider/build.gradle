@@ -29,6 +29,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'se.thinkcode.cucumber-runner'
 apply plugin: 'com.docktape.swagger-brake'
 
+
 swaggerBrake {
     newApi = findProperty('apiNew') ?:"${project.buildDir}/resources/main/static/fineract.json"
     oldApi = findProperty('apiBaseline') ?: "${projectDir}/config/swagger/fineract-baseline.json"
@@ -131,13 +132,13 @@ dependencies {
 
 apply from: 'dependencies.gradle'
 
-// Configuration for the modernizer plugin
+// Configuration for the modernizer plugins
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
     ignoreClassNamePatterns = [
-        '.*AbstractPersistableCustom',
-        '.*EntityTables',
-        '.*domain.*'
+            '.*AbstractPersistableCustom',
+            '.*EntityTables',
+            '.*domain.*'
     ]
 }
 
@@ -149,7 +150,7 @@ if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
 
 eclipse {
     project {
-        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
+        buildCommand([LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch"], 'org.eclipse.ui.externaltools.ExternalToolBuilder')
     }
 }
 
@@ -167,10 +168,10 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 // https://docs.groovy-lang.org/latest/html/api/groovy/sql/Sql.html
 import groovy.sql.Sql
 
-project.ext.mysqlUser='root'
-project.ext.mysqlPassword='mysql'
-project.ext.pgUser='root'
-project.ext.pgPassword='postgres'
+project.ext.mysqlUser = 'root'
+project.ext.mysqlPassword = 'mysql'
+project.ext.pgUser = 'root'
+project.ext.pgPassword = 'postgres'
 
 configurations {
     driver
@@ -182,7 +183,7 @@ dependencies {
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
-configurations.driver.each {File file ->
+configurations.driver.each { File file ->
     loader.addURL(file.toURL())
 }
 
@@ -271,7 +272,7 @@ jib {
         image = 'azul/zulu-openjdk-alpine:21'
         platforms {
             platform {
-                architecture = System.getProperty("os.arch").equals("aarch64")?"arm64":"amd64"
+                architecture = System.getProperty("os.arch").equals("aarch64") ? "arm64" : "amd64"
                 os = 'linux'
             }
         }
@@ -280,8 +281,8 @@ jib {
     to {
         image = 'fineract'
         tags = [
-            "${project.version}",
-            'latest'
+                "${project.version}",
+                'latest'
         ]
     }
 
@@ -290,10 +291,10 @@ jib {
         mainClass = 'org.apache.fineract.ServerApplication'
         extraClasspath = ['/app/plugins/*']
         args = [
-            '-Duser.home=/tmp',
-            '-Dfile.encoding=UTF-8',
-            '-Duser.timezone=UTC',
-            '-Djava.security.egd=file:/dev/./urandom'
+                '-Duser.home=/tmp',
+                '-Dfile.encoding=UTF-8',
+                '-Duser.timezone=UTC',
+                '-Djava.security.egd=file:/dev/./urandom'
         ]
         ports = ['8080/tcp', '8443/tcp']
         labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
@@ -333,10 +334,10 @@ cucumber {
     main = 'io.cucumber.core.cli.Main'
     shorten = 'argfile'
     plugin = [
-        'pretty',
-        'html:build/reports/cucumber/report.html',
-        'json:build/reports/cucumber/report.json',
-        'junit:build/reports/cucumber/report.xml'
+            'pretty',
+            'html:build/reports/cucumber/report.html',
+            'json:build/reports/cucumber/report.json',
+            'junit:build/reports/cucumber/report.xml'
     ]
 }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -32,6 +32,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -40,6 +41,7 @@ import java.time.temporal.ChronoField;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -134,7 +136,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     private LocalDate inactivationDate;
 
     public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition,
-            final JsonCommand command) {
+                                                         final JsonCommand command) {
 
         BigDecimal amount = command.bigDecimalValueOfParameterNamed(amountParamName);
         final LocalDate dueDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
@@ -155,8 +157,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     public static SavingsAccountCharge createNewWithoutSavingsAccount(final Charge chargeDefinition, final BigDecimal amountPayable,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, final boolean status,
-            final MonthDay feeOnMonthDay, final Integer feeInterval) {
+                                                                      final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, final boolean status,
+                                                                      final MonthDay feeOnMonthDay, final Integer feeInterval) {
         return new SavingsAccountCharge(null, chargeDefinition, amountPayable, chargeTime, chargeCalculation, dueDate, status,
                 feeOnMonthDay, feeInterval);
     }
@@ -166,8 +168,8 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
     }
 
     private SavingsAccountCharge(final SavingsAccount savingsAccount, final Charge chargeDefinition, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, final boolean status,
-            MonthDay feeOnMonthDay, final Integer feeInterval) {
+                                 final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, final boolean status,
+                                 MonthDay feeOnMonthDay, final Integer feeInterval) {
 
         this.savingsAccount = savingsAccount;
         this.charge = chargeDefinition;
@@ -261,7 +263,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             case FLAT:
                 this.percentage = null;
                 this.amount = chargeAmount;
@@ -270,7 +272,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = chargeAmount;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             case PERCENT_OF_AMOUNT:
                 this.percentage = chargeAmount;
                 this.amountPercentageAppliedTo = transactionAmount;
@@ -279,7 +281,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = calculateOutstanding();
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 this.percentage = null;
                 this.amount = null;
@@ -288,7 +290,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             case PERCENT_OF_INTEREST:
                 this.percentage = null;
                 this.amount = null;
@@ -297,7 +299,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             case PERCENT_OF_DISBURSEMENT_AMOUNT:
                 this.percentage = null;
                 this.amount = null;
@@ -306,7 +308,7 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
         }
     }
 
@@ -413,31 +415,31 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
         if (amount != null) {
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case INVALID:
-                break;
+                    break;
                 case FLAT:
                     this.amount = amount;
-                break;
+                    break;
                 case PERCENT_OF_AMOUNT:
                     this.percentage = amount;
                     this.amountPercentageAppliedTo = transactionAmount;
                     this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
                     this.amountOutstanding = calculateOutstanding();
-                break;
+                    break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     this.percentage = amount;
                     this.amount = null;
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
-                break;
+                    break;
                 case PERCENT_OF_INTEREST:
                     this.percentage = amount;
                     this.amount = null;
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
-                break;
+                    break;
                 case PERCENT_OF_DISBURSEMENT_AMOUNT:
                     LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
-                break;
+                    break;
             }
         }
     }
@@ -487,32 +489,32 @@ public class SavingsAccountCharge extends AbstractAuditableWithUTCDateTimeCustom
 
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case INVALID:
-                break;
+                    break;
                 case FLAT:
                     this.amount = newValue;
                     this.amountOutstanding = calculateOutstanding();
-                break;
+                    break;
                 case PERCENT_OF_AMOUNT:
                     this.percentage = newValue;
                     this.amountPercentageAppliedTo = null;
                     this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
                     this.amountOutstanding = calculateOutstanding();
-                break;
+                    break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     this.percentage = newValue;
                     this.amount = null;
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
-                break;
+                    break;
                 case PERCENT_OF_INTEREST:
                     this.percentage = newValue;
                     this.amount = null;
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
-                break;
+                    break;
                 case PERCENT_OF_DISBURSEMENT_AMOUNT:
                     LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
-                break;
+                    break;
             }
         }
 

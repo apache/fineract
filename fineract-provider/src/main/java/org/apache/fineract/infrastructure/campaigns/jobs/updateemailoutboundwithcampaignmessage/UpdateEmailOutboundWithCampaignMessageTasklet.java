@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
@@ -83,10 +85,12 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
     }
 
     private void insertDirectCampaignIntoEmailOutboundTable(final String emailParams, final String emailSubject,
-            final String messageTemplate, final String campaignName, final Long campaignId) {
+                                                            final String messageTemplate, final String campaignName, final Long campaignId) {
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailParams, new TypeReference<>() {});
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(emailParams, new TypeReference<>() {});
+            HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailParams, new TypeReference<>() {
+            });
+            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(emailParams, new TypeReference<>() {
+            });
             List<HashMap<String, Object>> runReportObject = emailCampaignWritePlatformService
                     .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
             if (runReportObject != null) {
@@ -125,7 +129,7 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
     }
 
     private String compileEmailTemplate(final String textMessageTemplate, final String campaignName,
-            final Map<String, Object> emailParams) {
+                                        final Map<String, Object> emailParams) {
         final MustacheFactory mf = new DefaultMustacheFactory();
         final Mustache mustache = mf.compile(new StringReader(textMessageTemplate), campaignName);
 

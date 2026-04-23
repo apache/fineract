@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.accounts.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -28,16 +29,19 @@ import java.util.Set;
  */
 final class AccountsApiResourceSwagger {
 
-    private AccountsApiResourceSwagger() {}
+    private AccountsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetAccountsTypeTemplateResponse")
     public static final class GetAccountsTypeTemplateResponse {
 
-        private GetAccountsTypeTemplateResponse() {}
+        private GetAccountsTypeTemplateResponse() {
+        }
 
         static final class GetAccountsTypeProductOptions {
 
-            private GetAccountsTypeProductOptions() {}
+            private GetAccountsTypeProductOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -59,11 +63,13 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "GetAccountsTypeAccountIdResponse")
     public static final class GetAccountsTypeAccountIdResponse {
 
-        private GetAccountsTypeAccountIdResponse() {}
+        private GetAccountsTypeAccountIdResponse() {
+        }
 
         static final class GetAccountsStatus {
 
-            private GetAccountsStatus() {}
+            private GetAccountsStatus() {
+            }
 
             @Schema(example = "300")
             public Long id;
@@ -85,7 +91,8 @@ final class AccountsApiResourceSwagger {
 
         static final class GetAccountsTimeline {
 
-            private GetAccountsTimeline() {}
+            private GetAccountsTimeline() {
+            }
 
             @Schema(example = "[2016, 4, 1]")
             public LocalDate submittedOnDate;
@@ -109,7 +116,8 @@ final class AccountsApiResourceSwagger {
 
         static final class GetAccountsCurrency {
 
-            private GetAccountsCurrency() {}
+            private GetAccountsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -129,7 +137,8 @@ final class AccountsApiResourceSwagger {
 
         static final class GetAccountsSummary {
 
-            private GetAccountsSummary() {}
+            private GetAccountsSummary() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -150,11 +159,13 @@ final class AccountsApiResourceSwagger {
 
         static final class GetAccountsPurchasedShares {
 
-            private GetAccountsPurchasedShares() {}
+            private GetAccountsPurchasedShares() {
+            }
 
             static final class GetAccountsPurchasedSharesStatus {
 
-                private GetAccountsPurchasedSharesStatus() {}
+                private GetAccountsPurchasedSharesStatus() {
+                }
 
                 @Schema(example = "300")
                 public Long id;
@@ -166,7 +177,8 @@ final class AccountsApiResourceSwagger {
 
             static final class GetAccountsPurchasedSharesType {
 
-                private GetAccountsPurchasedSharesType() {}
+                private GetAccountsPurchasedSharesType() {
+                }
 
                 @Schema(example = "500")
                 public Long id;
@@ -198,7 +210,8 @@ final class AccountsApiResourceSwagger {
 
         static final class GetAccountsLockPeriodTypeEnum {
 
-            private GetAccountsLockPeriodTypeEnum() {}
+            private GetAccountsLockPeriodTypeEnum() {
+            }
 
             @Schema(example = "0")
             public Long id;
@@ -210,11 +223,13 @@ final class AccountsApiResourceSwagger {
 
         static final class GetAccountsCharges {
 
-            private GetAccountsCharges() {}
+            private GetAccountsCharges() {
+            }
 
             static final class GetAccountsChargeTimeType {
 
-                private GetAccountsChargeTimeType() {}
+                private GetAccountsChargeTimeType() {
+                }
 
                 @Schema(example = "13")
                 public Long id;
@@ -226,7 +241,8 @@ final class AccountsApiResourceSwagger {
 
             static final class GetAccountsChargeCalculationType {
 
-                private GetAccountsChargeCalculationType() {}
+                private GetAccountsChargeCalculationType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -238,7 +254,8 @@ final class AccountsApiResourceSwagger {
 
             static final class GetAccountsChargesCurrency {
 
-                private GetAccountsChargesCurrency() {}
+                private GetAccountsChargesCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -324,15 +341,18 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "GetAccountsTypeResponse")
     public static final class GetAccountsTypeResponse {
 
-        private GetAccountsTypeResponse() {}
+        private GetAccountsTypeResponse() {
+        }
 
         static final class GetAccountsPageItems {
 
-            private GetAccountsPageItems() {}
+            private GetAccountsPageItems() {
+            }
 
             static final class GetAccountsTypeStatus {
 
-                private GetAccountsTypeStatus() {}
+                private GetAccountsTypeStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -354,7 +374,8 @@ final class AccountsApiResourceSwagger {
 
             static final class GetAccountsTypeTimeline {
 
-                private GetAccountsTypeTimeline() {}
+                private GetAccountsTypeTimeline() {
+                }
 
                 @Schema(example = "[2013, 3, 1]")
                 public LocalDate submittedOnDate;
@@ -362,7 +383,8 @@ final class AccountsApiResourceSwagger {
 
             static final class GetAccountsTypePurchasedShares {
 
-                private GetAccountsTypePurchasedShares() {}
+                private GetAccountsTypePurchasedShares() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -376,7 +398,8 @@ final class AccountsApiResourceSwagger {
 
             static final class GetAccountsTypeSummary {
 
-                private GetAccountsTypeSummary() {}
+                private GetAccountsTypeSummary() {
+                }
 
                 public GetAccountsTypeAccountIdResponse.GetAccountsCharges.GetAccountsChargesCurrency currency;
             }
@@ -408,11 +431,13 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "PostAccountsTypeRequest")
     public static final class PostAccountsTypeRequest {
 
-        private PostAccountsTypeRequest() {}
+        private PostAccountsTypeRequest() {
+        }
 
         static final class PostAccountsCharges {
 
-            private PostAccountsCharges() {}
+            private PostAccountsCharges() {
+            }
 
             @Schema(example = "20")
             public Long chargeId;
@@ -454,7 +479,8 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "PostAccountsTypeResponse")
     public static final class PostAccountsTypeResponse {
 
-        private PostAccountsTypeResponse() {}
+        private PostAccountsTypeResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -463,11 +489,13 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "PostAccountsTypeAccountIdRequest")
     public static final class PostAccountsTypeAccountIdRequest {
 
-        private PostAccountsTypeAccountIdRequest() {}
+        private PostAccountsTypeAccountIdRequest() {
+        }
 
         static final class PostAccountsRequestedShares {
 
-            private PostAccountsRequestedShares() {}
+            private PostAccountsRequestedShares() {
+            }
 
             @Schema(example = "35")
             public Long id;
@@ -479,7 +507,8 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "PostAccountsTypeAccountIdResponse")
     public static final class PostAccountsTypeAccountIdResponse {
 
-        private PostAccountsTypeAccountIdResponse() {}
+        private PostAccountsTypeAccountIdResponse() {
+        }
 
         @Schema(example = "5")
         public Long resourceId;
@@ -488,7 +517,8 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "PutAccountsTypeAccountIdRequest")
     public static final class PutAccountsTypeAccountIdRequest {
 
-        private PutAccountsTypeAccountIdRequest() {}
+        private PutAccountsTypeAccountIdRequest() {
+        }
 
         @Schema(example = "en")
         public String locale;
@@ -503,11 +533,13 @@ final class AccountsApiResourceSwagger {
     @Schema(description = "PutAccountsTypeAccountIdResponse")
     public static final class PutAccountsTypeAccountIdResponse {
 
-        private PutAccountsTypeAccountIdResponse() {}
+        private PutAccountsTypeAccountIdResponse() {
+        }
 
         static final class PutAccountsChanges {
 
-            private PutAccountsChanges() {}
+            private PutAccountsChanges() {
+            }
 
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;

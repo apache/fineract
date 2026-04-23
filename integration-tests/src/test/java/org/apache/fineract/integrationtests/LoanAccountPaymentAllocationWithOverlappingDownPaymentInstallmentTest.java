@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +35,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
@@ -821,8 +823,8 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
     }
 
     private void verifyPeriodDetails(GetLoansLoanIdRepaymentPeriod period, Integer periodNumber, double periodAmount,
-            double periodAmountPaid, double principalPaid, double outstandingAmount, double feeDue, double feePaid, double penaltyDue,
-            double penaltyPaid, boolean isComplete, LocalDate periodFromDate, LocalDate periodDueDate) {
+                                     double periodAmountPaid, double principalPaid, double outstandingAmount, double feeDue, double feePaid, double penaltyDue,
+                                     double penaltyPaid, boolean isComplete, LocalDate periodFromDate, LocalDate periodDueDate) {
         assertEquals(periodNumber, period.getPeriod());
         assertEquals(periodFromDate, period.getFromDate());
         assertEquals(periodDueDate, period.getDueDate());
@@ -838,7 +840,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
     }
 
     private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
-            final String externalId, final String repaymentStartegy) {
+                                                                    final String externalId, final String repaymentStartegy) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("2")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("2").withRepaymentEveryAfter("1")
@@ -883,7 +885,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
     }
 
     private void checkDownPaymentTransaction(final LocalDate transactionDate, final Float principalPortion, final Float interestPortion,
-            final Float feePortion, final Float penaltyPortion, final Integer loanID) {
+                                             final Float feePortion, final Float penaltyPortion, final Integer loanID) {
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
                 this.responseSpec, loanID);
         boolean isTransactionFound = false;

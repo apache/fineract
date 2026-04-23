@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -60,7 +60,7 @@ public class ShareProductsConfiguration {
     @Bean
     @ConditionalOnMissingBean(ShareProductDividendAssembler.class)
     public ShareProductDividendAssembler shareProductDividendAssembler(ShareProductReadPlatformService shareProductReadPlatformService,
-            ShareAccountReadPlatformService shareAccountReadPlatformService) {
+                                                                       ShareAccountReadPlatformService shareAccountReadPlatformService) {
         return new ShareProductDividendAssembler(shareProductReadPlatformService, shareAccountReadPlatformService);
 
     }
@@ -68,7 +68,7 @@ public class ShareProductsConfiguration {
     @Bean
     @ConditionalOnMissingBean(ShareProductDividendReadPlatformService.class)
     public ShareProductDividendReadPlatformService shareProductDividendReadPlatformService(JdbcTemplate jdbcTemplate,
-            ColumnValidator columnValidator, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                                           ColumnValidator columnValidator, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new ShareProductDividendReadPlatformServiceImpl(jdbcTemplate, columnValidator, paginationHelper, sqlGenerator);
 
     }
@@ -82,11 +82,11 @@ public class ShareProductsConfiguration {
     @Bean(value = "shareReadPlatformService")
     @ConditionalOnMissingBean(ShareProductReadPlatformService.class)
     public ShareProductReadPlatformService shareProductReadPlatformService(JdbcTemplate jdbcTemplate,
-            CurrencyReadPlatformService currencyReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
-            ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
-            AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
-            PaginationHelper shareProductDataPaginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                           CurrencyReadPlatformService currencyReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
+                                                                           ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
+                                                                           AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
+                                                                           ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
+                                                                           PaginationHelper shareProductDataPaginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new ShareProductReadPlatformServiceImpl(jdbcTemplate, currencyReadPlatformService, chargeReadPlatformService,
                 shareProductDropdownReadPlatformService, accountingDropdownReadPlatformService, accountMappingReadPlatformService,
                 shareProductDataPaginationHelper, sqlGenerator);
@@ -95,11 +95,11 @@ public class ShareProductsConfiguration {
     @Bean
     @ConditionalOnMissingBean(ShareProductWritePlatformService.class)
     public ShareProductWritePlatformService shareProductWritePlatformService(ShareProductRepositoryWrapper repository,
-            ShareProductDataSerializer serializer, FromJsonHelper fromApiJsonHelper,
-            ShareProductDividentPayOutDetailsRepositoryWrapper shareProductDividentPayOutDetailsRepository,
-            ShareProductDividendAssembler shareProductDividendAssembler,
-            ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            BusinessEventNotifierService businessEventNotifierService) {
+                                                                             ShareProductDataSerializer serializer, FromJsonHelper fromApiJsonHelper,
+                                                                             ShareProductDividentPayOutDetailsRepositoryWrapper shareProductDividentPayOutDetailsRepository,
+                                                                             ShareProductDividendAssembler shareProductDividendAssembler,
+                                                                             ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
+                                                                             BusinessEventNotifierService businessEventNotifierService) {
         return new ShareProductWritePlatformServiceJpaRepositoryImpl(repository, serializer, fromApiJsonHelper,
                 shareProductDividentPayOutDetailsRepository, shareProductDividendAssembler, accountMappingWritePlatformService,
                 businessEventNotifierService);

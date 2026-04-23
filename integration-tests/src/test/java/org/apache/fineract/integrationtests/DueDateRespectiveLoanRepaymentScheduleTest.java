@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,9 +29,11 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
@@ -1730,8 +1732,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String principal,
-            final String loanTermFrequency, final String repaymentAfterEvery, final String numberOfRepayments, final String interestRate,
-            final String repaymentStrategy, final String expectedDisbursementDate, final String submittedOnDate) {
+                                            final String loanTermFrequency, final String repaymentAfterEvery, final String numberOfRepayments, final String interestRate,
+                                            final String repaymentStrategy, final String expectedDisbursementDate, final String submittedOnDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principal)
                 .withLoanTermFrequency(loanTermFrequency).withLoanTermFrequencyAsDays().withNumberOfRepayments(numberOfRepayments)
@@ -1743,7 +1745,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
     }
 
     private Integer createLoanProductWithNoAccountingNoInterest(final String principal, final String repaymentAfterEvery,
-            final String numberOfRepayments, final String interestRate, final String repaymentStrategy) {
+                                                                final String numberOfRepayments, final String interestRate, final String repaymentStrategy) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(principal).withRepaymentTypeAsDays()
                 .withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)

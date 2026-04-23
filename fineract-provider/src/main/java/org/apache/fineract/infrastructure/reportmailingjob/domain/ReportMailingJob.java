@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,10 +24,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +44,7 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "m_report_mailing_job", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unique_name") })
+@Table(name = "m_report_mailing_job", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "unique_name")})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -116,9 +118,9 @@ public class ReportMailingJob extends AbstractAuditableCustom {
      * @return ReportMailingJob object
      **/
     public static ReportMailingJob newInstance(final String name, final String description, final LocalDateTime startDateTime,
-            final String recurrence, final String emailRecipients, final String emailSubject, final String emailMessage,
-            final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final Report stretchyReport,
-            final String stretchyReportParamMap, final boolean isActive, final AppUser runAsUser) {
+                                               final String recurrence, final String emailRecipients, final String emailSubject, final String emailMessage,
+                                               final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final Report stretchyReport,
+                                               final String stretchyReportParamMap, final boolean isActive, final AppUser runAsUser) {
         return new ReportMailingJob().setName(name).setDescription(description).setStartDateTime(startDateTime).setRecurrence(recurrence)
                 .setEmailRecipients(emailRecipients).setEmailSubject(emailSubject).setEmailMessage(emailMessage)
                 .setEmailAttachmentFileFormat(emailAttachmentFileFormat.getValue()).setStretchyReport(stretchyReport)

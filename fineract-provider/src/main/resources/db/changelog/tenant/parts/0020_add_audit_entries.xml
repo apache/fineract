@@ -45,7 +45,8 @@
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_client"
-                                 constraintName="FK_client_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_client_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -101,16 +102,20 @@
         </addColumn>
     </changeSet>
     <changeSet id="9" author="fineract">
-        <renameColumn tableName="m_loan_transaction" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
-        <renameColumn tableName="m_loan_transaction" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_loan_transaction" oldColumnName="createdby_id" newColumnName="created_by"
+                      columnDataType="BIGINT"/>
+        <renameColumn tableName="m_loan_transaction" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by"
+                      columnDataType="BIGINT"/>
     </changeSet>
     <changeSet author="fineract" id="10">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_transaction"
-                                 constraintName="FK_loan_transaction_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_transaction_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_transaction"
-                                 constraintName="FK_loan_transaction_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_transaction_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -37,7 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsProductCreationIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsProductCreationIntegrationTest.class);
@@ -140,7 +140,7 @@ public class SavingsProductCreationIntegrationTest {
     }
 
     public static Integer createSavingsProductWithAccrualAccountingWithOverdraftAllowed(final String interestReceivableAccount,
-            final String minOpenningBalance, final Account... accounts) {
+                                                                                        final String minOpenningBalance, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH OVERDRAFT ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //
@@ -151,7 +151,7 @@ public class SavingsProductCreationIntegrationTest {
     }
 
     public static Integer createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(final String minOpenningBalance,
-            final Account... accounts) {
+                                                                                           final Account... accounts) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITHOUT OVERDRAFT ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //
@@ -161,7 +161,7 @@ public class SavingsProductCreationIntegrationTest {
     }
 
     public static Integer updateSavingsProductWithAccrualAccountingWithOverdraftAllowed(final Integer productId,
-            final String interestReceivableAccount, final String minOpenningBalance, final Account... accounts) {
+                                                                                        final String interestReceivableAccount, final String minOpenningBalance, final Account... accounts) {
         LOG.info("------------------------------UPDATE SAVINGS PRODUCT ACCOUNT ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //

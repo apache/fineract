@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -32,6 +32,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
@@ -4469,7 +4471,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 5);
 
@@ -4531,7 +4533,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 5);
 
@@ -4594,7 +4596,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25))//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 5);
 
@@ -4654,7 +4656,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedCalculationType(null)//
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 5);
 
@@ -4756,7 +4758,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedCalculationType(null)//
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0, 4)
                     .interestRatePerPeriod(BigDecimal.valueOf(108.0));
@@ -4936,7 +4938,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .supportedInterestRefundTypes(interestRefundTypes) //
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "1 January 2024", 1000.0,
                     4);
@@ -5002,7 +5004,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxTrancheCount(10)//
                     .outstandingLoanBalance(10000.0)//
                     .installmentAmountInMultiplesOf(null)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 6);
 
@@ -5084,7 +5086,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxTrancheCount(10)//
                     .outstandingLoanBalance(10000.0)//
                     .installmentAmountInMultiplesOf(null)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 5);
 
@@ -5183,7 +5185,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .maxTrancheCount(10)//
                     .outstandingLoanBalance(10000.0)//
                     .installmentAmountInMultiplesOf(null)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "1 January 2024", 100.0,
                     6);
@@ -5472,7 +5474,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 400.0, 6);
 
@@ -5545,7 +5547,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 400.0, 4);
             final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(4.0);
@@ -5593,7 +5595,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLP2ProgressiveLoanRequest(clientId, loanProductResponse.getResourceId(),
                     operationDate, 1000.0, 7.0, 6, null);
@@ -5775,7 +5777,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
                     .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "01 January 2024", 400.0,
                     6);
@@ -5932,7 +5934,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .overAppliedCalculationType(null)//
                     .overAppliedNumber(null)//
                     .installmentAmountInMultiplesOf(null)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 100.0, 3)
                     .interestRatePerPeriod(BigDecimal.valueOf(4.0));
@@ -5990,7 +5992,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .allowApprovedDisbursedAmountsOverApplied(true)//
                     .overAppliedCalculationType("flat")//
                     .overAppliedNumber(500)//
-            ;//
+                    ;//
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, 1000.0, 4)
                     .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")//
@@ -6331,7 +6333,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private Long applyAndApproveLoanProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanProductId,
-            Integer numberOfRepayments, String loanDisbursementDate, double amount) {
+                                                                                                  Integer numberOfRepayments, String loanDisbursementDate, double amount) {
         LOG.info("------------------------------APPLY AND APPROVE LOAN ---------------------------------------");
         PostLoansRequest applicationRequest = applyLoanRequestProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(clientId,
                 loanProductId, amount, numberOfRepayments, loanDisbursementDate);
@@ -6349,7 +6351,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private PostLoansRequest applyLoanRequestProgressiveAdvancedPaymentAllocationStrategyMonthlyRepayments(Long clientId, Long loanId,
-            double amount, Integer numberOfRepayments, String loanDisbursementDate) {
+                                                                                                           double amount, Integer numberOfRepayments, String loanDisbursementDate) {
         return new PostLoansRequest().clientId(clientId).productId(loanId).submittedOnDate(loanDisbursementDate)
                 .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN).locale("en").loanType("individual")
                 .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY).amortizationType(1)
@@ -6435,8 +6437,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, LoanScheduleProcessingType loanScheduleProcessingType,
-            AdvancedPaymentData allocationRuleData, final Account... accounts) {
+                                             boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, LoanScheduleProcessingType loanScheduleProcessingType,
+                                             AdvancedPaymentData allocationRuleData, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
@@ -6452,7 +6454,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, final Account... accounts) {
+                                             boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
@@ -6467,8 +6469,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static ArrayList<HashMap<String, Object>> createLoanProductGetError(final String principal, final String repaymentAfterEvery,
-            final String numberOfRepayments, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
-            LoanScheduleProcessingType loanScheduleProcessingType, AdvancedPaymentData allocationRuleData, final Account... accounts) {
+                                                                                final String numberOfRepayments, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
+                                                                                LoanScheduleProcessingType loanScheduleProcessingType, AdvancedPaymentData allocationRuleData, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
@@ -6486,8 +6488,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
-            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+                                             boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
+                                             LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         AdvancedPaymentData goodwillCreditAllocation = createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT");
         AdvancedPaymentData merchantIssuedRefundAllocation = createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");
@@ -6509,9 +6511,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static void validatePeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, LocalDate paidDate,
-            Double balanceOfLoan, Double principalDue, Double principalPaid, Double principalOutstanding, Double feeDue, Double feePaid,
-            Double feeOutstanding, Double penaltyDue, Double penaltyPaid, Double penaltyOutstanding, Double interestDue,
-            Double interestPaid, Double interestOutstanding, Double paidInAdvance, Double paidLate) {
+                                       Double balanceOfLoan, Double principalDue, Double principalPaid, Double principalOutstanding, Double feeDue, Double feePaid,
+                                       Double feeOutstanding, Double penaltyDue, Double penaltyPaid, Double penaltyOutstanding, Double interestDue,
+                                       Double interestPaid, Double interestOutstanding, Double paidInAdvance, Double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().get(index);
         assertEquals(dueDate, period.getDueDate());
         assertEquals(paidDate, period.getObligationsMetOnDate());
@@ -6533,9 +6535,9 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
-            String loanScheduleProcessingType) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
+                                                             String loanScheduleProcessingType) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
@@ -6548,15 +6550,15 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate) {
         return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
                 interestRate, expectedDisbursementDate, submittedOnDate, LoanScheduleProcessingType.HORIZONTAL);
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate, LoanScheduleProcessingType loanScheduleProcessingType) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate, LoanScheduleProcessingType loanScheduleProcessingType) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return applyForLoanApplication(clientId, loanProductId, principal, loanTermFrequency, repaymentAfterEvery, numberOfRepayments,
                 interestRate, expectedDisbursementDate, submittedOnDate,
@@ -6564,7 +6566,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private static void validateLoanTransaction(GetLoansLoanIdResponse loanDetails, int index, double transactionAmount,
-            double principalPortion, double overPaidPortion, double loanBalance) {
+                                                double principalPortion, double overPaidPortion, double loanBalance) {
         assertEquals(transactionAmount, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getAmount()));
         assertEquals(principalPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getPrincipalPortion()));
         assertEquals(overPaidPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOverpaymentPortion()));
@@ -6572,7 +6574,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     }
 
     private void validateLoanCharge(GetLoansLoanIdResponse loanDetails, int index, LocalDate dueDate, double charged, double paid,
-            double outstanding) {
+                                    double outstanding) {
         GetLoansLoanIdLoanChargeData chargeData = loanDetails.getCharges().get(index);
         assertEquals(dueDate, chargeData.getDueDate());
         assertEquals(charged, Utils.getDoubleValue(chargeData.getAmount()));

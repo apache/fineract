@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -606,7 +607,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     }
 
     private LoanTransaction createRepayment(Loan loan, LoanTransaction toTransaction, double principalPortion, double interestPortion,
-            double feePortion, double penaltyPortion) {
+                                            double feePortion, double penaltyPortion) {
         LoanTransaction repayment = mock(LoanTransaction.class);
         lenient().when(repayment.getLoan()).thenReturn(loan);
         lenient().when(repayment.isRepayment()).thenReturn(true);
@@ -671,7 +672,7 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
     }
 
     private Map<AllocationType, Money> allocationMap(double principal, double interest, double fee, double penalty,
-            MonetaryCurrency currency) {
+                                                     MonetaryCurrency currency) {
         Map<AllocationType, Money> allocationMap = new HashMap<>();
         allocationMap.put(AllocationType.PRINCIPAL, Money.of(currency, BigDecimal.valueOf(principal)));
         allocationMap.put(AllocationType.INTEREST, Money.of(currency, BigDecimal.valueOf(interest)));

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.savings.data.DepositAccountDataValidator;
@@ -63,7 +64,7 @@ public class FixedDepositAccountInterestCalculationServiceImplTest {
 
         // Calculate interest
         BigDecimal expectedInterest = new BigDecimal("10509.4533691406250000"); // Expected interest calculated based
-                                                                                // on provided values
+        // on provided values
         BigDecimal calculatedInterest = service.calculateInterestInternal(BigDecimal.valueOf(10000), BigDecimal.valueOf(5), 12L, 3L);
 
         // Verify the result
@@ -75,7 +76,7 @@ public class FixedDepositAccountInterestCalculationServiceImplTest {
 
         // Calculate interest
         BigDecimal expectedInterest = new BigDecimal("105.062500"); // Expected interest calculated based on provided
-                                                                    // values
+        // values
         BigDecimal calculatedInterest = service.calculateInterestInternal(BigDecimal.valueOf(100), BigDecimal.valueOf(5), 12L, 6L);
 
         // Verify the result

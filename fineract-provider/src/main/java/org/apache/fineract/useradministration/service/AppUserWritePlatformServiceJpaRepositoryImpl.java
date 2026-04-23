@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.useradministration.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -80,7 +82,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Override
     @Transactional
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    @Caching(evict = {@CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true)})
     public CommandProcessingResult createUser(final JsonCommand command) {
         try {
             this.context.authenticatedUser();
@@ -140,7 +142,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Override
     @Transactional
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    @Caching(evict = {@CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true)})
     public CommandProcessingResult changeUserPassword(final Long userId, final JsonCommand command) {
         try {
             this.context.authenticatedUser(new CommandWrapperBuilder().changeUserPassword(userId).build());
@@ -172,7 +174,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Override
     @Transactional
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    @Caching(evict = {@CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true)})
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
         try {
             final AppUser currentUser = this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
@@ -284,7 +286,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Override
     @Transactional
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
+    @Caching(evict = {@CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true)})
     public CommandProcessingResult deleteUser(final Long userId) {
         final AppUser user = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (user.isDeleted()) {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,19 +36,19 @@ public enum SmsMessageStatusType {
         switch (statusValue) {
             case 100:
                 enumeration = SmsMessageStatusType.PENDING;
-            break;
+                break;
             case 150:
                 enumeration = SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT;
-            break;
+                break;
             case 200:
                 enumeration = SmsMessageStatusType.SENT;
-            break;
+                break;
             case 300:
                 enumeration = SmsMessageStatusType.DELIVERED;
-            break;
+                break;
             case 400:
                 enumeration = SmsMessageStatusType.FAILED;
-            break;
+                break;
         }
         return enumeration;
     }

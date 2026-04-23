@@ -23,9 +23,11 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
-        <renameTable oldTableName="m_loan_installment_delinquency_tag_history" newTableName="m_loan_installment_delinquency_tag"/>
+        <renameTable oldTableName="m_loan_installment_delinquency_tag_history"
+                     newTableName="m_loan_installment_delinquency_tag"/>
     </changeSet>
     <changeSet author="fineract" id="2">
-        <dropForeignKeyConstraint baseTableName="m_loan_installment_delinquency_tag" constraintName="FK_m_delinquency_installment_tags_installment" />
+        <dropForeignKeyConstraint baseTableName="m_loan_installment_delinquency_tag"
+                                  constraintName="FK_m_delinquency_installment_tags_installment"/>
     </changeSet>
 </databaseChangeLog>

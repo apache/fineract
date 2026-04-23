@@ -27,6 +27,8 @@
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_journal_entry_aggregation_summary"/>
         </preConditions>
-        <addForeignKeyConstraint baseColumnNames="external_owner_id" baseTableName="m_journal_entry_aggregation_summary" constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_EXTERNAL_OWNER_ID" referencedColumnNames="id" referencedTableName="m_external_asset_owner"/>
+        <addForeignKeyConstraint baseColumnNames="external_owner_id" baseTableName="m_journal_entry_aggregation_summary"
+                                 constraintName="FK_GL_JOURNAL_ENTRY_AGGREGATION_SUMMARY_ON_EXTERNAL_OWNER_ID"
+                                 referencedColumnNames="id" referencedTableName="m_external_asset_owner"/>
     </changeSet>
 </databaseChangeLog>

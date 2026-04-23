@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -67,8 +68,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
     @Override
     public AccountTransferData retrieveTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
-            final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
-            final Integer toAccountType) {
+                                                final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
+                                                final Integer toAccountType) {
 
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
@@ -124,7 +125,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
             if (mostRelevantFromAccountType == 1) {
-                loanStatus = new long[] { 300, 700 };
+                loanStatus = new long[]{300, 700};
             }
             PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
                     loanStatus);
@@ -177,7 +178,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     }
 
     private Collection<PortfolioAccountData> retrieveToAccounts(final PortfolioAccountData excludeThisAccountFromOptions,
-            final Integer toAccountType, final Long toClientId) {
+                                                                final Integer toAccountType, final Long toClientId) {
 
         final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCodeFromCurrency()
                 : null;
@@ -204,7 +205,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         Object[] finalObjectArray = {};
         if (accountDetailId != null) {
             sqlBuilder.append(" where att.account_transfer_details_id=?");
-            finalObjectArray = new Object[] { accountDetailId };
+            finalObjectArray = new Object[]{accountDetailId};
         }
 
         if (searchParameters.hasOrderBy()) {
@@ -232,7 +233,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         try {
             final String sql = "select " + this.accountTransfersMapper.schema() + " where att.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.accountTransfersMapper, new Object[] { transferId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.accountTransfersMapper, new Object[]{transferId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(transferId, e);
         }
@@ -295,14 +296,14 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             }
         }
 
-        final Object[] finalObjectArray = { id };
+        final Object[] finalObjectArray = {id};
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.accountTransfersMapper);
     }
 
     @Override
     public AccountTransferData retrieveRefundByTransferTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
-            final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
-            final Integer toAccountType) {
+                                                                final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
+                                                                final Integer toAccountType) {
         // TODO Auto-generated method stub
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
@@ -358,7 +359,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
             if (mostRelevantFromAccountType == 1) {
-                loanStatus = new long[] { 300, 700 };
+                loanStatus = new long[]{300, 700};
             }
             PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
                     loanStatus);

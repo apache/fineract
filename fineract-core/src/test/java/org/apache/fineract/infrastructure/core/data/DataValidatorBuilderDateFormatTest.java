@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -32,7 +33,7 @@ class DataValidatorBuilderDateFormatTest {
     private static final String PARAMETER = "dateFormat";
 
     @ParameterizedTest
-    @ValueSource(strings = { "dd MMMM yyyy", "yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy", "dd-MM-yyyy HH:mm:ss" })
+    @ValueSource(strings = {"dd MMMM yyyy", "yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy", "dd-MM-yyyy HH:mm:ss"})
     void validDateTimeFormatPatternShouldAcceptValidPatterns(final String pattern) {
         final List<ApiParameterError> errors = new ArrayList<>();
         new DataValidatorBuilder(errors).resource(RESOURCE).parameter(PARAMETER).value(pattern).validDateTimeFormatPattern();
@@ -40,7 +41,7 @@ class DataValidatorBuilderDateFormatTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "02 February 2026", "not-a-pattern", "P!@#$", "{{invalid}}" })
+    @ValueSource(strings = {"02 February 2026", "not-a-pattern", "P!@#$", "{{invalid}}"})
     void validDateTimeFormatPatternShouldRejectInvalidPatterns(final String pattern) {
         final List<ApiParameterError> errors = new ArrayList<>();
         new DataValidatorBuilder(errors).resource(RESOURCE).parameter(PARAMETER).value(pattern).validDateTimeFormatPattern();

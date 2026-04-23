@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.investor.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
@@ -67,8 +68,8 @@ public class InvestorAccountingHelper {
     }
 
     public JournalEntry createDebitJournalEntryOrReversalForInvestor(final Office office, final String currencyCode,
-            final int accountMappingTypeId, final Long loanProductId, final Long loanId, final Long transactionId,
-            final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversalOrder) {
+                                                                     final int accountMappingTypeId, final Long loanProductId, final Long loanId, final Long transactionId,
+                                                                     final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversalOrder) {
         final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, accountMappingTypeId);
         if (isReversalOrder) {
             return createCreditJournalEntryForInvestor(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
@@ -78,8 +79,8 @@ public class InvestorAccountingHelper {
     }
 
     public JournalEntry createCreditJournalEntryOrReversalForInvestor(final Office office, final String currencyCode, final Long loanId,
-            final Long transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversalOrder,
-            final GLAccount account) {
+                                                                      final Long transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversalOrder,
+                                                                      final GLAccount account) {
         if (isReversalOrder) {
             return createDebitJournalEntryForInvestor(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
         } else {
@@ -88,12 +89,12 @@ public class InvestorAccountingHelper {
     }
 
     public ProductToGLAccountMapping getChargeOffMappingByCodeValue(final Long loanProductId, final PortfolioProductType productType,
-            final Long chargeOffReasonId) {
+                                                                    final Long chargeOffReasonId) {
         return accountMappingRepository.findChargeOffReasonMapping(loanProductId, productType.getValue(), chargeOffReasonId);
     }
 
     private JournalEntry createCreditJournalEntryForInvestor(final Office office, final String currencyCode, final GLAccount account,
-            final Long loanId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount) {
+                                                             final Long loanId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
         final String modifiedTransactionId = INVESTOR_TRANSFER_IDENTIFIER + transactionId;
         final JournalEntry journalEntry = JournalEntry.createNew(office, null, account, currencyCode, modifiedTransactionId, manualEntry,
@@ -103,7 +104,7 @@ public class InvestorAccountingHelper {
     }
 
     private JournalEntry createDebitJournalEntryForInvestor(final Office office, final String currencyCode, final GLAccount account,
-            final Long loanId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount) {
+                                                            final Long loanId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
         String modifiedTransactionId = INVESTOR_TRANSFER_IDENTIFIER + transactionId;
 

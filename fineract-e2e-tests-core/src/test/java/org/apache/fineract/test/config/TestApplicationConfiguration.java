@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,4 +26,5 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @ComponentScan(value = "org.apache.fineract.test", excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org\\.apache\\.fineract\\.test\\.initializer.*"))
 @PropertySource("classpath:fineract-test-application.properties")
-public class TestApplicationConfiguration {}
+public class TestApplicationConfiguration {
+}

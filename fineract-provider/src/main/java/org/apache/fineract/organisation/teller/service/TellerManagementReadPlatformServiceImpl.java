@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Iterator;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -122,7 +123,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final TellerMapper tm = new TellerMapper();
             final String sql = "select " + tm.schema() + " where t.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { tellerId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, tm, new Object[]{tellerId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(tellerId, e);
         }
@@ -151,7 +152,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final CashierMapper cm = new CashierMapper();
             final String sql = "select " + cm.schema() + " where c.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, cm, new Object[] { cashierId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, cm, new Object[]{cashierId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(cashierId, e);
         }
@@ -200,7 +201,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final TellerMapper tm = new TellerMapper();
         final String sql = "select " + tm.schema() + "where o.hierarchy like ? order by o.hierarchy";
 
-        return this.jdbcTemplate.query(sql, tm, new Object[] { hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sql, tm, new Object[]{hierarchySearchString}); // NOSONAR
     }
 
     @Override
@@ -268,7 +269,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(final Long cashierId, final boolean includeAllTellers,
-            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
+                                                                                     final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
 
         sqlValidator.validate(searchParameters.getOrderBy());
         sqlValidator.validate(searchParameters.getSortOrder());
@@ -277,7 +278,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final CashierTransactionSummaryMapper ctsm = new CashierTransactionSummaryMapper();
         final String sql = "SELECT " + ctsm.cashierTxnSummarySchema(nextDay) + " LIMIT 1000";
         Collection<CashierTransactionTypeTotalsData> cashierTxnTypeTotals = this.jdbcTemplate.query(sql, ctsm, // NOSONAR
-                new Object[] { cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode });
+                new Object[]{cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode});
 
         Iterator<CashierTransactionTypeTotalsData> itr = cashierTxnTypeTotals.iterator();
         BigDecimal allocAmount = new BigDecimal(0);
@@ -313,7 +314,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Page<CashierTransactionData> retrieveCashierTransactions(final Long cashierId, final boolean includeAllTellers,
-            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
+                                                                    final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
 
         sqlValidator.validate(searchParameters.getOrderBy());
         sqlValidator.validate(searchParameters.getSortOrder());
@@ -349,8 +350,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         // hierarchySearchString, cashierId, currencyCode,
         // hierarchySearchString, cashierId, currencyCode, hierarchySearchString
         // });
-        Object[] params = new Object[] { cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode, cashierId,
-                currencyCode, };
+        Object[] params = new Object[]{cashierId, currencyCode, cashierId, currencyCode, cashierId, currencyCode, cashierId,
+                currencyCode,};
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sql, params, ctm);
     }
 

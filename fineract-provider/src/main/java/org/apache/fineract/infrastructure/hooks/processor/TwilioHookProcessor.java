@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,9 +26,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
@@ -52,7 +54,7 @@ public class TwilioHookProcessor implements HookProcessor {
 
     @Override
     public void process(final Hook hook, final String payload, final String entityName, final String actionName,
-            final FineractContext context) throws IOException {
+                        final FineractContext context) throws IOException {
 
         final SmsProviderData smsProviderData = new SmsProviderData(hook.getConfig());
 
@@ -61,12 +63,11 @@ public class TwilioHookProcessor implements HookProcessor {
 
     @SuppressWarnings("unchecked")
     private void sendRequest(final SmsProviderData smsProviderData, final String payload, String entityName, String actionName,
-            final Hook hook, final FineractContext context) throws IOException {
+                             final Hook hook, final FineractContext context) throws IOException {
 
         final WebHookService service = processorHelper.createWebHookService(smsProviderData.getUrl());
 
-        @SuppressWarnings("rawtypes")
-        final Callback callback = processorHelper.createCallback(smsProviderData.getUrl());
+        @SuppressWarnings("rawtypes") final Callback callback = processorHelper.createCallback(smsProviderData.getUrl());
 
         String apiKey = this.hookConfigurationRepository.findOneByHookIdAndFieldName(hook.getId(), apiKeyName);
         if (apiKey == null) {
@@ -98,8 +99,7 @@ public class TwilioHookProcessor implements HookProcessor {
 
     private JsonObject processUgdTemplate(final String payload, final Hook hook) throws IOException {
         JsonObject json = null;
-        @SuppressWarnings("unchecked")
-        final HashMap<String, Object> map = new ObjectMapper().readValue(payload, HashMap.class);
+        @SuppressWarnings("unchecked") final HashMap<String, Object> map = new ObjectMapper().readValue(payload, HashMap.class);
         map.put("BASE_URI", System.getProperty("baseUrl"));
         if (map.containsKey("clientId")) {
             final Long clientId = Long.valueOf(Integer.toString((int) map.get("clientId")));

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.fineract.infrastructure.contentstore.data.ContentStoreType;
 import org.apache.fineract.infrastructure.contentstore.detector.ContentDetectorManager;
 import org.apache.fineract.infrastructure.contentstore.service.ContentStoreService;
@@ -85,7 +86,7 @@ class ImageWritePlatformServiceImplTest {
         when(clientImageIdAdapter.accept(anyString())).thenReturn(false);
 
         ImageCreateRequest request = ImageCreateRequest.builder().entityType("STAFF").entityId(entityId).fileName("profile.png")
-                .type("image/png").stream(new ByteArrayInputStream(new byte[] { 1, 2, 3 })).build();
+                .type("image/png").stream(new ByteArrayInputStream(new byte[]{1, 2, 3})).build();
 
         var response = underTest.createImage(request);
 
@@ -103,7 +104,7 @@ class ImageWritePlatformServiceImplTest {
         when(clientImageIdAdapter.set(eq(entityId), anyLong())).thenReturn(Optional.empty());
 
         ImageCreateRequest request = ImageCreateRequest.builder().entityType("CLIENTS").entityId(entityId).fileName("profile.png")
-                .type("image/png").stream(new ByteArrayInputStream(new byte[] { 1, 2, 3 })).build();
+                .type("image/png").stream(new ByteArrayInputStream(new byte[]{1, 2, 3})).build();
 
         var response = underTest.createImage(request);
 

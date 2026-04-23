@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -187,14 +189,14 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
     }
 
     public void checkLoanRescheduleTab(List<List<String>> data, List<GetLoanRescheduleRequestResponse> reschedules, List<String> header,
-            String resourceId) {
+                                       String resourceId) {
         assertThat(reschedules.size()).as(ErrorMessageHelper.nrOfLinesWrongInRescheduleTab(resourceId, reschedules.size(), data.size() - 1))
                 .isEqualTo(data.size() - 1);
         checkLoanRescheduleTabRows(data, reschedules, header, resourceId);
     }
 
     public void checkLoanRescheduleTabRows(List<List<String>> data, List<GetLoanRescheduleRequestResponse> reschedules, List<String> header,
-            String resourceId) {
+                                           String resourceId) {
         for (int i = 1; i < data.size(); i++) {
             List<String> expectedValues = data.get(i);
             GetLoanRescheduleRequestResponse reschedule = reschedules.get(i - 1);
@@ -210,9 +212,9 @@ public class LoanRescheduleStepDef extends AbstractStepDef {
         for (String headerName : header) {
             switch (headerName) {
                 case "From Date" ->
-                    actualValues.add(r.getRescheduleFromDate() == null ? null : FORMATTER_EN.format(r.getRescheduleFromDate()));
+                        actualValues.add(r.getRescheduleFromDate() == null ? null : FORMATTER_EN.format(r.getRescheduleFromDate()));
                 case "Reason" ->
-                    actualValues.add(r.getRescheduleReasonCodeValue() == null ? null : r.getRescheduleReasonCodeValue().getName());
+                        actualValues.add(r.getRescheduleReasonCodeValue() == null ? null : r.getRescheduleReasonCodeValue().getName());
                 case "Status" -> actualValues.add(r.getStatusEnum() == null ? null : r.getStatusEnum().getValue());
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }

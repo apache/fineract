@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Service;
 public class LoanProductRelatedDetailUpdateUtil {
 
     public Map<String, Object> updateLoanRepaymentSchedule(final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-            final JsonCommand command, final AprCalculator aprCalculator) {
+                                                           final JsonCommand command, final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
 
@@ -370,7 +371,7 @@ public class LoanProductRelatedDetailUpdateUtil {
     }
 
     public void updateInterestRateDerivedFields(final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-            final AprCalculator aprCalculator) {
+                                                final AprCalculator aprCalculator) {
         BigDecimal annualNominalInterestRate = aprCalculator.calculateFrom(loanRepaymentScheduleDetail.getInterestPeriodFrequencyType(),
                 loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod(), loanRepaymentScheduleDetail.getNumberOfRepayments(),
                 loanRepaymentScheduleDetail.getRepayEvery(), loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType(),

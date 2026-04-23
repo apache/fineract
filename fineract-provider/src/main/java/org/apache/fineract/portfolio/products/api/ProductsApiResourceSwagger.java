@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.products.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Set;
 
 /**
@@ -26,16 +27,19 @@ import java.util.Set;
  */
 final class ProductsApiResourceSwagger {
 
-    private ProductsApiResourceSwagger() {}
+    private ProductsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetProductsTypeProductIdResponse")
     public static final class GetProductsTypeProductIdResponse {
 
-        private GetProductsTypeProductIdResponse() {}
+        private GetProductsTypeProductIdResponse() {
+        }
 
         static final class GetProductsCurrency {
 
-            private GetProductsCurrency() {}
+            private GetProductsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -55,7 +59,8 @@ final class ProductsApiResourceSwagger {
 
         static final class GetProductsMarketPrice {
 
-            private GetProductsMarketPrice() {}
+            private GetProductsMarketPrice() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -67,11 +72,13 @@ final class ProductsApiResourceSwagger {
 
         static final class GetProductsCharges {
 
-            private GetProductsCharges() {}
+            private GetProductsCharges() {
+            }
 
             static final class GetChargesCurrency {
 
-                private GetChargesCurrency() {}
+                private GetChargesCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -89,7 +96,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetChargeTimeType {
 
-                private GetChargeTimeType() {}
+                private GetChargeTimeType() {
+                }
 
                 @Schema(example = "13")
                 public Long id;
@@ -101,7 +109,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetChargeAppliesTo {
 
-                private GetChargeAppliesTo() {}
+                private GetChargeAppliesTo() {
+                }
 
                 @Schema(example = "4")
                 public Long id;
@@ -113,7 +122,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetChargeCalculationType {
 
-                private GetChargeCalculationType() {}
+                private GetChargeCalculationType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -125,7 +135,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetChargePaymentMode {
 
-                private GetChargePaymentMode() {}
+                private GetChargePaymentMode() {
+                }
 
                 @Schema(example = "0")
                 public Long id;
@@ -154,7 +165,8 @@ final class ProductsApiResourceSwagger {
 
         static final class GetLockPeriodTypeEnum {
 
-            private GetLockPeriodTypeEnum() {}
+            private GetLockPeriodTypeEnum() {
+            }
 
             @Schema(example = "0")
             public Long id;
@@ -164,7 +176,8 @@ final class ProductsApiResourceSwagger {
 
         static final class GetProductsAccountingRule {
 
-            private GetProductsAccountingRule() {}
+            private GetProductsAccountingRule() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -176,11 +189,13 @@ final class ProductsApiResourceSwagger {
 
         static final class GetProductsAccountingMappings {
 
-            private GetProductsAccountingMappings() {}
+            private GetProductsAccountingMappings() {
+            }
 
             static final class GetShareReferenceId {
 
-                private GetShareReferenceId() {}
+                private GetShareReferenceId() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -192,7 +207,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetIncomeFromFeeAccountId {
 
-                private GetIncomeFromFeeAccountId() {}
+                private GetIncomeFromFeeAccountId() {
+                }
 
                 @Schema(example = "14")
                 public Long id;
@@ -204,7 +220,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetShareEquityId {
 
-                private GetShareEquityId() {}
+                private GetShareEquityId() {
+                }
 
                 @Schema(example = "66")
                 public Long id;
@@ -216,7 +233,8 @@ final class ProductsApiResourceSwagger {
 
             static final class GetShareSuspenseId {
 
-                private GetShareSuspenseId() {}
+                private GetShareSuspenseId() {
+                }
 
                 @Schema(example = "8")
                 public Long id;
@@ -234,7 +252,8 @@ final class ProductsApiResourceSwagger {
 
         static final class GetProductsMinimumActivePeriodFrequencyTypeOptions {
 
-            private GetProductsMinimumActivePeriodFrequencyTypeOptions() {}
+            private GetProductsMinimumActivePeriodFrequencyTypeOptions() {
+            }
 
             @Schema(example = "0")
             public Long id;
@@ -246,15 +265,18 @@ final class ProductsApiResourceSwagger {
 
         static final class GetProductsAccountingMappingOptions {
 
-            private GetProductsAccountingMappingOptions() {}
+            private GetProductsAccountingMappingOptions() {
+            }
 
             static final class GetProductsLiabilityAccountOptions {
 
-                private GetProductsLiabilityAccountOptions() {}
+                private GetProductsLiabilityAccountOptions() {
+                }
 
                 static final class GetProductsLiabilityType {
 
-                    private GetProductsLiabilityType() {}
+                    private GetProductsLiabilityType() {
+                    }
 
                     @Schema(example = "2")
                     public Long id;
@@ -266,7 +288,8 @@ final class ProductsApiResourceSwagger {
 
                 static final class GetProductsLiabilityUsage {
 
-                    private GetProductsLiabilityUsage() {}
+                    private GetProductsLiabilityUsage() {
+                    }
 
                     @Schema(example = "1")
                     public Long id;
@@ -278,7 +301,8 @@ final class ProductsApiResourceSwagger {
 
                 static final class GetProductsTagId {
 
-                    private GetProductsTagId() {}
+                    private GetProductsTagId() {
+                    }
 
                     @Schema(example = "0")
                     public Long id;
@@ -307,11 +331,13 @@ final class ProductsApiResourceSwagger {
 
             static final class GetProductsAssetAccountOptions {
 
-                private GetProductsAssetAccountOptions() {}
+                private GetProductsAssetAccountOptions() {
+                }
 
                 static final class GetAssetType {
 
-                    private GetAssetType() {}
+                    private GetAssetType() {
+                    }
 
                     @Schema(example = "1")
                     public Long id;
@@ -342,11 +368,13 @@ final class ProductsApiResourceSwagger {
 
             static final class GetProductsIncomeAccountOptions {
 
-                private GetProductsIncomeAccountOptions() {}
+                private GetProductsIncomeAccountOptions() {
+                }
 
                 static final class GetIncomeType {
 
-                    private GetIncomeType() {}
+                    private GetIncomeType() {
+                    }
 
                     @Schema(example = "1")
                     public Long id;
@@ -377,11 +405,13 @@ final class ProductsApiResourceSwagger {
 
             static final class GetProductsEquityAccountOptions {
 
-                private GetProductsEquityAccountOptions() {}
+                private GetProductsEquityAccountOptions() {
+                }
 
                 static final class GetEquityType {
 
-                    private GetEquityType() {}
+                    private GetEquityType() {
+                    }
 
                     @Schema(example = "3")
                     public Long id;
@@ -459,11 +489,13 @@ final class ProductsApiResourceSwagger {
     @Schema(description = "GetProductsTypeResponse")
     public static final class GetProductsTypeResponse {
 
-        private GetProductsTypeResponse() {}
+        private GetProductsTypeResponse() {
+        }
 
         static final class GetProductsPageItems {
 
-            private GetProductsPageItems() {}
+            private GetProductsPageItems() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -483,11 +515,13 @@ final class ProductsApiResourceSwagger {
     @Schema(description = "PostProductsTypeRequest")
     public static final class PostProductsTypeRequest {
 
-        private PostProductsTypeRequest() {}
+        private PostProductsTypeRequest() {
+        }
 
         static final class PostProductsMarketPricePeriods {
 
-            private PostProductsMarketPricePeriods() {}
+            private PostProductsMarketPricePeriods() {
+            }
 
             @Schema(example = "en")
             public String locale;
@@ -501,7 +535,8 @@ final class ProductsApiResourceSwagger {
 
         static final class PostProductsChargesSelected {
 
-            private PostProductsChargesSelected() {}
+            private PostProductsChargesSelected() {
+            }
 
             @Schema(example = "20")
             public Long id;
@@ -552,7 +587,8 @@ final class ProductsApiResourceSwagger {
     @Schema(description = "PostProductsTypeResponse")
     public static final class PostProductsTypeResponse {
 
-        private PostProductsTypeResponse() {}
+        private PostProductsTypeResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -561,7 +597,8 @@ final class ProductsApiResourceSwagger {
     @Schema(description = "PutProductsTypeProductIdRequest")
     public static final class PutProductsTypeProductIdRequest {
 
-        private PutProductsTypeProductIdRequest() {}
+        private PutProductsTypeProductIdRequest() {
+        }
 
         @Schema(example = "Share Product Description.")
         public String description;
@@ -574,11 +611,13 @@ final class ProductsApiResourceSwagger {
     @Schema(description = "PutProductsTypeProductIdResponse")
     public static final class PutProductsTypeProductIdResponse {
 
-        private PutProductsTypeProductIdResponse() {}
+        private PutProductsTypeProductIdResponse() {
+        }
 
         static final class PutProductsChanges {
 
-            private PutProductsChanges() {}
+            private PutProductsChanges() {
+            }
 
             @Schema(example = "Share Product Description.")
             public String description;

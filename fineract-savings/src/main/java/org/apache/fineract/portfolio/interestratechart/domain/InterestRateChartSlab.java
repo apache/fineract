@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,6 +38,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -86,7 +88,7 @@ public class InterestRateChartSlab extends AbstractPersistableCustom<Long> {
     }
 
     public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final Locale locale) {
+                       final Locale locale) {
         this.slabFields.update(command, actualChanges, baseDataValidator, locale);
         updateIncentives(command, actualChanges, baseDataValidator, this, locale);
     }
@@ -143,7 +145,7 @@ public class InterestRateChartSlab extends AbstractPersistableCustom<Long> {
     }
 
     public void updateIncentives(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final InterestRateChartSlab chartSlab, final Locale locale) {
+                                 final InterestRateChartSlab chartSlab, final Locale locale) {
         final Map<String, Object> deleteIncentives = new HashMap<>();
         final Map<String, Object> IncentiveChanges = new HashMap<>();
         if (command.hasParameter(InterestRateChartSlabApiConstants.incentivesParamName)) {

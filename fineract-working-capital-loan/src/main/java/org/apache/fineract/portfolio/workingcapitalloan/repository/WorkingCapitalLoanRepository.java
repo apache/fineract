@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -82,30 +83,30 @@ public interface WorkingCapitalLoanRepository extends JpaRepository<WorkingCapit
 
     @Query("select loan.id from WorkingCapitalLoan loan where loan.id BETWEEN :minAccountId and :maxAccountId and loan.loanStatus in :nonClosedLoanStatuses and :cobBusinessDate = loan.lastClosedBusinessDate")
     List<Long> findAllLoansByLastClosedBusinessDateNotNullAndMinAndMaxLoanIdAndStatuses(Long minAccountId, Long maxAccountId,
-            LocalDate cobBusinessDate, Collection<LoanStatus> nonClosedLoanStatuses);
+                                                                                        LocalDate cobBusinessDate, Collection<LoanStatus> nonClosedLoanStatuses);
 
     @Query("select loan.id from WorkingCapitalLoan loan where loan.id BETWEEN :minAccountId and :maxAccountId and loan.loanStatus in :nonClosedLoanStatuses and (:cobBusinessDate = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)")
     List<Long> findAllLoansByLastClosedBusinessDateAndMinAndMaxLoanIdAndStatuses(Long minAccountId, Long maxAccountId,
-            LocalDate cobBusinessDate, Collection<LoanStatus> nonClosedLoanStatuses);
+                                                                                 LocalDate cobBusinessDate, Collection<LoanStatus> nonClosedLoanStatuses);
 
     @Query("select loan.id, loan.lastClosedBusinessDate from  WorkingCapitalLoan loan where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and (loan.lastClosedBusinessDate < :cobBusinessDate or loan.lastClosedBusinessDate is null)")
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOrNullByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
-            @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+                                                                                      @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     Long findIdByExternalId(ExternalId externalId);
 
     @Query("select loan.id, loan.lastClosedBusinessDate from WorkingCapitalLoan loan where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate < :cobBusinessDate")
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
-            @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+                                                                                @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query("select loan.id, loan.lastClosedBusinessDate from WorkingCapitalLoan loan LEFT JOIN FETCH loan.disbursementDetails detail where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate IS NULL and detail.actualDisbursementDate = :cobBusinessDate")
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOnDisbursementDate(@Param("cobBusinessDate") LocalDate cobBusinessDate,
-            @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+                                                                              @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query("select loan.id, loan.lastClosedBusinessDate from WorkingCapitalLoan loan where loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate = (select min(l.lastClosedBusinessDate) from WorkingCapitalLoan l where l"
             + ".loanStatus in :loanStatuses and l.lastClosedBusinessDate < :cobBusinessDate)")
     List<COBIdAndLastClosedBusinessDate> findOldestCOBProcessedLoan(@Param("cobBusinessDate") LocalDate cobBusinessDate,
-            @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
+                                                                    @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
     @Query("select loan.id, loan.externalId, loan.accountNumber from WorkingCapitalLoanAccountLock lock left join WorkingCapitalLoan loan on lock.loanId = loan.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate")
     List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);

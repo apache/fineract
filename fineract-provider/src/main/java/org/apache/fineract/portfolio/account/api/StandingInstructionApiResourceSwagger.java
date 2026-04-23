@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.account.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -34,11 +35,13 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "GetStandingInstructionsTemplateResponse")
     public static final class GetStandingInstructionsTemplateResponse {
 
-        private GetStandingInstructionsTemplateResponse() {}
+        private GetStandingInstructionsTemplateResponse() {
+        }
 
         static final class GetFromOfficeResponseStandingInstructionSwagger {
 
-            private GetFromOfficeResponseStandingInstructionSwagger() {}
+            private GetFromOfficeResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -56,7 +59,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetFromAccountTypeResponseStandingInstructionSwagger {
 
-            private GetFromAccountTypeResponseStandingInstructionSwagger() {}
+            private GetFromAccountTypeResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -68,7 +72,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetFromOfficeOptionsResponseStandingInstructionSwagger {
 
-            private GetFromOfficeOptionsResponseStandingInstructionSwagger() {}
+            private GetFromOfficeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -80,7 +85,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetFromClientOptionsResponseStandingInstructionSwagger {
 
-            private GetFromClientOptionsResponseStandingInstructionSwagger() {}
+            private GetFromClientOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -94,7 +100,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetFromAccountTypeOptionsResponseStandingInstructionSwagger {
 
-            private GetFromAccountTypeOptionsResponseStandingInstructionSwagger() {}
+            private GetFromAccountTypeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -106,7 +113,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetToOfficeOptionsResponseStandingInstructionSwagger {
 
-            private GetToOfficeOptionsResponseStandingInstructionSwagger() {}
+            private GetToOfficeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -118,7 +126,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetToAccountTypeOptionsResponseStandingInstructionSwagger {
 
-            private GetToAccountTypeOptionsResponseStandingInstructionSwagger() {}
+            private GetToAccountTypeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -130,7 +139,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetTransferTypeOptionsResponseStandingInstructionSwagger {
 
-            private GetTransferTypeOptionsResponseStandingInstructionSwagger() {}
+            private GetTransferTypeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -142,7 +152,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetStatusOptionsResponseStandingInstructionSwagger {
 
-            private GetStatusOptionsResponseStandingInstructionSwagger() {}
+            private GetStatusOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -154,7 +165,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetInstructionTypeOptionsResponseStandingInstructionSwagger {
 
-            private GetInstructionTypeOptionsResponseStandingInstructionSwagger() {}
+            private GetInstructionTypeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -166,7 +178,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetPriorityOptionsResponseStandingInstructionSwagger {
 
-            private GetPriorityOptionsResponseStandingInstructionSwagger() {}
+            private GetPriorityOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -178,7 +191,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetRecurrenceTypeOptionsResponseStandingInstructionSwagger {
 
-            private GetRecurrenceTypeOptionsResponseStandingInstructionSwagger() {}
+            private GetRecurrenceTypeOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -190,7 +204,8 @@ final class StandingInstructionApiResourceSwagger {
 
         static final class GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger {
 
-            private GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger() {}
+            private GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger() {
+            }
 
             @Schema(example = "0")
             public Integer id;
@@ -218,7 +233,8 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "PostStandingInstructionsResponse")
     public static final class PostStandingInstructionsResponse {
 
-        private PostStandingInstructionsResponse() {}
+        private PostStandingInstructionsResponse() {
+        }
 
         @Schema(example = "1")
         public Long clientId;
@@ -229,13 +245,15 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "GetStandingInstructionsResponse")
     public static final class GetStandingInstructionsResponse {
 
-        private GetStandingInstructionsResponse() {}
+        private GetStandingInstructionsResponse() {
+        }
 
         static final class GetPageItemsStandingInstructionSwagger {
 
             static final class GetFromOfficeStandingInstructionSwagger {
 
-                private GetFromOfficeStandingInstructionSwagger() {}
+                private GetFromOfficeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -245,7 +263,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetFromClientStandingInstructionSwagger {
 
-                private GetFromClientStandingInstructionSwagger() {}
+                private GetFromClientStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -259,7 +278,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetFromAccountTypeStandingInstructionSwagger {
 
-                private GetFromAccountTypeStandingInstructionSwagger() {}
+                private GetFromAccountTypeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "2")
                 public Integer id;
@@ -271,7 +291,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetFromAccountStandingInstructionSwagger {
 
-                private GetFromAccountStandingInstructionSwagger() {}
+                private GetFromAccountStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "14")
                 public Long id;
@@ -285,7 +306,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetToOfficeStandingInstructionSwagger {
 
-                private GetToOfficeStandingInstructionSwagger() {}
+                private GetToOfficeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -295,7 +317,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetToClientStandingInstructionSwagger {
 
-                private GetToClientStandingInstructionSwagger() {}
+                private GetToClientStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -309,7 +332,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetToAccountTypeStandingInstructionSwagger {
 
-                private GetToAccountTypeStandingInstructionSwagger() {}
+                private GetToAccountTypeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "2")
                 public Integer id;
@@ -321,7 +345,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetToAccountStandingInstructionSwagger {
 
-                private GetToAccountStandingInstructionSwagger() {}
+                private GetToAccountStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "3")
                 public Long id;
@@ -335,7 +360,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetTransferTypeStandingInstructionSwagger {
 
-                private GetTransferTypeStandingInstructionSwagger() {}
+                private GetTransferTypeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Integer id;
@@ -347,7 +373,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetPriorityStandingInstructionSwagger {
 
-                private GetPriorityStandingInstructionSwagger() {}
+                private GetPriorityStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "3")
                 public Integer id;
@@ -359,7 +386,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetInstructionTypeStandingInstructionSwagger {
 
-                private GetInstructionTypeStandingInstructionSwagger() {}
+                private GetInstructionTypeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Integer id;
@@ -371,7 +399,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetStatusStandingInstructionSwagger {
 
-                private GetStatusStandingInstructionSwagger() {}
+                private GetStatusStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Integer id;
@@ -383,7 +412,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetRecurrenceTypeStandingInstructionSwagger {
 
-                private GetRecurrenceTypeStandingInstructionSwagger() {}
+                private GetRecurrenceTypeStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "1")
                 public Integer id;
@@ -395,7 +425,8 @@ final class StandingInstructionApiResourceSwagger {
 
             static final class GetRecurrenceFrequencyStandingInstructionSwagger {
 
-                private GetRecurrenceFrequencyStandingInstructionSwagger() {}
+                private GetRecurrenceFrequencyStandingInstructionSwagger() {
+                }
 
                 @Schema(example = "2")
                 public Integer id;
@@ -443,7 +474,8 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "PostStandingInstructionsRequest")
     public static final class PostStandingInstructionsRequest {
 
-        private PostStandingInstructionsRequest() {}
+        private PostStandingInstructionsRequest() {
+        }
 
         @Schema(example = "1")
         public Long fromOfficeId;
@@ -494,7 +526,8 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "GetStandingInstructionsStandingInstructionIdResponse")
     public static final class GetStandingInstructionsStandingInstructionIdResponse {
 
-        private GetStandingInstructionsStandingInstructionIdResponse() {}
+        private GetStandingInstructionsStandingInstructionIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -529,7 +562,8 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "PutStandingInstructionsStandingInstructionIdResponse")
     public static final class PutStandingInstructionsStandingInstructionIdResponse {
 
-        private PutStandingInstructionsStandingInstructionIdResponse() {}
+        private PutStandingInstructionsStandingInstructionIdResponse() {
+        }
 
         static final class PutUpdateStandingInstructionChanges {
 
@@ -545,7 +579,8 @@ final class StandingInstructionApiResourceSwagger {
     @Schema(description = "PutStandingInstructionsStandingInstructionIdRequest")
     public static final class PutStandingInstructionsStandingInstructionIdRequest {
 
-        private PutStandingInstructionsStandingInstructionIdRequest() {}
+        private PutStandingInstructionsStandingInstructionIdRequest() {
+        }
 
         @Schema(example = "2")
         public Integer recurrenceInterval;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -61,12 +61,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import jakarta.validation.constraints.NotNull;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -99,9 +101,9 @@ public class DatatableCommandFromApiJsonDeserializer {
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_CHANGE_COLUMNS = Set.of(API_FIELD_NAME, API_FIELD_NEWNAME, API_FIELD_LENGTH,
             API_FIELD_MANDATORY, API_FIELD_AFTER, API_FIELD_CODE, API_FIELD_NEWCODE, API_FIELD_UNIQUE, API_FIELD_INDEXED);
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_DROP_COLUMNS = Set.of(API_FIELD_NAME);
-    private static final Object[] SUPPORTED_COLUMN_TYPES = { API_FIELD_TYPE_STRING, API_FIELD_TYPE_NUMBER, API_FIELD_TYPE_BOOLEAN,
+    private static final Object[] SUPPORTED_COLUMN_TYPES = {API_FIELD_TYPE_STRING, API_FIELD_TYPE_NUMBER, API_FIELD_TYPE_BOOLEAN,
             API_FIELD_TYPE_DECIMAL, API_FIELD_TYPE_DATE, API_FIELD_TYPE_DATETIME, API_FIELD_TYPE_TEXT, API_FIELD_TYPE_JSON,
-            API_FIELD_TYPE_DROPDOWN };
+            API_FIELD_TYPE_DROPDOWN};
 
     private final FromJsonHelper fromApiJsonHelper;
     private final DatabaseTypeResolver databaseTypeResolver;
@@ -117,7 +119,8 @@ public class DatatableCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS_FOR_CREATE);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -369,7 +372,7 @@ public class DatatableCommandFromApiJsonDeserializer {
     }
 
     private void validateEntitySubType(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final EntityTables entityTable) {
+                                       final EntityTables entityTable) {
         if (entityTable == EntityTables.CLIENT) {
             String entitySubType = this.fromApiJsonHelper.extractStringNamed(API_PARAM_SUBTYPE, element);
             baseDataValidator.reset().parameter(API_PARAM_SUBTYPE).value(entitySubType).notBlank(); // Person or Entity

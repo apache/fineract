@@ -53,9 +53,9 @@ compileJava {
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
     ignoreClassNamePatterns = [
-        '.*AbstractPersistableCustom',
-        '.*EntityTables',
-        '.*domain.*'
+            '.*AbstractPersistableCustom',
+            '.*EntityTables',
+            '.*domain.*'
     ]
 }
 

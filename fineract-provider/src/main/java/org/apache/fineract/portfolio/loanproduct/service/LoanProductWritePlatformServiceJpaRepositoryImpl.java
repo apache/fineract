@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.loanproduct.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -325,8 +327,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 product.isLinkedToFloatingInterestRate());
         final boolean isChangeInCriticalFloatingRateParams = product.getFloatingRates() != null
                 && (command.isChangeInLongParameterNamed("floatingRatesId", product.getFloatingRates().getFloatingRate().getId())
-                        || command.isChangeInBigDecimalParameterNamed("interestRateDifferential",
-                                product.getFloatingRates().getInterestRateDifferential()));
+                || command.isChangeInBigDecimalParameterNamed("interestRateDifferential",
+                product.getFloatingRates().getInterestRateDifferential()));
         return isChangeFromFloatingToFlatOrViceVersa || isChangeInCriticalFloatingRateParams;
     }
 

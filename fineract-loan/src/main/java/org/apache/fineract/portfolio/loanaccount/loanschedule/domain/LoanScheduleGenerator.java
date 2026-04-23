@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.Set;
+
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
@@ -35,19 +37,19 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 public interface LoanScheduleGenerator {
 
     LoanScheduleModel generate(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
-            HolidayDetailDTO holidayDetailDTO);
+                               HolidayDetailDTO holidayDetailDTO);
 
     LoanScheduleDTO rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Loan loan,
-            HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            LocalDate rescheduleFrom);
+                                               HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+                                               LocalDate rescheduleFrom);
 
     LoanScheduleDTO rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Loan loan,
-            HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            LocalDate rescheduleFrom, LocalDate rescheduleTill);
+                                               HolidayDetailDTO holidayDetailDTO, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+                                               LocalDate rescheduleFrom, LocalDate rescheduleTill);
 
     OutstandingAmountsDTO calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate, LoanApplicationTerms loanApplicationTerms,
-            MathContext mc, Loan loan, HolidayDetailDTO holidayDetailDTO,
-            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
+                                                    MathContext mc, Loan loan, HolidayDetailDTO holidayDetailDTO,
+                                                    LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
 
     Money getPeriodInterestTillDate(@NotNull LoanRepaymentScheduleInstallment installment, @NotNull LocalDate targetDate);
 }

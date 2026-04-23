@@ -20,15 +20,15 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
         <update tableName="stretchy_report">
-            <column name="report_name" value="Disbursal Vs Awaitingdisbursal" />
+            <column name="report_name" value="Disbursal Vs Awaitingdisbursal"/>
             <where>report_name = 'Disbursal_Vs_Awaitingdisbursal'</where>
         </update>
         <update tableName="stretchy_report">
-            <column name="report_name" value="Demand Vs Collection" />
+            <column name="report_name" value="Demand Vs Collection"/>
             <where>report_name = 'Demand_Vs_Collection'</where>
         </update>
     </changeSet>
@@ -109,7 +109,7 @@
             <where>id='154' AND report_name = 'LoanTrendsByMonth'</where>
         </update>
     </changeSet>
-        <!-- ClientTrendsByDay -->
+    <!-- ClientTrendsByDay -->
     <changeSet author="fineract" id="29" context="postgresql">
         <update tableName="stretchy_report">
             <column name="report_sql" value="SELECT COUNT(cl.id) AS count, cl.activation_date AS days

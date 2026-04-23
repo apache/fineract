@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,6 +36,7 @@ import io.restassured.http.ContentType;
 import io.restassured.internal.RequestSpecificationImpl;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -51,6 +52,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -131,7 +133,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 @Slf4j
-@ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
+@ExtendWith({LoanTestLifecycleExtension.class, ExternalEventsExtension.class})
 public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     static {
@@ -183,7 +185,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     protected final ExternalEventHelper externalEventHelper = new ExternalEventHelper();
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
+                                                  double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
         assertEquals(dueDate, period.getDueDate());
@@ -195,7 +197,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue,
-            double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
+                                                  double principalPaid, double principalOutstanding, double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
         assertEquals(principalDue, Utils.getDoubleValue(period.getPrincipalDue()));
@@ -206,40 +208,40 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected static void validateFullyUnpaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue) {
+                                                             double principalDue, double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index, LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH)),
                 principalDue, 0, principalDue, feeDue, 0, feeDue, penaltyDue, 0, penaltyDue, interestDue, 0, interestDue, 0, 0);
     }
 
     protected static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue) {
+                                                           double principalDue, double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index, LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH)),
                 principalDue, principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, 0, 0);
     }
 
     protected static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate) {
+                                                           double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate) {
         validateRepaymentPeriod(loanDetails, index, LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH)),
                 principalDue, principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, 0, paidLate);
     }
 
     protected static void validateFullyPaidRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, String dueDate,
-            double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate, double paidInAdvance) {
+                                                           double principalDue, double feeDue, double penaltyDue, double interestDue, double paidLate, double paidInAdvance) {
         validateRepaymentPeriod(loanDetails, index, LocalDate.parse(dueDate, DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.ENGLISH)),
                 principalDue, principalDue, 0, feeDue, feeDue, 0, penaltyDue, penaltyDue, 0, interestDue, interestDue, 0, paidInAdvance,
                 paidLate);
     }
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double feeDue, double penaltyDue, double interestDue) {
+                                                  double feeDue, double penaltyDue, double interestDue) {
         validateRepaymentPeriod(loanDetails, index, dueDate, principalDue, 0, principalDue, feeDue, 0, feeDue, penaltyDue, 0, penaltyDue,
                 interestDue, 0, interestDue, 0, 0);
     }
 
     protected static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, double principalDue,
-            double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
-            double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
-            double paidInAdvance, double paidLate) {
+                                                  double principalPaid, double principalOutstanding, double feeDue, double feePaid, double feeOutstanding, double penaltyDue,
+                                                  double penaltyPaid, double penaltyOutstanding, double interestDue, double interestPaid, double interestOutstanding,
+                                                  double paidInAdvance, double paidLate) {
         GetLoansLoanIdRepaymentPeriod period = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(p -> Objects.equals(p.getPeriod(), index)).findFirst().orElseThrow();
         assertEquals(dueDate, period.getDueDate());
@@ -320,7 +322,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
      * @return Result body
      */
     public PostLoansLoanIdTransactionsResponse makeLoanTransactionWithPermissionVerification(final Long loanId,
-            PostLoansLoanIdTransactionsRequest postLoansLoanIdTransactionsRequest, final String command, final String permission) {
+                                                                                             PostLoansLoanIdTransactionsRequest postLoansLoanIdTransactionsRequest, final String command, final String permission) {
         return performPermissionTestForRequest(permission, fineractClient -> fineractClient.loanTransactions.executeLoanTransaction(loanId,
                 postLoansLoanIdTransactionsRequest, command));
     }
@@ -343,8 +345,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
      * @return Result body
      */
     public PostLoansLoanIdTransactionsResponse adjustLoanTransactionWithPermissionVerification(final Long loanId,
-            final Long transactionIdToAdjust, PostLoansLoanIdTransactionsTransactionIdRequest postLoansLoanIdTransactionsRequest,
-            final String command, final String permission) {
+                                                                                               final Long transactionIdToAdjust, PostLoansLoanIdTransactionsTransactionIdRequest postLoansLoanIdTransactionsRequest,
+                                                                                               final String command, final String permission) {
         return performPermissionTestForRequest(permission, fineractClient -> fineractClient.loanTransactions.adjustLoanTransaction(loanId,
                 transactionIdToAdjust, postLoansLoanIdTransactionsRequest, command));
     }
@@ -855,7 +857,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                 .repaymentEvery(1)//
                 .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
                 .transactionProcessingStrategyCode(repaymentStrategy)//
-        ;
+                ;
         if (AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY.equals(repaymentStrategy)) {
             productRequest.loanScheduleType("PROGRESSIVE").loanScheduleProcessingType("HORIZONTAL")
                     .addPaymentAllocationItem(createDefaultPaymentAllocation("NEXT_INSTALLMENT"));
@@ -1006,12 +1008,12 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
-            String reAgeInterestHandling) {
+                             String reAgeInterestHandling) {
         reAgeLoan(loanId, frequencyType, frequencyNumber, startDate, numberOfInstallments, reAgeInterestHandling, null);
     }
 
     protected void reAgeLoan(Long loanId, String frequencyType, int frequencyNumber, String startDate, Integer numberOfInstallments,
-            String reAgeInterestHandling, Double transactionAmount) {
+                             String reAgeInterestHandling, Double transactionAmount) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
         request.setDateFormat(DATETIME_PATTERN);
         request.setLocale("en");
@@ -1173,7 +1175,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void verifyRepaymentSchedule(GetLoansLoanIdResponse savedLoanResponse, GetLoansLoanIdResponse actualLoanResponse,
-            int totalPeriods, int identicalPeriods) {
+                                           int totalPeriods, int identicalPeriods) {
         List<GetLoansLoanIdRepaymentPeriod> savedPeriods = savedLoanResponse.getRepaymentSchedule().getPeriods();
         List<GetLoansLoanIdRepaymentPeriod> actualPeriods = actualLoanResponse.getRepaymentSchedule().getPeriods();
 
@@ -1186,7 +1188,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     private void verifyPeriodsEquality(List<GetLoansLoanIdRepaymentPeriod> savedPeriods, List<GetLoansLoanIdRepaymentPeriod> actualPeriods,
-            int startIndex, int endIndex, boolean shouldEqual) {
+                                       int startIndex, int endIndex, boolean shouldEqual) {
         for (int i = startIndex; i < endIndex; i++) {
             Double savedTotalDue = Utils.getDoubleValue(savedPeriods.get(i).getTotalDueForPeriod());
             Double actualTotalDue = Utils.getDoubleValue(actualPeriods.get(i).getTotalDueForPeriod());
@@ -1333,12 +1335,12 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected PostLoansRequest applyLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            int numberOfRepayments) {
+                                                int numberOfRepayments) {
         return applyLoanRequest(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments, null);
     }
 
     protected PostLoansRequest applyLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+                                                int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
 
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId) //
                 .productId(loanProductId) //
@@ -1367,7 +1369,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected PostLoansRequest applyCumulativeLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+                                                          Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
 
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId)
                 .transactionProcessingStrategyCode(DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
@@ -1384,7 +1386,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected PostLoansRequest applyLP2ProgressiveLoanRequest(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+                                                              Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
 
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId)
                 .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).productId(loanProductId)
@@ -1411,12 +1413,12 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            int numberOfRepayments) {
+                                       int numberOfRepayments) {
         return applyAndApproveLoan(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments, null);
     }
 
     protected Long applyAndApproveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+                                       int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
         PostLoansResponse postLoansResponse = loanTransactionHelper
                 .applyLoan(applyLoanRequest(clientId, loanProductId, loanDisbursementDate, amount, numberOfRepayments, customizer));
 
@@ -1427,7 +1429,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected Long applyAndApproveCumulativeLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+                                                 Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
         PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyCumulativeLoanRequest(clientId, loanProductId,
                 loanDisbursementDate, amount, interestRate, numberOfRepayments, customizer));
 
@@ -1438,7 +1440,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected Long applyAndApproveProgressiveLoan(Long clientId, Long loanProductId, String loanDisbursementDate, Double amount,
-            Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+                                                  Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
         PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId,
                 loanDisbursementDate, amount, interestRate, numberOfRepayments, customizer));
 
@@ -1556,14 +1558,14 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected TransactionExt transaction(double amount, String type, String date, double outstandingPrincipal, double principalPortion,
-            double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion) {
+                                         double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion) {
         return new TransactionExt(amount, type, date, outstandingPrincipal, principalPortion, interestPortion, feePortion, penaltyPortion,
                 unrecognizedIncomePortion, overpaymentPortion, false);
     }
 
     protected TransactionExt transaction(double amount, String type, String date, double outstandingPrincipal, double principalPortion,
-            double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion,
-            boolean reversed) {
+                                         double interestPortion, double feePortion, double penaltyPortion, double unrecognizedIncomePortion, double overpaymentPortion,
+                                         boolean reversed) {
         return new TransactionExt(amount, type, date, outstandingPrincipal, principalPortion, interestPortion, feePortion, penaltyPortion,
                 unrecognizedIncomePortion, overpaymentPortion, reversed);
     }
@@ -1573,7 +1575,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double totalOutstandingAmount, Boolean completed,
-            String dueDate) {
+                                      String dueDate) {
         return new Installment(principalAmount, interestAmount, null, null, totalOutstandingAmount, completed, dueDate, null, null);
     }
 
@@ -1587,24 +1589,24 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double totalOutstandingAmount,
-            Boolean completed, String dueDate) {
+                                      Boolean completed, String dueDate) {
         return new Installment(principalAmount, interestAmount, feeAmount, null, totalOutstandingAmount, completed, dueDate, null, null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
-            double totalOutstandingAmount, Boolean completed, String dueDate) {
+                                      double totalOutstandingAmount, Boolean completed, String dueDate) {
         return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstandingAmount, completed, dueDate, null,
                 null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
-            OutstandingAmounts outstandingAmounts, Boolean completed, String dueDate) {
+                                      OutstandingAmounts outstandingAmounts, Boolean completed, String dueDate) {
         return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, null, completed, dueDate, outstandingAmounts,
                 null);
     }
 
     protected Installment installment(double principalAmount, double interestAmount, double feeAmount, double penaltyAmount,
-            double totalOutstanding, Boolean completed, String dueDate, double loanBalance) {
+                                      double totalOutstanding, Boolean completed, String dueDate, double loanBalance) {
         return new Installment(principalAmount, interestAmount, feeAmount, penaltyAmount, totalOutstanding, completed, dueDate, null,
                 loanBalance);
     }
@@ -1618,7 +1620,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void validateLoanSummaryBalances(GetLoansLoanIdResponse loanDetails, Double totalOutstanding, Double totalRepayment,
-            Double principalOutstanding, Double principalPaid, Double totalOverpaid) {
+                                               Double principalOutstanding, Double principalPaid, Double totalOverpaid) {
         assertEquals(totalOutstanding, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
         assertEquals(totalRepayment, Utils.getDoubleValue(loanDetails.getSummary().getTotalRepayment()));
         assertEquals(principalOutstanding, Utils.getDoubleValue(loanDetails.getSummary().getPrincipalOutstanding()));
@@ -1701,7 +1703,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         private List<BatchRequest> requests = new ArrayList<>();
 
         public BatchRequestBuilder rescheduleLoan(Long requestId, Long loanId, String submittedOnDate, String rescheduleFromDate,
-                String adjustedDueDate) {
+                                                  String adjustedDueDate) {
             BatchRequest bRequest = new BatchRequest();
             bRequest.setRequestId(requestId);
             bRequest.setRelativeUrl("rescheduleloans");

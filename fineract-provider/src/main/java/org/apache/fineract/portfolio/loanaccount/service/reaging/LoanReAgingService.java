@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -206,9 +207,9 @@ public class LoanReAgingService {
     private void processReAgeTransaction(final Loan loan, final LoanTransaction reAgeTransaction, final boolean withPostTransactionChecks) {
         if (reAgeTransaction.getTransactionDate().isBefore(reAgeTransaction.getSubmittedOnDate())
                 || LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST
-                        .equals(reAgeTransaction.getLoanReAgeParameter().getInterestHandlingType())
+                .equals(reAgeTransaction.getLoanReAgeParameter().getInterestHandlingType())
                 || LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_PAYABLE_INTEREST
-                        .equals(reAgeTransaction.getLoanReAgeParameter().getInterestHandlingType())) {
+                .equals(reAgeTransaction.getLoanReAgeParameter().getInterestHandlingType())) {
             final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, null);
             loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
             if (withPostTransactionChecks) {
@@ -315,7 +316,7 @@ public class LoanReAgingService {
     }
 
     private LoanReAgeParameter createReAgeParameterFromPreviewRequest(final LoanTransaction reAgeTransaction,
-            final ReAgePreviewRequest reAgePreviewRequest) {
+                                                                      final ReAgePreviewRequest reAgePreviewRequest) {
         final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.valueOf(reAgePreviewRequest.getFrequencyType());
         final Locale locale = Optional.ofNullable(reAgePreviewRequest.getLocale()).map(Locale::forLanguageTag).orElse(Locale.getDefault());
         final LocalDate startDate = JsonParserHelper.convertFrom(reAgePreviewRequest.getStartDate(), LoanReAgingApiConstants.startDate,

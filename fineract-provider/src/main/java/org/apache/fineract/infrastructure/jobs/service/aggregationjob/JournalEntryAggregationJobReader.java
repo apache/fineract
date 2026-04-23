@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service.aggregationjob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -97,7 +98,7 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                 FROM acc_gl_account
                 JOIN acc_gl_journal_entry
                     ON acc_gl_account.id = acc_gl_journal_entry.account_id
-
+                
                 -- entity_type_enum = 1 → LOAN
                 LEFT JOIN m_loan loan
                     ON loan.id = acc_gl_journal_entry.entity_id
@@ -105,7 +106,7 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                 LEFT JOIN m_product_loan loan_product
                     ON loan_product.id = loan.product_id
                     AND acc_gl_journal_entry.entity_type_enum = 1
-
+                
                 -- entity_type_enum = 2 → SAVING
                 LEFT JOIN m_savings_account savings
                     ON savings.id = acc_gl_journal_entry.entity_id
@@ -113,7 +114,7 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                 LEFT JOIN m_savings_product savings_product
                     ON savings_product.id = savings.product_id
                     AND acc_gl_journal_entry.entity_type_enum = 2
-
+                
                 -- entity_type_enum = 3 → PROVISIONING
                 LEFT JOIN m_provisioning_history prov
                     ON prov.id = acc_gl_journal_entry.entity_id
@@ -124,7 +125,7 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                 LEFT JOIN m_product_loan prov_product
                     ON prov_product.id = prov_entry.product_id
                     AND acc_gl_journal_entry.entity_type_enum = 3
-
+                
                 -- entity_type_enum = 4 → SHARED
                 LEFT JOIN m_share_account share
                     ON share.id = acc_gl_journal_entry.entity_id
@@ -132,14 +133,14 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                 LEFT JOIN m_share_product share_product
                     ON share_product.id = share.product_id
                     AND acc_gl_journal_entry.entity_type_enum = 4
-
+                
                 -- external owner
                 LEFT JOIN m_external_asset_owner_journal_entry_mapping aw
                     ON aw.journal_entry_id = acc_gl_journal_entry.id
-
+                
                 WHERE acc_gl_journal_entry.submitted_on_date > ?
                   AND acc_gl_journal_entry.submitted_on_date <= ?
-
+                
                 GROUP BY
                     productId,
                     glAccountId,

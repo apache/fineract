@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,12 +23,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FeignException;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -142,7 +144,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
     }
 
     private Long getTransactionIdForTransactionMetConditions(String transactionDate, double transactionAmount,
-            GetLoansLoanIdResponse loanDetailsResponse) {
+                                                             GetLoansLoanIdResponse loanDetailsResponse) {
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
         GetLoansLoanIdTransactions transactionMetConditions = new GetLoansLoanIdTransactions();
         for (int i = 0; i < transactions.size(); i++) {
@@ -173,7 +175,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
     }
 
     private Long getTransactionIdForLastChargeMetConditions(String chargeTypeEnum, String date,
-            GetLoansLoanIdResponse loanDetailsResponse) {
+                                                            GetLoansLoanIdResponse loanDetailsResponse) {
         List<GetLoansLoanIdLoanChargeData> charges = loanDetailsResponse.getCharges();
 
         ChargeProductType chargeType = ChargeProductType.valueOf(chargeTypeEnum);

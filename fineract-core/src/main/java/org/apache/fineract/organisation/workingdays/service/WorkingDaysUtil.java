@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.workingdays.service;
 
 import java.time.LocalDate;
+
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
@@ -31,7 +32,7 @@ public final class WorkingDaysUtil {
     }
 
     public static LocalDate getOffSetDateIfNonWorkingDay(final LocalDate date, final LocalDate nextMeetingDate,
-            final WorkingDays workingDays) {
+                                                         final WorkingDays workingDays) {
 
         // If date is a working day then return date.
         if (isWorkingDay(workingDays, date)) {
@@ -65,7 +66,7 @@ public final class WorkingDaysUtil {
     }
 
     public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO,
-            final WorkingDays workingDays) {
+                                                                      final WorkingDays workingDays) {
         final LocalDate changedScheduleDate = getOffSetDateIfNonWorkingDay(adjustedDateDetailsDTO.getChangedScheduleDate(),
                 adjustedDateDetailsDTO.getNextRepaymentPeriodDueDate(), workingDays);
         adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);

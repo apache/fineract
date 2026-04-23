@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,8 +31,10 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.CreditBureauConfigurationHelper;
@@ -59,7 +61,7 @@ public class CreditBureauConfigurationValidationTest {
     }
 
     @ParameterizedTest(name = "Create configuration missing {0} should return 400")
-    @CsvSource({ "configkey, value, description", "value, configkey, description", "description, configkey, value" })
+    @CsvSource({"configkey, value, description", "value, configkey, description", "description, configkey, value"})
     void testCreateConfiguration_MissingMandatoryFields(String fieldToOmit, String field1, String field2) {
         final Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put(field1, "testValue1");
@@ -147,7 +149,7 @@ public class CreditBureauConfigurationValidationTest {
     }
 
     @ParameterizedTest(name = "Create mapping missing {0} should return 400")
-    @CsvSource({ "isCreditcheckMandatory", "skipCreditcheckInFailure", "stalePeriod" })
+    @CsvSource({"isCreditcheckMandatory", "skipCreditcheckInFailure", "stalePeriod"})
     void testCreateMapping_MissingMandatoryFields(String fieldToOmit) {
         final Map<String, Object> jsonMap = buildMappingJsonOmitting(fieldToOmit);
         final String jsonBody = new Gson().toJson(jsonMap);

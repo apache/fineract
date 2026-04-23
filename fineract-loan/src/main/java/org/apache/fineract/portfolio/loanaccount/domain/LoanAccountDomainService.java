@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -35,26 +36,26 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(LoanTransactionType repaymentTransactionType, Loan loan, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId,
-            boolean isRecoveryRepayment, String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
-            Boolean isHolidayValidationDone);
+                                  BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId,
+                                  boolean isRecoveryRepayment, String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
+                                  Boolean isHolidayValidationDone);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
+                               BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
 
     LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId, boolean isLoanToLoanTransfer);
+                                            PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId, boolean isLoanToLoanTransfer);
 
     void reverseTransfer(LoanTransaction loanTransaction);
 
     LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId, Integer transactionType, Integer installmentNumber);
+                                      PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId, Integer transactionType, Integer installmentNumber);
 
     LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
+                                            PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
 
     LoanTransaction makeRefundForActiveLoan(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
+                                            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
 
     void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased);
 
@@ -70,12 +71,12 @@ public interface LoanAccountDomainService {
     void setLoanDelinquencyTag(Loan loan, LocalDate transactionDate, List<LoanDelinquencyActionData> effectiveDelinquencyList);
 
     LoanTransaction makeRepayment(LoanTransactionType repaymentTransactionType, Loan loan, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId,
-            boolean isRecoveryRepayment, String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
-            Boolean isHolidayValidationDone, boolean isLoanToLoanTransfer);
+                                  BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId,
+                                  boolean isRecoveryRepayment, String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
+                                  Boolean isHolidayValidationDone, boolean isLoanToLoanTransfer);
 
     LoanTransaction foreCloseLoan(Loan loan, LocalDate foreClourseDate, String noteText, ExternalId externalId,
-            Map<String, Object> changes);
+                                  Map<String, Object> changes);
 
     /**
      * Disables all standing instructions linked to a closed loan
@@ -86,11 +87,11 @@ public interface LoanAccountDomainService {
     void disableStandingInstructionsLinkedToClosedLoan(Loan loan);
 
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
-            ExternalId externalId, PaymentDetail paymentDetail);
+                                        ExternalId externalId, PaymentDetail paymentDetail);
 
     Pair<LoanTransaction, LoanTransaction> makeRefund(Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO,
-            LoanTransactionType loanTransactionType, LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail,
-            ExternalId txnExternalId, Boolean interestRefundCalculationOverride);
+                                                      LoanTransactionType loanTransactionType, LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail,
+                                                      ExternalId txnExternalId, Boolean interestRefundCalculationOverride);
 
     void updateAndSavePostDatedChecksForIndividualAccount(Loan loan, LoanTransaction transaction);
 
@@ -99,5 +100,5 @@ public interface LoanAccountDomainService {
     void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction transaction);
 
     LoanTransaction createManualInterestRefundWithAmount(Loan loan, LoanTransaction targetTransaction, BigDecimal amount,
-            PaymentDetail paymentDetail, ExternalId txnExternalId);
+                                                         PaymentDetail paymentDetail, ExternalId txnExternalId);
 }

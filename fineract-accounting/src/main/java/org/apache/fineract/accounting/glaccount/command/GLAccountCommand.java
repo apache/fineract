@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.glaccount.command;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.accounting.glaccount.api.GLAccountJsonInputParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
@@ -31,8 +32,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
  * Immutable command for adding a general Ledger Account
  */
 
-public record GLAccountCommand(Long id, String name, Long parentId, String glCode, Boolean disabled, Boolean manualEntriesAllowed,
-        Integer type, Integer usage, String description, Long tagId) {
+public record GLAccountCommand(Long id, String name, Long parentId, String glCode, Boolean disabled,
+                               Boolean manualEntriesAllowed,
+                               Integer type, Integer usage, String description, Long tagId) {
 
     public void validateForCreate() {
 

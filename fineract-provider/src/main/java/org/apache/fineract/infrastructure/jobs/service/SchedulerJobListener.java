@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import java.util.Date;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -50,10 +51,12 @@ public class SchedulerJobListener implements JobListener {
     }
 
     @Override
-    public void jobToBeExecuted(@SuppressWarnings("unused") final JobExecutionContext context) {}
+    public void jobToBeExecuted(@SuppressWarnings("unused") final JobExecutionContext context) {
+    }
 
     @Override
-    public void jobExecutionVetoed(@SuppressWarnings("unused") final JobExecutionContext context) {}
+    public void jobExecutionVetoed(@SuppressWarnings("unused") final JobExecutionContext context) {
+    }
 
     @Override
     public void jobWasExecuted(final JobExecutionContext context, final JobExecutionException jobException) {
@@ -120,8 +123,8 @@ public class SchedulerJobListener implements JobListener {
     private Throwable getCauseFromException(final Throwable exception) {
         if (this.stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL && exception.getCause() != null
                 && (exception.getCause().toString().contains(SchedulerServiceConstants.SCHEDULER_EXCEPTION)
-                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION)
-                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
+                || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION)
+                || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
             this.stackTraceLevel++;
             return getCauseFromException(exception.getCause());
         } else if (exception.getCause() != null) {

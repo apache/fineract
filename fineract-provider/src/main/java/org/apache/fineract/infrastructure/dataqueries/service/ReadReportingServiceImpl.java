@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.service;
 
 import jakarta.ws.rs.core.StreamingOutput;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,6 +36,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -312,7 +314,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String sql = rm.schema(id);
 
         final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm,
-                id != null ? new Object[] { id } : new Object[] {});
+                id != null ? new Object[]{id} : new Object[]{});
 
         final Collection<ReportData> reportList = new ArrayList<>();
         if (rpJoins == null || rpJoins.size() == 0) {
@@ -495,7 +497,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public ByteArrayOutputStream generatePentahoReportAsOutputStream(final String reportName, final String outputTypeParam,
-            final Map<String, String> queryParams, final Locale locale, final AppUser runReportAsUser, final StringBuilder errorLog) {
+                                                                     final Map<String, String> queryParams, final Locale locale, final AppUser runReportAsUser, final StringBuilder errorLog) {
         // This complete implementation should be moved to Pentaho Report
         // Service
         /*

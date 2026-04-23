@@ -35,7 +35,7 @@ jobs:
         id: git_hashes
 
       - name: Build the Apache Fineract image
-        run:  |
+        run: |
           TAGS=${{ github.ref_name }}
           if [ "${{ github.ref_name }}" == "develop" ]; then
             TAGS="$TAGS,${{ steps.git_hashes.outputs.short_hash }},${{ steps.git_hashes.outputs.long_hash }}"

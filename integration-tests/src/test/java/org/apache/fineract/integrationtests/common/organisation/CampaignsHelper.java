@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,9 +25,11 @@ import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.report.ReportData;
@@ -73,7 +75,7 @@ public class CampaignsHelper {
     }
 
     public List<HashMap> createCampaignWithNameExpectingError(ResponseSpecification errorResponseSpec, String reportName,
-            Integer triggerType, String campaignName) {
+                                                              Integer triggerType, String campaignName) {
         log.info("---------------------------------CREATING A CAMPAIGN WITH NAME (EXPECTING ERROR)---------------------");
         final String CREATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, errorResponseSpec, CREATE_SMS_CAMPAIGNS_URL,
@@ -85,7 +87,7 @@ public class CampaignsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public void verifyCampaignCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedCampaignId) {
+                                              final Integer generatedCampaignId) {
         log.info("------------------------------CHECK CAMPAIGN DETAILS------------------------------------\n");
         final String RETRIEVE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseCampaignId = Utils.performServerGet(requestSpec, responseSpec, RETRIEVE_SMS_CAMPAIGNS_URL, "id");
@@ -97,7 +99,7 @@ public class CampaignsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer updateCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedCampaignId, String reportName, Integer triggerType) {
+                                  final Integer generatedCampaignId, String reportName, Integer triggerType) {
         log.info("------------------------------UPDATE CAMPAIGN DETAILS------------------------------------\n");
         final String UPDATE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_SMS_CAMPAIGNS_URL, getUpdateCampaignJSON(reportName, triggerType),
@@ -109,7 +111,7 @@ public class CampaignsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer deleteCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedCampaignId) {
+                                  final Integer generatedCampaignId) {
         log.info("------------------------------DELETE CAMPAIGN DETAILS------------------------------------\n");
         final String DELETE_SMS_CAMPAIGNS_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(requestSpec, responseSpec, DELETE_SMS_CAMPAIGNS_URL, "resourceId");
@@ -120,7 +122,7 @@ public class CampaignsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer performActionsOnCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedCampaignId, String command) {
+                                            final Integer generatedCampaignId, String command) {
         log.info("------------------------------PERFORM ACTION ON CAMPAIGN DETAILS------------------------------------\n");
         final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
@@ -134,7 +136,7 @@ public class CampaignsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object performActionsOnCampaignWithFailure(final Integer generatedCampaignId, String command, String actionDate,
-            String responseJsonAttribute) {
+                                                      String responseJsonAttribute) {
         log.info("--------------------------PERFORM ACTION ON CAMPAIGN DETAILS WITH FAILURE-------------------------------\n");
         final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;

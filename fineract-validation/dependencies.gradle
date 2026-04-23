@@ -32,7 +32,7 @@ dependencies {
 
             'com.ibm.icu:icu4j',
             'org.yakworks:spring-icu4j',
-            )
+    )
     api('org.glassfish.jersey.ext:jersey-bean-validation') {
         exclude group: 'jakarta.el', module: 'jakarta.el-api'
     }
@@ -40,13 +40,13 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
 
-    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'jakarta.activation'
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation( 'io.github.classgraph:classgraph' )
-    testImplementation ('org.mockito:mockito-inline')
+    testImplementation('io.github.classgraph:classgraph')
+    testImplementation('org.mockito:mockito-inline')
 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -69,7 +71,7 @@ public final class ImportDocument extends AbstractPersistableCustom<Long> {
     private Integer failureCount;
 
     public static ImportDocument instance(final Long documentId, final LocalDateTime importTime, final Integer entityType,
-            final AppUser createdBy, final Integer totalRecords) {
+                                          final AppUser createdBy, final Integer totalRecords) {
 
         final Boolean completed = Boolean.FALSE;
         final Integer successCount = 0;
@@ -81,8 +83,8 @@ public final class ImportDocument extends AbstractPersistableCustom<Long> {
     }
 
     private ImportDocument(final Long documentId, final LocalDateTime importTime, final LocalDateTime endTime, Boolean completed,
-            final Integer entityType, final AppUser createdBy, final Integer totalRecords, final Integer successCount,
-            final Integer failureCount) {
+                           final Integer entityType, final AppUser createdBy, final Integer totalRecords, final Integer successCount,
+                           final Integer failureCount) {
         this.documentId = documentId;
         this.importTime = importTime;
         this.endTime = endTime;

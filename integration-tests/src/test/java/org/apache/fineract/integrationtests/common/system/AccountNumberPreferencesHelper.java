@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,8 +20,10 @@ package org.apache.fineract.integrationtests.common.system;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +120,7 @@ public class AccountNumberPreferencesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public HashMap<String, Object> createAccountNumberPreferenceWithInvalidData(ResponseSpecification responseSpec, String accountType,
-            String prefixType, String jsonAttributeToGetBack) {
+                                                                                String prefixType, String jsonAttributeToGetBack) {
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder().invalidDataBuild(accountType, prefixType);
 
@@ -132,7 +134,7 @@ public class AccountNumberPreferencesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public HashMap<String, Object> updateAccountNumberPreference(final Integer accountNumberFormatId, final String prefixType,
-            ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
+                                                                 ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder().updatePrefixType(prefixType);
 
@@ -147,7 +149,7 @@ public class AccountNumberPreferencesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public HashMap<String, Object> deleteAccountNumberPreference(final Integer accountNumberFormatId, ResponseSpecification responseSpec,
-            String jsonAttributeToGetBack) {
+                                                                 String jsonAttributeToGetBack) {
 
         LOG.info("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
@@ -181,9 +183,9 @@ public class AccountNumberPreferencesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public void verifyCreationOfAccountNumberPreferences(final Integer clientAccountNumberPreferenceId,
-            final Integer loanAccountNumberPreferenceId, final Integer savingsAccountNumberPreferenceId,
-            final Integer groupsAccountNumberPreferenceId, final Integer centerAccountNumberPreferenceId,
-            ResponseSpecification responseSpec, RequestSpecification requestSpec) {
+                                                         final Integer loanAccountNumberPreferenceId, final Integer savingsAccountNumberPreferenceId,
+                                                         final Integer groupsAccountNumberPreferenceId, final Integer centerAccountNumberPreferenceId,
+                                                         ResponseSpecification responseSpec, RequestSpecification requestSpec) {
 
         final String clientURL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/" + clientAccountNumberPreferenceId + "?" + Utils.TENANT_IDENTIFIER;
 
@@ -212,7 +214,7 @@ public class AccountNumberPreferencesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public void verifyUpdationOfAccountNumberPreferences(final Integer accountNumberPreferenceId, ResponseSpecification responseSpec,
-            RequestSpecification requestSpec) {
+                                                         RequestSpecification requestSpec) {
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/" + accountNumberPreferenceId + "?" + Utils.TENANT_IDENTIFIER;
         Utils.performServerGet(requestSpec, responseSpec, URL, "id");

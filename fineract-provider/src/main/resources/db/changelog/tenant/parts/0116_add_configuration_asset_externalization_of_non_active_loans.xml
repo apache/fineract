@@ -35,7 +35,8 @@
             <column name="string_value"/>
             <column name="enabled" valueBoolean="true"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="If enabled: when a loan state is changed to non-active -> pending transfers will be handled"/>
+            <column name="description"
+                    value="If enabled: when a loan state is changed to non-active -> pending transfers will be handled"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

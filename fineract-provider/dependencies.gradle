@@ -56,7 +56,7 @@ dependencies {
     //
     implementation(
             project(path: ':fineract-avro-schemas')
-            )
+    )
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-validation',
@@ -126,13 +126,13 @@ dependencies {
 
             'io.github.resilience4j:resilience4j-spring-boot3',
             'org.reflections:reflections',
-            )
+    )
 
     implementation 'software.amazon.msk:aws-msk-iam-auth'
 
     implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta'
 
-    implementation ('org.apache.commons:commons-email') {
+    implementation('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
         exclude group: 'javax.activation', module: 'activation'
     }
@@ -146,35 +146,35 @@ dependencies {
     implementation('org.dom4j:dom4j') {
         exclude group: 'javax.xml.bind'
     }
-    implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
+    implementation('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.apache.activemq:activemq-client') {
+    implementation('org.apache.activemq:activemq-client') {
         exclude group: 'org.apache.geronimo.specs'
         exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }
-    implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
     }
     implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
-    implementation ('org.quartz-scheduler:quartz') {
+    implementation('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
     }
-    implementation('org.apache.commons:commons-csv'){}
-    implementation ('software.amazon.awssdk:s3') {
+    implementation('org.apache.commons:commons-csv') {}
+    implementation('software.amazon.awssdk:s3') {
     }
-    implementation ('software.amazon.awssdk:auth') {
+    implementation('software.amazon.awssdk:auth') {
     }
 
-    implementation ('org.mnode.ical4j:ical4j') {
+    implementation('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
         exclude group: 'javax.activation'
         exclude group: 'com.sun.mail', module: 'javax.mail'
     }
 
-    implementation ('org.ehcache:ehcache') {
+    implementation('org.ehcache:ehcache') {
         exclude group: 'com.sun.activation'
     }
 
@@ -197,7 +197,7 @@ dependencies {
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient'
-            )
+    )
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -215,19 +215,19 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    testImplementation( 'io.cucumber:cucumber-spring',
+    testImplementation('io.cucumber:cucumber-spring',
             'io.github.classgraph:classgraph',
             'io.cucumber:cucumber-core',
             'io.cucumber:cucumber-java',
             'io.cucumber:cucumber-java8',
             'io.cucumber:cucumber-junit-platform-engine',
-            )
-    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+    )
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'jakarta.activation'
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
+    testImplementation('org.mockito:mockito-inline')
 }

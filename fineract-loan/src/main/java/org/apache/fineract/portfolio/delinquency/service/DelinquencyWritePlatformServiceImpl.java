@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -190,7 +191,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
     @Override
     public LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData,
-            List<LoanDelinquencyActionData> effectiveDelinquencyList) {
+                                                                List<LoanDelinquencyActionData> effectiveDelinquencyList) {
         Loan loan = loanScheduleDelinquencyData.getLoan();
         if (loan == null) {
             loan = this.loanRepository.findOneWithNotFoundDetection(loanScheduleDelinquencyData.getLoanId());
@@ -240,7 +241,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
     @Override
     public void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData,
-            List<LoanDelinquencyActionData> effectiveDelinquencyList) {
+                                          List<LoanDelinquencyActionData> effectiveDelinquencyList) {
         final Loan loan = loanDelinquencyData.getLoan();
         if (loan.hasDelinquencyBucket()) {
             final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
@@ -257,7 +258,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     private Map<String, Object> applyDelinquencyToLoanAndInstallments(Loan loan, DelinquencyBucket delinquencyBucket,
-            CollectionData collectionData, Map<Long, CollectionData> installmentsCollectionData) {
+                                                                      CollectionData collectionData, Map<Long, CollectionData> installmentsCollectionData) {
         // Order is important: first calculate loan level delinquency, then the installment level
         // delinquency for loan
         Map<String, Object> result = delinquencyHelper.applyDelinquencyForLoan(loan, delinquencyBucket, collectionData.getDelinquentDays());
@@ -349,7 +350,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     private DelinquencyRange updateDelinquencyRange(DelinquencyRange delinquencyRange, DelinquencyRangeData data,
-            Map<String, Object> changes) {
+                                                    Map<String, Object> changes) {
         if (!data.getClassification().equalsIgnoreCase(delinquencyRange.getClassification())) {
             delinquencyRange.setClassification(data.getClassification());
             changes.put(DelinquencyApiConstants.CLASSIFICATION_PARAM_NAME, data.getClassification());
@@ -394,7 +395,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     private DelinquencyBucket updateDelinquencyBucket(DelinquencyBucket delinquencyBucket, DelinquencyBucketData data,
-            Map<String, Object> changes) {
+                                                      Map<String, Object> changes) {
         if (!data.getName().equalsIgnoreCase(delinquencyBucket.getName())) {
             Optional<DelinquencyBucket> existingEntityByName = repositoryBucket.findByName(data.getName());
             if (existingEntityByName.isPresent()) {

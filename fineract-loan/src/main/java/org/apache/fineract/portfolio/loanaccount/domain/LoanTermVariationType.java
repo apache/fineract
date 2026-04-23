@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -55,37 +55,37 @@ public enum LoanTermVariationType {
         switch (value) {
             case 1:
                 enumeration = LoanTermVariationType.EMI_AMOUNT;
-            break;
+                break;
             case 2:
                 enumeration = LoanTermVariationType.INTEREST_RATE;
-            break;
+                break;
             case 3:
                 enumeration = LoanTermVariationType.PRINCIPAL_AMOUNT;
-            break;
+                break;
             case 4:
                 enumeration = LoanTermVariationType.DUE_DATE;
-            break;
+                break;
             case 5:
                 enumeration = LoanTermVariationType.INSERT_INSTALLMENT;
-            break;
+                break;
             case 6:
                 enumeration = LoanTermVariationType.DELETE_INSTALLMENT;
-            break;
+                break;
             case 7:
                 enumeration = LoanTermVariationType.GRACE_ON_INTEREST;
-            break;
+                break;
             case 8:
                 enumeration = LoanTermVariationType.GRACE_ON_PRINCIPAL;
-            break;
+                break;
             case 9:
                 enumeration = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD;
-            break;
+                break;
             case 10:
                 enumeration = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT;
-            break;
+                break;
             case 11:
                 enumeration = LoanTermVariationType.INTEREST_PAUSE;
-            break;
+                break;
         }
         return enumeration;
     }

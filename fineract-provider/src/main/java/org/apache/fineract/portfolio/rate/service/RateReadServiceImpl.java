@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -56,7 +57,7 @@ public class RateReadServiceImpl implements RateReadService {
             this.context.authenticatedUser();
             final RateMapper rm = new RateMapper();
             final String sql = "select " + rm.rateSchema() + " where r.id = ?";
-            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { rateId }); // NOSONAR
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{rateId}); // NOSONAR
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
@@ -70,7 +71,7 @@ public class RateReadServiceImpl implements RateReadService {
             this.context.authenticatedUser();
             final RateMapper rm = new RateMapper();
             final String sql = "select " + rm.rateSchema() + " where r.name = ?";
-            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { name }); // NOSONAR
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{name}); // NOSONAR
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
@@ -83,21 +84,21 @@ public class RateReadServiceImpl implements RateReadService {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { true, RateAppliesTo.LOAN.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{true, RateAppliesTo.LOAN.getValue()}); // NOSONAR
     }
 
     @Override
     public List<RateData> retrieveLoanRates(Long loanId) {
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.loanRateSchema() + " where lr.loan_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{loanId}); // NOSONAR
     }
 
     @Override
     public List<RateData> retrieveProductLoanRates(Long loanId) {
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.productLoanRateSchema() + " where lr.product_loan_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{loanId}); // NOSONAR
     }
 
     private static final class RateMapper implements RowMapper<RateData> {
@@ -115,7 +116,8 @@ public class RateReadServiceImpl implements RateReadService {
             return rateSchema() + " join m_product_loan_rate lr on lr.rate_id = r.id";
         }
 
-        RateMapper() {}
+        RateMapper() {
+        }
 
         @Override
         public RateData mapRow(ResultSet resultSet, int i) throws SQLException {

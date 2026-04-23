@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -46,6 +46,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.client.models.AdvancedQueryData;
 import org.apache.fineract.client.models.AdvancedQueryRequest;
 import org.apache.fineract.client.models.ColumnFilterData;
@@ -346,7 +348,7 @@ public class DatatableAdvancedQueryTest {
 
     @NonNull
     private HashMap<String, Object> createDatatableEntry(String datatable, Integer apptableId, LocalDate dateValue, Boolean boolValue,
-            Integer intValue, BigDecimal decValue) {
+                                                         Integer intValue, BigDecimal decValue) {
         final HashMap<String, Object> request = new HashMap<>();
         request.put(COLUMN_STRING, Utils.uniqueRandomStringGenerator(apptableId.toString() + "_", 5));
         request.put(COLUMN_TEXT, apptableId);

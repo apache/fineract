@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,12 +21,14 @@ package org.apache.fineract.integrationtests.common.rates;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class RatesHelper {
 
     private RatesHelper() {
@@ -52,7 +54,7 @@ public final class RatesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String request) {
+                                      final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_RATES_URL, request, "resourceId");
     }
 
@@ -61,7 +63,7 @@ public final class RatesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap getRateById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer rateId) {
+                                      final Integer rateId) {
         return Utils.performServerGet(requestSpec, responseSpec, RATES_URL + "/" + rateId + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
@@ -70,7 +72,7 @@ public final class RatesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap updateRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer rateId, final String request) {
+                                      final Integer rateId, final String request) {
         return Utils.performServerPut(requestSpec, responseSpec, RATES_URL + "/" + rateId + "?" + Utils.TENANT_IDENTIFIER, request,
                 CommonConstants.RESPONSE_CHANGES);
     }

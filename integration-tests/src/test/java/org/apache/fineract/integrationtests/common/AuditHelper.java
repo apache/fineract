@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,11 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+
 import org.apache.fineract.client.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +112,7 @@ public class AuditHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public void verifyMultipleAuditsOnserver(List<HashMap<String, Object>> auditsRecievedInitial,
-            List<HashMap<String, Object>> auditsRecieved, Integer id, String actionName, String entityType) {
+                                             List<HashMap<String, Object>> auditsRecieved, Integer id, String actionName, String entityType) {
         LOG.info("------------------------------CHECK IF AUDIT CREATED------------------------------------\n");
         assertEquals(auditsRecievedInitial.size() + 1, auditsRecieved.size(), "Audit is not Created");
 

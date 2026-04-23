@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -270,24 +272,24 @@ public final class LoanChargeApiJsonValidator {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
 
                     }
-                break;
+                    break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     if (loanCharge.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
                     } else if (loanCharge.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
+                    break;
                 case PERCENT_OF_INTEREST:
                     if (loanCharge.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     } else if (loanCharge.isInstalmentFee() && loanCharge.getLoan().isProgressiveSchedule()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
+                    break;
 
                 default:
-                break;
+                    break;
             }
             if (errorcode != null) {
                 baseDataValidator.reset().parameter("charges").failWithCode(errorcode);
@@ -421,7 +423,7 @@ public final class LoanChargeApiJsonValidator {
     }
 
     private void validateInterestBearingLoanProductRestriction(ChargeCalculationType chargeCalculationType, ChargeTimeType chargeTime,
-            LoanProduct loanProduct, DataValidatorBuilder baseDataValidator) {
+                                                               LoanProduct loanProduct, DataValidatorBuilder baseDataValidator) {
         if (loanProduct.isInterestRecalculationEnabled()) {
             String errorcode = null;
             switch (chargeCalculationType) {
@@ -430,14 +432,14 @@ public final class LoanChargeApiJsonValidator {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
 
                     }
-                break;
+                    break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     if (chargeTime.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
                     } else if (chargeTime.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
+                    break;
                 case PERCENT_OF_INTEREST:
                     if (chargeTime.isSpecifiedDueDate()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
@@ -445,10 +447,10 @@ public final class LoanChargeApiJsonValidator {
                             && loanProduct.getLoanProductRelatedDetail().getLoanScheduleType().equals(LoanScheduleType.PROGRESSIVE)) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
-                break;
+                    break;
 
                 default:
-                break;
+                    break;
             }
             if (errorcode != null) {
                 baseDataValidator.reset().parameter("charges").failWithCode(errorcode);

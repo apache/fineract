@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
@@ -138,7 +139,7 @@ class LoanScheduleGeneratorTest {
     }
 
     private void checkDisbursementPeriod(LoanSchedulePlanDisbursementPeriod period, LocalDate disbursementDate, BigDecimal principalAmount,
-            BigDecimal outstandingAmount) {
+                                         BigDecimal outstandingAmount) {
         assertEquals(disbursementDate, period.getPeriodFromDate());
         assertEquals(disbursementDate, period.getPeriodDueDate());
         assertEquals(0, principalAmount.compareTo(period.getPrincipalAmount()));
@@ -147,8 +148,8 @@ class LoanScheduleGeneratorTest {
     }
 
     private void checkRepaymentPeriod(LoanSchedulePlanRepaymentPeriod period, int expectedPeriodNumber, LocalDate expectedFromDate,
-            LocalDate expectedDueDate, BigDecimal expectedPrincipalDue, BigDecimal expectedInterestDue, BigDecimal expectedTotalDue,
-            BigDecimal expectedOutstandingLoanBalance) {
+                                      LocalDate expectedDueDate, BigDecimal expectedPrincipalDue, BigDecimal expectedInterestDue, BigDecimal expectedTotalDue,
+                                      BigDecimal expectedOutstandingLoanBalance) {
         assertEquals(expectedPeriodNumber, period.getPeriodNumber());
         assertEquals(expectedFromDate, period.getPeriodFromDate());
         assertEquals(expectedDueDate, period.getPeriodDueDate());
@@ -159,8 +160,8 @@ class LoanScheduleGeneratorTest {
     }
 
     private void checkDownPaymentPeriod(LoanSchedulePlanDownPaymentPeriod period, int expectedPeriodNumber, LocalDate expectedFromDate,
-            LocalDate expectedDueDate, BigDecimal expectedPrincipalDue, BigDecimal expectedTotalDue,
-            BigDecimal expectedOutstandingLoanBalance) {
+                                        LocalDate expectedDueDate, BigDecimal expectedPrincipalDue, BigDecimal expectedTotalDue,
+                                        BigDecimal expectedOutstandingLoanBalance) {
         assertEquals(expectedPeriodNumber, period.getPeriodNumber());
         assertEquals(expectedFromDate, period.getPeriodFromDate());
         assertEquals(expectedDueDate, period.getPeriodDueDate());

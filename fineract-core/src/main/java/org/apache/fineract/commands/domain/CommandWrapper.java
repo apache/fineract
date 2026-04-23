@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -37,6 +37,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_WORKINGDAYS;
 
 import java.util.Set;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
@@ -76,22 +77,22 @@ public class CommandWrapper {
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
-            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId) {
+                                                     final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId) {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId);
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
-            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId,
-            final Long creditBureauId, final Long organisationCreditBureauId, final String idempotencyKey,
-            final ExternalId loanExternalId) {
+                                                     final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
+                                                     final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId,
+                                                     final Long creditBureauId, final Long organisationCreditBureauId, final String idempotencyKey,
+                                                     final ExternalId loanExternalId) {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId, officeId,
                 groupId, clientId, loanId, savingsId, transactionId, creditBureauId, organisationCreditBureauId, idempotencyKey,
                 loanExternalId, null);
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
-            final Long subresourceId, final String resourceGetUrl, final Long productId) {
+                           final Long subresourceId, final String resourceGetUrl, final Long productId) {
         this.commandId = commandId;
         this.officeId = null;
         this.groupId = null;
@@ -116,10 +117,10 @@ public class CommandWrapper {
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
-            final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
-            final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
-            final Set<String> sanitizeJsonKeys) {
+                          final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
+                          final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
+                          final Long organisationCreditBureauId, final String jobName, final String idempotencyKey, final ExternalId loanExternalId,
+                          final Set<String> sanitizeJsonKeys) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -146,10 +147,10 @@ public class CommandWrapper {
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
-            final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
-            final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final Long creditBureauId,
-            final Long organisationCreditBureauId, final String idempotencyKey, final ExternalId loanExternalId,
-            final Set<String> sanitizeJsonKeys) {
+                           final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
+                           final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final Long creditBureauId,
+                           final Long organisationCreditBureauId, final String idempotencyKey, final ExternalId loanExternalId,
+                           final Set<String> sanitizeJsonKeys) {
 
         this.commandId = commandId;
         this.officeId = officeId;

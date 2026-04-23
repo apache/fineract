@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Sign In</title>
     <style>
         /* Reset basic styling */
@@ -93,15 +93,15 @@
         <form th:action="@{/login}" method="post">
             <div>
                 <label for="tenantId">Tenant ID</label>
-                <input type="text" id="tenantId" name="tenantId" required />
+                <input type="text" id="tenantId" name="tenantId" required/>
             </div>
             <div>
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" autocomplete="username" required />
+                <input type="text" id="username" name="username" autocomplete="username" required/>
             </div>
             <div>
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" autocomplete="current-password" required />
+                <input type="password" id="password" name="password" autocomplete="current-password" required/>
             </div>
             <button type="submit">Sign In</button>
         </form>

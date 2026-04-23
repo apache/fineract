@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.survey.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.survey.data.LikeliHoodPovertyLineData;
 import org.apache.fineract.infrastructure.survey.data.PovertyLineData;
 import org.apache.fineract.infrastructure.survey.data.PpiPovertyLineData;
@@ -120,7 +121,7 @@ public class PovertyLineServiceImpl implements PovertyLineService {
                 + " JOIN ppi_likelihoods_ppi lkp on lkp.id = pl.likelihood_ppi_id " + " JOIN ppi_scores sc on sc.id = pl.score_id "
                 + " WHERE lkp.ppi_name = ? ";
 
-        return this.jdbcTemplate.queryForRowSet(sql, new Object[] { ppiName });
+        return this.jdbcTemplate.queryForRowSet(sql, new Object[]{ppiName});
 
     }
 
@@ -130,7 +131,7 @@ public class PovertyLineServiceImpl implements PovertyLineService {
                 + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " JOIN ppi_scores sc on sc.id = pl.score_id "
                 + " WHERE pl.likelihood_ppi_id = ? ";
 
-        return this.jdbcTemplate.queryForRowSet(sql, new Object[] { likelihoodId });
+        return this.jdbcTemplate.queryForRowSet(sql, new Object[]{likelihoodId});
 
     }
 

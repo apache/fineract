@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -43,16 +43,16 @@ public class TaxConfiguration {
     @Bean
     @ConditionalOnMissingBean(TaxAssembler.class)
     public TaxAssembler taxAssembler(FromJsonHelper fromApiJsonHelper, GLAccountRepositoryWrapper glAccountRepositoryWrapper,
-            TaxComponentRepositoryWrapper taxComponentRepositoryWrapper) {
+                                     TaxComponentRepositoryWrapper taxComponentRepositoryWrapper) {
         return new TaxAssembler(fromApiJsonHelper, glAccountRepositoryWrapper, taxComponentRepositoryWrapper);
     }
 
     @Bean
     @ConditionalOnMissingBean(TaxReadPlatformService.class)
     public TaxReadPlatformService taxReadPlatformService(final TaxComponentRepository taxComponentRepository,
-            final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, final TaxComponentMapper taxComponentMapper,
-            final TaxGroupRepository taxGroupRepository, final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper,
-            final TaxGroupMapper taxGroupMapper, AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
+                                                         final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, final TaxComponentMapper taxComponentMapper,
+                                                         final TaxGroupRepository taxGroupRepository, final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper,
+                                                         final TaxGroupMapper taxGroupMapper, AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
         return new TaxReadPlatformServiceImpl(accountingDropdownReadPlatformService, taxComponentRepository, taxComponentRepositoryWrapper,
                 taxComponentMapper, taxGroupRepository, taxGroupRepositoryWrapper, taxGroupMapper);
     }
@@ -60,8 +60,8 @@ public class TaxConfiguration {
     @Bean
     @ConditionalOnMissingBean(TaxWritePlatformService.class)
     public TaxWritePlatformService taxWritePlatformService(TaxValidator validator, TaxAssembler taxAssembler,
-            TaxComponentRepository taxComponentRepository, TaxGroupRepository taxGroupRepository,
-            TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, TaxGroupRepositoryWrapper taxGroupRepositoryWrapper) {
+                                                           TaxComponentRepository taxComponentRepository, TaxGroupRepository taxGroupRepository,
+                                                           TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, TaxGroupRepositoryWrapper taxGroupRepositoryWrapper) {
         return new TaxWritePlatformServiceImpl(validator, taxAssembler, taxComponentRepository, taxComponentRepositoryWrapper,
                 taxGroupRepository, taxGroupRepositoryWrapper);
     }

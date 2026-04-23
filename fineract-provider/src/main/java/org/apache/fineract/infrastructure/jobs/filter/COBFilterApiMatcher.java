@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,8 +22,10 @@ import static org.apache.fineract.batch.command.CommandStrategyUtils.isRelativeU
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
@@ -62,7 +64,8 @@ public abstract class COBFilterApiMatcher implements COBFilterHelper {
     }
 
     protected List<BatchRequest> getBatchRequests(BodyCachingHttpServletRequestWrapper request) throws IOException {
-        List<BatchRequest> batchRequests = objectMapper.readValue(request.getInputStream(), new TypeReference<>() {});
+        List<BatchRequest> batchRequests = objectMapper.readValue(request.getInputStream(), new TypeReference<>() {
+        });
         // since we read body, we have to reset so the upcoming readings are successful
         request.resetStream();
         for (BatchRequest batchRequest : batchRequests) {

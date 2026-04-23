@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.shareaccount;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.SharedAccountsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -46,7 +47,7 @@ public class SharedAccountWorkBookPopulator extends AbstractWorkbookPopulator {
     private final SavingsAccountSheetPopulator savingsAccountSheetPopulator;
 
     public SharedAccountWorkBookPopulator(SharedProductsSheetPopulator sharedProductsSheetPopulator,
-            ClientSheetPopulator clientSheetPopulator, SavingsAccountSheetPopulator savingsAccountSheetPopulator) {
+                                          ClientSheetPopulator clientSheetPopulator, SavingsAccountSheetPopulator savingsAccountSheetPopulator) {
         this.sharedProductsSheetPopulator = sharedProductsSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.savingsAccountSheetPopulator = savingsAccountSheetPopulator;
@@ -107,9 +108,9 @@ public class SharedAccountWorkBookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint dateConstraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL,
                 "=TODAY()", null, dateFormat);
         DataValidationConstraint frequencyConstraint = validationHelper.createExplicitListConstraint(
-                new String[] { TemplatePopulateImportConstants.FREQUENCY_DAYS, TemplatePopulateImportConstants.FREQUENCY_WEEKS,
-                        TemplatePopulateImportConstants.FREQUENCY_MONTHS, TemplatePopulateImportConstants.FREQUENCY_YEARS });
-        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+                new String[]{TemplatePopulateImportConstants.FREQUENCY_DAYS, TemplatePopulateImportConstants.FREQUENCY_WEEKS,
+                        TemplatePopulateImportConstants.FREQUENCY_MONTHS, TemplatePopulateImportConstants.FREQUENCY_YEARS});
+        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
         DataValidation productValidation = validationHelper.createValidation(productNameConstraint, productRange);
         DataValidation submittedOnValidation = validationHelper.createValidation(dateConstraint, submittedDateRange);

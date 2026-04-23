@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -68,7 +69,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final AppUserMapper mapper = new AppUserMapper(this.roleReadPlatformService, this.staffReadPlatformService);
         final String sql = "select " + mapper.schema();
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{hierarchySearchString}); // NOSONAR
     }
 
     @Override
@@ -80,7 +81,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final AppUserLookupMapper mapper = new AppUserLookupMapper();
         final String sql = "select " + mapper.schema();
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString }); // NOSONAR
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{hierarchySearchString}); // NOSONAR
     }
 
     @Override
@@ -188,7 +189,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     @Override
     public boolean isUsernameExist(String username) {
         String sql = "select count(*) from m_appuser where username = ?";
-        Object[] params = new Object[] { username };
+        Object[] params = new Object[]{username};
         int count = this.jdbcTemplate.queryForObject(sql, Integer.class, params);
         return count != 0;
     }

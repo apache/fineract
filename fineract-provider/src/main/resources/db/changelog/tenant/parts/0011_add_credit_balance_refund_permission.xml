@@ -19,14 +19,16 @@
     under the License.
 
 -->
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
         <insert tableName="m_permission">
-            <column name="grouping" value="transaction_loan" />
-            <column name="code" value="CREDITBALANCEREFUND_LOAN" />
-            <column name="entity_name" value="LOAN" />
-            <column name="action_name" value="CREDITBALANCEREFUND" />
-            <column name="can_maker_checker" valueBoolean="false" />
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="CREDITBALANCEREFUND_LOAN"/>
+            <column name="entity_name" value="LOAN"/>
+            <column name="action_name" value="CREDITBALANCEREFUND"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

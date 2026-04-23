@@ -35,7 +35,8 @@
             <column name="string_value" value="due-date"/>
             <column name="enabled" valueBoolean="true"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="due-date: default for due-date, Use comma seperated values for due-date, submitted-date"/>
+            <column name="description"
+                    value="due-date: default for due-date, Use comma seperated values for due-date, submitted-date"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

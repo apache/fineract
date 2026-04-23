@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,12 +25,14 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -41,7 +43,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_provisioning_criteria", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "criteria_name" }, name = "criteria_name") })
+        @UniqueConstraint(columnNames = {"criteria_name"}, name = "criteria_name")})
 public class ProvisioningCriteria extends AbstractAuditableCustom {
 
     @Column(name = "criteria_name", nullable = false)
@@ -66,7 +68,7 @@ public class ProvisioningCriteria extends AbstractAuditableCustom {
     }
 
     public ProvisioningCriteria(String criteriaName, AppUser createdBy, LocalDateTime createdDate, AppUser lastModifiedBy,
-            LocalDateTime lastModifiedDate) {
+                                LocalDateTime lastModifiedDate) {
         this.criteriaName = criteriaName;
         setCreatedBy(createdBy.getId());
         setCreatedDate(createdDate);

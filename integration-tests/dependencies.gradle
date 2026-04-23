@@ -22,7 +22,7 @@ dependencies {
     //
     tomcat 'org.apache.tomcat:tomcat:10.1.49@zip'
     def providerMainOutput = project(':fineract-provider').extensions.getByType(SourceSetContainer).named('main').get().output
-    testImplementation( providerMainOutput,
+    testImplementation(providerMainOutput,
             project(path: ':fineract-core', configuration: 'runtimeElements'),
             project(path: ':fineract-accounting', configuration: 'runtimeElements'),
             project(path: ':fineract-investor', configuration: 'runtimeElements'),
@@ -34,7 +34,7 @@ dependencies {
             project(path: ':fineract-provider', configuration: 'runtimeElements'),
             project(path: ':fineract-avro-schemas', configuration: 'runtimeElements'),
             project(path: ':fineract-progressive-loan', configuration: 'runtimeElements')
-            )
+    )
 
     // Retrofit client for existing tests
     testImplementation project(path: ':fineract-client', configuration: 'runtimeElements')
@@ -44,12 +44,12 @@ dependencies {
     testImplementation(project(path: ':fineract-client-feign', configuration: 'runtimeElements')) {
         exclude group: 'org.apache.fineract', module: 'fineract-client'
     }
-    testImplementation ('org.mock-server:mockserver-junit-jupiter') {
+    testImplementation('org.mock-server:mockserver-junit-jupiter') {
         exclude group: 'com.sun.mail', module: 'mailapi'
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
         exclude group: 'javax.validation'
     }
-    testImplementation ('io.rest-assured:rest-assured') {
+    testImplementation('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
         exclude group: 'com.sun.xml.bind'

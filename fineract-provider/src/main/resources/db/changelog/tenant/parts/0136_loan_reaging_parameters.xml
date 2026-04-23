@@ -77,6 +77,7 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
-        <renameColumn tableName="m_loan_reage_parameter" oldColumnName="frequency" newColumnName="frequency_type" columnDataType="VARCHAR(100)"/>
+        <renameColumn tableName="m_loan_reage_parameter" oldColumnName="frequency" newColumnName="frequency_type"
+                      columnDataType="VARCHAR(100)"/>
     </changeSet>
 </databaseChangeLog>

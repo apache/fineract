@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,7 +29,7 @@ public class PortfolioAccountDTO {
     private final boolean excludeOverDraftAccounts;
 
     public PortfolioAccountDTO(final Integer accountTypeId, final Long clientId, final String currencyCode, final long[] accountStatus,
-            final Integer depositType, final boolean excludeOverDraftAccounts) {
+                               final Integer depositType, final boolean excludeOverDraftAccounts) {
         this.accountTypeId = accountTypeId;
         this.clientId = clientId;
         this.currencyCode = currencyCode;
@@ -48,7 +48,7 @@ public class PortfolioAccountDTO {
     }
 
     public PortfolioAccountDTO(final Integer accountTypeId, final Long clientId, final String currencyCode, final long[] accountStatus,
-            final Integer depositType) {
+                               final Integer depositType) {
         this.accountTypeId = accountTypeId;
         this.clientId = clientId;
         this.currencyCode = currencyCode;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,17 +19,20 @@
 package org.apache.fineract.portfolio.repaymentwithpostdatedchecks.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 final class PostDatedChecksApiResourceSwagger {
 
-    private PostDatedChecksApiResourceSwagger() {}
+    private PostDatedChecksApiResourceSwagger() {
+    }
 
     @Schema(description = "GetPostDatedChecks")
     public static final class GetPostDatedChecks {
 
-        private GetPostDatedChecks() {}
+        private GetPostDatedChecks() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -49,7 +52,8 @@ final class PostDatedChecksApiResourceSwagger {
     @Schema(description = "UpdatePostDatedCheckRequest")
     public static final class UpdatePostDatedCheckRequest {
 
-        private UpdatePostDatedCheckRequest() {}
+        private UpdatePostDatedCheckRequest() {
+        }
 
         @Schema(example = "en")
         public String locale;
@@ -70,7 +74,8 @@ final class PostDatedChecksApiResourceSwagger {
     @Schema(description = "UpdatePostDatedCheckResponse")
     public static final class UpdatePostDatedCheckResponse {
 
-        private UpdatePostDatedCheckResponse() {}
+        private UpdatePostDatedCheckResponse() {
+        }
 
         @Schema(example = "12")
         public Long resourceId;
@@ -78,7 +83,8 @@ final class PostDatedChecksApiResourceSwagger {
 
         static final class UpdateChangesResponse {
 
-            private UpdateChangesResponse() {}
+            private UpdateChangesResponse() {
+            }
 
             @Schema(example = "10000")
             public BigDecimal amount;
@@ -94,7 +100,8 @@ final class PostDatedChecksApiResourceSwagger {
     @Schema(description = "DeletePostDatedCheck")
     public static final class DeletePostDatedCheck {
 
-        private DeletePostDatedCheck() {}
+        private DeletePostDatedCheck() {
+        }
 
         @Schema(example = "1")
         public Long loanId;

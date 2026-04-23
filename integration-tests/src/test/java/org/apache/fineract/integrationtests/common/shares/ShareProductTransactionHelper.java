@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,7 +20,9 @@ package org.apache.fineract.integrationtests.common.shares;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.Utils;
 
 public final class ShareProductTransactionHelper {
@@ -37,7 +39,7 @@ public final class ShareProductTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createShareProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                             final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SHARE_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
@@ -46,7 +48,7 @@ public final class ShareProductTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Object> retrieveShareProduct(final Integer shareProductId, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                           final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + shareProductId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
@@ -56,7 +58,7 @@ public final class ShareProductTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateShareProduct(final Integer shareProductId, final String provsioningCriteriaJson,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                             final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + shareProductId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, url, provsioningCriteriaJson, "resourceId");
     }

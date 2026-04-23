@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +71,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
      * @param dve
      */
     private void handleAccountingRuleIntegrityIssues(final JsonCommand command, final Throwable realCause,
-            final NonTransientDataAccessException dve) {
+                                                     final NonTransientDataAccessException dve) {
         if (realCause.getMessage().contains("accounting_rule_name_unique")) {
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
         } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) {
@@ -282,7 +283,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     }
 
     private Set<String> determineCreditTagToAddAndRemoveOldTags(final String[] creditOrDebitTags, final JournalEntryType type,
-            final AccountingRule accountingRule) {
+                                                                final AccountingRule accountingRule) {
 
         final Set<String> incomingTags = new HashSet<>(Arrays.asList(creditOrDebitTags));
         final Set<AccountingTagRule> existingTags = accountingRule.getAccountingTagRulesByType(type);
@@ -331,7 +332,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     }
 
     private List<AccountingTagRule> saveDebitOrCreditTags(final Set<String> creditOrDebitTagArray, final JournalEntryType transactionType,
-            final List<AccountingTagRule> accountingTagRules) {
+                                                          final List<AccountingTagRule> accountingTagRules) {
         for (final String creditOrDebitTag : creditOrDebitTagArray) {
             if (creditOrDebitTag != null && StringUtils.isNotBlank(creditOrDebitTag)) {
                 final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);

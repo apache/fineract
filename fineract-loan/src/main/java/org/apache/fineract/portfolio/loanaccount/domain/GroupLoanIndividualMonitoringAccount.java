@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,13 +26,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.math.BigDecimal;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.group.domain.Group;
 
 @Entity
-@Table(name = "glim_accounts", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_number" }, name = "FK_glim_id") })
+@Table(name = "glim_accounts", uniqueConstraints = {@UniqueConstraint(columnNames = {"account_number"}, name = "FK_glim_id")})
 public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
@@ -60,10 +62,11 @@ public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCus
     @Column(name = "application_id", nullable = true)
     private BigDecimal applicationId;
 
-    protected GroupLoanIndividualMonitoringAccount() {}
+    protected GroupLoanIndividualMonitoringAccount() {
+    }
 
     private GroupLoanIndividualMonitoringAccount(String accountNumber, Group group, BigDecimal principalAmount, Long childAccountsCount,
-            Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
+                                                 Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
         this.accountNumber = accountNumber;
         this.group = group;
         this.principalAmount = principalAmount;
@@ -74,7 +77,7 @@ public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCus
     }
 
     public static GroupLoanIndividualMonitoringAccount getInstance(String accountNumber, Group group, BigDecimal principalAmount,
-            Long childAccountsCount, Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
+                                                                   Long childAccountsCount, Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
         return new GroupLoanIndividualMonitoringAccount(accountNumber, group, principalAmount, childAccountsCount, isAcceptingChild,
                 loanStatus, applicationId);
     }

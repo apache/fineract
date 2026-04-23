@@ -31,25 +31,25 @@
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="min_age_days" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="max_age_days" type="BIGINT">
-                <constraints nullable="true" />
+                <constraints nullable="true"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="m_delinquency_bucket">
@@ -60,19 +60,19 @@
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="m_delinquency_bucket_mappings">
@@ -80,25 +80,25 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="delinquency_range_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="delinquency_bucket_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="m_loan_delinquency_tag_history">
@@ -106,29 +106,29 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="delinquency_range_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="loan_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="addedon_date" type="DATE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column defaultValueComputed="NULL" name="liftedon_date" type="DATE" />
+            <column defaultValueComputed="NULL" name="liftedon_date" type="DATE"/>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="DATETIME">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
@@ -141,25 +141,25 @@
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="min_age_days" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="max_age_days" type="BIGINT">
-                <constraints nullable="true" />
+                <constraints nullable="true"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="m_delinquency_bucket">
@@ -170,19 +170,19 @@
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="m_delinquency_bucket_mappings">
@@ -190,25 +190,25 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="delinquency_range_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="delinquency_bucket_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="m_loan_delinquency_tag_history">
@@ -216,29 +216,29 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="delinquency_range_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="loan_id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="addedon_date" type="DATE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <column defaultValueComputed="NULL" name="liftedon_date" type="DATE" />
+            <column defaultValueComputed="NULL" name="liftedon_date" type="DATE"/>
             <column name="created_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="version" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_modified_by" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.campaigns.jobs.executereportmailingjo
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -121,8 +123,8 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
     }
 
     private void generateReportOutputStream(final ReportMailingJob reportMailingJob,
-            final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final MultivaluedMap<String, String> reportParams,
-            final String reportName, final StringBuilder errorLog) {
+                                            final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final MultivaluedMap<String, String> reportParams,
+                                            final String reportName, final StringBuilder errorLog) {
         try {
             final String reportType = readReportingService.getReportType(reportName, false);
             final ReportingProcessService reportingProcessService = reportingProcessServiceProvider.findReportingProcessService(reportType);
@@ -160,7 +162,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
     }
 
     private void updateReportMailingJobAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
-            final LocalDateTime jobStartDateTime) {
+                                                         final LocalDateTime jobStartDateTime) {
         final String recurrence = reportMailingJob.getRecurrence();
         final LocalDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
         ReportMailingJobPreviousRunStatus reportMailingJobPreviousRunStatus = ReportMailingJobPreviousRunStatus.SUCCESS;
@@ -193,7 +195,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
     }
 
     private void sendReportFileToEmailRecipients(final ReportMailingJob reportMailingJob, final String fileName,
-            final ByteArrayOutputStream byteArrayOutputStream, final StringBuilder errorLog) {
+                                                 final ByteArrayOutputStream byteArrayOutputStream, final StringBuilder errorLog) {
         final Set<String> emailRecipients = this.reportMailingJobValidator.validateEmailRecipients(reportMailingJob.getEmailRecipients());
 
         try {
@@ -234,7 +236,7 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
     }
 
     private void createReportMailingJobRunHistroryAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
-            final LocalDateTime jobStartDateTime, final String jobRunStatus) {
+                                                                    final LocalDateTime jobStartDateTime, final String jobRunStatus) {
         final LocalDateTime jobEndDateTime = DateUtils.getLocalDateTimeOfTenant();
         final String errorLogToString = (errorLog != null) ? errorLog.toString() : null;
         final ReportMailingJobRunHistory reportMailingJobRunHistory = ReportMailingJobRunHistory.newInstance(reportMailingJob,

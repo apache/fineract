@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.junit.jupiter.api.Assertions;
@@ -223,7 +224,7 @@ class AdvancedPaymentAllocationsValidatorTest {
     }
 
     private void assertPlatformException(String expectedMessage, String expectedCode,
-            PlatformApiDataValidationException platformApiDataValidationException) {
+                                         PlatformApiDataValidationException platformApiDataValidationException) {
         Assertions.assertEquals(expectedMessage, platformApiDataValidationException.getErrors().get(0).getDefaultUserMessage());
         Assertions.assertEquals(expectedCode, platformApiDataValidationException.getErrors().get(0).getUserMessageGlobalisationCode());
     }

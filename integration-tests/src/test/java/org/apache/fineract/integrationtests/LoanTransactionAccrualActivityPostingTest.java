@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,11 +28,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.ChargeRequest;
@@ -704,10 +706,10 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     // verify that the Accrual Activity transaction is reverse replayed
     // verify that the Accrual Activity holds the correct portions
     @ParameterizedTest
-    @CsvSource({ "29 January 2023,30 January 2023,31 January 2023", "31 January 2023,30 January 2023,29 January 2023",
-            "31 January 2023,31 January 2023,31 January 2023", "01 February 2023,01 February 2023,01 February 2023" })
+    @CsvSource({"29 January 2023,30 January 2023,31 January 2023", "31 January 2023,30 January 2023,29 January 2023",
+            "31 January 2023,31 January 2023,31 January 2023", "01 February 2023,01 February 2023,01 February 2023"})
     public void testAccrualActivityPostingReverseReplayAdvancedPaymentAllocation(final String chargeDueDate1st,
-            final String chargeDueDate2st, final String chargeDueDate3st) {
+                                                                                 final String chargeDueDate2st, final String chargeDueDate3st) {
         final String disbursementDay = "01 January 2023";
         final String repaymentPeriod1CloseDate = "02 February 2023";
         final String repaymentPeriod1OneDayAfterCloseDate = "03 February 2023";
@@ -781,10 +783,10 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     // verify that the Accrual Activity transaction is reverse replayed
     // verify that the Accrual Activity holds the correct portions
     @ParameterizedTest
-    @CsvSource({ "29 January 2023,30 January 2023,31 January 2023", "31 January 2023,30 January 2023,29 January 2023",
-            "31 January 2023,31 January 2023,31 January 2023", "01 February 2023,01 February 2023,01 February 2023" })
+    @CsvSource({"29 January 2023,30 January 2023,31 January 2023", "31 January 2023,30 January 2023,29 January 2023",
+            "31 January 2023,31 January 2023,31 January 2023", "01 February 2023,01 February 2023,01 February 2023"})
     public void testAccrualActivityPostingReverseReplayAdvancedPaymentAllocationBasicFlow(final String chargeDueDate1st,
-            final String chargeDueDate2st, final String chargeDueDate3st) {
+                                                                                          final String chargeDueDate2st, final String chargeDueDate3st) {
         final String disbursementDay = "01 January 2023";
         final String repaymentPeriod1CloseDate = "02 February 2023";
         final String repaymentPeriod1OneDayAfterCloseDate = "03 February 2023";
@@ -1618,7 +1620,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private static Long applyForLoanApplication(final Long clientID, final Long loanProductID, BigDecimal principal,
-            String applicationDisbursementDate) {
+                                                String applicationDisbursementDate) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .locale("en_GB").dateFormat("dd MMMM yyyy").expectedDisbursementDate(applicationDisbursementDate)
                 .submittedOnDate(applicationDisbursementDate).interestCalculationPeriodType(0).repaymentFrequencyType(0).repaymentEvery(30)
@@ -1631,7 +1633,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private static Long applyForLoanApplicationWithInterest(final Long clientID, final Long loanProductID, BigDecimal principal,
-            String applicationDisbursementDate) {
+                                                            String applicationDisbursementDate) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
                 .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(1)
@@ -1645,7 +1647,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private static Long applyForLoanApplicationWithInterest(final Long clientID, final Long loanProductID, BigDecimal principal,
-            String applicationDisbursementDate, String applicationDisbursementDate2) {
+                                                            String applicationDisbursementDate, String applicationDisbursementDate2) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
                 .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(0)
@@ -1724,7 +1726,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private static Long applyForLoanApplicationAdvancedPaymentAllocation(final Long clientID, final Long loanProductID,
-            BigDecimal principal, String applicationDisbursementDate, BigDecimal interestRatePerPeriod) {
+                                                                         BigDecimal principal, String applicationDisbursementDate, BigDecimal interestRatePerPeriod) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
                 .repaymentEvery(1).principal(principal).amortizationType(1).interestType(0).interestRatePerPeriod(interestRatePerPeriod)
@@ -1739,8 +1741,8 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     }
 
     private static Long applyForLoanApplicationAdvancedPaymentAllocation(final Long clientID, final Long loanProductID,
-            BigDecimal principal, String applicationDisbursementDate, String applicationDisbursementDate2,
-            BigDecimal interestRatePerPeriod) {
+                                                                         BigDecimal principal, String applicationDisbursementDate, String applicationDisbursementDate2,
+                                                                         BigDecimal interestRatePerPeriod) {
         final PostLoansRequest loanRequest = new PostLoansRequest() //
                 .loanTermFrequency(4).locale("en_GB").loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
                 .repaymentEvery(1).principal(principal).amortizationType(1).interestType(0).interestRatePerPeriod(interestRatePerPeriod)

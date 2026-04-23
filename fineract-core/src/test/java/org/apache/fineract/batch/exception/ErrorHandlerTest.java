@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,9 +22,11 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exceptionmapper.DefaultExceptionMapper;
 import org.apache.fineract.infrastructure.core.exceptionmapper.FineractExceptionMapper;
@@ -63,9 +65,9 @@ class ErrorHandlerTest {
         // given
         NullPointerException npe = new NullPointerException("Div by zero");
         Mockito.when(applicationContext.getBeanNamesForType(forClassWithGenerics(ExceptionMapper.class, NullPointerException.class)))
-                .thenReturn(new String[] { "exceptionMapper1", "exceptionMapper2", "exceptionMapper3" });
+                .thenReturn(new String[]{"exceptionMapper1", "exceptionMapper2", "exceptionMapper3"});
         Mockito.when(applicationContext.getBeanNamesForType(FineractExceptionMapper.class))
-                .thenReturn(new String[] { "exceptionMapper2", "exceptionMapper4" });
+                .thenReturn(new String[]{"exceptionMapper2", "exceptionMapper4"});
         Mockito.when(applicationContext.getBean("exceptionMapper2")).thenReturn(exceptionMapper);
         Mockito.when(exceptionMapper.toResponse(npe)).thenReturn(response);
         Mockito.when(response.getStatus()).thenReturn(406);
@@ -88,11 +90,11 @@ class ErrorHandlerTest {
         // given
         InputMismatchException ime = new InputMismatchException("Input Mismatch");
         Mockito.when(applicationContext.getBeanNamesForType(forClassWithGenerics(ExceptionMapper.class, InputMismatchException.class)))
-                .thenReturn(new String[] {}); // no direct handler for InputMismatchException
+                .thenReturn(new String[]{}); // no direct handler for InputMismatchException
         Mockito.when(applicationContext.getBeanNamesForType(forClassWithGenerics(ExceptionMapper.class, NoSuchElementException.class)))
-                .thenReturn(new String[] { "inputMismatchMapper" });
+                .thenReturn(new String[]{"inputMismatchMapper"});
         Mockito.when(applicationContext.getBeanNamesForType(FineractExceptionMapper.class))
-                .thenReturn(new String[] { "inputMismatchMapper", "someOtherMapper", "yetAnotherMapper" });
+                .thenReturn(new String[]{"inputMismatchMapper", "someOtherMapper", "yetAnotherMapper"});
         Mockito.when(applicationContext.getBean("inputMismatchMapper")).thenReturn(inputMismatchMapper);
         Mockito.when(inputMismatchMapper.toResponse(ime)).thenReturn(response);
         Mockito.when(response.getStatus()).thenReturn(406);
@@ -116,9 +118,9 @@ class ErrorHandlerTest {
         // given
         NullPointerException npe = new NullPointerException("Div by zero");
         Mockito.when(applicationContext.getBeanNamesForType(forClassWithGenerics(ExceptionMapper.class, NullPointerException.class)))
-                .thenReturn(new String[] {});
+                .thenReturn(new String[]{});
         Mockito.when(applicationContext.getBeanNamesForType(FineractExceptionMapper.class))
-                .thenReturn(new String[] { "exceptionMapper2", "exceptionMapper4" });
+                .thenReturn(new String[]{"exceptionMapper2", "exceptionMapper4"});
         Mockito.when(defaultExceptionMapper.toResponse(npe)).thenReturn(response);
         Mockito.when(response.getStatus()).thenReturn(406);
         Mockito.when(response.getEntity()).thenReturn(Map.of("Exception", "message body"));

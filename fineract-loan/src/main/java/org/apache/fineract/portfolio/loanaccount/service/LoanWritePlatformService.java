@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -41,16 +42,16 @@ public interface LoanWritePlatformService {
     CommandProcessingResult disburseLoan(Long loanId, JsonCommand command, Boolean isAccountTransfer, Boolean isWithoutAutoPayment);
 
     Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
-            Boolean isAccountTransfer);
+                                          Boolean isAccountTransfer);
 
     CommandProcessingResult undoLoanDisbursal(Long loanId, JsonCommand command);
 
     CommandProcessingResult makeLoanRepayment(LoanTransactionType repaymentTransactionType, Long loanId, JsonCommand command,
-            boolean isRecoveryRepayment);
+                                              boolean isRecoveryRepayment);
 
     @Transactional
     CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType repaymentTransactionType, Long loanId,
-            JsonCommand command, boolean isRecoveryRepayment, String chargeRefundChargeType);
+                                                                        JsonCommand command, boolean isRecoveryRepayment, String chargeRefundChargeType);
 
     @Transactional
     CommandProcessingResult makeInterestPaymentWaiver(JsonCommand command);
@@ -76,7 +77,7 @@ public interface LoanWritePlatformService {
     CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
 
     void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances,
-            Boolean reschedulebasedOnMeetingDates, LocalDate presentMeetingDate, LocalDate newMeetingDate);
+                                 Boolean reschedulebasedOnMeetingDates, LocalDate presentMeetingDate, LocalDate newMeetingDate);
 
     LoanTransaction initiateLoanTransfer(Loan loan, LocalDate transferDate);
 

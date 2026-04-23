@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.gson.JsonElement;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.sms.data.CampaignPreviewData;
@@ -206,10 +208,12 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(SmsCampaign smsCampaign) {
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(), new TypeReference<>() {});
+            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(), new TypeReference<>() {
+            });
 
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<>() {});
+                    new TypeReference<>() {
+                    });
 
             List<HashMap<String, Object>> runReportObject = getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);
@@ -248,11 +252,13 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             Set<Client> clientSet = new HashSet<>();
 
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             campaignParams.put("loanId", loan.getId().toString());
 
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             queryParamForRunReport.put("loanId", loan.getId().toString());
 
             if (loan.isGroupLoan()) {
@@ -303,10 +309,12 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     public void insertDirectCampaignIntoSmsOutboundTable(final Client client, final SmsCampaign smsCampaign) {
         try {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             campaignParams.put("clientId", client.getId().toString());
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
 
             campaignParams.put("clientId", client.getId().toString());
             queryParamForRunReport.put("clientId", client.getId().toString());
@@ -345,10 +353,12 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     public void insertDirectCampaignIntoSmsOutboundTable(final SavingsAccount savingsAccount, final SmsCampaign smsCampaign) {
         try {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             campaignParams.put("savingsId", savingsAccount.getId().toString());
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                    new TypeReference<HashMap<String, String>>() {});
+                    new TypeReference<HashMap<String, String>>() {
+                    });
             queryParamForRunReport.put("savingsId", savingsAccount.getId().toString());
 
             Client client = savingsAccount.getClient();
@@ -473,15 +483,16 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 
         try {
             final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
-            resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
+            resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {
+            });
         } catch (JsonParseException e) {
             log.warn("Conversion of report query results to JSON failed", e);
             return resultList;
         }
         // loop changes array date to string date
-        for (Iterator<HashMap<String, Object>> iter = resultList.iterator(); iter.hasNext();) {
+        for (Iterator<HashMap<String, Object>> iter = resultList.iterator(); iter.hasNext(); ) {
             HashMap<String, Object> entry = iter.next();
-            for (Iterator<Map.Entry<String, Object>> it = entry.entrySet().iterator(); it.hasNext();) {
+            for (Iterator<Map.Entry<String, Object>> it = entry.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Object> map = it.next();
                 String key = map.getKey();
                 Object ob = map.getValue();
@@ -506,8 +517,10 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final String textMessageTemplate = this.fromJsonHelper.extractStringNamed("message", query.parsedJson());
 
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
+            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams, new TypeReference<>() {
+            });
+            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams, new TypeReference<>() {
+            });
 
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);

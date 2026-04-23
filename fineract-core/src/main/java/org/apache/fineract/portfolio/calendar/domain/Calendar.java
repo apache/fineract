@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
@@ -35,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -99,8 +101,8 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public Calendar(final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
-            final Integer duration, final Integer typeId, final boolean repeating, final String recurrence, final Integer remindById,
-            final Integer firstReminder, final Integer secondReminder, final LocalTime meetingtime) {
+                    final Integer duration, final Integer typeId, final boolean repeating, final String recurrence, final Integer remindById,
+                    final Integer firstReminder, final Integer secondReminder, final LocalTime meetingtime) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
@@ -130,14 +132,14 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
-            final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,
-            final Integer repeatsOnNthDayOfMonth) {
+                                                   final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,
+                                                   final Integer repeatsOnNthDayOfMonth) {
         final String recurrence = constructRecurrence(frequencyType, interval, repeatsOnDay, repeatsOnNthDayOfMonth);
         return createRepeatingCalendar(title, startDate, typeId, recurrence);
     }
 
     public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
-            final String recurrence) {
+                                                   final String recurrence) {
         final String description = null;
         final String location = null;
         final LocalDate endDate = null;
@@ -376,7 +378,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @SuppressWarnings("null")
     public Map<String, Object> updateRepeatingCalendar(final LocalDate calendarStartDate, final CalendarFrequencyType frequencyType,
-            final Integer interval, final Integer repeatsOnDay, final Integer repeatsOnNthDay) {
+                                                       final Integer interval, final Integer repeatsOnDay, final Integer repeatsOnNthDay) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (calendarStartDate != null && this.startDate != null && !calendarStartDate.equals(this.getStartDateLocalDate())) {
@@ -514,7 +516,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     }
 
     private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,
-            final Integer repeatsOnNthDayOfMonth) {
+                                              final Integer repeatsOnNthDayOfMonth) {
         final StringBuilder recurrenceBuilder = new StringBuilder(200);
 
         recurrenceBuilder.append("FREQ=");

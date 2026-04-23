@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.email.ScheduledEmailConstants;
 import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailAttachmentFileFormat;
@@ -73,7 +75,8 @@ public final class EmailDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeToken = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ScheduledEmailConstants.CREATE_REQUEST_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -130,9 +133,7 @@ public final class EmailDataValidator {
 
                 // try to parse the date time string
                 LocalDateTime.parse(startDateTime, dateTimeFormatter);
-            }
-
-            catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat)
                         .failWithCode("invalid.date.format");
             }
@@ -156,7 +157,8 @@ public final class EmailDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeToken = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ScheduledEmailConstants.UPDATE_REQUEST_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -228,9 +230,7 @@ public final class EmailDataValidator {
 
                     // try to parse the date time string
                     LocalDateTime.parse(startDateTime, dateTimeFormatter);
-                }
-
-                catch (IllegalArgumentException ex) {
+                } catch (IllegalArgumentException ex) {
                     dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat)
                             .failWithCode("invalid.date.format");
                 }
@@ -303,10 +303,9 @@ public final class EmailDataValidator {
         if (!StringUtils.isEmpty(stretchyReportParamMap)) {
             try {
                 stretchyReportParamHashMap = new ObjectMapper().readValue(stretchyReportParamMap,
-                        new TypeReference<HashMap<String, String>>() {});
-            }
-
-            catch (Exception e) {
+                        new TypeReference<HashMap<String, String>>() {
+                        });
+            } catch (Exception e) {
                 stretchyReportParamHashMap = null;
             }
         }

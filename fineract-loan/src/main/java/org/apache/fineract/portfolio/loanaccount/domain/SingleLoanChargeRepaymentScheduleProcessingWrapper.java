@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Predicate;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -36,7 +38,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
 
     public void reprocess(final MonetaryCurrency currency, final LocalDate disbursementDate,
-            final List<LoanRepaymentScheduleInstallment> installments, LoanCharge loanCharge) {
+                          final List<LoanRepaymentScheduleInstallment> installments, LoanCharge loanCharge) {
         Money zero = Money.zero(currency);
         Money totalInterest = zero;
         Money totalPrincipal = zero;
@@ -102,8 +104,8 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
 
     @NotNull
     private Money calcChargeDue(final LocalDate periodStart, final LocalDate periodEnd, final LoanCharge loanCharge,
-            final MonetaryCurrency currency, LoanRepaymentScheduleInstallment period, final Money totalPrincipal, final Money totalInterest,
-            boolean isInstallmentChargeApplicable, boolean isFirstPeriod, Predicate<LoanCharge> predicate) {
+                                final MonetaryCurrency currency, LoanRepaymentScheduleInstallment period, final Money totalPrincipal, final Money totalInterest,
+                                boolean isInstallmentChargeApplicable, boolean isFirstPeriod, Predicate<LoanCharge> predicate) {
         Money zero = Money.zero(currency);
         if (!predicate.test(loanCharge)) {
             return zero;
@@ -142,8 +144,8 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
     }
 
     private Money calcChargeWaived(final LocalDate periodStart, final LocalDate periodEnd, final LoanCharge loanCharge,
-            final MonetaryCurrency currency, boolean isInstallmentChargeApplicable, boolean isFirstPeriod,
-            Predicate<LoanCharge> predicate) {
+                                   final MonetaryCurrency currency, boolean isInstallmentChargeApplicable, boolean isFirstPeriod,
+                                   Predicate<LoanCharge> predicate) {
         Money zero = Money.zero(currency);
         if (!predicate.test(loanCharge)) {
             return zero;
@@ -159,8 +161,8 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
     }
 
     private Money calcChargeWrittenOff(final LocalDate periodStart, final LocalDate periodEnd, final LoanCharge loanCharge,
-            final MonetaryCurrency currency, boolean isInstallmentChargeApplicable, boolean isFirstPeriod,
-            Predicate<LoanCharge> predicate) {
+                                       final MonetaryCurrency currency, boolean isInstallmentChargeApplicable, boolean isFirstPeriod,
+                                       Predicate<LoanCharge> predicate) {
         Money zero = Money.zero(currency);
         if (!predicate.test(loanCharge)) {
             return zero;
@@ -185,7 +187,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
 
     @NotNull
     private BigDecimal getBaseAmount(MonetaryCurrency currency, LoanRepaymentScheduleInstallment period, LoanCharge loanCharge,
-            BigDecimal amount) {
+                                     BigDecimal amount) {
         BigDecimal baseAmount = getBaseAmount(loanCharge, period.getPrincipal(currency).getAmount(),
                 period.getInterestCharged(currency).getAmount());
         return MathUtil.add(amount, baseAmount);
@@ -207,7 +209,7 @@ public class SingleLoanChargeRepaymentScheduleProcessingWrapper {
      * @return newly added period if there is any
      */
     public LoanRepaymentScheduleInstallment addChargeOnlyRepaymentInstallmentIfRequired(@NotNull LoanCharge loanCharge,
-            List<LoanRepaymentScheduleInstallment> installments) {
+                                                                                        List<LoanRepaymentScheduleInstallment> installments) {
         if (installments == null) {
             return null;
         }

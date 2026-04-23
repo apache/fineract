@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.domain.CollateralManagementDomain;
@@ -41,7 +42,7 @@ public class LoanCollateralManagementReadPlatformServiceImpl implements LoanColl
     private LoanRepository loanRepository;
 
     public LoanCollateralManagementReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final LoanCollateralManagementRepository loanCollateralManagementRepository, final LoanRepository loanRepository) {
+                                                           final LoanCollateralManagementRepository loanCollateralManagementRepository, final LoanRepository loanRepository) {
         this.context = context;
         this.loanCollateralManagementRepository = loanCollateralManagementRepository;
         this.loanRepository = loanRepository;

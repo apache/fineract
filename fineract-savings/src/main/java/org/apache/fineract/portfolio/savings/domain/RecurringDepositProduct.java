@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,12 +25,14 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -59,14 +61,14 @@ public class RecurringDepositProduct extends FixedDepositProduct {
     }
 
     public static RecurringDepositProduct createNew(final String name, final String shortName, final String description,
-            final MonetaryCurrency currency, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
-            final SavingsPeriodFrequencyType lockinPeriodFrequencyType, final AccountingRuleType accountingRuleType,
-            final Set<Charge> charges, final DepositProductTermAndPreClosure productTermAndPreClosure,
-            final DepositProductRecurringDetail recurringDetail, final Set<InterestRateChart> charts,
-            BigDecimal minBalanceForInterestCalculation, final TaxGroup taxGroup, final boolean withHoldTax) {
+                                                    final MonetaryCurrency currency, final BigDecimal interestRate,
+                                                    final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                                    final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                                    final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
+                                                    final SavingsPeriodFrequencyType lockinPeriodFrequencyType, final AccountingRuleType accountingRuleType,
+                                                    final Set<Charge> charges, final DepositProductTermAndPreClosure productTermAndPreClosure,
+                                                    final DepositProductRecurringDetail recurringDetail, final Set<InterestRateChart> charts,
+                                                    BigDecimal minBalanceForInterestCalculation, final TaxGroup taxGroup, final boolean withHoldTax) {
 
         final BigDecimal minRequiredOpeningBalance = null;
         final boolean withdrawalFeeApplicableForTransfer = false;
@@ -81,14 +83,14 @@ public class RecurringDepositProduct extends FixedDepositProduct {
     }
 
     protected RecurringDepositProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
-            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
-            final DepositProductTermAndPreClosure productTermAndPreClosure, final DepositProductRecurringDetail recurringDetail,
-            final Set<InterestRateChart> charts, final boolean allowOverdraft, final BigDecimal overdraftLimit,
-            final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroup taxGroup) {
+                                      final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                      final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                      final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+                                      final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+                                      final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
+                                      final DepositProductTermAndPreClosure productTermAndPreClosure, final DepositProductRecurringDetail recurringDetail,
+                                      final Set<InterestRateChart> charts, final boolean allowOverdraft, final BigDecimal overdraftLimit,
+                                      final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroup taxGroup) {
 
         super(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,

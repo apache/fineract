@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -70,7 +72,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unchecked" })
+@SuppressWarnings({"unchecked"})
 public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrationTest {
 
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
@@ -534,7 +536,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            final Account... accounts) {
+                                             final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
@@ -547,8 +549,8 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final Long principal,
-            final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
-            final String expectedDisbursementDate, final String submittedOnDate) {
+                                                             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
+                                                             final String expectedDisbursementDate, final String submittedOnDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
                 .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
@@ -561,7 +563,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
     }
 
     private static void validateLoanTransaction(GetLoansLoanIdResponse loanDetails, int index, double transactionAmount,
-            double principalPortion, double overPaidPortion, double loanBalance) {
+                                                double principalPortion, double overPaidPortion, double loanBalance) {
         assertEquals(transactionAmount, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getAmount()));
         assertEquals(principalPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getPrincipalPortion()));
         assertEquals(overPaidPortion, Utils.getDoubleValue(loanDetails.getTransactions().get(index).getOverpaymentPortion()));
@@ -569,7 +571,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
     }
 
     private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, int index, double principalDue, double principalPaid,
-            double principalOutstanding, double paidInAdvance, double paidLate) {
+                                                double principalOutstanding, double paidInAdvance, double paidLate) {
         assertEquals(principalDue, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalDue()));
         assertEquals(principalPaid, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalPaid()));
         assertEquals(principalOutstanding,
@@ -581,8 +583,8 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends BaseLoanIntegrat
     }
 
     private static void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, int index, double principalDue, double principalPaid,
-            double principalOutstanding, double penaltyDue, double penaltyPaid, double penaltyOutstanding, double paidInAdvance,
-            double paidLate) {
+                                                double principalOutstanding, double penaltyDue, double penaltyPaid, double penaltyOutstanding, double paidInAdvance,
+                                                double paidLate) {
         assertEquals(principalDue, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalDue()));
         assertEquals(principalPaid, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(index).getPrincipalPaid()));
         assertEquals(principalOutstanding,

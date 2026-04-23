@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common;
 
 import java.util.HashMap;
+
 import org.apache.fineract.client.services.CreditBureauIntegrationApi;
 import org.apache.fineract.client.util.Calls;
 import org.slf4j.Logger;
@@ -28,7 +29,8 @@ public final class CreditBureauIntegrationHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauIntegrationHelper.class);
 
-    private CreditBureauIntegrationHelper() {}
+    private CreditBureauIntegrationHelper() {
+    }
 
     private static CreditBureauIntegrationApi api() {
         return FineractClientHelper.getFineractClient().creditBureauIntegration;

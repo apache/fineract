@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import jakarta.persistence.LockModeType;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
@@ -60,7 +62,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("select sa from SavingsAccount sa where sa.id = :accountId and sa.depositType = :depositAccountTypeId")
     SavingsAccount findByIdAndDepositAccountType(@Param("accountId") Long accountId,
-            @Param("depositAccountTypeId") Integer depositAccountTypeId);
+                                                 @Param("depositAccountTypeId") Integer depositAccountTypeId);
 
     @Query("select sa from SavingsAccount sa where sa.accountNumber = :accountNumber and sa.status in (100, 200, 300, 303, 304) ")
     SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber);
@@ -95,7 +97,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             ORDER BY savings.id
             """)
     List<SavingsAccrualData> findAccrualData(@Param("tillDate") LocalDate tillDate, @Param("savingsId") Long savingsId,
-            @Param("status") Integer status, @Param("accountingRule") Integer accountingRule);
+                                             @Param("status") Integer status, @Param("accountingRule") Integer accountingRule);
 
     @Query("SELECT sa.id FROM SavingsAccount sa WHERE sa.status = :status")
     List<Long> findSavingsAccountIdsByStatusId(Integer status);
@@ -108,8 +110,8 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             AND (:cobBusinessDate = sa.lastClosedBusinessDate OR sa.lastClosedBusinessDate IS NULL)
             """)
     List<Long> findAllSavingsByLastClosedBusinessDateAndMinAndMaxSavingsIdAndStatuses(@Param("minSavingsId") Long minSavingsId,
-            @Param("maxSavingsId") Long maxSavingsId, @Param("cobBusinessDate") LocalDate cobBusinessDate,
-            @Param("savingsStatuses") Collection<Integer> savingsStatuses);
+                                                                                      @Param("maxSavingsId") Long maxSavingsId, @Param("cobBusinessDate") LocalDate cobBusinessDate,
+                                                                                      @Param("savingsStatuses") Collection<Integer> savingsStatuses);
 
     @Query("""
             SELECT sa.id FROM SavingsAccount sa
@@ -118,8 +120,8 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             AND sa.lastClosedBusinessDate = :cobBusinessDate
             """)
     List<Long> findAllSavingsByLastClosedBusinessDateNotNullAndMinAndMaxSavingsIdAndStatuses(@Param("minSavingsId") Long minSavingsId,
-            @Param("maxSavingsId") Long maxSavingsId, @Param("cobBusinessDate") LocalDate cobBusinessDate,
-            @Param("savingsStatuses") Collection<Integer> savingsStatuses);
+                                                                                             @Param("maxSavingsId") Long maxSavingsId, @Param("cobBusinessDate") LocalDate cobBusinessDate,
+                                                                                             @Param("savingsStatuses") Collection<Integer> savingsStatuses);
 
     @Query("""
             SELECT sa.id, sa.lastClosedBusinessDate
@@ -128,7 +130,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             AND (sa.lastClosedBusinessDate < :businessDate OR sa.lastClosedBusinessDate IS NULL)
             """)
     List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsBehindDateOrNull(@Param("businessDate") LocalDate businessDate,
-            @Param("savingsIds") List<Long> savingsIds);
+                                                                           @Param("savingsIds") List<Long> savingsIds);
 
     @Query("""
             SELECT sa.id, sa.lastClosedBusinessDate
@@ -137,7 +139,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
             AND sa.lastClosedBusinessDate < :businessDate
             """)
     List<COBIdAndLastClosedBusinessDate> findAllSavingsIdsBehindDate(@Param("businessDate") LocalDate businessDate,
-            @Param("savingsIds") List<Long> savingsIds);
+                                                                     @Param("savingsIds") List<Long> savingsIds);
 
     @Query("""
             SELECT sa.id, sa.lastClosedBusinessDate

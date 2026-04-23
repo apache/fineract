@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+
 import org.apache.fineract.infrastructure.core.service.Page;
 
 public final class CashierTransactionsWithSummaryData implements Serializable {
@@ -38,8 +39,8 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     private final Page<CashierTransactionData> cashierTransactions;
 
     private CashierTransactionsWithSummaryData(final Page<CashierTransactionData> cashierTransactions, final BigDecimal sumCashAllocation,
-            final BigDecimal sumInwardCash, final BigDecimal sumOutwardCash, final BigDecimal sumCashSettlement, final BigDecimal netCash,
-            final String officeName, final Long tellerId, final String tellerName, final Long cashierId, final String cashierName) {
+                                               final BigDecimal sumInwardCash, final BigDecimal sumOutwardCash, final BigDecimal sumCashSettlement, final BigDecimal netCash,
+                                               final String officeName, final Long tellerId, final String tellerName, final Long cashierId, final String cashierName) {
         this.cashierTransactions = cashierTransactions;
         this.sumCashAllocation = sumCashAllocation;
         this.sumInwardCash = sumInwardCash;
@@ -54,9 +55,9 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     }
 
     public static CashierTransactionsWithSummaryData instance(final Page<CashierTransactionData> cashierTransactions,
-            final BigDecimal sumCashAllocation, final BigDecimal sumInwardCash, final BigDecimal sumOutwardCash,
-            final BigDecimal sumCashSettlement, final String officeName, final Long tellerId, final String tellerName, final Long cashierId,
-            final String cashierName) {
+                                                              final BigDecimal sumCashAllocation, final BigDecimal sumInwardCash, final BigDecimal sumOutwardCash,
+                                                              final BigDecimal sumCashSettlement, final String officeName, final Long tellerId, final String tellerName, final Long cashierId,
+                                                              final String cashierName) {
 
         final BigDecimal netCash = sumCashAllocation.add(sumInwardCash).subtract(sumOutwardCash).subtract(sumCashSettlement);
         return new CashierTransactionsWithSummaryData(cashierTransactions, sumCashAllocation, sumInwardCash, sumOutwardCash,

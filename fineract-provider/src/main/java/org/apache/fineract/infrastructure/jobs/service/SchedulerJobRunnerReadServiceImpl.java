@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.IdTypeResolver;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -55,8 +56,8 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     @Autowired
     public SchedulerJobRunnerReadServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, ScheduledJobDetailRepository jobDetailRepository,
-            PaginationHelper paginationHelper) {
+                                             DatabaseSpecificSQLGenerator sqlGenerator, ScheduledJobDetailRepository jobDetailRepository,
+                                             PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
         this.sqlGenerator = sqlGenerator;
@@ -85,7 +86,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     @Override
     public Page<JobDetailHistoryData> retrieveJobHistory(@NonNull IdTypeResolver.IdType idType, String identifier,
-            SearchParameters searchParameters) {
+                                                         SearchParameters searchParameters) {
         if (!isJobExist(idType, identifier)) {
             throw new JobNotFoundException(idType, identifier);
         }
@@ -123,7 +124,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
             }
         }
 
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), new Object[] { idParam }, jobHistoryMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), new Object[]{idParam}, jobHistoryMapper);
     }
 
     @Override
@@ -132,7 +133,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         return switch (idType) {
             case ID -> Long.valueOf(identifier);
             case SHORT_NAME ->
-                jobDetailRepository.findIdByShortName(identifier).orElseThrow(() -> new JobNotFoundException(idType, identifier));
+                    jobDetailRepository.findIdByShortName(identifier).orElseThrow(() -> new JobNotFoundException(idType, identifier));
             default -> throw new JobNotFoundException(idType, identifier);
         };
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
@@ -212,11 +214,11 @@ public final class LoanProductDataValidator {
             LoanProductConstants.ALLOW_FULL_TERM_FOR_TRANCHE_PARAM_NAME //
     ));
 
-    private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
+    private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = {LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME};
     public static final String LOANPRODUCT = "loanproduct";
     public static final String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     public static final String OPENING_SQUARE_BRACKET = "[";
@@ -235,7 +237,8 @@ public final class LoanProductDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -864,7 +867,7 @@ public final class LoanProductDataValidator {
 
             if (LoanScheduleProcessingType.VERTICAL.equals(LoanScheduleProcessingType.valueOf(loanScheduleProcessingType))
                     && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                            .equals(transactionProcessingStrategyCode)) {
+                    .equals(transactionProcessingStrategyCode)) {
                 baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
                         "supported.only.for.progressive.loan.schedule.handling",
                         "Vertical repayment schedule processing is only available with `Advanced payment allocation` strategy");
@@ -913,7 +916,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateAutoRepaymentForDownPayment(Boolean enableDownPayment, DataValidatorBuilder baseDataValidator,
-            JsonElement element) {
+                                                     JsonElement element) {
         if (enableDownPayment) {
             if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, element)) {
                 final Boolean enableAutoRepaymentForDownPayment = this.fromApiJsonHelper
@@ -1028,7 +1031,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateMultiDisburseLoanData(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final LoanProduct loanProduct) {
+                                               final LoanProduct loanProduct) {
         Boolean multiDisburseLoan = false;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, element)) {
             multiDisburseLoan = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME,
@@ -1120,7 +1123,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateInterestRecalculationParams(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-            final LoanProduct loanProduct) {
+                                                     final LoanProduct loanProduct) {
 
         InterestRecalculationCompoundingMethod compoundingMethod = null;
 
@@ -1277,9 +1280,9 @@ public final class LoanProductDataValidator {
                 }
                 if (loanProduct == null
                         || this.fromApiJsonHelper.parameterExists(LoanProductConstants.recalculationCompoundingFrequencyNthDayParamName,
-                                element)
+                        element)
                         || this.fromApiJsonHelper.parameterExists(LoanProductConstants.recalculationCompoundingFrequencyWeekdayParamName,
-                                element)) {
+                        element)) {
                     CalendarUtils.validateNthDayOfMonthFrequency(baseDataValidator,
                             LoanProductConstants.recalculationCompoundingFrequencyNthDayParamName,
                             LoanProductConstants.recalculationCompoundingFrequencyWeekdayParamName, element, this.fromApiJsonHelper);
@@ -1336,7 +1339,8 @@ public final class LoanProductDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -2012,12 +2016,12 @@ public final class LoanProductDataValidator {
 
         if (LoanScheduleProcessingType.HORIZONTAL.name().equals(loanScheduleProcessingType)
                 && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                        .equals(transactionProcessingStrategyCode)) {
+                .equals(transactionProcessingStrategyCode)) {
             advancedPaymentAllocationsValidator.checkGroupingOfAllocationRules(allocationRules);
         }
         if (LoanScheduleProcessingType.VERTICAL.equals(LoanScheduleProcessingType.valueOf(loanScheduleProcessingType))
                 && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                        .equals(transactionProcessingStrategyCode)) {
+                .equals(transactionProcessingStrategyCode)) {
             baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
                     "supported.only.for.progressive.loan.schedule.handling",
                     "Vertical repayment schedule processing is only available with `Advanced payment allocation` strategy");
@@ -2073,7 +2077,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final boolean isPenalty) {
+                                                       final boolean isPenalty) {
         String parameterName;
         if (isPenalty) {
             parameterName = LoanProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
@@ -2120,14 +2124,14 @@ public final class LoanProductDataValidator {
     }
 
     private void validateAdditionalAccountMappings(DataValidatorBuilder baseDataValidator, JsonElement element, String parameterName,
-            LoanProductAccountingParams reasonCodeValueIdParam, String failCode,
-            BiConsumer<List<ApiParameterError>, List<JsonObject>> additionalMappingValidator) {
+                                                   LoanProductAccountingParams reasonCodeValueIdParam, String failCode,
+                                                   BiConsumer<List<ApiParameterError>, List<JsonObject>> additionalMappingValidator) {
         if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
             final JsonArray reasonToExpenseMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
             if (reasonToExpenseMappingArray != null && !reasonToExpenseMappingArray.isEmpty()) {
                 Map<Long, Set<Long>> reasonToAccounts = new HashMap<>();
                 List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings
-                                                                        // for the new method
+                // for the new method
 
                 int i = 0;
                 do {
@@ -2144,7 +2148,7 @@ public final class LoanProductDataValidator {
                                     + LoanProductAccountingParams.EXPENSE_GL_ACCOUNT_ID.getValue())
                             .value(expenseGlAccountIdString).notNull().longGreaterThanZero();
                     baseDataValidator.reset().parameter(
-                            parameterName + OPENING_SQUARE_BRACKET + i + CLOSING_SQUARE_BRACKET + DOT + reasonCodeValueIdParam.getValue())
+                                    parameterName + OPENING_SQUARE_BRACKET + i + CLOSING_SQUARE_BRACKET + DOT + reasonCodeValueIdParam.getValue())
                             .value(reasonCodeValueIdString).notNull().longGreaterThanZero();
 
                     final Long reasonCodeValueId = Long.valueOf(reasonCodeValueIdString);
@@ -2184,7 +2188,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateClassificationToIncomeMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final LoanProductAccountingParams classificationParameter) {
+                                                        final LoanProductAccountingParams classificationParameter) {
         String parameterName = classificationParameter.getValue();
 
         if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
@@ -2192,7 +2196,7 @@ public final class LoanProductDataValidator {
             if (classificationToIncomeMappingArray != null && classificationToIncomeMappingArray.size() > 0) {
                 Map<Long, Set<Long>> classificationToAccounts = new HashMap<>();
                 List<JsonObject> processedMappings = new ArrayList<>(); // Collect processed mappings
-                                                                        // for the new method
+                // for the new method
 
                 int i = 0;
                 do {
@@ -2236,22 +2240,22 @@ public final class LoanProductDataValidator {
                 // Call the new validation method for additional checks
                 final String dataCodeName = classificationParameter
                         .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
-                                ? LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE
-                                : LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE;
+                        ? LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE
+                        : LoanTransactionApiConstants.BUY_DOWN_FEE_CLASSIFICATION_CODE;
                 productToGLAccountMappingHelper.validateClassificationMappingsInDatabase(processedMappings, dataCodeName);
             }
         }
     }
 
     public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-            final LoanProduct loanProduct) {
+                                          final LoanProduct loanProduct) {
         validatePrincipalMinMaxConstraint(element, loanProduct, baseDataValidator);
         validateNumberOfRepaymentsMinMaxConstraint(element, loanProduct, baseDataValidator);
         validateNominalInterestRatePerPeriodMinMaxConstraint(element, loanProduct, baseDataValidator);
     }
 
     public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-            final LoanProduct loanProduct, Integer cycleNumber) {
+                                          final LoanProduct loanProduct, Integer cycleNumber) {
 
         final Map<String, BigDecimal> minmaxValues = loanProduct.fetchBorrowerCycleVariationsForCycleNumber(cycleNumber);
         final String principalParameterName = PRINCIPAL;
@@ -2328,7 +2332,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validatePrincipalMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
-            final DataValidatorBuilder baseDataValidator) {
+                                                   final DataValidatorBuilder baseDataValidator) {
         boolean principalUpdated = false;
         boolean minPrincipalUpdated = false;
         boolean maxPrincipalUpdated = false;
@@ -2385,7 +2389,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateNumberOfRepaymentsMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
-            final DataValidatorBuilder baseDataValidator) {
+                                                            final DataValidatorBuilder baseDataValidator) {
         boolean numberOfRepaymentsUpdated = false;
         boolean minNumberOfRepaymentsUpdated = false;
         boolean maxNumberOfRepaymentsUpdated = false;
@@ -2444,7 +2448,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateNominalInterestRatePerPeriodMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
-            final DataValidatorBuilder baseDataValidator) {
+                                                                      final DataValidatorBuilder baseDataValidator) {
 
         if ((this.fromApiJsonHelper.parameterExists(IS_LINKED_TO_FLOATING_INTEREST_RATES, element)
                 && this.fromApiJsonHelper.extractBooleanNamed(IS_LINKED_TO_FLOATING_INTEREST_RATES, element))
@@ -2552,8 +2556,8 @@ public final class LoanProductDataValidator {
     }
 
     private void validateBorrowerCycleVariations(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-            final String variationParameterName, final String defaultParameterName, final String minParameterName,
-            final String maxParameterName, final String valueUsageConditionParamName, final String cycleNumbersParamName) {
+                                                 final String variationParameterName, final String defaultParameterName, final String minParameterName,
+                                                 final String maxParameterName, final String valueUsageConditionParamName, final String cycleNumbersParamName) {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
         int lastCycleNumber = 0;
@@ -2637,7 +2641,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateGuaranteeParams(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-            final LoanProduct loanProduct) {
+                                         final LoanProduct loanProduct) {
         BigDecimal mandatoryGuarantee = BigDecimal.ZERO;
         BigDecimal minimumGuaranteeFromOwnFunds = BigDecimal.ZERO;
         BigDecimal minimumGuaranteeFromGuarantor = BigDecimal.ZERO;
@@ -2682,7 +2686,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validatePartialPeriodSupport(final Integer interestCalculationPeriodType, final DataValidatorBuilder baseDataValidator,
-            final JsonElement element, final LoanProduct loanProduct) {
+                                              final JsonElement element, final LoanProduct loanProduct) {
         if (interestCalculationPeriodType != null) {
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
                     .fromInt(interestCalculationPeriodType);
@@ -2763,8 +2767,8 @@ public final class LoanProductDataValidator {
     }
 
     public void fixedLengthValidations(final String transactionProcessingStrategyCode, final boolean thereIsInterest,
-            final Integer numberOfRepayments, final Integer repayEvery, final JsonElement element,
-            final DataValidatorBuilder baseDataValidator) {
+                                       final Integer numberOfRepayments, final Integer repayEvery, final JsonElement element,
+                                       final DataValidatorBuilder baseDataValidator) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.FIXED_LENGTH, element)) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
@@ -2798,7 +2802,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateLoanScheduleType(final String transactionProcessingStrategyCode, final DataValidatorBuilder baseDataValidator,
-            final JsonElement element) {
+                                          final JsonElement element) {
         final String loanScheduleType = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.LOAN_SCHEDULE_TYPE, element);
         baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).value(loanScheduleType).ignoreIfNull()
                 .isOneOfEnumValues(LoanScheduleType.class);
@@ -2809,7 +2813,7 @@ public final class LoanProductDataValidator {
 
         if (!LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
                 && AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                        .equals(transactionProcessingStrategyCode)) {
+                .equals(transactionProcessingStrategyCode)) {
             baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_PROCESSING_TYPE).failWithCode(
                     "supported.only.for.progressive.loan.schedule.type",
                     "Progressive repayment schedule processing is only available with `Advanced payment allocation` strategy");
@@ -2817,7 +2821,7 @@ public final class LoanProductDataValidator {
 
         if (LoanScheduleType.PROGRESSIVE.equals(LoanScheduleType.valueOf(loanScheduleType))
                 && !AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-                        .equals(transactionProcessingStrategyCode)) {
+                .equals(transactionProcessingStrategyCode)) {
             baseDataValidator.reset().parameter(LoanProductConstants.LOAN_SCHEDULE_TYPE).failWithCode(
                     "supported.only.with.advanced.payment.allocation.strategy",
                     loanScheduleType + " loan schedule type is not available with " + transactionProcessingStrategyCode + " strategy");
@@ -2825,8 +2829,8 @@ public final class LoanProductDataValidator {
     }
 
     public void validateRepaymentPeriodWithGraceSettings(final Integer numberOfRepayments, final Integer graceOnPrincipalPayment,
-            final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Integer recurringMoratoriumOnPrincipalPeriods,
-            DataValidatorBuilder baseDataValidator) {
+                                                         final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Integer recurringMoratoriumOnPrincipalPeriods,
+                                                         DataValidatorBuilder baseDataValidator) {
         if (numberOfRepayments != null) {
             if (numberOfRepayments <= defaultToZeroIfNull(graceOnPrincipalPayment)) {
                 baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment)
@@ -2861,7 +2865,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateIncomeCapitalization(String transactionProcessingStrategyCode, JsonElement element,
-            DataValidatorBuilder baseDataValidator, Integer accountingRuleType) {
+                                              DataValidatorBuilder baseDataValidator, Integer accountingRuleType) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element)) {
             final String capitalizedIncomeCalculationType = this.fromApiJsonHelper
                     .extractStringNamed(LoanProductConstants.CAPITALIZED_INCOME_CALCULATION_TYPE_PARAM_NAME, element);
@@ -2933,7 +2937,7 @@ public final class LoanProductDataValidator {
     }
 
     private void validateBuyDownFee(String transactionProcessingStrategyCode, JsonElement element, DataValidatorBuilder baseDataValidator,
-            Integer accountingRuleType) {
+                                    Integer accountingRuleType) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, element)) {
             final String buyDownFeeCalculationType = this.fromApiJsonHelper
                     .extractStringNamed(LoanProductConstants.BUY_DOWN_FEE_CALCULATION_TYPE_PARAM_NAME, element);

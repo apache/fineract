@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.sms.data;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -57,10 +58,10 @@ public final class SmsCampaignData {
     private final Collection<EnumOptionData> periodFrequencyOptions;
 
     public static SmsCampaignData instance(final Long id, final String campaignName, final EnumOptionData campaignType,
-            final EnumOptionData triggerType, final Long runReportId, final String reportName, final String paramValue,
-            final EnumOptionData campaignStatus, final String message, final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate,
-            final SmsCampaignTimeLine smsCampaignTimeLine, final ZonedDateTime recurrenceStartDate, final String recurrence,
-            final Long providerId, final boolean isNotification) {
+                                           final EnumOptionData triggerType, final Long runReportId, final String reportName, final String paramValue,
+                                           final EnumOptionData campaignStatus, final String message, final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate,
+                                           final SmsCampaignTimeLine smsCampaignTimeLine, final ZonedDateTime recurrenceStartDate, final String recurrence,
+                                           final Long providerId, final boolean isNotification) {
 
         return SmsCampaignData.builder().id(id).campaignName(campaignName).campaignType(campaignType).triggerType(triggerType)
                 .runReportId(runReportId).reportName(reportName).paramValue(paramValue).campaignStatus(campaignStatus)
@@ -70,10 +71,10 @@ public final class SmsCampaignData {
     }
 
     public static SmsCampaignData template(final Collection<SmsProviderData> smsProviderOptions,
-            final Collection<EnumOptionData> campaignTypeOptions, final Collection<SmsBusinessRulesData> businessRulesOptions,
-            final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months,
-            final Collection<EnumOptionData> weekDays, final Collection<EnumOptionData> frequencyTypeOptions,
-            final Collection<EnumOptionData> periodFrequencyOptions) {
+                                           final Collection<EnumOptionData> campaignTypeOptions, final Collection<SmsBusinessRulesData> businessRulesOptions,
+                                           final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months,
+                                           final Collection<EnumOptionData> weekDays, final Collection<EnumOptionData> frequencyTypeOptions,
+                                           final Collection<EnumOptionData> periodFrequencyOptions) {
         return SmsCampaignData.builder().smsProviderOptions(smsProviderOptions).businessRulesOptions(businessRulesOptions)
                 .campaignTypeOptions(campaignTypeOptions).triggerTypeOptions(triggerTypeOptions).months(months).weekDays(weekDays)
                 .frequencyTypeOptions(frequencyTypeOptions).periodFrequencyOptions(periodFrequencyOptions).build();

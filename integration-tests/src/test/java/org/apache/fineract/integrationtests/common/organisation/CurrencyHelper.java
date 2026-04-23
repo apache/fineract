@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,12 +24,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +77,8 @@ public class CurrencyHelper {
         final Gson gson = new Gson();
         Assert.notNull(json, "json");
         final ArrayList<Currency> currencyList = new ArrayList<Currency>();
-        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {}.getType();
+        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {
+        }.getType();
         final Map<String, List<Currency>> responseMap = gson.fromJson(json, typeOfHashMap);
         for (Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
             Assert.isTrue(permittedCurrencyArrays.contains(entry.getKey()), "permittedCurrencyArrays");
@@ -96,7 +99,8 @@ public class CurrencyHelper {
                 .put(CURRENCY_URL).andReturn().asString();
         final Gson gson = new Gson();
         Assert.notNull(json, "json");
-        final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {}.getType();
+        final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {
+        }.getType();
         final Map<String, Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
         return responseMap.get("changes").get("currencies");
     }

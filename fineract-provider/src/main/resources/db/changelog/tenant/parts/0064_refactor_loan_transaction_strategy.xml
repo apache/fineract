@@ -19,7 +19,9 @@
     under the License.
 
 -->
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
         <addColumn tableName="m_loan">
             <column defaultValue="-" name="loan_transaction_strategy_code" type="VARCHAR(100)">
@@ -30,41 +32,41 @@
             </column>
         </addColumn>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="mifos-standard-strategy" />
-            <column name="loan_transaction_strategy_name" value="Penalties, Fees, Interest, Principal order" />
+            <column name="loan_transaction_strategy_code" value="mifos-standard-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Penalties, Fees, Interest, Principal order"/>
             <where>loan_transaction_strategy_id = 1</where>
         </update>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="heavensfamily-strategy" />
-            <column name="loan_transaction_strategy_name" value="HeavensFamily Unique" />
+            <column name="loan_transaction_strategy_code" value="heavensfamily-strategy"/>
+            <column name="loan_transaction_strategy_name" value="HeavensFamily Unique"/>
             <where>loan_transaction_strategy_id = 2</where>
         </update>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="creocore-strategy" />
-            <column name="loan_transaction_strategy_name" value="Creocore Unique" />
+            <column name="loan_transaction_strategy_code" value="creocore-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Creocore Unique"/>
             <where>loan_transaction_strategy_id = 3</where>
         </update>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="rbi-india-strategy" />
-            <column name="loan_transaction_strategy_name" value="Overdue/Due Fee/Int,Principal" />
+            <column name="loan_transaction_strategy_code" value="rbi-india-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Overdue/Due Fee/Int,Principal"/>
             <where>loan_transaction_strategy_id = 4</where>
         </update>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="principal-interest-penalties-fees-order-strategy" />
-            <column name="loan_transaction_strategy_name" value="Principal, Interest, Penalties, Fees Order" />
+            <column name="loan_transaction_strategy_code" value="principal-interest-penalties-fees-order-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Principal, Interest, Penalties, Fees Order"/>
             <where>loan_transaction_strategy_id = 5</where>
         </update>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="interest-principal-penalties-fees-order-strategy" />
-            <column name="loan_transaction_strategy_name" value="Interest, Principal, Penalties, Fees Order" />
+            <column name="loan_transaction_strategy_code" value="interest-principal-penalties-fees-order-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Interest, Principal, Penalties, Fees Order"/>
             <where>loan_transaction_strategy_id = 6</where>
         </update>
         <update tableName="m_loan">
-            <column name="loan_transaction_strategy_code" value="early-repayment-strategy" />
-            <column name="loan_transaction_strategy_name" value="Early Repayment Strategy" />
+            <column name="loan_transaction_strategy_code" value="early-repayment-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Early Repayment Strategy"/>
             <where>loan_transaction_strategy_id = 7</where>
         </update>
-        <dropForeignKeyConstraint baseTableName="m_loan" constraintName="FK_loan_ltp_strategy" />
+        <dropForeignKeyConstraint baseTableName="m_loan" constraintName="FK_loan_ltp_strategy"/>
         <!--
         <dropColumn tableName="m_loan_product" columnName="loan_transaction_strategy_id" />
         -->
@@ -79,47 +81,48 @@
             </column>
         </addColumn>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="mifos-standard-strategy" />
-            <column name="loan_transaction_strategy_name" value="Penalties, Fees, Interest, Principal order" />
+            <column name="loan_transaction_strategy_code" value="mifos-standard-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Penalties, Fees, Interest, Principal order"/>
             <where>loan_transaction_strategy_id = 1</where>
         </update>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="heavensfamily-strategy" />
-            <column name="loan_transaction_strategy_name" value="HeavensFamily Unique" />
+            <column name="loan_transaction_strategy_code" value="heavensfamily-strategy"/>
+            <column name="loan_transaction_strategy_name" value="HeavensFamily Unique"/>
             <where>loan_transaction_strategy_id = 2</where>
         </update>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="creocore-strategy" />
-            <column name="loan_transaction_strategy_name" value="Creocore Unique" />
+            <column name="loan_transaction_strategy_code" value="creocore-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Creocore Unique"/>
             <where>loan_transaction_strategy_id = 3</where>
         </update>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="rbi-india-strategy" />
-            <column name="loan_transaction_strategy_name" value="Overdue/Due Fee/Int,Principal" />
+            <column name="loan_transaction_strategy_code" value="rbi-india-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Overdue/Due Fee/Int,Principal"/>
             <where>loan_transaction_strategy_id = 4</where>
         </update>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="principal-interest-penalties-fees-order-strategy" />
-            <column name="loan_transaction_strategy_name" value="Principal, Interest, Penalties, Fees Order" />
+            <column name="loan_transaction_strategy_code" value="principal-interest-penalties-fees-order-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Principal, Interest, Penalties, Fees Order"/>
             <where>loan_transaction_strategy_id = 5</where>
         </update>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="interest-principal-penalties-fees-order-strategy" />
-            <column name="loan_transaction_strategy_name" value="Interest, Principal, Penalties, Fees Order" />
+            <column name="loan_transaction_strategy_code" value="interest-principal-penalties-fees-order-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Interest, Principal, Penalties, Fees Order"/>
             <where>loan_transaction_strategy_id = 6</where>
         </update>
         <update tableName="m_product_loan">
-            <column name="loan_transaction_strategy_code" value="early-repayment-strategy" />
-            <column name="loan_transaction_strategy_name" value="Early Repayment Strategy" />
+            <column name="loan_transaction_strategy_code" value="early-repayment-strategy"/>
+            <column name="loan_transaction_strategy_name" value="Early Repayment Strategy"/>
             <where>loan_transaction_strategy_id = 7</where>
         </update>
-        <dropForeignKeyConstraint baseTableName="m_product_loan" constraintName="FK_ltp_strategy" />
+        <dropForeignKeyConstraint baseTableName="m_product_loan" constraintName="FK_ltp_strategy"/>
         <!--
         <dropColumn tableName="m_product_loan" columnName="loan_transaction_strategy_id" />
         -->
     </changeSet>
     <changeSet author="fineract" id="3">
-        <renameColumn tableName="m_product_loan_configurable_attributes" oldColumnName="loan_transaction_strategy_id" newColumnName="loan_transaction_strategy_code" columnDataType="BOOLEAN" />
+        <renameColumn tableName="m_product_loan_configurable_attributes" oldColumnName="loan_transaction_strategy_id"
+                      newColumnName="loan_transaction_strategy_code" columnDataType="BOOLEAN"/>
     </changeSet>
     <!--
     <changeSet author="fineract" id="4">

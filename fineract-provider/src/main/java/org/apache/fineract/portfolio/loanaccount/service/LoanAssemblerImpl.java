@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -369,7 +371,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
     }
 
     private void createAndSetGLIMAccount(BigDecimal totalLoan, Loan loan, AccountNumberFormat accountNumberFormat, Group group,
-            BigDecimal applicationId) {
+                                         BigDecimal applicationId) {
         final String accountNumber = this.accountNumberGenerator.generate(loan, accountNumberFormat);
         loan.setAccountNumber(accountNumber + "1");
         GroupLoanIndividualMonitoringAccount glimAccount = glimAccountInfoWritePlatformService.createGLIMAccount(accountNumber, group,
@@ -423,7 +425,7 @@ public class LoanAssemblerImpl implements LoanAssembler {
     }
 
     private void copyAdvancedPaymentRulesIfApplicable(String transactionProcessingStrategyCode, LoanProduct loanProduct,
-            Loan loanApplication) {
+                                                      Loan loanApplication) {
         if (transactionProcessingStrategyCode.equals(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)) {
             List<LoanPaymentAllocationRule> loanPaymentAllocationRules = loanProduct.getPaymentAllocationRules().stream()
                     .map(r -> new LoanPaymentAllocationRule(loanApplication, r.getTransactionType(), r.getAllocationTypes(),

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,7 +22,9 @@ package org.apache.fineract.portfolio.client.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @SuppressWarnings("serial")
@@ -51,10 +53,11 @@ public class ClientTransferDetails extends AbstractPersistableCustom<Long> {
     @Column(name = "submitted_by", nullable = false)
     private Long submittedBy;
 
-    protected ClientTransferDetails() {}
+    protected ClientTransferDetails() {
+    }
 
     private ClientTransferDetails(final Long clientId, final Long fromOfficeId, final Long toOfficeId, final LocalDate proposedTransferDate,
-            final Integer transferEventType, final LocalDate submittedOn, final Long submittedBy) {
+                                  final Integer transferEventType, final LocalDate submittedOn, final Long submittedBy) {
         this.clientId = clientId;
         this.fromOfficeId = fromOfficeId;
         this.toOfficeId = toOfficeId;
@@ -65,7 +68,7 @@ public class ClientTransferDetails extends AbstractPersistableCustom<Long> {
     }
 
     public static ClientTransferDetails instance(final Long clientId, final Long fromOfficeId, final Long toOfficeId,
-            final LocalDate proposedTransferDate, final Integer transferEventType, final LocalDate submittedOn, final Long submittedBy) {
+                                                 final LocalDate proposedTransferDate, final Integer transferEventType, final LocalDate submittedOn, final Long submittedBy) {
         return new ClientTransferDetails(clientId, fromOfficeId, toOfficeId, proposedTransferDate, transferEventType, submittedOn,
                 submittedBy);
 

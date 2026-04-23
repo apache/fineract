@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,12 +25,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import io.cucumber.java8.En;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateMapper;
@@ -77,7 +79,8 @@ public class TemplateServiceStepDefinitions implements En {
 
     private Map<String, Object> parse(String data) {
         Gson gson = new Gson();
-        Type ssMap = new TypeToken<Map<String, Object>>() {}.getType();
+        Type ssMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         JsonElement json = JsonParser.parseString(data);
         return gson.fromJson(json, ssMap);
     }

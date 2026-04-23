@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
 // Temporary solution until spring-batch fixes the concurrency issue
 // https://github.com/spring-projects/spring-batch/issues/4774
 // Mostly copy from spring-batch
-@SuppressWarnings({ "HideUtilityClassConstructor" })
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class StepSynchronizationManager {
 
     private static final SynchronizationManagerSupport<StepExecution, StepContext> manager = new SynchronizationManagerSupport<>() {
@@ -52,8 +52,8 @@ public class StepSynchronizationManager {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(StepExecution.class);
         enhancer.setCallback(new TenantAwareEqualsHashCodeAdvice(stepExecution));
-        return manager.register((StepExecution) enhancer.create(new Class[] { String.class, JobExecution.class },
-                new Object[] { stepExecution.getStepName(), stepExecution.getJobExecution() }));
+        return manager.register((StepExecution) enhancer.create(new Class[]{String.class, JobExecution.class},
+                new Object[]{stepExecution.getStepName(), stepExecution.getJobExecution()}));
     }
 
     public static void close() {

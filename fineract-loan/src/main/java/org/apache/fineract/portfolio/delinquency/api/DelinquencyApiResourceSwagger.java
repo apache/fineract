@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,18 +19,22 @@
 package org.apache.fineract.portfolio.delinquency.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 
 public final class DelinquencyApiResourceSwagger {
 
-    private DelinquencyApiResourceSwagger() {}
+    private DelinquencyApiResourceSwagger() {
+    }
 
     @Schema(description = "PostDelinquencyRangeResponse")
     public static final class PostDelinquencyRangeResponse {
 
-        private PostDelinquencyRangeResponse() {}
+        private PostDelinquencyRangeResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -39,7 +43,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "PutDelinquencyRangeResponse")
     public static final class PutDelinquencyRangeResponse {
 
-        private PutDelinquencyRangeResponse() {}
+        private PutDelinquencyRangeResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -49,7 +54,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "DeleteDelinquencyRangeResponse")
     public static final class DeleteDelinquencyRangeResponse {
 
-        private DeleteDelinquencyRangeResponse() {}
+        private DeleteDelinquencyRangeResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -58,7 +64,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "PostDelinquencyBucketResponse")
     public static final class PostDelinquencyBucketResponse {
 
-        private PostDelinquencyBucketResponse() {}
+        private PostDelinquencyBucketResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -67,7 +74,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "PutDelinquencyBucketResponse")
     public static final class PutDelinquencyBucketResponse {
 
-        private PutDelinquencyBucketResponse() {}
+        private PutDelinquencyBucketResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -76,7 +84,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "DeleteDelinquencyBucketResponse")
     public static final class DeleteDelinquencyBucketResponse {
 
-        private DeleteDelinquencyBucketResponse() {}
+        private DeleteDelinquencyBucketResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -85,7 +94,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "GetDelinquencyTagHistoryResponse")
     public static final class GetDelinquencyTagHistoryResponse {
 
-        private GetDelinquencyTagHistoryResponse() {}
+        private GetDelinquencyTagHistoryResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -101,7 +111,8 @@ public final class DelinquencyApiResourceSwagger {
     @Schema(description = "GetDelinquencyActionsResponse")
     public static final class GetDelinquencyActionsResponse {
 
-        private GetDelinquencyActionsResponse() {}
+        private GetDelinquencyActionsResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,11 +19,13 @@
 package org.apache.fineract.infrastructure.entityaccess.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -50,7 +52,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     @Autowired
     public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
+                                               final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
@@ -70,7 +72,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
      */
     @Override
     public String getSQLQueryInClause_WithListOfIDsForEntityAccess(FineractEntityType firstEntityType, final Long relId,
-            final Long fromEntityId, boolean includeAllOffices) {
+                                                                   final Long fromEntityId, boolean includeAllOffices) {
         Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId,
                 includeAllOffices);
         String returnIdListStr = null;
@@ -97,7 +99,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
             accessListCSVStrBuf = new StringBuilder();
             accessListCSVStrBuf.append("false"); // Append false so that no rows
-                                                 // will be returned
+            // will be returned
         }
         if (accessListCSVStrBuf != null) {
             returnIdListStr = accessListCSVStrBuf.toString();
@@ -108,7 +110,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     @Override
     public Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType, final Long relId,
-            final Long fromEntityId, boolean includeAllSubOffices) {
+                                                                                 final Long fromEntityId, boolean includeAllSubOffices) {
         final AppUser currentUser = this.context.authenticatedUser();
 
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -125,9 +127,9 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         if (includeAllSubOffices && firstEntityType.getTableName().equals("m_office")) {
             sql += " where firstentity.hierarchy like ? order by firstEntity.hierarchy";
-            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { fromEntityId, fromEntityId, hierarchySearchString });
+            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[]{fromEntityId, fromEntityId, hierarchySearchString});
         } else {
-            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { relId, fromEntityId });
+            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[]{relId, fromEntityId});
         }
 
         return entityAccessData;
@@ -181,7 +183,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     public Collection<FineractEntityRelationData> retrieveAllSupportedMappingTypes() {
         EntityRelationMapper entityMapper = new EntityRelationMapper();
         final String sql = entityMapper.schema();
-        final Collection<FineractEntityRelationData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[] {});
+        final Collection<FineractEntityRelationData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[]{});
         return mapTypes;
     }
 
@@ -207,7 +209,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         EntityToEntityMapper entityToEntityMapper = new EntityToEntityMapper();
         String sql = entityToEntityMapper.schema();
         final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityToEntityMapper,
-                new Object[] { mapId, fromId, fromId, toId, toId });
+                new Object[]{mapId, fromId, fromId, toId, toId});
         return mapTypes;
 
     }
@@ -216,7 +218,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     public Collection<FineractEntityToEntityMappingData> retrieveOneMapping(Long mapId) {
         GetOneEntityMapper entityMapper = new GetOneEntityMapper();
         String sql = entityMapper.schema();
-        final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[] { mapId });
+        final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[]{mapId});
         return mapTypes;
     }
 
@@ -228,7 +230,8 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                 from m_entity_to_entity_mapping eem
                 where eem.id= ?\s""";
 
-        GetOneEntityMapper() {}
+        GetOneEntityMapper() {
+        }
 
         public String schema() {
             return GET_ONE_ENTITY_SCHEMA;
@@ -296,7 +299,8 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                 ( ? = 0 or from_id = ? ) and
                 ( ? = 0 or to_id = ? )\s""";
 
-        EntityToEntityMapper() {}
+        EntityToEntityMapper() {
+        }
 
         public String schema() {
             return ENTITY_TO_ENTITY_SCHEMA;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -60,13 +61,13 @@ public final class AppUserData {
     private Set<ClientData> clients;
 
     public static AppUserData importInstance(Long officeId, Long staffId, String username, String firstname, String lastname, String email,
-            Boolean sendPasswordToEmail, Boolean passwordNeverExpires, List<Long> roleIds, Integer rowIndex) {
+                                             Boolean sendPasswordToEmail, Boolean passwordNeverExpires, List<Long> roleIds, Integer rowIndex) {
         return new AppUserData(officeId, staffId, username, firstname, lastname, email, sendPasswordToEmail, passwordNeverExpires, roleIds,
                 rowIndex);
     }
 
     private AppUserData(Long officeId, Long staffId, String username, String firstname, String lastname, String email,
-            Boolean sendPasswordToEmail, Boolean passwordNeverExpires, List<Long> roleIds, Integer rowIndex) {
+                        Boolean sendPasswordToEmail, Boolean passwordNeverExpires, List<Long> roleIds, Integer rowIndex) {
         this.id = null;
         this.username = username;
         this.officeId = officeId;
@@ -100,16 +101,16 @@ public final class AppUserData {
     }
 
     public static AppUserData instance(final Long id, final String username, final String email, final Long officeId,
-            final String officeName, final String firstname, final String lastname, final Collection<RoleData> availableRoles,
-            final Collection<RoleData> selectedRoles, final StaffData staff, final Boolean passwordNeverExpire) {
+                                       final String officeName, final String firstname, final String lastname, final Collection<RoleData> availableRoles,
+                                       final Collection<RoleData> selectedRoles, final StaffData staff, final Boolean passwordNeverExpire) {
         return new AppUserData(id, username, email, officeId, officeName, firstname, lastname, availableRoles, selectedRoles, null, staff,
                 passwordNeverExpire);
     }
 
     private AppUserData(final Long id, final String username, final String email, final Long officeId, final String officeName,
-            final String firstname, final String lastname, final Collection<RoleData> availableRoles,
-            final Collection<RoleData> selectedRoles, final Collection<OfficeData> allowedOffices, final StaffData staff,
-            final Boolean passwordNeverExpire) {
+                        final String firstname, final String lastname, final Collection<RoleData> availableRoles,
+                        final Collection<RoleData> selectedRoles, final Collection<OfficeData> allowedOffices, final StaffData staff,
+                        final Boolean passwordNeverExpire) {
         this.id = id;
         this.username = username;
         this.officeId = officeId;

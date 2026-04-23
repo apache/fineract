@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.api;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
 import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -74,9 +76,9 @@ public final class JsonCommand {
     private final ExternalId loanExternalId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
-            final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId,
-            final Long creditBureauId, final Long organisationCreditBureauId, final String jobName, final ExternalId loanExternalId) {
+                                   final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
+                                   final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId,
+                                   final Long creditBureauId, final Long organisationCreditBureauId, final String jobName, final ExternalId loanExternalId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
                 clientId, loanId, savingsId, transactionId, url, productId, creditBureauId, organisationCreditBureauId, jobName,
                 loanExternalId);
@@ -84,18 +86,18 @@ public final class JsonCommand {
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final String url, final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
-            final ExternalId loanExternalId) {
+                                                  final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
+                                                  final String url, final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
+                                                  final ExternalId loanExternalId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
                 null, null, null, url, productId, creditBureauId, organisationCreditBureauId, jobName, loanExternalId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId, Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
-            final ExternalId loanExternalId) {
+                                                  final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
+                                                  final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
+                                                  final Long productId, Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
+                                                  final ExternalId loanExternalId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
                 clientId, loanId, savingsId, transactionId, url, productId, creditBureauId, organisationCreditBureauId, jobName,
                 loanExternalId);
@@ -119,10 +121,10 @@ public final class JsonCommand {
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
-            final ExternalId loanExternalId) {
+                       final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
+                       final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
+                       final Long productId, final Long creditBureauId, final Long organisationCreditBureauId, final String jobName,
+                       final ExternalId loanExternalId) {
 
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
@@ -149,7 +151,7 @@ public final class JsonCommand {
     }
 
     public static JsonCommand fromJsonElement(final Long resourceId, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper) {
+                                              final FromJsonHelper fromApiJsonHelper) {
         return new JsonCommand(resourceId, parsedCommand, fromApiJsonHelper);
     }
 
@@ -375,13 +377,15 @@ public final class JsonCommand {
     }
 
     public Map<String, String> mapValueOfParameterNamed(final String json) {
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {
+        }.getType();
         final Map<String, String> value = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
         return value;
     }
 
     public Map<String, Object> mapObjectValueOfParameterNamed(final String json) {
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         final Map<String, Object> value = this.fromApiJsonHelper.extractObjectMap(typeOfMap, json);
         return value;
     }
@@ -561,7 +565,7 @@ public final class JsonCommand {
     }
 
     public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue,
-            final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
+                                                    final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final String workingValue = passwordValueOfParameterNamed(parameterName, platformPasswordEncoder, saltValue);
@@ -581,7 +585,7 @@ public final class JsonCommand {
     }
 
     public String passwordValueOfParameterNamed(final String parameterName, final PlatformPasswordEncoder platformPasswordEncoder,
-            final Long saltValue) {
+                                                final Long saltValue) {
         final String passwordPlainText = stringValueOfParameterNamed(parameterName);
 
         final PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser().setId(saltValue).setUsername("")

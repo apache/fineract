@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -58,12 +58,12 @@ public final class ApiParameterError {
     private final List<ApiErrorMessageArg> args;
 
     public static ApiParameterError generalError(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                 final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, "id", null);
     }
 
     public static ApiParameterError resourceIdentifierNotFound(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                               final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, "id", null);
     }
 
@@ -74,12 +74,12 @@ public final class ApiParameterError {
     }
 
     public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
-            final String parameterName, final Object... defaultUserMessageArgs) {
+                                                   final String parameterName, final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, null);
     }
 
     public static ApiParameterError parameterErrorWithValue(final String globalisationMessageCode, final String defaultUserMessage,
-            final String parameterName, final String value, final Object... defaultUserMessageArgs) {
+                                                            final String parameterName, final String value, final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, value);
     }
 
@@ -107,7 +107,7 @@ public final class ApiParameterError {
     }
 
     private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs,
-            String parameterName, String value) {
+                              String parameterName, String value) {
         this.userMessageGlobalisationCode = globalisationMessageCode;
         this.developerMessage = defaultUserMessage;
         this.defaultUserMessage = defaultUserMessage;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -49,16 +50,16 @@ public final class LoanScheduleModel {
     private final BigDecimal totalOutstanding;
 
     public static LoanScheduleModel from(final List<LoanScheduleModelPeriod> periods, final CurrencyData currency, final int loanTermInDays,
-            final Money principalDisbursed, final BigDecimal totalPrincipalExpected, final BigDecimal totalPrincipalPaid,
-            final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
-            final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
+                                         final Money principalDisbursed, final BigDecimal totalPrincipalExpected, final BigDecimal totalPrincipalPaid,
+                                         final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
+                                         final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
 
         return new LoanScheduleModel(periods, currency, loanTermInDays, principalDisbursed, totalPrincipalExpected, totalPrincipalPaid,
                 totalInterestCharged, totalFeeChargesCharged, totalPenaltyChargesCharged, totalRepaymentExpected, totalOutstanding);
     }
 
     public static LoanScheduleModel withOverdueChargeUpdation(final List<LoanScheduleModelPeriod> periods,
-            final LoanScheduleModel loanScheduleModel, final BigDecimal totalPenaltyChargesCharged) {
+                                                              final LoanScheduleModel loanScheduleModel, final BigDecimal totalPenaltyChargesCharged) {
 
         return new LoanScheduleModel(periods, loanScheduleModel.currency, loanScheduleModel.loanTermInDays,
                 loanScheduleModel.totalPrincipalDisbursed, loanScheduleModel.totalPrincipalExpected, loanScheduleModel.totalPrincipalPaid,
@@ -67,7 +68,7 @@ public final class LoanScheduleModel {
     }
 
     public static LoanScheduleModel withLoanScheduleModelPeriods(final List<LoanScheduleModelPeriod> periods,
-            final LoanScheduleModel loanScheduleModel) {
+                                                                 final LoanScheduleModel loanScheduleModel) {
 
         return new LoanScheduleModel(periods, loanScheduleModel.currency, loanScheduleModel.loanTermInDays,
                 loanScheduleModel.totalPrincipalDisbursed, loanScheduleModel.totalPrincipalExpected, loanScheduleModel.totalPrincipalPaid,
@@ -76,9 +77,9 @@ public final class LoanScheduleModel {
     }
 
     private LoanScheduleModel(final List<LoanScheduleModelPeriod> periods, final CurrencyData currency, final int loanTermInDays,
-            final Money principalDisbursed, final BigDecimal totalPrincipalExpected, final BigDecimal totalPrincipalPaid,
-            final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
-            final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
+                              final Money principalDisbursed, final BigDecimal totalPrincipalExpected, final BigDecimal totalPrincipalPaid,
+                              final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
+                              final BigDecimal totalRepaymentExpected, final BigDecimal totalOutstanding) {
         this.periods = periods;
         this.currency = currency;
         this.loanTermInDays = loanTermInDays;

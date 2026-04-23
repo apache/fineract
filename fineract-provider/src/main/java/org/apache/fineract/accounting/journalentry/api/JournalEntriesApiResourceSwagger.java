@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.accounting.journalentry.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
@@ -30,7 +32,8 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
  */
 final class JournalEntriesApiResourceSwagger {
 
-    private JournalEntriesApiResourceSwagger() {}
+    private JournalEntriesApiResourceSwagger() {
+    }
 
     @Schema(description = "PostJournalEntriesResponse")
     public static final class PostJournalEntriesResponse {
@@ -70,7 +73,8 @@ final class JournalEntriesApiResourceSwagger {
 
     public static final class CurrencyItem {
 
-        private CurrencyItem() {}
+        private CurrencyItem() {
+        }
 
         @Schema(example = "USD")
         public String code;
@@ -90,7 +94,8 @@ final class JournalEntriesApiResourceSwagger {
 
     static final class EnumOptionType {
 
-        private EnumOptionType() {}
+        private EnumOptionType() {
+        }
 
         @Schema(example = "2")
         public Long id;
@@ -102,11 +107,13 @@ final class JournalEntriesApiResourceSwagger {
 
     static final class JournalEntryTransactionItem {
 
-        private JournalEntryTransactionItem() {}
+        private JournalEntryTransactionItem() {
+        }
 
         static final class PaymentDetailData {
 
-            private PaymentDetailData() {}
+            private PaymentDetailData() {
+            }
 
             @Schema(example = "62")
             public Long id;
@@ -125,7 +132,8 @@ final class JournalEntriesApiResourceSwagger {
 
         static final class TransactionDetails {
 
-            private TransactionDetails() {}
+            private TransactionDetails() {
+            }
 
             @Schema(example = "2")
             public Long transactionId;
@@ -190,7 +198,8 @@ final class JournalEntriesApiResourceSwagger {
     @Schema(description = "GetJournalEntriesTransactionIdResponse")
     public static final class GetJournalEntriesTransactionIdResponse {
 
-        private GetJournalEntriesTransactionIdResponse() {}
+        private GetJournalEntriesTransactionIdResponse() {
+        }
 
         @Schema(example = "2")
         public Long totalFilteredRecords;

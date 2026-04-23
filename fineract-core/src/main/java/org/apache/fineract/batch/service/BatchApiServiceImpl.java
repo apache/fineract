@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import io.github.resilience4j.retry.Retry;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.ws.rs.core.UriInfo;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +42,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.command.CommandContext;
@@ -123,7 +125,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     }
 
     private List<BatchResponse> handleBatchRequests(final List<BatchRequest> requestList, final UriInfo uriInfo,
-            boolean enclosingTransaction) {
+                                                    boolean enclosingTransaction) {
         BatchRequestContextHolder.setIsEnclosingTransaction(enclosingTransaction);
         try {
             return enclosingTransaction ? callInTransaction(Function.identity()::apply, () -> handleRequestNodes(requestList, uriInfo))
@@ -143,7 +145,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      * @return
      */
     private List<BatchResponse> callInTransaction(Consumer<TransactionTemplate> transactionConfigurator,
-            Supplier<List<BatchResponse>> request) {
+                                                  Supplier<List<BatchResponse>> request) {
         // Retry logic for enclosingTransaction=true and when the isolation level is REPEATABLE_READ or stricter we need
         // to restart the transaction as well!
 
@@ -215,7 +217,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      * @return {@code BatchResponse}
      */
     private void callRequestRecursive(BatchRequest request, BatchRequestNode requestNode, List<BatchResponse> responseList,
-            UriInfo uriInfo) {
+                                      UriInfo uriInfo) {
         // run current node
         BatchResponse response = executeRequest(request, uriInfo);
         responseList.add(response);
@@ -280,7 +282,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     }
 
     private Either<RuntimeException, BatchRequest> runPreprocessor(List<BatchRequestPreprocessor> remainingPreprocessor,
-            BatchRequest request) {
+                                                                   BatchRequest request) {
         if (remainingPreprocessor.isEmpty()) {
             return Either.right(request);
         } else {
@@ -304,7 +306,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      * @return {@code BatchResponse} list of the generated batch responses
      */
     private List<BatchResponse> parentRequestFailedRecursive(@NonNull BatchRequest request, @NonNull BatchRequestNode requestNode,
-            @NonNull BatchResponse response, Long parentId) {
+                                                             @NonNull BatchResponse response, Long parentId) {
         List<BatchResponse> responseList = new ArrayList<>();
         if (parentId == null) { // root
             BatchRequestContextHolder.getEnclosingTransaction().ifPresent(TransactionExecution::setRollbackOnly);
@@ -358,7 +360,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     private List<BatchResponse> buildErrorResponses(Throwable ex, @NonNull List<BatchResponse> responseList) {
         BatchResponse response = responseList.isEmpty() ? null
                 : responseList.stream().filter(e -> e.getStatusCode() == null || e.getStatusCode() != SC_OK).findFirst()
-                        .orElse(responseList.get(responseList.size() - 1));
+                .orElse(responseList.get(responseList.size() - 1));
 
         if (response != null && response.getStatusCode() == SC_OK && ex instanceof TransactionSystemException tse) {
             ex = new ConcurrencyFailureException(tse.getMessage(), tse.getCause());

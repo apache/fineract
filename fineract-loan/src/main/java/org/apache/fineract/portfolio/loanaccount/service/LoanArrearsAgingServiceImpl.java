@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import jakarta.annotation.PostConstruct;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -217,7 +219,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
 
     @Override
     public void createInsertStatements(List<String> insertStatement, Map<Long, List<LoanSchedulePeriodData>> scheduleDate,
-            boolean isInsertStatement) {
+                                       boolean isInsertStatement) {
         for (Map.Entry<Long, List<LoanSchedulePeriodData>> entry : scheduleDate.entrySet()) {
             final Long loanId = entry.getKey();
             BigDecimal principalOverdue = BigDecimal.ZERO;
@@ -259,7 +261,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
     }
 
     private String constructInsertStatement(final Long loanId, BigDecimal principalOverdue, BigDecimal interestOverdue,
-            BigDecimal feeOverdue, BigDecimal penaltyOverdue, LocalDate overDueSince) {
+                                            BigDecimal feeOverdue, BigDecimal penaltyOverdue, LocalDate overDueSince) {
         final StringBuilder insertStatementBuilder = new StringBuilder(900);
         insertStatementBuilder.append("INSERT INTO m_loan_arrears_aging(loan_id,principal_overdue_derived,interest_overdue_derived,")
                 .append("fee_charges_overdue_derived,penalty_charges_overdue_derived,total_overdue_derived,overdue_since_date_derived) VALUES(");
@@ -275,7 +277,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
     }
 
     private String constructUpdateStatement(final Long loanId, BigDecimal principalOverdue, BigDecimal interestOverdue,
-            BigDecimal feeOverdue, BigDecimal penaltyOverdue, LocalDate overDueSince) {
+                                            BigDecimal feeOverdue, BigDecimal penaltyOverdue, LocalDate overDueSince) {
         final StringBuilder insertStatementBuilder = new StringBuilder(900);
         insertStatementBuilder.append("UPDATE m_loan_arrears_aging SET principal_overdue_derived=");
         insertStatementBuilder.append(principalOverdue).append(", interest_overdue_derived=");

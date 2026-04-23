@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,7 +24,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.time.LocalDate;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -33,9 +35,9 @@ import org.apache.fineract.organisation.office.domain.Office;
 @Getter
 @Setter
 @Entity
-@Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
-        @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
-        @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
+@Table(name = "m_staff", uniqueConstraints = {@UniqueConstraint(columnNames = {"display_name"}, name = "display_name"),
+        @UniqueConstraint(columnNames = {"external_id"}, name = "external_id_UNIQUE"),
+        @UniqueConstraint(columnNames = {"mobile_no"}, name = "mobile_no_UNIQUE")})
 public class Staff extends AbstractPersistableCustom<Long> {
 
     @Column(name = "firstname", length = 50)

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import static org.apache.fineract.infrastructure.dataqueries.data.StatusEnum.WRI
 
 import com.google.common.collect.ImmutableList;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public enum EntityTables {
     private final ImmutableList<StatusEnum> checkStatuses;
 
     EntityTables(@NotNull String name, @NotNull String apptableName, @NotNull String foreignKeyColumnNameOnDatatable,
-            @NotNull String refColumn, StatusEnum... statuses) {
+                 @NotNull String refColumn, StatusEnum... statuses) {
         this.name = name;
         this.apptableName = apptableName;
         this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;

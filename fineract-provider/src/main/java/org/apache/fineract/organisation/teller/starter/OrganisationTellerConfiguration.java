@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -49,9 +49,9 @@ public class OrganisationTellerConfiguration {
     @Bean
     @ConditionalOnMissingBean(TellerManagementReadPlatformService.class)
     public TellerManagementReadPlatformService tellerManagementReadPlatformService(JdbcTemplate jdbcTemplate,
-            PlatformSecurityContext context, OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
-            CurrencyReadPlatformService currencyReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationHelper paginationHelper, SqlValidator sqlValidator) {
+                                                                                   PlatformSecurityContext context, OfficeReadPlatformService officeReadPlatformService, StaffReadService staffReadPlatformService,
+                                                                                   CurrencyReadPlatformService currencyReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
+                                                                                   PaginationHelper paginationHelper, SqlValidator sqlValidator) {
         return new TellerManagementReadPlatformServiceImpl(jdbcTemplate, context, officeReadPlatformService, staffReadPlatformService,
                 currencyReadPlatformService, sqlGenerator, paginationHelper, sqlValidator);
     }
@@ -59,11 +59,11 @@ public class OrganisationTellerConfiguration {
     @Bean
     @ConditionalOnMissingBean(TellerWritePlatformService.class)
     public TellerWritePlatformService tellerWritePlatformService(PlatformSecurityContext context,
-            TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, TellerRepositoryWrapper tellerRepositoryWrapper,
-            OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepository staffRepository, CashierRepository cashierRepository,
-            CashierTransactionRepository cashierTxnRepository, JournalEntryRepository glJournalEntryRepository,
-            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            CashierTransactionDataValidator cashierTransactionDataValidator) {
+                                                                 TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, TellerRepositoryWrapper tellerRepositoryWrapper,
+                                                                 OfficeRepositoryWrapper officeRepositoryWrapper, StaffRepository staffRepository, CashierRepository cashierRepository,
+                                                                 CashierTransactionRepository cashierTxnRepository, JournalEntryRepository glJournalEntryRepository,
+                                                                 FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
+                                                                 CashierTransactionDataValidator cashierTransactionDataValidator) {
         return new TellerWritePlatformServiceJpaImpl(context, fromApiJsonDeserializer, tellerRepositoryWrapper, officeRepositoryWrapper,
                 staffRepository, cashierRepository, cashierTxnRepository, glJournalEntryRepository,
                 financialActivityAccountRepositoryWrapper, cashierTransactionDataValidator);

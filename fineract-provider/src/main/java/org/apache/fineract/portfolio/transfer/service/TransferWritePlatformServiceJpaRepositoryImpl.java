@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,11 +20,13 @@ package org.apache.fineract.portfolio.transfer.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -138,7 +140,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      ***/
     @Transactional
     public void transferClientBetweenGroups(final Group sourceGroup, final Client client, final Group destinationGroup,
-            final Boolean inheritDestinationGroupLoanOfficer, final Staff newLoanOfficer) {
+                                            final Boolean inheritDestinationGroupLoanOfficer, final Staff newLoanOfficer) {
 
         // next I shall validate that the client is present in this group
         if (!sourceGroup.hasClientAsMember(client)) {
@@ -360,7 +362,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     private void handleClientTransferLifecycleEvent(final Client client, final Office destinationOffice,
-            final TransferEventType transferEventType, final JsonCommand jsonCommand) {
+                                                    final TransferEventType transferEventType, final JsonCommand jsonCommand) {
         /** Get destination loan officer if exists **/
         Staff staff = null;
         Group destinationGroup = null;
@@ -386,13 +388,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                         case ACCEPTANCE:
                             this.loanWritePlatformService.acceptLoanTransfer(loan, loan.getLastUserTransactionDate(), destinationOffice,
                                     staff);
-                        break;
+                            break;
                         case PROPOSAL:
                             this.loanWritePlatformService.initiateLoanTransfer(loan, transferDate);
-                        break;
+                            break;
                         case REJECTION:
                             this.loanWritePlatformService.rejectLoanTransfer(loan);
-                        break;
+                            break;
                         case WITHDRAWAL:
                             this.loanWritePlatformService.withdrawLoanTransfer(loan, loan.getLastUserTransactionDate());
                     }
@@ -409,13 +411,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                         case ACCEPTANCE:
                             this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount,
                                     savingsAccount.retrieveLastTransactionDate(), destinationOffice, staff);
-                        break;
+                            break;
                         case PROPOSAL:
                             this.savingsAccountWritePlatformService.initiateSavingsTransfer(savingsAccount, transferDate);
-                        break;
+                            break;
                         case REJECTION:
                             this.savingsAccountWritePlatformService.rejectSavingsTransfer(savingsAccount);
-                        break;
+                            break;
                         case WITHDRAWAL:
                             this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount,
                                     savingsAccount.retrieveLastTransactionDate());
@@ -451,17 +453,17 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                         client.updateStaff(staff);
                     }
                 }
-            break;
+                break;
             case PROPOSAL:
                 client.setStatus(ClientStatus.TRANSFER_IN_PROGRESS.getValue());
                 client.updateTransferToOffice(destinationOffice);
                 client.updateProposedTransferDate(transferDate);
-            break;
+                break;
             case REJECTION:
                 client.setStatus(ClientStatus.TRANSFER_ON_HOLD.getValue());
                 client.updateTransferToOffice(null);
                 client.updateProposedTransferDate(null);
-            break;
+                break;
             case WITHDRAWAL:
                 client.setStatus(ClientStatus.ACTIVE.getValue());
                 client.updateTransferToOffice(null);

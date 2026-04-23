@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,11 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import com.google.common.collect.Lists;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -111,13 +113,13 @@ public class LoanRepositoryWrapper {
 
     // Only root entities is enough
     public List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
-            @Param("loanType") AccountType loanType) {
+                                                  @Param("loanType") AccountType loanType) {
         return this.repository.getGroupLoansDisbursedAfter(disbursementDate, groupId, loanType);
     }
 
     // Only root entities enough
     public List<Loan> getClientOrJLGLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate,
-            @Param("clientId") Long clientId) {
+                                                        @Param("clientId") Long clientId) {
         return this.repository.getClientOrJLGLoansDisbursedAfter(disbursementDate, clientId);
     }
 
@@ -126,7 +128,7 @@ public class LoanRepositoryWrapper {
     }
 
     public Integer getMaxGroupLoanProductCounter(@Param("productId") Long productId, @Param("groupId") Long groupId,
-            @Param("loanType") AccountType loanType) {
+                                                 @Param("loanType") AccountType loanType) {
         return this.repository.getMaxGroupLoanProductCounter(productId, groupId, loanType);
     }
 
@@ -149,7 +151,7 @@ public class LoanRepositoryWrapper {
 
     // Only root entities are enough
     public List<Loan> getGroupLoansToUpdateLoanCounter(@Param("loanCounter") Integer loanCounter, @Param("groupId") Long groupId,
-            @Param("groupLoanType") AccountType groupLoanType) {
+                                                       @Param("groupLoanType") AccountType groupLoanType) {
         return this.repository.getGroupLoansToUpdateLoanCounter(loanCounter, groupId, groupLoanType);
     }
 
@@ -160,13 +162,13 @@ public class LoanRepositoryWrapper {
 
     // Only root entities are enough
     public List<Loan> getGroupLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter,
-            @Param("groupId") Long groupId, @Param("groupLoanType") AccountType groupLoanType) {
+                                                              @Param("groupId") Long groupId, @Param("groupLoanType") AccountType groupLoanType) {
         return this.repository.getGroupLoansToUpdateLoanProductCounter(loanProductCounter, groupId, groupLoanType);
     }
 
     // Only root entities are enough
     public List<Loan> getClientLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter,
-            @Param("clientId") Long clientId) {
+                                                               @Param("clientId") Long clientId) {
         return this.repository.getClientLoansToUpdateLoanProductCounter(loanProductCounter, clientId);
     }
 
@@ -202,7 +204,7 @@ public class LoanRepositoryWrapper {
 
     // Looks like we need complete Data
     public List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
-            @Param("loanStatuses") Collection<LoanStatus> loanStatuses, @Param("loanTypes") Collection<AccountType> loanTypes) {
+                                                        @Param("loanStatuses") Collection<LoanStatus> loanStatuses, @Param("loanTypes") Collection<AccountType> loanTypes) {
         List<Loan> loans = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(ids.stream().toList(), fineractProperties.getQuery().getInClauseParameterSizeLimit());
         partitions
@@ -222,7 +224,7 @@ public class LoanRepositoryWrapper {
 
     // Repayments Schedule
     public List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
-            @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
+                                                         @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
         List<Loan> loans = this.repository.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses);
         if (loans != null && loans.size() > 0) {
             for (Loan loan : loans) {
@@ -234,7 +236,7 @@ public class LoanRepositoryWrapper {
 
     // Repayments Schedule
     public List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
-            @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
+                                                        @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
         List<Loan> loans = this.repository.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses);
         if (loans != null && loans.size() > 0) {
             for (Loan loan : loans) {

@@ -32,11 +32,11 @@
             <column autoIncrement="true" name="id" type="bigint" remarks="Internal ID">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="created_at" type="timestamp with time zone" />
-            <column name="command_id" type="uuid" />
-            <column name="tenant_id" type="varchar(255)" />
-            <column name="username" type="varchar(255)" />
-            <column name="payload" type="text" />
+            <column name="created_at" type="timestamp with time zone"/>
+            <column name="command_id" type="uuid"/>
+            <column name="tenant_id" type="varchar(255)"/>
+            <column name="username" type="varchar(255)"/>
+            <column name="payload" type="text"/>
         </createTable>
     </changeSet>
     <changeSet author="fineract" id="command-00002" context="mysql">
@@ -49,11 +49,11 @@
             <column autoIncrement="true" name="id" type="bigint" remarks="Internal ID">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="created_at" type="datetime" />
-            <column name="command_id" type="uuid" />
-            <column name="tenant_id" type="varchar(255)" />
-            <column name="username" type="varchar(255)" />
-            <column name="payload" type="text" />
+            <column name="created_at" type="datetime"/>
+            <column name="command_id" type="uuid"/>
+            <column name="tenant_id" type="varchar(255)"/>
+            <column name="username" type="varchar(255)"/>
+            <column name="payload" type="text"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,8 +22,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.List;
 import java.util.Map;
+
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
@@ -41,7 +43,8 @@ public final class ExternalEventHelper {
 
     private static final Gson GSON = new JSON().getGson();
 
-    public ExternalEventHelper() {}
+    public ExternalEventHelper() {
+    }
 
     @Builder
     public static class Filter {
@@ -79,11 +82,12 @@ public final class ExternalEventHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<ExternalEventResponse> getAllExternalEvents(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                                   final ResponseSpecification responseSpec) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
         log.info("---------------------------------GETTING ALL EXTERNAL EVENTS---------------------------------------------");
         String response = Utils.performServerGet(requestSpec, responseSpec, url);
-        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {}.getType());
+        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -91,11 +95,12 @@ public final class ExternalEventHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<ExternalEventResponse> getAllExternalEvents(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, Filter filter) {
+                                                                   final ResponseSpecification responseSpec, Filter filter) {
         final String url = "/fineract-provider/api/v1/internal/externalevents?" + filter.toQueryParams() + Utils.TENANT_IDENTIFIER;
         log.info("---------------------------------GETTING ALL EXTERNAL EVENTS---------------------------------------------");
         String response = Utils.performServerGet(requestSpec, responseSpec, url);
-        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {}.getType());
+        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -113,7 +118,7 @@ public final class ExternalEventHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void changeEventState(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String eventName,
-            boolean status) {
+                                        boolean status) {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
                 responseSpec, "{\"externalEventConfigurations\":{\"" + eventName + "\":" + status + "}}\n");
         Assertions.assertEquals(updatedConfigurations.size(), 1);

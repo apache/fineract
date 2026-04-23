@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,11 +25,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -59,10 +61,11 @@ public class DepositAccountOnHoldTransaction extends AbstractAuditableWithUTCDat
     @Column(name = "created_date", nullable = true)
     private LocalDateTime createdDateToRemove;
 
-    protected DepositAccountOnHoldTransaction() {}
+    protected DepositAccountOnHoldTransaction() {
+    }
 
     private DepositAccountOnHoldTransaction(final SavingsAccount savingsAccount, final BigDecimal amount,
-            final DepositAccountOnHoldTransactionType transactionType, final LocalDate transactionDate, final boolean reversed) {
+                                            final DepositAccountOnHoldTransactionType transactionType, final LocalDate transactionDate, final boolean reversed) {
         this.savingsAccount = savingsAccount;
         this.amount = amount;
         this.transactionType = transactionType.getValue();
@@ -72,14 +75,14 @@ public class DepositAccountOnHoldTransaction extends AbstractAuditableWithUTCDat
     }
 
     public static DepositAccountOnHoldTransaction hold(final SavingsAccount savingsAccount, final BigDecimal amount,
-            final LocalDate transactionDate) {
+                                                       final LocalDate transactionDate) {
         boolean reversed = false;
         return new DepositAccountOnHoldTransaction(savingsAccount, amount, DepositAccountOnHoldTransactionType.HOLD, transactionDate,
                 reversed);
     }
 
     public static DepositAccountOnHoldTransaction release(final SavingsAccount savingsAccount, final BigDecimal amount,
-            final LocalDate transactionDate) {
+                                                          final LocalDate transactionDate) {
         boolean reversed = false;
         return new DepositAccountOnHoldTransaction(savingsAccount, amount, DepositAccountOnHoldTransactionType.RELEASE, transactionDate,
                 reversed);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -54,10 +55,10 @@ public final class LoanRescheduleRequestData {
      *            TODO
      **/
     private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
-            Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
-            String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
-            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
-            Collection<CodeValueData> rescheduleReasons, final Collection<LoanTermVariationsData> loanTermVariationsData) {
+                                      Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
+                                      String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
+                                      final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
+                                      Collection<CodeValueData> rescheduleReasons, final Collection<LoanTermVariationsData> loanTermVariationsData) {
 
         this.id = id;
         this.loanId = loanId;
@@ -81,10 +82,10 @@ public final class LoanRescheduleRequestData {
      * @return an instance of the LoanRescheduleRequestData class
      **/
     public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
-            Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
-            String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
-            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
-            Collection<CodeValueData> rescheduleReasons, final Collection<LoanTermVariationsData> loanTermVariationsData) {
+                                                     Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
+                                                     String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
+                                                     final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
+                                                     Collection<CodeValueData> rescheduleReasons, final Collection<LoanTermVariationsData> loanTermVariationsData) {
 
         return new LoanRescheduleRequestData(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
                 rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
@@ -98,8 +99,8 @@ public final class LoanRescheduleRequestData {
      *            TODO
      **/
     private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum, final String clientName,
-            final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
-            final CodeValueData rescheduleReasonCodeValue) {
+                                      final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
+                                      final CodeValueData rescheduleReasonCodeValue) {
 
         this.id = id;
         this.loanId = loanId;
@@ -121,8 +122,8 @@ public final class LoanRescheduleRequestData {
      * @return an instance of the LoanRescheduleRequestData class
      **/
     public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
-            final String clientName, final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
-            final CodeValueData rescheduleReasonCodeValue) {
+                                                     final String clientName, final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
+                                                     final CodeValueData rescheduleReasonCodeValue) {
 
         return new LoanRescheduleRequestData(id, loanId, statusEnum, clientName, loanAccountNumber, clientId, rescheduleFromDate,
                 rescheduleReasonCodeValue);

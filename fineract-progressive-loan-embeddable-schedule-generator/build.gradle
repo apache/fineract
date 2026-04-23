@@ -33,7 +33,7 @@ var requiredModuleNames = [
 
 tasks.named('shadowJar', ShadowJar) {
     dependencies {
-        exclude((dep) -> !requiredModuleNames.any( (reqModName) -> dep.moduleName.contains(reqModName)))
+        exclude((dep) -> !requiredModuleNames.any((reqModName) -> dep.moduleName.contains(reqModName)))
     }
     minimize() {
         exclude("*.xml")

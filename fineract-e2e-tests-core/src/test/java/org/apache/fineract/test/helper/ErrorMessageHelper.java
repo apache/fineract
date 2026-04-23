@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.models.BatchResponse;
 import org.apache.fineract.client.models.Header;
@@ -35,7 +36,8 @@ public final class ErrorMessageHelper {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
-    private ErrorMessageHelper() {}
+    private ErrorMessageHelper() {
+    }
 
     public static String requestFailed(Response response) throws IOException {
         return String.format("Request failed. Error:%n%s", response.errorBody() != null ? response.errorBody().string() : null);
@@ -467,18 +469,18 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInRepaymentSchedule(String resourceId, int line, List<List<String>> actualList,
-            List<String> expected) {
+                                                             List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Repayment schedule of resource %s tab line %s." //
-                + "%nActual values in line (with the same due date) are: %n%s - %nBut expected values in line: %n%s", resourceId, line,
+                        + "%nActual values in line (with the same due date) are: %n%s - %nBut expected values in line: %n%s", resourceId, line,
                 actual, expected);
     }
 
     public static String wrongValueInLineInTransactionsTab(String resourceId, int line, List<List<String>> actualList,
-            List<String> expected) {
+                                                           List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Transactions tab of resource %s line %s." //
-                + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
+                        + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
                 expected);
     }
 
@@ -488,7 +490,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInRescheduleTab(String resourceId, int line, List<List<String>> actualList,
-            List<String> expected) {
+                                                         List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Reschedule tab of resource %s line %s." //
                 + "%nActual values in line are: %n%s %nExpected values in line: %n%s", resourceId, line, actual, expected);
@@ -502,7 +504,7 @@ public final class ErrorMessageHelper {
     public static String wrongValueInLineInChargesTab(String resourceId, int line, List<List<String>> actualList, List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Charges tab of resource %s line %s." //
-                + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
+                        + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
                 expected);
     }
 
@@ -511,17 +513,17 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInJournalEntries(String resourceId, int line, List<List<List<String>>> actualList,
-            List<String> expected) {
+                                                          List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Journal entries of resource %s line %s." //
-                + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
+                        + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
                 resourceId, line, actual, expected);
     }
 
     public static String wrongValueInLineInJournalEntry(String resourceId, int line, List<List<String>> actualList, List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Journal entries of resource %s line %s." //
-                + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
+                        + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
                 resourceId, line, actual, expected);
     }
 
@@ -879,7 +881,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInChargeOffReasonOptions(final int line, final List<List<String>> actual,
-            final List<String> expected) {
+                                                                  final List<String> expected) {
         final String actualValues = actual.stream().map(List::toString).collect(Collectors.joining(System.lineSeparator()));
 
         return String.format(
@@ -902,16 +904,16 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInDisbursementDetailsTab(String resourceId, int line, Set<List<String>> actualList,
-            List<String> expected) {
+                                                                  List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Loan Tranche Details tab of resource %s line %s." //
-                + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
+                        + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
                 expected);
     }
 
     public static String nrOfLinesWrongInLoanTrancheDetailsTab(String resourceId, int actual, int expected) {
         return String.format("%nNumber of lines does not match in Loan Tranche Details tab and expected datatable of resource %s." //
-                + "%nNumber of disbursement details tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual,
+                        + "%nNumber of disbursement details tab lines: %s %nNumber of expected datatable lines: %s%n", resourceId, actual,
                 expected);
     }
 
@@ -956,10 +958,10 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInBuyDownFeeTab(String resourceId, int line, List<List<String>> actualList,
-            List<String> expected) {
+                                                         List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Buy Down Fee tab of resource %s line %s." //
-                + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
+                        + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
                 expected);
     }
 
@@ -969,10 +971,10 @@ public final class ErrorMessageHelper {
     }
 
     public static String wrongValueInLineInDeferredIncomeTab(String resourceId, int line, List<List<String>> actualList,
-            List<String> expected) {
+                                                             List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Deferred Income tab of resource %s line %s." //
-                + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
+                        + "%nActual values in line (with the same date) are: %n%s %nExpected values in line: %n%s", resourceId, line, actual,
                 expected);
     }
 

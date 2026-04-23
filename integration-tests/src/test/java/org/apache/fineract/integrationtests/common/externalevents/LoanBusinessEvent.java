@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,7 +46,7 @@ public class LoanBusinessEvent extends BusinessEvent {
     }
 
     public LoanBusinessEvent(String type, String businessDate, Integer statusId, Double principalDisbursed, Double principalOutstanding,
-            List<String> loanTermVariationType) {
+                             List<String> loanTermVariationType) {
         super(type, businessDate);
         this.statusId = statusId;
         this.principalDisbursed = principalDisbursed;
@@ -66,7 +67,7 @@ public class LoanBusinessEvent extends BusinessEvent {
         return super.verify(externalEvent, formatter) && Objects.equals(statusId, getStatusId().doubleValue())
                 && Objects.equals(principalDisbursed, getPrincipalDisbursed())
                 && Objects.equals(principalOutstanding, getPrincipalOutstanding()) && loanTermVariationsMatch(
-                        (List<Map<String, Object>>) externalEvent.getPayLoad().get("loanTermVariations"), loanTermVariationType);
+                (List<Map<String, Object>>) externalEvent.getPayLoad().get("loanTermVariations"), loanTermVariationType);
     }
 
     private boolean loanTermVariationsMatch(final List<Map<String, Object>> loanTermVariations, final List<String> expectedTypes) {

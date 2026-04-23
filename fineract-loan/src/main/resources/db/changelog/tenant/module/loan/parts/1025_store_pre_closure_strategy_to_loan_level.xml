@@ -31,7 +31,8 @@
         </addColumn>
         <sql>
             UPDATE m_loan_recalculation_details SET pre_close_interest_calculation_strategy = 2 WHERE loan_id IN (
-                SELECT ml.id FROM m_loan ml, m_product_loan_recalculation_details plrd WHERE plrd.product_id = ml.product_id AND plrd.pre_close_interest_calculation_strategy = 2
+            SELECT ml.id FROM m_loan ml, m_product_loan_recalculation_details plrd WHERE plrd.product_id = ml.product_id
+            AND plrd.pre_close_interest_calculation_strategy = 2
             )
         </sql>
     </changeSet>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.holiday.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -29,7 +30,7 @@ public interface HolidayRepository extends JpaRepository<Holiday, Long>, JpaSpec
 
     @Query("select holiday from Holiday holiday, IN(holiday.offices) office where (holiday.fromDate >= :date OR :date <= holiday.toDate) and holiday.status = :status and office.id = :officeId")
     List<Holiday> findByOfficeIdAndGreaterThanDate(@Param("officeId") Long officeId, @Param("date") LocalDate date,
-            @Param("status") Integer status);
+                                                   @Param("status") Integer status);
 
     @Query("select holiday from Holiday holiday where holiday.processed = false and holiday.status = :status")
     List<Holiday> findUnprocessed(@Param("status") Integer status);

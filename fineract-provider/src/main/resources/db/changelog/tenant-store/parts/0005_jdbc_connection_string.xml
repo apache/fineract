@@ -29,20 +29,20 @@
         <sql dbms="postgresql">
             UPDATE tenant_server_connections
             SET schema_connection_parameters =
-                    CASE
-                        WHEN schema_connection_parameters IS NULL OR TRIM(schema_connection_parameters) = ''
-                            THEN 'serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
-                        ELSE schema_connection_parameters || '&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
-                        END;
+            CASE
+            WHEN schema_connection_parameters IS NULL OR TRIM(schema_connection_parameters) = ''
+            THEN 'serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
+            ELSE schema_connection_parameters || '&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
+            END;
         </sql>
         <sql dbms="mysql,mariadb">
             UPDATE tenant_server_connections
             SET schema_connection_parameters =
-                    CASE
-                        WHEN schema_connection_parameters IS NULL OR TRIM(schema_connection_parameters) = ''
-                            THEN 'serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
-                        ELSE CONCAT(schema_connection_parameters, '&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00''')
-                        END;
+            CASE
+            WHEN schema_connection_parameters IS NULL OR TRIM(schema_connection_parameters) = ''
+            THEN 'serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00'''
+            ELSE CONCAT(schema_connection_parameters, '&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone=''-00:00''')
+            END;
         </sql>
     </changeSet>
 

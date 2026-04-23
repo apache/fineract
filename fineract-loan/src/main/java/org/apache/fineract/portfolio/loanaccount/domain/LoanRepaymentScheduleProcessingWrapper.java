@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -36,7 +37,7 @@ import org.springframework.lang.NonNull;
 public class LoanRepaymentScheduleProcessingWrapper {
 
     public void reprocess(final MonetaryCurrency currency, final LocalDate disbursementDate,
-            final List<LoanRepaymentScheduleInstallment> repaymentPeriods, final Set<LoanCharge> loanCharges) {
+                          final List<LoanRepaymentScheduleInstallment> repaymentPeriods, final Set<LoanCharge> loanCharges) {
 
         Money totalInterest = Money.zero(currency);
         Money totalPrincipal = Money.zero(currency);
@@ -82,8 +83,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativeFeeChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd, final Set<LoanCharge> loanCharges,
-            final MonetaryCurrency monetaryCurrency, LoanRepaymentScheduleInstallment period, final Money totalPrincipal,
-            final Money totalInterest, boolean isInstallmentChargeApplicable, boolean isFirstPeriod) {
+                                                final MonetaryCurrency monetaryCurrency, LoanRepaymentScheduleInstallment period, final Money totalPrincipal,
+                                                final Money totalInterest, boolean isInstallmentChargeApplicable, boolean isFirstPeriod) {
 
         Money cumulative = Money.zero(monetaryCurrency);
         for (final LoanCharge loanCharge : loanCharges) {
@@ -127,8 +128,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativeChargesWaivedWithin(final LocalDate periodStart, final LocalDate periodEnd, final Set<LoanCharge> loanCharges,
-            final MonetaryCurrency currency, boolean isInstallmentChargeApplicable, boolean isFirstPeriod,
-            Predicate<LoanCharge> predicate) {
+                                                final MonetaryCurrency currency, boolean isInstallmentChargeApplicable, boolean isFirstPeriod,
+                                                Predicate<LoanCharge> predicate) {
 
         Money cumulative = Money.zero(currency);
 
@@ -150,8 +151,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativeChargesWrittenOffWithin(final LocalDate periodStart, final LocalDate periodEnd,
-            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, boolean isInstallmentChargeApplicable,
-            boolean isFirstPeriod, Predicate<LoanCharge> chargePredicate) {
+                                                    final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, boolean isInstallmentChargeApplicable,
+                                                    boolean isFirstPeriod, Predicate<LoanCharge> chargePredicate) {
 
         Money cumulative = Money.zero(currency);
 
@@ -177,8 +178,8 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativePenaltyChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd,
-            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, LoanRepaymentScheduleInstallment period,
-            final Money totalPrincipal, final Money totalInterest, boolean isInstallmentChargeApplicable, boolean isFirstPeriod) {
+                                                    final Set<LoanCharge> loanCharges, final MonetaryCurrency currency, LoanRepaymentScheduleInstallment period,
+                                                    final Money totalPrincipal, final Money totalInterest, boolean isInstallmentChargeApplicable, boolean isFirstPeriod) {
 
         Money cumulative = Money.zero(currency);
 
@@ -221,7 +222,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
     @NonNull
     private BigDecimal getBaseAmount(MonetaryCurrency monetaryCurrency, LoanRepaymentScheduleInstallment period, LoanCharge loanCharge,
-            BigDecimal amount) {
+                                     BigDecimal amount) {
         if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
             amount = amount.add(period.getPrincipal(monetaryCurrency).getAmount())
                     .add(period.getInterestCharged(monetaryCurrency).getAmount());
@@ -239,7 +240,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     public static boolean isInPeriod(LocalDate targetDate, LoanRepaymentScheduleInstallment targetInstallment,
-            List<LoanRepaymentScheduleInstallment> installments) {
+                                     List<LoanRepaymentScheduleInstallment> installments) {
         int firstPeriod = fetchFirstNormalInstallmentNumber(installments);
         return isInPeriod(targetDate, targetInstallment, targetInstallment.getInstallmentNumber().equals(firstPeriod));
     }
@@ -267,7 +268,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     public static Optional<LoanRepaymentScheduleInstallment> findInPeriod(LocalDate targetDate,
-            List<LoanRepaymentScheduleInstallment> installments) {
+                                                                          List<LoanRepaymentScheduleInstallment> installments) {
         int firstNumber = fetchFirstNormalInstallmentNumber(installments);
         return installments.stream().filter(e -> isInPeriod(targetDate, e, e.getInstallmentNumber().equals(firstNumber))).findFirst();
     }

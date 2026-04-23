@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -35,11 +35,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
@@ -1517,7 +1519,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, final String inArrearsTolerance) {
+                                                               final Long delinquencyBucketId, final String inArrearsTolerance) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withDaysInMonth("30").withDaysInYear("360")
                 .withInArrearsTolerance(inArrearsTolerance).build(null, delinquencyBucketId);
         final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
@@ -1534,14 +1536,14 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private PutLoanProductsProductIdResponse updateLoanProduct(LoanTransactionHelper loanTransactionHelper, Long id,
-            final Integer inArrearsTolerance) {
+                                                               final Integer inArrearsTolerance) {
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
                 .inArrearsTolerance(inArrearsTolerance);
         return loanTransactionHelper.updateLoanProduct(id, requestModifyLoan);
     }
 
     private Integer createLoanApplication(final LoanTransactionHelper loanTransactionHelper, final String clientId,
-            final String loanProductId, final String operationDate, final String inArrearsTolerance) {
+                                          final String loanProductId, final String operationDate, final String inArrearsTolerance) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("12")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths() //
@@ -1561,7 +1563,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String inArrearsTolerance) {
+                                      final String operationDate, final String inArrearsTolerance) {
         final Integer loanId = createLoanApplication(loanTransactionHelper, clientId, loanProductId, operationDate, inArrearsTolerance);
         disburseLoanAccount(loanTransactionHelper, loanId, operationDate);
         return loanId;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,16 +28,19 @@ import java.util.Set;
  */
 final class CentersApiResourceSwagger {
 
-    private CentersApiResourceSwagger() {}
+    private CentersApiResourceSwagger() {
+    }
 
     @Schema(description = "GetCentersTemplateResponse")
     public static final class GetCentersTemplateResponse {
 
-        private GetCentersTemplateResponse() {}
+        private GetCentersTemplateResponse() {
+        }
 
         static final class GetCentersOfficeOptions {
 
-            private GetCentersOfficeOptions() {}
+            private GetCentersOfficeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -48,7 +52,8 @@ final class CentersApiResourceSwagger {
 
         static final class GetCentersStaffOptions {
 
-            private GetCentersStaffOptions() {}
+            private GetCentersStaffOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -69,15 +74,18 @@ final class CentersApiResourceSwagger {
     @Schema(description = "GetCentersResponse")
     public static final class GetCentersResponse {
 
-        private GetCentersResponse() {}
+        private GetCentersResponse() {
+        }
 
         static final class GetCentersPageItems {
 
-            private GetCentersPageItems() {}
+            private GetCentersPageItems() {
+            }
 
             static final class GetCentersStatus {
 
-                private GetCentersStatus() {}
+                private GetCentersStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -110,7 +118,8 @@ final class CentersApiResourceSwagger {
     @Schema(description = "GetCentersCenterIdResponse")
     public static final class GetCentersCenterIdResponse {
 
-        private GetCentersCenterIdResponse() {}
+        private GetCentersCenterIdResponse() {
+        }
 
         @Schema(example = "8")
         public Long id;
@@ -130,7 +139,8 @@ final class CentersApiResourceSwagger {
     @Schema(description = "PostCentersRequest")
     public static final class PostCentersRequest {
 
-        private PostCentersRequest() {}
+        private PostCentersRequest() {
+        }
 
         @Schema(example = "First Center (No groups)")
         public String name;
@@ -143,7 +153,8 @@ final class CentersApiResourceSwagger {
     @Schema(description = "PostCentersResponse")
     public static final class PostCentersResponse {
 
-        private PostCentersResponse() {}
+        private PostCentersResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -156,7 +167,8 @@ final class CentersApiResourceSwagger {
     @Schema(description = "PutCentersCenterIdRequest")
     public static final class PutCentersCenterIdRequest {
 
-        private PutCentersCenterIdRequest() {}
+        private PutCentersCenterIdRequest() {
+        }
 
         @Schema(example = "First Center (No groups)")
         public String name;
@@ -165,11 +177,13 @@ final class CentersApiResourceSwagger {
     @Schema(description = "PutCentersCenterIdResponse")
     public static final class PutCentersCenterIdResponse {
 
-        private PutCentersCenterIdResponse() {}
+        private PutCentersCenterIdResponse() {
+        }
 
         static final class PutCentersChanges {
 
-            private PutCentersChanges() {}
+            private PutCentersChanges() {
+            }
 
             @Schema(example = "First Center (No groups) - modified")
             public String name;
@@ -187,11 +201,13 @@ final class CentersApiResourceSwagger {
     @Schema(description = "DeleteCentersCenterIdResponse")
     public static final class DeleteCentersCenterIdResponse {
 
-        private DeleteCentersCenterIdResponse() {}
+        private DeleteCentersCenterIdResponse() {
+        }
 
         static final class DeleteCentersChanges {
 
-            private DeleteCentersChanges() {}
+            private DeleteCentersChanges() {
+            }
         }
 
         @Schema(example = "1")
@@ -202,7 +218,8 @@ final class CentersApiResourceSwagger {
     @Schema(description = "PostCentersCenterIdRequest")
     public static final class PostCentersCenterIdRequest {
 
-        private PostCentersCenterIdRequest() {}
+        private PostCentersCenterIdRequest() {
+        }
 
         @Schema(example = "32")
         public Long closureReasonId;
@@ -217,7 +234,8 @@ final class CentersApiResourceSwagger {
     @Schema(description = "PostCentersCenterIdResponse")
     public static final class PostCentersCenterIdResponse {
 
-        private PostCentersCenterIdResponse() {}
+        private PostCentersCenterIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -226,15 +244,18 @@ final class CentersApiResourceSwagger {
     @Schema(description = "GetCentersCenterIdAccountsResponse")
     public static final class GetCentersCenterIdAccountsResponse {
 
-        private GetCentersCenterIdAccountsResponse() {}
+        private GetCentersCenterIdAccountsResponse() {
+        }
 
         static final class GetCentersSavingsAccounts {
 
-            private GetCentersSavingsAccounts() {}
+            private GetCentersSavingsAccounts() {
+            }
 
             static final class GetCentersCenterIdStatus {
 
-                private GetCentersCenterIdStatus() {}
+                private GetCentersCenterIdStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -264,7 +285,8 @@ final class CentersApiResourceSwagger {
 
             static final class GetCentersCenterIdCurrency {
 
-                private GetCentersCenterIdCurrency() {}
+                private GetCentersCenterIdCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -284,7 +306,8 @@ final class CentersApiResourceSwagger {
 
             static final class GetCentersAccountType {
 
-                private GetCentersAccountType() {}
+                private GetCentersAccountType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -296,7 +319,8 @@ final class CentersApiResourceSwagger {
 
             static final class GetCentersTimeline {
 
-                private GetCentersTimeline() {}
+                private GetCentersTimeline() {
+                }
 
                 @Schema(example = "[2014, 5, 1]")
                 public LocalDate submittedOnDate;
@@ -310,7 +334,8 @@ final class CentersApiResourceSwagger {
 
             static final class GetCentersDepositType {
 
-                private GetCentersDepositType() {}
+                private GetCentersDepositType() {
+                }
 
                 @Schema(example = "100")
                 public Long id;

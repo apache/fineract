@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,8 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.jayway.jsonpath.ReadContext;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.exception.BatchReferenceInvalidException;
@@ -119,8 +121,8 @@ public class ResolutionHelperTest {
 
         // Mock the response context
         ReadContext readContext = mock(ReadContext.class);
-        when(readContext.read("$.dates[0]")).thenReturn(new int[] { 2023, 5, 15 });
-        when(readContext.read("$.dates[1]")).thenReturn(new int[] { 2023, 6, 15 });
+        when(readContext.read("$.dates[0]")).thenReturn(new int[]{2023, 5, 15});
+        when(readContext.read("$.dates[1]")).thenReturn(new int[]{2023, 6, 15});
 
         BatchRequest resolvedRequest = resolutionHelper.resolveRequest(batchRequest, parentResponse);
         assertNotNull(resolvedRequest);

@@ -25,45 +25,45 @@
   http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-   <changeSet id="1" author="fineract" context="postgresql">
-    <preConditions onFail="MARK_RAN">
-        <columnExists
-            tableName="m_portfolio_command_source"
-            columnName="processing_result_enum"/>
-    </preConditions>
-
-    <renameColumn
-        tableName="m_portfolio_command_source"
-        oldColumnName="processing_result_enum"
-        newColumnName="status"/>
-   </changeSet>
-
-   <changeSet id="2" author="fineract" context="mysql">
-    <preConditions onFail="MARK_RAN">
-        <columnExists
-            tableName="m_portfolio_command_source"
-            columnName="processing_result_enum"/>
-    </preConditions>
-
-    <renameColumn
-        tableName="m_portfolio_command_source"
-        oldColumnName="processing_result_enum"
-        newColumnName="status"
-        columnDataType="smallint(6)"/>
-   </changeSet>
-
-   <changeSet id="3" author="fineract" context="postgresql,mysql">
-    <preConditions onFail="MARK_RAN">
-        <not>
+    <changeSet id="1" author="fineract" context="postgresql">
+        <preConditions onFail="MARK_RAN">
             <columnExists
-                tableName="m_portfolio_command_source"
-                columnName="result"/>
-        </not>
-    </preConditions>
+                    tableName="m_portfolio_command_source"
+                    columnName="processing_result_enum"/>
+        </preConditions>
 
-    <addColumn tableName="m_portfolio_command_source">
-        <column name="result" type="TEXT"/>
-    </addColumn>
-   </changeSet>
+        <renameColumn
+                tableName="m_portfolio_command_source"
+                oldColumnName="processing_result_enum"
+                newColumnName="status"/>
+    </changeSet>
+
+    <changeSet id="2" author="fineract" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <columnExists
+                    tableName="m_portfolio_command_source"
+                    columnName="processing_result_enum"/>
+        </preConditions>
+
+        <renameColumn
+                tableName="m_portfolio_command_source"
+                oldColumnName="processing_result_enum"
+                newColumnName="status"
+                columnDataType="smallint(6)"/>
+    </changeSet>
+
+    <changeSet id="3" author="fineract" context="postgresql,mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists
+                        tableName="m_portfolio_command_source"
+                        columnName="result"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="m_portfolio_command_source">
+            <column name="result" type="TEXT"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

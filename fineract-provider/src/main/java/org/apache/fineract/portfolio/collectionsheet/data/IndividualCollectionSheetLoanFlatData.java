@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -44,10 +45,10 @@ public class IndividualCollectionSheetLoanFlatData {
     private BigDecimal feePaid = BigDecimal.ZERO;
 
     public IndividualCollectionSheetLoanFlatData(final String clientName, final Long clientId, final Long loanId, final String accountId,
-            final Integer accountStatusId, final String productShortName, final Long productId, final CurrencyData currency,
-            final BigDecimal disbursementAmount, final BigDecimal principalDue, final BigDecimal principalPaid,
-            final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue, final BigDecimal feeDue,
-            final BigDecimal feePaid) {
+                                                 final Integer accountStatusId, final String productShortName, final Long productId, final CurrencyData currency,
+                                                 final BigDecimal disbursementAmount, final BigDecimal principalDue, final BigDecimal principalPaid,
+                                                 final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue, final BigDecimal feeDue,
+                                                 final BigDecimal feePaid) {
         this.clientName = clientName;
         this.clientId = clientId;
         this.loanId = loanId;

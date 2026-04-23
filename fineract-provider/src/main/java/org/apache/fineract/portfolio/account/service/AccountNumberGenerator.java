@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.account.service;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -125,7 +126,7 @@ public class AccountNumberGenerator implements AccountNumberGeneratorService {
             case SHARES -> generate((ShareAccount) entity, format);
             case WORKING_CAPITAL_LOAN -> generate((WorkingCapitalLoan) entity, format);
             case CENTER, GROUP ->
-                throw new UnsupportedOperationException("Use generateCenterAccountNumber / generateGroupAccountNumber for " + type);
+                    throw new UnsupportedOperationException("Use generateCenterAccountNumber / generateGroupAccountNumber for " + type);
         };
     }
 
@@ -158,24 +159,24 @@ public class AccountNumberGenerator implements AccountNumberGeneratorService {
             switch (accountNumberPrefixType) {
                 case CLIENT_TYPE:
                     prefix = propertyMap.get(CLIENT_TYPE);
-                break;
+                    break;
 
                 case OFFICE_NAME:
                     prefix = propertyMap.get(OFFICE_NAME);
-                break;
+                    break;
 
                 case LOAN_PRODUCT_SHORT_NAME:
                     prefix = propertyMap.get(LOAN_PRODUCT_SHORT_NAME);
-                break;
+                    break;
 
                 case SAVINGS_PRODUCT_SHORT_NAME:
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
-                break;
+                    break;
 
                 case PREFIX_SHORT_NAME:
                     generatePrefix(propertyMap, propertyMap.get(ID), accountMaxLength, accountNumberFormat);
                     prefix = propertyMap.get(PREFIX_SHORT_NAME);
-                break;
+                    break;
             }
 
             // FINERACT-590
@@ -222,7 +223,7 @@ public class AccountNumberGenerator implements AccountNumberGeneratorService {
     }
 
     public Boolean checkAccountNumberConflict(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat,
-            String accountNumber) {
+                                              String accountNumber) {
 
         String entityType = propertyMap.get(ENTITY_TYPE);
         if (entityType == null) { // No entityType in map -> cannot check for conflicts.
@@ -237,37 +238,37 @@ public class AccountNumberGenerator implements AccountNumberGeneratorService {
                 if (client != null) {
                     randomNumberConflict = true;
                 }
-            break;
+                break;
 
             case "loan":
                 Loan loan = this.loanRepository.findLoanAccountByAccountNumber(accountNumber);
                 if (loan != null) {
                     randomNumberConflict = true;
                 }
-            break;
+                break;
 
             case "savingsAccount":
                 SavingsAccount savingsAccount = this.savingsAccountRepository.findSavingsAccountByAccountNumber(accountNumber);
                 if (savingsAccount != null) {
                     randomNumberConflict = true;
                 }
-            break;
+                break;
 
             case "workingCapitalLoan":
                 if (this.workingCapitalLoanRepository.existsByAccountNumber(accountNumber)) {
                     randomNumberConflict = true;
                 }
-            break;
+                break;
 
             default:
-            break;
+                break;
         }
 
         return randomNumberConflict;
     }
 
     private Map<String, String> generatePrefix(Map<String, String> propertyMap, String accountNumber, Integer accountMaxLength,
-            AccountNumberFormat accountNumberFormat) {
+                                               AccountNumberFormat accountNumberFormat) {
 
         String prefix = accountNumberFormat.getPrefixCharacter();
         Integer prefixLength = prefix.length();

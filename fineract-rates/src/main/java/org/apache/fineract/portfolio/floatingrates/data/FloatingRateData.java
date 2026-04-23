@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.floatingrates.data;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.List;
+
 import lombok.Getter;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -42,8 +43,8 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
     private final List<EnumOptionData> interestRateFrequencyTypeOptions;
 
     public FloatingRateData(Long id, String name, Boolean isBaseLendingRate, Boolean isActive, String createdBy, OffsetDateTime createdOn,
-            String modifiedBy, OffsetDateTime modifiedOn, List<FloatingRatePeriodData> ratePeriods,
-            List<EnumOptionData> interestRateFrequencyTypeOptions) {
+                            String modifiedBy, OffsetDateTime modifiedOn, List<FloatingRatePeriodData> ratePeriods,
+                            List<EnumOptionData> interestRateFrequencyTypeOptions) {
         this.id = id;
         this.name = name;
         this.isBaseLendingRate = isBaseLendingRate;

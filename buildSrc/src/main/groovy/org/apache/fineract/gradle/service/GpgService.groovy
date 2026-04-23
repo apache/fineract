@@ -52,8 +52,8 @@ class GpgService {
         // TODO: provide implementation for *.gpg key rings
         def keyBox = config.publicKeyring.endsWith(".kbx") ? new BcKeyBox(new FileInputStream(config.publicKeyring)) : null
 
-        if(keyBox) {
-            for(def keyBlob : keyBox.getKeyBlobs()) {
+        if (keyBox) {
+            for (def keyBlob : keyBox.getKeyBlobs()) {
                 switch (keyBlob.type) {
                     case BlobType.X509_BLOB:
                         break
@@ -67,7 +67,7 @@ class GpgService {
                             if (k.isEncryptionKey()) {
                                 def keyName = Long.toHexString(k.keyID).toUpperCase(java.util.Locale.ROOT)
 
-                                if(config.keyName.substring(config.keyName.length()-keyName.length()) == keyName) {
+                                if (config.keyName.substring(config.keyName.length() - keyName.length()) == keyName) {
                                     publicKey = k;
                                     log.warn("Found: ${publicKey.getUserIDs().next()}")
                                     break
@@ -84,7 +84,7 @@ class GpgService {
 
             def secretKey = secretRingCollection.getSecretKey(publicKey.keyID)
 
-            if(secretKey!=null) {
+            if (secretKey != null) {
                 this.privateKey = secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build(config.password.toCharArray()))
             }
         } else {
@@ -137,8 +137,8 @@ class GpgService {
             byte[] hash = digest.digest()
             BigInteger bigInt = new BigInteger(1, hash)
             output = bigInt.toString(16)
-            while ( output.length() < 32 ) {
-                output = "0"+output
+            while (output.length() < 32) {
+                output = "0" + output
             }
         } catch (Exception e) {
             log.error(e.toString(), e)

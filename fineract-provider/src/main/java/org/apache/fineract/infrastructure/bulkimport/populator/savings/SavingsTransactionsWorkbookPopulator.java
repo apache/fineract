@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TransactionConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -54,7 +55,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
     private final List<SavingsAccountData> savingsAccounts;
 
     public SavingsTransactionsWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
-            ExtrasSheetPopulator extrasSheetPopulator, List<SavingsAccountData> savingsAccounts) {
+                                                ExtrasSheetPopulator extrasSheetPopulator, List<SavingsAccountData> savingsAccounts) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.extrasSheetPopulator = extrasSheetPopulator;
@@ -135,7 +136,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
         DataValidationConstraint accountNumberConstraint = validationHelper.createFormulaListConstraint(
                 "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
         DataValidationConstraint transactionTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Withdrawal", "Deposit" });
+                .createExplicitListConstraint(new String[]{"Withdrawal", "Deposit"});
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint transactionDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN,
@@ -188,7 +189,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
         for (int i = 0; i < savingsAccounts.size(); i++) {
             if (!clientName.equals(savingsAccounts.get(i).getClientName())) {
                 endIndex = i + 1;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
                 startIndex = i + 2;
                 clientName = savingsAccounts.get(i).getClientName();
                 clientId = savingsAccounts.get(i).getClientId();
@@ -197,7 +198,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
             }
             if (i == savingsAccounts.size() - 1) {
                 endIndex = i + 2;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
             }
         }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -88,7 +89,7 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
                         writeLong(STAFF_ID_COL, row, staff.getId());
                         row = staffSheet.createRow(++rowIndex);
                     }
-                    officeNameToBeginEndIndexesOfStaff.put(officeIndex++, new Integer[] { startIndex, rowIndex });
+                    officeNameToBeginEndIndexesOfStaff.put(officeIndex++, new Integer[]{startIndex, rowIndex});
                 }
             } else {
                 officeIndex++;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,13 +21,15 @@ package org.apache.fineract.infrastructure.dataqueries.service.export;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.lang.NonNull;
 
 public final class DatatableExportUtil {
 
-    private DatatableExportUtil() {}
+    private DatatableExportUtil() {
+    }
 
     public static String normalizeFolderName(String folderName) {
         if (StringUtils.isBlank(folderName)) {
@@ -56,7 +58,7 @@ public final class DatatableExportUtil {
     }
 
     public static String generateS3DatatableExportFileName(int maxLength, String folder, String extension, String reportName,
-            Map<String, String> reportParams) {
+                                                           Map<String, String> reportParams) {
         exportBasicValidation(extension, reportName);
         if (maxLength < 30) {
             throw new IllegalArgumentException("The maximum length must be greater than 30");
@@ -72,7 +74,7 @@ public final class DatatableExportUtil {
 
     @NonNull
     private static String generateReportFileName(int maxLength, String folder, String extension, String reportName,
-            Map<String, String> reportParams) {
+                                                 Map<String, String> reportParams) {
         String extensionWithDot = extension.startsWith(".") ? extension : "." + extension;
         String timestamp = "_" + DateUtils.getOffsetDateTimeOfTenant().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 

@@ -26,7 +26,8 @@
         <createIndex indexName="ind_m_loan_delinquency_tag_history_loan_id" tableName="m_loan_delinquency_tag_history">
             <column name="loan_id"/>
         </createIndex>
-        <createIndex indexName="ind_m_loan_delinquency_tag_history_liftedon_date" tableName="m_loan_delinquency_tag_history">
+        <createIndex indexName="ind_m_loan_delinquency_tag_history_liftedon_date"
+                     tableName="m_loan_delinquency_tag_history">
             <column name="liftedon_date"/>
         </createIndex>
     </changeSet>

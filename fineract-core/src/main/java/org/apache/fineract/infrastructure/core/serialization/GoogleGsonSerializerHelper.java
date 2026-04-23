@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.serialization;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,6 +31,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.api.DateAdapter;
 import org.apache.fineract.infrastructure.core.api.ExternalIdAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
@@ -59,7 +61,7 @@ public final class GoogleGsonSerializerHelper {
     }
 
     public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(final Set<String> supportedParameters,
-            final Set<String> responseParameters) {
+                                                                             final Set<String> responseParameters) {
 
         final Set<String> parameterNamesToSkip = new HashSet<>();
 

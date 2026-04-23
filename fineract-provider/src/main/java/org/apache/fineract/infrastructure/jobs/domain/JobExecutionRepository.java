@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import static org.springframework.batch.core.BatchStatus.UNKNOWN;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
@@ -155,36 +156,36 @@ public class JobExecutionRepository {
     }
 
     public LocalDate getBusinessDateOfRunningJobByExecutionParameter(String jobName, String jobCustomParamKeyName, String parameterKeyName,
-            String parameterValue, String dateParameterName) {
+                                                                     String parameterValue, String dateParameterName) {
         try {
             if (databaseTypeResolver.isPostgreSQL()) {
                 return namedParameterJdbcTemplate.queryForObject("""
-                        SELECT
-                                J2->>'parameterValue'
-                        FROM
-                            BATCH_JOB_INSTANCE BJI
-                                INNER JOIN BATCH_JOB_EXECUTION BJE ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
-                                INNER JOIN BATCH_JOB_EXECUTION_PARAMS BJEP ON BJE.JOB_EXECUTION_ID = BJEP.JOB_EXECUTION_ID
-                                inner join batch_custom_job_parameters CJP ON cast(BJEP.parameter_value as bigint) = CJP.id
-                                AND BJEP.parameter_name = :jobCustomParamKeyName
-                                CROSS JOIN LATERAL json_array_elements(CJP.parameter_json) J
-                                CROSS JOIN LATERAL json_array_elements(CJP.parameter_json) J2
-                        WHERE
-                                    J ->> 'parameterName' = :filterParameterName
-                          AND J ->> 'parameterValue' = :filterParameterValue
-                          AND J2 ->> 'parameterName' = :dateParameterName
-                          AND BJE.STATUS IN (:statuses)
-                          AND BJI.JOB_NAME = :jobName
-                          AND BJE.JOB_INSTANCE_ID NOT IN (
-                            SELECT
-                                IBJE.JOB_INSTANCE_ID
-                            FROM
-                                BATCH_JOB_INSTANCE IBJI
-                                    INNER JOIN BATCH_JOB_EXECUTION IBJE ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
-                            WHERE
-                                    IBJE.STATUS = :completedStatus
-                              AND IBJI.JOB_NAME = :jobName)
-                        """,
+                                SELECT
+                                        J2->>'parameterValue'
+                                FROM
+                                    BATCH_JOB_INSTANCE BJI
+                                        INNER JOIN BATCH_JOB_EXECUTION BJE ON BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID
+                                        INNER JOIN BATCH_JOB_EXECUTION_PARAMS BJEP ON BJE.JOB_EXECUTION_ID = BJEP.JOB_EXECUTION_ID
+                                        inner join batch_custom_job_parameters CJP ON cast(BJEP.parameter_value as bigint) = CJP.id
+                                        AND BJEP.parameter_name = :jobCustomParamKeyName
+                                        CROSS JOIN LATERAL json_array_elements(CJP.parameter_json) J
+                                        CROSS JOIN LATERAL json_array_elements(CJP.parameter_json) J2
+                                WHERE
+                                            J ->> 'parameterName' = :filterParameterName
+                                  AND J ->> 'parameterValue' = :filterParameterValue
+                                  AND J2 ->> 'parameterName' = :dateParameterName
+                                  AND BJE.STATUS IN (:statuses)
+                                  AND BJI.JOB_NAME = :jobName
+                                  AND BJE.JOB_INSTANCE_ID NOT IN (
+                                    SELECT
+                                        IBJE.JOB_INSTANCE_ID
+                                    FROM
+                                        BATCH_JOB_INSTANCE IBJI
+                                            INNER JOIN BATCH_JOB_EXECUTION IBJE ON IBJI.JOB_INSTANCE_ID = IBJE.JOB_INSTANCE_ID
+                                    WHERE
+                                            IBJE.STATUS = :completedStatus
+                                      AND IBJI.JOB_NAME = :jobName)
+                                """,
                         Map.of("jobCustomParamKeyName", jobCustomParamKeyName, "filterParameterName", parameterKeyName,
                                 "filterParameterValue", parameterValue, "statuses", List.of(STARTED.name(), STARTING.name()),
                                 "completedStatus", COMPLETED.name(), "jobName", jobName, "dateParameterName", dateParameterName),

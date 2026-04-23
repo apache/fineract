@@ -29,7 +29,8 @@
             </column>
         </addColumn>
         <addColumn tableName="m_product_loan">
-            <column defaultValueComputed="NULL" name="disbursed_amount_percentage_for_down_payment" type="DECIMAL(9, 6)"/>
+            <column defaultValueComputed="NULL" name="disbursed_amount_percentage_for_down_payment"
+                    type="DECIMAL(9, 6)"/>
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="2">
@@ -39,7 +40,8 @@
             </column>
         </addColumn>
         <addColumn tableName="m_loan">
-            <column defaultValueComputed="NULL" name="disbursed_amount_percentage_for_down_payment" type="DECIMAL(9, 6)"/>
+            <column defaultValueComputed="NULL" name="disbursed_amount_percentage_for_down_payment"
+                    type="DECIMAL(9, 6)"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,10 +23,12 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.models.AdvancedPaymentData;
@@ -172,7 +174,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests {
         Assertions.assertEquals(1, loanProduct.getCreditAllocation().size());
         Assertions.assertEquals(createChargebackAllocation(), loanProduct.getCreditAllocation().get(0));
 
-        PutLoanProductsProductIdRequest putLoanProductsProductIdRequest = updateLoanProductRequest(new CreditAllocationData[] {});
+        PutLoanProductsProductIdRequest putLoanProductsProductIdRequest = updateLoanProductRequest(new CreditAllocationData[]{});
         LOAN_TRANSACTION_HELPER.updateLoanProduct(loanProductId.longValue(), putLoanProductsProductIdRequest);
         loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         Assertions.assertEquals(0, loanProduct.getCreditAllocation().size());
@@ -240,7 +242,7 @@ public class LoanProductWithCreditAllocationsIntegrationTests {
     private LoanProductTestBuilder baseLoanProduct() {
         return new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
                 .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
                 .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL);

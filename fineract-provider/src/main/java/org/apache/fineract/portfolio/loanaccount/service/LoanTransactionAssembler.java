@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -70,7 +71,7 @@ public class LoanTransactionAssembler {
     }
 
     public LoanTransaction assembleAccrualActivityTransaction(@NonNull Loan loan, @NonNull LoanRepaymentScheduleInstallment installment,
-            @NonNull LocalDate transactionDate) {
+                                                              @NonNull LocalDate transactionDate) {
         ExternalId externalId = externalIdFactory.create();
 
         BigDecimal interestPortion = installment.getInterestCharged();
@@ -79,7 +80,7 @@ public class LoanTransactionAssembler {
         BigDecimal transactionAmount = MathUtil.add(interestPortion, feeChargesPortion, penaltyChargesPortion);
         return MathUtil.isGreaterThanZero(transactionAmount)
                 ? new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.ACCRUAL_ACTIVITY, transactionDate, transactionAmount,
-                        null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null, externalId)
+                null, interestPortion, feeChargesPortion, penaltyChargesPortion, null, false, null, externalId)
                 : null;
     }
 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -38,30 +39,30 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
         switch (repaymentFrequencyType) {
             case DAYS:
                 paymentPeriodsInOneYear = 365;
-            break;
+                break;
             case WEEKS:
                 paymentPeriodsInOneYear = 52;
-            break;
+                break;
             case MONTHS:
                 paymentPeriodsInOneYear = 12;
-            break;
+                break;
             case YEARS:
                 paymentPeriodsInOneYear = 1;
-            break;
+                break;
             case INVALID:
                 paymentPeriodsInOneYear = 0;
-            break;
+                break;
             case WHOLE_TERM:
                 log.error("TODO Implement repaymentFrequencyType for WHOLE_TERM");
-            break;
+                break;
         }
         return paymentPeriodsInOneYear;
     }
 
     @Override
     public BigDecimal calculatePortionOfRepaymentPeriodInterestChargingGrace(final LocalDate repaymentPeriodStartDate,
-            final LocalDate scheduledDueDate, final LocalDate interestChargedFromLocalDate,
-            final PeriodFrequencyType repaymentPeriodFrequencyType, final int repaidEvery, MathContext mc) {
+                                                                             final LocalDate scheduledDueDate, final LocalDate interestChargedFromLocalDate,
+                                                                             final PeriodFrequencyType repaymentPeriodFrequencyType, final int repaidEvery, MathContext mc) {
 
         BigDecimal periodFraction = BigDecimal.ZERO;
 
@@ -81,7 +82,7 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
     }
 
     private BigDecimal calculateRepaymentPeriodFraction(final PeriodFrequencyType repaymentPeriodFrequencyType, final int repaidEvery,
-            final int numberOfDaysInterestCalculationGrace, final MathContext mc) {
+                                                        final int numberOfDaysInterestCalculationGrace, final MathContext mc) {
 
         BigDecimal repayEveryBD = BigDecimal.valueOf(repaidEvery);
         BigDecimal noDaysInterestCalculationGrace = BigDecimal.valueOf(numberOfDaysInterestCalculationGrace);

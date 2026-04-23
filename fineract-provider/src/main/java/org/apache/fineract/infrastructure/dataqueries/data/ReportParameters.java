@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -78,7 +78,7 @@ public final class ReportParameters {
             + "The exact parameters required depend on the specific report being executed.\n"
             + "Some reports may accept additional parameters not listed here.";
 
-    @Parameters({ @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
+    @Parameters({@Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
             @Parameter(name = PARAMETER_TYPE, description = "Optional - Indicates if this is a parameter type request", example = "false"),
             @Parameter(name = OUTPUT_TYPE, description = "Optional - Output format type (HTML, XLS, CSV, PDF)", example = "HTML"),
             @Parameter(name = ENABLE_BUSINESS_DATE, description = "Optional - Enable business date filtering", example = "true"),
@@ -115,7 +115,7 @@ public final class ReportParameters {
             @Parameter(name = "SavingsAccountSubStatus", description = "Optional - Savings account sub-status", example = "active"),
             @Parameter(name = "SelectLoanType", description = "Optional - Loan type selection", example = "individual"),
 
-            @Parameter(name = "R_*", description = "Optional - Additional report-specific parameters prefixed with 'R_'") })
+            @Parameter(name = "R_*", description = "Optional - Additional report-specific parameters prefixed with 'R_'")})
 
     public static void getOpenApiParameters() {
 
@@ -153,10 +153,10 @@ public final class ReportParameters {
         return FULL_DESCRIPTION;
     }
 
-    @Parameters({ @Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
+    @Parameters({@Parameter(name = EXPORT_CSV, description = "Optional - Set to true to export results as CSV", example = "true"),
             @Parameter(name = PARAMETER_TYPE, description = "Optional - Indicates if this is a parameter type request", example = "false"),
             @Parameter(name = OUTPUT_TYPE, description = "Optional - Output format type (HTML, XLS, CSV, PDF)", example = "HTML"),
-            @Parameter(name = "R_*", description = "Optional - Report-specific parameters prefixed with 'R_'") })
+            @Parameter(name = "R_*", description = "Optional - Report-specific parameters prefixed with 'R_'")})
     public static void getMinimalOpenApiParameters() {
 
     }

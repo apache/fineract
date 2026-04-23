@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -177,7 +178,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddFieldsMapper rm = new AddFieldsMapper();
         final String sql = "select " + rm.schema() + " where client.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{clientid}); // NOSONAR
     }
 
     @Override
@@ -185,7 +186,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         this.context.authenticatedUser();
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{clientid}); // NOSONAR
     }
 
     @Override
@@ -195,7 +196,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{clientid, typeid}); // NOSONAR
     }
 
     @Override
@@ -206,7 +207,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=? and ca.is_active=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid, temp }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{clientid, typeid, temp}); // NOSONAR
     }
 
     @Override
@@ -217,7 +218,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.is_active=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, temp }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{clientid, temp}); // NOSONAR
     }
 
     @Override

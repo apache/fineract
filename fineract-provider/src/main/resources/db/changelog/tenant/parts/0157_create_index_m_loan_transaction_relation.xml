@@ -31,7 +31,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently IDX_M_LOAN_TRANSACTION_RELATION_TO_LOAN_TRANSACTION_ID on m_loan_transaction_relation(to_loan_transaction_id);
+            create index concurrently IDX_M_LOAN_TRANSACTION_RELATION_TO_LOAN_TRANSACTION_ID on
+            m_loan_transaction_relation(to_loan_transaction_id);
         </sql>
     </changeSet>
     <changeSet author="fineract" id="2" runInTransaction="false" context="postgresql">
@@ -41,7 +42,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently IDX_M_LOAN_TRANSACTION_RELATION_TO_LOAN_CHARGE_ID on m_loan_transaction_relation(to_loan_charge_id);
+            create index concurrently IDX_M_LOAN_TRANSACTION_RELATION_TO_LOAN_CHARGE_ID on
+            m_loan_transaction_relation(to_loan_charge_id);
         </sql>
     </changeSet>
 </databaseChangeLog>

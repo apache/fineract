@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,12 +23,14 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.models.AdvancedPaymentData;
@@ -218,7 +220,7 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
 
         String loanProduct = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).withRepaymentStrategy("advanced-payment-allocation-strategy").build();
 
@@ -377,7 +379,7 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
         String loanProduct = loanProductTestBuilder(customization -> customization
                 .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation).withPrincipal("15,000.00")
                 .withNumberOfRepayments(null).withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build());
 
@@ -399,7 +401,7 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
         String loanProduct = loanProductTestBuilder(customization -> customization
                 .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation).withPrincipal("15,000.00")
                 .withNumberOfRepayments("4").withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod(null)
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build());
 
@@ -456,7 +458,7 @@ public class LoanProductWithAdvancedPaymentAllocationIntegrationTests {
     private String loanProductTestBuilder(Consumer<LoanProductTestBuilder> customization) {
         LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
                 .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL);

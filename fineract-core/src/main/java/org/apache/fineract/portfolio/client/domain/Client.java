@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,12 +29,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -55,8 +57,8 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Entity
 @Getter
 @Setter
-@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
-        @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
+@Table(name = "m_client", uniqueConstraints = {@UniqueConstraint(columnNames = {"account_no"}, name = "account_no_UNIQUE"), //
+        @UniqueConstraint(columnNames = {"mobile_no"}, name = "mobile_no_UNIQUE")})
 public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
@@ -206,24 +208,25 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     protected Set<ClientIdentifier> identifiers = new HashSet<>();
 
     public static Client instance(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
-            final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
-            final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
-            final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
-            final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
-            final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
+                                  final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
+                                  final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
+                                  final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
+                                  final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
+                                  final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
         return new Client(currentUser, status, office, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
                 activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
                 savingsAccountId, dateOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
     }
 
-    protected Client() {}
+    protected Client() {
+    }
 
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
-            final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
-            final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
-            final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
-            final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
-            final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
+                   final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
+                   final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
+                   final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
+                   final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
+                   final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -80,7 +81,7 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     }
 
     private boolean createUpdateCacheValue(Long appUserId, Long now,
-            HashMap<Long, CacheNotificationResponseHeader> notificationResponseHeaderCache) {
+                                           HashMap<Long, CacheNotificationResponseHeader> notificationResponseHeaderCache) {
         boolean hasNotifications;
         Long tenantId = ThreadLocalContextUtil.getTenant().getId();
         CacheNotificationResponseHeader cacheNotificationResponseHeader;
@@ -153,7 +154,7 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
             }
         }
 
-        Object[] params = new Object[] { appUserId };
+        Object[] params = new Object[]{appUserId};
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), params, this.notificationDataRow);
     }
 

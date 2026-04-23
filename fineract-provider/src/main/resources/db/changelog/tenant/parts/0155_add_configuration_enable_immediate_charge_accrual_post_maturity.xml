@@ -35,7 +35,8 @@
             <column name="string_value"/>
             <column name="enabled" valueBoolean="false"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="Whether the system creates accruals immediately for charge creation after the maturity date"/>
+            <column name="description"
+                    value="Whether the system creates accruals immediately for charge creation after the maturity date"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

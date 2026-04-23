@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,10 +22,11 @@ import org.apache.fineract.client.models.PostGLAccountsRequest;
 
 public final class GLAccountRequestFactory {
 
-    private GLAccountRequestFactory() {}
+    private GLAccountRequestFactory() {
+    }
 
     public static PostGLAccountsRequest defaultGLAccountRequest(String name, String glCode, Integer type, Integer usage,
-            Boolean manualEntriesAllowed) {
+                                                                Boolean manualEntriesAllowed) {
         return new PostGLAccountsRequest().name(name).glCode(glCode).type(type).usage(usage).manualEntriesAllowed(manualEntriesAllowed);
     }
 }

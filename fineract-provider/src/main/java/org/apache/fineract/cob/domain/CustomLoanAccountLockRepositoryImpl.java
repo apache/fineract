@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,16 +38,16 @@ public class CustomLoanAccountLockRepositoryImpl implements CustomLoanAccountLoc
         String sql = "UPDATE m_loan SET last_closed_business_date = (select "
                 + databaseSpecificSQLGenerator.subDate("lck.lock_placed_on_cob_business_date", "1", "DAY")
                 + """
-                                                             from m_loan_account_locks lck
-                                                             where lck.loan_id = id
-                                                               and lck.lock_placed_on_cob_business_date is not null
-                                                               and lck.error is not null
-                                                               and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
-                        where last_closed_business_date is null and exists  (select lck.loan_id
-                                      from m_loan_account_locks lck  where lck.loan_id = id
-                                        and lck.lock_placed_on_cob_business_date is not null and lck.error is not null
-                                        and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
-                            """;
+                                                     from m_loan_account_locks lck
+                                                     where lck.loan_id = id
+                                                       and lck.lock_placed_on_cob_business_date is not null
+                                                       and lck.error is not null
+                                                       and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
+                where last_closed_business_date is null and exists  (select lck.loan_id
+                              from m_loan_account_locks lck  where lck.loan_id = id
+                                and lck.lock_placed_on_cob_business_date is not null and lck.error is not null
+                                and lck.lock_owner in ('LOAN_COB_CHUNK_PROCESSING','LOAN_INLINE_COB_PROCESSING'))
+                """;
 
         entityManager.createNativeQuery(sql).executeUpdate();
         entityManager.flush();

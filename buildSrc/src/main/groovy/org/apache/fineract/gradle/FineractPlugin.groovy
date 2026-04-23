@@ -75,13 +75,13 @@ class FineractPlugin implements Plugin<Project> {
             doLast {
                 log.warn("Fineract Publish Doc...")
 
-                def url = extension.config.doc.url?:"git@github.com:apache/fineract-site.git";
-                def branch = extension.config.doc.branch?:"asf-site"
-                def directory = extension.config.doc.directory?:System.getProperty("java.io.tmpdir")+"/fineract-site"
+                def url = extension.config.doc.url ?: "git@github.com:apache/fineract-site.git";
+                def branch = extension.config.doc.branch ?: "asf-site"
+                def directory = extension.config.doc.directory ?: System.getProperty("java.io.tmpdir") + "/fineract-site"
 
                 def d = new File(directory)
 
-                if(d.exists()) {
+                if (d.exists()) {
                     gitService.pull(directory)
                 } else {
                     gitService.clone(url, branch, directory)
@@ -92,7 +92,7 @@ class FineractPlugin implements Plugin<Project> {
                 def source = new File("fineract-doc/build/docs/html/en");
                 def target = new File(directory + "/docs/current")
 
-                if(!target.name) {
+                if (!target.name) {
                     target.mkdirs()
                 }
 
@@ -195,21 +195,21 @@ class FineractPlugin implements Plugin<Project> {
                 String issue = project.properties?['fineract.release.issue']
                 String date = project.properties?['fineract.releaseBranch.date']
 
-                if(!version || !issue || !date) {
+                if (!version || !issue || !date) {
                     TextIO textIO = TextIoFactory.getTextIO()
 
-                    if(!version) {
+                    if (!version) {
                         version = textIO.newStringInputReader()
                                 .withPattern("\\d+.\\d+.\\d+")
                                 .read("Release Version");
                     }
-                    if(!issue) {
+                    if (!issue) {
                         issue = textIO.newStringInputReader()
                                 .withMaxLength(4)
                                 .withPattern("\\d+")
                                 .read("Jira Issue");
                     }
-                    if(!date) {
+                    if (!date) {
                         date = textIO.newStringInputReader()
                                 .withMaxLength(10)
                                 .withPattern("\\d\\d\\d\\d-\\d\\d-\\d\\d")
@@ -226,8 +226,8 @@ class FineractPlugin implements Plugin<Project> {
                 this.context?.project?['fineract.release.issue'] = issue
                 this.context?.project?['fineract.releaseBranch.date'] = date
 
-                if(step.email) {
-                    emailService.send( processEmailParams(step.email, this.context) )
+                if (step.email) {
+                    emailService.send(processEmailParams(step.email, this.context))
                 }
             }
         }
@@ -251,15 +251,15 @@ class FineractPlugin implements Plugin<Project> {
                 String version = project.properties?['fineract.release.version']
                 String date = project.properties?['fineract.release.date']
 
-                if(!version || !date) {
+                if (!version || !date) {
                     TextIO textIO = TextIoFactory.getTextIO()
 
-                    if(!version) {
+                    if (!version) {
                         version = textIO.newStringInputReader()
                                 .withPattern("\\d+.\\d+.\\d+")
                                 .read("Release Version");
                     }
-                    if(!date) {
+                    if (!date) {
                         date = textIO.newStringInputReader()
                                 .withMaxLength(10)
                                 .withPattern("\\d\\d\\d\\d-\\d\\d-\\d\\d")
@@ -277,8 +277,8 @@ class FineractPlugin implements Plugin<Project> {
                 this.context?.project?['fineract.release.version'] = version
                 this.context?.project?['fineract.release.date'] = date
 
-                if(step.email) {
-                    emailService.send( processEmailParams(step.email, this.context) )
+                if (step.email) {
+                    emailService.send(processEmailParams(step.email, this.context))
                 }
             }
         }
@@ -300,7 +300,7 @@ class FineractPlugin implements Plugin<Project> {
 
                 String version = project.properties?['fineract.release.version']
 
-                if(!version) {
+                if (!version) {
                     TextIO textIO = TextIoFactory.getTextIO()
 
                     if (!version) {
@@ -314,7 +314,7 @@ class FineractPlugin implements Plugin<Project> {
 
                 def params = processGitParams(step.git, this.context)
 
-                params.tag = params.tag?:version
+                params.tag = params.tag ?: version
 
                 gitService.createTag(params.tag, params.message)
             }
@@ -345,7 +345,7 @@ class FineractPlugin implements Plugin<Project> {
 
                 String version = project.properties?['fineract.release.version']
 
-                if(!version) {
+                if (!version) {
                     TextIO textIO = TextIoFactory.getTextIO()
 
                     version = textIO.newStringInputReader()
@@ -357,7 +357,7 @@ class FineractPlugin implements Plugin<Project> {
 
                 subversionService.checkout(step.subversion)
 
-                def directory = step.subversion.directory?:System.getProperty("java.io.tmpdir") + "/fineract-dist-dev"
+                def directory = step.subversion.directory ?: System.getProperty("java.io.tmpdir") + "/fineract-dist-dev"
 
                 def source = new File("fineract-war/build/distributions")
                 def target = new File("${directory}/${version}")
@@ -440,7 +440,7 @@ class FineractPlugin implements Plugin<Project> {
     private FineractPluginExtension.FineractPluginStep step(FineractPluginExtension extension, String id) {
         FineractPluginExtension.FineractPluginStep step = extension.steps[id]
 
-        if(step) {
+        if (step) {
             log.warn("Fineract release step ${step.order}: ${step.description}.")
         } else {
             throw new RuntimeException("Could not find any parameters for step with ID '${id}'")
@@ -450,12 +450,12 @@ class FineractPlugin implements Plugin<Project> {
     }
 
     private FineractPluginExtension.FineractPluginEmailParams processEmailParams(FineractPluginExtension.FineractPluginEmailParams params, Object data) {
-        if(params.subjectTemplate) {
+        if (params.subjectTemplate) {
             def result = templateService.render(params.subjectTemplate, data)
 
             params.subject = result.output
         }
-        if(params.messageTemplate) {
+        if (params.messageTemplate) {
             def result = templateService.render(params.messageTemplate, data)
 
             params.message = result.output
@@ -465,7 +465,7 @@ class FineractPlugin implements Plugin<Project> {
     }
 
     private FineractPluginExtension.FineractPluginGitParams processGitParams(FineractPluginExtension.FineractPluginGitParams params, Object data) {
-        if(params.messageTemplate) {
+        if (params.messageTemplate) {
             def result = templateService.render(params.messageTemplate, data)
 
             params.message = result.output
@@ -475,11 +475,11 @@ class FineractPlugin implements Plugin<Project> {
     }
 
     private Map<String, ?> context(Project project) {
-        return Map.of("project", project.getProperties().findAll { it.key != "password"})
+        return Map.of("project", project.getProperties().findAll { it.key != "password" })
     }
 
     private void printInstructions(Project project, String step) {
-        String version = project.properties?['fineract.release.version']?:"0.0.0"
+        String version = project.properties?['fineract.release.version'] ?: "0.0.0"
 
         this.context?.project?['fineract.release.version'] = version
 

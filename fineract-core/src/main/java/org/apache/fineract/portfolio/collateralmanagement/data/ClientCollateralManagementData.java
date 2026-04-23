@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.collateralmanagement.data;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -42,7 +43,7 @@ public final class ClientCollateralManagementData {
     private final Long id;
 
     public static ClientCollateralManagementData instance(final String name, final BigDecimal quantity, final BigDecimal total,
-            final BigDecimal totalCollateral, final Long clientId, final List<LoanTransactionData> loanTransactionData, final Long id) {
+                                                          final BigDecimal totalCollateral, final Long clientId, final List<LoanTransactionData> loanTransactionData, final Long id) {
         return new ClientCollateralManagementData(name, quantity, total, totalCollateral, clientId, loanTransactionData, id);
     }
 

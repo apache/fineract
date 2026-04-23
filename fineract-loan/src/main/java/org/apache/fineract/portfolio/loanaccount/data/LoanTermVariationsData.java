@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -38,7 +39,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     private Boolean isProcessed;
 
     public LoanTermVariationsData(final Long id, final EnumOptionData termType, final LocalDate termVariationApplicableFrom,
-            final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
+                                  final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = id;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;
@@ -48,7 +49,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     public LoanTermVariationsData(final Long id, final Integer termType, final LocalDate termVariationApplicableFrom,
-            final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
+                                  final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = id;
         this.termType = LoanEnumerations.loanVariationType(LoanTermVariationType.fromInt(termType));
         this.termVariationApplicableFrom = termVariationApplicableFrom;
@@ -58,7 +59,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     public LoanTermVariationsData(final EnumOptionData termType, final LocalDate termVariationApplicableFrom, final BigDecimal decimalValue,
-            LocalDate dateValue, final boolean isSpecificToInstallment) {
+                                  LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = null;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;

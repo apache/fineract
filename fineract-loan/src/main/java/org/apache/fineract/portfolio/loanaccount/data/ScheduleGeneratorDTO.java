@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.time.LocalDate;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
@@ -49,14 +50,14 @@ public class ScheduleGeneratorDTO {
     final boolean isPrincipalCompoundingDisabledForOverdueLoans;
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final CurrencyData currency,
-            final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
-            final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
-            final LocalDate recalculateFrom, final LocalDate recalculateTill, final Long overdurPenaltyWaitPeriod,
-            final FloatingRateDTO floatingRateDTO, final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
-            final Boolean isInterestChargedFromDateAsDisbursementDateEnabled, final Integer numberOfdays,
-            final boolean isSkipRepaymentOnFirstDayofMonth, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled,
-            final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
-            final boolean isPrincipalCompoundingDisabledForOverdueLoans) {
+                                final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
+                                final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
+                                final LocalDate recalculateFrom, final LocalDate recalculateTill, final Long overdurPenaltyWaitPeriod,
+                                final FloatingRateDTO floatingRateDTO, final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
+                                final Boolean isInterestChargedFromDateAsDisbursementDateEnabled, final Integer numberOfdays,
+                                final boolean isSkipRepaymentOnFirstDayofMonth, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled,
+                                final boolean isFirstRepaymentDateAllowedOnHoliday, final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI,
+                                final boolean isPrincipalCompoundingDisabledForOverdueLoans) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.currency = currency;

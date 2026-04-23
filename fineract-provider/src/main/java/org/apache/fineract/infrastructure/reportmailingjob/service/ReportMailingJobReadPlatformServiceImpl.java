@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -54,7 +55,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
 
     @Autowired
     public ReportMailingJobReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
+                                                   DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
         this.sqlGenerator = sqlGenerator;
@@ -109,10 +110,8 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
             final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = false";
 
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { reportMailingJobId }); // NOSONAR
-        }
-
-        catch (final EmptyResultDataAccessException ex) {
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[]{reportMailingJobId}); // NOSONAR
+        } catch (final EmptyResultDataAccessException ex) {
             throw new ReportMailingJobNotFoundException(reportMailingJobId, ex);
         }
     }

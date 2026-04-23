@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.commands.service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -178,7 +180,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     @Override
     public Page<AuditData> retrievePaginatedAuditEntries(final SQLBuilder extraCriteria, final boolean includeJson,
-            final PaginationParameters parameters) {
+                                                         final PaginationParameters parameters) {
 
         sqlValidator.validate(parameters.getOrderBy());
         sqlValidator.validate(parameters.getSortOrder());
@@ -215,7 +217,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     }
 
     private List<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL,
-            final boolean includeJson) {
+                                            final boolean includeJson) {
 
         if ((!useType.equals("audit") && !useType.equals("makerchecker"))) {
             throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
@@ -266,7 +268,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final String auditAsJson = auditResult.getCommandAsJson();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
 
         final Map<String, Object> commandAsJsonMap = this.fromApiJsonHelper.extractObjectMap(typeOfMap, auditAsJson);
         final JsonElement auditJsonFragment = this.fromApiJsonHelper.parse(auditAsJson);
@@ -364,8 +367,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         if (entityName.equalsIgnoreCase("LOAN") || entityName.equalsIgnoreCase("LOANPRODUCT")) {
 
-            final String[] enumTypes = { "loanTermFrequencyType", "termFrequencyType", "repaymentFrequencyType", "amortizationType",
-                    "interestType", "interestCalculationPeriodType", "interestRateFrequencyType", "accountingRule" };
+            final String[] enumTypes = {"loanTermFrequencyType", "termFrequencyType", "repaymentFrequencyType", "amortizationType",
+                    "interestType", "interestCalculationPeriodType", "interestRateFrequencyType", "accountingRule"};
 
             for (final String typeName : enumTypes) {
                 if (commandAsJsonMap.containsKey(typeName)) {
@@ -383,10 +386,10 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                 || entityName.equalsIgnoreCase("RECURRINGDEPOSITPRODUCT") || entityName.equalsIgnoreCase("RECURRINGDEPOSITACCOUNT")
                 || entityName.equalsIgnoreCase("FIXEDDEPOSITPRODUCT") || entityName.equalsIgnoreCase("FIXEDDEPOSITACCOUNT")) {
 
-            final String[] enumTypes = { "interestCompoundingPeriodType", "interestPostingPeriodType", "interestCalculationType",
+            final String[] enumTypes = {"interestCompoundingPeriodType", "interestPostingPeriodType", "interestCalculationType",
                     "lockinPeriodFrequencyType", "minDepositTermTypeId", "maxDepositTermTypeId", "inMultiplesOfDepositTermTypeId",
                     "depositPeriodFrequencyId", "accountingRule", "interestCalculationDaysInYearType", "preClosurePenalInterestOnTypeId",
-                    "recurringFrequencyType" };
+                    "recurringFrequencyType"};
 
             for (final String typeName : enumTypes) {
                 if (commandAsJsonMap.containsKey(typeName)) {
@@ -403,7 +406,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     }
 
     private void replaceStaffIdWithStaffName(final String staffIdStr, final String staffNameParamName,
-            Map<String, Object> commandAsJsonMap) {
+                                             Map<String, Object> commandAsJsonMap) {
 
         Long staffId = null;
         if (StringUtils.isNotBlank(staffIdStr)) {

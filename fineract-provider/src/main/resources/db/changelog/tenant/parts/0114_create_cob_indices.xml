@@ -29,7 +29,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently idx_batch_step_execution_step_name_job_execution_id on batch_step_execution(job_execution_id, step_name, start_time);
+            create index concurrently idx_batch_step_execution_step_name_job_execution_id on
+            batch_step_execution(job_execution_id, step_name, start_time);
         </sql>
     </changeSet>
 

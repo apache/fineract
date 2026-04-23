@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
@@ -93,13 +94,13 @@ class EmbeddableProgressiveLoanScheduleGeneratorTest {
     }
 
     private static void checkPeriod(LoanSchedulePlanPeriod period, LocalDate fromDate, LocalDate dueDate, double principal,
-            double outstandingBalance) {
+                                    double outstandingBalance) {
         checkPeriod(period, null, fromDate, dueDate, principal, 0.0, 0.0, 0.0, 0.0, outstandingBalance, 0.0);
     }
 
     private static void checkPeriod(LoanSchedulePlanPeriod period, Integer periodNumber, LocalDate fromDate, LocalDate dueDate,
-            double principal, double interest, double fee, double penalty, double totalDue, double outstandingBalance,
-            double totalOutstandingBalance) {
+                                    double principal, double interest, double fee, double penalty, double totalDue, double outstandingBalance,
+                                    double totalOutstandingBalance) {
         Assertions.assertEquals(periodNumber, period.periodNumber());
         Assertions.assertEquals(fromDate, period.periodFromDate());
         Assertions.assertEquals(dueDate, period.periodDueDate());

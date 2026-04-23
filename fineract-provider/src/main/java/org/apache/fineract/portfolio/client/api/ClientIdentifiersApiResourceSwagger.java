@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,16 +26,19 @@ import org.apache.fineract.portfolio.client.data.ClientIdentifierRequest;
  */
 final class ClientIdentifiersApiResourceSwagger {
 
-    private ClientIdentifiersApiResourceSwagger() {}
+    private ClientIdentifiersApiResourceSwagger() {
+    }
 
     @Schema(description = "GetClientsClientIdIdentifiersResponse")
     public static final class GetClientsClientIdIdentifiersResponse {
 
-        private GetClientsClientIdIdentifiersResponse() {}
+        private GetClientsClientIdIdentifiersResponse() {
+        }
 
         static final class GetClientsDocumentType {
 
-            private GetClientsDocumentType() {}
+            private GetClientsDocumentType() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -57,7 +60,8 @@ final class ClientIdentifiersApiResourceSwagger {
     @Schema(description = "PostClientsClientIdIdentifiersRequest")
     public static final class PostClientsClientIdIdentifiersRequest {
 
-        private PostClientsClientIdIdentifiersRequest() {}
+        private PostClientsClientIdIdentifiersRequest() {
+        }
 
         @Schema(example = "1")
         public Long documentTypeId;
@@ -72,7 +76,8 @@ final class ClientIdentifiersApiResourceSwagger {
     @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdResponse")
     public static final class PutClientsClientIdIdentifiersIdentifierIdResponse {
 
-        private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
+        private PutClientsClientIdIdentifiersIdentifierIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -86,7 +91,8 @@ final class ClientIdentifiersApiResourceSwagger {
     @Schema(description = "PostClientsClientIdIdentifiersResponse")
     public static final class PostClientsClientIdIdentifiersResponse {
 
-        private PostClientsClientIdIdentifiersResponse() {}
+        private PostClientsClientIdIdentifiersResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -99,7 +105,8 @@ final class ClientIdentifiersApiResourceSwagger {
     @Schema(description = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
     public static final class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
 
-        private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
+        private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

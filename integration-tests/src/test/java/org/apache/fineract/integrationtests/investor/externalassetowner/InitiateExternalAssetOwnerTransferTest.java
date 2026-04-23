@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -40,6 +40,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -57,6 +58,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import lombok.RequiredArgsConstructor;
 import okhttp3.ResponseBody;
 import org.apache.fineract.accounting.common.AccountingConstants;
@@ -114,7 +116,7 @@ import org.springframework.lang.NonNull;
 import retrofit2.Response;
 
 @SuppressWarnings("rawtypes")
-@ExtendWith({ ExternalEventsExtension.class })
+@ExtendWith({ExternalEventsExtension.class})
 public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
     private static ResponseSpecification RESPONSE_SPEC;
@@ -1451,7 +1453,7 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
     }
 
     private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
-            String transferExternalGroupId, String ownerExternalId, String purchasePriceRatio) {
+                                                            String transferExternalGroupId, String ownerExternalId, String purchasePriceRatio) {
         PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
                 new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId).transferExternalGroupId(transferExternalGroupId)
@@ -1537,7 +1539,7 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build(chargeId);
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
@@ -1694,22 +1696,22 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
         private final BigDecimal totalOverpaid;
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
-                BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
-                BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
+                                                     String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
+                                                     BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
+                                                     BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
             return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null,
                     detailsExpected, totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding, totalPenaltyOutstanding,
                     totalFeeOutstanding, totalOverpaid);
         }
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo) {
+                                                     String settlementDate, String effectiveFrom, String effectiveTo) {
             return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null, false,
                     null, null, null, null, null, null);
         }
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo, ExternalTransferData.SubStatusEnum subStatus) {
+                                                     String settlementDate, String effectiveFrom, String effectiveTo, ExternalTransferData.SubStatusEnum subStatus) {
             return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, subStatus,
                     false, null, null, null, null, null, null);
         }
@@ -1727,7 +1729,7 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
         private final LocalDate submittedOnDate;
 
         static ExpectedJournalEntryData expected(Long glAccountId, Long entryTypeId, BigDecimal amount, LocalDate transactionDate,
-                LocalDate submittedOnDate) {
+                                                 LocalDate submittedOnDate) {
             return new ExpectedJournalEntryData(glAccountId, entryTypeId, amount, transactionDate, submittedOnDate);
         }
 

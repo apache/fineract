@@ -52,22 +52,23 @@ class TemplateService {
                     te.printStackTrace(pw, false, true, false);
                     pw.flush();  // To commit the HTTP response
                 }
-            }}
+            }
+        }
         )
     }
 
     FineractPluginExtension.FineractPluginTemplateParams render(FineractPluginExtension.FineractPluginTemplateParams params, Object data) {
         Template template = null;
 
-        if(params.templateFile) {
+        if (params.templateFile) {
             template = new Template("template", new FileReader(new File(params.templateFile), Charset.forName("UTF-8")), this.config)
         }
-        if(params.template) {
+        if (params.template) {
             template = new Template("template", new StringReader(params.template), this.config)
         }
 
-        if(template) {
-            if(params.outputFile) {
+        if (template) {
+            if (params.outputFile) {
                 def output = new File(params.outputFile)
                 output.createNewFile()
 

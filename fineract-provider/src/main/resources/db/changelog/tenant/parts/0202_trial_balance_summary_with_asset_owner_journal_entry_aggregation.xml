@@ -25,7 +25,7 @@
 
     <changeSet author="fineract" id="trial-balance-summary-with-asset-owner-update-4">
         <update tableName="stretchy_report">
-            <column name="report_sql"  value="WITH retained_earning AS (
+            <column name="report_sql" value="WITH retained_earning AS (
       SELECT DISTINCT '${endDate}' AS postingdate,
              lp.name AS product,
              gl_code AS glacct,

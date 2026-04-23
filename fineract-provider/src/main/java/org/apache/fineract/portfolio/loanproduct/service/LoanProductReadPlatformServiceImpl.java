@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.api.ApiFacingEnum;
@@ -232,9 +233,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         private final Collection<DelinquencyBucketData> delinquencyBucketOptions;
 
         LoanProductMapper(final Collection<ChargeData> charges,
-                final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates,
-                final Collection<DelinquencyBucketData> delinquencyBucketOptions, Collection<AdvancedPaymentData> advancedPaymentData,
-                Collection<CreditAllocationData> creditAllocationData) {
+                          final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates,
+                          final Collection<DelinquencyBucketData> delinquencyBucketOptions, Collection<AdvancedPaymentData> advancedPaymentData,
+                          Collection<CreditAllocationData> creditAllocationData) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
             this.rates = rates;
@@ -834,7 +835,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
 
-        LoanProductFloatingRateMapper() {}
+        LoanProductFloatingRateMapper() {
+        }
 
         public String schema() {
             return "lp.id as id,  lp.name as name," + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "

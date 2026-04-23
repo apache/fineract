@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.cob.converter.COBParameterConverter;
@@ -41,7 +42,7 @@ public class BeforeStepLockingItemReaderHelper<T extends AccountLock> {
     private final RetrieveIdService retrieveIdService;
     private final LockingService<T> loanLockingService;
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     public LinkedBlockingQueue<Long> filterRemainingData(@NonNull StepExecution stepExecution) {
         ExecutionContext executionContext = stepExecution.getExecutionContext();
         COBParameter loanCOBParameter = COBParameterConverter.convert(executionContext.get(COBConstant.COB_PARAMETER));

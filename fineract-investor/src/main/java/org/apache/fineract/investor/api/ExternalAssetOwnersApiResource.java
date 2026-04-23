@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,8 +39,10 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandHandlerRegistry;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -93,14 +95,14 @@ public class ExternalAssetOwnersApiResource {
 
     @POST
     @Path("/transfers/loans/{loanId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnerRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithLoanId(@PathParam("loanId") final Long loanId,
-            @Parameter ExternalAssetOwnerRequest assetOwnerReq,
-            @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
+                                                             @Parameter ExternalAssetOwnerRequest assetOwnerReq,
+                                                             @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
         platformUserRightsContext.isAuthenticated();
         final String serializedAssetRequest = postApiJsonSerializerService.serialize(assetOwnerReq);
         final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, loanId, serializedAssetRequest,
@@ -110,14 +112,14 @@ public class ExternalAssetOwnersApiResource {
 
     @POST
     @Path("/transfers/loans/external-id/{loanExternalId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnerRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithLoanExternalId(@PathParam("loanExternalId") final String externalLoanId,
-            @Parameter ExternalAssetOwnerRequest assetOwnerReq,
-            @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
+                                                                     @Parameter ExternalAssetOwnerRequest assetOwnerReq,
+                                                                     @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
         platformUserRightsContext.isAuthenticated();
         final Long loanId = loanReadPlatformService.getLoanIdByLoanExternalId(externalLoanId);
         final String serializedAssetRequest = postApiJsonSerializerService.serialize(assetOwnerReq);
@@ -129,13 +131,13 @@ public class ExternalAssetOwnersApiResource {
 
     @POST
     @Path("/transfers/{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Transfer external asset", operationId = "transferRequestWithId")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("id") final Long id,
-            @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
+                                                         @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
         platformUserRightsContext.isAuthenticated();
         final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, id, null,
                 new UnrecognizedQueryParamException(COMMAND_PARAM, commandParam));
@@ -144,13 +146,13 @@ public class ExternalAssetOwnersApiResource {
 
     @POST
     @Path("/transfers/external-id/{externalId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Transfer external asset by external ID", operationId = "transferRequestWithIdByExternalId")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("externalId") final String externalId,
-            @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
+                                                         @QueryParam(COMMAND_PARAM) @Parameter(description = COMMAND_PARAM) final String commandParam) {
         platformUserRightsContext.isAuthenticated();
         final Long id = externalAssetOwnersReadService.retrieveLastTransferIdByExternalId(new ExternalId(externalId));
         final CommandWrapper commandRequest = COMMAND_HANDLER_REGISTRY.execute(commandParam, id, null,
@@ -160,9 +162,9 @@ public class ExternalAssetOwnersApiResource {
 
     @GET
     @Path("/transfers")
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(tags = {
-            "External Asset Owners" }, summary = "Retrieve External Asset Owner Transfers", description = "Retrieve External Asset Owner Transfer items by transferExternalId, loanId or loanExternalId")
+            "External Asset Owners"}, summary = "Retrieve External Asset Owner Transfers", description = "Retrieve External Asset Owner Transfer items by transferExternalId, loanId or loanExternalId")
     public Page<ExternalTransferData> getTransfers(
             @QueryParam("transferExternalId") @Parameter(description = "transferExternalId") final String transferExternalId,
             @QueryParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -175,9 +177,9 @@ public class ExternalAssetOwnersApiResource {
 
     @GET
     @Path("/transfers/active-transfer")
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(tags = {
-            "External Asset Owners" }, summary = "Retrieve Active Asset Owner Transfer", description = "Retrieve Active External Asset Owner Transfer by transferExternalId, loanId or loanExternalId")
+            "External Asset Owners"}, summary = "Retrieve Active Asset Owner Transfer", description = "Retrieve Active External Asset Owner Transfer by transferExternalId, loanId or loanExternalId")
     public ExternalTransferData getActiveTransfer(
             @QueryParam("transferExternalId") @Parameter(description = "transferExternalId") final String transferExternalId,
             @QueryParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -188,9 +190,9 @@ public class ExternalAssetOwnersApiResource {
 
     @GET
     @Path("/transfers/{transferId}/journal-entries")
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(tags = {
-            "External Asset Owners" }, summary = "Retrieve Journal Entries of Transfer", description = "Retrieve Journal entries of transfer by transferId")
+            "External Asset Owners"}, summary = "Retrieve Journal Entries of Transfer", description = "Retrieve Journal entries of transfer by transferId")
     public ExternalOwnerTransferJournalEntryData getJournalEntriesOfTransfer(
             @PathParam("transferId") @Parameter(description = "transferId") final Long transferId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -201,9 +203,9 @@ public class ExternalAssetOwnersApiResource {
 
     @GET
     @Path("/owners/external-id/{ownerExternalId}/journal-entries")
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(tags = {
-            "External Asset Owners" }, summary = "Retrieve Journal Entries of Owner", description = "Retrieve Journal entries of owner by owner externalId")
+            "External Asset Owners"}, summary = "Retrieve Journal Entries of Owner", description = "Retrieve Journal entries of owner by owner externalId")
     public ExternalOwnerJournalEntryData getJournalEntriesOfOwner(
             @PathParam("ownerExternalId") @Parameter(description = "ownerExternalId") final String ownerExternalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -214,8 +216,8 @@ public class ExternalAssetOwnersApiResource {
 
     @POST
     @Path("/search")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Search External Asset Owner Transfers by text or date ranges to settlement or effective dates")
     public Page<ExternalTransferData> searchInvestorData(@Parameter PagedRequest<ExternalAssetOwnerSearchRequest> request) {
         platformUserRightsContext.isAuthenticated();
@@ -223,8 +225,8 @@ public class ExternalAssetOwnersApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Create an External Asset Owner using the External Id")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostExternalAssetOwnerRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostExternalAssetOwnerResponse.class)))
@@ -237,7 +239,7 @@ public class ExternalAssetOwnersApiResource {
     }
 
     @GET
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Get all External Asset Owner with details")
     public List<ExternalTransferOwnerData> retrieveExternalAssetOwners() {
         platformUserRightsContext.isAuthenticated();

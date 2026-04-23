@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -175,7 +177,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
     }
 
     private void checkAccrualTransaction(final LocalDate transactionDate, final Float interestPortion, final Float feePortion,
-            final Float penaltyPortion, final Integer loanID) {
+                                         final Float penaltyPortion, final Integer loanID) {
 
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
                 this.responseSpec, loanID);
@@ -205,7 +207,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
     }
 
     private GetLoanProductsProductIdResponse createLoanProductMultipleDisbursements(final LoanTransactionHelper loanTransactionHelper,
-            final Account... accounts) {
+                                                                                    final Account... accounts) {
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
@@ -217,7 +219,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
     }
 
     private Integer createLoanAccountAndDisbursePartialAmount(final Integer clientID, final Integer loanProductID,
-            final String externalId) {
+                                                              final String externalId) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()

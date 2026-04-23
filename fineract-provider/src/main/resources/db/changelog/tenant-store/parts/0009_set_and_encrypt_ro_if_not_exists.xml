@@ -25,7 +25,8 @@
     <changeSet author="fineract" id="1" context="tenant_store_db">
         <preConditions onFail="CONTINUE">
             <sqlCheck expectedResult="1">
-                SELECT count(1) FROM tenant_server_connections WHERE id = 1 and readonly_schema_password is null and readonly_schema_username is null and readonly_schema_name is null;
+                SELECT count(1) FROM tenant_server_connections WHERE id = 1 and readonly_schema_password is null and
+                readonly_schema_username is null and readonly_schema_name is null;
             </sqlCheck>
         </preConditions>
         <update tableName="tenant_server_connections">
@@ -36,6 +37,7 @@
             <column name="readonly_schema_password" value="${fineract.tenant.read-only-password}"/>
             <column name="readonly_schema_connection_parameters" value="${fineract.tenant.read-only-parameters}"/>
         </update>
-        <customChange class="org.apache.fineract.infrastructure.core.service.migration.TenantReadOnlyPasswordEncryptionTask"/>
+        <customChange
+                class="org.apache.fineract.infrastructure.core.service.migration.TenantReadOnlyPasswordEncryptionTask"/>
     </changeSet>
 </databaseChangeLog>

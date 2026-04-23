@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
 
 import java.io.Serializable;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
@@ -53,15 +54,15 @@ public class LoanProductInterestRecalculationData implements Serializable {
     private final Boolean disallowInterestCalculationOnPastDue;
 
     public LoanProductInterestRecalculationData(final Long id, final Long productId,
-            final EnumOptionData interestRecalculationCompoundingType, final EnumOptionData rescheduleStrategyType,
-            final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
-            final EnumOptionData recalculationRestFrequencyNthDay, final EnumOptionData recalculationRestFrequencyWeekday,
-            final Integer recalculationRestFrequencyOnDay, final EnumOptionData recalculationCompoundingFrequencyType,
-            final Integer recalculationCompoundingFrequencyInterval, final EnumOptionData recalculationCompoundingFrequencyNthDay,
-            final EnumOptionData recalculationCompoundingFrequencyWeekday, final Integer recalculationCompoundingFrequencyOnDay,
-            final boolean isArrearsBasedOnOriginalSchedule, boolean isCompoundingToBePostedAsTransaction,
-            final EnumOptionData preCloseInterestCalculationStrategy, final boolean allowCompoundingOnEod,
-            final Boolean disallowInterestCalculationOnPastDue) {
+                                                final EnumOptionData interestRecalculationCompoundingType, final EnumOptionData rescheduleStrategyType,
+                                                final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
+                                                final EnumOptionData recalculationRestFrequencyNthDay, final EnumOptionData recalculationRestFrequencyWeekday,
+                                                final Integer recalculationRestFrequencyOnDay, final EnumOptionData recalculationCompoundingFrequencyType,
+                                                final Integer recalculationCompoundingFrequencyInterval, final EnumOptionData recalculationCompoundingFrequencyNthDay,
+                                                final EnumOptionData recalculationCompoundingFrequencyWeekday, final Integer recalculationCompoundingFrequencyOnDay,
+                                                final boolean isArrearsBasedOnOriginalSchedule, boolean isCompoundingToBePostedAsTransaction,
+                                                final EnumOptionData preCloseInterestCalculationStrategy, final boolean allowCompoundingOnEod,
+                                                final Boolean disallowInterestCalculationOnPastDue) {
         this.id = id;
         this.productId = productId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;

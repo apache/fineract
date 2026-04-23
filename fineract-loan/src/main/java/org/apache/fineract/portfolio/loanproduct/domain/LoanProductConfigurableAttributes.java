@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,8 +23,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.io.Serializable;
 import java.util.Objects;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -61,11 +63,11 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     @Column(name = "grace_on_arrears_ageing")
     private Boolean graceOnArrearsAgeing;
 
-    private static final String[] supportedLoanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
+    private static final String[] supportedLoanConfigurableAttributes = {LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME};
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 
@@ -117,8 +119,8 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     }
 
     public LoanProductConfigurableAttributes(Boolean amortization, Boolean interestMethod, Boolean transactionProcessingStrategyCode,
-            Boolean interestCalcPeriod, Boolean arrearsTolerance, Boolean repaymentEvery, Boolean graceOnPrincipalAndInterestPayment,
-            Boolean graceOnArrearsAging) {
+                                             Boolean interestCalcPeriod, Boolean arrearsTolerance, Boolean repaymentEvery, Boolean graceOnPrincipalAndInterestPayment,
+                                             Boolean graceOnArrearsAging) {
         this.amortizationType = amortization;
         this.interestType = interestMethod;
         this.inArrearsTolerance = arrearsTolerance;

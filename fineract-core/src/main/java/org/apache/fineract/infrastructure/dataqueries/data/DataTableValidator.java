@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import static org.apache.fineract.portfolio.search.SearchConstants.API_PARAM_TAB
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import jakarta.validation.constraints.NotNull;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -61,7 +63,8 @@ public class DataTableValidator {
 
     public void validateDataTableRegistration(final String json) {
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -72,7 +75,7 @@ public class DataTableValidator {
         if (this.fromApiJsonHelper.parameterExists(DataTableApiConstant.categoryParamName, element)) {
 
             final Integer category = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(DataTableApiConstant.categoryParamName, element);
-            Object[] objectArray = new Integer[] { DataTableApiConstant.CATEGORY_PPI, DataTableApiConstant.CATEGORY_DEFAULT };
+            Object[] objectArray = new Integer[]{DataTableApiConstant.CATEGORY_PPI, DataTableApiConstant.CATEGORY_DEFAULT};
             baseDataValidator.reset().parameter(DataTableApiConstant.categoryParamName).value(category).isOneOfTheseValues(objectArray);
         }
 

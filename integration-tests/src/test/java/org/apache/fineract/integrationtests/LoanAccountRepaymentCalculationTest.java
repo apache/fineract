@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,9 +26,11 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -412,7 +414,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
     }
 
     private void verifyPeriodDetails(GetLoansLoanIdRepaymentPeriod period, double expectedAmount, int expectedPeriodNumber,
-            LocalDate expectedPeriodFromDate, LocalDate expectedPeriodDueDate, boolean isComplete) {
+                                     LocalDate expectedPeriodFromDate, LocalDate expectedPeriodDueDate, boolean isComplete) {
         assertEquals(expectedPeriodNumber, period.getPeriod());
         assertEquals(expectedPeriodFromDate, period.getFromDate());
         assertEquals(expectedPeriodDueDate, period.getDueDate());
@@ -421,7 +423,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
     }
 
     private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
-            final String principalAmount, final String externalId, final String repaymentStartegy) {
+                                                                    final String principalAmount, final String externalId, final String repaymentStartegy) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("3")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("3").withRepaymentEveryAfter("1")

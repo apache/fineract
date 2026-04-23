@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -94,19 +95,19 @@ public class ShareAccountData implements Serializable, AccountData {
     private String dateFormat;
 
     public static ShareAccountData importInstance(Long clientId, Long productId, Integer requestedShares, String externalId,
-            LocalDate submittedOnDate, Integer minimumActivePeriodDays, Integer minimumActivePeriodFrequencyType,
-            Integer lockinPeriodFrequency, Integer lockinPeriodFrequencyType, LocalDate applicationDate,
-            Boolean allowDividendCalculationForInactiveClients, Collection<ShareAccountChargeData> charges, Long defaultSavingsAccountId,
-            Integer rowIndex, String locale, String dateFormat) {
+                                                  LocalDate submittedOnDate, Integer minimumActivePeriodDays, Integer minimumActivePeriodFrequencyType,
+                                                  Integer lockinPeriodFrequency, Integer lockinPeriodFrequencyType, LocalDate applicationDate,
+                                                  Boolean allowDividendCalculationForInactiveClients, Collection<ShareAccountChargeData> charges, Long defaultSavingsAccountId,
+                                                  Integer rowIndex, String locale, String dateFormat) {
         return new ShareAccountData(clientId, productId, requestedShares, externalId, submittedOnDate, minimumActivePeriodDays,
                 minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType, applicationDate,
                 allowDividendCalculationForInactiveClients, charges, defaultSavingsAccountId, rowIndex, locale, dateFormat);
     }
 
     private ShareAccountData(Long clientId, Long productId, Integer requestedShares, String externalId, LocalDate submittedDate,
-            Integer minimumActivePeriod, Integer minimumActivePeriodFrequencyType, Integer lockinPeriodFrequency,
-            Integer lockinPeriodFrequencyType, LocalDate applicationDate, Boolean allowDividendCalculationForInactiveClients,
-            Collection<ShareAccountChargeData> charges, Long savingsAccountId, Integer rowIndex, String locale, String dateFormat) {
+                             Integer minimumActivePeriod, Integer minimumActivePeriodFrequencyType, Integer lockinPeriodFrequency,
+                             Integer lockinPeriodFrequencyType, LocalDate applicationDate, Boolean allowDividendCalculationForInactiveClients,
+                             Collection<ShareAccountChargeData> charges, Long savingsAccountId, Integer rowIndex, String locale, String dateFormat) {
 
         this.clientId = clientId;
         this.productId = productId;
@@ -155,12 +156,12 @@ public class ShareAccountData implements Serializable, AccountData {
     private Collection<SavingsAccountData> clientSavingsAccounts;
 
     public ShareAccountData(final Long id, final String accountNo, final String externalId, final Long savingsAccountId,
-            final String savingsAccountNumber, final Long clientId, final String clientName, final Long productId, final String productName,
-            final ShareAccountStatusEnumData status, final ShareAccountApplicationTimelineData timeline, final CurrencyData currency,
-            final ShareAccountSummaryData summaryData, final Collection<ShareAccountChargeData> charges,
-            final Collection<ShareAccountTransactionData> purchasedSharesData, final Integer lockinPeriod,
-            final EnumOptionData lockPeriodTypeEnum, final Integer minimumActivePeriod, final EnumOptionData minimumActivePeriodTypeEnum,
-            Boolean allowdividendsforinactiveclients) {
+                            final String savingsAccountNumber, final Long clientId, final String clientName, final Long productId, final String productName,
+                            final ShareAccountStatusEnumData status, final ShareAccountApplicationTimelineData timeline, final CurrencyData currency,
+                            final ShareAccountSummaryData summaryData, final Collection<ShareAccountChargeData> charges,
+                            final Collection<ShareAccountTransactionData> purchasedSharesData, final Integer lockinPeriod,
+                            final EnumOptionData lockPeriodTypeEnum, final Integer minimumActivePeriod, final EnumOptionData minimumActivePeriodTypeEnum,
+                            Boolean allowdividendsforinactiveclients) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -184,7 +185,7 @@ public class ShareAccountData implements Serializable, AccountData {
     }
 
     public ShareAccountData(final Long clientId, final String clientName, final Collection<ProductData> productOptions,
-            final Collection<ChargeData> chargeOptions) {
+                            final Collection<ChargeData> chargeOptions) {
         this.clientId = clientId;
         this.clientName = clientName;
         this.productOptions = productOptions;
@@ -192,10 +193,10 @@ public class ShareAccountData implements Serializable, AccountData {
     }
 
     public ShareAccountData(final Long clientId, final String clientName, final CurrencyData currency,
-            final Collection<ShareAccountChargeData> charges, final BigDecimal currentMarketPrice,
-            final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<SavingsAccountData> clientSavingsAccounts,
-            final Long defaultShares) {
+                            final Collection<ShareAccountChargeData> charges, final BigDecimal currentMarketPrice,
+                            final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions,
+                            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<SavingsAccountData> clientSavingsAccounts,
+                            final Long defaultShares) {
         this.clientId = clientId;
         this.clientName = clientName;
         this.charges = charges;
@@ -209,15 +210,15 @@ public class ShareAccountData implements Serializable, AccountData {
     }
 
     private ShareAccountData(final Long id, final String accountNo, final String externalId, final Long savingsAccountId,
-            final String savingsAccountNumber, final Long clientId, final String clientName, final Long productId, final String productName,
-            final ShareAccountStatusEnumData status, final ShareAccountApplicationTimelineData timeline, final CurrencyData currency,
-            final ShareAccountSummaryData summaryData, final Collection<ShareAccountChargeData> charges,
-            final Collection<ShareAccountTransactionData> purchasedSharesData, final Integer lockinPeriod,
-            final EnumOptionData lockPeriodTypeEnum, final Integer minimumActivePeriod, final EnumOptionData minimumActivePeriodTypeEnum,
-            final Boolean allowDividendCalculationForInactiveClients, final Collection<ProductData> productOptions,
-            final Collection<ChargeData> chargeOptions, final Collection<SavingsAccountData> clientSavingsAccounts,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions,
-            final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOption, final BigDecimal currenMarketPrice) {
+                             final String savingsAccountNumber, final Long clientId, final String clientName, final Long productId, final String productName,
+                             final ShareAccountStatusEnumData status, final ShareAccountApplicationTimelineData timeline, final CurrencyData currency,
+                             final ShareAccountSummaryData summaryData, final Collection<ShareAccountChargeData> charges,
+                             final Collection<ShareAccountTransactionData> purchasedSharesData, final Integer lockinPeriod,
+                             final EnumOptionData lockPeriodTypeEnum, final Integer minimumActivePeriod, final EnumOptionData minimumActivePeriodTypeEnum,
+                             final Boolean allowDividendCalculationForInactiveClients, final Collection<ProductData> productOptions,
+                             final Collection<ChargeData> chargeOptions, final Collection<SavingsAccountData> clientSavingsAccounts,
+                             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions,
+                             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOption, final BigDecimal currenMarketPrice) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -247,9 +248,9 @@ public class ShareAccountData implements Serializable, AccountData {
     }
 
     public static ShareAccountData template(ShareAccountData data, Collection<ProductData> productOptions,
-            Collection<ChargeData> chargeOptions, Collection<SavingsAccountData> clientSavingsAccounts,
-            Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions,
-            Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions) {
+                                            Collection<ChargeData> chargeOptions, Collection<SavingsAccountData> clientSavingsAccounts,
+                                            Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions,
+                                            Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions) {
         return new ShareAccountData(data.id, data.accountNo, data.externalId, data.savingsAccountId, data.savingsAccountNumber,
                 data.clientId, data.clientName, data.productId, data.productName, data.status, data.timeline, data.currency, data.summary,
                 data.charges, data.purchasedShares, data.lockinPeriod, data.lockPeriodTypeEnum, data.minimumActivePeriod,

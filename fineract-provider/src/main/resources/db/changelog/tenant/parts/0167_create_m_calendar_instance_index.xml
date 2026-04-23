@@ -29,7 +29,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently idx_m_calendar_instance_entity_id_entity_type on m_calendar_instance(entity_id, entity_type_enum);
+            create index concurrently idx_m_calendar_instance_entity_id_entity_type on m_calendar_instance(entity_id,
+            entity_type_enum);
         </sql>
     </changeSet>
 

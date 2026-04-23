@@ -1,6 +1,6 @@
 name: Fineract Docker Builds
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 permissions:
   contents: read
@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        db_type: [mariadb, postgresql]
+        db_type: [ mariadb, postgresql ]
         include:
           - db_type: mariadb
             compose_file: docker-compose.yml

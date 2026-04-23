@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,20 +28,24 @@ import java.util.Set;
  */
 final class FixedDepositProductsApiResourceSwagger {
 
-    private FixedDepositProductsApiResourceSwagger() {}
+    private FixedDepositProductsApiResourceSwagger() {
+    }
 
     @Schema(description = "PostFixedDepositProductsRequest")
     public static final class PostFixedDepositProductsRequest {
 
-        private PostFixedDepositProductsRequest() {}
+        private PostFixedDepositProductsRequest() {
+        }
 
         static final class PostFixedDepositProductsCharts {
 
-            private PostFixedDepositProductsCharts() {}
+            private PostFixedDepositProductsCharts() {
+            }
 
             static final class PostFixedDepositProductsChartSlabs {
 
-                private PostFixedDepositProductsChartSlabs() {}
+                private PostFixedDepositProductsChartSlabs() {
+                }
 
                 @Schema(example = "from 0 to 90 days")
                 public String description;
@@ -107,7 +112,8 @@ final class FixedDepositProductsApiResourceSwagger {
     @Schema(description = "PostFixedDepositProductsResponse")
     public static final class PostFixedDepositProductsResponse {
 
-        private PostFixedDepositProductsResponse() {}
+        private PostFixedDepositProductsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -116,7 +122,8 @@ final class FixedDepositProductsApiResourceSwagger {
     @Schema(description = "PutFixedDepositProductsProductIdRequest")
     public static final class PutFixedDepositProductsProductIdRequest {
 
-        private PutFixedDepositProductsProductIdRequest() {}
+        private PutFixedDepositProductsProductIdRequest() {
+        }
 
         @Schema(example = "Fixed deposit product new offerings")
         public String description;
@@ -131,11 +138,13 @@ final class FixedDepositProductsApiResourceSwagger {
     @Schema(description = "PutFixedDepositProductsProductIdResponse")
     public static final class PutFixedDepositProductsProductIdResponse {
 
-        private PutFixedDepositProductsProductIdResponse() {}
+        private PutFixedDepositProductsProductIdResponse() {
+        }
 
         static final class PutFixedDepositProductsChanges {
 
-            private PutFixedDepositProductsChanges() {}
+            private PutFixedDepositProductsChanges() {
+            }
 
             @Schema(example = "Fixed deposit product new offerings")
             public String description;
@@ -151,11 +160,13 @@ final class FixedDepositProductsApiResourceSwagger {
     @Schema(description = "GetFixedDepositProductsResponse")
     public static final class GetFixedDepositProductsResponse {
 
-        private GetFixedDepositProductsResponse() {}
+        private GetFixedDepositProductsResponse() {
+        }
 
         static final class GetFixedDepositProductsCurrency {
 
-            private GetFixedDepositProductsCurrency() {}
+            private GetFixedDepositProductsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -175,7 +186,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsMinDepositTermType {
 
-            private GetFixedDepositProductsMinDepositTermType() {}
+            private GetFixedDepositProductsMinDepositTermType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -187,7 +199,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsMaxDepositTermType {
 
-            private GetFixedDepositProductsMaxDepositTermType() {}
+            private GetFixedDepositProductsMaxDepositTermType() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -199,7 +212,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsInterestCompoundingPeriodType {
 
-            private GetFixedDepositProductsInterestCompoundingPeriodType() {}
+            private GetFixedDepositProductsInterestCompoundingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -211,7 +225,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsInterestPostingPeriodType {
 
-            private GetFixedDepositProductsInterestPostingPeriodType() {}
+            private GetFixedDepositProductsInterestPostingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -223,7 +238,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsInterestCalculationType {
 
-            private GetFixedDepositProductsInterestCalculationType() {}
+            private GetFixedDepositProductsInterestCalculationType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -235,7 +251,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsInterestCalculationDaysInYearType {
 
-            private GetFixedDepositProductsInterestCalculationDaysInYearType() {}
+            private GetFixedDepositProductsInterestCalculationDaysInYearType() {
+            }
 
             @Schema(example = "365")
             public Long id;
@@ -247,7 +264,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsAccountingRule {
 
-            private GetFixedDepositProductsAccountingRule() {}
+            private GetFixedDepositProductsAccountingRule() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -286,11 +304,13 @@ final class FixedDepositProductsApiResourceSwagger {
     @Schema(description = "GetFixedDepositProductsProductIdResponse")
     public static final class GetFixedDepositProductsProductIdResponse {
 
-        private GetFixedDepositProductsProductIdResponse() {}
+        private GetFixedDepositProductsProductIdResponse() {
+        }
 
         static final class GetFixedDepositProductsProductIdCurrency {
 
-            private GetFixedDepositProductsProductIdCurrency() {}
+            private GetFixedDepositProductsProductIdCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -308,7 +328,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdInterestCompoundingPeriodType {
 
-            private GetFixedDepositProductsProductIdInterestCompoundingPeriodType() {}
+            private GetFixedDepositProductsProductIdInterestCompoundingPeriodType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -320,7 +341,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsGlAccount {
 
-            private GetFixedDepositProductsGlAccount() {}
+            private GetFixedDepositProductsGlAccount() {
+            }
 
             @Schema(example = "12")
             public Long id;
@@ -332,7 +354,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdAccountingMappings {
 
-            private GetFixedDepositProductsProductIdAccountingMappings() {}
+            private GetFixedDepositProductsProductIdAccountingMappings() {
+            }
 
             public GetFixedDepositProductsGlAccount savingsReferenceAccount;
             public GetFixedDepositProductsGlAccount feeReceivableAccount;
@@ -347,11 +370,13 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappings {
 
-            private GetFixedDepositProductsProductIdFeeToIncomeAccountMappings() {}
+            private GetFixedDepositProductsProductIdFeeToIncomeAccountMappings() {
+            }
 
             static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
 
-                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
+                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {
+                }
 
                 @Schema(example = "11")
                 public Long id;
@@ -365,7 +390,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
             static final class GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
 
-                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
+                private GetFixedDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {
+                }
 
                 @Schema(example = "16")
                 public Long id;
@@ -381,11 +407,13 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings {
 
-            private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings() {}
+            private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappings() {
+            }
 
             static final class GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
 
-                private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
+                private GetFixedDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {
+                }
 
                 @Schema(example = "12")
                 public Long id;
@@ -403,7 +431,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdPreClosurePenalInterestOnType {
 
-            private GetFixedDepositProductsProductIdPreClosurePenalInterestOnType() {}
+            private GetFixedDepositProductsProductIdPreClosurePenalInterestOnType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -415,7 +444,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdMinDepositTermType {
 
-            private GetFixedDepositProductsProductIdMinDepositTermType() {}
+            private GetFixedDepositProductsProductIdMinDepositTermType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -427,7 +457,8 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdMaxDepositTermType {
 
-            private GetFixedDepositProductsProductIdMaxDepositTermType() {}
+            private GetFixedDepositProductsProductIdMaxDepositTermType() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -439,15 +470,18 @@ final class FixedDepositProductsApiResourceSwagger {
 
         static final class GetFixedDepositProductsProductIdActiveChart {
 
-            private GetFixedDepositProductsProductIdActiveChart() {}
+            private GetFixedDepositProductsProductIdActiveChart() {
+            }
 
             static final class GetFixedDepositProductsProductIdChartSlabs {
 
-                private GetFixedDepositProductsProductIdChartSlabs() {}
+                private GetFixedDepositProductsProductIdChartSlabs() {
+                }
 
                 static final class GetFixedDepositProductsProductIdPeriodType {
 
-                    private GetFixedDepositProductsProductIdPeriodType() {}
+                    private GetFixedDepositProductsProductIdPeriodType() {
+                    }
 
                     @Schema(example = "1")
                     public Long id;
@@ -516,7 +550,8 @@ final class FixedDepositProductsApiResourceSwagger {
     @Schema(description = "DeleteFixedDepositProductsProductIdResponse")
     public static final class DeleteFixedDepositProductsProductIdResponse {
 
-        private DeleteFixedDepositProductsProductIdResponse() {}
+        private DeleteFixedDepositProductsProductIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;

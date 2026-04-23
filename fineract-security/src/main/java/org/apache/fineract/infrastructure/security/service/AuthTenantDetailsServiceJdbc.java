@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.security.service;
 
 import javax.sql.DataSource;
+
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantMapper;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
@@ -51,7 +52,7 @@ public class AuthTenantDetailsServiceJdbc implements AuthTenantDetailsService {
             final TenantMapper rm = new TenantMapper(isReport);
             final String sql = "select  " + rm.schema() + " where t.identifier = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[]{tenantIdentifier}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new InvalidTenantIdentifierException("The tenant identifier: " + tenantIdentifier + " is not valid.", e);
         }

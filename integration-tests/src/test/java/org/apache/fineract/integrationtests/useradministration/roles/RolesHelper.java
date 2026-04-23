@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,10 +22,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.PutPermissionsRequest;
 import org.apache.fineract.client.util.Calls;
@@ -74,7 +76,7 @@ public final class RolesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, Object> getRoleDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId) {
+                                                         final Integer roleId) {
         final String GET_ROLE_URL = "/fineract-provider/api/v1/roles/" + roleId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_ROLE_URL, "");
     }
@@ -84,7 +86,7 @@ public final class RolesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId) {
+                                      final Integer roleId) {
         return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(DISABLE_ROLE_COMMAND, roleId), "", "resourceId");
     }
 
@@ -93,7 +95,7 @@ public final class RolesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer enableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId) {
+                                     final Integer roleId) {
         return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "", "resourceId");
     }
 
@@ -102,7 +104,7 @@ public final class RolesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId) {
+                                     final Integer roleId) {
         return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "resourceId");
     }
 
@@ -111,7 +113,7 @@ public final class RolesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String addPermissionsToRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId, final Map<String, Boolean> permissionMap) {
+                                              final Integer roleId, final Map<String, Boolean> permissionMap) {
         return Utils.performServerPut(requestSpec, responseSpec, ROLE_URL + "/" + roleId + "/permissions?" + Utils.TENANT_IDENTIFIER,
                 getAddPermissionsToRoleJSON(permissionMap));
     }
@@ -121,10 +123,11 @@ public final class RolesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<PermissionData> getPermissions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            boolean makerCheckerable) {
+                                                      boolean makerCheckerable) {
         String response = Utils.performServerGet(requestSpec, responseSpec,
                 PERMISSIONS_URL + "?" + makerCheckerable + "=" + makerCheckerable);
-        final Type listType = new TypeToken<List<PermissionData>>() {}.getType();
+        final Type listType = new TypeToken<List<PermissionData>>() {
+        }.getType();
         return GSON.fromJson(response, listType);
     }
 

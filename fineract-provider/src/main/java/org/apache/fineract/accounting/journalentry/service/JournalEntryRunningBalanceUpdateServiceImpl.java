@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
@@ -117,15 +118,15 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         for (Map<String, Object> entries : list) {
             Long accountId = Long.parseLong(entries.get("accountId").toString()); // Drizzle
-                                                                                  // is
-                                                                                  // returning
-                                                                                  // Big
-                                                                                  // Integer
-                                                                                  // where
-                                                                                  // as
-                                                                                  // MySQL
-                                                                                  // returns
-                                                                                  // Long.
+            // is
+            // returning
+            // Big
+            // Integer
+            // where
+            // as
+            // MySQL
+            // returns
+            // Long.
             if (!runningBalanceMap.containsKey(accountId)) {
                 runningBalanceMap.put(accountId, (BigDecimal) entries.get("runningBalance"));
             }
@@ -174,8 +175,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
 
-                params.add(new Object[] { Boolean.TRUE, runningBalance, officeRunningBalance,
-                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getAuditOffsetDateTime(), entryData.getId() });
+                params.add(new Object[]{Boolean.TRUE, runningBalance, officeRunningBalance,
+                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getAuditOffsetDateTime(), entryData.getId()});
                 batchIndex++;
                 if (batchIndex == batchUpdateSize || index == entryDataList.size() - 1) {
                     this.jdbcTemplate.batchUpdate(sql, params);
@@ -211,8 +212,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         String sql = "UPDATE acc_gl_journal_entry SET office_running_balance=?, last_modified_by=?, last_modified_on_utc=? WHERE id=?";
         for (JournalEntryData entryData : entryDataList) {
             BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-            params.add(new Object[] { runningBalance, platformSecurityContext.authenticatedUser().getId(),
-                    DateUtils.getAuditOffsetDateTime(), entryData.getId() });
+            params.add(new Object[]{runningBalance, platformSecurityContext.authenticatedUser().getId(),
+                    DateUtils.getAuditOffsetDateTime(), entryData.getId()});
         }
         this.jdbcTemplate.batchUpdate(sql, params);
     }
@@ -231,14 +232,14 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 if (entryType.isDebitType()) {
                     isIncrease = true;
                 }
-            break;
+                break;
             case EQUITY:
             case INCOME:
             case LIABILITY:
                 if (entryType.isCreditType()) {
                     isIncrease = true;
                 }
-            break;
+                break;
         }
         if (isIncrease) {
             runningBalance = runningBalance.add(entry.getAmount());

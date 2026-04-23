@@ -105,11 +105,13 @@ tasks.register('waitForFineract') {
         int interval = 5
 
         TrustManager[] trustAllCerts = [
-            new X509TrustManager() {
-                java.security.cert.X509Certificate[] getAcceptedIssuers() { return null }
-                void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
-                void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
-            }
+                new X509TrustManager() {
+                    java.security.cert.X509Certificate[] getAcceptedIssuers() { return null }
+
+                    void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+
+                    void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+                }
         ] as TrustManager[]
 
         SSLContext sc = SSLContext.getInstance("SSL")
@@ -131,7 +133,8 @@ tasks.register('waitForFineract') {
                     println "Fineract is up!"
                     return
                 }
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
             sleep(interval * 1000)
             waited += interval
             println "Still waiting..."

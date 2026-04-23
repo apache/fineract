@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -92,7 +93,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
     List<ScorecardValue> getScorecardValueBySurveyAndClient(final Long surveyId, final Long clientId) {
         ScorecardValueMapper scvm = new ScorecardValueMapper();
         String sql = "select " + scvm.schema();
-        return this.jdbcTemplate.query(sql, scvm, new Object[] { surveyId, clientId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, scvm, new Object[]{surveyId, clientId}); // NOSONAR
     }
 
     Collection<ScorecardData> updateScorecardValues(Collection<ScorecardData> scorecard) {
@@ -107,7 +108,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
         this.context.authenticatedUser();
         ScorecardMapper scm = new ScorecardMapper();
         String sql = "select " + scm.schema() + " where sc.survey_id = ? " + " group by sc.survey_id, sc.client_id, sc.id ";
-        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { surveyId }); // NOSONAR
+        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[]{surveyId}); // NOSONAR
         updateScorecardValues(scorecardDatas);
         return scorecardDatas;
     }
@@ -117,7 +118,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
         this.context.authenticatedUser();
         ScorecardMapper scm = new ScorecardMapper();
         String sql = "select " + scm.schema() + " where sc.client_id = ? " + " group by sc.survey_id, sc.client_id, sc.id ";
-        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { clientId }); // NOSONAR
+        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[]{clientId}); // NOSONAR
         updateScorecardValues(scorecardDatas);
         return scorecardDatas;
     }
@@ -128,7 +129,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
         ScorecardMapper scm = new ScorecardMapper();
         String sql = "select " + scm.schema() + " where sc.survey_id = ? and sc.client_id = ? "
                 + " group by sc.survey_id, sc.client_id, sc.id ";
-        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { surveyId, clientId }); // NOSONAR
+        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[]{surveyId, clientId}); // NOSONAR
         updateScorecardValues(scorecardDatas);
         return scorecardDatas;
     }

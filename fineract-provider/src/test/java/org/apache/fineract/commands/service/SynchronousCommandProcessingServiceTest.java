@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,9 +39,11 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.configuration.RetryConfigurationAssembler;
 import org.apache.fineract.commands.domain.CommandProcessingResultType;
@@ -130,7 +132,7 @@ public class SynchronousCommandProcessingServiceTest {
         settings.getInstances().getExecuteCommand().setWaitDuration(Duration.ofMillis(1));
         settings.getInstances().getExecuteCommand().setEnableExponentialBackoff(false);
         settings.getInstances().getExecuteCommand()
-                .setRetryExceptions(new Class[] { RetryException.class, IdempotentCommandProcessUnderProcessingException.class });
+                .setRetryExceptions(new Class[]{RetryException.class, IdempotentCommandProcessUnderProcessingException.class});
         when(fineractProperties.getRetry()).thenReturn(settings);
         when(retryRegistry.retry(anyString(), any(RetryConfig.class)))
                 .thenAnswer(i -> Retry.of((String) i.getArgument(0), (RetryConfig) i.getArgument(1)));
@@ -483,7 +485,8 @@ public class SynchronousCommandProcessingServiceTest {
         });
     }
 
-    private static final class RetryException extends RuntimeException {}
+    private static final class RetryException extends RuntimeException {
+    }
 
     @Test
     public void testExecuteCommandWithRetry() {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,9 +23,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -84,15 +86,15 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
     private String errorMessage;
 
     public static EmailMessage pendingEmail(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign,
-            final String emailSubject, final String message, final String emailAddress, final String campaignName) {
+                                            final String emailSubject, final String message, final String emailAddress, final String campaignName) {
         return new EmailMessage().setGroup(group).setClient(client).setStaff(staff).setEmailCampaign(emailCampaign)
                 .setStatusType(emailCampaign.getStatus()).setEmailSubject(emailSubject).setMessage(message).setEmailAddress(emailAddress)
                 .setCampaignName(campaignName);
     }
 
     public static EmailMessage instance(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign,
-            final EmailMessageStatusType statusType, final String emailSubject, final String message, final String sourceAddress,
-            final String emailAddress, final String campaignName) {
+                                        final EmailMessageStatusType statusType, final String emailSubject, final String message, final String sourceAddress,
+                                        final String emailAddress, final String campaignName) {
         return new EmailMessage().setGroup(group).setClient(client).setStaff(staff).setEmailCampaign(emailCampaign)
                 .setEmailSubject(emailSubject).setMessage(message).setEmailAddress(emailAddress).setCampaignName(campaignName)
                 .setStatusType(statusType.getValue());

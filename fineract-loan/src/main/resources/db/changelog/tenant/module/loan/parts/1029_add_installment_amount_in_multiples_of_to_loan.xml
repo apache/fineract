@@ -32,7 +32,7 @@
         <validCheckSum>9:e513a98940f115bc53cdd5e656b19bcd</validCheckSum>
         <sql>
             UPDATE m_loan SET installment_amount_in_multiples_of = lp.instalment_amount_in_multiples_of FROM (
-                SELECT id, instalment_amount_in_multiples_of FROM m_product_loan
+            SELECT id, instalment_amount_in_multiples_of FROM m_product_loan
             ) lp WHERE lp.id = m_loan.product_id AND lp.instalment_amount_in_multiples_of IS NOT NULL
         </sql>
     </changeSet>
@@ -40,11 +40,12 @@
         <validCheckSum>9:e7490702ae64f9df7509a1c4fc37d2ba</validCheckSum>
         <sql>
             UPDATE m_loan JOIN m_product_loan lp ON lp.id = m_loan.product_id
-                SET m_loan.installment_amount_in_multiples_of = lp.instalment_amount_in_multiples_of
+            SET m_loan.installment_amount_in_multiples_of = lp.instalment_amount_in_multiples_of
             WHERE lp.instalment_amount_in_multiples_of IS NOT NULL
         </sql>
     </changeSet>
     <changeSet author="fineract" id="1029-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <renameColumn tableName="m_product_loan" oldColumnName="instalment_amount_in_multiples_of" newColumnName="installment_amount_in_multiples_of" columnDataType="DECIMAL(19, 6)"/>
+        <renameColumn tableName="m_product_loan" oldColumnName="instalment_amount_in_multiples_of"
+                      newColumnName="installment_amount_in_multiples_of" columnDataType="DECIMAL(19, 6)"/>
     </changeSet>
 </databaseChangeLog>

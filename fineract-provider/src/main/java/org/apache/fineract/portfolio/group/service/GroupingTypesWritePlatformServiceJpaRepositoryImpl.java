@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.service;
 
 import jakarta.persistence.PersistenceException;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -728,17 +730,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleGroupDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve,
-            final GroupTypes groupLevel) {
+                                                final GroupTypes groupLevel) {
         String levelName = "Invalid";
         switch (groupLevel) {
             case CENTER:
                 levelName = "Center";
-            break;
+                break;
             case GROUP:
                 levelName = "Group";
-            break;
+                break;
             case INVALID:
-            break;
+                break;
         }
 
         String errorMessageForUser = null;
@@ -900,7 +902,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     public void validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(final Office groupOffice, final GroupLevel groupLevel,
-            final LocalDate activationDate) {
+                                                                         final LocalDate activationDate) {
         if (activationDate != null && DateUtils.isAfter(groupOffice.getOpeningLocalDate(), activationDate)) {
             final String levelName = groupLevel.getLevelName();
             final String errorMessage = levelName + " activation date should be greater than or equal to the parent Office's creation date "

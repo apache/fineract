@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,10 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -241,7 +243,7 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
     }
 
     public void checkCreateWCDelinquencyBucketWithInvalidDataFailure(DelinquencyBucketRequest defaultWCDelinquencyBucketCreateRequest,
-            String errorMessage, int errorCode) {
+                                                                     String errorMessage, int errorCode) {
         CallFailedRuntimeException exception = fail(
                 () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().createBucket(defaultWCDelinquencyBucketCreateRequest));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(errorCode);
@@ -249,7 +251,7 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
     }
 
     public DelinquencyBucketRequest setWCDelinquencyBucketCreateFieldValue(DelinquencyBucketRequest delinquencyBucketRequest,
-            String fieldName, String fieldValue) {
+                                                                           String fieldName, String fieldValue) {
         if (fieldValue.equals("null")) {
             fieldValue = null;
         }
@@ -272,36 +274,36 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
         switch (fieldName) {
             case "name":
                 delinquencyBucketRequest.setName(fieldValue);
-            break;
+                break;
             case "ranges":
                 delinquencyBucketRequest.setRanges(valueArrayList);
-            break;
+                break;
             case "bucketType":
                 delinquencyBucketRequest.setBucketType(fieldValue);
-            break;
+                break;
             case "minimumPaymentPeriodAndRule":
                 delinquencyBucketRequest.setMinimumPaymentPeriodAndRule(fieldValue == null ? null : minimumPaymentPeriodAndRuleRequest);
-            break;
+                break;
             case "frequency":
                 minimumPaymentPeriodAndRuleRequest.setFrequency(valueInt);
-            break;
+                break;
             case "frequencyType":
                 minimumPaymentPeriodAndRuleRequest.setFrequencyType(fieldValue);
-            break;
+                break;
             case "minimumPayment":
                 minimumPaymentPeriodAndRuleRequest.setMinimumPayment(valueBigDecimal);
-            break;
+                break;
             case "minimumPaymentType":
                 minimumPaymentPeriodAndRuleRequest.setMinimumPaymentType(fieldValue);
-            break;
+                break;
             default:
-            break;
+                break;
         }
         return delinquencyBucketRequest;
     }
 
     public void checkDelinquencyBucketData(DelinquencyBucketRequest delinquencyBucketRequest,
-            DelinquencyBucketResponse delinquencyBucketData) {
+                                           DelinquencyBucketResponse delinquencyBucketData) {
         SoftAssertions assertions = new SoftAssertions();
         assertions.assertThat(delinquencyBucketRequest.getName()).isEqualTo(delinquencyBucketData.getName());
         assert delinquencyBucketRequest.getBucketType() != null;
@@ -314,7 +316,7 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
         assert minimumPaymentPeriodAndRuleRequest != null;
         assert minimumPaymentPeriodAndRuleResponse != null;
         assertions.assertThat(
-                minimumPaymentPeriodAndRuleRequest.getMinimumPayment().compareTo(minimumPaymentPeriodAndRuleResponse.getMinimumPayment()))
+                        minimumPaymentPeriodAndRuleRequest.getMinimumPayment().compareTo(minimumPaymentPeriodAndRuleResponse.getMinimumPayment()))
                 .isEqualTo(0);
         assert minimumPaymentPeriodAndRuleResponse.getMinimumPaymentType() != null;
         assertions.assertThat(minimumPaymentPeriodAndRuleRequest.getMinimumPaymentType())
@@ -334,7 +336,7 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
     }
 
     public void checkUpdateWCDelinquencyBucketWithInvalidDataFailure(Long id, DelinquencyBucketRequest defaultWCDelinquencyBucketRequest,
-            String errorMessage, int errorCode) {
+                                                                     String errorMessage, int errorCode) {
         CallFailedRuntimeException exception = fail(
                 () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().updateBucket(id, defaultWCDelinquencyBucketRequest));
         assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(errorCode);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,28 +19,34 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.fineract.portfolio.TransactionEntryType;
 
 final class SavingsAccountTransactionsApiResourceSwagger {
 
-    private SavingsAccountTransactionsApiResourceSwagger() {}
+    private SavingsAccountTransactionsApiResourceSwagger() {
+    }
 
     @Schema(description = "SavingsAccountTransactionsSearchResponse")
     public static final class SavingsAccountTransactionsSearchResponse {
 
-        private SavingsAccountTransactionsSearchResponse() {}
+        private SavingsAccountTransactionsSearchResponse() {
+        }
 
         static final class GetSavingsAccountTransactionsPageItem {
 
-            private GetSavingsAccountTransactionsPageItem() {}
+            private GetSavingsAccountTransactionsPageItem() {
+            }
 
             static final class GetTranscationEnumData {
 
-                private GetTranscationEnumData() {}
+                private GetTranscationEnumData() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -85,7 +91,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
             static final class GetTransactionsCurrency {
 
-                private GetTransactionsCurrency() {}
+                private GetTransactionsCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -105,11 +112,13 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
             static final class GetTransactionsPaymentDetailData {
 
-                private GetTransactionsPaymentDetailData() {}
+                private GetTransactionsPaymentDetailData() {
+                }
 
                 static final class GetPaymentTypeData {
 
-                    private GetPaymentTypeData() {}
+                    private GetPaymentTypeData() {
+                    }
 
                     @Schema(example = "1")
                     public Long id;
@@ -137,7 +146,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
             static final class GetSavingsAccountChargesPaidByData {
 
-                private GetSavingsAccountChargesPaidByData() {}
+                private GetSavingsAccountChargesPaidByData() {
+                }
 
                 @Schema(example = "1")
                 public Long chargeId;
@@ -192,7 +202,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
     @Schema(description = "PostSavingsAccountTransactionsRequest")
     public static final class PostSavingsAccountTransactionsRequest {
 
-        private PostSavingsAccountTransactionsRequest() {}
+        private PostSavingsAccountTransactionsRequest() {
+        }
 
         @Schema(example = "27 March 2022")
         public String transactionDate;
@@ -213,7 +224,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
     @Schema(description = "PostSavingsAccountTransactionsResponse")
     public static final class PostSavingsAccountTransactionsResponse {
 
-        private PostSavingsAccountTransactionsResponse() {}
+        private PostSavingsAccountTransactionsResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -228,7 +240,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
     @Schema(description = "PostSavingsAccountBulkReversalTransactionsRequest")
     public static final class PostSavingsAccountBulkReversalTransactionsRequest {
 
-        private PostSavingsAccountBulkReversalTransactionsRequest() {}
+        private PostSavingsAccountBulkReversalTransactionsRequest() {
+        }
 
         @Schema(example = "true")
         public String isBulk;

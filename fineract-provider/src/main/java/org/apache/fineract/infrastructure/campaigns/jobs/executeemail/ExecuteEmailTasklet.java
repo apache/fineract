@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.campaigns.jobs.executeemail;
 
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
@@ -173,7 +175,7 @@ public class ExecuteEmailTasklet implements Tasklet {
     }
 
     private HashMap<String, String> replaceStretchyParamsWithActualClientParams(final HashMap<String, String> stretchyParams,
-            final Client client) {
+                                                                                final Client client) {
         HashMap<String, String> actualParams = new HashMap<>();
         for (Map.Entry<String, String> entry : stretchyParams.entrySet()) {
             switch (entry.getKey()) {
@@ -183,16 +185,16 @@ public class ExecuteEmailTasklet implements Tasklet {
                     } else {
                         actualParams.put(entry.getKey(), client.getOffice().getId().toString());
                     }
-                break;
+                    break;
                 case "selectClient":
                     actualParams.put(entry.getKey(), client.getId().toString());
-                break;
+                    break;
                 case "selectLoanofficer":
                     actualParams.put(entry.getKey(), client.getStaff().getId().toString());
-                break;
+                    break;
                 case "environementUrl":
                     actualParams.put(entry.getKey(), entry.getKey());
-                break;
+                    break;
                 default:
                     log.warn("Query parameter could not be mapped: {}", entry.getKey());
             }
@@ -201,7 +203,7 @@ public class ExecuteEmailTasklet implements Tasklet {
     }
 
     private File generateAttachments(final EmailCampaign emailCampaign, final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat,
-            final Map<String, String> reportParams, final String reportName, final StringBuilder errorLog) {
+                                     final Map<String, String> reportParams, final String reportName, final StringBuilder errorLog) {
         if (reportName == null) {
             return null;
         }

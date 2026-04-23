@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
+
 import okhttp3.MediaType;
 import okhttp3.MultipartBody.Part;
 import okhttp3.ResponseBody;
@@ -121,7 +122,8 @@ class DocumentTest extends IntegrationTest {
     }
 
     @Order(9999)
-    @Test // FINERACT-1036
+    @Test
+        // FINERACT-1036
     void createDocumentBadArgs() {
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> ok(fineractClient().documents.createDocument("clients", 123L, null, "test.pdf", null)));

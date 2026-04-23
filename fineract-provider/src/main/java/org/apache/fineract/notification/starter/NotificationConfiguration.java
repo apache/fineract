@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -48,14 +48,14 @@ public class NotificationConfiguration {
     @Bean
     @ConditionalOnMissingBean(NotificationDomainService.class)
     public NotificationDomainService notificationDomainService(BusinessEventNotifierService businessEventNotifierService,
-            PlatformSecurityContext context, UserNotificationService userNotificationService) {
+                                                               PlatformSecurityContext context, UserNotificationService userNotificationService) {
         return new NotificationDomainServiceImpl(businessEventNotifierService, context, userNotificationService);
     }
 
     @Bean
     @ConditionalOnMissingBean(NotificationReadPlatformService.class)
     public NotificationReadPlatformService notificationReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            ColumnValidator columnValidator, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                           ColumnValidator columnValidator, PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new NotificationReadPlatformServiceImpl(jdbcTemplate, context, columnValidator, paginationHelper, sqlGenerator);
     }
 
@@ -72,9 +72,9 @@ public class NotificationConfiguration {
     @Bean
     @ConditionalOnMissingBean(UserNotificationService.class)
     public UserNotificationService userNotificationService(NotificationEventPublisher notificationEventPublisher,
-            AppUserRepository appUserRepository, FineractProperties fineractProperties,
-            NotificationReadPlatformService notificationReadPlatformService,
-            NotificationWritePlatformService notificationWritePlatformService) {
+                                                           AppUserRepository appUserRepository, FineractProperties fineractProperties,
+                                                           NotificationReadPlatformService notificationReadPlatformService,
+                                                           NotificationWritePlatformService notificationWritePlatformService) {
         return new UserNotificationServiceImpl(notificationEventPublisher, appUserRepository, fineractProperties,
                 notificationReadPlatformService, notificationWritePlatformService);
     }

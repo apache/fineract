@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 
@@ -51,19 +52,19 @@ public class PlatformApiDataValidationException extends AbstractPlatformExceptio
     }
 
     public PlatformApiDataValidationException(String globalisationMessageCode, String defaultUserMessage, List<ApiParameterError> errors,
-            Throwable cause) {
+                                              Throwable cause) {
         super(globalisationMessageCode, defaultUserMessage, cause);
         this.errors = errors;
     }
 
     public PlatformApiDataValidationException(String messageCode, String userMessage, String parameterName, Throwable cause,
-            final Object... userMessageArgs) {
+                                              final Object... userMessageArgs) {
         this("validation.msg.validation.errors.exist", "Validation errors exist.",
                 List.of(ApiParameterError.parameterError(messageCode, userMessage, parameterName, userMessageArgs)), cause);
     }
 
     public PlatformApiDataValidationException(String messageCode, String userMessage, String parameterName,
-            final Object... userMessageArgs) {
+                                              final Object... userMessageArgs) {
         this("validation.msg.validation.errors.exist", "Validation errors exist.",
                 List.of(ApiParameterError.parameterError(messageCode, userMessage, parameterName, userMessageArgs)), null);
     }

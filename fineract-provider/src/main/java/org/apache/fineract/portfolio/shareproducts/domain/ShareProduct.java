@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,10 +31,12 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -126,11 +128,11 @@ public class ShareProduct extends AbstractAuditableCustom {
     }
 
     public ShareProduct(final String name, final String shortName, final String description, final String externalId,
-            final MonetaryCurrency currency, final Long totalShares, final Long totalSharesIssued, final BigDecimal unitPrice,
-            final BigDecimal shareCapital, final Long minimumShares, final Long nominalShares, final Long maximumShares,
-            Set<ShareProductMarketPrice> marketPrice, Set<Charge> charges, final Boolean allowDividendCalculationForInactiveClients,
-            final Integer lockinPeriod, final PeriodFrequencyType lockPeriodType, final Integer minimumActivePeriod,
-            final PeriodFrequencyType minimumActivePeriodForDividendsType, final AccountingRuleType accountingRuleType) {
+                        final MonetaryCurrency currency, final Long totalShares, final Long totalSharesIssued, final BigDecimal unitPrice,
+                        final BigDecimal shareCapital, final Long minimumShares, final Long nominalShares, final Long maximumShares,
+                        Set<ShareProductMarketPrice> marketPrice, Set<Charge> charges, final Boolean allowDividendCalculationForInactiveClients,
+                        final Integer lockinPeriod, final PeriodFrequencyType lockPeriodType, final Integer minimumActivePeriod,
+                        final PeriodFrequencyType minimumActivePeriodForDividendsType, final AccountingRuleType accountingRuleType) {
 
         this.name = name;
         this.shortName = shortName;

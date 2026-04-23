@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,16 +29,19 @@ import java.util.Set;
  */
 final class FixedDepositAccountsApiResourceSwagger {
 
-    private FixedDepositAccountsApiResourceSwagger() {}
+    private FixedDepositAccountsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetFixedDepositAccountsTemplateResponse")
     public static final class GetFixedDepositAccountsTemplateResponse {
 
-        private GetFixedDepositAccountsTemplateResponse() {}
+        private GetFixedDepositAccountsTemplateResponse() {
+        }
 
         static final class GetFixedDepositAccountsProductOptions {
 
-            private GetFixedDepositAccountsProductOptions() {}
+            private GetFixedDepositAccountsProductOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -55,11 +59,13 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "GetFixedDepositAccountsResponse")
     public static final class GetFixedDepositAccountsResponse {
 
-        private GetFixedDepositAccountsResponse() {}
+        private GetFixedDepositAccountsResponse() {
+        }
 
         static final class GetFixedDepositAccountsStatus {
 
-            private GetFixedDepositAccountsStatus() {}
+            private GetFixedDepositAccountsStatus() {
+            }
 
             @Schema(example = "100")
             public Long id;
@@ -89,7 +95,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsTimeline {
 
-            private GetFixedDepositAccountsTimeline() {}
+            private GetFixedDepositAccountsTimeline() {
+            }
 
             @Schema(example = "[2014, 3, 1]")
             public LocalDate submittedOnDate;
@@ -103,7 +110,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsCurrency {
 
-            private GetFixedDepositAccountsCurrency() {}
+            private GetFixedDepositAccountsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -123,7 +131,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsInterestCompoundingPeriodType {
 
-            private GetFixedDepositAccountsInterestCompoundingPeriodType() {}
+            private GetFixedDepositAccountsInterestCompoundingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -135,7 +144,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsInterestPostingPeriodType {
 
-            private GetFixedDepositAccountsInterestPostingPeriodType() {}
+            private GetFixedDepositAccountsInterestPostingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -147,7 +157,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsInterestCalculationType {
 
-            private GetFixedDepositAccountsInterestCalculationType() {}
+            private GetFixedDepositAccountsInterestCalculationType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -159,7 +170,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsInterestCalculationDaysInYearType {
 
-            private GetFixedDepositAccountsInterestCalculationDaysInYearType() {}
+            private GetFixedDepositAccountsInterestCalculationDaysInYearType() {
+            }
 
             @Schema(example = "365")
             public Long id;
@@ -171,7 +183,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsSummary {
 
-            private GetFixedDepositAccountsSummary() {}
+            private GetFixedDepositAccountsSummary() {
+            }
 
             public GetFixedDepositAccountsCurrency currency;
             @Schema(example = "0")
@@ -180,7 +193,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsMinDepositTermType {
 
-            private GetFixedDepositAccountsMinDepositTermType() {}
+            private GetFixedDepositAccountsMinDepositTermType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -192,7 +206,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsMaxDepositTermType {
 
-            private GetFixedDepositAccountsMaxDepositTermType() {}
+            private GetFixedDepositAccountsMaxDepositTermType() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -204,7 +219,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsDepositPeriodFrequency {
 
-            private GetFixedDepositAccountsDepositPeriodFrequency() {}
+            private GetFixedDepositAccountsDepositPeriodFrequency() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -260,7 +276,8 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "CalculateFixedDepositInterestRequest")
     public static final class CalculateFixedDepositInterestRequest {
 
-        private CalculateFixedDepositInterestRequest() {}
+        private CalculateFixedDepositInterestRequest() {
+        }
 
         @Schema(example = "10000")
         public BigDecimal principalAmount;
@@ -278,7 +295,8 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "CalculateFixedDepositInterestResponse")
     public static final class CalculateFixedDepositInterestResponse {
 
-        private CalculateFixedDepositInterestResponse() {}
+        private CalculateFixedDepositInterestResponse() {
+        }
 
         @Schema(example = "10511.61")
         public BigDecimal maturityAmount;
@@ -290,7 +308,8 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "PostFixedDepositAccountsRequest")
     public static final class PostFixedDepositAccountsRequest {
 
-        private PostFixedDepositAccountsRequest() {}
+        private PostFixedDepositAccountsRequest() {
+        }
 
         @Schema(example = "1")
         public Long clientId;
@@ -313,7 +332,8 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "PostFixedDepositAccountsResponse")
     public static final class PostFixedDepositAccountsResponse {
 
-        private PostFixedDepositAccountsResponse() {}
+        private PostFixedDepositAccountsResponse() {
+        }
 
         @Schema(example = "2")
         public Long officeId;
@@ -328,19 +348,23 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "GetFixedDepositAccountsAccountIdResponse")
     public static final class GetFixedDepositAccountsAccountIdResponse {
 
-        private GetFixedDepositAccountsAccountIdResponse() {}
+        private GetFixedDepositAccountsAccountIdResponse() {
+        }
 
         static final class GetFixedDepositAccountsAccountChart {
 
-            private GetFixedDepositAccountsAccountChart() {}
+            private GetFixedDepositAccountsAccountChart() {
+            }
 
             static final class GetFixedDepositAccountsChartSlabs {
 
-                private GetFixedDepositAccountsChartSlabs() {}
+                private GetFixedDepositAccountsChartSlabs() {
+                }
 
                 static final class GetFixedDepositAccountsPeriodType {
 
-                    private GetFixedDepositAccountsPeriodType() {}
+                    private GetFixedDepositAccountsPeriodType() {
+                    }
 
                     @Schema(example = "0")
                     public Long id;
@@ -352,7 +376,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
                 static final class GetFixedDepositAccountsAccountChartCurrency {
 
-                    private GetFixedDepositAccountsAccountChartCurrency() {}
+                    private GetFixedDepositAccountsAccountChartCurrency() {
+                    }
 
                     @Schema(example = "USD")
                     public String code;
@@ -382,7 +407,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
             static final class GetFixedDepositAccountsPeriodTypes {
 
-                private GetFixedDepositAccountsPeriodTypes() {}
+                private GetFixedDepositAccountsPeriodTypes() {
+                }
 
                 @Schema(example = "0")
                 public Long id;
@@ -406,7 +432,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsAccountIdCurrency {
 
-            private GetFixedDepositAccountsAccountIdCurrency() {}
+            private GetFixedDepositAccountsAccountIdCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -426,7 +453,8 @@ final class FixedDepositAccountsApiResourceSwagger {
 
         static final class GetFixedDepositAccountsAccountIdSummary {
 
-            private GetFixedDepositAccountsAccountIdSummary() {}
+            private GetFixedDepositAccountsAccountIdSummary() {
+            }
 
             public GetFixedDepositAccountsAccountIdCurrency currency;
             @Schema(example = "0")
@@ -482,7 +510,8 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "PutFixedDepositAccountsAccountIdRequest")
     public static final class PutFixedDepositAccountsAccountIdRequest {
 
-        private PutFixedDepositAccountsAccountIdRequest() {}
+        private PutFixedDepositAccountsAccountIdRequest() {
+        }
 
         @Schema(example = "en")
         public String locale;
@@ -493,11 +522,13 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "PutFixedDepositAccountsAccountIdResponse")
     public static final class PutFixedDepositAccountsAccountIdResponse {
 
-        private PutFixedDepositAccountsAccountIdResponse() {}
+        private PutFixedDepositAccountsAccountIdResponse() {
+        }
 
         static final class PutFixedDepositAccountsChanges {
 
-            private PutFixedDepositAccountsChanges() {}
+            private PutFixedDepositAccountsChanges() {
+            }
 
             @Schema(example = "6000")
             public Float depositAmount;
@@ -519,13 +550,15 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "PostFixedDepositAccountsAccountIdRequest")
     public static final class PostFixedDepositAccountsAccountIdRequest {
 
-        private PostFixedDepositAccountsAccountIdRequest() {}
+        private PostFixedDepositAccountsAccountIdRequest() {
+        }
     }
 
     @Schema(description = "PostFixedDepositAccountsAccountIdResponse")
     public static final class PostFixedDepositAccountsAccountIdResponse {
 
-        private PostFixedDepositAccountsAccountIdResponse() {}
+        private PostFixedDepositAccountsAccountIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -540,7 +573,8 @@ final class FixedDepositAccountsApiResourceSwagger {
     @Schema(description = "DeleteFixedDepositAccountsAccountIdResponse")
     public static final class DeleteFixedDepositAccountsAccountIdResponse {
 
-        private DeleteFixedDepositAccountsAccountIdResponse() {}
+        private DeleteFixedDepositAccountsAccountIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

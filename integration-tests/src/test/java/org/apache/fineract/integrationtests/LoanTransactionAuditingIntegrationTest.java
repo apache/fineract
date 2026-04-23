@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,12 +30,14 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -151,8 +153,8 @@ public class LoanTransactionAuditingIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate,
-            final String disbursementDate) {
+                                                                           List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String submittedOnDate,
+                                                                           final String disbursementDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -174,7 +176,7 @@ public class LoanTransactionAuditingIntegrationTest {
     }
 
     private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
-            final String accountingRule, final Account... accounts) {
+                                      final String accountingRule, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //

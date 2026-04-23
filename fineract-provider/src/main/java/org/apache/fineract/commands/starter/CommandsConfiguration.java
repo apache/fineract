@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -45,14 +45,14 @@ public class CommandsConfiguration {
     @Bean
     @ConditionalOnMissingBean(AuditReadPlatformService.class)
     public AuditReadPlatformService auditReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
-            FromJsonHelper fromApiJsonHelper, AppUserReadPlatformService appUserReadPlatformService,
-            OfficeReadPlatformService officeReadPlatformService, ClientReadPlatformService clientReadPlatformService,
-            LoanProductReadPlatformService loanProductReadPlatformService, StaffReadService staffReadPlatformService,
-            PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
-            PaginationParametersDataValidator paginationParametersDataValidator,
-            SavingsProductReadPlatformService savingsProductReadPlatformService,
-            DepositProductReadPlatformService depositProductReadPlatformService, ColumnValidator columnValidator,
-            SqlValidator sqlValidator) {
+                                                             FromJsonHelper fromApiJsonHelper, AppUserReadPlatformService appUserReadPlatformService,
+                                                             OfficeReadPlatformService officeReadPlatformService, ClientReadPlatformService clientReadPlatformService,
+                                                             LoanProductReadPlatformService loanProductReadPlatformService, StaffReadService staffReadPlatformService,
+                                                             PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator,
+                                                             PaginationParametersDataValidator paginationParametersDataValidator,
+                                                             SavingsProductReadPlatformService savingsProductReadPlatformService,
+                                                             DepositProductReadPlatformService depositProductReadPlatformService, ColumnValidator columnValidator,
+                                                             SqlValidator sqlValidator) {
         return new AuditReadPlatformServiceImpl(jdbcTemplate, context, fromApiJsonHelper, appUserReadPlatformService,
                 officeReadPlatformService, clientReadPlatformService, loanProductReadPlatformService, staffReadPlatformService,
                 paginationHelper, sqlGenerator, paginationParametersDataValidator, savingsProductReadPlatformService,

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.interestratechart.incentive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentivesFields;
@@ -39,7 +40,7 @@ public class ClientAttributeIncentiveCalculation extends AttributeIncentiveCalcu
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             client.genderId());
                 }
-            break;
+                break;
             case AGE:
                 if (client.dateOfBirth() != null) {
                     final LocalDate dobLocalDate = client.dateOfBirth();
@@ -47,34 +48,34 @@ public class ClientAttributeIncentiveCalculation extends AttributeIncentiveCalcu
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             (long) age);
                 }
-            break;
+                break;
             case CLIENT_TYPE:
                 if (client.clientTypeId() != null) {
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             client.clientTypeId());
                 }
-            break;
+                break;
             case CLIENT_CLASSIFICATION:
                 if (client.clientClassificationId() != null) {
                     applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
                             client.clientClassificationId());
                 }
-            break;
+                break;
 
             default:
-            break;
+                break;
 
         }
         if (applyIncentive) {
             switch (incentivesFields.incentiveType()) {
                 case FIXED:
                     interest = incentivesFields.amount();
-                break;
+                    break;
                 case INCENTIVE:
                     interest = interest.add(incentivesFields.amount());
-                break;
+                    break;
                 default:
-                break;
+                    break;
 
             }
         }

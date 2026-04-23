@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
@@ -87,17 +88,17 @@ public class DepositProductData {
     protected final Collection<TaxGroupData> taxGroupOptions;
 
     public static DepositProductData template(final CurrencyData currency, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
-            final EnumOptionData interestCalculationDaysInYearType, final EnumOptionData accountingRule,
-            final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestCalculationTypeOptions,
-            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
-            final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
-            final Collection<ChargeData> penaltyOptions, final InterestRateChartData chartTemplate,
-            final Collection<TaxGroupData> taxGroupOptions) {
+                                              final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+                                              final EnumOptionData interestCalculationDaysInYearType, final EnumOptionData accountingRule,
+                                              final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+                                              final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+                                              final Collection<EnumOptionData> interestCalculationTypeOptions,
+                                              final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
+                                              final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
+                                              final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
+                                              final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
+                                              final Collection<ChargeData> penaltyOptions, final InterestRateChartData chartTemplate,
+                                              final Collection<TaxGroupData> taxGroupOptions) {
 
         final Long id = null;
         final String name = null;
@@ -151,15 +152,15 @@ public class DepositProductData {
      *            TODO
      */
     public static DepositProductData withTemplate(final DepositProductData existingProduct, final Collection<CurrencyData> currencyOptions,
-            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestCalculationTypeOptions,
-            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
-            final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
-            final Collection<ChargeData> penaltyOptions, final InterestRateChartData chartTemplate,
-            Collection<TaxGroupData> taxGroupOptions) {
+                                                  final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+                                                  final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+                                                  final Collection<EnumOptionData> interestCalculationTypeOptions,
+                                                  final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
+                                                  final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
+                                                  final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
+                                                  final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
+                                                  final Collection<ChargeData> penaltyOptions, final InterestRateChartData chartTemplate,
+                                                  Collection<TaxGroupData> taxGroupOptions) {
 
         return new DepositProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
                 existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
@@ -176,9 +177,9 @@ public class DepositProductData {
     }
 
     public static DepositProductData withAccountingDetails(final DepositProductData existingProduct,
-            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
-            final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
-            final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings) {
+                                                           final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
+                                                           final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
+                                                           final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings) {
 
         final Collection<CurrencyData> currencyOptions = null;
         final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
@@ -208,11 +209,11 @@ public class DepositProductData {
     }
 
     public static DepositProductData instance(final Long id, final String name, final String shortName, final String description,
-            final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
-            final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
-            final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
-            final BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroupData taxGroup) {
+                                              final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
+                                              final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+                                              final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
+                                              final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
+                                              final BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroupData taxGroup) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -296,7 +297,7 @@ public class DepositProductData {
     }
 
     public static DepositProductData withInterestChart(final DepositProductData existingProduct,
-            final Collection<InterestRateChartData> interestRateCharts) {
+                                                       final Collection<InterestRateChartData> interestRateCharts) {
         return new DepositProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
                 existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
@@ -314,24 +315,24 @@ public class DepositProductData {
     }
 
     protected DepositProductData(final Long id, final String name, final String shortName, final String description,
-            final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
-            final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
-            final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
-            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
-            final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestCalculationTypeOptions,
-            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
-            final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> charges,
-            final Collection<ChargeData> chargeOptions, final Collection<ChargeData> penaltyOptions,
-            final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
-            final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings,
-            final Collection<InterestRateChartData> interestRateCharts, final InterestRateChartData chartTemplate,
-            final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
-            final Collection<TaxGroupData> taxGroupOptions) {
+                                 final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
+                                 final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+                                 final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
+                                 final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
+                                 final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
+                                 final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+                                 final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+                                 final Collection<EnumOptionData> interestCalculationTypeOptions,
+                                 final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
+                                 final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
+                                 final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
+                                 final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> charges,
+                                 final Collection<ChargeData> chargeOptions, final Collection<ChargeData> penaltyOptions,
+                                 final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
+                                 final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings,
+                                 final Collection<InterestRateChartData> interestRateCharts, final InterestRateChartData chartTemplate,
+                                 final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
+                                 final Collection<TaxGroupData> taxGroupOptions) {
 
         this.id = id;
         this.name = name;
@@ -367,9 +368,9 @@ public class DepositProductData {
 
         this.charges = charges;// charges associated with Savings product
         this.chargeOptions = chargeOptions;// charges available for adding to
-                                           // Savings product
+        // Savings product
         this.penaltyOptions = penaltyOptions;// penalties available for adding
-                                             // to Savings product
+        // to Savings product
 
         this.feeToIncomeAccountMappings = feeToIncomeAccountMappings;
         this.penaltyToIncomeAccountMappings = penaltyToIncomeAccountMappings;

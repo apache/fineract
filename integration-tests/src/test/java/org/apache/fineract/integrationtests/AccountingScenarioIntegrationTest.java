@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
@@ -84,7 +86,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unchecked" })
+@SuppressWarnings({"unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountingScenarioIntegrationTest {
 
@@ -114,9 +116,9 @@ public class AccountingScenarioIntegrationTest {
     static Float SP_WITHDRAWAL_AMOUNT = Float.valueOf(WITHDRAWAL_AMOUNT);
     static Float SP_WITHDRAWAL_AMOUNT_ADJUSTED = Float.valueOf(WITHDRAWAL_AMOUNT_ADJUSTED);
 
-    private static final String[] REPAYMENT_DATE = { "", "04 May 2011", "04 July 2011", "04 September 2011", "04 November 2011",
-            "04 January 2012" };
-    private static final Float[] REPAYMENT_AMOUNT = { .0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f };
+    private static final String[] REPAYMENT_DATE = {"", "04 May 2011", "04 July 2011", "04 September 2011", "04 November 2011",
+            "04 January 2012"};
+    private static final Float[] REPAYMENT_AMOUNT = {.0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f};
 
     private static final Float AMOUNT_TO_BE_WAIVE = 400.0f;
     private LoanTransactionHelper loanTransactionHelper;
@@ -186,9 +188,9 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(TOTAL_INTEREST, JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(TOTAL_INTEREST, JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT),};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
         LOG.info("CHECKING INCOME: ******************************************");
         final JournalEntry incomeJournalEntry = new JournalEntry(TOTAL_INTEREST, JournalEntry.TransactionType.CREDIT);
@@ -201,8 +203,8 @@ public class AccountingScenarioIntegrationTest {
         final float FIRST_PRINCIPAL = 2000.0f;
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFirstEntry = {new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountFirstEntry);
         LOG.info("Repayment 1 Done......");
 
@@ -213,8 +215,8 @@ public class AccountingScenarioIntegrationTest {
         final float SECOND_PRINCIPAL = REPAYMENT_AMOUNT[2] - SECOND_AND_THIRD_INTEREST;
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
-        final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountSecondEntry = {new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], assetAccountSecondEntry);
         LOG.info("Repayment 2 Done ......");
 
@@ -233,8 +235,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Repayment 3 ......");
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        final JournalEntry[] assetAccountThirdEntry = { new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountThirdEntry = {new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT)};
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], assetAccountThirdEntry);
         LOG.info("Repayment 3 Done ......");
@@ -244,15 +246,15 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
-        final JournalEntry[] assetAccountFourthEntry = { new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFourthEntry = {new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], assetAccountFourthEntry);
         LOG.info("Repayment 4 Done  ......");
 
         // Repayment 5
         LOG.info("Repayment 5 ......");
-        final JournalEntry[] assetAccountFifthEntry = { new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFifthEntry = {new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT)};
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
@@ -306,8 +308,8 @@ public class AccountingScenarioIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liablilityAccountInitialEntry);
 
@@ -320,9 +322,9 @@ public class AccountingScenarioIntegrationTest {
 
         LOG.info("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
         final JournalEntry[] assetAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT)};
         final JournalEntry[] liabililityAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountFirstTransactionEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
                 liabililityAccountFirstTransactionEntry);
@@ -336,9 +338,9 @@ public class AccountingScenarioIntegrationTest {
 
         LOG.info("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
         final JournalEntry[] assetAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT)};
         final JournalEntry[] liabililityAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountSecondTransactionEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
                 liabililityAccountSecondTransactionEntry);
@@ -361,11 +363,11 @@ public class AccountingScenarioIntegrationTest {
         summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
         balance = balance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
 
-        final JournalEntry[] liabililityAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liabililityAccountThirdTransactionEntry = {new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT)};
         final JournalEntry[] assetAccountThirdTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] incomeAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT)};
+        final JournalEntry[] incomeAccountThirdTransactionEntry = {new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountThirdTransactionEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
                 liabililityAccountThirdTransactionEntry);
@@ -404,8 +406,8 @@ public class AccountingScenarioIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(SP_BALANCE, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE, liablilityAccountInitialEntry);
 
@@ -418,9 +420,9 @@ public class AccountingScenarioIntegrationTest {
 
         LOG.info("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
         final JournalEntry[] assetAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.DEBIT)};
         final JournalEntry[] liabililityAccountFirstTransactionEntry = {
-                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(SP_DEPOSIT_AMOUNT, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountFirstTransactionEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
                 liabililityAccountFirstTransactionEntry);
@@ -434,9 +436,9 @@ public class AccountingScenarioIntegrationTest {
 
         LOG.info("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
         final JournalEntry[] assetAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.CREDIT)};
         final JournalEntry[] liabililityAccountSecondTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT, JournalEntry.TransactionType.DEBIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountSecondTransactionEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
                 liabililityAccountSecondTransactionEntry);
@@ -459,11 +461,11 @@ public class AccountingScenarioIntegrationTest {
         summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
         balance = balance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
 
-        final JournalEntry[] liabililityAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liabililityAccountThirdTransactionEntry = {new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.DEBIT)};
         final JournalEntry[] assetAccountThirdTransactionEntry = {
-                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] incomeAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(SP_WITHDRAWAL_AMOUNT_ADJUSTED, JournalEntry.TransactionType.CREDIT)};
+        final JournalEntry[] incomeAccountThirdTransactionEntry = {new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, TRANSACTION_DATE, assetAccountThirdTransactionEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE,
                 liabililityAccountThirdTransactionEntry);
@@ -527,8 +529,8 @@ public class AccountingScenarioIntegrationTest {
         Float depositAmount = (Float) accountSummary.get("totalDeposits");
 
         // Checking initial Journal entries after Activation.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
@@ -539,8 +541,8 @@ public class AccountingScenarioIntegrationTest {
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
 
         // Checking initial Journal entries after Interest Posting.
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -612,8 +614,8 @@ public class AccountingScenarioIntegrationTest {
         Assertions.assertNotNull(depositTransactionId);
 
         // Checking initial Journal entries after Activation.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountInitialEntry = {new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE, assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE,
                 liablilityAccountInitialEntry);
@@ -626,8 +628,8 @@ public class AccountingScenarioIntegrationTest {
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
 
         // Checking initial Journal entries after Interest Posting.
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -652,7 +654,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType) {
+                                                    final String validTo, final String submittedOnDate, final String penalInterestType) {
         LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
@@ -669,7 +671,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
+                                                        final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
         LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(requestSpec, responseSpec)
                 //
@@ -725,8 +727,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT),};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
 
         final String jobName = "Add Accrual Transactions";
@@ -744,8 +746,8 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[1], REPAYMENT_AMOUNT[1], loanID);
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFirstEntry = {new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountFirstEntry);
         LOG.info("Repayment 1 Done......");
 
@@ -760,8 +762,8 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(REPAYMENT_DATE[3]), FIRST_INTEREST, FEE_PORTION,
                 PENALTY_PORTION, loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
-        final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountSecondEntry = {new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], assetAccountSecondEntry);
         LOG.info("Repayment 2 Done ......");
 
@@ -784,8 +786,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Repayment 3 ......");
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        final JournalEntry[] assetAccountThirdEntry = { new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountThirdEntry = {new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT)};
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], assetAccountThirdEntry);
         LOG.info("Repayment 3 Done ......");
@@ -795,15 +797,15 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
-        final JournalEntry[] assetAccountFourthEntry = { new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFourthEntry = {new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], assetAccountFourthEntry);
         LOG.info("Repayment 4 Done  ......");
 
         // Repayment 5
         LOG.info("Repayment 5 ......");
-        final JournalEntry[] assetAccountFifthEntry = { new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFifthEntry = {new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT)};
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
@@ -849,8 +851,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT),};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
 
         final String jobName = "Add Accrual Transactions";
@@ -868,8 +870,8 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[1], 15000f, loanID);
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountEntry = { new JournalEntry(15000f, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(11000f, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountEntry = {new JournalEntry(15000f, JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(11000f, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, REPAYMENT_DATE[1],
                 new JournalEntry(4000f, JournalEntry.TransactionType.CREDIT));
@@ -948,8 +950,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT),};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
 
         final String jobName = "Add Periodic Accrual Transactions";
@@ -1063,8 +1065,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT),};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
@@ -1150,8 +1152,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Entries ......");
         final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
         final float TOTAL_INTEREST = 1000.0f;
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
 
         // MAKE 1
@@ -1161,8 +1163,8 @@ public class AccountingScenarioIntegrationTest {
         final float FIRST_PRINCIPAL = 2000.0f;
         float expected_value = LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
-        final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFirstEntry = {new JournalEntry(REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[1], assetAccountFirstEntry);
         LOG.info("CHECKING INCOME: ******************************************");
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, REPAYMENT_DATE[1],
@@ -1176,8 +1178,8 @@ public class AccountingScenarioIntegrationTest {
         final float SECOND_PRINCIPAL = REPAYMENT_AMOUNT[2] - SECOND_AND_THIRD_INTEREST;
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
-        final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT), };
+        final JournalEntry[] assetAccountSecondEntry = {new JournalEntry(REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT),};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[2], assetAccountSecondEntry);
         LOG.info("CHECKING INCOME: ******************************************");
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, REPAYMENT_DATE[2],
@@ -1196,8 +1198,8 @@ public class AccountingScenarioIntegrationTest {
         LOG.info("Repayment 3 ......");
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[3], REPAYMENT_AMOUNT[3], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
-        final JournalEntry[] assetAccountThirdEntry = { new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountThirdEntry = {new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[3], JournalEntry.TransactionType.CREDIT)};
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(3, expected_value, loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[3], assetAccountThirdEntry);
         LOG.info("Repayment 3 Done ......");
@@ -1207,15 +1209,15 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[4], REPAYMENT_AMOUNT[4], loanID);
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(4, expected_value, loanID);
-        final JournalEntry[] assetAccountFourthEntry = { new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFourthEntry = {new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[4], JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, REPAYMENT_DATE[4], assetAccountFourthEntry);
         LOG.info("Repayment 4 Done  ......");
 
         // Repayment 5
         LOG.info("Repayment 5 ......");
-        final JournalEntry[] assetAccountFifthEntry = { new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountFifthEntry = {new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(REPAYMENT_AMOUNT[5], JournalEntry.TransactionType.CREDIT)};
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.makeRepayment(REPAYMENT_DATE[5], REPAYMENT_AMOUNT[5], loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(5, expected_value, loanID);
@@ -1272,10 +1274,10 @@ public class AccountingScenarioIntegrationTest {
         ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
 
         // Checking sharing entries.
-        final JournalEntry[] assetAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liabilityAccountEntry = { new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] assetAccountEntry = {new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liabilityAccountEntry = {new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT)};
         final JournalEntry[] checkJournalEntryForEquityAccount = {
-                new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat("200"), JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "01 Jan 2016", assetAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, "01 Jan 2016", liabilityAccountEntry);
         this.journalEntryHelper.checkJournalEntryForEquityAccount(equityAccount, "01 Jan 2016", checkJournalEntryForEquityAccount);

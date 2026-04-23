@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -29,6 +29,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
@@ -62,7 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Response;
 
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 public class SavingsAccountHelper {
 
     private final RequestSpecification requestSpec;
@@ -154,7 +156,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer applyForSavingsApplicationOnDate(final Integer clientOrGroupId, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate) {
+                                                    final String submittedOnDate) {
         return applyForSavingsApplicationOnDate(clientOrGroupId, savingsProductID, accountType, null, false, submittedOnDate);
     }
 
@@ -163,7 +165,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer applyForSavingsApplicationWithExternalId(final Integer clientOrGroupId, final Integer savingsProductID,
-            final String accountType, String externalId, boolean withdrawalFeeForTransfers) {
+                                                            final String accountType, String externalId, boolean withdrawalFeeForTransfers) {
         return applyForSavingsApplicationOnDate(clientOrGroupId, savingsProductID, accountType, externalId, withdrawalFeeForTransfers,
                 CREATED_DATE);
     }
@@ -173,7 +175,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer applyForSavingsApplicationOnDate(final Integer clientOrGroupId, final Integer savingsProductID, final String accountType,
-            String externalId, boolean withdrawalFeeForTransfers, final String submittedOnDate) {
+                                                    String externalId, boolean withdrawalFeeForTransfers, final String submittedOnDate) {
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withExternalId(externalId) //
                 .withWithdrawalFeeForTransfers(withdrawalFeeForTransfers) //
@@ -197,7 +199,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer applyForSavingsApplicationWithDatatables(final Integer id, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate, final String datatableName) {
+                                                            final String submittedOnDate, final String datatableName) {
         LOG.info("----------------------------APPLYING FOR SAVINGS APPLICATION WITH DATATABLES----------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
@@ -212,7 +214,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object applyForSavingsApplicationWithFailure(final Integer id, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate, final String responseAttribute) {
+                                                        final String submittedOnDate, final String responseAttribute) {
         LOG.info("----------------------------APPLYING FOR SAVINGS APPLICATION WITH ERROR----------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
@@ -240,7 +242,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public HashMap updateSavingsAccount(final Integer id, final Integer savingsProductID, final Integer savingsId,
-            final String accountType) {
+                                        final String accountType) {
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(CREATED_DATE_PLUS_ONE) //
                 .build(id.toString(), savingsProductID.toString(), accountType);
@@ -268,7 +270,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer applyForGsimApplication(final String clientArrays, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                  final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + GSIM_SAVINGS + "?" + Utils.TENANT_IDENTIFIER,
                 clientArrays, "gsimId");
     }
@@ -431,19 +433,19 @@ public class SavingsAccountHelper {
     }
 
     public Response<PostSavingsAccountTransactionsResponse> withdrawalFromSavingsAccount(final Long savingsId,
-            PostSavingsAccountTransactionsRequest request) {
+                                                                                         PostSavingsAccountTransactionsRequest request) {
         return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId,
                 request, "withdrawal"));
     }
 
     public Response<PostSavingsAccountTransactionsResponse> forceWithdrawalFromSavingsAccount(final Long savingsId,
-            PostSavingsAccountTransactionsRequest request) {
+                                                                                              PostSavingsAccountTransactionsRequest request) {
         return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId,
                 request, "force-withdrawal"));
     }
 
     public Response<PostSavingsAccountTransactionsResponse> depositIntoSavingsAccount(final Long savingsId,
-            PostSavingsAccountTransactionsRequest request) {
+                                                                                      PostSavingsAccountTransactionsRequest request) {
         return Calls.executeU(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId,
                 request, "deposit"));
     }
@@ -453,7 +455,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object withdrawalFromSavingsAccountWithPaymentType(final Integer savingsId, final String amount, String date, Long paymentTypeId,
-            String jsonAttributeToGetback) {
+                                                              String jsonAttributeToGetback) {
         LOG.info("\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL WITH PAYMENT TYPE--------------------------------");
         return withdrawalFromSavingsAccount(savingsId, getSavingsTransactionPaymentTypeJSON(amount, date, paymentTypeId),
                 jsonAttributeToGetback);
@@ -473,7 +475,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object payChargeToSavingsAccount(final Integer savingsID, final Integer chargeId, final String amount, String date,
-            String jsonAttributeToGetback) {
+                                            String jsonAttributeToGetback) {
         LOG.info("--------------------------------- PAY SAVINGS CHARGE --------------------------------");
         return performSavingActions(createChargesURL("paycharge", savingsID, chargeId), getSavingsPayChargeJSON(amount, date),
                 jsonAttributeToGetback);
@@ -581,7 +583,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Integer addChargesForSavingsWithDueDateAndFeeOnMonthDay(final Integer savingsId, final Integer chargeId, String addDueDate,
-            Integer amount, String feeOnMonthDay) {
+                                                                   Integer amount, String feeOnMonthDay) {
         return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
                 getPeriodChargeRequestJSONWithDueDateAndFeeOnMonthDay(chargeId, addDueDate, amount, feeOnMonthDay),
                 CommonConstants.RESPONSE_RESOURCE_ID);
@@ -702,7 +704,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, final Boolean lienAllowed, String date,
-            String jsonAttributeToGetback) {
+                                             String jsonAttributeToGetback) {
         LOG.info("--------------------------------- SAVINGS TRANSACTION HOLD AMOUNT--------------------------------");
 
         return performSavingActions(createSavingsTransactionURL(HOLD_AMOUNT_SAVINGS_COMMAND, savingsID),
@@ -1089,7 +1091,8 @@ public class SavingsAccountHelper {
     public List<HashMap> getSavingsTransactions(final Integer savingsID) {
         final Object get = getSavingsCollectionAttribute(savingsID, "transactions");
         final String json = new Gson().toJson(get);
-        return new Gson().fromJson(json, new TypeToken<ArrayList<HashMap>>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<ArrayList<HashMap>>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -1137,7 +1140,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent,
-            final Boolean isBlock) {
+                                                    final Boolean isBlock) {
         HashMap status = null;
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
                 CommonConstants.RESPONSE_CHANGES);
@@ -1155,7 +1158,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private Object performSavingActions(final String postURLForSavingsTransaction, final String jsonToBeSent,
-            final String jsonAttributeToGetBack) {
+                                        final String jsonAttributeToGetBack) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
                 jsonAttributeToGetBack);
     }
@@ -1165,7 +1168,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object closeSavingsAccountAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
-            final String jsonAttributeToGetBack, final String closedOnDate) {
+                                                             final String jsonAttributeToGetBack, final String closedOnDate) {
         LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
@@ -1176,7 +1179,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object closeSavingsAccountPostInterestAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
-            final String jsonAttributeToGetBack, final String closedOnDate) {
+                                                                         final String jsonAttributeToGetBack, final String closedOnDate) {
         LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountPostInterestJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
@@ -1221,7 +1224,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private String getPeriodChargeRequestJSONWithDueDateAndFeeOnMonthDay(Integer chargeId, String addDueDate, Integer amount,
-            String feeOnMonthDay) {
+                                                                         String feeOnMonthDay) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("chargeId", chargeId);
         map.put("amount", amount);
@@ -1282,7 +1285,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer openSavingsAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer clientId, final String minimumOpeningBalance) {
+                                             final Integer clientId, final String minimumOpeningBalance) {
         final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, minimumOpeningBalance);
         Assertions.assertNotNull(savingsProductID);
 
@@ -1307,7 +1310,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance) {
+                                                final String minOpenningBalance) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
@@ -1447,7 +1450,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer depositGsimApplication(Integer savingsID, final String savingsArrays, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                 final ResponseSpecification responseSpec) {
 
         final String depositGsimURL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions" + "?" + "command="
                 + GSIM_DEPOSIT_SAVINGS_COMMAND + "&" + Utils.TENANT_IDENTIFIER;
@@ -1480,7 +1483,7 @@ public class SavingsAccountHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public Object closeGsimSavingsAccountAndGetBackRequiredField(final Integer gsimId, String withdrawBalance,
-            final String jsonAttributeToGetBack, final String closedOnDate) {
+                                                                 final String jsonAttributeToGetBack, final String closedOnDate) {
         LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingActions(createSavingsGsimOperationURL(CLOSE_SAVINGS_COMMAND, gsimId),
                 getCloseAccountJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
@@ -1509,10 +1512,10 @@ public class SavingsAccountHelper {
     }
 
     public Integer createSavingsProductWithAccrualAccounting(final Account assetAccount, final Account liabilityAccount,
-            final Account incomeAccount, final Account expenseAccount, final String interestRate) {
+                                                             final Account incomeAccount, final Account expenseAccount, final String interestRate) {
 
         SavingsProductHelper productHelper = new SavingsProductHelper();
-        final Account[] accountList = { assetAccount, liabilityAccount, incomeAccount, expenseAccount };
+        final Account[] accountList = {assetAccount, liabilityAccount, incomeAccount, expenseAccount};
 
         final String savingsProductJSON = productHelper.withInterestCompoundingPeriodTypeAsDaily().withInterestPostingPeriodTypeAsMonthly()
                 .withInterestCalculationPeriodTypeAsDailyBalance().withAccountingRuleAsAccrualBased(accountList)
@@ -1534,7 +1537,7 @@ public class SavingsAccountHelper {
     }
 
     public Object forceWithdrawalFromSavingsAccount(final Integer savingsId, final String amount, String date,
-            String jsonAttributeToGetback) {
+                                                    String jsonAttributeToGetback) {
         LOG.info("\n--------------------------------- SAVINGS TRANSACTION FORCE WITHDRAWAL --------------------------------");
         return performSavingActions(createSavingsTransactionURL("force-withdrawal", savingsId), getSavingsTransactionJSON(amount, date),
                 jsonAttributeToGetback);

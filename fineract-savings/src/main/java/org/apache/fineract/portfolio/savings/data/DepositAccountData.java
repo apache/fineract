@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
+
 import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -91,9 +92,9 @@ public class DepositAccountData {
     private Long productId;
 
     public DepositAccountData(Long clientId, Long productId, Long fieldOfficerId, EnumOptionData interestCompoundingPeriodType,
-            EnumOptionData interestPostingPeriodType, EnumOptionData interestCalculationType,
-            EnumOptionData interestCalculationDaysInYearType, Integer lockinPeriodFrequency, EnumOptionData lockinPeriodFrequencyType,
-            String externalId, Collection<SavingsAccountChargeData> charges) {
+                              EnumOptionData interestPostingPeriodType, EnumOptionData interestCalculationType,
+                              EnumOptionData interestCalculationDaysInYearType, Integer lockinPeriodFrequency, EnumOptionData lockinPeriodFrequencyType,
+                              String externalId, Collection<SavingsAccountChargeData> charges) {
         this.id = null;
         this.accountNo = null;
         this.externalId = externalId;
@@ -141,14 +142,14 @@ public class DepositAccountData {
     }
 
     public static DepositAccountData instance(final Long id, final String accountNo, final String externalId, final Long groupId,
-            final String groupName, final Long clientId, final String clientName, final Long productId, final String productName,
-            final Long fieldOfficerId, final String fieldOfficerName, final SavingsAccountStatusEnumData status,
-            final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency, final BigDecimal interestRate,
-            final EnumOptionData interestCompoundingPeriodType, final EnumOptionData interestPostingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
-            final boolean withdrawalFeeForTransfers, final SavingsAccountSummaryData summary, final EnumOptionData depositType,
-            final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup) {
+                                              final String groupName, final Long clientId, final String clientName, final Long productId, final String productName,
+                                              final Long fieldOfficerId, final String fieldOfficerName, final SavingsAccountStatusEnumData status,
+                                              final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency, final BigDecimal interestRate,
+                                              final EnumOptionData interestCompoundingPeriodType, final EnumOptionData interestPostingPeriodType,
+                                              final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
+                                              final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
+                                              final boolean withdrawalFeeForTransfers, final SavingsAccountSummaryData summary, final EnumOptionData depositType,
+                                              final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup) {
 
         final Collection<DepositProductData> productOptions = null;
         final Collection<StaffData> fieldOfficerOptions = null;
@@ -226,23 +227,23 @@ public class DepositAccountData {
     }
 
     protected DepositAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
-            final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldOfficerId,
-            final String fieldOfficerName, final SavingsAccountStatusEnumData status, final SavingsAccountApplicationTimelineData timeline,
-            final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestPeriodType,
-            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
-            final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
-            final SavingsAccountSummaryData summary, final Collection<SavingsAccountTransactionData> transactions,
-            final Collection<DepositProductData> productOptions, final Collection<StaffData> fieldOfficerOptions,
-            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestCalculationTypeOptions,
-            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions,
-            final DepositAccountInterestRateChartData accountChart, final DepositAccountInterestRateChartData chartTemplate,
-            final EnumOptionData depositType, final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax,
-            final TaxGroupData taxGroup) {
+                                 final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldOfficerId,
+                                 final String fieldOfficerName, final SavingsAccountStatusEnumData status, final SavingsAccountApplicationTimelineData timeline,
+                                 final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestPeriodType,
+                                 final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+                                 final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+                                 final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
+                                 final SavingsAccountSummaryData summary, final Collection<SavingsAccountTransactionData> transactions,
+                                 final Collection<DepositProductData> productOptions, final Collection<StaffData> fieldOfficerOptions,
+                                 final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+                                 final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+                                 final Collection<EnumOptionData> interestCalculationTypeOptions,
+                                 final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
+                                 final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
+                                 final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions,
+                                 final DepositAccountInterestRateChartData accountChart, final DepositAccountInterestRateChartData chartTemplate,
+                                 final EnumOptionData depositType, final BigDecimal minBalanceForInterestCalculation, final boolean withHoldTax,
+                                 final TaxGroupData taxGroup) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;

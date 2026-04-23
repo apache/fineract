@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,6 +31,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus;
@@ -55,7 +57,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "sms_campaign", uniqueConstraints = { @UniqueConstraint(columnNames = { "campaign_name" }, name = "campaign_name_UNIQUE") })
+@Table(name = "sms_campaign", uniqueConstraints = {@UniqueConstraint(columnNames = {"campaign_name"}, name = "campaign_name_UNIQUE")})
 public class SmsCampaign extends AbstractPersistableCustom<Long> {
 
     @Column(name = "campaign_name", nullable = false)
@@ -122,11 +124,12 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
     @Column(name = "is_notification", nullable = true)
     private boolean isNotification;
 
-    public SmsCampaign() {}
+    public SmsCampaign() {
+    }
 
     private SmsCampaign(final String campaignName, final Integer campaignType, final Integer triggerType, final Report businessRuleId,
-            final Long providerId, final String paramValue, final String message, final LocalDate submittedOnDate,
-            final AppUser submittedBy, final String recurrence, final LocalDateTime recurrenceStartDate, final boolean isNotification) {
+                        final Long providerId, final String paramValue, final String message, final LocalDate submittedOnDate,
+                        final AppUser submittedBy, final String recurrence, final LocalDateTime recurrenceStartDate, final boolean isNotification) {
         this.campaignName = campaignName;
         this.campaignType = campaignType;
         this.triggerType = SmsCampaignTriggerType.fromInt(triggerType).getValue();
@@ -519,7 +522,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
     }
 
     private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval,
-            final Integer repeatsOnDay) {
+                                              final Integer repeatsOnDay) {
         final StringBuilder recurrenceBuilder = new StringBuilder(200);
 
         recurrenceBuilder.append("FREQ=");

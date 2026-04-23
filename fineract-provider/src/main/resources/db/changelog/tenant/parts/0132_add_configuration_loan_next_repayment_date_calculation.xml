@@ -35,7 +35,8 @@
             <column name="string_value" value="earliest-unpaid-date"/>
             <column name="enabled" valueBoolean="true"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="earliest-unpaid-date: default for next-payment-due-date, Use earliest-unpaid-date or next-unpaid-due-date"/>
+            <column name="description"
+                    value="earliest-unpaid-date: default for next-payment-due-date, Use earliest-unpaid-date or next-unpaid-due-date"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

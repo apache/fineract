@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.data.AmortizationAllocationBaseTransactionDTO;
 import org.apache.fineract.portfolio.loanaccount.data.AmortizationAllocationMappingDTO;
@@ -47,7 +48,7 @@ public class LoanAmortizationAllocationServiceImpl implements LoanAmortizationAl
 
     @Override
     public LoanAmortizationAllocationData retrieveLoanAmortizationAllocationsForBuyDownFeeTransaction(final Long loanTransactionId,
-            final Long loanId) {
+                                                                                                      final Long loanId) {
         final LoanTransaction loanTransaction = this.loanTransactionRepository.findByIdAndLoanId(loanTransactionId, loanId)
                 .orElseThrow(() -> new LoanTransactionNotFoundException(loanTransactionId));
         if (!LoanTransactionType.BUY_DOWN_FEE.equals(loanTransaction.getTypeOf())) {
@@ -59,7 +60,7 @@ public class LoanAmortizationAllocationServiceImpl implements LoanAmortizationAl
 
     @Override
     public LoanAmortizationAllocationData retrieveLoanAmortizationAllocationsForCapitalizedIncomeTransaction(final Long loanTransactionId,
-            final Long loanId) {
+                                                                                                             final Long loanId) {
         final LoanTransaction loanTransaction = this.loanTransactionRepository.findByIdAndLoanId(loanTransactionId, loanId)
                 .orElseThrow(() -> new LoanTransactionNotFoundException(loanTransactionId));
         if (!LoanTransactionType.CAPITALIZED_INCOME.equals(loanTransaction.getTypeOf())) {
@@ -75,7 +76,7 @@ public class LoanAmortizationAllocationServiceImpl implements LoanAmortizationAl
     }
 
     private LoanAmortizationAllocationData retrieveLoanAmortizationAllocationData(final LoanTransaction loanTransaction,
-            final Long loanId) {
+                                                                                  final Long loanId) {
         try {
             final Long loanTransactionId = loanTransaction.getId();
             final AmortizationAllocationBaseTransactionDTO baseTransactionInfo = getBaseTransactionInfo(loanTransaction, loanId);

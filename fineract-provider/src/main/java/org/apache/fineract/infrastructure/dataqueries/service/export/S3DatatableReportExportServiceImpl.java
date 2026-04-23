@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,9 +21,11 @@ package org.apache.fineract.infrastructure.dataqueries.service.export;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -45,7 +47,7 @@ public class S3DatatableReportExportServiceImpl implements DatatableReportExport
 
     @Override
     public ResponseHolder export(String reportName, MultivaluedMap<String, String> queryParams, Map<String, String> reportParams,
-            String parameterTypeValue) {
+                                 String parameterTypeValue) {
         try {
             StreamingOutput output = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams);
             try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {

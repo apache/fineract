@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,9 +59,9 @@ public final class CashierTransactionData implements Serializable {
     private Collection<CurrencyData> currencyOptions;
 
     public static CashierTransactionData instance(final Long id, final Long cashierId, CashierTxnType txnType, final BigDecimal txnAmount,
-            final LocalDate txnDate, final String txnNote, final String entityType, final Long entityId, final OffsetDateTime createdDate,
-            final Long officeId, final String officeName, final Long tellerId, final String tellerName, final String cashierName,
-            final CashierData cashierData, LocalDate startDate, LocalDate endDate) {
+                                                  final LocalDate txnDate, final String txnNote, final String entityType, final Long entityId, final OffsetDateTime createdDate,
+                                                  final Long officeId, final String officeName, final Long tellerId, final String tellerName, final String cashierName,
+                                                  final CashierData cashierData, LocalDate startDate, LocalDate endDate) {
         return new CashierTransactionData().setId(id).setCashierId(cashierId).setTxnType(txnType).setTxnAmount(txnAmount)
                 .setTxnDate(txnDate).setTxnNote(txnNote).setEntityType(entityType).setEntityId(entityId).setCreatedDate(createdDate)
                 .setOfficeId(officeId).setOfficeName(officeName).setTellerId(tellerId).setTellerName(tellerName).setCashierName(cashierName)
@@ -68,8 +69,8 @@ public final class CashierTransactionData implements Serializable {
     }
 
     public static CashierTransactionData template(final Long cashierId, final Long tellerId, final String tellerName, final Long officeId,
-            final String officeName, final String cashierName, final CashierData cashierData, LocalDate startDate, LocalDate endDate,
-            final Collection<CurrencyData> currencyOptions) {
+                                                  final String officeName, final String cashierName, final CashierData cashierData, LocalDate startDate, LocalDate endDate,
+                                                  final Collection<CurrencyData> currencyOptions) {
         return new CashierTransactionData().setCashierId(cashierId).setOfficeId(officeId).setOfficeName(officeName).setTellerId(tellerId)
                 .setTellerName(tellerName).setCashierName(cashierName).setCashierData(cashierData).setStartDate(startDate)
                 .setEndDate(endDate).setCurrencyOptions(currencyOptions);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.serialization;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -42,7 +43,7 @@ public final class LoanDownPaymentTransactionValidator {
     private final LoanBalanceService loanBalanceService;
 
     public void validateRepaymentDateIsOnNonWorkingDay(final LocalDate repaymentDate, final WorkingDays workingDays,
-            final boolean allowTransactionsOnNonWorkingDay) {
+                                                       final boolean allowTransactionsOnNonWorkingDay) {
         if (!allowTransactionsOnNonWorkingDay && !WorkingDaysUtil.isWorkingDay(workingDays, repaymentDate)) {
             final String errorMessage = "Repayment date cannot be on a non working day";
             throw new LoanApplicationDateException("repayment.date.on.non.working.day", errorMessage, repaymentDate);
@@ -50,7 +51,7 @@ public final class LoanDownPaymentTransactionValidator {
     }
 
     public void validateRepaymentDateIsOnHoliday(final LocalDate repaymentDate, final boolean allowTransactionsOnHoliday,
-            final List<Holiday> holidays) {
+                                                 final List<Holiday> holidays) {
         if (!allowTransactionsOnHoliday && HolidayUtil.isHoliday(repaymentDate, holidays)) {
             final String errorMessage = "Repayment date cannot be on a holiday";
             throw new LoanApplicationDateException("repayment.date.on.holiday", errorMessage, repaymentDate);

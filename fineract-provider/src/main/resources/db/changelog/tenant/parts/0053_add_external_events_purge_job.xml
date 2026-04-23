@@ -36,7 +36,8 @@
             <column name="string_value"/>
             <column name="enabled" valueBoolean="false"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value="Number of days criteria to purge old external events sent to message channel"/>
+            <column name="description"
+                    value="Number of days criteria to purge old external events sent to message channel"/>
         </insert>
         <insert tableName="job">
             <column name="name" value="Purge External Events"/>

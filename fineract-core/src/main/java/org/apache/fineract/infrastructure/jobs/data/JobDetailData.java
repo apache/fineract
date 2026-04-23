@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.data;
 
 import java.util.Date;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -55,8 +56,8 @@ public class JobDetailData {
     private JobDetailHistoryData lastRunHistory;
 
     public JobDetailData(Long jobId, String displayName, String shortName, Date nextRunTime, String initializingError,
-            String cronExpression, boolean active, boolean currentlyRunning, Long version, Date jobRunStartTime, Date jobRunEndTime,
-            String status, String jobRunErrorMessage, String triggerType, String jobRunErrorLog) {
+                         String cronExpression, boolean active, boolean currentlyRunning, Long version, Date jobRunStartTime, Date jobRunEndTime,
+                         String status, String jobRunErrorMessage, String triggerType, String jobRunErrorLog) {
         this.jobId = jobId;
         this.displayName = displayName;
         this.shortName = shortName;

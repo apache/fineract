@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -145,7 +146,7 @@ public class LoanReAmortizationService {
 
     @Transactional(readOnly = true)
     public LoanScheduleData previewReAmortization(final Long loanId, final String loanExternalId,
-            final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
+                                                  final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
         final Loan loan = loanId != null ? loanAssembler.assembleFrom(loanId)
                 : loanAssembler.assembleFrom(ExternalIdFactory.produce(loanExternalId), false);
         return previewReAmortization(loan, reAmortizationPreviewRequest);
@@ -199,7 +200,7 @@ public class LoanReAmortizationService {
     }
 
     private LoanTransaction createReAmortizeTransactionFromPreviewRequest(final Loan loan,
-            final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
+                                                                          final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
         // re-amortization transaction date is always the current business date
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         final Money txPrincipal = loan.getTotalPrincipalOutstandingUntil(transactionDate);
@@ -232,14 +233,14 @@ public class LoanReAmortizationService {
     }
 
     private LoanReAmortizationParameter createReAmortizationParameterFromPreviewRequest(final LoanTransaction reAmortizationTransaction,
-            final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
+                                                                                        final ReAmortizationPreviewRequest reAmortizationPreviewRequest) {
         final LoanReAmortizationInterestHandlingType reAmortizationInterestHandlingType = LoanReAmortizationInterestHandlingType
                 .valueOf(reAmortizationPreviewRequest.getReAmortizationInterestHandling());
         return new LoanReAmortizationParameter(reAmortizationTransaction, reAmortizationInterestHandlingType, null);
     }
 
     private void processReAmortizationTransaction(final Loan loan, final LoanTransaction reAmortizationTransaction,
-            final boolean withPostTransactionChecks) {
+                                                  final boolean withPostTransactionChecks) {
         if (loan.isInterestBearingAndInterestRecalculationEnabled()) {
             loanScheduleService.regenerateRepaymentSchedule(loan);
             if (withPostTransactionChecks) {

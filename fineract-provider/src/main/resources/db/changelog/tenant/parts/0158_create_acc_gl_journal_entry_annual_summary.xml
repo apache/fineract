@@ -25,7 +25,8 @@
     <changeSet id="1" author="fineract" context="postgresql">
         <createTable tableName="acc_gl_journal_entry_annual_summary">
             <column autoIncrement="true" name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_acc_gl_journal_entry_annual_summary"/>
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="pk_acc_gl_journal_entry_annual_summary"/>
             </column>
             <column name="gl_code" type="VARCHAR(45)">
                 <constraints nullable="false"/>
@@ -59,7 +60,8 @@
     <changeSet id="3" author="fineract" context="mysql">
         <createTable tableName="acc_gl_journal_entry_annual_summary">
             <column autoIncrement="true" name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_acc_gl_journal_entry_annual_summary"/>
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="pk_acc_gl_journal_entry_annual_summary"/>
             </column>
             <column name="gl_code" type="VARCHAR(45)">
                 <constraints nullable="false"/>
@@ -92,23 +94,27 @@
 
     <changeSet author="fineract" id="4">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="acc_gl_journal_entry_annual_summary"
-                                 constraintName="FK_annual_report_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_annual_report_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="acc_gl_journal_entry_annual_summary"
-                                 constraintName="FK_annual_report_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_annual_report_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
     </changeSet>
 
     <changeSet author="fineract" id="5" runInTransaction="false" context="postgresql">
         <sql>
-            create index concurrently if not exists acc_gl_journal_entry_annual_summary_idx_1 on acc_gl_journal_entry_annual_summary(gl_code,product_id);
+            create index concurrently if not exists acc_gl_journal_entry_annual_summary_idx_1 on
+            acc_gl_journal_entry_annual_summary(gl_code,product_id);
         </sql>
     </changeSet>
     <changeSet author="fineract" id="6" context="mysql">
         <sql>
-            create index acc_gl_journal_entry_annual_summary_idx_1 on acc_gl_journal_entry_annual_summary(gl_code,product_id);
+            create index acc_gl_journal_entry_annual_summary_idx_1 on
+            acc_gl_journal_entry_annual_summary(gl_code,product_id);
         </sql>
     </changeSet>
 </databaseChangeLog>

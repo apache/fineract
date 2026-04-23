@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,8 +24,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -35,6 +37,8 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "m_client_charge")
@@ -170,16 +174,16 @@ public class ClientCharge extends AbstractPersistableCustom<Long> {
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             case FLAT:
                 this.amount = amount;
                 this.amountPaid = null;
                 this.amountOutstanding = amount;
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
-            break;
+                break;
             default:
-            break;
+                break;
         }
     }
 
@@ -299,6 +303,11 @@ public class ClientCharge extends AbstractPersistableCustom<Long> {
 
     public Money getAmountOutstanding() {
         return Money.of(getCurrency(), this.amountOutstanding);
+    }
+
+    public void inactivate() {
+        this.status = false;
+        this.inactivationDate = LocalDate.now();
     }
 
 }

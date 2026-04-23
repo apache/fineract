@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -56,8 +57,8 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     private final SavingsAccountChargeDueMapper chargeDueMapper;
 
     public SavingsAccountChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final DropdownReadPlatformService dropdownReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                       final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
+                                                       final DropdownReadPlatformService dropdownReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = jdbcTemplate;
@@ -176,7 +177,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             final String sql = "select " + rm.schema() + " where sc.id=? and sc.savings_account_id=?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[]{id, savingsAccountId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountChargeNotFoundException(savingsAccountId, e);
         }
@@ -196,7 +197,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         }
         sqlBuilder.append(" order by sc.charge_time_enum ASC, sc.charge_due_date ASC, sc.is_penalty ASC");
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[]{loanId});
     }
 
     private static final class SavingsAccountChargeDueMapper implements RowMapper<SavingsAccountAnnualFeeData> {
@@ -237,7 +238,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + sqlGenerator.currentBusinessDate() + " and sa.status_enum = ? ";
 
         return this.jdbcTemplate.query(sql, this.chargeDueMapper, // NOSONAR
-                new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
+                new Object[]{ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue()});
     }
 
     @Override
@@ -247,7 +248,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + " order by sac.charge_due_date ";
 
         return this.jdbcTemplate.query(sql, this.chargeDueMapper, // NOSONAR
-                new Object[] { DateUtils.getBusinessLocalDate(), SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
+                new Object[]{DateUtils.getBusinessLocalDate(), SavingsAccountStatusType.ACTIVE.getValue()}); // NOSONAR
     }
 
 }

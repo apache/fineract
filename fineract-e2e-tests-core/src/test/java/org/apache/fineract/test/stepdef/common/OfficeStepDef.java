@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +21,9 @@ package org.apache.fineract.test.stepdef.common;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import io.cucumber.java.en.When;
+
 import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.PostOfficesRequest;

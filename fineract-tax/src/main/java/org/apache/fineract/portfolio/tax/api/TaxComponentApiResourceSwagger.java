@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.tax.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,16 +28,19 @@ import java.util.Set;
  */
 final class TaxComponentApiResourceSwagger {
 
-    private TaxComponentApiResourceSwagger() {}
+    private TaxComponentApiResourceSwagger() {
+    }
 
     @Schema(description = "GetTaxesComponentsResponse")
     public static final class GetTaxesComponentsResponse {
 
-        private GetTaxesComponentsResponse() {}
+        private GetTaxesComponentsResponse() {
+        }
 
         static final class GetTaxesComponentsCreditAccountType {
 
-            private GetTaxesComponentsCreditAccountType() {}
+            private GetTaxesComponentsCreditAccountType() {
+            }
 
             @Schema(example = "2")
             public Integer id;
@@ -48,7 +52,8 @@ final class TaxComponentApiResourceSwagger {
 
         static final class GetTaxesComponentsCreditAccount {
 
-            private GetTaxesComponentsCreditAccount() {}
+            private GetTaxesComponentsCreditAccount() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -60,7 +65,8 @@ final class TaxComponentApiResourceSwagger {
 
         static final class GetTaxesComponentsHistories {
 
-            private GetTaxesComponentsHistories() {}
+            private GetTaxesComponentsHistories() {
+            }
         }
 
         @Schema(example = "1")
@@ -79,7 +85,8 @@ final class TaxComponentApiResourceSwagger {
     @Schema(description = "PostTaxesComponentsRequest")
     public static final class PostTaxesComponentsRequest {
 
-        private PostTaxesComponentsRequest() {}
+        private PostTaxesComponentsRequest() {
+        }
 
         @Schema(example = "tax component 1")
         public String name;
@@ -104,7 +111,8 @@ final class TaxComponentApiResourceSwagger {
     @Schema(description = "PostTaxesComponentsResponse")
     public static final class PostTaxesComponentsResponse {
 
-        private PostTaxesComponentsResponse() {}
+        private PostTaxesComponentsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -113,7 +121,8 @@ final class TaxComponentApiResourceSwagger {
     @Schema(description = "PutTaxesComponentsTaxComponentIdRequest")
     public static final class PutTaxesComponentsTaxComponentIdRequest {
 
-        private PutTaxesComponentsTaxComponentIdRequest() {}
+        private PutTaxesComponentsTaxComponentIdRequest() {
+        }
 
         @Schema(example = "tax component 2")
         public String name;
@@ -130,11 +139,13 @@ final class TaxComponentApiResourceSwagger {
     @Schema(description = "PutTaxesComponentsTaxComponentIdResponse")
     public static final class PutTaxesComponentsTaxComponentIdResponse {
 
-        private PutTaxesComponentsTaxComponentIdResponse() {}
+        private PutTaxesComponentsTaxComponentIdResponse() {
+        }
 
         static final class PutTaxesComponentsChanges {
 
-            private PutTaxesComponentsChanges() {}
+            private PutTaxesComponentsChanges() {
+            }
 
             @Schema(example = "15")
             public Float percentage;

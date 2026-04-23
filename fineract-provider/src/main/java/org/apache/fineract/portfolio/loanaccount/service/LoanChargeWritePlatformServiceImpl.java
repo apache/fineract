@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -606,7 +608,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     @Transactional
     @Override
     public CommandProcessingResult payLoanCharge(final Long loanId, Long loanChargeId, final JsonCommand command,
-            final boolean isChargeIdIncludedInJson) {
+                                                 final boolean isChargeIdIncludedInJson) {
 
         this.loanChargeApiJsonValidator.validateChargePaymentTransaction(command.json(), isChargeIdIncludedInJson);
         if (isChargeIdIncludedInJson) {
@@ -864,7 +866,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private LoanTransaction applyChargeAdjustment(final Loan loan, final LoanCharge loanCharge, final BigDecimal transactionAmount,
-            final LocalDate transactionDate, final ExternalId txnExternalId, PaymentDetail paymentDetail) {
+                                                  final LocalDate transactionDate, final ExternalId txnExternalId, PaymentDetail paymentDetail) {
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargeAdjustmentPreBusinessEvent(loan));
 
         LoanTransaction loanChargeAdjustmentTransaction = LoanTransaction.chargeAdjustment(loan, transactionAmount, transactionDate,
@@ -894,7 +896,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private void undoWaivedCharge(final Map<String, Object> changes, final Loan loan, final LoanTransaction loanTransaction,
-            final LoanChargePaidBy loanChargePaidBy) {
+                                  final LoanChargePaidBy loanChargePaidBy) {
         switch (loanChargePaidBy.getLoanCharge().getChargeTimeType()) {
             case SPECIFIED_DUE_DATE -> undoSpecifiedDueDateCharge(changes, loan, loanTransaction, loanChargePaidBy);
             case INSTALMENT_FEE -> undoInstalmentFee(changes, loan, loanTransaction, loanChargePaidBy);
@@ -904,7 +906,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private void undoInstalmentFee(Map<String, Object> changes, Loan loan, LoanTransaction loanTransaction,
-            LoanChargePaidBy loanChargePaidBy) {
+                                   LoanChargePaidBy loanChargePaidBy) {
         LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
         final Integer installmentNumber = loanChargePaidBy.getInstallmentNumber();
         LoanInstallmentCharge chargePerInstallment;
@@ -957,7 +959,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private void undoSpecifiedDueDateCharge(final Map<String, Object> changes, final Loan loan, final LoanTransaction loanTransaction,
-            final LoanChargePaidBy loanChargePaidBy) {
+                                            final LoanChargePaidBy loanChargePaidBy) {
         LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
         BigDecimal amountWaived = loanCharge.getAmountWaived(loan.getCurrency()).getAmount();
         if (!loanCharge.isWaived() || amountWaived == null) {
@@ -979,7 +981,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private void updateRepaymentInstalmentWithWaivedAmount(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment,
-            final BigDecimal amountWaived) {
+                                                           final BigDecimal amountWaived) {
         if (loanCharge.isPenaltyCharge()) {
             // Get the penalty charges waived amount per installment
             BigDecimal penaltyChargesWaivedAmount = installment.getPenaltyChargesWaived(loanCharge.getLoan().getCurrency()).getAmount();
@@ -1081,7 +1083,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private LoanOverdueDTO applyChargeToOverdueLoanInstallment(final Loan loan, final Long loanChargeId, final Integer periodNumber,
-            final JsonCommand command) {
+                                                               final JsonCommand command) {
         boolean runInterestRecalculation = false;
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(loanChargeId);
 
@@ -1210,7 +1212,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     private BigDecimal loanChargeValidateRefundAmount(LoanCharge loanCharge, LoanInstallmentCharge installmentChargeEntry,
-            BigDecimal transactionAmount) {
+                                                      BigDecimal transactionAmount) {
         // if transactionAmount not provided return max refundable amount (amount paid minus previous refunds)
         BigDecimal chargeAmountPaid;
         BigDecimal chargeAmountRefunded = BigDecimal.ZERO;
@@ -1374,8 +1376,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     }
 
     public LoanTransaction waiveLoanCharge(final Loan loan, final LoanCharge loanCharge, final Map<String, Object> changes,
-            final Integer loanInstallmentNumber, final ScheduleGeneratorDTO scheduleGeneratorDTO, final Money accruedCharge,
-            final ExternalId externalId) {
+                                           final Integer loanInstallmentNumber, final ScheduleGeneratorDTO scheduleGeneratorDTO, final Money accruedCharge,
+                                           final ExternalId externalId) {
         final Money amountWaived = loanCharge.waive(loan.getCurrency(), loanInstallmentNumber);
         changes.put("amount", amountWaived.getAmount());
 

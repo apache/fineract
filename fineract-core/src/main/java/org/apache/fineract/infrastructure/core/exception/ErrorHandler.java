@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
+
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.naming.AuthenticationException;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.validate.ValidationException;
@@ -160,10 +162,10 @@ public final class ErrorHandler {
     }
 
     public static RuntimeException getMappable(@NotNull Throwable t, String msgCode, String defaultMsg, String param,
-            final Object... defaultMsgArgs) {
+                                               final Object... defaultMsgArgs) {
         String msg = defaultMsg == null ? t.getMessage() : defaultMsg;
         String codePfx = "error.msg" + (param == null ? "" : ("." + param));
-        Object[] args = defaultMsgArgs == null ? new Object[] { t } : defaultMsgArgs;
+        Object[] args = defaultMsgArgs == null ? new Object[]{t} : defaultMsgArgs;
 
         Throwable cause;
         if ((cause = PessimisticLockingFailureCode.match(t)) != null) {

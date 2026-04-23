@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,8 +27,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -81,22 +83,22 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
     private AccountTransferStandingInstruction accountTransferStandingInstruction;
 
     public static AccountTransferDetails savingsToSavingsTransfer(final Office fromOffice, final Client fromClient,
-            final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
-            Integer transferType) {
+                                                                  final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
+                                                                  Integer transferType) {
 
         return new AccountTransferDetails(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, toSavingsAccount, null,
                 transferType, null);
     }
 
     public static AccountTransferDetails savingsToLoanTransfer(final Office fromOffice, final Client fromClient,
-            final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final Loan toLoanAccount,
-            Integer transferType) {
+                                                               final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final Loan toLoanAccount,
+                                                               Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, null, toLoanAccount,
                 transferType, null);
     }
 
     public static AccountTransferDetails loanTosavingsTransfer(final Office fromOffice, final Client fromClient, final Loan fromLoanAccount,
-            final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount, Integer transferType) {
+                                                               final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount, Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, toSavingsAccount, null,
                 transferType, null);
     }
@@ -106,9 +108,9 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
     }
 
     private AccountTransferDetails(final Office fromOffice, final Client fromClient, final SavingsAccount fromSavingsAccount,
-            final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
-            final Loan toLoanAccount, final Integer transferType,
-            final AccountTransferStandingInstruction accountTransferStandingInstruction) {
+                                   final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
+                                   final Loan toLoanAccount, final Integer transferType,
+                                   final AccountTransferStandingInstruction accountTransferStandingInstruction) {
         this.fromOffice = fromOffice;
         this.fromClient = fromClient;
         this.fromSavingsAccount = fromSavingsAccount;
@@ -154,7 +156,7 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
     }
 
     public static AccountTransferDetails loanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice,
-            Client toClient, Loan toLoanAccount, Integer transferType) {
+                                                            Client toClient, Loan toLoanAccount, Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
                 transferType, null);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,20 +29,24 @@ import java.util.Set;
  */
 final class ClientTransactionsApiResourceSwagger {
 
-    private ClientTransactionsApiResourceSwagger() {}
+    private ClientTransactionsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetClientsClientIdTransactionsResponse")
     public static final class GetClientsClientIdTransactionsResponse {
 
-        private GetClientsClientIdTransactionsResponse() {}
+        private GetClientsClientIdTransactionsResponse() {
+        }
 
         static final class GetClientsPageItems {
 
-            private GetClientsPageItems() {}
+            private GetClientsPageItems() {
+            }
 
             static final class GetClientsClientIdTransactionsType {
 
-                private GetClientsClientIdTransactionsType() {}
+                private GetClientsClientIdTransactionsType() {
+                }
 
                 @Schema(example = "1")
                 public Long id;
@@ -53,7 +58,8 @@ final class ClientTransactionsApiResourceSwagger {
 
             static final class GetClientTransactionsCurrency {
 
-                private GetClientTransactionsCurrency() {}
+                private GetClientTransactionsCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -95,7 +101,8 @@ final class ClientTransactionsApiResourceSwagger {
     @Schema(description = "GetClientsClientIdTransactionsTransactionIdResponse")
     public static final class GetClientsClientIdTransactionsTransactionIdResponse {
 
-        private GetClientsClientIdTransactionsTransactionIdResponse() {}
+        private GetClientsClientIdTransactionsTransactionIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -118,7 +125,8 @@ final class ClientTransactionsApiResourceSwagger {
     @Schema(description = "PostClientsClientIdTransactionsTransactionIdResponse")
     public static final class PostClientsClientIdTransactionsTransactionIdResponse {
 
-        private PostClientsClientIdTransactionsTransactionIdResponse() {}
+        private PostClientsClientIdTransactionsTransactionIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

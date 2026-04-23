@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.client.feign.util;
 
 import java.util.function.Supplier;
+
 import org.apache.fineract.client.feign.FeignException;
 
 /**
@@ -26,7 +27,8 @@ import org.apache.fineract.client.feign.FeignException;
  */
 public final class FeignCalls {
 
-    private FeignCalls() {}
+    private FeignCalls() {
+    }
 
     /**
      * Execute a Feign call, expecting success, returning strongly typed body. This covers the most typical use and is

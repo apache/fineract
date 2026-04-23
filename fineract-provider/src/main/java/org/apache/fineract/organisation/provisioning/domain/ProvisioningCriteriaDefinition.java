@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
+
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
@@ -61,7 +63,7 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
     }
 
     private ProvisioningCriteriaDefinition(ProvisioningCriteria criteria, ProvisioningCategory provisioningCategory, Long minimumAge,
-            Long maximumAge, BigDecimal provisioningPercentage, GLAccount liabilityAccount, GLAccount expenseAccount) {
+                                           Long maximumAge, BigDecimal provisioningPercentage, GLAccount liabilityAccount, GLAccount expenseAccount) {
         this.criteria = criteria;
         this.provisioningCategory = provisioningCategory;
         this.minimumAge = minimumAge;
@@ -72,8 +74,8 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
     }
 
     public static ProvisioningCriteriaDefinition newPrivisioningCriteria(ProvisioningCriteria criteria,
-            ProvisioningCategory provisioningCategory, Long minimumAge, Long maximumAge, BigDecimal provisioningPercentage,
-            GLAccount liabilityAccount, GLAccount expenseAccount) {
+                                                                         ProvisioningCategory provisioningCategory, Long minimumAge, Long maximumAge, BigDecimal provisioningPercentage,
+                                                                         GLAccount liabilityAccount, GLAccount expenseAccount) {
 
         return new ProvisioningCriteriaDefinition(criteria, provisioningCategory, minimumAge, maximumAge, provisioningPercentage,
                 liabilityAccount, expenseAccount);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -213,7 +214,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
     }
 
     private Long applyAndApproveLoanApplication(Long clientId, Long productId, String disbursementDate, double amount,
-            int numberOfRepayments) {
+                                                int numberOfRepayments) {
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId).productId(productId)
                 .expectedDisbursementDate(disbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)

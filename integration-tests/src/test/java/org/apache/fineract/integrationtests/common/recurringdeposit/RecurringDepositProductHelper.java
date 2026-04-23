@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package org.apache.fineract.integrationtests.common.recurringdeposit;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -32,7 +34,7 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({"unused", "rawtypes"})
 public class RecurringDepositProductHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositProductHelper.class);
@@ -246,7 +248,7 @@ public class RecurringDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createRecurringDepositProduct(final String recurrungDepositProductCreateJson,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                                        final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         LOG.info("------------------ CREATING RECURRING DEPOSIT PRODUCT--------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_RECURRING_DEPOSIT_PRODUCT_URL, recurrungDepositProductCreateJson,
                 "resourceId");
@@ -257,7 +259,7 @@ public class RecurringDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList retrieveAllRecurringDepositProducts(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                                final ResponseSpecification responseSpec) {
         LOG.info("----------------- RETRIEVING ALL RECURRING DEPOSIT PRODUCTS---------------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
@@ -269,7 +271,7 @@ public class RecurringDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static GetRecurringDepositProductsProductIdResponse getRecurringDepositProductById(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer productId) {
+                                                                                              final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
         final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, GET_RD_PRODUCT_BY_ID_URL);
@@ -281,7 +283,7 @@ public class RecurringDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap retrieveRecurringDepositProductById(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String productId) {
+                                                              final ResponseSpecification responseSpec, final String productId) {
         LOG.info("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
         final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_RD_PRODUCT_BY_ID_URL, "");
@@ -293,7 +295,7 @@ public class RecurringDepositProductHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer productId) {
+                                                                 final ResponseSpecification responseSpec, final Integer productId) {
         LOG.info("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
                 "chartSlabs");

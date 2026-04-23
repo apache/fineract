@@ -1,6 +1,6 @@
 name: Fineract Messaging Smoke Tests
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 permissions:
   contents: read

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings;
 
 import java.time.LocalDate;
+
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -36,27 +37,27 @@ public final class DepositAccountUtils {
     public static final int GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS = 5;
 
     public static LocalDate calculateNextDepositDate(final LocalDate lastDepositDate, final PeriodFrequencyType frequency,
-            final int recurringEvery) {
+                                                     final int recurringEvery) {
         LocalDate nextDepositDate = lastDepositDate;
 
         switch (frequency) {
             case DAYS:
                 nextDepositDate = lastDepositDate.plusDays(recurringEvery);
-            break;
+                break;
             case WEEKS:
                 nextDepositDate = lastDepositDate.plusWeeks(recurringEvery);
-            break;
+                break;
             case MONTHS:
                 nextDepositDate = lastDepositDate.plusMonths(recurringEvery);
-            break;
+                break;
             case YEARS:
                 nextDepositDate = lastDepositDate.plusYears(recurringEvery);
-            break;
+                break;
             case INVALID:
-            break;
+                break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement calculateNextDepositDate for WHOLE_TERM");
-            break;
+                break;
         }
         return nextDepositDate;
     }

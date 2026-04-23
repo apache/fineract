@@ -37,7 +37,8 @@
             <column name="string_value" value="TOTAL_OUTSTANDING_INTEREST"/>
             <column name="enabled" valueBoolean="true"/>
             <column name="is_trap_door" valueBoolean="false"/>
-            <column name="description" value=" Available options: TOTAL_OUTSTANDING_INTEREST, PAYABLE_OUTSTANDING_INTEREST. Define whether total outstanding interest (due + not yet due + projected) or payable till transfer date ( due + not yet due) should be involved in the asset transfer."/>
+            <column name="description"
+                    value=" Available options: TOTAL_OUTSTANDING_INTEREST, PAYABLE_OUTSTANDING_INTEREST. Define whether total outstanding interest (due + not yet due + projected) or payable till transfer date ( due + not yet due) should be involved in the asset transfer."/>
         </insert>
     </changeSet>
 </databaseChangeLog>

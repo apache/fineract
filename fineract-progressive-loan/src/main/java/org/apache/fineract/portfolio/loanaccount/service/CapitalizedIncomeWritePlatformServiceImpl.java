@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -132,7 +133,7 @@ public class CapitalizedIncomeWritePlatformServiceImpl implements CapitalizedInc
 
     @Override
     public CommandProcessingResult capitalizedIncomeAdjustment(final Long loanId, final Long capitalizedIncomeTransactionId,
-            final JsonCommand command) {
+                                                               final JsonCommand command) {
         loanTransactionValidator.validateCapitalizedIncomeAdjustment(command, loanId, capitalizedIncomeTransactionId);
         final Loan loan = loanAssembler.assembleFrom(loanId);
         final Map<String, Object> changes = new LinkedHashMap<>();

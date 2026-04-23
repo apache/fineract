@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -279,7 +280,7 @@ public class SearchReadServiceImpl implements SearchReadService {
         public String schema(final AdHocQuerySearchConditions searchConditions, final MapSqlParameterSource params) {
             final StringBuilder sql = new StringBuilder();
             sql.append(
-                    "Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
+                            "Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
                     .append("from (select mo.name, mp.name Product, SUM(COALESCE(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
                     .append("SUM(COALESCE(ml.total_outstanding_derived,0.0)) outstandingAmt,  ")
                     .append("(SUM(COALESCE(ml.total_outstanding_derived,0.0)) * 100 / SUM(COALESCE(ml.total_expected_repayment_derived,0.0))) percentOut ")

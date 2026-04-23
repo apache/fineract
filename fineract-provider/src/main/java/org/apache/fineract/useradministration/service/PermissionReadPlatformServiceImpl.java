@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.useradministration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -45,7 +46,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.permissionSchema();
         log.debug("retrieveAllPermissions: {}", sql);
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{});
     }
 
     @Override
@@ -57,7 +58,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
         final String sql = mapper.makerCheckerablePermissionSchema();
         log.debug("retrieveAllMakerCheckerablePermissions: {}", sql);
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{});
     }
 
     @Override
@@ -67,7 +68,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
         final String sql = mapper.rolePermissionSchema();
         log.debug("retrieveAllRolePermissions: {}", sql);
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { roleId });
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{roleId});
     }
 
     private static final class PermissionUsageDataMapper implements RowMapper<PermissionData> {

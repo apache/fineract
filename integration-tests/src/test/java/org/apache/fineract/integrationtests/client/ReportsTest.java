@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Map;
+
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
@@ -65,12 +66,13 @@ public class ReportsTest extends IntegrationTest {
         assertThat(result.body().string()).contains("Office/Branch");
     }
 
-    @Test // see FINERACT-1306
+    @Test
+        // see FINERACT-1306
     void runReportCategory() throws IOException {
         // Using raw OkHttp instead of Retrofit API here, because /runreports/reportCategoryList returns JSON Array -
         // but runReportGetData() expects columnHeaders/data JSON.
         var req = new Request.Builder().url(fineractClient().baseURL().resolve(
-                "/fineract-provider/api/v1/runreports/reportCategoryList?R_reportCategory=Fund&genericResultSet=false&parameterType=true&tenantIdentifier=default"))
+                        "/fineract-provider/api/v1/runreports/reportCategoryList?R_reportCategory=Fund&genericResultSet=false&parameterType=true&tenantIdentifier=default"))
                 .build();
         try (var response = fineractClient().okHttpClient().newCall(req).execute()) {
             assertThat(response.code()).isEqualTo(200);

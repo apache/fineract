@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -43,7 +43,7 @@ public final class SmsData {
     private String campaignName;
 
     public static SmsData instance(final Long id, final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
-            final String mobileNo, final String message, final Long providerId, final String camapignName) {
+                                   final String mobileNo, final String message, final Long providerId, final String camapignName) {
         return new SmsData().setId(id).setGroupId(groupId).setClientId(clientId).setStaffId(staffId).setStatus(status).setMobileNo(mobileNo)
                 .setMessage(message).setProviderId(providerId).setCampaignName(camapignName);
     }

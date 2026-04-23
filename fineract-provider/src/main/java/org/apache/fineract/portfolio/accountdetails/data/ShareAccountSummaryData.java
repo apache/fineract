@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.io.Serializable;
+
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
@@ -40,8 +41,8 @@ public class ShareAccountSummaryData implements Serializable {
     private final ShareAccountApplicationTimelineData timeline;
 
     public ShareAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String productName, final String shortProductName, final ShareAccountStatusEnumData status, final CurrencyData currency,
-            final Long approvedShares, final Long pendingForApprovalShares, final ShareAccountApplicationTimelineData timeline) {
+                                   final String productName, final String shortProductName, final ShareAccountStatusEnumData status, final CurrencyData currency,
+                                   final Long approvedShares, final Long pendingForApprovalShares, final ShareAccountApplicationTimelineData timeline) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;

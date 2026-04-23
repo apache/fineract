@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,7 +24,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -67,8 +69,8 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
     }
 
     private LoanTransactionToRepaymentScheduleMapping(final LoanTransaction loanTransaction,
-            final LoanRepaymentScheduleInstallment installment, final BigDecimal principalPortion, final BigDecimal interestPortion,
-            final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal amount) {
+                                                      final LoanRepaymentScheduleInstallment installment, final BigDecimal principalPortion, final BigDecimal interestPortion,
+                                                      final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal amount) {
         this.loanTransaction = loanTransaction;
         this.installment = installment;
         this.principalPortion = principalPortion;
@@ -79,8 +81,8 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
     }
 
     public static LoanTransactionToRepaymentScheduleMapping createFrom(final LoanTransaction loanTransaction,
-            final LoanRepaymentScheduleInstallment installment, final Money principalPortion, final Money interestPortion,
-            final Money feeChargesPortion, final Money penaltyChargesPortion) {
+                                                                       final LoanRepaymentScheduleInstallment installment, final Money principalPortion, final Money interestPortion,
+                                                                       final Money feeChargesPortion, final Money penaltyChargesPortion) {
         return new LoanTransactionToRepaymentScheduleMapping(loanTransaction, installment, defaultToNullIfZero(principalPortion),
                 defaultToNullIfZero(interestPortion), defaultToNullIfZero(feeChargesPortion), defaultToNullIfZero(penaltyChargesPortion),
                 defaultToNullIfZero(MathUtil.plus(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion)));
@@ -100,7 +102,7 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
     }
 
     void updateComponents(final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges) {
+                          final BigDecimal penaltyCharges) {
         this.principalPortion = MathUtil.zeroToNull(MathUtil.add(getPrincipalPortion(), principal));
         this.interestPortion = MathUtil.zeroToNull(MathUtil.add(getInterestPortion(), interest));
         updateChargesComponents(feeCharges, penaltyCharges);
@@ -112,7 +114,7 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
     }
 
     public void setComponents(final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges) {
+                              final BigDecimal penaltyCharges) {
         this.principalPortion = principal;
         this.interestPortion = interest;
         this.feeChargesPortion = feeCharges;

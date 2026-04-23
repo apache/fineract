@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -105,7 +106,7 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
     @Override
     public InterestRateChartData retrieveOneWithSlabs(Long chartId) {
         final String sql = "select " + chartExtractor.schema() + " where irc.id = ? order by ircd.id asc";
-        Collection<InterestRateChartData> chartDatas = jdbcTemplate.query(sql, chartExtractor, new Object[] { chartId }); // NOSONAR
+        Collection<InterestRateChartData> chartDatas = jdbcTemplate.query(sql, chartExtractor, new Object[]{chartId}); // NOSONAR
         if (chartDatas == null || chartDatas.isEmpty()) {
             throw new InterestRateChartNotFoundException(chartId);
         }
@@ -182,11 +183,11 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
                     left join m_code_value code on \
                     """
                     + sqlGenerator.castChar("code.id") + """
-                             = iri.attribute_value \
-                            left join m_currency curr on ircd.currency_code= curr.code \
-                            left join m_deposit_product_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id \
-                            left join m_savings_product sp on sp.id=dpirc.deposit_product_id \
-                            """;
+                     = iri.attribute_value \
+                    left join m_currency curr on ircd.currency_code= curr.code \
+                    left join m_deposit_product_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id \
+                    left join m_savings_product sp on sp.id=dpirc.deposit_product_id \
+                    """;
         }
 
         @Override
@@ -280,9 +281,9 @@ public class InterestRateChartReadServiceImpl implements InterestRateChartReadSe
                     left join m_code_value code on \
                     """
                     + sqlGenerator.castChar("code.id") + """
-                             = iri.attribute_value \
-                            left join m_currency curr on ircd.currency_code= curr.code \
-                            """;
+                     = iri.attribute_value \
+                    left join m_currency curr on ircd.currency_code= curr.code \
+                    """;
         }
 
         @Override

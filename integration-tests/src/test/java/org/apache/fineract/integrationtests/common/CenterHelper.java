@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,12 +25,14 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class CenterHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CenterHelper.class);
@@ -52,7 +54,8 @@ public final class CenterHelper {
         LOG.info("------------------------ RETRIEVING CENTER AT {}-------------------------", id);
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, "");
         final String jsonData = new Gson().toJson(get);
-        return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -60,12 +63,13 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<CenterDomain> paginatedListCenters(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                               final ResponseSpecification responseSpec) {
         final String GET_CENTER = CENTERS_URL + "?paged=true&limit=-1&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING CENTERS-------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "pageItems");
         final String jsonData = new Gson().toJson(get);
-        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -77,7 +81,8 @@ public final class CenterHelper {
         LOG.info("------------------------ RETRIEVING CENTERS-------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "");
         final String jsonData = new Gson().toJson(get);
-        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -85,12 +90,13 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<CenterDomain> listCentersOrdered(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                             final ResponseSpecification responseSpec) {
         final String GET_CENTER = CENTERS_URL + "?limit=-1&orderBy=id&sortOrder=asc&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING CENTERS-------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "");
         final String jsonData = new Gson().toJson(get);
-        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -98,7 +104,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static int createCenter(final String name, final int officeId, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                   final ResponseSpecification responseSpec) {
         return createCenter(name, officeId, null, -1, null, null, requestSpec, responseSpec);
     }
 
@@ -107,7 +113,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static int createCenter(final String name, final int officeId, final String activationDate,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                   final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createCenter(name, officeId, null, -1, null, activationDate, requestSpec, responseSpec);
     }
 
@@ -116,7 +122,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static int createCenter(final String name, final int officeId, final String externalId, final int staffId,
-            final int[] groupMembers, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                   final int[] groupMembers, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createCenter(name, officeId, externalId, staffId, groupMembers, null, requestSpec, responseSpec);
     }
 
@@ -125,8 +131,8 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static int createCenter(final String name, final int officeId, final String externalId, final int staffId,
-            final int[] groupMembers, final String activationDate, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                   final int[] groupMembers, final String activationDate, final RequestSpecification requestSpec,
+                                   final ResponseSpecification responseSpec) {
         final String CREATE_CENTER_URL = CENTERS_URL + "?" + Utils.TENANT_IDENTIFIER;
         HashMap hm = new HashMap();
         hm.put("name", name);
@@ -158,7 +164,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, String> updateCenter(final int id, HashMap request, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                       final ResponseSpecification responseSpec) {
         final String UPDATE_CENTER_URL = CENTERS_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------UPDATE CENTER AT {}---------------------------------------------", id);
         HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, UPDATE_CENTER_URL, new Gson().toJson(request),
@@ -171,7 +177,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static int[] associateGroups(final int id, final int[] groupMembers, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                        final ResponseSpecification responseSpec) {
         final String ASSOCIATE_GROUP_CENTER_URL = CENTERS_URL + "/" + id + "?command=associateGroups&" + Utils.TENANT_IDENTIFIER;
         HashMap groupMemberHashMap = new HashMap();
         groupMemberHashMap.put("groupMembers", groupMembers);
@@ -202,7 +208,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            @SuppressWarnings("unused") final boolean active) {
+                                       @SuppressWarnings("unused") final boolean active) {
         LOG.info("---------------------------------CREATING A CENTER---------------------------------------------");
         return createCenter(requestSpec, responseSpec, "CREATED_DATE");
     }
@@ -212,7 +218,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String activationDate) {
+                                       final String activationDate) {
         LOG.info("---------------------------------CREATING A CENTER---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL, getTestCenterAsJSON(true, activationDate), "groupId");
     }
@@ -232,7 +238,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static int createCenterWithStaffId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer staffId) {
+                                              final Integer staffId) {
         LOG.info("---------------------------------CREATING A CENTER---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL,
                 getTestCenterWithStaffAsJSON(true, CenterHelper.CREATED_DATE, staffId), "groupId");
@@ -243,7 +249,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyCenterCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedCenterID) {
+                                                   final Integer generatedCenterID) {
         LOG.info("------------------------------CHECK CENTER DETAILS------------------------------------\n");
         final String CENTER_URL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseCenterID = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "id");
@@ -255,7 +261,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void verifyCenterActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedCenterID, final boolean generatedCenterStatus) {
+                                                     final Integer generatedCenterID, final boolean generatedCenterStatus) {
         LOG.info("------------------------------CHECK CENTER STATUS------------------------------------\n");
         final String CENTER_URL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseCenterStatus = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "active");
@@ -267,7 +273,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer activateCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String centerId) {
+                                         final String centerId) {
         final String CENTER_ASSOCIATE_URL = "/fineract-provider/api/v1/centers/" + centerId + "?command=activate&"
                 + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------ACTIVATE A CENTER---------------------------------------------");
@@ -369,7 +375,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
-            final Long staffId) {
+                                     final Long staffId) {
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
         LOG.info("---------------------------------Assign Staff---------------------------------------------");
@@ -381,7 +387,7 @@ public final class CenterHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object unassignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String groupId, final Long staffId) {
+                                       final String groupId, final Long staffId) {
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=unassignStaff";
         LOG.info("---------------------------------Unassign Staff---------------------------------------------");

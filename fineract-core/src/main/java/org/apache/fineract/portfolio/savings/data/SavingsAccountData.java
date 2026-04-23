@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -155,12 +156,12 @@ public final class SavingsAccountData implements Serializable {
     private BigDecimal overdraftPosting;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
-            BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
-            EnumOptionData interestPostingPeriodTypeEnum, EnumOptionData interestCalculationTypeEnum,
-            EnumOptionData interestCalculationDaysInYearTypeEnum, BigDecimal minRequiredOpeningBalance, Integer lockinPeriodFrequency,
-            EnumOptionData lockinPeriodFrequencyTypeEnum, boolean applyWithdrawalFeeForTransfers, Integer rowIndex, String externalId,
-            Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit, String locale,
-            String dateFormat) {
+                                                              BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
+                                                              EnumOptionData interestPostingPeriodTypeEnum, EnumOptionData interestCalculationTypeEnum,
+                                                              EnumOptionData interestCalculationDaysInYearTypeEnum, BigDecimal minRequiredOpeningBalance, Integer lockinPeriodFrequency,
+                                                              EnumOptionData lockinPeriodFrequencyTypeEnum, boolean applyWithdrawalFeeForTransfers, Integer rowIndex, String externalId,
+                                                              Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit, String locale,
+                                                              String dateFormat) {
         return new SavingsAccountData(clientId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate,
                 interestCompoundingPeriodTypeEnum, interestPostingPeriodTypeEnum, interestCalculationTypeEnum,
                 interestCalculationDaysInYearTypeEnum, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyTypeEnum,
@@ -169,11 +170,11 @@ public final class SavingsAccountData implements Serializable {
     }
 
     private SavingsAccountData(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
-            BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodType, EnumOptionData interestPostingPeriodType,
-            EnumOptionData interestCalculationType, EnumOptionData interestCalculationDaysInYearType, BigDecimal minRequiredOpeningBalance,
-            Integer lockinPeriodFrequency, EnumOptionData lockinPeriodFrequencyType, boolean withdrawalFeeForTransfers, Integer rowIndex,
-            String externalId, Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit,
-            String locale, String dateFormat) {
+                               BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodType, EnumOptionData interestPostingPeriodType,
+                               EnumOptionData interestCalculationType, EnumOptionData interestCalculationDaysInYearType, BigDecimal minRequiredOpeningBalance,
+                               Integer lockinPeriodFrequency, EnumOptionData lockinPeriodFrequencyType, boolean withdrawalFeeForTransfers, Integer rowIndex,
+                               String externalId, Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit,
+                               String locale, String dateFormat) {
         this.id = null;
         this.accountNo = null;
         this.depositType = null;
@@ -308,7 +309,7 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public void setHelpers(final SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final SavingsHelper savingsHelper) {
+                           final SavingsHelper savingsHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsHelper = savingsHelper;
     }
@@ -414,12 +415,12 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public static SavingsAccountData importInstanceGroup(Long groupId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
-            BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
-            EnumOptionData interestPostingPeriodTypeEnum, EnumOptionData interestCalculationTypeEnum,
-            EnumOptionData interestCalculationDaysInYearTypeEnum, BigDecimal minRequiredOpeningBalance, Integer lockinPeriodFrequency,
-            EnumOptionData lockinPeriodFrequencyTypeEnum, boolean applyWithdrawalFeeForTransfers, Integer rowIndex, String externalId,
-            Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit, String locale,
-            String dateFormat) {
+                                                         BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
+                                                         EnumOptionData interestPostingPeriodTypeEnum, EnumOptionData interestCalculationTypeEnum,
+                                                         EnumOptionData interestCalculationDaysInYearTypeEnum, BigDecimal minRequiredOpeningBalance, Integer lockinPeriodFrequency,
+                                                         EnumOptionData lockinPeriodFrequencyTypeEnum, boolean applyWithdrawalFeeForTransfers, Integer rowIndex, String externalId,
+                                                         Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit, String locale,
+                                                         String dateFormat) {
 
         return new SavingsAccountData(groupId, productId, fieldOfficerId, submittedOnDate, nominalAnnualInterestRate,
                 interestCompoundingPeriodTypeEnum, interestPostingPeriodTypeEnum, interestCalculationTypeEnum,
@@ -429,11 +430,11 @@ public final class SavingsAccountData implements Serializable {
     }
 
     private SavingsAccountData(Long groupId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
-            BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodType, EnumOptionData interestPostingPeriodType,
-            EnumOptionData interestCalculationType, EnumOptionData interestCalculationDaysInYearType, BigDecimal minRequiredOpeningBalance,
-            Integer lockinPeriodFrequency, EnumOptionData lockinPeriodFrequencyType, boolean withdrawalFeeForTransfers, Integer rowIndex,
-            String externalId, Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit, Long id,
-            String locale, String dateFormat) {
+                               BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodType, EnumOptionData interestPostingPeriodType,
+                               EnumOptionData interestCalculationType, EnumOptionData interestCalculationDaysInYearType, BigDecimal minRequiredOpeningBalance,
+                               Integer lockinPeriodFrequency, EnumOptionData lockinPeriodFrequencyType, boolean withdrawalFeeForTransfers, Integer rowIndex,
+                               String externalId, Collection<SavingsAccountChargeData> charges, boolean allowOverdraft, BigDecimal overdraftLimit, Long id,
+                               String locale, String dateFormat) {
         this.id = id;
         this.accountNo = null;
         this.depositType = null;
@@ -501,20 +502,20 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public static SavingsAccountData instance(final Long id, final String accountNo, final EnumOptionData depositType,
-            final String externalId, final Long groupId, final String groupName, final Long clientId, final String clientName,
-            final Long productId, final String productName, final Long fieldOfficerId, final String fieldOfficerName,
-            final SavingsAccountStatusEnumData status, SavingsAccountSubStatusEnumData subStatus, final String reasonForBlock,
-            final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency, final BigDecimal interestRate,
-            final EnumOptionData interestCompoundingPeriodType, final EnumOptionData interestPostingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
-            final boolean withdrawalFeeForTransfers, final SavingsAccountSummaryData summary, final boolean allowOverdraft,
-            final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
-            final BigDecimal maxAllowedLienLimit, final boolean lienAllowed, final BigDecimal minBalanceForInterestCalculation,
-            final BigDecimal onHoldFunds, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
-            final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive,
-            final Integer daysToDormancy, final Integer daysToEscheat, final BigDecimal savingsAmountOnHold) {
+                                              final String externalId, final Long groupId, final String groupName, final Long clientId, final String clientName,
+                                              final Long productId, final String productName, final Long fieldOfficerId, final String fieldOfficerName,
+                                              final SavingsAccountStatusEnumData status, SavingsAccountSubStatusEnumData subStatus, final String reasonForBlock,
+                                              final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency, final BigDecimal interestRate,
+                                              final EnumOptionData interestCompoundingPeriodType, final EnumOptionData interestPostingPeriodType,
+                                              final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
+                                              final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
+                                              final boolean withdrawalFeeForTransfers, final SavingsAccountSummaryData summary, final boolean allowOverdraft,
+                                              final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
+                                              final BigDecimal maxAllowedLienLimit, final boolean lienAllowed, final BigDecimal minBalanceForInterestCalculation,
+                                              final BigDecimal onHoldFunds, final BigDecimal nominalAnnualInterestRateOverdraft,
+                                              final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
+                                              final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive,
+                                              final Integer daysToDormancy, final Integer daysToEscheat, final BigDecimal savingsAmountOnHold) {
 
         final Collection<SavingsProductData> productOptions = null;
         final Collection<StaffData> fieldOfficerOptions = null;
@@ -618,7 +619,7 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public static SavingsAccountData lookupWithProductDetails(final Long accountId, final String accountNo,
-            final EnumOptionData depositType, final Long productId, final String productName, final SavingsAccountStatusEnumData status) {
+                                                              final EnumOptionData depositType, final Long productId, final String productName, final SavingsAccountStatusEnumData status) {
 
         final String externalId = null;
         final Long groupId = null;
@@ -687,7 +688,7 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
-            final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges) {
+                                                         final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges) {
 
         if (template == null) {
             final Collection<SavingsProductData> productOptions = null;
@@ -723,14 +724,14 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
-            final Collection<SavingsProductData> productOptions, final Collection<StaffData> fieldOfficerOptions,
-            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestCalculationTypeOptions,
-            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges,
-            final Collection<ChargeData> chargeOptions) {
+                                                         final Collection<SavingsProductData> productOptions, final Collection<StaffData> fieldOfficerOptions,
+                                                         final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+                                                         final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+                                                         final Collection<EnumOptionData> interestCalculationTypeOptions,
+                                                         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
+                                                         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
+                                                         final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges,
+                                                         final Collection<ChargeData> chargeOptions) {
 
         return new SavingsAccountData(account.id, account.accountNo, account.depositType, account.externalId, account.groupId,
                 account.groupName, account.clientId, account.clientName, account.savingsProductId, account.savingsProductName,
@@ -750,7 +751,7 @@ public final class SavingsAccountData implements Serializable {
     }
 
     public static SavingsAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
-            final String groupName) {
+                                                        final String groupName) {
 
         final Long id = null;
         final String accountNo = null;
@@ -821,27 +822,27 @@ public final class SavingsAccountData implements Serializable {
     }
 
     private SavingsAccountData(final Long id, final String accountNo, final EnumOptionData depositType, final String externalId,
-            final Long groupId, final String groupName, final Long clientId, final String clientName, final Long productId,
-            final String productName, final Long fieldOfficerId, final String fieldOfficerName, final SavingsAccountStatusEnumData status,
-            final SavingsAccountSubStatusEnumData subStatus, final String reasonForBlock,
-            final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency, final BigDecimal nominalAnnualInterestRate,
-            final EnumOptionData interestPeriodType, final EnumOptionData interestPostingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
-            final boolean withdrawalFeeForTransfers, final SavingsAccountSummaryData summary,
-            final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsProductData> productOptions,
-            final Collection<StaffData> fieldOfficerOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
-            final Collection<EnumOptionData> interestCalculationTypeOptions,
-            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions, final boolean allowOverdraft,
-            final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
-            final BigDecimal maxAllowedLienLimit, final boolean lienAllowd, final BigDecimal minBalanceForInterestCalculation,
-            final BigDecimal onHoldFunds, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
-            final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive,
-            final Integer daysToDormancy, final Integer daysToEscheat, final BigDecimal savingsAmountOnHold) {
+                               final Long groupId, final String groupName, final Long clientId, final String clientName, final Long productId,
+                               final String productName, final Long fieldOfficerId, final String fieldOfficerName, final SavingsAccountStatusEnumData status,
+                               final SavingsAccountSubStatusEnumData subStatus, final String reasonForBlock,
+                               final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency, final BigDecimal nominalAnnualInterestRate,
+                               final EnumOptionData interestPeriodType, final EnumOptionData interestPostingPeriodType,
+                               final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
+                               final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
+                               final boolean withdrawalFeeForTransfers, final SavingsAccountSummaryData summary,
+                               final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsProductData> productOptions,
+                               final Collection<StaffData> fieldOfficerOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+                               final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+                               final Collection<EnumOptionData> interestCalculationTypeOptions,
+                               final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
+                               final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
+                               final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions, final boolean allowOverdraft,
+                               final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
+                               final BigDecimal maxAllowedLienLimit, final boolean lienAllowd, final BigDecimal minBalanceForInterestCalculation,
+                               final BigDecimal onHoldFunds, final BigDecimal nominalAnnualInterestRateOverdraft,
+                               final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
+                               final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive,
+                               final Integer daysToDormancy, final Integer daysToEscheat, final BigDecimal savingsAmountOnHold) {
         this.id = id;
         this.accountNo = accountNo;
         this.depositType = depositType;

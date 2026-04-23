@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -64,8 +64,8 @@ public class OrganisationProvisioningConfiguration {
     @Bean
     @ConditionalOnMissingBean(ProvisioningCriteriaAssembler.class)
     public ProvisioningCriteriaAssembler provisioningCriteriaAssembler(FromJsonHelper fromApiJsonHelper,
-            ProvisioningCategoryRepository provisioningCategoryRepository, LoanProductRepository loanProductRepository,
-            GLAccountRepository glAccountRepository, PlatformSecurityContext platformSecurityContext) {
+                                                                       ProvisioningCategoryRepository provisioningCategoryRepository, LoanProductRepository loanProductRepository,
+                                                                       GLAccountRepository glAccountRepository, PlatformSecurityContext platformSecurityContext) {
         return new ProvisioningCriteriaAssembler(fromApiJsonHelper, provisioningCategoryRepository, loanProductRepository,
                 glAccountRepository, platformSecurityContext);
     }
@@ -73,9 +73,9 @@ public class OrganisationProvisioningConfiguration {
     @Bean
     @ConditionalOnMissingBean(ProvisioningCriteriaReadPlatformService.class)
     public ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService(JdbcTemplate jdbcTemplate,
-            ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
-            LoanProductReadPlatformService loanProductReadPlatformService, GLAccountReadPlatformService glAccountReadPlatformService,
-            LoanProductReadPlatformService loanProductReaPlatformService) {
+                                                                                           ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
+                                                                                           LoanProductReadPlatformService loanProductReadPlatformService, GLAccountReadPlatformService glAccountReadPlatformService,
+                                                                                           LoanProductReadPlatformService loanProductReaPlatformService) {
         return new ProvisioningCriteriaReadPlatformServiceImpl(jdbcTemplate, provisioningCategoryReadPlatformService,
                 loanProductReadPlatformService, glAccountReadPlatformService, loanProductReaPlatformService);
     }

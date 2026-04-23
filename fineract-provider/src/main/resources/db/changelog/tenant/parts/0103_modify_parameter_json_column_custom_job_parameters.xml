@@ -29,14 +29,27 @@
     </changeSet>
     <changeSet author="fineract" id="1-postgresql" context="postgresql">
         <sql>
-            UPDATE batch_custom_job_parameters SET parameter_json = json_build_array(json_build_object('parameterName','LoanIds','parameterValue',parameter_json)) WHERE id IN (SELECT DISTINCT cjp.id FROM (SELECT id,json_array_elements(parameter_json) AS json_data FROM batch_custom_job_parameters cjp1 WHERE json_typeof(cjp1.parameter_json)='array') AS cjp WHERE (json_typeof(cjp.json_data) = 'number'));
-            UPDATE batch_custom_job_parameters SET parameter_json = json_build_array(json_build_object('parameterName','BusinessDate','parameterValue',parameter_json)) WHERE id IN (SELECT DISTINCT cjp.id FROM batch_custom_job_parameters cjp WHERE json_typeof(parameter_json) IS DISTINCT FROM 'array');
+            UPDATE batch_custom_job_parameters SET parameter_json =
+            json_build_array(json_build_object('parameterName','LoanIds','parameterValue',parameter_json)) WHERE id IN
+            (SELECT DISTINCT cjp.id FROM (SELECT id,json_array_elements(parameter_json) AS json_data FROM
+            batch_custom_job_parameters cjp1 WHERE json_typeof(cjp1.parameter_json)='array') AS cjp WHERE
+            (json_typeof(cjp.json_data) = 'number'));
+            UPDATE batch_custom_job_parameters SET parameter_json =
+            json_build_array(json_build_object('parameterName','BusinessDate','parameterValue',parameter_json)) WHERE id
+            IN (SELECT DISTINCT cjp.id FROM batch_custom_job_parameters cjp WHERE json_typeof(parameter_json) IS
+            DISTINCT FROM 'array');
         </sql>
     </changeSet>
     <changeSet author="fineract" id="2-mysql" context="mysql">
         <sql>
-            UPDATE batch_custom_job_parameters SET parameter_json = JSON_ARRAY(JSON_OBJECT('parameterName','LoanIds','parameterValue',parameter_json)) WHERE id IN (SELECT DISTINCT cjp.id FROM (SELECT * FROM batch_custom_job_parameters) cjp WHERE JSON_TYPE(cjp.parameter_json) = 'ARRAY' AND JSON_TYPE(JSON_EXTRACT(cjp.parameter_json, '$[0]')) = 'INTEGER');
-            UPDATE batch_custom_job_parameters SET parameter_json = JSON_ARRAY(JSON_OBJECT('parameterName','BusinessDate','parameterValue',parameter_json)) WHERE id IN (SELECT DISTINCT cjp.id FROM (SELECT * FROM batch_custom_job_parameters) cjp WHERE JSON_TYPE(cjp.parameter_json) != 'ARRAY');
+            UPDATE batch_custom_job_parameters SET parameter_json =
+            JSON_ARRAY(JSON_OBJECT('parameterName','LoanIds','parameterValue',parameter_json)) WHERE id IN (SELECT
+            DISTINCT cjp.id FROM (SELECT * FROM batch_custom_job_parameters) cjp WHERE JSON_TYPE(cjp.parameter_json) =
+            'ARRAY' AND JSON_TYPE(JSON_EXTRACT(cjp.parameter_json, '$[0]')) = 'INTEGER');
+            UPDATE batch_custom_job_parameters SET parameter_json =
+            JSON_ARRAY(JSON_OBJECT('parameterName','BusinessDate','parameterValue',parameter_json)) WHERE id IN (SELECT
+            DISTINCT cjp.id FROM (SELECT * FROM batch_custom_job_parameters) cjp WHERE JSON_TYPE(cjp.parameter_json) !=
+            'ARRAY');
         </sql>
     </changeSet>
     <changeSet author="fineract" id="4">

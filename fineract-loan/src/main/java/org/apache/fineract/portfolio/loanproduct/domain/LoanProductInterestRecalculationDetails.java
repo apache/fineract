@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -105,13 +105,13 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     }
 
     public LoanProductInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod,
-            final Integer rescheduleStrategyMethod, final Integer restFrequencyType, final Integer restInterval,
-            final Integer restFrequencyNthDay, final Integer restFrequencyOnDay, final Integer restFrequencyWeekday,
-            Integer compoundingFrequencyType, Integer compoundingInterval, final Integer compoundingFrequencyNthDay,
-            final Integer compoundingFrequencyOnDay, final Integer compoundingFrequencyWeekday,
-            final boolean isArrearsBasedOnOriginalSchedule, final Integer preCloseInterestCalculationStrategy,
-            final boolean isCompoundingToBePostedAsTransaction, final boolean allowCompoundingOnEod,
-            final boolean disallowInterestCalculationOnPastDue) {
+                                                   final Integer rescheduleStrategyMethod, final Integer restFrequencyType, final Integer restInterval,
+                                                   final Integer restFrequencyNthDay, final Integer restFrequencyOnDay, final Integer restFrequencyWeekday,
+                                                   Integer compoundingFrequencyType, Integer compoundingInterval, final Integer compoundingFrequencyNthDay,
+                                                   final Integer compoundingFrequencyOnDay, final Integer compoundingFrequencyWeekday,
+                                                   final boolean isArrearsBasedOnOriginalSchedule, final Integer preCloseInterestCalculationStrategy,
+                                                   final boolean isCompoundingToBePostedAsTransaction, final boolean allowCompoundingOnEod,
+                                                   final boolean disallowInterestCalculationOnPastDue) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
         this.restFrequencyType = restFrequencyType;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -36,6 +37,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -83,7 +85,7 @@ public class GuarantorTest {
         savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testGuarantor() {
 
@@ -241,7 +243,7 @@ public class GuarantorTest {
 
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testGuarantor_UNDO_DISBURSAL() {
 
@@ -439,7 +441,7 @@ public class GuarantorTest {
         verifySavingsOnHoldBalance(externalSavigsId_2, Float.valueOf((float) EXTERNAL2_GURANTEE));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testGuarantor_RECOVER_GUARANTEES() {
 
@@ -510,7 +512,7 @@ public class GuarantorTest {
 
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testGuarantor_RECOVER_GUARANTEES_WITH_MORE_GUARANTEE() {
 
@@ -587,7 +589,7 @@ public class GuarantorTest {
 
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testGuarantor_WRITE_OFF_LOAN() {
 
@@ -665,7 +667,7 @@ public class GuarantorTest {
         assertEquals(expectedBalance, onHoldAmount, "Verifying On Hold Funds");
     }
 
-    @SuppressWarnings({ "rawtypes", "cast" })
+    @SuppressWarnings({"rawtypes", "cast"})
     private void verifySavingsBalanceAndOnHoldBalance(final Integer savingsId, final Float expectedBalance, final Float accountBalance) {
         HashMap savingsDetails = (HashMap) this.savingsAccountHelper.getSavingsDetails(savingsId);
         assertEquals(expectedBalance, savingsDetails.get("onHoldFunds"), "Verifying On Hold Funds");
@@ -688,7 +690,7 @@ public class GuarantorTest {
     }
 
     private Integer createLoanProductWithHoldFunds(final String mandatoryGuarantee, final String minimumGuaranteeFromGuarantor,
-            final String minimumGuaranteeFromOwnFunds) {
+                                                   final String minimumGuaranteeFromOwnFunds) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
@@ -738,7 +740,7 @@ public class GuarantorTest {
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void testGuarantorWithGroupSavingsAccount() {
         // Create a group

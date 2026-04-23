@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.GuarantorConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -52,7 +53,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
     private final List<CodeValueData> guarantorRelationshipTypes;
 
     public GuarantorWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
-            List<LoanAccountData> loans, List<SavingsAccountData> savings, List<CodeValueData> guarantorRelationshipTypes) {
+                                      List<LoanAccountData> loans, List<SavingsAccountData> savings, List<CodeValueData> guarantorRelationshipTypes) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.loans = loans;
@@ -210,8 +211,8 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint savingsaccountNumberConstraint = validationHelper.createFormulaListConstraint(
                 "INDIRECT(CONCATENATE(\"SavingsAccount_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($G1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
         DataValidationConstraint guranterTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.GUARANTOR_INTERNAL,
-                        TemplatePopulateImportConstants.GUARANTOR_EXTERNAL, TemplatePopulateImportConstants.GUARANTOR_GROUP });
+                .createExplicitListConstraint(new String[]{TemplatePopulateImportConstants.GUARANTOR_INTERNAL,
+                        TemplatePopulateImportConstants.GUARANTOR_EXTERNAL, TemplatePopulateImportConstants.GUARANTOR_GROUP});
         DataValidationConstraint guarantorRelationshipConstraint = validationHelper.createFormulaListConstraint("GuarantorRelationship");
         DataValidationConstraint entityofficeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint entityclientNameConstraint = validationHelper
@@ -277,7 +278,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         for (int i = 0; i < loans.size(); i++) {
             if (!clientName.equals(loans.get(i).getClientName())) {
                 endIndex = i + 1;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
                 startIndex = i + 2;
                 clientName = loans.get(i).getClientName();
                 clientId = loans.get(i).getClientId().toString();
@@ -286,7 +287,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             }
             if (i == loans.size() - 1) {
                 endIndex = i + 2;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
             }
         }
 
@@ -308,7 +309,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         for (int i = 0; i < savings.size(); i++) {
             if (!clientName.equals(savings.get(i).getClientName())) {
                 endIndex = i + 1;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
                 startIndex = i + 2;
                 clientName = savings.get(i).getClientName();
                 clientId = savings.get(i).getClientId().toString();
@@ -317,7 +318,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             }
             if (i == savings.size() - 1) {
                 endIndex = i + 2;
-                clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
+                clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
             }
         }
         // Account Number Named after Clients

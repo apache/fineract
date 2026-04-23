@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 /**
@@ -26,22 +27,26 @@ import java.util.List;
  */
 final class LoanScheduleApiResourceSwagger {
 
-    private LoanScheduleApiResourceSwagger() {}
+    private LoanScheduleApiResourceSwagger() {
+    }
 
     @Schema(description = "PostLoansLoanIdScheduleRequest")
     public static final class PostLoansLoanIdScheduleRequest {
 
-        private PostLoansLoanIdScheduleRequest() {}
+        private PostLoansLoanIdScheduleRequest() {
+        }
     }
 
     @Schema(description = "PostLoansLoanIdScheduleResponse")
     public static final class PostLoansLoanIdScheduleResponse {
 
-        private PostLoansLoanIdScheduleResponse() {}
+        private PostLoansLoanIdScheduleResponse() {
+        }
 
         static final class PostLoanChanges {
 
-            private PostLoanChanges() {}
+            private PostLoanChanges() {
+            }
 
             @Schema(example = "[21, 22]")
             public List<Long> removedEntityIds;

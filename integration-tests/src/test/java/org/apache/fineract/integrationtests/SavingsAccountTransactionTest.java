@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,6 +39,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.domain.Header;
@@ -77,8 +79,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes" })
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@SuppressWarnings({"rawtypes"})
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsAccountTransactionTest {
 
     private static final Logger log = LoggerFactory.getLogger(SavingsAccountTransactionTest.class);
@@ -290,7 +292,7 @@ public class SavingsAccountTransactionTest {
         Integer transactionId = isDeposit
                 ? (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, amount, depositDateString, RESPONSE_RESOURCE_ID)
                 : (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, amount, withdrawDateString,
-                        RESPONSE_RESOURCE_ID);
+                RESPONSE_RESOURCE_ID);
 
         assertNotNull(transactionId);
 
@@ -337,7 +339,7 @@ public class SavingsAccountTransactionTest {
         private final List<String> columnNames;
 
         private TransactionExecutor(SavingsAccountHelper savingsHelper, Integer savingsId, SavingsTransactionData transactionData,
-                boolean batch, boolean enclosingTransaction, String datatableName, List<String> columnNames) {
+                                    boolean batch, boolean enclosingTransaction, String datatableName, List<String> columnNames) {
             this.savingsId = savingsId;
             this.savingsHelper = savingsHelper;
             this.transactionData = transactionData;
@@ -352,7 +354,7 @@ public class SavingsAccountTransactionTest {
         }
 
         TransactionExecutor(SavingsAccountHelper batchHelper, Integer savingsId, SavingsTransactionData transactionData,
-                boolean enclosingTransaction, String datatableName, List<String> columnNames) {
+                            boolean enclosingTransaction, String datatableName, List<String> columnNames) {
             this(batchHelper, savingsId, transactionData, true, enclosingTransaction, datatableName, columnNames);
         }
 
@@ -429,7 +431,7 @@ public class SavingsAccountTransactionTest {
     }
 
     private void runDeadlockBatch(SavingsAccountHelper savingsHelper, Integer savingsId1, Integer savingsId2,
-            SavingsTransactionData transactionData) {
+                                  SavingsTransactionData transactionData) {
         final BatchRequest depositRequest1 = BatchHelper.depositSavingAccount(1L, savingsId1.longValue(), transactionData);
         final BatchRequest withdrawRequest1 = BatchHelper.withdrawSavingAccount(2L, savingsId1.longValue(), transactionData);
         final BatchRequest depositRequest2 = BatchHelper.depositSavingAccount(3L, savingsId2.longValue(), transactionData);

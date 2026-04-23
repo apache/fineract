@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.workingcapitalloan;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -287,7 +288,7 @@ public class WorkingCapitalLoanApplicationTestBuilder {
     }
 
     public static String buildApproveJson(final LocalDate approvedOnDate, final BigDecimal approvedLoanAmount,
-            final BigDecimal discountAmount) {
+                                          final BigDecimal discountAmount) {
         final JsonObject json = new JsonObject();
         json.addProperty("locale", DEFAULT_LOCALE);
         json.addProperty("dateFormat", DEFAULT_DATE_FORMAT);

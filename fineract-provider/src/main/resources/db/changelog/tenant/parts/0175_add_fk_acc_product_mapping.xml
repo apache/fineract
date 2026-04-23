@@ -24,7 +24,8 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet author="fineract" id="1">
         <addForeignKeyConstraint baseColumnNames="gl_account_id" baseTableName="acc_product_mapping"
-                                 constraintName="FK_acc_product_mapping_gl_account_id" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_acc_product_mapping_gl_account_id" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="acc_gl_account" validate="true"/>
     </changeSet>

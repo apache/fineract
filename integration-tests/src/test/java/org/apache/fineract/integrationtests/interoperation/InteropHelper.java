@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,9 +22,11 @@ import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.UUID;
+
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.interoperation.domain.InteropAmountType;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
@@ -36,7 +38,7 @@ import org.apache.fineract.interoperation.util.InteropUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 public class InteropHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(InteropHelper.class);
@@ -71,7 +73,7 @@ public class InteropHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String tenantId, String accountExternalId,
-            String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
+                         String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
         this.tenantId = tenantId;
@@ -87,7 +89,7 @@ public class InteropHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId,
-            String transactionCode) {
+                         String transactionCode) {
         this(requestSpec, responseSpec, Utils.DEFAULT_TENANT, accountExternalId, transactionCode, "TZS", BigDecimal.TEN, BigDecimal.ONE);
     }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -71,12 +72,12 @@ public class LoanScheduleService {
     }
 
     public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+                                                       final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         recalculateScheduleFromLastTransaction(loan, generatorDTO, existingTransactionIds, existingReversedTransactionIds, false);
     }
 
     public void recalculateScheduleFromLastTransaction(final Loan loan, final ScheduleGeneratorDTO generatorDTO,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, boolean skipTransactionIdCollecting) {
+                                                       final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, boolean skipTransactionIdCollecting) {
         if (!skipTransactionIdCollecting) {
             existingTransactionIds.addAll(loanTransactionRepository.findTransactionIdsByLoan(loan));
             existingReversedTransactionIds.addAll(loanTransactionRepository.findReversedTransactionIdsByLoan(loan));

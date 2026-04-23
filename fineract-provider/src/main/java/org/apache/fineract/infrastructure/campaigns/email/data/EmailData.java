@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -53,10 +54,10 @@ public final class EmailData {
     private String errorMessage;
 
     public static EmailData instance(final Long id, final Long groupId, final Long clientId, final Long staffId,
-            final EnumOptionData status, final String emailAddress, final String emailSubject, final String message,
-            final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
-            final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
-            final String campaignName, final LocalDate sentDate, final String errorMessage) {
+                                     final EnumOptionData status, final String emailAddress, final String emailSubject, final String message,
+                                     final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
+                                     final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
+                                     final String campaignName, final LocalDate sentDate, final String errorMessage) {
         return new EmailData().setId(id).setGroupId(groupId).setClientId(clientId).setStaffId(staffId).setStatus(status)
                 .setEmailAddress(emailAddress).setEmailSubject(emailSubject).setEmailMessage(message)
                 .setEmailAttachmentFileFormat(emailAttachmentFileFormat).setStretchyReport(stretchyReport)

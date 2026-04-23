@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,16 +29,19 @@ import java.util.Set;
  */
 final class RescheduleLoansApiResourceSwagger {
 
-    private RescheduleLoansApiResourceSwagger() {}
+    private RescheduleLoansApiResourceSwagger() {
+    }
 
     @Schema(description = "GetRescheduleReasonsTemplateResponse")
     public static final class GetRescheduleReasonsTemplateResponse {
 
-        private GetRescheduleReasonsTemplateResponse() {}
+        private GetRescheduleReasonsTemplateResponse() {
+        }
 
         static final class GetRescheduleReasonsAllowedTypes {
 
-            private GetRescheduleReasonsAllowedTypes() {}
+            private GetRescheduleReasonsAllowedTypes() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -59,11 +63,13 @@ final class RescheduleLoansApiResourceSwagger {
     @Schema(description = "GetLoanRescheduleRequestResponse")
     public static final class GetLoanRescheduleRequestResponse {
 
-        private GetLoanRescheduleRequestResponse() {}
+        private GetLoanRescheduleRequestResponse() {
+        }
 
         static final class GetLoanRescheduleRequestStatus {
 
-            private GetLoanRescheduleRequestStatus() {}
+            private GetLoanRescheduleRequestStatus() {
+            }
 
             @Schema(example = "100")
             public Long id;
@@ -81,7 +87,8 @@ final class RescheduleLoansApiResourceSwagger {
 
         static final class RescheduleReasonsCodeValue {
 
-            private RescheduleReasonsCodeValue() {}
+            private RescheduleReasonsCodeValue() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -95,7 +102,8 @@ final class RescheduleLoansApiResourceSwagger {
 
         static final class RescheduleReasonsTimeline {
 
-            private RescheduleReasonsTimeline() {}
+            private RescheduleReasonsTimeline() {
+            }
 
             @Schema(example = "[2014, 5, 1]")
             public LocalDate submittedOnDate;
@@ -117,7 +125,8 @@ final class RescheduleLoansApiResourceSwagger {
 
         static final class LoanTermTypeOptions {
 
-            private LoanTermTypeOptions() {}
+            private LoanTermTypeOptions() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -129,7 +138,8 @@ final class RescheduleLoansApiResourceSwagger {
 
         static final class LoanTermVariationsData {
 
-            private LoanTermVariationsData() {}
+            private LoanTermVariationsData() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -222,7 +232,8 @@ final class RescheduleLoansApiResourceSwagger {
     @Schema(description = "PostCreateRescheduleLoansResponse ")
     public static final class PostCreateRescheduleLoansResponse {
 
-        private PostCreateRescheduleLoansResponse() {}
+        private PostCreateRescheduleLoansResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -237,11 +248,13 @@ final class RescheduleLoansApiResourceSwagger {
     @Schema(description = "PostUpdateRescheduleLoansResponse ")
     public static final class PostUpdateRescheduleLoansResponse {
 
-        private PostUpdateRescheduleLoansResponse() {}
+        private PostUpdateRescheduleLoansResponse() {
+        }
 
         static final class PostUpdateRescheduleLoanChanges {
 
-            private PostUpdateRescheduleLoanChanges() {}
+            private PostUpdateRescheduleLoanChanges() {
+            }
 
             @Schema(example = "en")
             public String locale;

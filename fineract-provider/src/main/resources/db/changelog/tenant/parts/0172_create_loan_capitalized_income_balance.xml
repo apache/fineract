@@ -45,8 +45,8 @@
             <column name="unrecognized_amount" type="DECIMAL(19, 6)">
                 <constraints nullable="false"/>
             </column>
-            <column name="charged_off_amount" type="DECIMAL(19, 6)" />
-            <column name="amount_adjustment" type="DECIMAL(19, 6)" />
+            <column name="charged_off_amount" type="DECIMAL(19, 6)"/>
+            <column name="amount_adjustment" type="DECIMAL(19, 6)"/>
             <column name="created_by" type="BIGINT"/>
             <column name="created_on_utc" type="timestamp with time zone"/>
             <column name="last_modified_by" type="BIGINT"/>
@@ -76,8 +76,8 @@
             <column name="unrecognized_amount" type="DECIMAL(19, 6)">
                 <constraints nullable="false"/>
             </column>
-            <column name="charged_off_amount" type="DECIMAL(19, 6)" />
-            <column name="amount_adjustment" type="DECIMAL(19, 6)" />
+            <column name="charged_off_amount" type="DECIMAL(19, 6)"/>
+            <column name="amount_adjustment" type="DECIMAL(19, 6)"/>
             <column name="created_by" type="BIGINT"/>
             <column name="created_on_utc" type="DATETIME"/>
             <column name="last_modified_by" type="BIGINT"/>
@@ -86,31 +86,38 @@
     </changeSet>
     <changeSet author="fineract" id="3">
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_capitalized_income_balance"
-                                 constraintName="FK_loan_capitalized_income_balance_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_capitalized_income_balance_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_capitalized_income_balance"
-                                 constraintName="FK_loan_capitalized_income_balance_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_capitalized_income_balance_last_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="loan_id" baseTableName="m_loan_capitalized_income_balance"
-                                 constraintName="FK_loan_capitalized_income_balance_loan_id" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_capitalized_income_balance_loan_id" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="loan_transaction_id" baseTableName="m_loan_capitalized_income_balance"
-                                 constraintName="FK_loan_capitalized_income_balance_transaction_id" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_capitalized_income_balance_transaction_id" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_loan_transaction" validate="true"/>
     </changeSet>
     <changeSet author="fineract" id="4" runInTransaction="false" context="postgresql">
         <sql>
-            create unique index concurrently if not exists m_loan_capitalized_income_balance_idx_1 on m_loan_capitalized_income_balance(loan_id,loan_transaction_id);
-            create index concurrently if not exists m_loan_capitalized_income_balance_idx_2 on m_loan_capitalized_income_balance(loan_id);
+            create unique index concurrently if not exists m_loan_capitalized_income_balance_idx_1 on
+            m_loan_capitalized_income_balance(loan_id,loan_transaction_id);
+            create index concurrently if not exists m_loan_capitalized_income_balance_idx_2 on
+            m_loan_capitalized_income_balance(loan_id);
         </sql>
     </changeSet>
     <changeSet author="fineract" id="5" context="mysql">
         <sql>
-            create unique index m_loan_capitalized_income_balance_idx_1 on m_loan_capitalized_income_balance(loan_id,loan_transaction_id);
+            create unique index m_loan_capitalized_income_balance_idx_1 on
+            m_loan_capitalized_income_balance(loan_id,loan_transaction_id);
             create index m_loan_capitalized_income_balance_idx_2 on m_loan_capitalized_income_balance(loan_id);
         </sql>
     </changeSet>

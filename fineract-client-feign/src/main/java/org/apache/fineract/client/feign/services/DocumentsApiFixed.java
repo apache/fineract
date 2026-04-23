@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +21,9 @@ package org.apache.fineract.client.feign.services;
 import feign.Param;
 import feign.RequestLine;
 import feign.Response;
+
 import java.util.List;
+
 import org.apache.fineract.client.models.DocumentCreateResponse;
 import org.apache.fineract.client.models.DocumentData;
 import org.apache.fineract.client.models.DocumentDeleteResponse;
@@ -45,7 +47,7 @@ public interface DocumentsApiFixed {
      */
     @RequestLine("POST /v1/{entityType}/{entityId}/documents")
     DocumentCreateResponse createDocument(@Param("entityType") String entityType, @Param("entityId") Long entityId,
-            org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData multipartData);
+                                          org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData multipartData);
 
     /**
      * Remove a Document
@@ -60,7 +62,7 @@ public interface DocumentsApiFixed {
      */
     @RequestLine("DELETE /v1/{entityType}/{entityId}/documents/{documentId}")
     DocumentDeleteResponse deleteDocument(@Param("entityType") String entityType, @Param("entityId") Long entityId,
-            @Param("documentId") Long documentId);
+                                          @Param("documentId") Long documentId);
 
     /**
      * Retrieve Binary File associated with Document Request used to download the file associated with the document
@@ -92,7 +94,7 @@ public interface DocumentsApiFixed {
      */
     @RequestLine("GET /v1/{entityType}/{entityId}/documents/{documentId}")
     DocumentData getDocument(@Param("entityType") String entityType, @Param("entityId") Long entityId,
-            @Param("documentId") Long documentId);
+                             @Param("documentId") Long documentId);
 
     /**
      * List documents Example Requests: clients/1/documents client_identifiers/1/documents
@@ -115,5 +117,5 @@ public interface DocumentsApiFixed {
      */
     @RequestLine("PUT /v1/{entityType}/{entityId}/documents/{documentId}")
     DocumentUpdateResponse updateDocument(@Param("entityType") String entityType, @Param("entityId") Long entityId,
-            @Param("documentId") Long documentId, org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData multipartData);
+                                          @Param("documentId") Long documentId, org.apache.fineract.client.feign.FineractMultipartEncoder.MultipartData multipartData);
 }

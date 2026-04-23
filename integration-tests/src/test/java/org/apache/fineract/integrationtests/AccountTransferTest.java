@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,11 +26,13 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -63,7 +65,7 @@ import org.slf4j.LoggerFactory;
 /**
  * JUnit Test Cases for Account Transfer for.
  */
-@SuppressWarnings({ "rawtypes", "unused" })
+@SuppressWarnings({"rawtypes", "unused"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountTransferTest {
 
@@ -231,9 +233,9 @@ public class AccountTransferTest {
         assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
                 "Verifying To Savings Account Balance after Account Transfer");
         final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.CREDIT)};
         final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.DEBIT)};
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -330,9 +332,9 @@ public class AccountTransferTest {
                 "Verifying To Loan Repayment Amount after Account Transfer");
 
         final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT)};
         final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT)};
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -453,9 +455,9 @@ public class AccountTransferTest {
                 "Verifying From Savings Account Balance after Account Transfer");
 
         final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT)};
         final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT)};
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -908,7 +910,7 @@ public class AccountTransferTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, final Account... accounts) {
+                                         final String minOpenningBalance, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //

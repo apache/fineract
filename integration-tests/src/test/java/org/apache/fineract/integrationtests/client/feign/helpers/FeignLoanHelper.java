@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -191,7 +192,7 @@ public class FeignLoanHelper {
     }
 
     public CallFailedRuntimeException createSubmittedLoanWithOriginatorsExpectingError(Long clientId,
-            List<PostLoansOriginatorData> originators) {
+                                                                                       List<PostLoansOriginatorData> originators) {
         PostLoansRequest request = buildSubmittedLoanRequest(clientId);
         request.setOriginators(originators);
         return fail(() -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(request, (String) null));

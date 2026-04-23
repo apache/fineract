@@ -114,9 +114,15 @@
         </createIndex>
     </changeSet>
     <changeSet author="fineract" id="6">
-        <addForeignKeyConstraint baseColumnNames="oltp_id" baseTableName="tenants" constraintName="fk_oltp_id" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="tenant_server_connections" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="oltp_id" baseTableName="tenants" constraintName="fk_oltp_id"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="tenant_server_connections"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="fineract" id="7">
-        <addForeignKeyConstraint baseColumnNames="report_id" baseTableName="tenants" constraintName="fk_report_id" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="tenant_server_connections" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="report_id" baseTableName="tenants" constraintName="fk_report_id"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="tenant_server_connections"
+                                 validate="true"/>
     </changeSet>
 </databaseChangeLog>

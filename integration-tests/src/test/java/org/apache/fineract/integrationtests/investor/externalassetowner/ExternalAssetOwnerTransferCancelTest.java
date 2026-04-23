@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,6 +33,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
@@ -246,7 +248,7 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
     }
 
     private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
-            String ownerExternalId, String purchasePriceRatio) {
+                                                            String ownerExternalId, String purchasePriceRatio) {
         PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
                 new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
@@ -326,7 +328,7 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[]{ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT})
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build(chargeId);
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
@@ -431,9 +433,9 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
         private final BigDecimal totalOverpaid;
 
         static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
-                BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
-                BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
+                                                     String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
+                                                     BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
+                                                     BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
             return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, detailsExpected,
                     totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding, totalPenaltyOutstanding, totalFeeOutstanding,
                     totalOverpaid);
@@ -451,7 +453,7 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
         private final LocalDate submittedOnDate;
 
         static ExpectedJournalEntryData expected(Long glAccountId, Long entryTypeId, BigDecimal amount, LocalDate transactionDate,
-                LocalDate submittedOnDate) {
+                                                 LocalDate submittedOnDate) {
             return new ExpectedJournalEntryData(glAccountId, entryTypeId, amount, transactionDate, submittedOnDate);
         }
 

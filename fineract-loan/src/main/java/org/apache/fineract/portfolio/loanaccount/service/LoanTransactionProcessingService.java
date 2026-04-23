@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.OutstandingAmountsDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -36,14 +37,14 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 public interface LoanTransactionProcessingService {
 
     boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,
-            LoanRepaymentScheduleInstallment currentInstallment);
+                                            LoanRepaymentScheduleInstallment currentInstallment);
 
     ChangedTransactionDetail processLatestTransaction(String transactionProcessingStrategyCode, LoanTransaction loanTransaction,
-            TransactionCtx ctx);
+                                                      TransactionCtx ctx);
 
     ChangedTransactionDetail reprocessLoanTransactions(String transactionProcessingStrategyCode, LocalDate disbursementDate,
-            List<LoanTransaction> repaymentsOrWaivers, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
+                                                       List<LoanTransaction> repaymentsOrWaivers, MonetaryCurrency currency,
+                                                       List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
 
     LoanRepaymentScheduleTransactionProcessor getTransactionProcessor(String transactionProcessingStrategyCode);
 

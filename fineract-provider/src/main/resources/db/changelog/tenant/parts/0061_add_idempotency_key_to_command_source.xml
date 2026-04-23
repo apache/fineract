@@ -33,10 +33,11 @@
             <column defaultValueComputed="NULL" name="idempotency_key" type="VARCHAR(50)"/>
         </addColumn>
         <update tableName="m_portfolio_command_source">
-            <column name="idempotency_key" valueComputed="${uuid}" />
+            <column name="idempotency_key" valueComputed="${uuid}"/>
             <where>idempotency_key is null</where>
         </update>
-        <addUniqueConstraint columnNames="action_name, entity_name, idempotency_key" constraintName="UNIQUE_PORTFOLIO_COMMAND_SOURCE"
+        <addUniqueConstraint columnNames="action_name, entity_name, idempotency_key"
+                             constraintName="UNIQUE_PORTFOLIO_COMMAND_SOURCE"
                              tableName="m_portfolio_command_source"/>
         <createIndex indexName="portfolio_command_source_composite_index" tableName="m_portfolio_command_source">
             <column name="action_name"/>

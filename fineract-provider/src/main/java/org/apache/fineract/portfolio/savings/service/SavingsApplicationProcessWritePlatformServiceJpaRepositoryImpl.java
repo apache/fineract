@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import jakarta.persistence.PersistenceException;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -170,7 +172,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                     if (command.booleanObjectValueOfParameterNamed("isParentAccount") != null
                             && ("1".equals(command.stringValueOfParameterNamed("isParentAccount"))
-                                    || command.booleanObjectValueOfParameterNamed("isParentAccount"))) {
+                            || command.booleanObjectValueOfParameterNamed("isParentAccount"))) {
                         // empty table check
                         if (gsimRepository.count() != 0) {
                             // Parent-Not an empty table
@@ -699,16 +701,16 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             msgCode += ".duplicate.accountNo";
             msg = "Savings account with accountNo " + accountNo + " already exists";
             param = "accountNo";
-            msgArgs = new Object[] { accountNo, dve };
+            msgArgs = new Object[]{accountNo, dve};
         } else if (checkEx.getMessage().contains("sa_externalid_UNIQUE")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             msgCode += ".duplicate.externalId";
             msg = "Savings account with externalId " + externalId + " already exists";
             param = "externalId";
-            msgArgs = new Object[] { externalId, dve };
+            msgArgs = new Object[]{externalId, dve};
         } else {
             msgCode += ".unknown.data.integrity.issue";
-            msgArgs = new Object[] { dve };
+            msgArgs = new Object[]{dve};
         }
         log.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, msgCode, msg, param, msgArgs);

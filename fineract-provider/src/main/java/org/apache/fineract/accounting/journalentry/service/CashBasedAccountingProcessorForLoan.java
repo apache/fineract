@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -190,7 +191,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     private void populateCreditDebitMaps(Long loanProductId, BigDecimal transactionPartAmount, Long paymentTypeId,
-            Integer creditAccountType, Integer debitAccountType, GLAccountBalanceHolder glAccountBalanceHolder) {
+                                         Integer creditAccountType, Integer debitAccountType, GLAccountBalanceHolder glAccountBalanceHolder) {
         // Resolve Credit
         GLAccount accountCredit = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, creditAccountType, paymentTypeId);
         glAccountBalanceHolder.addToCredit(accountCredit, transactionPartAmount);
@@ -200,10 +201,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     private Integer returnExistingDebitAccountInMapMatchingGLAccount(Long loanProductId, Long paymentTypeId, Integer accountType,
-            Map<Integer, BigDecimal> accountMap) {
+                                                                     Map<Integer, BigDecimal> accountMap) {
         GLAccount glAccount = this.helper.getLinkedGLAccountForLoanProduct(loanProductId, accountType, paymentTypeId);
         Integer accountEntry = accountMap.entrySet().stream().filter(account -> this.helper
-                .getLinkedGLAccountForLoanProduct(loanProductId, account.getKey(), paymentTypeId).getGlCode().equals(glAccount.getGlCode()))
+                        .getLinkedGLAccountForLoanProduct(loanProductId, account.getKey(), paymentTypeId).getGlCode().equals(glAccount.getGlCode()))
                 .map(Map.Entry::getKey).findFirst().orElse(accountType);
         return accountEntry;
     }
@@ -219,7 +220,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     private void createJournalEntriesForChargeOffLoanChargeAdjustment(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO,
-            Office office) {
+                                                                      Office office) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -446,7 +447,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
      * @param office
      */
     private void createJournalEntriesForDisbursements(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office) {
+                                                      final Office office) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -517,7 +518,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
      * penalty payment)
      */
     private void createJournalEntriesForRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office) {
+                                                   final Office office) {
 
         final boolean isMarkedChargeOff = loanDTO.isMarkedAsChargeOff();
         if (isMarkedChargeOff) {
@@ -833,7 +834,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     private void populateDebitAccountEntry(Long loanProductId, BigDecimal transactionPartAmount, Integer debitAccountType,
-            Map<Integer, BigDecimal> accountMapForDebit, Long paymentTypeId) {
+                                           Map<Integer, BigDecimal> accountMapForDebit, Long paymentTypeId) {
         Integer accountDebit = returnExistingDebitAccountInMapMatchingGLAccount(loanProductId, paymentTypeId, debitAccountType,
                 accountMapForDebit);
         if (accountMapForDebit.containsKey(accountDebit)) {
@@ -848,7 +849,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
      * Create a single Debit to fund source and a single credit to "Income from Recovery"
      */
     private void createJournalEntriesForRecoveryRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office) {
+                                                           final Office office) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -901,7 +902,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     private void createJournalEntriesForCreditBalanceRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office) {
+                                                            final Office office) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();

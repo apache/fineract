@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,7 +28,8 @@ public final class LoanTestData {
     public static final String DATETIME_PATTERN = "dd MMMM yyyy";
     public static final String LOCALE = "en";
 
-    private LoanTestData() {}
+    private LoanTestData() {
+    }
 
     @ToString
     @AllArgsConstructor
@@ -114,7 +115,8 @@ public final class LoanTestData {
         public static final Integer EQUAL_PRINCIPAL = 0;
         public static final Integer EQUAL_INSTALLMENTS = 1;
 
-        private AmortizationType() {}
+        private AmortizationType() {
+        }
     }
 
     public static final class InterestType {
@@ -122,14 +124,16 @@ public final class LoanTestData {
         public static final Integer DECLINING_BALANCE = 0;
         public static final Integer FLAT = 1;
 
-        private InterestType() {}
+        private InterestType() {
+        }
     }
 
     public static final class InterestRecalculationCompoundingMethod {
 
         public static final Integer NONE = 0;
 
-        private InterestRecalculationCompoundingMethod() {}
+        private InterestRecalculationCompoundingMethod() {
+        }
     }
 
     public static final class RepaymentFrequencyType {
@@ -141,7 +145,8 @@ public final class LoanTestData {
         public static final Long DAYS_L = 0L;
         public static final String DAYS_STRING = "DAYS";
 
-        private RepaymentFrequencyType() {}
+        private RepaymentFrequencyType() {
+        }
     }
 
     public static final class RecalculationRestFrequencyType {
@@ -149,7 +154,8 @@ public final class LoanTestData {
         public static final Integer SAME_AS_REPAYMENT_PERIOD = 1;
         public static final Integer DAILY = 2;
 
-        private RecalculationRestFrequencyType() {}
+        private RecalculationRestFrequencyType() {
+        }
     }
 
     public static final class InterestCalculationPeriodType {
@@ -157,7 +163,8 @@ public final class LoanTestData {
         public static final Integer DAILY = 0;
         public static final Integer SAME_AS_REPAYMENT_PERIOD = 1;
 
-        private InterestCalculationPeriodType() {}
+        private InterestCalculationPeriodType() {
+        }
     }
 
     public static final class InterestRateFrequencyType {
@@ -166,14 +173,16 @@ public final class LoanTestData {
         public static final Integer YEARS = 3;
         public static final Integer WHOLE_TERM = 4;
 
-        private InterestRateFrequencyType() {}
+        private InterestRateFrequencyType() {
+        }
     }
 
     public static final class TransactionProcessingStrategyCode {
 
         public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
 
-        private TransactionProcessingStrategyCode() {}
+        private TransactionProcessingStrategyCode() {
+        }
     }
 
     public static final class RescheduleStrategyMethod {
@@ -182,7 +191,8 @@ public final class LoanTestData {
         public static final Integer REDUCE_EMI_AMOUNT = 3;
         public static final Integer ADJUST_LAST_UNPAID_PERIOD = 4;
 
-        private RescheduleStrategyMethod() {}
+        private RescheduleStrategyMethod() {
+        }
     }
 
     public static final class DaysInYearType {
@@ -193,7 +203,8 @@ public final class LoanTestData {
         public static final Integer DAYS_364 = 364;
         public static final Integer DAYS_365 = 365;
 
-        private DaysInYearType() {}
+        private DaysInYearType() {
+        }
     }
 
     public static final class DaysInMonthType {
@@ -202,7 +213,8 @@ public final class LoanTestData {
         public static final Integer ACTUAL = 1;
         public static final Integer DAYS_30 = 30;
 
-        private DaysInMonthType() {}
+        private DaysInMonthType() {
+        }
     }
 
     public static final class FuturePaymentAllocationRule {
@@ -211,7 +223,8 @@ public final class LoanTestData {
         public static final String NEXT_INSTALLMENT = "NEXT_INSTALLMENT";
         public static final String NEXT_LAST_INSTALLMENT = "NEXT_LAST_INSTALLMENT";
 
-        private FuturePaymentAllocationRule() {}
+        private FuturePaymentAllocationRule() {
+        }
     }
 
     public static final class SupportedInterestRefundTypesItem {
@@ -219,7 +232,8 @@ public final class LoanTestData {
         public static final String MERCHANT_ISSUED_REFUND = "MERCHANT_ISSUED_REFUND";
         public static final String PAYOUT_REFUND = "PAYOUT_REFUND";
 
-        private SupportedInterestRefundTypesItem() {}
+        private SupportedInterestRefundTypesItem() {
+        }
     }
 
     public static final class DaysInYearCustomStrategy {
@@ -227,6 +241,7 @@ public final class LoanTestData {
         public static final String FEB_29_PERIOD_ONLY = "FEB_29_PERIOD_ONLY";
         public static final String FULL_LEAP_YEAR = "FULL_LEAP_YEAR";
 
-        private DaysInYearCustomStrategy() {}
+        private DaysInYearCustomStrategy() {
+        }
     }
 }

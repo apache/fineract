@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public final class ClientEnumerations {
@@ -38,31 +39,31 @@ public final class ClientEnumerations {
         switch (status) {
             case INVALID:
                 optionData = new EnumOptionData(ClientStatus.INVALID.getValue().longValue(), ClientStatus.INVALID.getCode(), "Invalid");
-            break;
+                break;
             case PENDING:
                 optionData = new EnumOptionData(ClientStatus.PENDING.getValue().longValue(), ClientStatus.PENDING.getCode(), "Pending");
-            break;
+                break;
             case ACTIVE:
                 optionData = new EnumOptionData(ClientStatus.ACTIVE.getValue().longValue(), ClientStatus.ACTIVE.getCode(), "Active");
-            break;
+                break;
             case CLOSED:
                 optionData = new EnumOptionData(ClientStatus.CLOSED.getValue().longValue(), ClientStatus.CLOSED.getCode(), "Closed");
-            break;
+                break;
             case REJECTED:
                 optionData = new EnumOptionData(ClientStatus.REJECTED.getValue().longValue(), ClientStatus.REJECTED.getCode(), "Rejected");
-            break;
+                break;
             case WITHDRAWN:
                 optionData = new EnumOptionData(ClientStatus.WITHDRAWN.getValue().longValue(), ClientStatus.WITHDRAWN.getCode(),
                         "Withdrawn");
-            break;
+                break;
             case TRANSFER_IN_PROGRESS:
                 optionData = new EnumOptionData(ClientStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
                         ClientStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
-            break;
+                break;
             case TRANSFER_ON_HOLD:
                 optionData = new EnumOptionData(ClientStatus.TRANSFER_ON_HOLD.getValue().longValue(),
                         ClientStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
-            break;
+                break;
         }
 
         return optionData;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -56,14 +56,14 @@ public class InterestRateChartConfiguration {
     @Bean
     @ConditionalOnMissingBean(InterestRateChartAssembler.class)
     public InterestRateChartAssembler interestRateChartAssembler(FromJsonHelper fromApiJsonHelper,
-            InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper, InterestRateChartSlabAssembler chartSlabAssembler) {
+                                                                 InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper, InterestRateChartSlabAssembler chartSlabAssembler) {
         return new InterestRateChartAssembler(fromApiJsonHelper, interestRateChartRepositoryWrapper, chartSlabAssembler);
     }
 
     @Bean
     @ConditionalOnMissingBean(InterestRateChartSlabAssembler.class)
     public InterestRateChartSlabAssembler interestRateChartSlabAssembler(FromJsonHelper fromApiJsonHelper,
-            InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper, InterestIncentiveAssembler incentiveAssembler) {
+                                                                         InterestRateChartRepositoryWrapper interestRateChartRepositoryWrapper, InterestIncentiveAssembler incentiveAssembler) {
         return new InterestRateChartSlabAssembler(fromApiJsonHelper, interestRateChartRepositoryWrapper, incentiveAssembler);
     }
 
@@ -96,10 +96,10 @@ public class InterestRateChartConfiguration {
     @Bean
     @ConditionalOnMissingBean(InterestRateChartReadService.class)
     public InterestRateChartReadService interestRateChartReadService(JdbcTemplate jdbcTemplate,
-            InterestRateChartReadServiceImpl.InterestRateChartExtractor chartExtractor,
-            InterestRateChartDropdownReadService chartDropdownReadPlatformService,
-            InterestIncentiveDropdownReadService interestIncentiveDropdownReadService,
-            CodeValueReadPlatformService codeValueReadPlatformService) {
+                                                                     InterestRateChartReadServiceImpl.InterestRateChartExtractor chartExtractor,
+                                                                     InterestRateChartDropdownReadService chartDropdownReadPlatformService,
+                                                                     InterestIncentiveDropdownReadService interestIncentiveDropdownReadService,
+                                                                     CodeValueReadPlatformService codeValueReadPlatformService) {
         return new InterestRateChartReadServiceImpl(jdbcTemplate, chartExtractor, chartDropdownReadPlatformService,
                 interestIncentiveDropdownReadService, codeValueReadPlatformService);
     }
@@ -113,10 +113,10 @@ public class InterestRateChartConfiguration {
     @Bean
     @ConditionalOnMissingBean(InterestRateChartSlabsReadService.class)
     public InterestRateChartSlabsReadService interestRateChartSlabReadService(JdbcTemplate jdbcTemplate,
-            InterestRateChartSlabsReadServiceImpl.InterestRateChartSlabExtractor chartSlabExtractor,
-            InterestRateChartDropdownReadService chartDropdownReadPlatformService,
-            InterestIncentiveDropdownReadService interestIncentiveDropdownReadService,
-            CodeValueReadPlatformService codeValueReadPlatformService) {
+                                                                              InterestRateChartSlabsReadServiceImpl.InterestRateChartSlabExtractor chartSlabExtractor,
+                                                                              InterestRateChartDropdownReadService chartDropdownReadPlatformService,
+                                                                              InterestIncentiveDropdownReadService interestIncentiveDropdownReadService,
+                                                                              CodeValueReadPlatformService codeValueReadPlatformService) {
         return new InterestRateChartSlabsReadServiceImpl(jdbcTemplate, chartSlabExtractor, chartDropdownReadPlatformService,
                 interestIncentiveDropdownReadService, codeValueReadPlatformService);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
@@ -37,7 +38,7 @@ public final class TaxUtils {
     }
 
     public static Map<TaxComponent, BigDecimal> splitTax(final BigDecimal amount, final LocalDate date,
-            final Set<TaxGroupMappings> taxGroupMappings, final int scale) {
+                                                         final Set<TaxGroupMappings> taxGroupMappings, final int scale) {
         Map<TaxComponent, BigDecimal> map = new HashMap<>(3);
         if (amount != null) {
             final double amountVal = amount.doubleValue();
@@ -58,7 +59,7 @@ public final class TaxUtils {
     }
 
     public static Map<TaxComponentData, BigDecimal> splitTaxData(final BigDecimal amount, final LocalDate date,
-            final Set<TaxGroupMappingsData> taxGroupMappings, final int scale) {
+                                                                 final Set<TaxGroupMappingsData> taxGroupMappings, final int scale) {
         Map<TaxComponentData, BigDecimal> map = new HashMap<>(3);
         if (amount != null) {
             final double amountVal = amount.doubleValue();
@@ -79,7 +80,7 @@ public final class TaxUtils {
     }
 
     public static BigDecimal incomeAmount(final BigDecimal amount, final LocalDate date, final Set<TaxGroupMappings> taxGroupMappings,
-            final int scale) {
+                                          final int scale) {
         Map<TaxComponent, BigDecimal> map = splitTax(amount, date, taxGroupMappings, scale);
         return incomeAmount(amount, map);
     }
@@ -106,7 +107,7 @@ public final class TaxUtils {
     }
 
     public static BigDecimal addTax(final BigDecimal amount, final LocalDate date, final List<TaxGroupMappings> taxGroupMappings,
-            final int scale) {
+                                    final int scale) {
         BigDecimal totalAmount = null;
         if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             double percentageVal = 0;

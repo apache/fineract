@@ -87,6 +87,6 @@ services:
       - ./config/docker/env/debug.env
     logging: *default-logging
     networks:
-     default:
-       aliases:
-         - fineract-server
+      default:
+        aliases:
+          - fineract-server

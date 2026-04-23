@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,11 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import jakarta.persistence.FlushModeType;
+
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.annotation.WithFlushMode;
@@ -68,7 +70,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
 
     @Override
     public boolean canProcessLatestTransactionOnly(Loan loan, LoanTransaction loanTransaction,
-            LoanRepaymentScheduleInstallment currentInstallment) {
+                                                   LoanRepaymentScheduleInstallment currentInstallment) {
         if (!loan.isInterestBearingAndInterestRecalculationEnabled()) {
             return true;
         }
@@ -82,7 +84,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
         if (interestRecalculationDetails != null && ((interestRecalculationDetails.getRestFrequencyType().isSameAsRepayment()
                 && interestRecalculationDetails.getPreCloseInterestCalculationStrategy().calculateTillPreClosureDateEnabled())
                 || (interestRecalculationDetails.getRestFrequencyType().isDaily()
-                        && interestRecalculationDetails.getPreCloseInterestCalculationStrategy().calculateTillRestFrequencyEnabled()))) {
+                && interestRecalculationDetails.getPreCloseInterestCalculationStrategy().calculateTillRestFrequencyEnabled()))) {
             return false;
         }
         if (loan.isProgressiveSchedule()) {
@@ -94,7 +96,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
 
     @Override
     public ChangedTransactionDetail processLatestTransaction(String transactionProcessingStrategyCode, LoanTransaction loanTransaction,
-            TransactionCtx ctx) {
+                                                             TransactionCtx ctx) {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 transactionProcessingStrategyCode);
         if (loanRepaymentScheduleTransactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor
@@ -106,8 +108,8 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
 
     @Override
     public ChangedTransactionDetail reprocessLoanTransactions(String transactionProcessingStrategyCode, LocalDate disbursementDate,
-            List<LoanTransaction> loanTransactions, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges) {
+                                                              List<LoanTransaction> loanTransactions, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
+                                                              Set<LoanCharge> charges) {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = getTransactionProcessor(
                 transactionProcessingStrategyCode);
         if (loanRepaymentScheduleTransactionProcessor instanceof AdvancedPaymentScheduleTransactionProcessor advancedProcessor) {
@@ -189,7 +191,7 @@ public class LoanTransactionProcessingServiceImpl implements LoanTransactionProc
     }
 
     private Loan getLoan(List<LoanTransaction> loanTransactions, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges) {
+                         Set<LoanCharge> charges) {
         if (!ObjectUtils.isEmpty(loanTransactions)) {
             return loanTransactions.getFirst().getLoan();
         } else if (!ObjectUtils.isEmpty(installments)) {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
 import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleCallback;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
@@ -43,7 +44,7 @@ public class ScheduledJobRunnerConfig {
 
     @Bean
     public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers,
-            List<TransactionLifecycleCallback> callbacks) {
+                                                         List<TransactionLifecycleCallback> callbacks) {
         ExtendedJpaTransactionManager transactionManager = new ExtendedJpaTransactionManager();
         transactionManager.setLifecycleCallbacks(callbacks);
         transactionManager.setValidateExistingTransaction(true);
@@ -65,7 +66,7 @@ public class ScheduledJobRunnerConfig {
 
     @Bean
     public JobRepository jobRepository(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager,
-            Jackson2ExecutionContextStringSerializer executionContextSerializer, DataFieldMaxValueIncrementerFactory incrementerFactory)
+                                       Jackson2ExecutionContextStringSerializer executionContextSerializer, DataFieldMaxValueIncrementerFactory incrementerFactory)
             throws Exception {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
         factory.setDataSource(routingDataSource);
@@ -79,7 +80,7 @@ public class ScheduledJobRunnerConfig {
 
     @Bean
     public JobExplorer jobExplorer(RoutingDataSource routingDataSource, PlatformTransactionManager transactionManager,
-            Jackson2ExecutionContextStringSerializer executionContextSerializer) throws Exception {
+                                   Jackson2ExecutionContextStringSerializer executionContextSerializer) throws Exception {
         JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
         jobExplorerFactoryBean.setDataSource(routingDataSource);
         jobExplorerFactoryBean.setTransactionManager(transactionManager);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,7 +32,8 @@ final class LoanCOBCatchUpApiResourceSwagger {
     @Schema(description = "GetOldestCOBProcessedLoanResponse")
     public static final class GetOldestCOBProcessedLoanResponse {
 
-        private GetOldestCOBProcessedLoanResponse() {}
+        private GetOldestCOBProcessedLoanResponse() {
+        }
 
         public List<Long> loanIds;
         @Schema(example = "[2022, 9, 18]")
@@ -43,7 +45,8 @@ final class LoanCOBCatchUpApiResourceSwagger {
     @Schema(description = "IsCatchUpRunningResponse")
     public static final class IsCatchUpRunningResponse {
 
-        private IsCatchUpRunningResponse() {}
+        private IsCatchUpRunningResponse() {
+        }
 
         @Schema(example = "true")
         public boolean isCatchUpRunning;

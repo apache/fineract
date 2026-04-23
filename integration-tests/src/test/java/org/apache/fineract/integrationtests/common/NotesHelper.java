@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,7 @@ import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
 import org.apache.fineract.portfolio.note.data.NoteData;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class NotesHelper {
 
     private static final Gson GSON = new JSON().getGson();
@@ -41,7 +41,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createClientNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
-            String request) {
+                                           String request) {
         String createClientNoteURL = CLIENT_URL + "/" + clientId + "/notes?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, createClientNoteURL, request, "resourceId");
     }
@@ -51,7 +51,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getClientNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
-            Integer noteId) {
+                                       Integer noteId) {
         String getClientNoteURL = CLIENT_URL + "/" + clientId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, getClientNoteURL, "note");
     }
@@ -61,7 +61,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateClientNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
-            Integer noteId, String request) {
+                                           Integer noteId, String request) {
         String updateClientNoteURL = CLIENT_URL + "/" + clientId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, updateClientNoteURL, request, "resourceId");
     }
@@ -71,7 +71,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void deleteClientNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
-            Integer noteId) {
+                                        Integer noteId) {
         String deleteClientNoteURL = CLIENT_URL + "/" + clientId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         Utils.performServerDelete(requestSpec, responseSpec, deleteClientNoteURL, "");
     }
@@ -83,7 +83,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createGroupNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer groupId,
-            String request) {
+                                          String request) {
         String createGroupNoteURL = GROUP_URL + "/" + groupId + "/notes?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, createGroupNoteURL, request, "resourceId");
     }
@@ -93,7 +93,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getGroupNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer groupId,
-            Integer noteId) {
+                                      Integer noteId) {
         String getGroupNoteURL = GROUP_URL + "/" + groupId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, getGroupNoteURL, "note");
     }
@@ -103,7 +103,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateGroupNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer groupId,
-            Integer noteId, String request) {
+                                          Integer noteId, String request) {
         String updateGroupNoteURL = GROUP_URL + "/" + groupId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, updateGroupNoteURL, request, "resourceId");
     }
@@ -113,7 +113,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void deleteGroupNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer groupId,
-            Integer noteId) {
+                                       Integer noteId) {
         String deleteGroupNoteURL = GROUP_URL + "/" + groupId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         Utils.performServerDelete(requestSpec, responseSpec, deleteGroupNoteURL, "");
     }
@@ -125,7 +125,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createLoanNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer loanId,
-            String request) {
+                                         String request) {
         String createLoanNoteURL = LOAN_URL + "/" + loanId + "/notes?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, createLoanNoteURL, request, "resourceId");
     }
@@ -144,7 +144,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateLoanNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer loanId,
-            Integer noteId, String updateRequest) {
+                                         Integer noteId, String updateRequest) {
         String updateLoanNoteURL = LOAN_URL + "/" + loanId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, updateLoanNoteURL, updateRequest, "resourceId");
     }
@@ -154,7 +154,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void deleteLoanNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer loanId,
-            Integer noteId) {
+                                      Integer noteId) {
         String deleteLoanNoteURL = LOAN_URL + "/" + loanId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         Utils.performServerDelete(requestSpec, responseSpec, deleteLoanNoteURL, "");
     }
@@ -166,7 +166,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createLoanTransactionNote(RequestSpecification requestSpec, ResponseSpecification responseSpec,
-            Integer loanTransactionId, String request) {
+                                                    Integer loanTransactionId, String request) {
         String createLoanTransactionNoteURL = LOAN_TRANSACTION_URL + "/" + loanTransactionId + "/notes?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, createLoanTransactionNoteURL, request, "resourceId");
     }
@@ -176,7 +176,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static String getLoanTransactionNote(RequestSpecification requestSpec, ResponseSpecification responseSpec,
-            Integer loanTransactionId, Integer noteId) {
+                                                Integer loanTransactionId, Integer noteId) {
         String getLoanTransactionNoteURL = LOAN_TRANSACTION_URL + "/" + loanTransactionId + "/notes/" + noteId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, getLoanTransactionNoteURL, "note");
@@ -187,7 +187,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer updateLoanTransactionNote(RequestSpecification requestSpec, ResponseSpecification responseSpec,
-            Integer loanTransactionId, Integer noteId, String updateRequest) {
+                                                    Integer loanTransactionId, Integer noteId, String updateRequest) {
         String updateLoanTransactionNoteURL = LOAN_TRANSACTION_URL + "/" + loanTransactionId + "/notes/" + noteId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, updateLoanTransactionNoteURL, updateRequest, "resourceId");
@@ -198,7 +198,7 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void deleteLoanTransactionNote(RequestSpecification requestSpec, ResponseSpecification responseSpec,
-            Integer loanTransactionId, Integer noteId) {
+                                                 Integer loanTransactionId, Integer noteId) {
         String deleteLoanTransactionNoteURL = LOAN_TRANSACTION_URL + "/" + loanTransactionId + "/notes/" + noteId + "?"
                 + Utils.TENANT_IDENTIFIER;
         Utils.performServerDelete(requestSpec, responseSpec, deleteLoanTransactionNoteURL, "");
@@ -211,14 +211,14 @@ public final class NotesHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static NoteCreateResponse createSavingsNote(RequestSpecification requestSpec, ResponseSpecification responseSpec,
-            Integer savingsId, String request) {
+                                                       Integer savingsId, String request) {
         final String noteURL = SAVINGS_URL + "/" + savingsId + "/notes?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerPost(requestSpec, responseSpec, noteURL, request);
         return GSON.fromJson(response, NoteCreateResponse.class);
     }
 
     public static NoteData retrieveSavingsNote(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer savingsId,
-            Integer noteId) {
+                                               Integer noteId) {
         final String noteURL = SAVINGS_URL + "/" + savingsId + "/notes/" + noteId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, noteURL);
         return GSON.fromJson(response, NoteData.class);

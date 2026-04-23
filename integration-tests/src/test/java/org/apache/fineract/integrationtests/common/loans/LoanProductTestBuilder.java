@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,12 +20,14 @@ package org.apache.fineract.integrationtests.common.loans;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.Builder;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
@@ -659,7 +661,7 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withInterestRecalculationDetails(final String interestRecalculationCompoundingMethod,
-            final String rescheduleStrategyMethod, String preCloseInterestCalculationStrategy) {
+                                                                   final String rescheduleStrategyMethod, String preCloseInterestCalculationStrategy) {
         this.isInterestRecalculationEnabled = true;
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
@@ -668,8 +670,8 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withInterestRecalculationRestFrequencyDetails(final String recalculationRestFrequencyType,
-            final String recalculationRestFrequencyInterval, final Integer recalculationRestFrequencyOnDayType,
-            final Integer recalculationRestFrequencyDayOfWeekType) {
+                                                                                final String recalculationRestFrequencyInterval, final Integer recalculationRestFrequencyOnDayType,
+                                                                                final Integer recalculationRestFrequencyDayOfWeekType) {
         this.isInterestRecalculationEnabled = true;
         this.recalculationRestFrequencyType = recalculationRestFrequencyType;
         this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
@@ -684,8 +686,8 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withInterestRecalculationCompoundingFrequencyDetails(final String recalculationCompoundingFrequencyType,
-            final String recalculationCompoundingFrequencyInterval, final Integer recalculationCompoundingFrequencyOnDayType,
-            final Integer recalculationCompoundingFrequencyDayOfWeekType) {
+                                                                                       final String recalculationCompoundingFrequencyInterval, final Integer recalculationCompoundingFrequencyOnDayType,
+                                                                                       final Integer recalculationCompoundingFrequencyDayOfWeekType) {
         this.isInterestRecalculationEnabled = true;
         this.recalculationCompoundingFrequencyType = recalculationCompoundingFrequencyType;
         this.recalculationCompoundingFrequencyInterval = recalculationCompoundingFrequencyInterval;
@@ -706,7 +708,7 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withOnHoldFundDetails(final String mandatoryGuarantee, final String minimumGuaranteeFromGuarantor,
-            final String minimumGuaranteeFromOwnFunds) {
+                                                        final String minimumGuaranteeFromOwnFunds) {
         this.holdGuaranteeFunds = true;
         this.mandatoryGuarantee = mandatoryGuarantee;
         this.minimumGuaranteeFromGuarantor = minimumGuaranteeFromGuarantor;
@@ -726,7 +728,7 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withVariableInstallmentsConfig(Boolean allowVariableInstallments, Integer minimumGap,
-            Integer maximumGap) {
+                                                                 Integer maximumGap) {
         this.allowVariableInstallments = allowVariableInstallments;
         this.minimumGap = minimumGap;
         this.maximumGap = maximumGap;
@@ -791,7 +793,7 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withEnableDownPayment(final Boolean enableDownPayment,
-            final String disbursedAmountPercentageForDownPayment, final Boolean enableAutoRepaymentForDownPayment) {
+                                                        final String disbursedAmountPercentageForDownPayment, final Boolean enableAutoRepaymentForDownPayment) {
         this.enableDownPayment = enableDownPayment;
         this.disbursedAmountPercentageForDownPayment = disbursedAmountPercentageForDownPayment;
         this.enableAutoRepaymentForDownPayment = enableAutoRepaymentForDownPayment;

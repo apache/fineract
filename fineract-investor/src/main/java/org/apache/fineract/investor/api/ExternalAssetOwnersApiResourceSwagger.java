@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,17 +19,20 @@
 package org.apache.fineract.investor.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 
-@SuppressWarnings({ "MemberName" })
+@SuppressWarnings({"MemberName"})
 final class ExternalAssetOwnersApiResourceSwagger {
 
-    private ExternalAssetOwnersApiResourceSwagger() {}
+    private ExternalAssetOwnersApiResourceSwagger() {
+    }
 
     @Schema(description = "PostInitiateTransferResponse")
     public static final class PostInitiateTransferResponse {
 
-        private PostInitiateTransferResponse() {}
+        private PostInitiateTransferResponse() {
+        }
 
         @Schema(example = "1", description = "transfer ID")
         public Long resourceId;
@@ -71,7 +74,8 @@ final class ExternalAssetOwnersApiResourceSwagger {
     @Schema(description = "PostExternalAssetOwnerRequest")
     public static final class PostExternalAssetOwnerRequest {
 
-        private PostExternalAssetOwnerRequest() {}
+        private PostExternalAssetOwnerRequest() {
+        }
 
         @Schema(example = "36efeb06-d835-48a1-99eb-09bd1d348c1e", description = "External Asset Owner External Id")
         public String ownerExternalId;
@@ -80,7 +84,8 @@ final class ExternalAssetOwnersApiResourceSwagger {
     @Schema(description = "PostExternalAssetOwnerResponse")
     public static final class PostExternalAssetOwnerResponse {
 
-        private PostExternalAssetOwnerResponse() {}
+        private PostExternalAssetOwnerResponse() {
+        }
 
         @Schema(example = "1", description = "External Asset Owner Id")
         public Long resourceId;

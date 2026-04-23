@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import static org.apache.fineract.portfolio.savings.SavingsAccountTransactionTyp
 import static org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction.releaseAmount;
 
 import jakarta.persistence.PersistenceException;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -204,7 +206,7 @@ public class InteropServiceImpl implements InteropService {
     @Override
     @Transactional
     public InteropTransactionsData getAccountTransactions(@NonNull String accountId, boolean debit, boolean credit,
-            java.time.LocalDateTime transactionsFrom, java.time.LocalDateTime transactionsTo) {
+                                                          java.time.LocalDateTime transactionsFrom, java.time.LocalDateTime transactionsTo) {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
 
         Predicate<SavingsAccountTransaction> transFilter = t -> {
@@ -256,7 +258,7 @@ public class InteropServiceImpl implements InteropService {
     @Transactional
     @Override
     public InteropIdentifierAccountResponseData getAccountByIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
-            String subIdOrType) {
+                                                                       String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null) {
             throw new InteropAccountNotFoundException(idType, idValue, subIdOrType);
@@ -269,7 +271,7 @@ public class InteropServiceImpl implements InteropService {
     @Transactional
     @Override
     public InteropIdentifierAccountResponseData registerAccountIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
-            String subIdOrType, @NonNull JsonCommand command) {
+                                                                          String subIdOrType, @NonNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
@@ -297,7 +299,7 @@ public class InteropServiceImpl implements InteropService {
     @Transactional
     @Override
     public InteropIdentifierAccountResponseData deleteAccountIdentifier(@NonNull InteropIdentifierType idType, @NonNull String idValue,
-            String subIdOrType) {
+                                                                        String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null) {
             throw new InteropAccountNotFoundException(idType, idValue, subIdOrType);
@@ -515,7 +517,7 @@ public class InteropServiceImpl implements InteropService {
             final InteropServiceImpl.KycMapper rm = new InteropServiceImpl.KycMapper(sqlGenerator);
             final String sql = "select " + rm.schema() + " where c.id = ?";
 
-            final InteropKycData accountKyc = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId }); // NOSONAR
+            final InteropKycData accountKyc = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{clientId}); // NOSONAR
 
             return InteropKycResponseData.build(accountKyc);
         } catch (final EmptyResultDataAccessException e) {
@@ -647,7 +649,7 @@ public class InteropServiceImpl implements InteropService {
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleInteropDataIntegrityIssues(InteropIdentifierType idType, String accountId, final Throwable realCause,
-            final Exception dve) {
+                                                  final Exception dve) {
         if (realCause.getMessage().contains("uk_interop_identifier_account")) {
             throw new PlatformDataIntegrityException("error.msg.interop.duplicate.account.identifier",
                     "Account identifier of type `" + idType.name() + "' already exists for account with externalId `" + accountId + "`",

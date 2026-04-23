@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -128,7 +129,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
     @Override
     public Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean pendingPayment,
-            SearchParameters searchParameters) {
+                                                        SearchParameters searchParameters) {
         final ClientChargeMapper rm = new ClientChargeMapper();
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ").append(rm.schema()).append(" where cc.client_id=? ");
@@ -160,7 +161,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
             }
         }
 
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), new Object[] { clientId },
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), new Object[]{clientId},
                 this.clientChargeMapper);
     }
 

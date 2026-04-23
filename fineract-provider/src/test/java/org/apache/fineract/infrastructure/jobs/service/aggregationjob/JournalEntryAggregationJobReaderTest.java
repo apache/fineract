@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import com.zaxxer.hikari.HikariDataSource;
+
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
@@ -123,7 +125,7 @@ public class JournalEntryAggregationJobReaderTest {
         when(resultSet.getLong("glAccountId")).thenReturn(1001L);
         when(resultSet.getLong("productId")).thenReturn(100L);
         when(resultSet.getString("currencyCode")).thenReturn("USD");
-        when(resultSet.getDate("aggregatedOnDate")).thenReturn(Date.valueOf(LocalDate.of(2023,6,15)));
+        when(resultSet.getDate("aggregatedOnDate")).thenReturn(Date.valueOf(LocalDate.of(2023, 6, 15)));
         when(resultSet.findColumn("externalOwner")).thenReturn(5);
         when(resultSet.getLong(5)).thenReturn(500L);
         when(resultSet.getLong("officeId")).thenReturn(1L);
@@ -136,7 +138,7 @@ public class JournalEntryAggregationJobReaderTest {
         when(resultSet.getLong("glAccountId")).thenReturn(1001L);
         when(resultSet.getLong("productId")).thenReturn(100L);
         when(resultSet.getString("currencyCode")).thenReturn("USD");
-        when(resultSet.getDate("aggregatedOnDate")).thenReturn(Date.valueOf(LocalDate.of(2023,6,15)));
+        when(resultSet.getDate("aggregatedOnDate")).thenReturn(Date.valueOf(LocalDate.of(2023, 6, 15)));
         when(resultSet.getLong("officeId")).thenReturn(1L);
         when(resultSet.getLong("entityTypeEnum")).thenReturn(1L);
         when(resultSet.getBigDecimal("debitAmount")).thenReturn(new BigDecimal("1000.00"));

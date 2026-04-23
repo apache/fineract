@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,21 +19,25 @@
 package org.apache.fineract.portfolio.interestratechart.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
 final class InterestRateChartsApiResourceSwagger {
 
-    private InterestRateChartsApiResourceSwagger() {}
+    private InterestRateChartsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetInterestRateChartsTemplateResponse")
     public static final class GetInterestRateChartsTemplateResponse {
 
-        private GetInterestRateChartsTemplateResponse() {}
+        private GetInterestRateChartsTemplateResponse() {
+        }
 
         static final class GetInterestRateChartsTemplatePeriodTypes {
 
-            private GetInterestRateChartsTemplatePeriodTypes() {}
+            private GetInterestRateChartsTemplatePeriodTypes() {
+            }
 
             @Schema(example = "0")
             public Integer id;
@@ -49,11 +53,13 @@ final class InterestRateChartsApiResourceSwagger {
     @Schema(description = "GetInterestRateChartsResponse")
     public static final class GetInterestRateChartsResponse {
 
-        private GetInterestRateChartsResponse() {}
+        private GetInterestRateChartsResponse() {
+        }
 
         static final class GetInterestRateChartsChartSlabs {
 
-            private GetInterestRateChartsChartSlabs() {}
+            private GetInterestRateChartsChartSlabs() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -67,7 +73,8 @@ final class InterestRateChartsApiResourceSwagger {
 
         static final class GetInterestRateChartsCurrency {
 
-            private GetInterestRateChartsCurrency() {}
+            private GetInterestRateChartsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;

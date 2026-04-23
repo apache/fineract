@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartS
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -35,6 +36,7 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -76,15 +78,15 @@ public class InterestRateChartSlabFields {
     }
 
     public static InterestRateChartSlabFields createNew(final String description, final SavingsPeriodFrequencyType periodFrequencyType,
-            final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
-            final BigDecimal annualInterestRate, final String currencyCode) {
+                                                        final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
+                                                        final BigDecimal annualInterestRate, final String currencyCode) {
         return new InterestRateChartSlabFields(description, periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
                 annualInterestRate, currencyCode);
     }
 
     private InterestRateChartSlabFields(final String description, final SavingsPeriodFrequencyType periodFrequencyType,
-            final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
-            final BigDecimal annualInterestRate, final String currencyCode) {
+                                        final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
+                                        final BigDecimal annualInterestRate, final String currencyCode) {
         this.description = description;
         this.periodType = (periodFrequencyType == null || periodFrequencyType == SavingsPeriodFrequencyType.INVALID) ? null
                 : periodFrequencyType.getValue();
@@ -97,7 +99,7 @@ public class InterestRateChartSlabFields {
     }
 
     public void update(final JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final Locale locale) {
+                       final Locale locale) {
 
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
@@ -145,7 +147,7 @@ public class InterestRateChartSlabFields {
     }
 
     public void validateChartSlabPlatformRules(final JsonCommand chartSlabsCommand, final DataValidatorBuilder baseDataValidator,
-            Locale locale) {
+                                               Locale locale) {
         if (isFromPeriodGreaterThanToPeriod()) {
             final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName, locale);
             baseDataValidator.parameter(fromPeriodParamName).value(fromPeriod).failWithCode("from.period.is.greater.than.to.period");
@@ -228,7 +230,7 @@ public class InterestRateChartSlabFields {
     public static boolean isNotProperAmountStart(final InterestRateChartSlabFields interestRateChartSlabFields) {
         return interestRateChartSlabFields.amountRangeFrom != null
                 && (interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ONE) != 0
-                        && interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ZERO) != 0);
+                && interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ZERO) != 0);
     }
 
     private boolean isNotProperAmountStart(final BigDecimal amount) {
@@ -329,19 +331,19 @@ public class InterestRateChartSlabFields {
         switch (periodFrequencyType) {
             case DAYS:
                 actualDepositPeriod = DateUtils.getExactDifferenceInDays(periodStartDate, periodEndDate);
-            break;
+                break;
             case WEEKS:
                 actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.WEEKS);
-            break;
+                break;
             case MONTHS:
                 actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.MONTHS);
-            break;
+                break;
             case YEARS:
                 actualDepositPeriod = DateUtils.getExactDifference(periodStartDate, periodEndDate, ChronoUnit.YEARS);
-            break;
+                break;
             case INVALID:
                 actualDepositPeriod = 0;// default value
-            break;
+                break;
         }
         return actualDepositPeriod;
     }

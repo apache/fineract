@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -44,7 +45,7 @@ public class ShareProductDividendAssembler {
     private final ShareAccountReadPlatformService shareAccountReadPlatformService;
 
     public ShareProductDividendPayOutDetails calculateDividends(final Long productId, final BigDecimal amount,
-            final LocalDate dividendPeriodStartDate, final LocalDate dividendPeriodEndDate) {
+                                                                final LocalDate dividendPeriodStartDate, final LocalDate dividendPeriodEndDate) {
 
         ShareProductData product = (ShareProductData) this.shareProductReadPlatformService.retrieveOne(productId, false);
         MonetaryCurrency currency = new MonetaryCurrency(product.getCurrency().getCode(), product.getCurrency().getDecimalPlaces(),
@@ -58,7 +59,7 @@ public class ShareProductDividendAssembler {
         ShareProductDividendPayOutDetails productDividendPayOutDetails = null;
         int minimumActivePeriod = 0;
         if (product.getMinimumActivePeriod() != null) { // minimum active period
-                                                        // may be null
+            // may be null
             minimumActivePeriod = product.getMinimumActivePeriod();
         }
         final Map<Long, Long> numberOfSharesdaysPerAccount = new HashMap<>();
@@ -83,8 +84,8 @@ public class ShareProductDividendAssembler {
     }
 
     private long calculateNumberOfShareDays(final LocalDate postingDate, final LocalDate lastDividendPostDate,
-            final int minimumActivePeriod, final Collection<ShareAccountData> shareAccountDatas,
-            final Map<Long, Long> numberOfSharesdaysPerAccount) {
+                                            final int minimumActivePeriod, final Collection<ShareAccountData> shareAccountDatas,
+                                            final Map<Long, Long> numberOfSharesdaysPerAccount) {
         long numberOfShareDays = 0;
         for (ShareAccountData accountData : shareAccountDatas) {
             long numberOfShareDaysPerAccount = 0;

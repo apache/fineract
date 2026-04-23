@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,6 +30,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
@@ -1389,7 +1391,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments, final boolean withJournalEntries,
-            LoanProductTestBuilder loanProductTestBuilder) {
+                                   LoanProductTestBuilder loanProductTestBuilder) {
         // Delinquency Bucket
         final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
         final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
@@ -1411,7 +1413,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, final boolean withJournalEntries, LoanProductTestBuilder loanProductTestBuilder) {
+                                                               final Long delinquencyBucketId, final boolean withJournalEntries, LoanProductTestBuilder loanProductTestBuilder) {
         final HashMap<String, Object> loanProductMap;
         if (withJournalEntries) {
             loanProductMap = loanProductTestBuilder
@@ -1437,7 +1439,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String principalAmount, final String numberOfRepayments, final String repaymentStrategy) {
+                                      final String operationDate, final String principalAmount, final String numberOfRepayments, final String repaymentStrategy) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount)
                 .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments)
                 .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths() //
@@ -1454,7 +1456,7 @@ public class LoanTransactionChargebackTest extends BaseLoanIntegrationTest {
     }
 
     private void reviewLoanTransactionRelations(final Integer loanId, final Long transactionId, final Integer expectedSize,
-            final Double outstandingBalance) {
+                                                final Double outstandingBalance) {
         log.info("Loan Transaction Id: {} {}", loanId, transactionId);
 
         GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,

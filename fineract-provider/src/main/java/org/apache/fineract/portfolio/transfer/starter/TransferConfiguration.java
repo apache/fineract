@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -44,13 +44,13 @@ public class TransferConfiguration {
     @Bean
     @ConditionalOnMissingBean(TransferWritePlatformService.class)
     public TransferWritePlatformService transferWritePlatformService(ClientRepositoryWrapper clientRepositoryWrapper,
-            OfficeRepositoryWrapper officeRepository, CalendarInstanceRepository calendarInstanceRepository,
-            LoanWritePlatformService loanWritePlatformService, GroupRepositoryWrapper groupRepository,
-            LoanRepositoryWrapper loanRepositoryWrapper, TransfersDataValidator transfersDataValidator,
-            StaffRepositoryWrapper staffRepositoryWrapper, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper, PlatformSecurityContext context,
-            LoanOfficerService loanOfficerService, ApplicationEventPublisher eventPublisher) {
+                                                                     OfficeRepositoryWrapper officeRepository, CalendarInstanceRepository calendarInstanceRepository,
+                                                                     LoanWritePlatformService loanWritePlatformService, GroupRepositoryWrapper groupRepository,
+                                                                     LoanRepositoryWrapper loanRepositoryWrapper, TransfersDataValidator transfersDataValidator,
+                                                                     StaffRepositoryWrapper staffRepositoryWrapper, SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+                                                                     SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+                                                                     ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper, PlatformSecurityContext context,
+                                                                     LoanOfficerService loanOfficerService, ApplicationEventPublisher eventPublisher) {
         return new TransferWritePlatformServiceJpaRepositoryImpl(clientRepositoryWrapper, officeRepository, calendarInstanceRepository,
                 groupRepository, loanWritePlatformService, savingsAccountWritePlatformService, loanRepositoryWrapper,
                 savingsAccountRepositoryWrapper, transfersDataValidator, staffRepositoryWrapper, clientTransferDetailsRepositoryWrapper,

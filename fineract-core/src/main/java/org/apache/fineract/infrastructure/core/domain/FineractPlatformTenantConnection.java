@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.domain;
 import java.io.Serializable;
 import java.sql.Connection;
 import javax.sql.DataSource;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -67,14 +68,14 @@ public class FineractPlatformTenantConnection implements Serializable {
     private final String masterPasswordHash;
 
     public FineractPlatformTenantConnection(final Long connectionId, final String schemaName, String schemaServer,
-            final String schemaServerPort, final String schemaConnectionParameters, final String schemaUsername,
-            final String schemaPassword, final boolean autoUpdateEnabled, final int initialSize, final long validationInterval,
-            final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
-            final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
-            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final boolean tesOnBorrow,
-            final String readOnlySchemaServer, final String readOnlySchemaServerPort, final String readOnlySchemaName,
-            final String readOnlySchemaUsername, final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters,
-            final String masterPasswordHash) {
+                                            final String schemaServerPort, final String schemaConnectionParameters, final String schemaUsername,
+                                            final String schemaPassword, final boolean autoUpdateEnabled, final int initialSize, final long validationInterval,
+                                            final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
+                                            final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
+                                            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final boolean tesOnBorrow,
+                                            final String readOnlySchemaServer, final String readOnlySchemaServerPort, final String readOnlySchemaName,
+                                            final String readOnlySchemaUsername, final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters,
+                                            final String masterPasswordHash) {
 
         this.connectionId = connectionId;
         this.schemaName = schemaName;

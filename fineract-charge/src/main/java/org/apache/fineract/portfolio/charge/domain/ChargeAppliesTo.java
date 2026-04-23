@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -49,19 +49,19 @@ public enum ChargeAppliesTo {
             switch (chargeAppliesTo) {
                 case 1:
                     chargeAppliesToType = LOAN;
-                break;
+                    break;
                 case 2:
                     chargeAppliesToType = SAVINGS;
-                break;
+                    break;
                 case 3:
                     chargeAppliesToType = CLIENT;
-                break;
+                    break;
                 case 4:
                     chargeAppliesToType = SHARES;
-                break;
+                    break;
                 default:
                     chargeAppliesToType = INVALID;
-                break;
+                    break;
             }
         }
 
@@ -85,7 +85,7 @@ public enum ChargeAppliesTo {
     }
 
     public static Object[] validValues() {
-        return new Object[] { ChargeAppliesTo.LOAN.getValue(), ChargeAppliesTo.SAVINGS.getValue(), ChargeAppliesTo.CLIENT.getValue(),
-                ChargeAppliesTo.SHARES.getValue() };
+        return new Object[]{ChargeAppliesTo.LOAN.getValue(), ChargeAppliesTo.SAVINGS.getValue(), ChargeAppliesTo.CLIENT.getValue(),
+                ChargeAppliesTo.SHARES.getValue()};
     }
 }

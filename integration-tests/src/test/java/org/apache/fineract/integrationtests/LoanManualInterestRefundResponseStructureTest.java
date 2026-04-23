@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,9 +27,11 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
@@ -194,7 +196,7 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
      * Helper method to make loan merchant issued refund with external ID (without automatic interest refund)
      */
     private PostLoansLoanIdTransactionsResponse makeLoanMerchantIssuedRefundWithExternalId(Long loanId, String externalId,
-            String transactionDate, Double amount) {
+                                                                                           String transactionDate, Double amount) {
         // Create merchant issued refund transaction with external ID but without automatic interest refund
         org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest request = new org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest()
                 .transactionDate(transactionDate).transactionAmount(amount).externalId(externalId).interestRefundCalculation(false)
@@ -213,8 +215,8 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
      * Helper method to apply and approve progressive loan with external ID
      */
     private Long applyAndApproveProgressiveLoanWithExternalId(Long clientId, Long productId, String loanExternalId, String submittedDate,
-            Double amount, Double interestRate, Integer termFrequency,
-            java.util.function.Consumer<org.apache.fineract.client.models.PostLoansRequest> customizer) {
+                                                              Double amount, Double interestRate, Integer termFrequency,
+                                                              java.util.function.Consumer<org.apache.fineract.client.models.PostLoansRequest> customizer) {
 
         org.apache.fineract.client.models.PostLoansRequest request = applyLP2ProgressiveLoanRequest(clientId, productId, submittedDate,
                 amount, interestRate, termFrequency, customizer);

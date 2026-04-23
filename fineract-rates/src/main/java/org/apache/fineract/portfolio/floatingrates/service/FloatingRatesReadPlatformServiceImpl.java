@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
@@ -66,7 +67,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         try {
             FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(true);
             final String sql = "select " + rateMapper.schema() + " where rate.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[] { floatingRateId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[]{floatingRateId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException(floatingRateId, e);
         }
@@ -76,7 +77,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
     public List<InterestRatePeriodData> retrieveInterestRatePeriods(final Long productId) {
         try {
             FloatingInterestRatePeriodRowMapper mapper = new FloatingInterestRatePeriodRowMapper();
-            return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] { productId }); // NOSONAR
+            return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[]{productId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException("error.msg.floatingrate.not.found.for.product", e);
         }

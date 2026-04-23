@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.InterestRecalculationAdditionalDetailData;
@@ -50,17 +51,17 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private final MathContext mc;
 
     public static LoanScheduleModelRepaymentPeriod repayment(final int periodNumber, final LocalDate startDate,
-            final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, boolean recalculatedInterestComponent,
-            final MathContext mc) {
+                                                             final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
+                                                             final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, boolean recalculatedInterestComponent,
+                                                             final MathContext mc) {
 
         return new LoanScheduleModelRepaymentPeriod(periodNumber, startDate, scheduledDueDate, principalDue, outstandingLoanBalance,
                 interestDue, feeChargesDue, penaltyChargesDue, totalDue, recalculatedInterestComponent, mc);
     }
 
     public LoanScheduleModelRepaymentPeriod(final int periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
-            final Money penaltyChargesDue, final Money totalDue, final boolean recalculatedInterestComponent, final MathContext mc) {
+                                            final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
+                                            final Money penaltyChargesDue, final Money totalDue, final boolean recalculatedInterestComponent, final MathContext mc) {
         this.periodNumber = periodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;

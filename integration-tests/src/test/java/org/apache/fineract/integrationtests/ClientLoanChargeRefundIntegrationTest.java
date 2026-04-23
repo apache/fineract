@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -54,7 +56,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class ClientLoanChargeRefundIntegrationTest {
 
@@ -154,7 +156,7 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private void testRefundAndReverseOfPaidChargeSucceeds(final Float repaymentAmount, final Float refundAmount,
-            final String expectedPostRepaymentStatus, final String expectedPostRefundStatus) {
+                                                          final String expectedPostRepaymentStatus, final String expectedPostRefundStatus) {
         // disburse, repay, add charge, charge refund and reverse charge refund
         Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, expectedPostRepaymentStatus, NONE, true);
 
@@ -425,13 +427,13 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private void disburseLoanOfAccountingRule(final String accountingType, final String loanAmount, final String loanDate,
-            final boolean penalty) {
+                                              final boolean penalty) {
         this.disbursedLoanID = fromStartToDisburseLoan(loanDate, loanAmount, penalty, accountingType, assetAccount, feeIncomeAccount,
                 expenseAccount, overpaymentAccount);
     }
 
     private Integer fromStartToDisburseLoan(String submitApproveDisburseDate, String principal, final boolean penalty,
-            final String accountingRule, final Account... accounts) {
+                                            final String accountingRule, final Account... accounts) {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
@@ -491,7 +493,7 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private Integer createLoanProduct(final String principal, final boolean multiDisburseLoan, final String accountingRule,
-            final Account... accounts) {
+                                      final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal(principal) //
@@ -512,7 +514,7 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges, String principal,
-            String loanDate) {
+                                            String loanDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String savingsId = null;
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -533,7 +535,7 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private Integer disburseAddChargeAndRepay(final Float repaymentAmount, final String expectedPostRepaymentStatus,
-            final String accountingType, final boolean penalty) {
+                                              final String accountingType, final boolean penalty) {
         final String loanDate = "01 January 2022";
         final String loanAmount = "12,000.00";
         disburseLoanOfAccountingRule(accountingType, loanAmount, loanDate, penalty);

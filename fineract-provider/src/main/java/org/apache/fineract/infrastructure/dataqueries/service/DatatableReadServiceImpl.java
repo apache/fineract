@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,10 +23,12 @@ import static org.apache.fineract.infrastructure.core.service.database.SqlOperat
 
 import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
@@ -77,9 +79,9 @@ public class DatatableReadServiceImpl implements DatatableReadService {
         Object[] params;
         if (appTable != null) {
             sql = sql + " and application_table_name like ? ";
-            params = new Object[] { this.context.authenticatedUser().getId(), appTable };
+            params = new Object[]{this.context.authenticatedUser().getId(), appTable};
         } else {
-            params = new Object[] { this.context.authenticatedUser().getId() };
+            params = new Object[]{this.context.authenticatedUser().getId()};
         }
         sql = sql + " order by application_table_name, registered_table_name";
 
@@ -111,7 +113,7 @@ public class DatatableReadServiceImpl implements DatatableReadService {
 
         DatatableData datatableData = null;
 
-        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), datatable }); // NOSONAR
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[]{this.context.authenticatedUser().getId(), datatable}); // NOSONAR
         if (rowSet.next()) {
             final String appTableName = rowSet.getString(APPLICATION_TABLE_NAME);
             final String registeredDatatableName = rowSet.getString("registered_table_name");
@@ -127,7 +129,7 @@ public class DatatableReadServiceImpl implements DatatableReadService {
 
     @Override
     public List<JsonObject> queryDataTable(@NonNull String datatable, @NonNull String columnName, String columnValueString,
-            @NonNull String resultColumnsString) {
+                                           @NonNull String resultColumnsString) {
         datatable = datatableUtil.validateDatatableRegistered(datatable);
         Map<String, ResultsetColumnHeaderData> headersByName = searchUtil
                 .mapHeadersToName(genericDataService.fillResultsetColumnHeaders(datatable));
@@ -220,8 +222,8 @@ public class DatatableReadServiceImpl implements DatatableReadService {
 
     @Override
     public boolean buildDataQueryEmbedded(@NonNull EntityTables entityTable, @NonNull String datatable, @NonNull AdvancedQueryData request,
-            @NonNull List<String> selectColumns, @NonNull StringBuilder select, @NonNull StringBuilder from, @NonNull StringBuilder where,
-            @NonNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale) {
+                                          @NonNull List<String> selectColumns, @NonNull StringBuilder select, @NonNull StringBuilder from, @NonNull StringBuilder where,
+                                          @NonNull List<Object> params, String mainAlias, String alias, String dateFormat, String dateTimeFormat, Locale locale) {
         List<String> resultColumns = request.getResultColumns();
         List<ColumnFilterData> columnFilters = request.getColumnFilters();
         if ((resultColumns == null || resultColumns.isEmpty()) && (columnFilters == null || columnFilters.isEmpty())) {
@@ -254,7 +256,7 @@ public class DatatableReadServiceImpl implements DatatableReadService {
     @Override
     @Transactional(readOnly = true)
     public GenericResultsetData retrieveDataTableGenericResultSet(final String dataTableName, final Long appTableId, final String order,
-            final Long id) {
+                                                                  final Long id) {
         final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
         datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
         return datatableUtil.retrieveDataTableGenericResultSet(entityTable, dataTableName, appTableId, order, id);

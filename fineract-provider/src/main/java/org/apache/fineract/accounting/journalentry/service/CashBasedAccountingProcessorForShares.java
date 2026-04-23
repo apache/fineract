@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
@@ -70,8 +71,8 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
     }
 
     public void createJournalEntriesForRedeem(final Long shareAccountId, final Long shareProductId, final String currencyCode,
-            final LocalDate transactionDate, final String transactionId, final Office office, final Long paymentTypeId,
-            final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
+                                              final LocalDate transactionDate, final String transactionId, final Office office, final Long paymentTypeId,
+                                              final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
         if (chargeAmount == null || chargeAmount.compareTo(BigDecimal.ZERO) <= 0) {
             this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_EQUITY.getValue(),
                     CashAccountsForShares.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
@@ -87,8 +88,8 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
     }
 
     public void createJournalEntriesForPurchase(final Long shareAccountId, final Long shareProductId, final String currencyCode,
-            SharesTransactionDTO transactionDTO, final LocalDate transactionDate, final String transactionId, final Office office,
-            final Long paymentTypeId, final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
+                                                SharesTransactionDTO transactionDTO, final LocalDate transactionDate, final String transactionId, final Office office,
+                                                final Long paymentTypeId, final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
         if (transactionDTO.getTransactionStatus().isApplied()) {
             if (chargeAmount == null || chargeAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(),

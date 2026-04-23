@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,9 +24,11 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.payl
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
@@ -42,7 +44,7 @@ public class WebHookProcessor implements HookProcessor {
 
     @Override
     public void process(final Hook hook, final String payload, final String entityName, final String actionName,
-            final FineractContext context) {
+                        final FineractContext context) {
 
         final Set<HookConfiguration> config = hook.getConfig();
 
@@ -64,13 +66,12 @@ public class WebHookProcessor implements HookProcessor {
 
     @SuppressWarnings("unchecked")
     private void sendRequest(final String url, final String contentType, final String payload, final String entityName,
-            final String actionName, final FineractContext context) {
+                             final String actionName, final FineractContext context) {
 
         final String fineractEndpointUrl = System.getProperty("baseUrl");
         final WebHookService service = processorHelper.createWebHookService(url);
 
-        @SuppressWarnings("rawtypes")
-        final Callback callback = processorHelper.createCallback(url);
+        @SuppressWarnings("rawtypes") final Callback callback = processorHelper.createCallback(url);
 
         if (contentType.equalsIgnoreCase("json") || contentType.contains("json")) {
             final JsonObject json = JsonParser.parseString(payload).getAsJsonObject();

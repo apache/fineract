@@ -2,7 +2,7 @@ name: Fineract PR Compliance
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    types: [ opened, edited, reopened, synchronize ]
 
 permissions:
   pull-requests: read

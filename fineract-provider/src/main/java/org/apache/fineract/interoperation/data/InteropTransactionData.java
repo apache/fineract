@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,10 @@
 package org.apache.fineract.interoperation.data;
 
 import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -55,8 +57,8 @@ public class InteropTransactionData extends CommandProcessingResult {
     private String note;
 
     public InteropTransactionData(Long entityId, String accountId, String transactionId, SavingsAccountTransactionType transactionType,
-            BigDecimal amount, BigDecimal chargeAmount, String currency, BigDecimal accountBalance, LocalDate bookingDateTime,
-            LocalDate valueDateTime, String note) {
+                                  BigDecimal amount, BigDecimal chargeAmount, String currency, BigDecimal accountBalance, LocalDate bookingDateTime,
+                                  LocalDate valueDateTime, String note) {
         super(entityId);
         this.accountId = accountId;
         this.savingTransactionId = transactionId;

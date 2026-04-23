@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -84,7 +86,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -111,7 +113,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                     .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL) //
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -139,7 +141,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .paymentAllocation(List.of(createDefaultPaymentAllocation("REAMORTIZATION")))//
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 600.0, 60.0,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -172,7 +174,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .paymentAllocation(List.of(createDefaultPaymentAllocation("REAMORTIZATION")))//
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -213,7 +215,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .paymentAllocation(List.of(createDefaultPaymentAllocation("REAMORTIZATION")))//
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -253,7 +255,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -310,7 +312,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -341,7 +343,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -385,7 +387,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -423,7 +425,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .daysInYearType(DaysInYearType.ACTUAL) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 26.0,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -463,7 +465,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -495,7 +497,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -526,7 +528,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -573,7 +575,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(2).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -608,7 +610,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -647,7 +649,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(2).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -696,7 +698,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 December 2020", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -727,7 +729,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -770,7 +772,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(2).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -803,7 +805,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -839,7 +841,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -903,7 +905,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -942,7 +944,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -992,7 +994,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(2).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -1055,7 +1057,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(3).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -1130,7 +1132,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(3).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -1198,7 +1200,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(3).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     6, null);
             Assertions.assertNotNull(loanId);
@@ -1271,7 +1273,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(2).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.99,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -1342,7 +1344,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -1382,7 +1384,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -1410,7 +1412,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .maxTrancheCount(2).addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -1472,7 +1474,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2021", 1000.0, 9.9,
                     12, null);
             Assertions.assertNotNull(loanId);
@@ -1539,7 +1541,7 @@ public class LoanInterestRefundTest extends BaseLoanIntegrationTest {
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND) //
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND) //
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-            );
+                    );
             Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "07 March 2025", 915.88, 24.99,
                     24, null);
             Assertions.assertNotNull(loanId);

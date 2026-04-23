@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,19 +39,19 @@ public enum ShareAccountStatusType {
         switch (type) {
             case 100:
                 enumeration = ShareAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
-            break;
+                break;
             case 200:
                 enumeration = ShareAccountStatusType.APPROVED;
-            break;
+                break;
             case 300:
                 enumeration = ShareAccountStatusType.ACTIVE;
-            break;
+                break;
             case 500:
                 enumeration = ShareAccountStatusType.REJECTED;
-            break;
+                break;
             case 600:
                 enumeration = ShareAccountStatusType.CLOSED;
-            break;
+                break;
         }
         return enumeration;
     }

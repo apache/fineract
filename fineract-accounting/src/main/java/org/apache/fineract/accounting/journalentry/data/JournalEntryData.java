@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.Data;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -97,11 +98,12 @@ public class JournalEntryData {
     private String externalAssetOwner;
     private transient Long savingTransactionId;
 
-    public JournalEntryData() {}
+    public JournalEntryData() {
+    }
 
     // for opening bal bulk import
     public JournalEntryData(Long officeId, LocalDate transactionDate, String currencyCode, List<CreditDebit> credits,
-            List<CreditDebit> debits, String locale, String dateFormat) {
+                            List<CreditDebit> debits, String locale, String dateFormat) {
         this.officeId = officeId;
         this.dateFormat = dateFormat;
         this.locale = locale;
@@ -143,8 +145,8 @@ public class JournalEntryData {
     }
 
     private JournalEntryData(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId, Integer rowIndex,
-            List<CreditDebit> credits, List<CreditDebit> debits, String accountNumber, String checkNumber, String routingCode,
-            String receiptNumber, String bankNumber, String comments, String locale, String dateFormat) {
+                             List<CreditDebit> credits, List<CreditDebit> debits, String accountNumber, String checkNumber, String routingCode,
+                             String receiptNumber, String bankNumber, String comments, String locale, String dateFormat) {
 
         this.officeId = officeId;
         this.dateFormat = dateFormat;
@@ -187,12 +189,12 @@ public class JournalEntryData {
     }
 
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName, final Long glAccountId,
-            final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
-            final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
-            final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate submittedOnDate,
-            final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber,
-            final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance, final Boolean runningBalanceComputed,
-            final TransactionDetailData transactionDetailData, final CurrencyData currency, final String externalAssetOwner) {
+                            final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
+                            final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
+                            final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate submittedOnDate,
+                            final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber,
+                            final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance, final Boolean runningBalanceComputed,
+                            final TransactionDetailData transactionDetailData, final CurrencyData currency, final String externalAssetOwner) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -223,14 +225,14 @@ public class JournalEntryData {
     }
 
     public static JournalEntryData importInstance(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId,
-            Integer rowIndex, List<CreditDebit> credits, List<CreditDebit> debits, String accountNumber, String checkNumber,
-            String routingCode, String receiptNumber, String bankNumber, String comments, String locale, String dateFormat) {
+                                                  Integer rowIndex, List<CreditDebit> credits, List<CreditDebit> debits, String accountNumber, String checkNumber,
+                                                  String routingCode, String receiptNumber, String bankNumber, String comments, String locale, String dateFormat) {
         return new JournalEntryData(officeId, transactionDate, currencyCode, paymentTypeId, rowIndex, credits, debits, accountNumber,
                 checkNumber, routingCode, receiptNumber, bankNumber, comments, locale, dateFormat);
     }
 
     public static JournalEntryData importInstance1(Long officeId, LocalDate transactionDate, String currencyCode, List<CreditDebit> credits,
-            List<CreditDebit> debits, String locale, String dateFormat) {
+                                                   List<CreditDebit> debits, String locale, String dateFormat) {
         return new JournalEntryData(officeId, transactionDate, currencyCode, credits, debits, locale, dateFormat);
     }
 

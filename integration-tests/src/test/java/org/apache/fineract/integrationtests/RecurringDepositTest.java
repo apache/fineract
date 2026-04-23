@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -66,7 +68,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
+@SuppressWarnings({"unused", "rawtypes", "unchecked", "static-access"})
 public class RecurringDepositTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTest.class);
@@ -241,8 +243,8 @@ public class RecurringDepositTest {
         HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
 
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -419,8 +421,8 @@ public class RecurringDepositTest {
         HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
 
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -623,8 +625,8 @@ public class RecurringDepositTest {
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
         Assertions.assertNull(accountSummary.get("totalWithholdTax"));
 
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -953,8 +955,8 @@ public class RecurringDepositTest {
         HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
 
-        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] expenseAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT)};
+        final JournalEntry[] liablilityAccountEntry = {new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT)};
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
@@ -2889,7 +2891,7 @@ public class RecurringDepositTest {
     }
 
     private void testFixedDepositAccountForInterestRate(final String chartToUse, final String depositAmount, final String depositPeriod,
-            final Float interestRate) {
+                                                        final Float interestRate) {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -2944,7 +2946,7 @@ public class RecurringDepositTest {
     }
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
-            Account... accounts) {
+                                                  Account... accounts) {
         LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec,
                 this.responseSpec);
@@ -2958,7 +2960,7 @@ public class RecurringDepositTest {
     }
 
     private Integer createRecurringDepositProductWithWithHoldTax(final String validFrom, final String validTo, final String taxGroupId,
-            final String accountingRule, Account... accounts) {
+                                                                 final String accountingRule, Account... accounts) {
         LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec,
                 this.responseSpec);
@@ -2973,7 +2975,7 @@ public class RecurringDepositTest {
     }
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
-            final String chartToBePicked, Account... accounts) {
+                                                  final String chartToBePicked, Account... accounts) {
         LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec,
                 this.responseSpec);
@@ -2986,25 +2988,25 @@ public class RecurringDepositTest {
         switch (chartToBePicked) {
             case "period":
                 recurringDepositProductHelper = recurringDepositProductHelper.withPeriodRangeChart();
-            break;
+                break;
             case "amount":
                 recurringDepositProductHelper = recurringDepositProductHelper.withAmountRangeChart();
-            break;
+                break;
             case "period_amount":
                 recurringDepositProductHelper = recurringDepositProductHelper.withPeriodAndAmountRangeChart();
-            break;
+                break;
             case "amount_period":
                 recurringDepositProductHelper = recurringDepositProductHelper.withAmountAndPeriodRangeChart();
-            break;
+                break;
             default:
-            break;
+                break;
         }
         final String recurringDepositProductJSON = recurringDepositProductHelper.build(validFrom, validTo);
         return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
     }
 
     private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
+                                                        final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
         LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
@@ -3014,8 +3016,8 @@ public class RecurringDepositTest {
     }
 
     private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate,
-            final String depositAmount, final String depositPeriod) {
+                                                        final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate,
+                                                        final String depositAmount, final String depositPeriod) {
         LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
@@ -3025,7 +3027,7 @@ public class RecurringDepositTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, final String accountingRule, Account... accounts) {
+                                         final String minOpenningBalance, final String accountingRule, Account... accounts) {
         LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         if (accountingRule.equals(CASH_BASED)) {
@@ -3089,7 +3091,7 @@ public class RecurringDepositTest {
     }
 
     private void assertFinancialActivityAccountCreation(Integer financialActivityAccountId, Integer financialActivityId,
-            Account glAccount) {
+                                                        Account glAccount) {
         HashMap mappingDetails = this.financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId,
                 this.responseSpec);
         Assertions.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));

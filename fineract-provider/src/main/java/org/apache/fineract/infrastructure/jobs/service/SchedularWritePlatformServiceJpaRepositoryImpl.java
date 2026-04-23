@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import io.github.resilience4j.retry.annotation.Retry;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -50,8 +52,8 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     @Autowired
     public SchedularWritePlatformServiceJpaRepositoryImpl(final ScheduledJobDetailRepository scheduledJobDetailsRepository,
-            final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository, final JobDetailDataValidator dataValidator,
-            final SchedulerDetailRepository schedulerDetailRepository) {
+                                                          final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository, final JobDetailDataValidator dataValidator,
+                                                          final SchedulerDetailRepository schedulerDetailRepository) {
         this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
         this.scheduledJobRunHistoryRepository = scheduledJobRunHistoryRepository;
         this.schedulerDetailRepository = schedulerDetailRepository;

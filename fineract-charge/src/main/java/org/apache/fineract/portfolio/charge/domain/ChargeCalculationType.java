@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -44,29 +44,29 @@ public enum ChargeCalculationType {
     }
 
     public static Object[] validValuesForLoan() {
-        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue(),
+        return new Integer[]{ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue(),
                 ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue(), ChargeCalculationType.PERCENT_OF_INTEREST.getValue(),
-                ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
+                ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
     }
 
     public static Object[] validValuesForSavings() {
-        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
+        return new Integer[]{ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue()};
     }
 
     public static Object[] validValuesForShares() {
-        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
+        return new Integer[]{ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue()};
     }
 
     public static Object[] validValuesForClients() {
-        return new Integer[] { ChargeCalculationType.FLAT.getValue() };
+        return new Integer[]{ChargeCalculationType.FLAT.getValue()};
     }
 
     public static Object[] validValuesForShareAccountActivation() {
-        return new Integer[] { ChargeCalculationType.FLAT.getValue() };
+        return new Integer[]{ChargeCalculationType.FLAT.getValue()};
     }
 
     public static Object[] validValuesForTrancheDisbursement() {
-        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue() };
+        return new Integer[]{ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
     }
 
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {

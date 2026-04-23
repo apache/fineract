@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.group.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,16 +28,19 @@ import java.util.Set;
  */
 final class GroupsApiResourceSwagger {
 
-    private GroupsApiResourceSwagger() {}
+    private GroupsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetGroupsTemplateResponse")
     public static final class GetGroupsTemplateResponse {
 
-        private GetGroupsTemplateResponse() {}
+        private GetGroupsTemplateResponse() {
+        }
 
         static final class GetGroupsTemplateOfficeOptions {
 
-            private GetGroupsTemplateOfficeOptions() {}
+            private GetGroupsTemplateOfficeOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -48,7 +52,8 @@ final class GroupsApiResourceSwagger {
 
         static final class GetGroupsTemplateStaffOptions {
 
-            private GetGroupsTemplateStaffOptions() {}
+            private GetGroupsTemplateStaffOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -58,7 +63,8 @@ final class GroupsApiResourceSwagger {
 
         static final class GetGroupsTemplateClientOptions {
 
-            private GetGroupsTemplateClientOptions() {}
+            private GetGroupsTemplateClientOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -72,15 +78,18 @@ final class GroupsApiResourceSwagger {
 
         static final class GetGroupsTemplateDatatables {
 
-            private GetGroupsTemplateDatatables() {}
+            private GetGroupsTemplateDatatables() {
+            }
 
             static final class GetGroupsTemplateColumnHeaderData {
 
-                private GetGroupsTemplateColumnHeaderData() {}
+                private GetGroupsTemplateColumnHeaderData() {
+                }
 
                 static final class GetGroupsTemplateColumnValues {
 
-                    private GetGroupsTemplateColumnValues() {}
+                    private GetGroupsTemplateColumnValues() {
+                    }
                 }
 
                 @Schema(example = "group_id")
@@ -116,15 +125,18 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "GetGroupsResponse")
     public static final class GetGroupsResponse {
 
-        private GetGroupsResponse() {}
+        private GetGroupsResponse() {
+        }
 
         static final class GetGroupsPageItems {
 
-            private GetGroupsPageItems() {}
+            private GetGroupsPageItems() {
+            }
 
             static final class GetGroupsStatus {
 
-                private GetGroupsStatus() {}
+                private GetGroupsStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -157,11 +169,13 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "GetGroupsGroupIdResponse")
     public static final class GetGroupsGroupIdResponse {
 
-        private GetGroupsGroupIdResponse() {}
+        private GetGroupsGroupIdResponse() {
+        }
 
         static final class GetGroupsGroupIdTimeline {
 
-            private GetGroupsGroupIdTimeline() {}
+            private GetGroupsGroupIdTimeline() {
+            }
 
             @Schema(example = "[2013, 11, 14]")
             public LocalDate activatedOnDate;
@@ -191,7 +205,8 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PostGroupsRequest")
     public static final class PostGroupsRequest {
 
-        private PostGroupsRequest() {}
+        private PostGroupsRequest() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -204,7 +219,8 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PostGroupsResponse")
     public static final class PostGroupsResponse {
 
-        private PostGroupsResponse() {}
+        private PostGroupsResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -217,7 +233,8 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "DeleteGroupsGroupIdResponse")
     public static final class DeleteGroupsGroupIdResponse {
 
-        private DeleteGroupsGroupIdResponse() {}
+        private DeleteGroupsGroupIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -230,7 +247,8 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PostGroupsGroupIdCommandUnassignStaffRequest")
     public static final class PostGroupsGroupIdCommandUnassignStaffRequest {
 
-        private PostGroupsGroupIdCommandUnassignStaffRequest() {}
+        private PostGroupsGroupIdCommandUnassignStaffRequest() {
+        }
 
         @Schema(example = "1")
         public Long staffId;
@@ -239,11 +257,13 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PostGroupsGroupIdCommandUnassignStaffResponse")
     public static final class PostGroupsGroupIdCommandUnassignStaffResponse {
 
-        private PostGroupsGroupIdCommandUnassignStaffResponse() {}
+        private PostGroupsGroupIdCommandUnassignStaffResponse() {
+        }
 
         static final class PostGroupsGroupIdCommandUnassignStaffChanges {
 
-            private PostGroupsGroupIdCommandUnassignStaffChanges() {}
+            private PostGroupsGroupIdCommandUnassignStaffChanges() {
+            }
         }
 
         @Schema(example = "1")
@@ -258,7 +278,8 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PutGroupsGroupIdRequest")
     public static final class PutGroupsGroupIdRequest {
 
-        private PutGroupsGroupIdRequest() {}
+        private PutGroupsGroupIdRequest() {
+        }
 
         @Schema(example = "First Group (changed)")
         public String name;
@@ -267,11 +288,13 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PutGroupsGroupIdResponse")
     public static final class PutGroupsGroupIdResponse {
 
-        private PutGroupsGroupIdResponse() {}
+        private PutGroupsGroupIdResponse() {
+        }
 
         static final class PutGroupsGroupIdChanges {
 
-            private PutGroupsGroupIdChanges() {}
+            private PutGroupsGroupIdChanges() {
+            }
 
             @Schema(example = "First Group (changed)")
             public String name;
@@ -289,15 +312,18 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "GetGroupsGroupIdAccountsResponse")
     public static final class GetGroupsGroupIdAccountsResponse {
 
-        private GetGroupsGroupIdAccountsResponse() {}
+        private GetGroupsGroupIdAccountsResponse() {
+        }
 
         static final class GetGroupsGroupIdAccountsLoanAccounts {
 
-            private GetGroupsGroupIdAccountsLoanAccounts() {}
+            private GetGroupsGroupIdAccountsLoanAccounts() {
+            }
 
             static final class GetGroupsGroupIdAccountsStatus {
 
-                private GetGroupsGroupIdAccountsStatus() {}
+                private GetGroupsGroupIdAccountsStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -325,7 +351,8 @@ final class GroupsApiResourceSwagger {
 
             static final class GetGroupsGroupIdAccountsLoanType {
 
-                private GetGroupsGroupIdAccountsLoanType() {}
+                private GetGroupsGroupIdAccountsLoanType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -349,11 +376,13 @@ final class GroupsApiResourceSwagger {
 
         static final class GetGroupsGroupIdAccountsSavingAccounts {
 
-            private GetGroupsGroupIdAccountsSavingAccounts() {}
+            private GetGroupsGroupIdAccountsSavingAccounts() {
+            }
 
             static final class GetGroupsGroupIdAccountsSavingStatus {
 
-                private GetGroupsGroupIdAccountsSavingStatus() {}
+                private GetGroupsGroupIdAccountsSavingStatus() {
+                }
 
                 @Schema(example = "100")
                 public Long id;
@@ -377,7 +406,8 @@ final class GroupsApiResourceSwagger {
 
             static final class GetGroupsGroupIdAccountsSavingCurrency {
 
-                private GetGroupsGroupIdAccountsSavingCurrency() {}
+                private GetGroupsGroupIdAccountsSavingCurrency() {
+                }
 
                 @Schema(example = "USD")
                 public String code;
@@ -395,7 +425,8 @@ final class GroupsApiResourceSwagger {
 
             static final class GetGroupsGroupIdAccountsSavingAccountType {
 
-                private GetGroupsGroupIdAccountsSavingAccountType() {}
+                private GetGroupsGroupIdAccountsSavingAccountType() {
+                }
 
                 @Schema(example = "2")
                 public Long id;
@@ -428,11 +459,13 @@ final class GroupsApiResourceSwagger {
 
         static final class GetGroupsGroupIdAccountsMemberLoanAccounts {
 
-            private GetGroupsGroupIdAccountsMemberLoanAccounts() {}
+            private GetGroupsGroupIdAccountsMemberLoanAccounts() {
+            }
 
             static final class GetGroupsGroupIdAccountsMemberLoanStatus {
 
-                private GetGroupsGroupIdAccountsMemberLoanStatus() {}
+                private GetGroupsGroupIdAccountsMemberLoanStatus() {
+                }
 
                 @Schema(example = "200")
                 public Long id;
@@ -460,7 +493,8 @@ final class GroupsApiResourceSwagger {
 
             static final class GetGroupsGroupIdAccountsMemberLoanType {
 
-                private GetGroupsGroupIdAccountsMemberLoanType() {}
+                private GetGroupsGroupIdAccountsMemberLoanType() {
+                }
 
                 @Schema(example = "3")
                 public Long id;
@@ -484,7 +518,8 @@ final class GroupsApiResourceSwagger {
 
         static final class GetGroupsGroupIdAccountsMemberSavingsAccounts {
 
-            private GetGroupsGroupIdAccountsMemberSavingsAccounts() {}
+            private GetGroupsGroupIdAccountsMemberSavingsAccounts() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -508,11 +543,13 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PostGroupsGroupIdRequest")
     public static final class PostGroupsGroupIdRequest {
 
-        private PostGroupsGroupIdRequest() {}
+        private PostGroupsGroupIdRequest() {
+        }
 
         static final class PostGroupsGroupIdClients {
 
-            private PostGroupsGroupIdClients() {}
+            private PostGroupsGroupIdClients() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -526,7 +563,8 @@ final class GroupsApiResourceSwagger {
     @Schema(description = "PostGroupsGroupIdResponse")
     public static final class PostGroupsGroupIdResponse {
 
-        private PostGroupsGroupIdResponse() {}
+        private PostGroupsGroupIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,10 +20,12 @@ package org.apache.fineract.portfolio.floatingrates.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
 import lombok.Getter;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -44,7 +46,7 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
     private OffsetDateTime modifiedOn;
 
     public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, Boolean isDifferentialToBaseLendingRate,
-            Boolean isActive, String createdBy, OffsetDateTime createdOn, String modifiedBy, OffsetDateTime modifiedOn) {
+                                  Boolean isActive, String createdBy, OffsetDateTime createdOn, String modifiedBy, OffsetDateTime modifiedOn) {
         this.id = id;
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -57,7 +59,7 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
     }
 
     public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, Boolean isDifferentialToBaseLendingRate,
-            Boolean isActive) {
+                                  Boolean isActive) {
         this.id = id;
         this.fromDate = fromDate;
         this.interestRate = interestRate;

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+
 import lombok.Getter;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
@@ -40,7 +41,7 @@ public final class GuarantorTransactionData implements Serializable {
     private final boolean reversed;
 
     private GuarantorTransactionData(final Long id, final DepositAccountOnHoldTransactionData onHoldTransactionData,
-            final LoanTransactionData loanTransactionData, final boolean reversed) {
+                                     final LoanTransactionData loanTransactionData, final boolean reversed) {
 
         this.id = id;
         this.onHoldTransactionData = onHoldTransactionData;
@@ -49,7 +50,7 @@ public final class GuarantorTransactionData implements Serializable {
     }
 
     public static GuarantorTransactionData instance(final Long id, final DepositAccountOnHoldTransactionData onHoldTransactionData,
-            final LoanTransactionData loanTransactionData, final boolean reversed) {
+                                                    final LoanTransactionData loanTransactionData, final boolean reversed) {
         return new GuarantorTransactionData(id, onHoldTransactionData, loanTransactionData, reversed);
     }
 

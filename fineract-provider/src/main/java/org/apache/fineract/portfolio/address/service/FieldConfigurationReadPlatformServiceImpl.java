@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.address.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
         final FieldMapper rm = new FieldMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entity }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{entity}); // NOSONAR
     }
 
     @Override

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -85,9 +85,9 @@ public class WorkingCapitalLoanInlineCOBConfig {
 
     @Bean
     public Step inlineWorkingCapitalLoanCOBStep(WorkingCapitalInlineCOBLoanItemReader inlineWorkingCapitalLoanCobWorkerItemReader,
-            WorkingCapitalLoanInlineCOBWorkerItemProcessor inlineWorkingCapitalLoanCobWorkerItemProcessor,
-            InlineWorkingCapitalLoanCOBWorkerItemWriter inlineWorkingCapitalLoanCobWorkerItemWriter,
-            InlineWorkingCapitalLoanCOBWorkerItemListener inlineWorkingCapitalLoanCobLoanItemListener) {
+                                                WorkingCapitalLoanInlineCOBWorkerItemProcessor inlineWorkingCapitalLoanCobWorkerItemProcessor,
+                                                InlineWorkingCapitalLoanCOBWorkerItemWriter inlineWorkingCapitalLoanCobWorkerItemWriter,
+                                                InlineWorkingCapitalLoanCOBWorkerItemListener inlineWorkingCapitalLoanCobLoanItemListener) {
         return new StepBuilder("Inline Working Capital Loan COB Step", jobRepository)
                 .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(JobName.WORKING_CAPITAL_LOAN_COB_JOB.name()),
                         transactionManager)
@@ -97,7 +97,7 @@ public class WorkingCapitalLoanInlineCOBConfig {
 
     @Bean(name = "inlineWorkingCapitalLoanCOBJob")
     public Job inlineWorkingCapitalLoanCOBJob(Step inlineWorkingCapitalLoanCOBBuildExecutionContextStep,
-            Step inlineWorkingCapitalLoanCOBStep, Step inlineWorkingCapitalLoanCOBResetContextStep) {
+                                              Step inlineWorkingCapitalLoanCOBStep, Step inlineWorkingCapitalLoanCOBResetContextStep) {
         return new JobBuilder(WorkingCapitalLoanCOBConstant.INLINE_WORKING_CAPITAL_LOAN_COB_JOB_NAME, jobRepository) //
                 .start(inlineWorkingCapitalLoanCOBBuildExecutionContextStep).next(inlineWorkingCapitalLoanCOBStep)
                 .next(inlineWorkingCapitalLoanCOBResetContextStep) //
@@ -141,7 +141,7 @@ public class WorkingCapitalLoanInlineCOBConfig {
     @Bean
     public ExecutionContextPromotionListener inlineWorkingCapitalLoanCobPromotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { COBConstant.COB_PARAMETER, COBConstant.BUSINESS_STEPS, COBConstant.BUSINESS_DATE_PARAMETER_NAME });
+        listener.setKeys(new String[]{COBConstant.COB_PARAMETER, COBConstant.BUSINESS_STEPS, COBConstant.BUSINESS_DATE_PARAMETER_NAME});
         return listener;
     }
 }

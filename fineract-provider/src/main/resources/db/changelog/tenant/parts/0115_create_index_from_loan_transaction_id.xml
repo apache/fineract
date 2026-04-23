@@ -28,7 +28,8 @@
                 <indexExists tableName="m_loan_transaction_relation" columnNames="from_loan_transaction_id"/>
             </not>
         </preConditions>
-        <createIndex indexName="IDX_M_LOAN_TRANSACTION_RELATION_FROM_LOAN_TRANSACTION_ID" tableName="m_loan_transaction_relation">
+        <createIndex indexName="IDX_M_LOAN_TRANSACTION_RELATION_FROM_LOAN_TRANSACTION_ID"
+                     tableName="m_loan_transaction_relation">
             <column name="from_loan_transaction_id"/>
         </createIndex>
     </changeSet>

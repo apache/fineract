@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -96,18 +97,18 @@ public final class CalendarData implements Serializable {
     private String typeId;
 
     public static CalendarData importInstanceNoRepeatsOnDay(LocalDate startDate, boolean repeating, EnumOptionData frequency,
-            Integer interval, Integer rowIndex, String locale, String dateFormat) {
+                                                            Integer interval, Integer rowIndex, String locale, String dateFormat) {
         return new CalendarData(startDate, repeating, frequency, interval, rowIndex, locale, dateFormat);
 
     }
 
     public static CalendarData importInstanceWithRepeatsOnDay(LocalDate startDate, boolean repeating, EnumOptionData frequency,
-            Integer interval, EnumOptionData repeatsOnDay, Integer rowIndex, String locale, String dateFormat) {
+                                                              Integer interval, EnumOptionData repeatsOnDay, Integer rowIndex, String locale, String dateFormat) {
         return new CalendarData(startDate, repeating, frequency, interval, repeatsOnDay, rowIndex, locale, dateFormat);
     }
 
     private CalendarData(LocalDate startDate, boolean repeating, EnumOptionData frequency, Integer interval, Integer rowIndex,
-            String locale, String dateFormat) {
+                         String locale, String dateFormat) {
         this.startDate = startDate;
         this.repeating = repeating;
         this.frequency = frequency;
@@ -153,7 +154,7 @@ public final class CalendarData implements Serializable {
     }
 
     private CalendarData(LocalDate startDate, boolean repeating, EnumOptionData frequency, Integer interval, EnumOptionData repeatsOnDay,
-            Integer rowIndex, String locale, String dateFormat) {
+                         Integer rowIndex, String locale, String dateFormat) {
         this.startDate = startDate;
         this.repeating = repeating;
         this.frequency = frequency;
@@ -199,7 +200,7 @@ public final class CalendarData implements Serializable {
     }
 
     public CalendarData(String title, String description, LocalDate startDate, boolean repeating, EnumOptionData frequency,
-            Integer interval, EnumOptionData repeatsOnDay, String dateFormat, String locale, String typeId) {
+                        Integer interval, EnumOptionData repeatsOnDay, String dateFormat, String locale, String typeId) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;
@@ -221,14 +222,14 @@ public final class CalendarData implements Serializable {
     }
 
     public static CalendarData instance(final Long id, final Long calendarInstanceId, final Long entityId, final EnumOptionData entityType,
-            final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
-            final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,
-            final EnumOptionData frequency, final Integer interval, final EnumOptionData repeatsOnDay,
-            final EnumOptionData repeatsOnNthDayOfMonth, final EnumOptionData remindBy, final Integer firstReminder,
-            final Integer secondReminder, final String humanReadable, final OffsetDateTime createdDate,
-            final OffsetDateTime lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
-            final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final LocalTime meetingTime,
-            final Integer repeatsOnDayOfMonth) {
+                                        final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
+                                        final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,
+                                        final EnumOptionData frequency, final Integer interval, final EnumOptionData repeatsOnDay,
+                                        final EnumOptionData repeatsOnNthDayOfMonth, final EnumOptionData remindBy, final Integer firstReminder,
+                                        final Integer secondReminder, final String humanReadable, final OffsetDateTime createdDate,
+                                        final OffsetDateTime lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
+                                        final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final LocalTime meetingTime,
+                                        final Integer repeatsOnDayOfMonth) {
 
         final Collection<LocalDate> recurringDates = null;
         final Collection<LocalDate> nextTenRecurringDates = null;
@@ -250,7 +251,7 @@ public final class CalendarData implements Serializable {
     }
 
     public static CalendarData withRecurringDates(final CalendarData calendarData, final Collection<LocalDate> recurringDates,
-            final Collection<LocalDate> nextTenRecurringDates, final LocalDate recentEligibleMeetingDate) {
+                                                  final Collection<LocalDate> nextTenRecurringDates, final LocalDate recentEligibleMeetingDate) {
         return new CalendarData(calendarData.id, calendarData.calendarInstanceId, calendarData.entityId, calendarData.entityType,
                 calendarData.title, calendarData.description, calendarData.location, calendarData.startDate, calendarData.endDate,
                 calendarData.duration, calendarData.type, calendarData.repeating, calendarData.recurrence, calendarData.frequency,
@@ -327,9 +328,9 @@ public final class CalendarData implements Serializable {
     }
 
     public static CalendarData withTemplateOptions(final CalendarData calendarData, final List<EnumOptionData> entityTypeOptions,
-            final List<EnumOptionData> calendarTypeOptions, final List<EnumOptionData> remindByOptions,
-            final List<EnumOptionData> repeatsOptions, final List<EnumOptionData> repeatsOnDayOptions,
-            final List<EnumOptionData> frequencyNthDayTypeOptions) {
+                                                   final List<EnumOptionData> calendarTypeOptions, final List<EnumOptionData> remindByOptions,
+                                                   final List<EnumOptionData> repeatsOptions, final List<EnumOptionData> repeatsOnDayOptions,
+                                                   final List<EnumOptionData> frequencyNthDayTypeOptions) {
 
         return new CalendarData(calendarData.id, calendarData.calendarInstanceId, calendarData.entityId, calendarData.entityType,
                 calendarData.title, calendarData.description, calendarData.location, calendarData.startDate, calendarData.endDate,
@@ -343,18 +344,18 @@ public final class CalendarData implements Serializable {
     }
 
     private CalendarData(final Long id, final Long calendarInstanceId, final Long entityId, final EnumOptionData entityType,
-            final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
-            final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,
-            final EnumOptionData frequency, final Integer interval, final EnumOptionData repeatsOnDay,
-            final EnumOptionData repeatsOnNthDayOfMonth, final EnumOptionData remindBy, final Integer firstReminder,
-            final Integer secondReminder, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates,
-            final String humanReadable, final LocalDate recentEligibleMeetingDate, final OffsetDateTime createdDate,
-            final OffsetDateTime lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
-            final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final Integer repeatsOnDayOfMonth,
-            final List<EnumOptionData> entityTypeOptions, final List<EnumOptionData> calendarTypeOptions,
-            final List<EnumOptionData> remindByOptions, final List<EnumOptionData> repeatsOptions,
-            final List<EnumOptionData> repeatsOnDayOptions, final LocalTime meetingTime,
-            final List<EnumOptionData> frequencyNthDayTypeOptions) {
+                         final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
+                         final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,
+                         final EnumOptionData frequency, final Integer interval, final EnumOptionData repeatsOnDay,
+                         final EnumOptionData repeatsOnNthDayOfMonth, final EnumOptionData remindBy, final Integer firstReminder,
+                         final Integer secondReminder, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates,
+                         final String humanReadable, final LocalDate recentEligibleMeetingDate, final OffsetDateTime createdDate,
+                         final OffsetDateTime lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
+                         final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final Integer repeatsOnDayOfMonth,
+                         final List<EnumOptionData> entityTypeOptions, final List<EnumOptionData> calendarTypeOptions,
+                         final List<EnumOptionData> remindByOptions, final List<EnumOptionData> repeatsOptions,
+                         final List<EnumOptionData> repeatsOnDayOptions, final LocalTime meetingTime,
+                         final List<EnumOptionData> frequencyNthDayTypeOptions) {
         this.id = id;
         this.calendarInstanceId = calendarInstanceId;
         this.entityId = entityId;

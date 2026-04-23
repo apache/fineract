@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -183,18 +185,18 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
-            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
-            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
+                                            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+                                            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+                                            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion) {
         this(loan, installmentNumber, fromDate, dueDate, principal, interest, feeCharges, penaltyCharges, recalculatedInterestComponent,
                 compoundingDetails, rescheduleInterestPortion, false);
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
-            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
-            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion,
-            final boolean isDownPayment) {
+                                            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+                                            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+                                            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails, final BigDecimal rescheduleInterestPortion,
+                                            final boolean isDownPayment) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate;
@@ -214,9 +216,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
-            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
-            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
+                                            final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
+                                            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+                                            final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate;
@@ -242,9 +244,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public LoanRepaymentScheduleInstallment(Loan loan, Integer installmentNumber, LocalDate fromDate, LocalDate dueDate,
-            BigDecimal principal, BigDecimal interestCharged, BigDecimal feeChargesCharged, BigDecimal penaltyCharges,
-            BigDecimal creditedPrincipal, BigDecimal creditedInterest, BigDecimal creditedFee, BigDecimal creditedPenalty,
-            boolean additional, boolean isDownPayment, boolean isReAged) {
+                                            BigDecimal principal, BigDecimal interestCharged, BigDecimal feeChargesCharged, BigDecimal penaltyCharges,
+                                            BigDecimal creditedPrincipal, BigDecimal creditedInterest, BigDecimal creditedFee, BigDecimal creditedPenalty,
+                                            boolean additional, boolean isDownPayment, boolean isReAged) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate;
@@ -263,8 +265,8 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
-            final BigDecimal penalties, final BigDecimal interestAccrued, final BigDecimal feeAccrued, final BigDecimal penaltyAccrued) {
+                                                                        final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
+                                                                        final BigDecimal penalties, final BigDecimal interestAccrued, final BigDecimal feeAccrued, final BigDecimal penaltyAccrued) {
         LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate,
                 principal, interest, fees, penalties, null, null, null, null, false, false, true);
         installment.setInterestAccrued(interestAccrued);
@@ -274,15 +276,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public static LoanRepaymentScheduleInstallment newReAgedInstallment(final Loan loan, final Integer installmentNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
-            final BigDecimal penalties) {
+                                                                        final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
+                                                                        final BigDecimal penalties) {
         return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, interest, fees, penalties, null,
                 null, null, null, false, false, true);
     }
 
     public static LoanRepaymentScheduleInstallment newInstallmentWithMovedPaidAmountDuringReAging(final Loan loan,
-            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
-            final BigDecimal interest) {
+                                                                                                  final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+                                                                                                  final BigDecimal interest) {
         return new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal, interest, null, null, null, null,
                 null, null, false, false, true);
     }
@@ -784,7 +786,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void updateChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
-            final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
+                                    final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
         setFeeChargesCharged(feeChargesDue.getAmount());
         setFeeChargesWaived(feeChargesWaived.getAmount());
         setFeeChargesWrittenOff(feeChargesWrittenOff.getAmount());
@@ -794,7 +796,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     public void addToChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
-            final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
+                                   final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {
         setFeeChargesCharged(MathUtil.add(feeChargesDue.getAmount(), this.feeChargesCharged));
         setFeeChargesWaived(MathUtil.add(feeChargesWaived.getAmount(), this.feeChargesWaived));
         setFeeChargesWrittenOff(MathUtil.add(feeChargesWrittenOff.getAmount(), this.feeChargesWrittenOff));
@@ -821,7 +823,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     private void trackAdvanceAndLateTotalsForRepaymentPeriod(final LocalDate transactionDate, final MonetaryCurrency currency,
-            final Money amountPaidInRepaymentPeriod) {
+                                                             final Money amountPaidInRepaymentPeriod) {
         if (isInAdvance(transactionDate)) {
             setTotalPaidInAdvance(asMoney(this.totalPaidInAdvance, currency).plus(amountPaidInRepaymentPeriod).getAmount());
         } else if (isLatePayment(transactionDate)) {
@@ -1066,7 +1068,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     }
 
     private void reduceAdvanceAndLateTotalsForRepaymentPeriod(final LocalDate transactionDate, final MonetaryCurrency currency,
-            final Money amountDeductedInRepaymentPeriod) {
+                                                              final Money amountDeductedInRepaymentPeriod) {
         if (isInAdvance(transactionDate)) {
             final Money mTotalPaidInAdvance = Money.of(currency, this.totalPaidInAdvance);
 
@@ -1220,7 +1222,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             loanCompoundingDetails.forEach(nlcd -> {
                 nlcd.setLoanRepaymentScheduleInstallment(this);
                 getLoanCompoundingDetails().stream().filter(lcd -> MathUtil.isEqualTo(lcd.getAmount(), nlcd.getAmount()) //
-                        && DateUtils.isEqual(lcd.getEffectiveDate(), nlcd.getEffectiveDate())) //
+                                && DateUtils.isEqual(lcd.getEffectiveDate(), nlcd.getEffectiveDate())) //
                         .findAny().ifPresentOrElse(retainedLoanCompoundingDetails::add, () -> retainedLoanCompoundingDetails.add(nlcd));
             });
         }
@@ -1233,14 +1235,14 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             installmentCharges.forEach(nic -> {
                 nic.setInstallment(this);
                 getInstallmentCharges().stream().filter(ic -> MathUtil.isEqualTo(ic.getAmountOutstanding(), nic.getAmountOutstanding()) //
-                        && MathUtil.isEqualTo(ic.getAmountWrittenOff(), nic.getAmountWrittenOff()) //
-                        && MathUtil.isEqualTo(ic.getAmountPaid(), nic.getAmountPaid()) //
-                        && MathUtil.isEqualTo(ic.getAmountThroughChargePayment(), nic.getAmountThroughChargePayment()) //
-                        && MathUtil.isEqualTo(ic.getAmountWaived(), nic.getAmountWaived()) //
-                        && MathUtil.isEqualTo(ic.getAmount(), nic.getAmount()) //
-                        && Boolean.logicalAnd(ic.isPaid(), nic.isPaid()) //
-                        && Boolean.logicalAnd(ic.isWaived(), nic.isWaived()) //
-                        && Boolean.logicalAnd(ic.isPending(), nic.isPending())) //
+                                && MathUtil.isEqualTo(ic.getAmountWrittenOff(), nic.getAmountWrittenOff()) //
+                                && MathUtil.isEqualTo(ic.getAmountPaid(), nic.getAmountPaid()) //
+                                && MathUtil.isEqualTo(ic.getAmountThroughChargePayment(), nic.getAmountThroughChargePayment()) //
+                                && MathUtil.isEqualTo(ic.getAmountWaived(), nic.getAmountWaived()) //
+                                && MathUtil.isEqualTo(ic.getAmount(), nic.getAmount()) //
+                                && Boolean.logicalAnd(ic.isPaid(), nic.isPaid()) //
+                                && Boolean.logicalAnd(ic.isWaived(), nic.isWaived()) //
+                                && Boolean.logicalAnd(ic.isPending(), nic.isPending())) //
                         .findAny().ifPresentOrElse(retainedInstallmentCharges::add, () -> retainedInstallmentCharges.add(nic));
             });
         }
@@ -1253,11 +1255,11 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
             postDatedChecks.forEach(npdc -> {
                 npdc.setLoanRepaymentScheduleInstallment(this);
                 getPostDatedChecks().stream().filter(pdc -> MathUtil.isEqualTo(pdc.getCheckNo(), npdc.getCheckNo()) //
-                        && MathUtil.isEqualTo(pdc.getAccountNo(), npdc.getAccountNo()) //
-                        && MathUtil.isEqualTo(pdc.getAmount(), npdc.getAmount()) //
-                        && StringUtils.equals(pdc.getBankName(), npdc.getBankName()) //
-                        && MathUtil.isEqualTo(pdc.getStatus(), npdc.getStatus()) //
-                        && DateUtils.isEqual(pdc.getRepaymentDate(), npdc.getRepaymentDate())) //
+                                && MathUtil.isEqualTo(pdc.getAccountNo(), npdc.getAccountNo()) //
+                                && MathUtil.isEqualTo(pdc.getAmount(), npdc.getAmount()) //
+                                && StringUtils.equals(pdc.getBankName(), npdc.getBankName()) //
+                                && MathUtil.isEqualTo(pdc.getStatus(), npdc.getStatus()) //
+                                && DateUtils.isEqual(pdc.getRepaymentDate(), npdc.getRepaymentDate())) //
                         .findAny().ifPresentOrElse(retainedPostDatedChecks::add, () -> retainedPostDatedChecks.add(npdc));
             });
         }

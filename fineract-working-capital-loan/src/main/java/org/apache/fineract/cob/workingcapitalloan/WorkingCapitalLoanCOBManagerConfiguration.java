@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -79,7 +79,7 @@ public class WorkingCapitalLoanCOBManagerConfiguration {
 
     @Bean(WORKING_CAPITAL_JOB_HUMAN_READABLE_NAME)
     public Job workingCapitalLoanCOBJob(WorkingCapitalLoanCOBPartitioner workingCapitalLoanCOBPartitioner,
-            ExecutionContextPromotionListener customJobParametersPromotionListener) {
+                                        ExecutionContextPromotionListener customJobParametersPromotionListener) {
         return new JobBuilder(WORKING_CAPITAL_LOAN_COB_JOB.name(), jobRepository)
                 .start(resolveCustomJobParametersForWorkingCapitalStep(customJobParametersPromotionListener))
                 .next(workingCapitalLoanCOBStep(workingCapitalLoanCOBPartitioner)).incrementer(new RunIdIncrementer()) //

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,11 +26,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -109,10 +111,10 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     }
 
     private Guarantor(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType, final Long entityId,
-            final String firstname, final String lastname, final LocalDate dateOfBirth, final String addressLine1,
-            final String addressLine2, final String city, final String state, final String country, final String zip,
-            final String housePhoneNumber, final String mobilePhoneNumber, final String comment, final boolean active,
-            final List<GuarantorFundingDetails> guarantorFundDetails) {
+                      final String firstname, final String lastname, final LocalDate dateOfBirth, final String addressLine1,
+                      final String addressLine2, final String city, final String state, final String country, final String zip,
+                      final String housePhoneNumber, final String mobilePhoneNumber, final String comment, final boolean active,
+                      final List<GuarantorFundingDetails> guarantorFundDetails) {
         this.loan = loan;
         this.clientRelationshipType = clientRelationshipType;
         this.gurantorType = gurantorType;
@@ -134,7 +136,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     }
 
     public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType, final JsonCommand command,
-            final List<GuarantorFundingDetails> fundingDetails) {
+                                     final List<GuarantorFundingDetails> fundingDetails) {
         final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue());
         final Long entityId = command.longValueOfParameterNamed(GuarantorJSONinputParams.ENTITY_ID.getValue());
         final boolean active = true;
@@ -203,7 +205,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            Integer propertyToBeUpdated, final boolean sansLocale) {
+                                      Integer propertyToBeUpdated, final boolean sansLocale) {
         if (command.isChangeInIntegerParameterNamed(paramName, propertyToBeUpdated)) {
             Integer newValue = null;
             if (sansLocale) {
@@ -221,7 +223,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            String propertyToBeUpdated) {
+                                      String propertyToBeUpdated) {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -254,7 +256,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            LocalDate propertyToBeUpdated) {
+                                      LocalDate propertyToBeUpdated) {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);

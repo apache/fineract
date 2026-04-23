@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,18 +19,22 @@
 package org.apache.fineract.portfolio.loanorigination.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.codes.api.CodeValuesApiResourceSwagger.GetCodeValuesDataResponse;
 
 final class LoanOriginatorApiResourceSwagger {
 
-    private LoanOriginatorApiResourceSwagger() {}
+    private LoanOriginatorApiResourceSwagger() {
+    }
 
     @Schema(description = "GetLoanOriginatorsResponse")
     public static final class GetLoanOriginatorsResponse {
 
-        private GetLoanOriginatorsResponse() {}
+        private GetLoanOriginatorsResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -49,7 +53,8 @@ final class LoanOriginatorApiResourceSwagger {
     @Schema(description = "GetLoanOriginatorTemplateResponse")
     public static final class GetLoanOriginatorTemplateResponse {
 
-        private GetLoanOriginatorTemplateResponse() {}
+        private GetLoanOriginatorTemplateResponse() {
+        }
 
         @Schema(example = "EXT-001")
         public String externalId;
@@ -61,7 +66,8 @@ final class LoanOriginatorApiResourceSwagger {
     @Schema(description = "PostLoanOriginatorsRequest")
     public static final class PostLoanOriginatorsRequest {
 
-        private PostLoanOriginatorsRequest() {}
+        private PostLoanOriginatorsRequest() {
+        }
 
         @Schema(example = "EXT-001")
         public String externalId;
@@ -78,7 +84,8 @@ final class LoanOriginatorApiResourceSwagger {
     @Schema(description = "PostLoanOriginatorsResponse")
     public static final class PostLoanOriginatorsResponse {
 
-        private PostLoanOriginatorsResponse() {}
+        private PostLoanOriginatorsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -87,7 +94,8 @@ final class LoanOriginatorApiResourceSwagger {
     @Schema(description = "PutLoanOriginatorsRequest")
     public static final class PutLoanOriginatorsRequest {
 
-        private PutLoanOriginatorsRequest() {}
+        private PutLoanOriginatorsRequest() {
+        }
 
         @Schema(example = "Updated Name")
         public String name;
@@ -102,7 +110,8 @@ final class LoanOriginatorApiResourceSwagger {
     @Schema(description = "PutLoanOriginatorsResponse")
     public static final class PutLoanOriginatorsResponse {
 
-        private PutLoanOriginatorsResponse() {}
+        private PutLoanOriginatorsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -111,7 +120,8 @@ final class LoanOriginatorApiResourceSwagger {
     @Schema(description = "DeleteLoanOriginatorsResponse")
     public static final class DeleteLoanOriginatorsResponse {
 
-        private DeleteLoanOriginatorsResponse() {}
+        private DeleteLoanOriginatorsResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;

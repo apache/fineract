@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -35,6 +35,7 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -53,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
@@ -124,7 +126,7 @@ import org.slf4j.LoggerFactory;
  * Client Loan Integration Test for checking Loan Application Repayments Schedule, loan charges, penalties, loan
  * repayments and verifying accounting transactions
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 @SuppressFBWarnings(value = "RV_EXCEPTION_NOT_THROWN", justification = "False positive")
 public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
@@ -1272,9 +1274,9 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
@@ -1462,9 +1464,9 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
@@ -1653,9 +1655,9 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT));
@@ -1840,11 +1842,11 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("200.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.CREDIT),
@@ -2048,12 +2050,12 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.CREDIT),
@@ -2245,11 +2247,11 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("126.04"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("605.94"), JournalEntry.TransactionType.CREDIT),
@@ -2449,9 +2451,9 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("100.00"), JournalEntry.TransactionType.CREDIT));
@@ -2656,7 +2658,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
             final JournalEntry[] assetAccountInitialEntry = {
                     new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.DEBIT),
                     new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                    new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                    new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
             JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
             JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                     new JournalEntry(Float.parseFloat("120.00"), JournalEntry.TransactionType.CREDIT));
@@ -2860,9 +2862,9 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.parseFloat("126.06"), JournalEntry.TransactionType.CREDIT));
@@ -3891,7 +3893,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
         ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
-        Account[] accounts = { assetAccount, incomeAccount, expenseAccount, overpaymentAccount };
+        Account[] accounts = {assetAccount, incomeAccount, expenseAccount, overpaymentAccount};
         final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
@@ -3936,8 +3938,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(10000.0f, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(10000.0f, JournalEntry.TransactionType.DEBIT), };
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(10000.0f, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(10000.0f, JournalEntry.TransactionType.DEBIT),};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         String runOndate = dateFormat.format(todaysDate.getTime());
@@ -4228,7 +4230,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         final JournalEntry[] assetAccountInitialEntry = {
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, fourMonthsfromNow, assetAccountInitialEntry);
 
         ArrayList<HashMap> loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -4407,10 +4409,10 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(Float.parseFloat("1440"), JournalEntry.TransactionType.DEBIT),
+        final JournalEntry[] assetAccountInitialEntry = {new JournalEntry(Float.parseFloat("1440"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("300.00"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, fourMonthsfromNow, assetAccountInitialEntry);
 
         ArrayList<HashMap> loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -4599,7 +4601,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         final JournalEntry[] assetAccountInitialEntry = {
                 new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT) };
+                new JournalEntry(Float.parseFloat("12000.00"), JournalEntry.TransactionType.DEBIT)};
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, fourMonthsfromNow, assetAccountInitialEntry);
 
         ArrayList<HashMap> loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -5524,7 +5526,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
             final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                    .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                    .withAccountingRulePeriodicAccrual(new Account[]{assetAccount, incomeAccount, expenseAccount, overpaymentAccount})
                     .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
                     .withFeeToIncomeAccountMapping(feeCharge.getResourceId(), uniqueIncomeAccountForFee.getResourceId())
                     .withPenaltyToIncomeAccountMapping(penaltyCharge.getResourceId(), uniqueIncomeAccountForPenalty.getResourceId())
@@ -7191,7 +7193,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithProductConfigurationAsTrue(final Integer clientID, final Integer loanProductID,
-            String principal) {
+                                                                          String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(collateralId);
@@ -7217,7 +7219,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithProductConfigurationAsFalse(final Integer clientID, final Integer loanProductID,
-            String principal) {
+                                                                           String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(collateralId);
@@ -7273,7 +7275,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private void validateCharge(Integer amountPercentage, final List<HashMap> loanCharges, final String amount, final String outstanding,
-            String amountPaid, String amountWaived) {
+                                String amountPaid, String amountWaived) {
         HashMap chargeDetail = getloanCharge(amountPercentage, loanCharges);
         assertTrue(Float.valueOf(amount).compareTo(Float.valueOf(String.valueOf(chargeDetail.get("amountOrPercentage")))) == 0);
         assertTrue(Float.valueOf(outstanding).compareTo(Float.valueOf(String.valueOf(chargeDetail.get("amountOutstanding")))) == 0);
@@ -7282,7 +7284,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private void validateChargeExcludePrecission(Integer amountPercentage, final List<HashMap> loanCharges, final String amount,
-            final String outstanding, String amountPaid, String amountWaived) {
+                                                 final String outstanding, String amountPaid, String amountWaived) {
         DecimalFormat twoDForm = new DecimalFormat("#");
         HashMap chargeDetail = getloanCharge(amountPercentage, loanCharges);
         assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(amount)))
@@ -7346,7 +7348,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
-            final String accountingRule, final Account... accounts) {
+                                      final String accountingRule, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
@@ -7363,7 +7365,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String graceOnPrincipalPayment,
-            List<HashMap> collaterals) {
+                                            List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000000.00") //
@@ -7383,7 +7385,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal, List<HashMap> collaterals) {
+                                            final String savingsId, String principal, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -7403,8 +7405,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String disbursementDate,
-            String submissionDate, String interestRate, List<HashMap> charges, final String savingsId, String principal,
-            List<HashMap> collaterals) {
+                                            String submissionDate, String interestRate, List<HashMap> charges, final String savingsId, String principal,
+                                            List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principal).withLoanTermFrequency("2")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("2").withRepaymentEveryAfter("1")
@@ -7416,8 +7418,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithExternalId(RequestSpecification requestSpecification,
-            ResponseSpecification responseSpecification, final Integer clientID, final Integer loanProductID, String principal,
-            final String externalId) {
+                                                          ResponseSpecification responseSpecification, final Integer clientID, final Integer loanProductID, String principal,
+                                                          final String externalId) {
         LOG.info("------------------------APPLYING FOR LOAN APPLICATION WITH EXTERNALID------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -7438,7 +7440,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal, List<HashMap> tranches, List<HashMap> collaterals) {
+                                                        final String savingsId, String principal, List<HashMap> tranches, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -7459,7 +7461,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private String updateLoanJson(final Integer clientID, final Integer loanProductID, List<HashMap> charges, String savingsId,
-            List<HashMap> collaterals) {
+                                  List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10,000.00") //
@@ -7479,7 +7481,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategy(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal, final String repaymentStrategy, final List<HashMap> collaterals) {
+                                                               final String savingsId, String principal, final String repaymentStrategy, final List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -7500,8 +7502,8 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationWithPaymentStrategyAndPastMonth(final Integer clientID, final Integer loanProductID,
-            List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String fourMonthsfromNow,
-            List<HashMap> collaterals) {
+                                                                           List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final String fourMonthsfromNow,
+                                                                           List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN);
@@ -7730,7 +7732,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private void testLoanScheduleWithInterestRecalculation_FOR_PRE_CLOSE_WITH_MORATORIUM(final String preCloseStrategy,
-            final String preCloseAmount) {
+                                                                                         final String preCloseAmount) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
@@ -7797,7 +7799,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private void addRepaymentValues(List<Map<String, Object>> expectedvalues, Calendar todaysDate, int addPeriod, boolean isAddDays,
-            String principalDue, String interestDue, String feeChargesDue, String penaltyChargesDue) {
+                                    String principalDue, String interestDue, String feeChargesDue, String penaltyChargesDue) {
         Map<String, Object> values = new HashMap<>(3);
         if (isAddDays) {
             values.put("dueDate", getDateAsArray(todaysDate, addPeriod));
@@ -7823,10 +7825,10 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy, final Account[] accounts,
-            final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
+                                                               final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                               final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
+                                                               final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy, final Account[] accounts,
+                                                               final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
         final String recalculationCompoundingFrequencyType = null;
         final String recalculationCompoundingFrequencyInterval = null;
         final String recalculationCompoundingFrequencyDate = null;
@@ -7841,13 +7843,13 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculationAndCompoundingDetails(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
-            final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
-            final String preCloseInterestCalculationStrategy, final Account[] accounts,
-            final Integer recalculationCompoundingFrequencyOnDayType, final Integer recalculationCompoundingFrequencyDayOfWeekType,
-            final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
+                                                                                    final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                                                    final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
+                                                                                    final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
+                                                                                    final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
+                                                                                    final String preCloseInterestCalculationStrategy, final Account[] accounts,
+                                                                                    final Integer recalculationCompoundingFrequencyOnDayType, final Integer recalculationCompoundingFrequencyDayOfWeekType,
+                                                                                    final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
         return createLoanProductWithInterestRecalculation(repaymentStrategy, interestRecalculationCompoundingMethod,
                 rescheduleStrategyMethod, recalculationRestFrequencyType, recalculationRestFrequencyInterval,
                 recalculationRestFrequencyDate, recalculationCompoundingFrequencyType, recalculationCompoundingFrequencyInterval,
@@ -7857,14 +7859,14 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
-            final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
-            final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
-            boolean isArrearsBasedOnOriginalSchedule, final Integer recalculationCompoundingFrequencyOnDayType,
-            final Integer recalculationCompoundingFrequencyDayOfWeekType, final Integer recalculationRestFrequencyOnDayType,
-            final Integer recalculationRestFrequencyDayOfWeekType) {
+                                                               final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                               final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
+                                                               final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
+                                                               final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
+                                                               final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
+                                                               boolean isArrearsBasedOnOriginalSchedule, final Integer recalculationCompoundingFrequencyOnDayType,
+                                                               final Integer recalculationCompoundingFrequencyDayOfWeekType, final Integer recalculationRestFrequencyOnDayType,
+                                                               final Integer recalculationRestFrequencyDayOfWeekType) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("10000000.00").withNumberOfRepayments("24")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
@@ -7891,9 +7893,9 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculationAndCompoundingDetails(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String preCloseInterestCalculationStrategy, final Account[] accounts,
-            final String installmentMultipleOf) {
+                                                                                    final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                                                    final String recalculationRestFrequencyType, final String preCloseInterestCalculationStrategy, final Account[] accounts,
+                                                                                    final String installmentMultipleOf) {
         final String recalculationCompoundingFrequencyType = null;
         final String recalculationCompoundingFrequencyInterval = null;
         final Integer recalculationCompoundingFrequencyOnDayType = null;
@@ -7905,11 +7907,11 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationCompoundingFrequencyType, final String recalculationCompoundingFrequencyInterval,
-            final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
-            boolean isArrearsBasedOnOriginalSchedule, final Integer recalculationCompoundingFrequencyOnDayType,
-            final Integer recalculationCompoundingFrequencyDayOfWeekType, final String installmentsMultiplesOf) {
+                                                               final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
+                                                               final String recalculationCompoundingFrequencyType, final String recalculationCompoundingFrequencyInterval,
+                                                               final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
+                                                               boolean isArrearsBasedOnOriginalSchedule, final Integer recalculationCompoundingFrequencyOnDayType,
+                                                               final Integer recalculationCompoundingFrequencyDayOfWeekType, final String installmentsMultiplesOf) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("19.9")
@@ -7936,7 +7938,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, final Integer loanProductID,
-            final String disbursementDate, final String repaymentStrategy, final String firstRepaymentDate) {
+                                                                    final String disbursementDate, final String repaymentStrategy, final String firstRepaymentDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(collateralId);
@@ -7967,27 +7969,27 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, final Integer loanProductID,
-            final String disbursementDate, final String repaymentStrategy, final List<HashMap> charges) {
+                                                                    final String disbursementDate, final String repaymentStrategy, final List<HashMap> charges) {
         return applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, disbursementDate, repaymentStrategy, charges, null,
                 null);
     }
 
     private Integer applyForLoanApplicationForInterestRecalculationWithMoratorium(final Integer clientID, final Integer loanProductID,
-            final String disbursementDate, final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
-            final String graceOnPrincipalPayment) {
+                                                                                  final String disbursementDate, final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
+                                                                                  final String graceOnPrincipalPayment) {
         return applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, disbursementDate, repaymentStrategy, charges,
                 graceOnInterestPayment, graceOnPrincipalPayment);
     }
 
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, final Integer loanProductID,
-            final String disbursementDate, final String compoundingStartDate, final String repaymentStrategy, final List<HashMap> charges) {
+                                                                    final String disbursementDate, final String compoundingStartDate, final String repaymentStrategy, final List<HashMap> charges) {
         return applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, disbursementDate, repaymentStrategy, charges, null,
                 null);
     }
 
     private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, final Integer loanProductID,
-            final String disbursementDate, final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
-            final String graceOnPrincipalPayment) {
+                                                                    final String disbursementDate, final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
+                                                                    final String graceOnPrincipalPayment) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(collateralId);
@@ -8264,7 +8266,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     }
 
     private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Long clientId, Long loanProductId,
-            String loanDisbursementDate, String repaymentStrategyCode) {
+                                                                                                     String loanDisbursementDate, String repaymentStrategyCode) {
         return LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(clientId.longValue()).productId(loanProductId)
                 .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(repaymentStrategyCode).locale("en").submittedOnDate(loanDisbursementDate)

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanorigination.mapper;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
@@ -27,7 +28,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-@Mapper(config = MapstructMapperConfig.class, uses = { CodeValueMapper.class })
+@Mapper(config = MapstructMapperConfig.class, uses = {CodeValueMapper.class})
 @ConditionalOnProperty(value = "fineract.module.loan-origination.enabled", havingValue = "true")
 public interface LoanOriginatorMapper {
 

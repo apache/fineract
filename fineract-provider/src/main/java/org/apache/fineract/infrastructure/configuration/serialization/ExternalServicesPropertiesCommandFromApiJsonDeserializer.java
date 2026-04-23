@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,9 +19,11 @@
 package org.apache.fineract.infrastructure.configuration.serialization;
 
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.NotificationJSONinputParams;
@@ -57,9 +59,12 @@ public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
         }.getType();
         switch (externalServiceName) {
             case "S3" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, S3_SUPPORTED_PARAMETERS);
-            case "SMTP" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SMTP_SUPPORTED_PARAMETERS);
-            case "SMS" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SMS_SUPPORTED_PARAMETERS);
-            case "NOTIFICATION" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, NOTIFICATION_SUPPORTED_PARAMETERS);
+            case "SMTP" ->
+                    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SMTP_SUPPORTED_PARAMETERS);
+            case "SMS" ->
+                    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SMS_SUPPORTED_PARAMETERS);
+            case "NOTIFICATION" ->
+                    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, NOTIFICATION_SUPPORTED_PARAMETERS);
             default -> throw new ExternalServiceConfigurationNotFoundException(externalServiceName);
         }
 

@@ -26,16 +26,20 @@
         <insert tableName="r_enum_value">
             <column name="enum_name" value="loan_transaction_strategy_id"/>
             <column name="enum_id" valueNumeric="8"/>
-            <column name="enum_message_property" value="Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest"/>
-            <column name="enum_value" value="Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest"/>
+            <column name="enum_message_property"
+                    value="Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest"/>
+            <column name="enum_value"
+                    value="Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest"/>
             <column name="enum_type" valueBoolean="false"/>
         </insert>
     </changeSet>
     <changeSet id="2" author="fineract">
         <insert tableName="ref_loan_transaction_processing_strategy">
             <column name="id" valueNumeric="8"/>
-            <column name="code" value="due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy"/>
-            <column name="name" value="Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest"/>
+            <column name="code"
+                    value="due-penalty-fee-interest-principal-in-advance-principal-penalty-fee-interest-strategy"/>
+            <column name="name"
+                    value="Due penalty, fee, interest, principal, In advance principal, penalty, fee, interest"/>
             <column name="sort_order" valueNumeric="8"/>
         </insert>
     </changeSet>

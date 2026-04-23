@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
@@ -237,9 +238,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final LocalDate submittedOnDateFrom,
-            final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
-            final JournalEntryAssociationParametersData associationParametersData) {
+                                              final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final LocalDate submittedOnDateFrom,
+                                              final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
+                                              final JournalEntryAssociationParametersData associationParametersData) {
         GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ").append(sqlGenerator.calcFoundRows()).append(" ");
@@ -388,7 +389,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId,
-            JournalEntryAssociationParametersData associationParametersData) {
+                                                       JournalEntryAssociationParametersData associationParametersData) {
         try {
 
             final GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
@@ -459,7 +460,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     }
 
     private List<JournalEntryData> populateOpeningBalances(final List<JournalEntryData> existingOpeningBalanceTransactions,
-            final List<JournalEntryData> allOpeningTransactions) {
+                                                           final List<JournalEntryData> allOpeningTransactions) {
         final List<JournalEntryData> allOpeningBalanceTransactions = new ArrayList<>(allOpeningTransactions.size());
         for (final JournalEntryData newOpeningBalanceTransaction : allOpeningTransactions) {
             boolean isNewTransactionAddedToCollection = false;
@@ -491,7 +492,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     }
 
     private List<JournalEntryData> retrieveOfficeBalanceTransactions(final Long officeId, final String transactionId,
-            final String currencyCode) {
+                                                                     final String currencyCode) {
         final Long contraId = null;
         return retrieveContraTransactions(officeId, contraId, transactionId, currencyCode).getPageItems();
     }
@@ -508,7 +509,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     }
 
     private Page<JournalEntryData> retrieveContraTransactions(final Long officeId, final Long contraId, final String transactionId,
-            final String currencyCode) {
+                                                              final String currencyCode) {
         final Integer entityType = null;
         final Boolean onlyManualEntries = null;
         final LocalDate fromDate = null;
@@ -532,7 +533,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final GLJournalEntryMapper rm = getGlJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema()
                     + " where journalEntry.transaction_id = ? and journalEntry.entity_id = ? and journalEntry.entity_type_enum = ?";
-            Object[] data = { transactionId, entityId, entityType };
+            Object[] data = {transactionId, entityId, entityType};
             return this.paginationHelper.fetchPage(this.jdbcTemplate, sql, data, rm);
         } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(entityId, e);

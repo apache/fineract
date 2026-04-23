@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,9 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Collections;
+
 import net.minidev.json.JSONArray;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -93,7 +95,7 @@ public class LoanValidationIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayment() //
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "0")
-                .withAccounting("2", new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount }).build(null);
+                .withAccounting("2", new Account[]{assetAccount, incomeAccount, expenseAccount, overpaymentAccount}).build(null);
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
 
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,15 +20,17 @@ package org.apache.fineract.investor.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@SuppressWarnings({ "MemberName" })
+@SuppressWarnings({"MemberName"})
 final class ExternalAssetOwnerLoanProductAttributesApiResourceSwagger {
 
-    private ExternalAssetOwnerLoanProductAttributesApiResourceSwagger() {}
+    private ExternalAssetOwnerLoanProductAttributesApiResourceSwagger() {
+    }
 
     @Schema(description = "PostExternalAssetOwnerLoanProductAttributeRequest")
     public static final class PostExternalAssetOwnerLoanProductAttributeRequest {
 
-        private PostExternalAssetOwnerLoanProductAttributeRequest() {}
+        private PostExternalAssetOwnerLoanProductAttributeRequest() {
+        }
 
         @Schema(example = "SETTLEMENT_MODEL")
         public String attributeKey;
@@ -40,7 +42,8 @@ final class ExternalAssetOwnerLoanProductAttributesApiResourceSwagger {
     @Schema(description = "PutExternalAssetOwnerLoanProductAttributeRequest")
     public static final class PutExternalAssetOwnerLoanProductAttributeRequest {
 
-        private PutExternalAssetOwnerLoanProductAttributeRequest() {}
+        private PutExternalAssetOwnerLoanProductAttributeRequest() {
+        }
 
         @Schema(example = "SETTLEMENT_MODEL")
         public String attributeKey;

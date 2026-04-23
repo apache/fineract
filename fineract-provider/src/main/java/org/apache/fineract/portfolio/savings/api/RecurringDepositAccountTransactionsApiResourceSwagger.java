@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,16 +29,19 @@ import java.util.List;
  */
 final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
-    private RecurringDepositAccountTransactionsApiResourceSwagger() {}
+    private RecurringDepositAccountTransactionsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
     public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
 
-        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
+        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {
+        }
 
         static final class GetRecurringTransactionType {
 
-            private GetRecurringTransactionType() {}
+            private GetRecurringTransactionType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -71,7 +75,8 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
         static final class GetRecurringCurrency {
 
-            private GetRecurringCurrency() {}
+            private GetRecurringCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -110,11 +115,13 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     @Schema(description = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
     public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
-        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
+        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {
+        }
 
         static final class GetRecurringTransactionsCurrency {
 
-            private GetRecurringTransactionsCurrency() {}
+            private GetRecurringTransactionsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -134,7 +141,8 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
         static final class GetRecurringTransactionsTransactionType {
 
-            private GetRecurringTransactionsTransactionType() {}
+            private GetRecurringTransactionsTransactionType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -154,11 +162,13 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
 
         static final class GetRecurringPaymentDetailData {
 
-            private GetRecurringPaymentDetailData() {}
+            private GetRecurringPaymentDetailData() {
+            }
 
             static final class GetRecurringPaymentType {
 
-                private GetRecurringPaymentType() {}
+                private GetRecurringPaymentType() {
+                }
 
                 @Schema(example = "11")
                 public Long id;
@@ -203,7 +213,8 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     @Schema(description = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
     public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
 
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {}
+        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {
+        }
 
         @Schema(example = "en")
         public String locale;
@@ -230,11 +241,13 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     @Schema(description = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
     public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
 
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
+        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {
+        }
 
         static final class PostRecurringChanges {
 
-            private PostRecurringChanges() {}
+            private PostRecurringChanges() {
+            }
 
             @Schema(example = "acc123")
             public String accountNumber;
@@ -262,7 +275,8 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     @Schema(description = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
     public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
+        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

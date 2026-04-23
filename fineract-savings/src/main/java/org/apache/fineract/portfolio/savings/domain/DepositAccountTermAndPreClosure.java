@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,11 +34,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -93,9 +95,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
     }
 
     public static DepositAccountTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
-            SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
-            Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
-            final DepositAccountOnClosureType accountOnClosureType, Boolean trasferInterest, Long transferToSavingsId) {
+                                                            SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
+                                                            Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
+                                                            final DepositAccountOnClosureType accountOnClosureType, Boolean trasferInterest, Long transferToSavingsId) {
 
         return new DepositAccountTermAndPreClosure(preClosureDetail, depositTermDetail, account, depositAmount, maturityAmount,
                 maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType, trasferInterest,
@@ -103,9 +105,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
     }
 
     private DepositAccountTermAndPreClosure(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
-            SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
-            Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
-            final DepositAccountOnClosureType accountOnClosureType, Boolean transferInterest, Long transferToSavingsId) {
+                                            SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
+                                            Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
+                                            final DepositAccountOnClosureType accountOnClosureType, Boolean transferInterest, Long transferToSavingsId) {
         this.depositAmount = depositAmount;
         this.maturityAmount = maturityAmount;
         this.maturityDate = maturityDate;
@@ -255,19 +257,19 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
         switch (depositPeriodFrequencyType) {
             case DAYS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.DAYS.between(depositFromDate, interestPostingUpToDate));
-            break;
+                break;
             case WEEKS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.WEEKS.between(depositFromDate, interestPostingUpToDate));
-            break;
+                break;
             case MONTHS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(depositFromDate, interestPostingUpToDate));
-            break;
+                break;
             case YEARS:
                 actualDepositPeriod = Math.toIntExact(ChronoUnit.YEARS.between(depositFromDate, interestPostingUpToDate));
-            break;
+                break;
             case INVALID:
                 actualDepositPeriod = this.depositPeriod;// default value
-            break;
+                break;
         }
         return actualDepositPeriod;
     }

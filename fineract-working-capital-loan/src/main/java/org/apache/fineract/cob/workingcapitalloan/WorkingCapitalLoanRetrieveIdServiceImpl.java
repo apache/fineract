@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.COBConstant;
 import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
@@ -86,7 +87,7 @@ public class WorkingCapitalLoanRetrieveIdServiceImpl implements WorkingCapitalLo
 
     @Override
     public List<Long> retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(COBParameter loanCOBParameter,
-            boolean isCatchUp) {
+                                                                                          boolean isCatchUp) {
         if (isCatchUp) {
             return loanRepository.findAllLoansByLastClosedBusinessDateNotNullAndMinAndMaxLoanIdAndStatuses(
                     loanCOBParameter.getMinAccountId(), loanCOBParameter.getMaxAccountId(),

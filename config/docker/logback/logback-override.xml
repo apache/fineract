@@ -33,7 +33,8 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <withJansi>false</withJansi>
         <encoder>
-            <pattern>%green(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+            <pattern>%green(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n
+            </pattern>
         </encoder>
     </appender>
 
@@ -52,10 +53,10 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework.transaction" level="INFO" />
+    <logger name="org.springframework.transaction" level="INFO"/>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>
 </configuration>

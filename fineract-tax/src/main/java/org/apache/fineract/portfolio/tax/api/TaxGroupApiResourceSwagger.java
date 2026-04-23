@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.tax.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -28,20 +29,24 @@ import java.util.Set;
  */
 final class TaxGroupApiResourceSwagger {
 
-    private TaxGroupApiResourceSwagger() {}
+    private TaxGroupApiResourceSwagger() {
+    }
 
     @Schema(description = "GetTaxesGroupResponse")
     public static final class GetTaxesGroupResponse {
 
-        private GetTaxesGroupResponse() {}
+        private GetTaxesGroupResponse() {
+        }
 
         static final class GetTaxesGroupTaxAssociations {
 
-            private GetTaxesGroupTaxAssociations() {}
+            private GetTaxesGroupTaxAssociations() {
+            }
 
             static final class GetTaxesGroupTaxComponent {
 
-                private GetTaxesGroupTaxComponent() {}
+                private GetTaxesGroupTaxComponent() {
+                }
 
                 @Schema(example = "7")
                 public Long id;
@@ -66,11 +71,13 @@ final class TaxGroupApiResourceSwagger {
     @Schema(description = "PostTaxesGroupRequest")
     public static final class PostTaxesGroupRequest {
 
-        private PostTaxesGroupRequest() {}
+        private PostTaxesGroupRequest() {
+        }
 
         static final class PostTaxesGroupTaxComponents {
 
-            private PostTaxesGroupTaxComponents() {}
+            private PostTaxesGroupTaxComponents() {
+            }
 
             @Schema(example = "7")
             public Long taxComponentId;
@@ -90,7 +97,8 @@ final class TaxGroupApiResourceSwagger {
     @Schema(description = "PostTaxesGroupResponse")
     public static final class PostTaxesGroupResponse {
 
-        private PostTaxesGroupResponse() {}
+        private PostTaxesGroupResponse() {
+        }
 
         @Schema(example = "1")
         public Long resourceId;
@@ -99,11 +107,13 @@ final class TaxGroupApiResourceSwagger {
     @Schema(description = "PutTaxesGroupTaxGroupIdRequest")
     public static final class PutTaxesGroupTaxGroupIdRequest {
 
-        private PutTaxesGroupTaxGroupIdRequest() {}
+        private PutTaxesGroupTaxGroupIdRequest() {
+        }
 
         static final class PutTaxesGroupTaxComponents {
 
-            private PutTaxesGroupTaxComponents() {}
+            private PutTaxesGroupTaxComponents() {
+            }
 
             @Schema(example = "7")
             public Long id;
@@ -125,15 +135,18 @@ final class TaxGroupApiResourceSwagger {
     @Schema(description = "PutTaxesGroupTaxGroupIdResponse")
     public static final class PutTaxesGroupTaxGroupIdResponse {
 
-        private PutTaxesGroupTaxGroupIdResponse() {}
+        private PutTaxesGroupTaxGroupIdResponse() {
+        }
 
         static final class PutTaxesGroupChanges {
 
-            private PutTaxesGroupChanges() {}
+            private PutTaxesGroupChanges() {
+            }
 
             static final class PutTaxesGroupModifiedComponents {
 
-                private PutTaxesGroupModifiedComponents() {}
+                private PutTaxesGroupModifiedComponents() {
+                }
 
                 @Schema(example = "Apr 22, 2016 12:00:00 AM")
                 public String endDate;

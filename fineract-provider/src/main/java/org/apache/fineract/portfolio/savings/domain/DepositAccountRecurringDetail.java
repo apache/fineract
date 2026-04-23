@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -73,7 +75,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
     }
 
     public static DepositAccountRecurringDetail createNew(final BigDecimal mandatoryRecommendedDepositAmount,
-            final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
+                                                          final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
         final BigDecimal totalOverdueAmount = null;
         final Integer noOfOverdueInstallments = null;
         return new DepositAccountRecurringDetail(mandatoryRecommendedDepositAmount, totalOverdueAmount, noOfOverdueInstallments,
@@ -88,8 +90,8 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
      * @param account
      */
     protected DepositAccountRecurringDetail(final BigDecimal mandatoryRecommendedDepositAmount, final BigDecimal totalOverdueAmount,
-            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account,
-            final boolean isCalendarInherited) {
+                                            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account,
+                                            final boolean isCalendarInherited) {
         this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
         this.totalOverdueAmount = totalOverdueAmount;
         this.noOfOverdueInstallments = noOfOverdueInstallments;
@@ -113,7 +115,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
     }
 
     public Map<String, Object> updateMandatoryRecommendedDepositAmount(BigDecimal newMandatoryRecommendedDepositAmount,
-            LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth) {
+                                                                       LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         actualChanges.put(mandatoryRecommendedDepositAmountParamName, newMandatoryRecommendedDepositAmount);
         this.mandatoryRecommendedDepositAmount = newMandatoryRecommendedDepositAmount;

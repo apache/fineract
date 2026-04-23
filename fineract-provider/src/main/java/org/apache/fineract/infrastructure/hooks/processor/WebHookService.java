@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,7 +19,9 @@
 package org.apache.fineract.infrastructure.hooks.processor;
 
 import com.google.gson.JsonObject;
+
 import java.util.Map;
+
 import org.apache.fineract.infrastructure.hooks.processor.data.SmsProviderData;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -44,18 +46,18 @@ public interface WebHookService {
     // Template - Web
     @POST(".")
     Call<Void> sendJsonRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
-            @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader, @Body JsonObject result);
+                               @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader, @Body JsonObject result);
 
     @FormUrlEncoded
     @POST(".")
     Call<Void> sendFormRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
-            @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader,
-            @FieldMap Map<String, String> params);
+                               @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader,
+                               @FieldMap Map<String, String> params);
 
     // Template - SMS Bridge
     @POST(".")
     Call<Void> sendSmsBridgeRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
-            @Header(TENANT_HEADER) String tenantHeader, @Header(API_KEY_HEADER) String apiKeyHeader, @Body JsonObject result);
+                                    @Header(TENANT_HEADER) String tenantHeader, @Header(API_KEY_HEADER) String apiKeyHeader, @Body JsonObject result);
 
     @POST("/configuration")
     Call<String> sendSmsBridgeConfigRequest(@Body SmsProviderData config);

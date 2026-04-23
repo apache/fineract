@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -64,6 +64,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.MonthDay;
@@ -71,6 +72,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
@@ -104,7 +106,8 @@ public class DepositProductDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, FIXED_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -131,7 +134,8 @@ public class DepositProductDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, FIXED_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -157,7 +161,8 @@ public class DepositProductDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -186,7 +191,8 @@ public class DepositProductDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -210,7 +216,7 @@ public class DepositProductDataValidator {
     }
 
     private void validateDepositDetailForCreate(final JsonElement element, final FromJsonHelper fromApiJsonHelper,
-            final DataValidatorBuilder baseDataValidator, final DepositAccountType accountType) {
+                                                final DataValidatorBuilder baseDataValidator, final DepositAccountType accountType) {
         final String name = fromApiJsonHelper.extractStringNamed(nameParamName, element);
         baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
 
@@ -384,7 +390,7 @@ public class DepositProductDataValidator {
     }
 
     public void validateDepositDetailForUpdate(final JsonElement element, final FromJsonHelper fromApiJsonHelper,
-            final DataValidatorBuilder baseDataValidator) {
+                                               final DataValidatorBuilder baseDataValidator) {
         if (fromApiJsonHelper.parameterExists(nameParamName, element)) {
             final String name = fromApiJsonHelper.extractStringNamed(nameParamName, element);
             baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
@@ -684,7 +690,7 @@ public class DepositProductDataValidator {
     }
 
     private void validateTaxWithHoldingParams(final DataValidatorBuilder baseDataValidator, final JsonElement element,
-            final boolean isCreate) {
+                                              final boolean isCreate) {
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();

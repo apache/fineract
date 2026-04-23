@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -42,7 +42,7 @@ public final class FinanicalFunctions {
      * @param type
      */
     public static double pmt(final double interestRateFraction, final double numberOfPayments, final double principal,
-            final double futureValue, final boolean type) {
+                             final double futureValue, final boolean type) {
         double payment = 0;
         if (interestRateFraction == 0) {
             payment = -1 * (futureValue + principal) / numberOfPayments;
@@ -55,7 +55,7 @@ public final class FinanicalFunctions {
     }
 
     public static int nop(final double interestRateFraction, final double emiAmount, final double principal, final double futureValue,
-            final boolean type) {
+                          final boolean type) {
         double numberOfPayments = 0;
         if (interestRateFraction == 0) {
             numberOfPayments = ((Double) (-1 * (futureValue + principal) / emiAmount)).intValue();

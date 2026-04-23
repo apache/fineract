@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -80,18 +80,18 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
 
     @POST
     @Path("{loanId}/amortization-schedule")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Operation(summary = "Generate and save Projected Amortization Schedule (testing)", description = """
             Generates a projected amortization schedule from the provided parameters \
             and saves it for the given Working Capital Loan.
-
+            
             DO NOT USE THIS IN PRODUCTION! In the real flow, the schedule will be \
             generated during loan approval/disbursement from the loan and product data.""")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Working Capital Loan not found") })
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Working Capital Loan not found")})
     public void generateAmortizationSchedule(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
-            final ProjectedAmortizationScheduleGenerateRequest request) {
+                                             final ProjectedAmortizationScheduleGenerateRequest request) {
         writeService.generateAndSaveAmortizationSchedule(loanId, request);
     }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,7 +19,9 @@
 package org.apache.fineract.organisation.provisioning.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Collection;
+
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
@@ -110,7 +112,8 @@ final class ProvisioningCriteriaApiResourceSwagger {
 
         static final class PutProvisioningCriteriaResponseChanges {
 
-            private PutProvisioningCriteriaResponseChanges() {}
+            private PutProvisioningCriteriaResponseChanges() {
+            }
 
             @Schema(example = "High Risk Products Criteria")
             public String criteriaName;

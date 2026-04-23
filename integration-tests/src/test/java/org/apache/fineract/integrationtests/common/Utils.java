@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,6 +38,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -65,6 +66,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.ConfigProperties;
@@ -188,7 +190,8 @@ public final class Utils {
             "Willis", "Winters", "Wise", "Wolfe", "Wong", "Woodard", "Woods", "Wooten", "Workman", "Wyatt", "Yates", "York", "Zamora",
             "Zimmerman");
 
-    private Utils() {}
+    private Utils() {
+    }
 
     @Deprecated(forRemoval = true)
     public static void initializeRESTAssured() {
@@ -298,19 +301,19 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static String performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String url) {
+                                          final String url) {
         return performServerGet(requestSpec, responseSpec, url, null);
     }
 
     @Deprecated(forRemoval = true)
     public static Response performServerGetRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, Function<RequestSpecification, RequestSpecification> requestMapper) {
+                                               final String getURL, Function<RequestSpecification, RequestSpecification> requestMapper) {
         return requestMapper.apply(given().spec(requestSpec)).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn();
     }
 
     @Deprecated(forRemoval = true)
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
+                                         final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         if (jsonAttributeToGetBack == null) {
             return (T) json;
@@ -320,7 +323,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static <T> T performServerPatch(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
+                                           final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().patch(getURL).andReturn()
                 .asString();
         if (jsonAttributeToGetBack == null) {
@@ -331,7 +334,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static List<String> performServerGetList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
+                                                    final String getURL, final String jsonAttributeToGetBack) {
         final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
         List<String> items = jsonPath.getList(jsonAttributeToGetBack);
         return items;
@@ -339,7 +342,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static JsonElement performServerGetArray(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final int position, final String jsonAttributeToGetBack) {
+                                                    final String getURL, final int position, final String jsonAttributeToGetBack) {
         final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
         List<Map<String, Object>> items = jsonPath.getList("$");
         return gson.fromJson(((ArrayList) items.get(position).get(jsonAttributeToGetBack)).toString(), JsonArray.class);
@@ -347,25 +350,25 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL) {
+                                                final String getURL) {
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
     }
 
     @Deprecated(forRemoval = true)
     public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL) {
+                                                  final String getURL) {
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asByteArray();
     }
 
     @Deprecated(forRemoval = true)
     public static String performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend) {
+                                           final String postURL, final String jsonBodyToSend) {
         return performServerPost(requestSpec, responseSpec, postURL, jsonBodyToSend, null);
     }
 
     @Deprecated(forRemoval = true)
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+                                          final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         LOG.info("JSON {}", jsonBodyToSend);
         RequestSpecification spec = given().spec(requestSpec);
         if (StringUtils.isNotBlank(jsonBodyToSend)) {
@@ -380,19 +383,19 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static Response performServerPutRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, Function<RequestSpecification, RequestSpecification> bodyMapper) {
+                                               final String putURL, Function<RequestSpecification, RequestSpecification> bodyMapper) {
         return bodyMapper.apply(given().spec(requestSpec)).expect().spec(responseSpec).log().ifError().when().put(putURL).andReturn();
     }
 
     @Deprecated(forRemoval = true)
     public static String performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend) {
+                                          final String putURL, final String jsonBodyToSend) {
         return performServerPut(requestSpec, responseSpec, putURL, jsonBodyToSend, null);
     }
 
     @Deprecated(forRemoval = true)
     public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+                                         final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
         if (jsonAttributeToGetBack == null) {
@@ -403,7 +406,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String deleteURL, final String jsonAttributeToGetBack) {
+                                            final String deleteURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
                 .asString();
         if (jsonAttributeToGetBack == null) {
@@ -414,7 +417,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+                                            final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when()
                 .delete(deleteURL).andReturn().asString();
         return (T) (jsonAttributeToGetBack == null ? json : JsonPath.from(json).get(jsonAttributeToGetBack));
@@ -431,7 +434,7 @@ public final class Utils {
     }
 
     @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+            "DMI_RANDOM_USED_ONLY_ONCE"}, justification = "False positive for random object created and used only once")
     public static String randomStringGenerator(final String prefix, final int len, final String sourceSetString) {
         final int lengthOfSource = sourceSetString.length();
         final StringBuilder sb = new StringBuilder(len);
@@ -471,7 +474,7 @@ public final class Utils {
     }
 
     @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+            "DMI_RANDOM_USED_ONLY_ONCE"}, justification = "False positive for random object created and used only once")
     public static Integer randomNumberGenerator(final int expectedLength) {
         String response = randomStringGenerator("", expectedLength, SOURCE_SET_NUMBERS);
         return Integer.parseInt(response);
@@ -551,7 +554,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static String performServerTemplatePost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String legalFormType, final File file, final String locale, final String dateFormat) {
+                                                   final String postURL, final String legalFormType, final File file, final String locale, final String dateFormat) {
 
         final String importDocumentId = given().spec(requestSpec).queryParam("legalFormType", legalFormType).multiPart("file", file)
                 .formParam("locale", locale).formParam("dateFormat", dateFormat).expect().spec(responseSpec).log().ifError().when()
@@ -561,7 +564,7 @@ public final class Utils {
 
     @Deprecated(forRemoval = true)
     public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
+                                                                final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
         return given().spec(requestSpec).queryParam("importDocumentId", importDocumentId).expect().spec(responseSpec).log().ifError().when()
                 .get(getURL).andReturn().asString();
     }

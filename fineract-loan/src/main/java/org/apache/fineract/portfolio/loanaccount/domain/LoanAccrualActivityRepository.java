@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
 import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,6 +29,6 @@ public interface LoanAccrualActivityRepository extends JpaRepository<Loan, Long>
 
     @Query("select loan.id from Loan loan left join LoanTransaction lt on lt.loan = loan and lt.typeOf = :loanType and lt.reversed = false and lt.dateOf = :currentDate inner join LoanRepaymentScheduleInstallment rs on rs.loan = loan and rs.isDownPayment = false and rs.additional = false and rs.dueDate = :currentDate where loan.loanRepaymentScheduleDetail.enableAccrualActivityPosting = true and loan.loanStatus = :loanStatus and lt.id is null ")
     Set<Long> fetchLoanIdsForAccrualActivityPosting(@Param("currentDate") LocalDate currentDate,
-            @Param("loanType") LoanTransactionType loanTransactionType, @Param("loanStatus") LoanStatus loanStatus);
+                                                    @Param("loanType") LoanTransactionType loanTransactionType, @Param("loanStatus") LoanStatus loanStatus);
 
 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,11 +41,11 @@ import org.springframework.test.context.ContextConfiguration;
 
 @Slf4j
 @SpringBootTest
-@ContextConfiguration(classes = { LocalDateValidationTest.TestConfig.class })
+@ContextConfiguration(classes = {LocalDateValidationTest.TestConfig.class})
 class LocaleValidationTest {
 
     @Configuration
-    @Import({ MessageSourceAutoConfiguration.class })
+    @Import({MessageSourceAutoConfiguration.class})
     static class TestConfig {
 
         @Bean
@@ -69,7 +69,7 @@ class LocaleValidationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "invalid-locale", // invalid format
+    @ValueSource(strings = {"invalid-locale", // invalid format
             "xx-YY", // non-existent locale
             "random text", // random text
             "123", // numbers
@@ -82,7 +82,7 @@ class LocaleValidationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "en", // language only
+    @ValueSource(strings = {"en", // language only
             "EN", // uppercase language only
             "en-US", // language with country (hyphen)
             "en_US", // language with country (underscore)

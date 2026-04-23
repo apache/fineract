@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -39,7 +40,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
     public Collection<ShareAccountTransactionData> retrievePurchasedShares(Long accountId) {
         PurchasedSharesDataRowMapper mapper = new PurchasedSharesDataRowMapper();
         final String sql = "select " + mapper.schema() + " where saps.account_id=? and saps.is_active = true";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { accountId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, mapper, new Object[]{accountId}); // NOSONAR
     }
 
     private static final class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {

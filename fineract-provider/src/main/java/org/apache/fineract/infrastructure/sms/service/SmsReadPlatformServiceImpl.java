@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,12 +19,14 @@
 package org.apache.fineract.infrastructure.sms.service;
 
 import jakarta.annotation.PostConstruct;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -75,7 +77,8 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
                 from sms_messages_outbound smo
                 join sms_campaign smc on smc.id = smo.campaign_id\s""";
 
-        SmsMapper() {}
+        SmsMapper() {
+        }
 
         public String schema() {
             return SMS_SCHEMA;
@@ -119,7 +122,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     public SmsData retrieveOne(final Long resourceId) {
         try {
             final String sql = "select " + this.smsRowMapper.schema() + " where smo.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.smsRowMapper, new Object[] { resourceId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.smsRowMapper, new Object[]{resourceId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SmsNotFoundException(resourceId, e);
         }
@@ -198,7 +201,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Page<SmsData> retrieveSmsByStatus(final Long campaignId, final SearchParameters searchParameters, final Integer status,
-            final LocalDate dateFrom, final LocalDate dateTo) {
+                                             final LocalDate dateFrom, final LocalDate dateTo) {
         sqlValidator.validate(searchParameters.getOrderBy());
         sqlValidator.validate(searchParameters.getSortOrder());
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,10 +28,12 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Splitter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.java8.En;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
@@ -119,10 +121,10 @@ public class COBBusinessStepServiceStepDefinitions implements En {
                             .thenReturn(Collections.singletonList(this.batchBusinessStep));
                     lenient().when(this.batchBusinessStepRepository.findAllByJobName("notExist")).thenReturn(Collections.emptyList());
                     lenient().when(this.reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
-                    lenient().when(this.beanFactory.getBeanNamesForType((Class<?>) null)).thenReturn(new String[] { "notExist" });
-                    lenient().when(this.beanFactory.getBeanNamesForType(Object.class)).thenReturn(new String[] { "testNotRegistered" });
-                    lenient().when(this.beanFactory.getBeanNamesForType(String.class)).thenReturn(new String[] {});
-                    lenient().when(this.beanFactory.getBeanNamesForType(LoanCOBBusinessStep.class)).thenReturn(new String[] { "test" });
+                    lenient().when(this.beanFactory.getBeanNamesForType((Class<?>) null)).thenReturn(new String[]{"notExist"});
+                    lenient().when(this.beanFactory.getBeanNamesForType(Object.class)).thenReturn(new String[]{"testNotRegistered"});
+                    lenient().when(this.beanFactory.getBeanNamesForType(String.class)).thenReturn(new String[]{});
+                    lenient().when(this.beanFactory.getBeanNamesForType(LoanCOBBusinessStep.class)).thenReturn(new String[]{"test"});
 
                     lenient().when(this.applicationContext.getBean("test")).thenReturn(this.cobBusinessStep);
                     lenient().when(this.applicationContext.getBean("testNotRegistered")).thenReturn(this.notRegistereCobBusinessStep);

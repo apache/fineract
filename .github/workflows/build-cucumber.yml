@@ -1,6 +1,6 @@
 name: Fineract Build & Cucumber tests (without E2E tests)
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 permissions:
   contents: read

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,10 +34,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -77,7 +79,7 @@ public final class Hook extends AbstractAuditableCustom {
     private Template ugdTemplate;
 
     public static Hook fromJson(final JsonCommand command, final HookTemplate template, final Set<HookConfiguration> config,
-            final Set<HookResource> events, final Template ugdTemplate) {
+                                final Set<HookResource> events, final Template ugdTemplate) {
         final String displayName = command.stringValueOfParameterNamed(displayNameParamName);
         Boolean isActive = command.booleanObjectValueOfParameterNamed(isActiveParamName);
         if (isActive == null) {
@@ -87,7 +89,7 @@ public final class Hook extends AbstractAuditableCustom {
     }
 
     private Hook(final HookTemplate template, final String displayName, final Boolean isActive, final Set<HookConfiguration> config,
-            final Set<HookResource> events, final Template ugdTemplate) {
+                 final Set<HookResource> events, final Template ugdTemplate) {
 
         this.template = template;
 

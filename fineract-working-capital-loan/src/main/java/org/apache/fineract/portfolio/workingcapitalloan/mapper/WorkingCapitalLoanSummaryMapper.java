@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.mapper;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
@@ -34,7 +35,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper(config = MapstructMapperConfig.class, uses = { WorkingCapitalLoanMapper.class })
+@Mapper(config = MapstructMapperConfig.class, uses = {WorkingCapitalLoanMapper.class})
 public interface WorkingCapitalLoanSummaryMapper {
 
     @Mapping(target = "accountNo", source = "accountNumber")

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,16 +26,19 @@ import org.apache.fineract.portfolio.collateral.data.LoansLoanIdCollateralsReque
  */
 final class CollateralsApiResourceSwagger {
 
-    private CollateralsApiResourceSwagger() {}
+    private CollateralsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetLoansLoanIdCollateralsResponse")
     public static final class GetLoansLoanIdCollateralsResponse {
 
-        private GetLoansLoanIdCollateralsResponse() {}
+        private GetLoansLoanIdCollateralsResponse() {
+        }
 
         static final class GetCollateralTypeResponse {
 
-            private GetCollateralTypeResponse() {}
+            private GetCollateralTypeResponse() {
+            }
 
             @Schema(example = "8")
             public Long id;
@@ -45,7 +48,8 @@ final class CollateralsApiResourceSwagger {
 
         static final class GetCollateralCurrencyResponse {
 
-            private GetCollateralCurrencyResponse() {}
+            private GetCollateralCurrencyResponse() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -74,7 +78,8 @@ final class CollateralsApiResourceSwagger {
     @Schema(description = "PostLoansLoanIdCollateralsResponse")
     public static final class PostLoansLoanIdCollateralsResponse {
 
-        private PostLoansLoanIdCollateralsResponse() {}
+        private PostLoansLoanIdCollateralsResponse() {
+        }
 
         @Schema(example = "12")
         public Long resourceId;
@@ -83,7 +88,8 @@ final class CollateralsApiResourceSwagger {
     @Schema(description = "PutLoansLoanIdCollateralsCollateralIdResponse")
     public static final class PutLoansLoanIdCollateralsCollateralIdResponse {
 
-        private PutLoansLoanIdCollateralsCollateralIdResponse() {}
+        private PutLoansLoanIdCollateralsCollateralIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long loanId;
@@ -95,7 +101,8 @@ final class CollateralsApiResourceSwagger {
     @Schema(description = "DeleteLoansLoanIdCollateralsCollateralIdResponse")
     public static final class DeleteLoansLoanIdCollateralsCollateralIdResponse {
 
-        private DeleteLoansLoanIdCollateralsCollateralIdResponse() {}
+        private DeleteLoansLoanIdCollateralsCollateralIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long loanId;

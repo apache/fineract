@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.mock;
 
 import com.zaxxer.hikari.HikariDataSource;
+
 import java.util.List;
+
 import liquibase.change.custom.CustomTaskChange;
 import okhttp3.OkHttpClient;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -77,14 +79,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * (and faster to run such tests).
  */
 @Configuration
-@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
         DataSourceTransactionManagerAutoConfiguration.class, GsonAutoConfiguration.class, JdbcTemplateAutoConfiguration.class,
-        LiquibaseAutoConfiguration.class, BatchAutoConfiguration.class })
+        LiquibaseAutoConfiguration.class, BatchAutoConfiguration.class})
 @EnableTransactionManagement
 @EnableWebSecurity
-@EnableConfigurationProperties({ FineractProperties.class, LiquibaseProperties.class })
+@EnableConfigurationProperties({FineractProperties.class, LiquibaseProperties.class})
 @ComponentScan(basePackages = "org.apache.fineract", excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledJobRunnerConfig.class) })
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledJobRunnerConfig.class)})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @PropertySource("classpath:application-test.properties")
@@ -144,7 +146,7 @@ public class TestConfiguration {
 
     @Bean
     public TenantDatabaseStateVerifier tenantDatabaseStateVerifier(DatabaseIndependentQueryService databaseIndependentQueryService,
-            LiquibaseProperties liquibaseProperties, DatabaseTypeResolver databaseTypeResolver) {
+                                                                   LiquibaseProperties liquibaseProperties, DatabaseTypeResolver databaseTypeResolver) {
         return new TenantDatabaseStateVerifier(liquibaseProperties, databaseIndependentQueryService, databaseTypeResolver);
     }
 
@@ -154,10 +156,10 @@ public class TestConfiguration {
      */
     @Bean
     public TenantDatabaseUpgradeService tenantDatabaseUpgradeService(TenantDetailsService tenantDetailsService,
-            HikariDataSource tenantDataSource, TenantDatabaseStateVerifier tenantDatabaseStateVerifier,
-            ExtendedSpringLiquibaseFactory liquibaseFactory, TenantDataSourceFactory tenantDataSourceFactory,
-            FineractProperties fineractProperties, Environment environment,
-            List<CustomTaskChange> customTaskChangesForDependencyInjection) {
+                                                                     HikariDataSource tenantDataSource, TenantDatabaseStateVerifier tenantDatabaseStateVerifier,
+                                                                     ExtendedSpringLiquibaseFactory liquibaseFactory, TenantDataSourceFactory tenantDataSourceFactory,
+                                                                     FineractProperties fineractProperties, Environment environment,
+                                                                     List<CustomTaskChange> customTaskChangesForDependencyInjection) {
         return new TenantDatabaseUpgradeService(tenantDetailsService, tenantDataSource, fineractProperties, tenantDatabaseStateVerifier,
                 liquibaseFactory, tenantDataSourceFactory, environment, customTaskChangesForDependencyInjection);
     }

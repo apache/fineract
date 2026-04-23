@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.zaxxer.hikari.HikariDataSource;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import javax.sql.DataSource;
+
 import liquibase.Scope;
 import liquibase.ThreadLocalScopeManager;
 import liquibase.change.custom.CustomTaskChange;
@@ -213,7 +215,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     }
 
     private void applyInitialLiquibase(DataSource dataSource, ExtendedSpringLiquibase liquibase, String id,
-            Function<DataSource, Boolean> isUpgradableFn) throws LiquibaseException {
+                                       Function<DataSource, Boolean> isUpgradableFn) throws LiquibaseException {
         if (databaseStateVerifier.isFlywayPresent(dataSource)) {
             if (isUpgradableFn.apply(dataSource)) {
                 log.error("Cannot proceed with upgrading database {}", id);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,12 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import feign.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.fineract.client.feign.FineractFeignClientConfig;
 import org.apache.fineract.client.feign.services.ImagesApi;
 import org.junit.jupiter.api.AfterEach;
@@ -62,7 +64,7 @@ class ImagesApiIntegrationTest {
                 .connectTimeout(5, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
 
         testImageFile = new File(tempDir, "test-image.jpg");
-        Files.write(testImageFile.toPath(), new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x01, 0x02, 0x03 });
+        Files.write(testImageFile.toPath(), new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x01, 0x02, 0x03});
     }
 
     @AfterEach
@@ -74,7 +76,7 @@ class ImagesApiIntegrationTest {
 
     @Test
     void testRetrieveClientImage() throws IOException {
-        byte[] imageData = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x10, 0x11, 0x12 };
+        byte[] imageData = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x10, 0x11, 0x12};
         wireMockServer.stubFor(get(urlEqualTo("/v1/clients/123/images"))
                 .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(imageData)));
 
@@ -89,7 +91,7 @@ class ImagesApiIntegrationTest {
 
     @Test
     void testRetrieveClientImageWithMaxDimensions() throws IOException {
-        byte[] resizedImage = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x20, 0x21 };
+        byte[] resizedImage = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x20, 0x21};
         wireMockServer.stubFor(get(urlPathEqualTo("/v1/clients/123/images")).withQueryParam("maxWidth", equalTo("100"))
                 .withQueryParam("maxHeight", equalTo("100"))
                 .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(resizedImage)));
@@ -107,7 +109,7 @@ class ImagesApiIntegrationTest {
 
     @Test
     void testRetrieveClientImageWithMaxWidthOnly() throws IOException {
-        byte[] resizedImage = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x30 };
+        byte[] resizedImage = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 0x30};
         wireMockServer.stubFor(get(urlPathEqualTo("/v1/clients/123/images")).withQueryParam("maxWidth", equalTo("200"))
                 .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(resizedImage)));
 
@@ -145,7 +147,7 @@ class ImagesApiIntegrationTest {
 
     @Test
     void testRetrieveImageWithPngFormat() throws IOException {
-        byte[] pngImage = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A };
+        byte[] pngImage = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A};
         wireMockServer.stubFor(get(urlEqualTo("/v1/clients/123/images"))
                 .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/png").withBody(pngImage)));
 
@@ -159,15 +161,15 @@ class ImagesApiIntegrationTest {
 
     @Test
     void testMultipleEntityTypes() {
-        String[] entityTypes = { "clients", "staff" };
-        Long[] entityIds = { 100L, 200L };
+        String[] entityTypes = {"clients", "staff"};
+        Long[] entityIds = {100L, 200L};
 
         for (int i = 0; i < entityTypes.length; i++) {
             String entityType = entityTypes[i];
             Long entityId = entityIds[i];
 
             wireMockServer.stubFor(get(urlEqualTo("/v1/" + entityType + "/" + entityId + "/images"))
-                    .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(new byte[] { 0x01 })));
+                    .willReturn(aResponse().withStatus(200).withHeader(CONTENT_TYPE, "image/jpeg").withBody(new byte[]{0x01})));
         }
 
         ImagesApi api = config.createClient(ImagesApi.class);

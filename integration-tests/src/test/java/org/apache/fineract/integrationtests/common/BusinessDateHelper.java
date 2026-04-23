@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,9 +21,11 @@ package org.apache.fineract.integrationtests.common;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
@@ -40,14 +42,15 @@ public final class BusinessDateHelper {
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static final Gson GSON = new JSON().getGson();
 
-    public BusinessDateHelper() {}
+    public BusinessDateHelper() {
+    }
 
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap updateBusinessDate(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final BusinessDateType type, final LocalDate date) {
+                                             final BusinessDateType type, final LocalDate date) {
         final String BUSINESS_DATE_API = "/fineract-provider/api/v1/businessdate?" + Utils.TENANT_IDENTIFIER;
         log.info("------------------UPDATE BUSINESS DATE----------------------");
         log.info("------------------Type: {}, date: {}----------------------", type, date);
@@ -65,7 +68,7 @@ public final class BusinessDateHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public BusinessDateResponse getBusinessDateByType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final BusinessDateType type) {
+                                                      final BusinessDateType type) {
         final String BUSINESS_DATE_API = "/fineract-provider/api/v1/businessdate/" + type.name() + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, BUSINESS_DATE_API);
         log.info("{}", response);

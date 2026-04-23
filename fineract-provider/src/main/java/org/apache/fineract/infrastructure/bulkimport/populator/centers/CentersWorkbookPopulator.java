@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.centers;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.CenterConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -45,7 +46,7 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
     private final GroupSheetPopulator groupSheetPopulator;
 
     public CentersWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
-            GroupSheetPopulator groupSheetPopulator) {
+                                    GroupSheetPopulator groupSheetPopulator) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.personnelSheetPopulator = personnelSheetPopulator;
         this.groupSheetPopulator = groupSheetPopulator;
@@ -122,9 +123,9 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
             writeInt(CenterConstants.LOOKUP_REPEAT_NORMAL_COL, centerSheet.getRow(rowIndex), rowIndex);
         }
 
-        String[] days = new String[] { TemplatePopulateImportConstants.MONDAY, TemplatePopulateImportConstants.TUESDAY,
+        String[] days = new String[]{TemplatePopulateImportConstants.MONDAY, TemplatePopulateImportConstants.TUESDAY,
                 TemplatePopulateImportConstants.WEDNESDAY, TemplatePopulateImportConstants.THURSDAY, TemplatePopulateImportConstants.FRIDAY,
-                TemplatePopulateImportConstants.SATURDAY, TemplatePopulateImportConstants.SUNDAY };
+                TemplatePopulateImportConstants.SATURDAY, TemplatePopulateImportConstants.SUNDAY};
 
         for (rowIndex = 1; rowIndex <= 7; rowIndex++) {
             writeString(CenterConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, centerSheet.getRow(rowIndex), days[rowIndex - 1]);
@@ -164,14 +165,14 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($B1,$IR$2:$IS" + (offices.size() + 1) + ",2,FALSE)", "=TODAY()",
                 dateFormat);
-        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[]{"True", "False"});
         DataValidationConstraint submittedOnDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=$F1", null, dateFormat);
         DataValidationConstraint meetingStartDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$F1", "=TODAY()", dateFormat);
         DataValidationConstraint repeatsConstraint = validationHelper.createExplicitListConstraint(
-                new String[] { TemplatePopulateImportConstants.FREQUENCY_DAILY, TemplatePopulateImportConstants.FREQUENCY_WEEKLY,
-                        TemplatePopulateImportConstants.FREQUENCY_MONTHLY, TemplatePopulateImportConstants.FREQUENCY_YEARLY });
+                new String[]{TemplatePopulateImportConstants.FREQUENCY_DAILY, TemplatePopulateImportConstants.FREQUENCY_WEEKLY,
+                        TemplatePopulateImportConstants.FREQUENCY_MONTHLY, TemplatePopulateImportConstants.FREQUENCY_YEARLY});
         DataValidationConstraint repeatsEveryConstraint = validationHelper.createFormulaListConstraint("INDIRECT($J1)");
         DataValidationConstraint repeatsOnConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE($J1,\"_DAYS\"))");
 

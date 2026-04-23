@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -54,6 +54,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import jakarta.persistence.PersistenceException;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -67,6 +68,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -187,8 +189,8 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     @Override
     public void deregisterDatatable(final String datatable) {
         datatableUtil.validateDatatableRegistered(datatable);
-        final Object[] permissionCodes = { "CREATE_" + datatable, "CREATE_" + datatable + "_CHECKER", "READ_" + datatable,
-                "UPDATE_" + datatable, "UPDATE_" + datatable + "_CHECKER", "DELETE_" + datatable, "DELETE_" + datatable + "_CHECKER" };
+        final Object[] permissionCodes = {"CREATE_" + datatable, "CREATE_" + datatable + "_CHECKER", "READ_" + datatable,
+                "UPDATE_" + datatable, "UPDATE_" + datatable + "_CHECKER", "DELETE_" + datatable, "DELETE_" + datatable + "_CHECKER"};
         final String placeholders = "(?, ?, ?, ?, ?, ?, ?)";
 
         this.jdbcTemplate
@@ -340,7 +342,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
 
             if (!StringUtils.isBlank(entitySubType)) {
                 jdbcTemplate.update("update x_registered_table SET entity_subtype=? WHERE registered_table_name = ?", // NOSONAR
-                        new Object[] { entitySubType, datatableName });
+                        new Object[]{entitySubType, datatableName});
             }
 
             if (!StringUtils.isBlank(entityName)) {
@@ -575,14 +577,14 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     @Transactional
     @Override
     public CommandProcessingResult updateDatatableEntryOneToOne(final String dataTableName, final Long appTableId,
-            final JsonCommand command) {
+                                                                final JsonCommand command) {
         return updateDatatableEntry(dataTableName, appTableId, null, command);
     }
 
     @Transactional
     @Override
     public CommandProcessingResult updateDatatableEntryOneToMany(final String dataTableName, final Long appTableId, final Long datatableId,
-            final JsonCommand command) {
+                                                                 final JsonCommand command) {
         return updateDatatableEntry(dataTableName, appTableId, datatableId, command);
     }
 
@@ -595,12 +597,12 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     @Transactional
     @Override
     public CommandProcessingResult deleteDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId,
-            JsonCommand command) {
+                                                        JsonCommand command) {
         return deleteDatatableEntries(dataTableName, appTableId, datatableId, command);
     }
 
     private void registerDataTable(final String entityName, final String dataTableName, final String entitySubType,
-            final Integer category) {
+                                   final Integer category) {
         datatableUtil.resolveEntity(entityName);
         datatableUtil.validateDatatableName(dataTableName);
         validateDataTableExists(dataTableName);
@@ -637,13 +639,13 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 .map(sqlGenerator::escape).toList();
         final String columns = String.join(", ", escapedColumns);
         final String sql = "INSERT INTO m_permission (" + columns + ") VALUES ('datatable', ?, ?, ?, ?)";
-        final Object[][] permissions = { { "CREATE_" + dataTableName, "CREATE", dataTableName, canMakerChecker },
-                { "CREATE_" + dataTableName + "_CHECKER", "CREATE", dataTableName, false },
-                { "READ_" + dataTableName, "READ", dataTableName, false },
-                { "UPDATE_" + dataTableName, "UPDATE", dataTableName, canMakerChecker },
-                { "UPDATE_" + dataTableName + "_CHECKER", "UPDATE", dataTableName, false },
-                { "DELETE_" + dataTableName, "DELETE", dataTableName, canMakerChecker },
-                { "DELETE_" + dataTableName + "_CHECKER", "DELETE", dataTableName, false }, };
+        final Object[][] permissions = {{"CREATE_" + dataTableName, "CREATE", dataTableName, canMakerChecker},
+                {"CREATE_" + dataTableName + "_CHECKER", "CREATE", dataTableName, false},
+                {"READ_" + dataTableName, "READ", dataTableName, false},
+                {"UPDATE_" + dataTableName, "UPDATE", dataTableName, canMakerChecker},
+                {"UPDATE_" + dataTableName + "_CHECKER", "UPDATE", dataTableName, false},
+                {"DELETE_" + dataTableName, "DELETE", dataTableName, canMakerChecker},
+                {"DELETE_" + dataTableName + "_CHECKER", "DELETE", dataTableName, false},};
         for (Object[] params : permissions) {
             this.jdbcTemplate.update(sql, params);
         }
@@ -655,7 +657,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private JsonElement addColumn(final String name, final JdbcJavaType dataType, final boolean isMandatory, final Integer length,
-            final boolean isUnique, final boolean isIndexed) {
+                                  final boolean isUnique, final boolean isIndexed) {
         JsonObject column = new JsonObject();
         column.addProperty(API_FIELD_NAME, name);
         column.addProperty(API_FIELD_TYPE, dataType.formatSql(databaseTypeResolver.databaseType()));
@@ -669,8 +671,8 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private void parseDatatableColumnObjectForCreate(final JsonObject column, StringBuilder sqlBuilder,
-            final StringBuilder constrainBuilder, final String dataTableNameAlias, final Map<String, Long> codeMappings,
-            final boolean isConstraintApproach) {
+                                                     final StringBuilder constrainBuilder, final String dataTableNameAlias, final Map<String, Long> codeMappings,
+                                                     final boolean isConstraintApproach) {
         String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
         final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase() : null;
         final Integer length = column.has(API_FIELD_LENGTH) ? column.get(API_FIELD_LENGTH).getAsInt() : null;
@@ -731,7 +733,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private void parseDatatableColumnForAdd(final JsonObject column, StringBuilder sqlBuilder, final String dataTableNameAlias,
-            final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final boolean isConstraintApproach) {
+                                            final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final boolean isConstraintApproach) {
 
         String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
         final String type = column.has(API_FIELD_TYPE) ? column.get(API_FIELD_TYPE).getAsString().toLowerCase() : null;
@@ -772,9 +774,9 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private void parseDatatableColumnForUpdate(final JsonObject column,
-            final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition, final String datatableName, StringBuilder renameBuilder,
-            StringBuilder changeBuilder, final StringBuilder constrainBuilder, final Map<String, Long> codeMappings,
-            final List<String> removeMappings, final boolean isConstraintApproach) {
+                                               final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition, final String datatableName, StringBuilder renameBuilder,
+                                               StringBuilder changeBuilder, final StringBuilder constrainBuilder, final Map<String, Long> codeMappings,
+                                               final List<String> removeMappings, final boolean isConstraintApproach) {
         String oldName = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
         if (!mapColumnNameDefinition.containsKey(oldName)) {
             throw new PlatformDataIntegrityException(ERROR_MSG_DATATABLE_COLUMN_MISSING_UPDATE_PARSE,
@@ -875,7 +877,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private void parseDatatableColumnForDrop(final JsonObject column, StringBuilder sqlBuilder, final String datatableName,
-            final StringBuilder constrainBuilder, final List<String> codeMappings) {
+                                             final StringBuilder constrainBuilder, final List<String> codeMappings) {
         final String datatableAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
         final String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : null;
         if (name == null) {
@@ -938,7 +940,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
      * @see <a href="https://mifosforge.jira.com/browse/MIFOSX-1145">MIFOSX-1145</a>
      **/
     private void removeNullValuesFromStringColumn(final String datatableName, final JsonObject column,
-            final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
+                                                  final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
         final boolean mandatory = column.has(API_FIELD_MANDATORY) && column.get(API_FIELD_MANDATORY).getAsBoolean();
         final String name = column.has(API_FIELD_NAME) ? column.get(API_FIELD_NAME).getAsString() : "";
         final JdbcJavaType type = mapColumnNameDefinition.containsKey(name) ? mapColumnNameDefinition.get(name).getColumnType() : null;
@@ -951,7 +953,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private void updateUniqueConstraintsForTable(String datatableName, JsonArray changeColumns,
-            Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
+                                                 Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
         for (final JsonElement column : changeColumns) {
             String name = column.getAsJsonObject().has(API_FIELD_NAME) ? column.getAsJsonObject().get(API_FIELD_NAME).getAsString() : null;
 
@@ -1020,7 +1022,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private void updateIndexesForTable(String datatableName, JsonArray changeColumns,
-            Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
+                                       Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
         for (final JsonElement column : changeColumns) {
             String name = column.getAsJsonObject().has(API_FIELD_NAME) ? column.getAsJsonObject().get(API_FIELD_NAME).getAsString() : null;
             if (!mapColumnNameDefinition.containsKey(name)) {
@@ -1095,14 +1097,15 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final String json,
-            boolean addScore) {
+                                                            boolean addScore) {
         final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
         CommandProcessingResult commandProcessingResult = datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
 
         List<ResultsetColumnHeaderData> columnHeaders = genericDataService.fillResultsetColumnHeaders(dataTableName);
         Map<String, ResultsetColumnHeaderData> headersByName = searchUtil.mapHeadersToName(columnHeaders);
 
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {
+        }.getType();
         final Map<String, String> dataParams = fromJsonHelper.extractDataMap(typeOfMap, json);
 
         final String dateFormat = dataParams.get(API_PARAM_DATE_FORMAT);
@@ -1195,9 +1198,9 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
                 && !entityTable.getForeignKeyColumnNameOnDatatable().equals(columnName);
     }
 
-    @SuppressWarnings({ "WhitespaceAround" })
+    @SuppressWarnings({"WhitespaceAround"})
     private CommandProcessingResult updateDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId,
-            final JsonCommand command) {
+                                                         final JsonCommand command) {
         final EntityTables entityTable = datatableUtil.queryForApplicationEntity(dataTableName);
         CommandProcessingResult commandProcessingResult = datatableUtil.checkMainResourceExistsWithinScope(entityTable, appTableId);
 
@@ -1219,9 +1222,11 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
         Map<String, ResultsetColumnHeaderData> headersByName = searchUtil.mapHeadersToName(columnHeaders);
         final List<Object> existingValues = existingRows.getData().get(0).getRow();
         HashMap<ResultsetColumnHeaderData, Object> valuesByHeader = columnHeaders.stream().collect(HashMap::new,
-                (map, e) -> map.put(e, existingValues.get(map.size())), (map, map2) -> {});
+                (map, e) -> map.put(e, existingValues.get(map.size())), (map, map2) -> {
+                });
 
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {
+        }.getType();
         final Map<String, String> dataParams = fromJsonHelper.extractDataMap(typeOfMap, command.json());
         final Map<String, Object> dataObjectParams = new HashMap<String, Object>();
 
@@ -1295,7 +1300,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
     }
 
     private CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId, final Long datatableId,
-            JsonCommand command) {
+                                                           JsonCommand command) {
         datatableUtil.validateDatatableName(dataTableName);
         if (isDatatableAttachedToEntityDatatableCheck(dataTableName)) {
             throw new DatatableEntryRequiredException(dataTableName, appTableId);
@@ -1410,11 +1415,11 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             param = API_PARAM_DATATABLE_NAME;
             if (appTableId == null) {
                 msg = "Datatable `" + dataTableName + "` is already registered against an application table.";
-                msgArgs = new Object[] { dataTableName, e };
+                msgArgs = new Object[]{dataTableName, e};
             } else {
                 msg = "An entry already exists for datatable `" + dataTableName + "` and application table with identifier `" + appTableId
                         + "`.";
-                msgArgs = new Object[] { dataTableName, appTableId, e };
+                msgArgs = new Object[]{dataTableName, appTableId, e};
             }
         } else if ((realCause != null && realCause.getMessage().contains("doesn't have a default value"))
                 || (cause != null && cause.getMessage().contains("doesn't have a default value"))) {
@@ -1422,10 +1427,10 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             msg = "No values provided for the datatable `" + dataTableName + "` and application table with identifier `" + appTableId
                     + "`.";
             param = API_PARAM_DATATABLE_NAME;
-            msgArgs = new Object[] { dataTableName, appTableId, e };
+            msgArgs = new Object[]{dataTableName, appTableId, e};
         } else {
             msgCode += ".unknown.data.integrity.issue";
-            msgArgs = new Object[] { dataTableName, e };
+            msgArgs = new Object[]{dataTableName, e};
         }
         log.error("Error occured.", e);
         throw ErrorHandler.getMappable(e, msgCode, msg, param, msgArgs);

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -78,14 +79,14 @@ public class LoanUtilService implements ILoanUtilService {
 
     @Override
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom,
-            final LocalDate rescheduleTill) {
+                                                          final LocalDate rescheduleTill) {
         final HolidayDetailDTO holidayDetailDTO = null;
         return buildScheduleGeneratorDTO(loan, recalculateFrom, rescheduleTill, holidayDetailDTO);
     }
 
     @Override
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom, final LocalDate recalculateTill,
-            final HolidayDetailDTO holidayDetailDTO) {
+                                                          final HolidayDetailDTO holidayDetailDTO) {
         HolidayDetailDTO holidayDetails = holidayDetailDTO;
         if (holidayDetailDTO == null) {
             holidayDetails = constructHolidayDTO(loan);
@@ -222,13 +223,13 @@ public class LoanUtilService implements ILoanUtilService {
     }
 
     private LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
-            final CalendarInstance calendarInstance, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
+                                                              final CalendarInstance calendarInstance, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         final Calendar calendar = calendarInstance == null ? null : calendarInstance.getCalendar();
         return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar, calendarHistoryDataWrapper);
     }
 
     private LocalDate calculateRepaymentStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan, final Calendar calendar,
-            final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
+                                                         final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         LocalDate calculatedRepaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
         if (calendar != null) { // sync repayments
 
@@ -270,7 +271,7 @@ public class LoanUtilService implements ILoanUtilService {
     }
 
     private LocalDate generateCalculatedRepaymentStartDate(final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
-            LocalDate actualDisbursementDate, Loan loan) {
+                                                           LocalDate actualDisbursementDate, Loan loan) {
         final LoanProductRelatedDetail repaymentScheduleDetails = loan.getLoanProductRelatedDetail();
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         LocalDate calculatedRepaymentsStartingFromDate = null;

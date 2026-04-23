@@ -27,7 +27,7 @@ dependencies {
     implementation(
             project(path: ':fineract-core'),
             project(path: ':fineract-command'),
-            )
+    )
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
@@ -52,26 +52,26 @@ dependencies {
             'org.apache.tika:tika-parser-microsoft-module',
             'org.apache.tika:tika-parser-miscoffice-module',
             'org.apache.tika:tika-parser-image-module',
-            )
+    )
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
-    implementation('org.apache.commons:commons-csv'){}
-    implementation ('software.amazon.awssdk:s3') {
+    implementation('org.apache.commons:commons-csv') {}
+    implementation('software.amazon.awssdk:s3') {
     }
-    implementation ('software.amazon.awssdk:auth') {
+    implementation('software.amazon.awssdk:auth') {
     }
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    testImplementation( 'io.github.classgraph:classgraph' )
-    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('io.github.classgraph:classgraph')
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'jakarta.activation'
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
+    testImplementation('org.mockito:mockito-inline')
     testImplementation 'com.github.romankh3:image-comparison'
 }

@@ -18,51 +18,64 @@
 --
 
 DROP TABLE IF EXISTS `latam_extra_client_details`;
-CREATE TABLE `latam_extra_client_details` (
-  `client_id` BIGINT NOT NULL,
-  `Business Description` varchar(100) DEFAULT NULL,
-  `Years in Business` INT DEFAULT NULL,
-  `Gender_cd` INT DEFAULT NULL,
-  `Education_cv` varchar(60) DEFAULT NULL,
-  `Next Visit` date DEFAULT NULL,
-  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
-  `Comment` text,
-  PRIMARY KEY (`client_id`),
-  CONSTRAINT `FK_latam_extra_client_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+CREATE TABLE `latam_extra_client_details`
+(
+    `client_id`            BIGINT NOT NULL,
+    `Business Description` varchar(100)   DEFAULT NULL,
+    `Years in Business`    INT            DEFAULT NULL,
+    `Gender_cd`            INT            DEFAULT NULL,
+    `Education_cv`         varchar(60)    DEFAULT NULL,
+    `Next Visit`           date           DEFAULT NULL,
+    `Highest Rate Paid`    decimal(19, 6) DEFAULT NULL,
+    `Comment`              text,
+    PRIMARY KEY (`client_id`),
+    CONSTRAINT `FK_latam_extra_client_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 DROP TABLE IF EXISTS `latam_family_details`;
-CREATE TABLE `latam_family_details` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `client_id` BIGINT NOT NULL,
-  `Name` varchar(40) DEFAULT NULL,
-  `Date of Birth` date DEFAULT NULL,
-  `Points Score` INT DEFAULT NULL,
-  `Education_cd_Highest` INT DEFAULT NULL,
-  `Other Notes` text,
-  PRIMARY KEY (`id`),
-  KEY `FK_Extra Family Details Data_1` (`client_id`),
-  CONSTRAINT `FK_latam_family_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+CREATE TABLE `latam_family_details`
+(
+    `id`                   BIGINT NOT NULL AUTO_INCREMENT,
+    `client_id`            BIGINT NOT NULL,
+    `Name`                 varchar(40) DEFAULT NULL,
+    `Date of Birth`        date        DEFAULT NULL,
+    `Points Score`         INT         DEFAULT NULL,
+    `Education_cd_Highest` INT         DEFAULT NULL,
+    `Other Notes`          text,
+    PRIMARY KEY (`id`),
+    KEY                    `FK_Extra Family Details Data_1` (`client_id`),
+    CONSTRAINT `FK_latam_family_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 DROP TABLE IF EXISTS `latam_extra_loan_details`;
-CREATE TABLE `latam_extra_loan_details` (
-  `loan_id` BIGINT NOT NULL,
-  `Business Description` varchar(100) DEFAULT NULL,
-  `Years in Business` INT DEFAULT NULL,
-  `Gender_cd` INT DEFAULT NULL,
-  `Education_cv` varchar(60) DEFAULT NULL,
-  `Next Visit` date DEFAULT NULL,
-  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
-  `Comment` text,
-  PRIMARY KEY (`loan_id`),
-  CONSTRAINT `FK_latam_extra_loan_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+CREATE TABLE `latam_extra_loan_details`
+(
+    `loan_id`              BIGINT NOT NULL,
+    `Business Description` varchar(100)   DEFAULT NULL,
+    `Years in Business`    INT            DEFAULT NULL,
+    `Gender_cd`            INT            DEFAULT NULL,
+    `Education_cv`         varchar(60)    DEFAULT NULL,
+    `Next Visit`           date           DEFAULT NULL,
+    `Highest Rate Paid`    decimal(19, 6) DEFAULT NULL,
+    `Comment`              text,
+    PRIMARY KEY (`loan_id`),
+    CONSTRAINT `FK_latam_extra_loan_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
-INSERT INTO `mifostenant-latam`.`m_code` (`code_name`, `is_system_defined`) VALUES ('Gender', 1);
-INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (2, 'Male', 1); INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (2, 'Female', 2);
+INSERT INTO `mifostenant-latam`.`m_code` (`code_name`, `is_system_defined`)
+VALUES ('Gender', 1);
+INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`)
+VALUES (2, 'Male', 1);
+INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`)
+VALUES (2, 'Female', 2);
 
 
-INSERT INTO `mifostenant-latam`.`m_code` (`code_name`, `is_system_defined`) VALUES ('Education', 1);
-INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (3, 'Primary', 1); INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (3, 'Secondary', 2); INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (3, 'University', 3);
+INSERT INTO `mifostenant-latam`.`m_code` (`code_name`, `is_system_defined`)
+VALUES ('Education', 1);
+INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`)
+VALUES (3, 'Primary', 1);
+INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`)
+VALUES (3, 'Secondary', 2);
+INSERT INTO `mifostenant-latam`.`m_code_value` (`code_id`, `code_value`, `order_position`)
+VALUES (3, 'University', 3);

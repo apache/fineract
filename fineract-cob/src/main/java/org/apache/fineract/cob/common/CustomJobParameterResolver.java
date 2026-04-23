@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,12 +20,14 @@ package org.apache.fineract.cob.common;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.exceptions.CustomJobParameterNotFoundException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -48,7 +50,7 @@ public class CustomJobParameterResolver {
     protected Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     public void resolve(StepContribution contribution, ChunkContext chunkContext, String customJobParameterKey,
-            String parameterNameInExecutionContext) {
+                        String parameterNameInExecutionContext) {
         Set<JobParameterDTO> jobParameterDTOList = getCustomJobParameterSet(chunkContext.getStepContext().getStepExecution())
                 .orElseThrow(() -> new CustomJobParameterNotFoundException(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY));
         JobParameterDTO businessDateParameter = jobParameterDTOList.stream()
@@ -67,7 +69,8 @@ public class CustomJobParameterResolver {
     public Optional<Set<JobParameterDTO>> getCustomJobParameterSet(StepExecution stepExecution) {
         Long customJobParameterId = (Long) getJobParameters(stepExecution).get(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY);
         return customJobParameterRepository.findById(customJobParameterId).map(CustomJobParameter::getParameterJson)
-                .map(json -> gson.fromJson(json, new TypeToken<HashSet<JobParameterDTO>>() {}.getType()));
+                .map(json -> gson.fromJson(json, new TypeToken<HashSet<JobParameterDTO>>() {
+                }.getType()));
     }
 
     public Optional<String> getCustomJobParameterById(StepExecution stepExecution, String key) {

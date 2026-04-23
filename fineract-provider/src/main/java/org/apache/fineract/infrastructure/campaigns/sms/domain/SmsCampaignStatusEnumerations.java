@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,13 +36,13 @@ public final class SmsCampaignStatusEnumerations {
 
         return switch (status) {
             case INVALID ->
-                new EnumOptionData(SmsCampaignStatus.INVALID.getValue().longValue(), SmsCampaignStatus.INVALID.getCode(), "Invalid");
+                    new EnumOptionData(SmsCampaignStatus.INVALID.getValue().longValue(), SmsCampaignStatus.INVALID.getCode(), "Invalid");
             case PENDING ->
-                new EnumOptionData(SmsCampaignStatus.PENDING.getValue().longValue(), SmsCampaignStatus.PENDING.getCode(), "Pending");
+                    new EnumOptionData(SmsCampaignStatus.PENDING.getValue().longValue(), SmsCampaignStatus.PENDING.getCode(), "Pending");
             case ACTIVE ->
-                new EnumOptionData(SmsCampaignStatus.ACTIVE.getValue().longValue(), SmsCampaignStatus.ACTIVE.getCode(), "active");
+                    new EnumOptionData(SmsCampaignStatus.ACTIVE.getValue().longValue(), SmsCampaignStatus.ACTIVE.getCode(), "active");
             case CLOSED ->
-                new EnumOptionData(SmsCampaignStatus.CLOSED.getValue().longValue(), SmsCampaignStatus.CLOSED.getCode(), "closed");
+                    new EnumOptionData(SmsCampaignStatus.CLOSED.getValue().longValue(), SmsCampaignStatus.CLOSED.getCode(), "closed");
         };
     }
 }

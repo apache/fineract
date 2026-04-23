@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -76,14 +77,14 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
         final String guarantorWhereClause = " where g.entity_id = ? and g.is_active = true order by l.account_no ASC";
 
-        final List<LoanAccountSummaryData> glimAccounts = retrieveLoanAccountDetails(glimLoanClause, new Object[] { clientId });
-        final List<LoanAccountSummaryData> loanAccounts = retrieveLoanAccountDetails(loanwhereClause, new Object[] { clientId });
+        final List<LoanAccountSummaryData> glimAccounts = retrieveLoanAccountDetails(glimLoanClause, new Object[]{clientId});
+        final List<LoanAccountSummaryData> loanAccounts = retrieveLoanAccountDetails(loanwhereClause, new Object[]{clientId});
         final List<WorkingCapitalLoanAccountSummaryData> workingCapitalLoanAccounts = workingCapitalLoanApplicationReadPlatformService
                 .retrieveLoanSummaryData(clientId);
-        final List<SavingsAccountSummaryData> savingsAccounts = retrieveAccountDetails(savingswhereClause, new Object[] { clientId });
+        final List<SavingsAccountSummaryData> savingsAccounts = retrieveAccountDetails(savingswhereClause, new Object[]{clientId});
         final List<ShareAccountSummaryData> shareAccounts = retrieveShareAccountDetails(clientId);
         final List<GuarantorAccountSummaryData> guarantorloanAccounts = retrieveGuarantorLoanAccountDetails(guarantorWhereClause,
-                new Object[] { clientId });
+                new Object[]{clientId});
         return new AccountSummaryCollectionData(loanAccounts, glimAccounts, savingsAccounts, shareAccounts, guarantorloanAccounts,
                 workingCapitalLoanAccounts);
     }
@@ -101,21 +102,21 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final String guarantorWhereClauseForGroup = " where l.group_id = ? and l.client_id is null and g.is_active = true order by l.account_no ASC";
         final String guarantorWhereClauseForMembers = " where l.group_id = ? and l.client_id is not null and g.is_active = true order by l.account_no ASC";
         final List<LoanAccountSummaryData> glimAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroupAndLoanType,
-                new Object[] { groupId });
+                new Object[]{groupId});
 
         final List<LoanAccountSummaryData> groupLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroup,
-                new Object[] { groupId });
+                new Object[]{groupId});
         final List<SavingsAccountSummaryData> groupSavingsAccounts = retrieveAccountDetails(savingswhereClauseForGroup,
-                new Object[] { groupId });
+                new Object[]{groupId});
         final List<GuarantorAccountSummaryData> groupGuarantorloanAccounts = retrieveGuarantorLoanAccountDetails(
-                guarantorWhereClauseForGroup, new Object[] { groupId });
+                guarantorWhereClauseForGroup, new Object[]{groupId});
         final List<LoanAccountSummaryData> memberLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForMembers,
-                new Object[] { groupId });
+                new Object[]{groupId});
         final List<SavingsAccountSummaryData> memberSavingsAccounts = retrieveAccountDetails(savingswhereClauseForMembers,
-                new Object[] { groupId });
+                new Object[]{groupId});
 
         final List<GuarantorAccountSummaryData> memberGuarantorloanAccounts = retrieveGuarantorLoanAccountDetails(
-                guarantorWhereClauseForMembers, new Object[] { groupId });
+                guarantorWhereClauseForMembers, new Object[]{groupId});
         return new AccountSummaryCollectionData(groupLoanAccounts, glimAccounts, groupSavingsAccounts, groupGuarantorloanAccounts,
                 memberLoanAccounts, memberSavingsAccounts, memberGuarantorloanAccounts);
 
@@ -132,15 +133,15 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final String savingswhereClauseForMembers = " where sa.group_id = ? and sa.client_id is not null order by sa.status_enum ASC, sa.account_no ASC";
 
         final List<LoanAccountSummaryData> glimAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroupAndLoanType,
-                new Object[] { groupId });
+                new Object[]{groupId});
         final List<LoanAccountSummaryData> groupLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroup,
-                new Object[] { groupId });
+                new Object[]{groupId});
         final List<SavingsAccountSummaryData> gsimSavingsAccounts = retrieveAccountDetails(savingswhereClauseForGroup,
-                new Object[] { groupId, gsimId });
+                new Object[]{groupId, gsimId});
         final List<LoanAccountSummaryData> memberLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForMembers,
-                new Object[] { groupId });
+                new Object[]{groupId});
         final List<SavingsAccountSummaryData> memberSavingsAccounts = retrieveAccountDetails(savingswhereClauseForMembers,
-                new Object[] { groupId });
+                new Object[]{groupId});
         return new AccountSummaryCollectionData(groupLoanAccounts, glimAccounts, gsimSavingsAccounts, null, memberLoanAccounts,
                 memberSavingsAccounts, null);
     }
@@ -150,7 +151,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         // Check if client exists
         this.clientReadPlatformService.retrieveOne(clientId);
         final String loanWhereClause = " where l.client_id = ? and l.loan_officer_id = ?";
-        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { clientId, loanOfficerId });
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[]{clientId, loanOfficerId});
     }
 
     @Override
@@ -158,28 +159,28 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         // Check if group exists
         this.groupReadPlatformService.retrieveOne(groupId);
         final String loanWhereClause = " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
-        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId, loanOfficerId });
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[]{groupId, loanOfficerId});
     }
 
     @Override
     public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId) {
         final String loanWhereClause = " where l.client_id = ? and l.loan_status_id = 300 ";
-        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { clientId });
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[]{clientId});
     }
 
     @Override
     public List<LoanAccountSummaryData> retrieveLoanAccountDetailsByGroupIdAndGlimAccountNumber(final Long groupId,
-            final String glimAccount) {
+                                                                                                final String glimAccount) {
         final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
         final String loanWhereClauseForGroupAndLoanType = " where l.group_id =? and glim.account_number=? and l.loan_type_enum=4";
         final String sql = "select " + rm.loanAccountSummarySchema() + loanWhereClauseForGroupAndLoanType;
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, glimAccount }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[]{groupId, glimAccount}); // NOSONAR
     }
 
     @Override
     public Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(final Long groupId) {
         final String loanWhereClause = " where l.group_id = ? and l.loan_status_id = 300 and l.client_id is null";
-        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId });
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[]{groupId});
     }
 
     private List<LoanAccountSummaryData> retrieveLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {
@@ -203,7 +204,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     private List<ShareAccountSummaryData> retrieveShareAccountDetails(final Long clientId) {
         final ShareAccountSummaryDataMapper mapper = new ShareAccountSummaryDataMapper();
         final String query = "select " + mapper.schema() + " where sa.client_id = ?";
-        return this.jdbcTemplate.query(query, mapper, new Object[] { clientId }); // NOSONAR
+        return this.jdbcTemplate.query(query, mapper, new Object[]{clientId}); // NOSONAR
     }
 
     private List<GuarantorAccountSummaryData> retrieveGuarantorLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {

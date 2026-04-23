@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -51,9 +52,9 @@ public class LoanAccountSummaryData {
     private final BigDecimal amountPaid;
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
-            final CurrencyData currency, final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline,
-            final Boolean inArrears, final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid) {
+                                  final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+                                  final CurrencyData currency, final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline,
+                                  final Boolean inArrears, final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid) {
         this.id = id;
         this.accountNo = accountNo;
         this.parentAccountNumber = null;

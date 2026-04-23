@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.bulkimport.populator.loan;
 
 import java.util.List;
+
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -57,9 +58,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
     private ExtrasSheetPopulator extrasSheetPopulator;
 
     public LoanWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
-            GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
-            LoanProductSheetPopulator productSheetPopulator, ChargeSheetPopulator chargeSheetPopulator,
-            ExtrasSheetPopulator extrasSheetPopulator) {
+                                 GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
+                                 LoanProductSheetPopulator productSheetPopulator, ChargeSheetPopulator chargeSheetPopulator,
+                                 ExtrasSheetPopulator extrasSheetPopulator) {
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.groupSheetPopulator = groupSheetPopulator;
@@ -158,7 +159,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint loanTypeConstraint = validationHelper.createExplicitListConstraint(
-                new String[] { LoanConstants.LOAN_TYPE_INDIVIDUAL, LoanConstants.LOAN_TYPE_GROUP, LoanConstants.LOAN_TYPE_JLG });
+                new String[]{LoanConstants.LOAN_TYPE_INDIVIDUAL, LoanConstants.LOAN_TYPE_GROUP, LoanConstants.LOAN_TYPE_JLG});
         DataValidationConstraint clientNameConstraint = validationHelper.createFormulaListConstraint(
                 "IF($B1=\"Group\",INDIRECT(CONCATENATE(\"Group_\",$A1)),INDIRECT(CONCATENATE(\"Client_\",$A1)))");
         DataValidationConstraint productNameConstraint = validationHelper.createFormulaListConstraint("Products");
@@ -184,9 +185,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
                 DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE(\"MIN_REPAYMENT_\",$E1))",
                 "=INDIRECT(CONCATENATE(\"MAX_REPAYMENT_\",$E1))");
         DataValidationConstraint frequencyConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Days", "Weeks", "Months", "Semi Month" });
+                .createExplicitListConstraint(new String[]{"Days", "Weeks", "Months", "Semi Month"});
         DataValidationConstraint loanTermFrequencyConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Days", "Weeks", "Months" });
+                .createExplicitListConstraint(new String[]{"Days", "Weeks", "Months"});
         DataValidationConstraint loanTermConstraint = validationHelper
                 .createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$M1/$N1", "=$M1*$N1");
         DataValidationConstraint interestFrequencyConstraint = validationHelper
@@ -195,14 +196,14 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
                 DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE(\"MIN_INTEREST_\",$E1))",
                 "=INDIRECT(CONCATENATE(\"MAX_INTEREST_\",$E1))");
         DataValidationConstraint amortizationConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Equal principal payments", "Equal installments" });
+                .createExplicitListConstraint(new String[]{"Equal principal payments", "Equal installments"});
         DataValidationConstraint interestMethodConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Flat", "Declining Balance" });
+                .createExplicitListConstraint(new String[]{"Flat", "Declining Balance"});
         DataValidationConstraint interestCalculationPeriodConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Daily", "Same as repayment period" });
-        DataValidationConstraint repaymentStrategyConstraint = validationHelper.createExplicitListConstraint(new String[] {
+                .createExplicitListConstraint(new String[]{"Daily", "Same as repayment period"});
+        DataValidationConstraint repaymentStrategyConstraint = validationHelper.createExplicitListConstraint(new String[]{
                 "Penalties, Fees, Interest, Principal order", "HeavensFamily Unique", "Creocore Unique", "Overdue/Due Fee/Int,Principal",
-                "Principal, Interest, Penalties, Fees Order", "Interest, Principal, Penalties, Fees Order", "Early Repayment Strategy" });
+                "Principal, Interest, Penalties, Fees Order", "Interest, Principal, Penalties, Fees Order", "Early Repayment Strategy"});
         DataValidationConstraint arrearsToleranceConstraint = validationHelper
                 .createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "0", null);
         DataValidationConstraint graceOnPrincipalPaymentConstraint = validationHelper
@@ -216,11 +217,11 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 
         DataValidationConstraint chargeOneNameConstraint = validationHelper.createFormulaListConstraint("Charges");
         DataValidationConstraint chargeOneAmountTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Flat", "% Amount" });
+                .createExplicitListConstraint(new String[]{"Flat", "% Amount"});
 
         DataValidationConstraint chargeTwoNameConstraint = validationHelper.createFormulaListConstraint("Charges");
         DataValidationConstraint chargeTwoAmountTypeConstraint = validationHelper
-                .createExplicitListConstraint(new String[] { "Flat", "% Amount" });
+                .createExplicitListConstraint(new String[]{"Flat", "% Amount"});
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation loanTypeValidation = validationHelper.createValidation(loanTypeConstraint, loanTypeRange);

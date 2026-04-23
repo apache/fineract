@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.mix.service;
 
 import com.google.gson.Gson;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.mix.data.MixReportXBRLData;
 import org.apache.fineract.mix.data.MixTaxonomyData;
@@ -52,7 +54,7 @@ public class MixReportXBRLResultServiceImpl implements MixReportXBRLResultServic
 
     @Autowired
     public MixReportXBRLResultServiceImpl(final JdbcTemplate jdbcTemplate, final MixTaxonomyMappingReadService readTaxonomyMappingService,
-            final MixTaxonomyReadService readTaxonomyService) {
+                                          final MixTaxonomyReadService readTaxonomyService) {
         this.readTaxonomyMappingService = readTaxonomyMappingService;
         this.readTaxonomyService = readTaxonomyService;
         this.jdbcTemplate = jdbcTemplate;

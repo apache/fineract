@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -54,12 +54,12 @@ public class ProgressiveLoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(CapitalizedIncomePlatformService.class)
     public CapitalizedIncomePlatformService capitalizedIncomePlatformService(ProgressiveLoanTransactionValidator loanTransactionValidator,
-            LoanAssembler loanAssembler, LoanTransactionRepository loanTransactionRepository,
-            PaymentDetailWritePlatformService paymentDetailWritePlatformService, LoanJournalEntryPoster journalEntryPoster,
-            ExternalIdFactory externalIdFactory, LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository,
-            ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanBalanceService loanBalanceService,
-            LoanLifecycleStateMachine loanLifecycleStateMachine, BusinessEventNotifierService businessEventNotifierService,
-            CodeValueRepository codeValueRepository, LoanScheduleService loanScheduleService, ApplicationEventPublisher eventPublisher) {
+                                                                             LoanAssembler loanAssembler, LoanTransactionRepository loanTransactionRepository,
+                                                                             PaymentDetailWritePlatformService paymentDetailWritePlatformService, LoanJournalEntryPoster journalEntryPoster,
+                                                                             ExternalIdFactory externalIdFactory, LoanCapitalizedIncomeBalanceRepository capitalizedIncomeBalanceRepository,
+                                                                             ReprocessLoanTransactionsService reprocessLoanTransactionsService, LoanBalanceService loanBalanceService,
+                                                                             LoanLifecycleStateMachine loanLifecycleStateMachine, BusinessEventNotifierService businessEventNotifierService,
+                                                                             CodeValueRepository codeValueRepository, LoanScheduleService loanScheduleService, ApplicationEventPublisher eventPublisher) {
         return new CapitalizedIncomeWritePlatformServiceImpl(loanTransactionValidator, loanAssembler, loanTransactionRepository,
                 paymentDetailWritePlatformService, journalEntryPoster, externalIdFactory, capitalizedIncomeBalanceRepository,
                 reprocessLoanTransactionsService, loanBalanceService, loanLifecycleStateMachine, businessEventNotifierService,
@@ -69,10 +69,10 @@ public class ProgressiveLoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(ProgressiveLoanTransactionValidator.class)
     public ProgressiveLoanTransactionValidator progressiveLoanTransactionValidator(FromJsonHelper fromApiJsonHelper,
-            LoanTransactionValidator loanTransactionValidator, LoanRepositoryWrapper loanRepositoryWrapper,
-            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
-            LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository, LoanTransactionRepository loanTransactionRepository,
-            LoanMaximumAmountCalculator loanMaximumAmountCalculator) {
+                                                                                   LoanTransactionValidator loanTransactionValidator, LoanRepositoryWrapper loanRepositoryWrapper,
+                                                                                   LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository,
+                                                                                   LoanBuyDownFeeBalanceRepository loanBuydownFeeBalanceRepository, LoanTransactionRepository loanTransactionRepository,
+                                                                                   LoanMaximumAmountCalculator loanMaximumAmountCalculator) {
         return new ProgressiveLoanTransactionValidatorImpl(fromApiJsonHelper, loanTransactionValidator, loanRepositoryWrapper,
                 loanCapitalizedIncomeBalanceRepository, loanBuydownFeeBalanceRepository, loanTransactionRepository,
                 loanMaximumAmountCalculator);
@@ -88,7 +88,7 @@ public class ProgressiveLoanAccountConfiguration {
     @Bean
     @ConditionalOnMissingBean(CapitalizedIncomeBalanceReadService.class)
     public CapitalizedIncomeBalanceReadService capitalizedIncomeBalanceReadService(LoanRepositoryWrapper loanRepository,
-            LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository) {
+                                                                                   LoanCapitalizedIncomeBalanceRepository loanCapitalizedIncomeBalanceRepository) {
         return new CapitalizedIncomeBalanceReadServiceImpl(loanRepository, loanCapitalizedIncomeBalanceRepository);
     }
 

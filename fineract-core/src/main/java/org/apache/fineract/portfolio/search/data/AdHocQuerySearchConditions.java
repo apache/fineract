@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 
 public class AdHocQuerySearchConditions {
@@ -44,12 +45,12 @@ public class AdHocQuerySearchConditions {
     private final BigDecimal outstandingAmount;
 
     public static AdHocQuerySearchConditions instance(final List<String> loanStatus, final List<Long> loanProducts,
-            final List<Long> offices, final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
-            final Boolean includeOutStandingAmountPercentage, final String outStandingAmountPercentageCondition,
-            final BigDecimal minOutStandingAmountPercentage, final BigDecimal maxOutStandingAmountPercentage,
-            final BigDecimal outStandingAmountPercentage, final Boolean includeOutstandingAmountParamName,
-            final String outstandingAmountCondition, final BigDecimal minOutstandingAmount, final BigDecimal maxOutstandingAmount,
-            final BigDecimal outstandingAmount) {
+                                                      final List<Long> offices, final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
+                                                      final Boolean includeOutStandingAmountPercentage, final String outStandingAmountPercentageCondition,
+                                                      final BigDecimal minOutStandingAmountPercentage, final BigDecimal maxOutStandingAmountPercentage,
+                                                      final BigDecimal outStandingAmountPercentage, final Boolean includeOutstandingAmountParamName,
+                                                      final String outstandingAmountCondition, final BigDecimal minOutstandingAmount, final BigDecimal maxOutstandingAmount,
+                                                      final BigDecimal outstandingAmount) {
 
         return new AdHocQuerySearchConditions(loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate,
                 includeOutStandingAmountPercentage, outStandingAmountPercentageCondition, minOutStandingAmountPercentage,
@@ -59,11 +60,11 @@ public class AdHocQuerySearchConditions {
     }
 
     public AdHocQuerySearchConditions(final List<String> loanStatus, final List<Long> loanProducts, final List<Long> offices,
-            final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
-            final Boolean includeOutStandingAmountPercentage, final String outStandingAmountPercentageCondition,
-            final BigDecimal minOutStandingAmountPercentage, final BigDecimal maxOutStandingAmountPercentage,
-            final BigDecimal outStandingAmountPercentage, final Boolean includeOutstandingAmount, final String outstandingAmountCondition,
-            final BigDecimal minOutstandingAmount, final BigDecimal maxOutstandingAmount, final BigDecimal outstandingAmount) {
+                                      final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
+                                      final Boolean includeOutStandingAmountPercentage, final String outStandingAmountPercentageCondition,
+                                      final BigDecimal minOutStandingAmountPercentage, final BigDecimal maxOutStandingAmountPercentage,
+                                      final BigDecimal outStandingAmountPercentage, final Boolean includeOutstandingAmount, final String outstandingAmountCondition,
+                                      final BigDecimal minOutstandingAmount, final BigDecimal maxOutstandingAmount, final BigDecimal outstandingAmount) {
 
         this.loanStatus = loanStatus;
         this.loanProducts = loanProducts;

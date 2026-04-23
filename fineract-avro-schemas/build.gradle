@@ -41,7 +41,7 @@ abstract class PreprocessAvroSchemasTask extends DefaultTask {
         def template = getBigDecimalTemplate().get().asFile.getText("UTF-8")
         def input = getInputDir().get().asFile
         def output = getOutputDir().get().asFile
-        
+
         input.eachFileRecurse { file ->
             if (file.isFile()) {
                 def relativePath = input.toPath().relativize(file.toPath())

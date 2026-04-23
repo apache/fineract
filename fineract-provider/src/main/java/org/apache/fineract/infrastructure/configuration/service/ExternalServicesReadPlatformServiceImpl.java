@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.configuration.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
@@ -42,19 +43,19 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
         switch (serviceName) {
             case "S3":
                 serviceNameToUse = ExternalServicesConstants.S3_SERVICE_NAME;
-            break;
+                break;
 
             case "SMTP":
                 serviceNameToUse = ExternalServicesConstants.SMTP_SERVICE_NAME;
-            break;
+                break;
 
             case "SMS":
                 serviceNameToUse = ExternalServicesConstants.SMS_SERVICE_NAME;
-            break;
+                break;
 
             case "NOTIFICATION":
                 serviceNameToUse = ExternalServicesConstants.NOTIFICATION_SERVICE_NAME;
-            break;
+                break;
 
             default:
                 throw new ExternalServiceConfigurationNotFoundException(serviceName);

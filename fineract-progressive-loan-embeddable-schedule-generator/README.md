@@ -8,12 +8,13 @@
         ./gradlew :fineract-progressive-loan-embeddable-schedule-generator:shadowJar
     ```
 
-- Copy Jar from `fineract-progressive-loan-embeddable-schedule-generator/build/libs/fineract-progressive-loan-embeddable-schedule-generator-*-SNAPSHOT-all.jar` to Your class path.
+- Copy Jar from
+  `fineract-progressive-loan-embeddable-schedule-generator/build/libs/fineract-progressive-loan-embeddable-schedule-generator-*-SNAPSHOT-all.jar`
+  to Your class path.
 
 ## Dependencies
 
 There is no extra dependency.
-
 
 ## Sample Application
 
@@ -21,8 +22,8 @@ Copy a [Main.java](misc/Main.java) file from the `misc` directory into the worki
 
 The project directory structure:
 
-  - `Main.java`
-  - `fineract-embeddable-calculator-1.11.0-SNAPSHOT-all.jar`
+- `Main.java`
+- `fineract-embeddable-calculator-1.11.0-SNAPSHOT-all.jar`
 
 
 - Check Java minimum version

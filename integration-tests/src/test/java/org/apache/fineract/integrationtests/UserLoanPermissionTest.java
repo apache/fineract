@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
@@ -74,7 +75,7 @@ public class UserLoanPermissionTest extends BaseLoanIntegrationTest {
     public void testCapitalizedIncomeAndCapitalizedIncomeAdjustmentPermissions() {
         runAt("1 January 2025", () -> {
             Long capitalizedIncomeId = makeLoanTransactionWithPermissionVerification(loanId, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(50.0).transactionDate("01 January 2025"),
+                            .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(50.0).transactionDate("01 January 2025"),
                     "capitalizedIncome", "CAPITALIZEDINCOME_LOAN").getResourceId();
 
             adjustLoanTransactionWithPermissionVerification(

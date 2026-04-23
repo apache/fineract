@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,8 +27,10 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -164,17 +166,17 @@ public class JournalEntryReversalOrderingIntegrationTest extends BaseLoanIntegra
     }
 
     private Integer createLoanProductWithAccounting(final Account assetAccount, final Account incomeAccount, final Account expenseAccount,
-            final Account overpaymentAccount) {
+                                                    final Account overpaymentAccount) {
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("10000").withRepaymentAfterEvery("1")
                 .withNumberOfRepayments("12").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
-                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                .withAccountingRulePeriodicAccrual(new Account[]{assetAccount, incomeAccount, expenseAccount, overpaymentAccount})
                 .build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String submittedOnDate,
-            final String principal) {
+                                            final String principal) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principal).withLoanTermFrequency("12")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withExpectedDisbursementDate(submittedOnDate)

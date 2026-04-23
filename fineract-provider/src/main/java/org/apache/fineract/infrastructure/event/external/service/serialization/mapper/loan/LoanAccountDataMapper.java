@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,8 +24,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(config = AvroMapperConfig.class, uses = { LoanTransactionDataMapper.class, LoanChargeDataMapper.class,
-        LoanDelinquencyPausePeriodMapper.class })
+@Mapper(config = AvroMapperConfig.class, uses = {LoanTransactionDataMapper.class, LoanChargeDataMapper.class,
+        LoanDelinquencyPausePeriodMapper.class})
 public interface LoanAccountDataMapper {
 
     // TODO: avoid prefix "is" in class attributes; I would recommend to fix this also in the Avro structures

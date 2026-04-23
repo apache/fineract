@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,16 +28,19 @@ import java.util.Set;
  */
 final class RecurringDepositAccountsApiResourceSwagger {
 
-    private RecurringDepositAccountsApiResourceSwagger() {}
+    private RecurringDepositAccountsApiResourceSwagger() {
+    }
 
     @Schema(description = "GetRecurringDepositAccountsTemplateResponse")
     public static final class GetRecurringDepositAccountsTemplateResponse {
 
-        private GetRecurringDepositAccountsTemplateResponse() {}
+        private GetRecurringDepositAccountsTemplateResponse() {
+        }
 
         static final class GetRecurringProductOptions {
 
-            private GetRecurringProductOptions() {}
+            private GetRecurringProductOptions() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -54,11 +58,13 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "GetRecurringDepositAccountsResponse")
     public static final class GetRecurringDepositAccountsResponse {
 
-        private GetRecurringDepositAccountsResponse() {}
+        private GetRecurringDepositAccountsResponse() {
+        }
 
         static final class GetRecurringDepositAccountsStatus {
 
-            private GetRecurringDepositAccountsStatus() {}
+            private GetRecurringDepositAccountsStatus() {
+            }
 
             @Schema(example = "100")
             public Long id;
@@ -88,7 +94,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsTimeline {
 
-            private GetRecurringDepositAccountsTimeline() {}
+            private GetRecurringDepositAccountsTimeline() {
+            }
 
             @Schema(example = "[2014, 3, 1]")
             public LocalDate submittedOnDate;
@@ -102,7 +109,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsCurrency {
 
-            private GetRecurringDepositAccountsCurrency() {}
+            private GetRecurringDepositAccountsCurrency() {
+            }
 
             @Schema(example = "USD")
             public String code;
@@ -122,7 +130,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsInterestCompoundingPeriodType {
 
-            private GetRecurringDepositAccountsInterestCompoundingPeriodType() {}
+            private GetRecurringDepositAccountsInterestCompoundingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -134,7 +143,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsInterestPostingPeriodType {
 
-            private GetRecurringDepositAccountsInterestPostingPeriodType() {}
+            private GetRecurringDepositAccountsInterestPostingPeriodType() {
+            }
 
             @Schema(example = "4")
             public Long id;
@@ -146,7 +156,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsInterestCalculationType {
 
-            private GetRecurringDepositAccountsInterestCalculationType() {}
+            private GetRecurringDepositAccountsInterestCalculationType() {
+            }
 
             @Schema(example = "1")
             public Long id;
@@ -158,7 +169,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsInterestCalculationDaysInYearType {
 
-            private GetRecurringDepositAccountsInterestCalculationDaysInYearType() {}
+            private GetRecurringDepositAccountsInterestCalculationDaysInYearType() {
+            }
 
             @Schema(example = "365")
             public Long id;
@@ -170,7 +182,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsSummary {
 
-            private GetRecurringDepositAccountsSummary() {}
+            private GetRecurringDepositAccountsSummary() {
+            }
 
             public GetRecurringDepositAccountsCurrency currency;
             @Schema(example = "0")
@@ -179,7 +192,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsMinDepositTermType {
 
-            private GetRecurringDepositAccountsMinDepositTermType() {}
+            private GetRecurringDepositAccountsMinDepositTermType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -191,7 +205,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsMaxDepositTermType {
 
-            private GetRecurringDepositAccountsMaxDepositTermType() {}
+            private GetRecurringDepositAccountsMaxDepositTermType() {
+            }
 
             @Schema(example = "3")
             public Long id;
@@ -203,7 +218,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsDepositPeriodFrequency {
 
-            private GetRecurringDepositAccountsDepositPeriodFrequency() {}
+            private GetRecurringDepositAccountsDepositPeriodFrequency() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -215,7 +231,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
         static final class GetRecurringDepositAccountsRecurringDepositFrequencyType {
 
-            private GetRecurringDepositAccountsRecurringDepositFrequencyType() {}
+            private GetRecurringDepositAccountsRecurringDepositFrequencyType() {
+            }
 
             @Schema(example = "2")
             public Long id;
@@ -274,7 +291,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "PostRecurringDepositAccountsRequest")
     public static final class PostRecurringDepositAccountsRequest {
 
-        private PostRecurringDepositAccountsRequest() {}
+        private PostRecurringDepositAccountsRequest() {
+        }
 
         @Schema(example = "1")
         public Long clientId;
@@ -305,7 +323,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "PostRecurringDepositAccountsResponse")
     public static final class PostRecurringDepositAccountsResponse {
 
-        private PostRecurringDepositAccountsResponse() {}
+        private PostRecurringDepositAccountsResponse() {
+        }
 
         @Schema(example = "2")
         public Long officeId;
@@ -320,19 +339,23 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "GetRecurringDepositAccountsAccountIdResponse")
     public static final class GetRecurringDepositAccountsAccountIdResponse {
 
-        private GetRecurringDepositAccountsAccountIdResponse() {}
+        private GetRecurringDepositAccountsAccountIdResponse() {
+        }
 
         static final class GetRecurringDepositAccountsAccountChart {
 
-            private GetRecurringDepositAccountsAccountChart() {}
+            private GetRecurringDepositAccountsAccountChart() {
+            }
 
             static final class GetRecurringDepositAccountsChartSlabs {
 
-                private GetRecurringDepositAccountsChartSlabs() {}
+                private GetRecurringDepositAccountsChartSlabs() {
+                }
 
                 static final class GetRecurringDepositAccountsPeriodType {
 
-                    private GetRecurringDepositAccountsPeriodType() {}
+                    private GetRecurringDepositAccountsPeriodType() {
+                    }
 
                     @Schema(example = "0")
                     public Long id;
@@ -344,7 +367,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
                 static final class GetRecurringDepositAccountsAccountChartCurrency {
 
-                    private GetRecurringDepositAccountsAccountChartCurrency() {}
+                    private GetRecurringDepositAccountsAccountChartCurrency() {
+                    }
 
                     @Schema(example = "USD")
                     public String code;
@@ -374,7 +398,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
 
             static final class GetRecurringDepositAccountsPeriodTypes {
 
-                private GetRecurringDepositAccountsPeriodTypes() {}
+                private GetRecurringDepositAccountsPeriodTypes() {
+                }
 
                 @Schema(example = "0")
                 public Long id;
@@ -444,7 +469,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "PutRecurringDepositAccountsAccountIdRequest")
     public static final class PutRecurringDepositAccountsAccountIdRequest {
 
-        private PutRecurringDepositAccountsAccountIdRequest() {}
+        private PutRecurringDepositAccountsAccountIdRequest() {
+        }
 
         @Schema(example = "en")
         public String locale;
@@ -455,11 +481,13 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "PutRecurringDepositAccountsAccountIdResponse")
     public static final class PutRecurringDepositAccountsAccountIdResponse {
 
-        private PutRecurringDepositAccountsAccountIdResponse() {}
+        private PutRecurringDepositAccountsAccountIdResponse() {
+        }
 
         static final class PutRecurringDepositAccountsChanges {
 
-            private PutRecurringDepositAccountsChanges() {}
+            private PutRecurringDepositAccountsChanges() {
+            }
 
             @Schema(example = "6000")
             public Integer depositAmount;
@@ -481,13 +509,15 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "PostRecurringDepositAccountsAccountIdRequest")
     public static final class PostRecurringDepositAccountsAccountIdRequest {
 
-        private PostRecurringDepositAccountsAccountIdRequest() {}
+        private PostRecurringDepositAccountsAccountIdRequest() {
+        }
     }
 
     @Schema(description = "PostRecurringDepositAccountsAccountIdResponse")
     public static final class PostRecurringDepositAccountsAccountIdResponse {
 
-        private PostRecurringDepositAccountsAccountIdResponse() {}
+        private PostRecurringDepositAccountsAccountIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -502,7 +532,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
     @Schema(description = "DeleteRecurringDepositAccountsResponse")
     public static final class DeleteRecurringDepositAccountsResponse {
 
-        private DeleteRecurringDepositAccountsResponse() {}
+        private DeleteRecurringDepositAccountsResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

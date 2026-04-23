@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,10 +26,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,7 +42,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "acc_gl_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "gl_code" }, name = "acc_gl_code") })
+@Table(name = "acc_gl_account", uniqueConstraints = {@UniqueConstraint(columnNames = {"gl_code"}, name = "acc_gl_code")})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -113,7 +115,7 @@ public class GLAccount extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final Integer propertyToBeUpdated, final boolean sansLocale) {
+                                      final Integer propertyToBeUpdated, final boolean sansLocale) {
         boolean changeDetected = false;
         if (sansLocale) {
             changeDetected = command.isChangeInIntegerSansLocaleParameterNamed(paramName, propertyToBeUpdated);
@@ -138,7 +140,7 @@ public class GLAccount extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final String propertyToBeUpdated) {
+                                      final String propertyToBeUpdated) {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -154,7 +156,7 @@ public class GLAccount extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final Long propertyToBeUpdated) {
+                                      final Long propertyToBeUpdated) {
         if (command.isChangeInLongParameterNamed(paramName, propertyToBeUpdated)) {
             final Long newValue = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -166,7 +168,7 @@ public class GLAccount extends AbstractPersistableCustom<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final boolean propertyToBeUpdated) {
+                                      final boolean propertyToBeUpdated) {
         if (command.isChangeInBooleanParameterNamed(paramName, propertyToBeUpdated)) {
             final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);

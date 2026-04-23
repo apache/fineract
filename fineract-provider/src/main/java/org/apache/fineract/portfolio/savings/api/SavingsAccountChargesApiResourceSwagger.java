@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Set;
 
 /**
@@ -26,12 +27,14 @@ import java.util.Set;
  */
 final class SavingsAccountChargesApiResourceSwagger {
 
-    private SavingsAccountChargesApiResourceSwagger() {}
+    private SavingsAccountChargesApiResourceSwagger() {
+    }
 
     @Schema(description = "GetSavingsAccountsSavingsAccountIdChargesResponse")
     public static final class GetSavingsAccountsSavingsAccountIdChargesResponse {
 
-        private GetSavingsAccountsSavingsAccountIdChargesResponse() {}
+        private GetSavingsAccountsSavingsAccountIdChargesResponse() {
+        }
 
         static final class GetChargesCurrencyResponse {
 
@@ -51,7 +54,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
         static final class GetChargesChargeCalculationType {
 
-            private GetChargesChargeCalculationType() {}
+            private GetChargesChargeCalculationType() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -63,7 +67,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
         static final class GetChargesChargeTimeType {
 
-            private GetChargesChargeTimeType() {}
+            private GetChargesChargeTimeType() {
+            }
 
             @Schema(example = "1")
             public Integer id;
@@ -107,15 +112,18 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "GetSavingsAccountsSavingsAccountIdChargesTemplateResponse")
     public static final class GetSavingsAccountsSavingsAccountIdChargesTemplateResponse {
 
-        private GetSavingsAccountsSavingsAccountIdChargesTemplateResponse() {}
+        private GetSavingsAccountsSavingsAccountIdChargesTemplateResponse() {
+        }
 
         static final class GetSavingsChargesOptions {
 
-            private GetSavingsChargesOptions() {}
+            private GetSavingsChargesOptions() {
+            }
 
             static final class GetSavingsChargesChargeTimeType {
 
-                private GetSavingsChargesChargeTimeType() {}
+                private GetSavingsChargesChargeTimeType() {
+                }
 
                 @Schema(example = "2")
                 public Integer id;
@@ -127,7 +135,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
             static final class GetChargesAppliesTo {
 
-                private GetChargesAppliesTo() {}
+                private GetChargesAppliesTo() {
+                }
 
                 @Schema(example = "1")
                 public Integer id;
@@ -167,7 +176,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public static final class GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
-        private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
+        private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long id;
@@ -201,7 +211,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "PostSavingsAccountsSavingsAccountIdChargesRequest")
     public static final class PostSavingsAccountsSavingsAccountIdChargesRequest {
 
-        private PostSavingsAccountsSavingsAccountIdChargesRequest() {}
+        private PostSavingsAccountsSavingsAccountIdChargesRequest() {
+        }
 
         @Schema(example = "2")
         public Long chargeId;
@@ -218,7 +229,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "PostSavingsAccountsSavingsAccountIdChargesResponse")
     public static final class PostSavingsAccountsSavingsAccountIdChargesResponse {
 
-        private PostSavingsAccountsSavingsAccountIdChargesResponse() {}
+        private PostSavingsAccountsSavingsAccountIdChargesResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -233,7 +245,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
     public static final class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
 
-        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {}
+        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {
+        }
 
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -248,11 +261,13 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public static final class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
-        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
+        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
+        }
 
         static final class PutSavingsChanges {
 
-            private PutSavingsChanges() {}
+            private PutSavingsChanges() {
+            }
 
             @Schema(example = "27 March 2013")
             public String dueDate;
@@ -278,7 +293,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
     public static final class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
 
-        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {}
+        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {
+        }
 
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -293,7 +309,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public static final class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
-        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
+        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;
@@ -308,7 +325,8 @@ final class SavingsAccountChargesApiResourceSwagger {
     @Schema(description = "DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public static final class DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
 
-        private DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
+        private DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
+        }
 
         @Schema(example = "1")
         public Long officeId;

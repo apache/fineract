@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
@@ -34,7 +35,7 @@ public final class LoanScheduleModelDownPaymentPeriod implements LoanScheduleMod
     private final Money outstandingLoanBalance;
 
     public static LoanScheduleModelDownPaymentPeriod downPayment(final int periodNumber, final LocalDate periodDate,
-            final Money principalDue, final Money outstandingLoanBalance) {
+                                                                 final Money principalDue, final Money outstandingLoanBalance) {
 
         return new LoanScheduleModelDownPaymentPeriod(periodNumber, periodDate, principalDue, outstandingLoanBalance);
     }

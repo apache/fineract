@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
@@ -217,7 +218,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
      * @return
      */
     private List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappings(final PortfolioProductType portfolioProductType,
-            final Long loanProductId) {
+                                                                                    final Long loanProductId) {
         final List<ProductToGLAccountMapping> mappings = productToGLAccountMappingRepository.findAllPaymentTypeMappings(loanProductId,
                 portfolioProductType.getValue());
 
@@ -256,7 +257,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     }
 
     private List<ChargeToGLAccountMapper> fetchChargeToIncomeAccountMappings(final PortfolioProductType portfolioProductType,
-            final Long loanProductId, final boolean penalty) {
+                                                                             final Long loanProductId, final boolean penalty) {
         final List<ProductToGLAccountMapping> mappings = penalty
                 ? productToGLAccountMappingRepository.findAllPenaltyMappings(loanProductId, portfolioProductType.getValue())
                 : productToGLAccountMappingRepository.findAllFeeMappings(loanProductId, portfolioProductType.getValue());
@@ -275,13 +276,13 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     }
 
     private List<AdvancedMappingToExpenseAccountData> fetchChargeOffReasonMappings(final PortfolioProductType portfolioProductType,
-            final Long loanProductId) {
+                                                                                   final Long loanProductId) {
         return fetchAdvancedMappingToExpenseAccountData(
                 productToGLAccountMappingRepository.findAllChargeOffReasonsMappings(loanProductId, portfolioProductType.getValue()));
     }
 
     private List<AdvancedMappingToExpenseAccountData> fetchWriteOffReasonMappings(final PortfolioProductType portfolioProductType,
-            final Long loanProductId) {
+                                                                                  final Long loanProductId) {
         return fetchAdvancedMappingToExpenseAccountData(
                 productToGLAccountMappingRepository.findAllWriteOffReasonsMappings(loanProductId, portfolioProductType.getValue()));
     }
@@ -304,13 +305,13 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     }
 
     private List<ClassificationToGLAccountData> fetchClassificationMappings(final PortfolioProductType portfolioProductType,
-            final Long loanProductId, LoanProductAccountingParams classificationParameter) {
+                                                                            final Long loanProductId, LoanProductAccountingParams classificationParameter) {
         final List<ProductToGLAccountMapping> mappings = classificationParameter
                 .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
-                        ? productToGLAccountMappingRepository.findAllCapitalizedIncomeClassificationsMappings(loanProductId,
-                                portfolioProductType.getValue())
-                        : productToGLAccountMappingRepository.findAllBuyDownFeeClassificationsMappings(loanProductId,
-                                portfolioProductType.getValue());
+                ? productToGLAccountMappingRepository.findAllCapitalizedIncomeClassificationsMappings(loanProductId,
+                portfolioProductType.getValue())
+                : productToGLAccountMappingRepository.findAllBuyDownFeeClassificationsMappings(loanProductId,
+                portfolioProductType.getValue());
 
         List<ClassificationToGLAccountData> classificationToGLAccountMappers = mappings.isEmpty() ? null : new ArrayList<>();
         for (final ProductToGLAccountMapping mapping : mappings) {
@@ -321,8 +322,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
             final CodeValueData classificationCodeValue = classificationParameter
                     .equals(LoanProductAccountingParams.CAPITALIZED_INCOME_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS)
-                            ? codeValueMapper.map(mapping.getCapitalizedIncomeClassification())
-                            : codeValueMapper.map(mapping.getBuydownFeeClassification());
+                    ? codeValueMapper.map(mapping.getCapitalizedIncomeClassification())
+                    : codeValueMapper.map(mapping.getBuydownFeeClassification());
 
             final ClassificationToGLAccountData classificationToGLAccountMapper = new ClassificationToGLAccountData()
                     .setClassificationCodeValue(classificationCodeValue).setIncomeAccount(glAccountData);
@@ -383,7 +384,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     @Override
     public List<ClassificationToGLAccountData> fetchClassificationMappingsForLoanProduct(Long loanProductId,
-            LoanProductAccountingParams classificationParameter) {
+                                                                                         LoanProductAccountingParams classificationParameter) {
         return fetchClassificationMappings(PortfolioProductType.LOAN, loanProductId, classificationParameter);
     }
 

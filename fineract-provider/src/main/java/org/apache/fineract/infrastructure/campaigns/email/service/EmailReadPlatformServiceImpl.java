@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageEnumerations;
@@ -66,7 +67,8 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
                 emo.error_message as errorMessage
                 from scheduled_email_messages_outbound emo\s""";
 
-        EmailMapper() {}
+        EmailMapper() {
+        }
 
         public String schema() {
             return EMAIL_SCHEMA;
@@ -110,7 +112,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     public EmailData retrieveOne(final Long resourceId) {
         try {
             final String sql = "select " + this.emailRowMapper.schema() + " where emo.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.emailRowMapper, new Object[] { resourceId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.emailRowMapper, new Object[]{resourceId}); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new EmailNotFoundException(resourceId, e);
         }
@@ -146,7 +148,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
     @Override
     public Page<EmailData> retrieveEmailByStatus(final Integer limit, final Integer status, final LocalDate dateFrom,
-            final LocalDate dateTo) {
+                                                 final LocalDate dateTo) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.emailRowMapper.schema());
@@ -165,7 +167,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
             sqlBuilder.append(sqlPlusLimit);
         }
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(),
-                new Object[] { status, fromDateString, toDateString }, this.emailRowMapper);
+                new Object[]{status, fromDateString, toDateString}, this.emailRowMapper);
     }
 
     private Collection<EmailData> retrieveEmailByStatus(final Integer status, final Integer limit) {

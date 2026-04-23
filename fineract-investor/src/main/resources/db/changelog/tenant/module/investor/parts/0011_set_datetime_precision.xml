@@ -25,15 +25,25 @@
     <changeSet author="fineract" id="1" context="mysql">
         <modifyDataType tableName="m_external_asset_owner" columnName="created_on_utc" newDataType="datetime(6)"/>
         <modifyDataType tableName="m_external_asset_owner" columnName="last_modified_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_journal_entry_mapping" columnName="created_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_journal_entry_mapping" columnName="last_modified_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer" columnName="created_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer" columnName="last_modified_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer_details" columnName="created_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer_details" columnName="last_modified_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer_journal_entry_mapping" columnName="created_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer_journal_entry_mapping" columnName="last_modified_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer_loan_mapping" columnName="created_on_utc" newDataType="datetime(6)"/>
-        <modifyDataType tableName="m_external_asset_owner_transfer_loan_mapping" columnName="last_modified_on_utc" newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_journal_entry_mapping" columnName="created_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_journal_entry_mapping" columnName="last_modified_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer" columnName="created_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer" columnName="last_modified_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer_details" columnName="created_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer_details" columnName="last_modified_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer_journal_entry_mapping" columnName="created_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                        columnName="last_modified_on_utc" newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer_loan_mapping" columnName="created_on_utc"
+                        newDataType="datetime(6)"/>
+        <modifyDataType tableName="m_external_asset_owner_transfer_loan_mapping" columnName="last_modified_on_utc"
+                        newDataType="datetime(6)"/>
     </changeSet>
 </databaseChangeLog>

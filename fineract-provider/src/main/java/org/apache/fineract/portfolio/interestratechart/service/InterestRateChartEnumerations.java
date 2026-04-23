@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.interestratechart.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.slf4j.Logger;
@@ -43,27 +44,27 @@ public final class InterestRateChartEnumerations {
 
         switch (type) {
             case INVALID:
-            break;
+                break;
             case DAYS:
                 optionData = new EnumOptionData(PeriodFrequencyType.DAYS.getValue().longValue(), PeriodFrequencyType.DAYS.getCode(),
                         "Days");
-            break;
+                break;
             case WEEKS:
                 optionData = new EnumOptionData(PeriodFrequencyType.WEEKS.getValue().longValue(), PeriodFrequencyType.WEEKS.getCode(),
                         "Weeks");
-            break;
+                break;
             case MONTHS:
                 optionData = new EnumOptionData(PeriodFrequencyType.MONTHS.getValue().longValue(), PeriodFrequencyType.MONTHS.getCode(),
                         "Months");
-            break;
+                break;
             case YEARS:
                 optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(), PeriodFrequencyType.YEARS.getCode(),
                         "Years");
-            break;
+                break;
             case WHOLE_TERM:
                 optionData = new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(),
                         PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole Term");
-            break;
+                break;
         }
 
         return optionData;

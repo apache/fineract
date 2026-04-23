@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,7 +23,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +56,7 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter {
     }
 
     private void handleCorrelations(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain,
-            FineractProperties.FineractCorrelationProperties correlationProperties) throws IOException, ServletException {
+                                    FineractProperties.FineractCorrelationProperties correlationProperties) throws IOException, ServletException {
         try {
             String correlationHeaderName = correlationProperties.getHeaderName();
             String correlationId = request.getHeader(correlationHeaderName);

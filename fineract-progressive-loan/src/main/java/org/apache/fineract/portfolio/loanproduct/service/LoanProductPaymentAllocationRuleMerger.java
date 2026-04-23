@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
@@ -32,7 +33,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransac
 public class LoanProductPaymentAllocationRuleMerger {
 
     public boolean updateProductPaymentAllocationRules(LoanProduct loanProduct,
-            final List<LoanProductPaymentAllocationRule> newLoanProductPaymentAllocationRules) {
+                                                       final List<LoanProductPaymentAllocationRule> newLoanProductPaymentAllocationRules) {
         if (newLoanProductPaymentAllocationRules == null) {
             return false;
         }
@@ -76,7 +77,7 @@ public class LoanProductPaymentAllocationRuleMerger {
     }
 
     private boolean mergeLoanProductPaymentAllocationRule(LoanProductPaymentAllocationRule into,
-            LoanProductPaymentAllocationRule newElement) {
+                                                          LoanProductPaymentAllocationRule newElement) {
         boolean changed = false;
 
         if (!Objects.equals(into.getFutureInstallmentAllocationRule(), newElement.getFutureInstallmentAllocationRule())) {

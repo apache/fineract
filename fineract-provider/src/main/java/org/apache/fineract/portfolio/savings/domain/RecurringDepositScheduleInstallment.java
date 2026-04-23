@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,11 +25,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -81,7 +83,8 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUT
     /**
      *
      */
-    protected RecurringDepositScheduleInstallment() {}
+    protected RecurringDepositScheduleInstallment() {
+    }
 
     /**
      * @param account
@@ -96,9 +99,9 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUT
      * @param obligationsMetOnDate
      */
     private RecurringDepositScheduleInstallment(final RecurringDepositAccount account, final Integer installmentNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
-            final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate, final boolean obligationsMet,
-            final LocalDate obligationsMetOnDate) {
+                                                final LocalDate fromDate, final LocalDate dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
+                                                final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate, final boolean obligationsMet,
+                                                final LocalDate obligationsMetOnDate) {
         this.account = account;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate;
@@ -112,15 +115,15 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUT
     }
 
     public static RecurringDepositScheduleInstallment from(final RecurringDepositAccount account, final Integer installmentNumber,
-            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
-            final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate, final boolean obligationsMet,
-            final LocalDate obligationsMetOnDate) {
+                                                           final LocalDate fromDate, final LocalDate dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
+                                                           final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate, final boolean obligationsMet,
+                                                           final LocalDate obligationsMetOnDate) {
         return new RecurringDepositScheduleInstallment(account, installmentNumber, fromDate, dueDate, depositAmount, depositAmountCompleted,
                 totalPaidInAdvance, totalPaidLate, obligationsMet, obligationsMetOnDate);
     }
 
     public static RecurringDepositScheduleInstallment installment(final RecurringDepositAccount account, final Integer installmentNumber,
-            final LocalDate dueDate, final BigDecimal depositAmount) {
+                                                                  final LocalDate dueDate, final BigDecimal depositAmount) {
 
         final LocalDate fromDate = null;
         final BigDecimal depositAmountCompleted = null;
@@ -227,7 +230,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableWithUT
     }
 
     private void trackAdvanceAndLateTotalsForInstallment(final LocalDate transactionDate, final MonetaryCurrency currency,
-            final Money amountPaidInInstallment) {
+                                                         final Money amountPaidInInstallment) {
         if (isInAdvance(transactionDate)) {
             this.totalPaidInAdvance = asMoney(this.totalPaidInAdvance, currency).plus(amountPaidInInstallment).getAmount();
         } else if (isLatePayment(transactionDate)) {

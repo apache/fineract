@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+
 import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -188,8 +190,8 @@ public class LoanSummary {
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
-            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges, Money capitalizedIncome,
-            Money capitalizedIncomeAdjustment) {
+                              final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges, Money capitalizedIncome,
+                              Money capitalizedIncomeAdjustment) {
         this.totalPrincipalDisbursed = principal.getAmount();
         this.totalCapitalizedIncome = capitalizedIncome.getAmount();
         this.totalCapitalizedIncomeAdjustment = capitalizedIncomeAdjustment.getAmount();
@@ -337,7 +339,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPrincipalRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                  final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPrincipalCompleted(currency));
@@ -346,7 +348,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPrincipalAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                    final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getCreditedPrincipal(currency));
@@ -355,7 +357,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalFeeAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                              final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getCreditedFee(currency));
@@ -364,7 +366,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPenaltyAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                  final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getCreditedPenalty(currency));
@@ -373,7 +375,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPrincipalWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                      final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPrincipalWrittenOff(currency));
@@ -382,7 +384,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalInterestCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                  final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestCharged(currency));
@@ -391,7 +393,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalInterestRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                 final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestPaid(currency));
@@ -400,7 +402,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalInterestWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                 final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestWaived(currency));
@@ -409,7 +411,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalInterestWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                     final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestWrittenOff(currency));
@@ -418,7 +420,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalFeeChargesCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                    final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesCharged(currency));
@@ -427,7 +429,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalFeeChargesRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                   final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesPaid(currency));
@@ -446,7 +448,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalFeeChargesWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                       final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesWrittenOff(currency));
@@ -455,7 +457,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPenaltyChargesCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                        final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesCharged(currency));
@@ -464,7 +466,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPenaltyChargesRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                       final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesPaid(currency));
@@ -473,7 +475,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPenaltyChargesWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                       final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesWaived(currency));
@@ -482,7 +484,7 @@ public class LoanSummary {
     }
 
     protected Money calculateTotalPenaltyChargesWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
-            final MonetaryCurrency currency) {
+                                                           final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesWrittenOff(currency));

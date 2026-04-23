@@ -4,7 +4,9 @@ This document explains the static weaving setup for JPA entities in the Fineract
 
 ## Overview
 
-Static weaving is a process that enhances JPA entities at build time to improve runtime performance. This is done using the `org.eclipse.persistence.tools.weaving.jpa.StaticWeave` which processes the compiled classes and applies the necessary bytecode transformations.
+Static weaving is a process that enhances JPA entities at build time to improve runtime performance. This is done using
+the `org.eclipse.persistence.tools.weaving.jpa.StaticWeave` which processes the compiled classes and applies the
+necessary bytecode transformations.
 
 ## Configuration
 
@@ -13,7 +15,8 @@ The static weaving is configured in `static-weaving.gradle` and applied to all J
 ## How It Works
 
 1. **Compilation**: Java source files are compiled to the standard classes directory (`build/classes/java/main`).
-2. **Weaving**: Weaving happens as last step of **compileJava** task, which outputs them to the standard classes directory (`build/classes/java/main`).
+2. **Weaving**: Weaving happens as last step of **compileJava** task, which outputs them to the standard classes
+   directory (`build/classes/java/main`).
 
 ## Adding Static Weaving to a Module
 

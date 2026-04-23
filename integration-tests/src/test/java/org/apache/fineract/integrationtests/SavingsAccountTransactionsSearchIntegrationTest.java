@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.fineract.client.models.GetSavingsAccountTransactionsPageItem;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
@@ -61,8 +63,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-@SuppressWarnings({ "rawtypes" })
-@ExtendWith({ SavingsTestLifecycleExtension.class })
+@SuppressWarnings({"rawtypes"})
+@ExtendWith({SavingsTestLifecycleExtension.class})
 public class SavingsAccountTransactionsSearchIntegrationTest {
 
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";

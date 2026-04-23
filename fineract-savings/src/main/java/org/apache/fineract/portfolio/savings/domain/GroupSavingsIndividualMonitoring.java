@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,13 +26,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import java.math.BigDecimal;
 import java.util.Set;
+
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.group.domain.Group;
 
 @Entity
-@Table(name = "gsim_accounts", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_number" }, name = "gsim_id") })
+@Table(name = "gsim_accounts", uniqueConstraints = {@UniqueConstraint(columnNames = {"account_number"}, name = "gsim_id")})
 public final class GroupSavingsIndividualMonitoring extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
@@ -60,10 +62,11 @@ public final class GroupSavingsIndividualMonitoring extends AbstractPersistableC
     @Column(name = "application_id", nullable = true)
     private BigDecimal applicationId;
 
-    private GroupSavingsIndividualMonitoring() {}
+    private GroupSavingsIndividualMonitoring() {
+    }
 
     private GroupSavingsIndividualMonitoring(String accountNumber, Group group, BigDecimal parentDeposit, Long childAccountsCount,
-            Boolean isAcceptingChild, Integer savingsStatus, BigDecimal applicationId) {
+                                             Boolean isAcceptingChild, Integer savingsStatus, BigDecimal applicationId) {
         this.accountNumber = accountNumber;
         this.group = group;
         this.parentDeposit = parentDeposit;
@@ -75,7 +78,7 @@ public final class GroupSavingsIndividualMonitoring extends AbstractPersistableC
     }
 
     public static GroupSavingsIndividualMonitoring getInstance(String accountNumber, Group group, BigDecimal parentDeposit,
-            Long childAccountsCount, Boolean isAcceptingChild, Integer savingsStatus, BigDecimal applicationId) {
+                                                               Long childAccountsCount, Boolean isAcceptingChild, Integer savingsStatus, BigDecimal applicationId) {
         return new GroupSavingsIndividualMonitoring(accountNumber, group, parentDeposit, childAccountsCount, isAcceptingChild,
                 savingsStatus, applicationId);
     }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,7 +24,8 @@ import java.util.function.Function;
 
 public final class EnumResolver {
 
-    private EnumResolver() {}
+    private EnumResolver() {
+    }
 
     public static <T extends Enum<T>> T from(Class<T> clazz, String str, Function<T, String> fn) {
         return Arrays.stream(clazz.getEnumConstants()).filter(c -> fn.apply(c).equals(str)).findAny()

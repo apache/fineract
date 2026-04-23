@@ -100,7 +100,8 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="wc_loan_product_id" type="BIGINT">
-                <constraints nullable="false" foreignKeyName="m_wc_loan_product_payment_allocation_rule_fk" referencedTableName="m_wc_loan_product" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="m_wc_loan_product_payment_allocation_rule_fk"
+                             referencedTableName="m_wc_loan_product" referencedColumnNames="id"/>
             </column>
             <column name="transaction_type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -129,7 +130,9 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="wc_loan_product_id" type="BIGINT">
-                <constraints nullable="false" unique="true" foreignKeyName="m_wc_loan_product_configurable_attributes_fk" referencedTableName="m_wc_loan_product" referencedColumnNames="id"/>
+                <constraints nullable="false" unique="true"
+                             foreignKeyName="m_wc_loan_product_configurable_attributes_fk"
+                             referencedTableName="m_wc_loan_product" referencedColumnNames="id"/>
             </column>
             <column defaultValueComputed="NULL" name="flat_percentage_amount_overridable" type="BOOLEAN"/>
             <column defaultValueComputed="NULL" name="delinquency_bucket_classification_overridable" type="BOOLEAN"/>
@@ -169,16 +172,21 @@
                                  constraintName="FK_wc_loan_product_fund" deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_fund" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="delinquency_bucket_classification_id" baseTableName="m_wc_loan_product"
-                                 constraintName="FK_wc_loan_product_delinquency_bucket" deferrable="false" initiallyDeferred="false"
+        <addForeignKeyConstraint baseColumnNames="delinquency_bucket_classification_id"
+                                 baseTableName="m_wc_loan_product"
+                                 constraintName="FK_wc_loan_product_delinquency_bucket" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_delinquency_bucket" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_wc_loan_product_payment_allocation_rule"
-                                 constraintName="FK_wc_loan_product_payment_allocation_rule_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_wc_loan_product_payment_allocation_rule_created_by"
+                                 deferrable="false" initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
-        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_wc_loan_product_payment_allocation_rule"
-                                 constraintName="FK_wc_loan_product_payment_allocation_rule_last_modified_by" deferrable="false"
+        <addForeignKeyConstraint baseColumnNames="last_modified_by"
+                                 baseTableName="m_wc_loan_product_payment_allocation_rule"
+                                 constraintName="FK_wc_loan_product_payment_allocation_rule_last_modified_by"
+                                 deferrable="false"
                                  initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="m_appuser" validate="true"/>
@@ -192,10 +200,12 @@
         <createIndex tableName="m_wc_loan_product" indexName="IND_wc_loan_product_external_id">
             <column name="external_id"/>
         </createIndex>
-        <createIndex tableName="m_wc_loan_product_payment_allocation_rule" indexName="IND_wc_loan_product_payment_allocation_rule_product_id">
+        <createIndex tableName="m_wc_loan_product_payment_allocation_rule"
+                     indexName="IND_wc_loan_product_payment_allocation_rule_product_id">
             <column name="wc_loan_product_id"/>
         </createIndex>
-        <createIndex tableName="m_wc_loan_product_configurable_attributes" indexName="IND_wc_loan_product_configurable_attributes_product_id">
+        <createIndex tableName="m_wc_loan_product_configurable_attributes"
+                     indexName="IND_wc_loan_product_configurable_attributes_product_id">
             <column name="wc_loan_product_id"/>
         </createIndex>
     </changeSet>

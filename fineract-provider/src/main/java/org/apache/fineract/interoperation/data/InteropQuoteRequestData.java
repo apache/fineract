@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,9 +36,11 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACT
 
 import com.google.gson.JsonObject;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropAmountType;
@@ -47,21 +49,21 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 
 public class InteropQuoteRequestData extends InteropRequestData {
 
-    static final String[] PARAMS = { PARAM_TRANSACTION_CODE, PARAM_REQUEST_CODE, PARAM_ACCOUNT_ID, PARAM_AMOUNT, PARAM_TRANSACTION_TYPE,
+    static final String[] PARAMS = {PARAM_TRANSACTION_CODE, PARAM_REQUEST_CODE, PARAM_ACCOUNT_ID, PARAM_AMOUNT, PARAM_TRANSACTION_TYPE,
             PARAM_TRANSACTION_ROLE, PARAM_NOTE, PARAM_GEO_CODE, PARAM_EXPIRATION, PARAM_EXTENSION_LIST, PARAM_QUOTE_CODE, PARAM_AMOUNT_TYPE,
-            PARAM_FEES, PARAM_LOCALE, PARAM_DATE_FORMAT };
+            PARAM_FEES, PARAM_LOCALE, PARAM_DATE_FORMAT};
     @NotNull
     private final String quoteCode;
     @NotNull
     private final InteropAmountType amountType;
 
     private final MoneyData fees; // only for disclosed Payer fees on the Payee
-                                  // side
+    // side
 
     public InteropQuoteRequestData(@NotNull String transactionCode, String requestCode, @NotNull String accountId,
-            @NotNull MoneyData amount, @NotNull InteropTransactionRole transactionRole, @NotNull InteropTransactionTypeData transactionType,
-            String note, GeoCodeData geoCode, LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode,
-            @NotNull InteropAmountType amountType, MoneyData fees) {
+                                   @NotNull MoneyData amount, @NotNull InteropTransactionRole transactionRole, @NotNull InteropTransactionTypeData transactionType,
+                                   String note, GeoCodeData geoCode, LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode,
+                                   @NotNull InteropAmountType amountType, MoneyData fees) {
         super(transactionCode, requestCode, accountId, amount, transactionRole, transactionType, note, geoCode, expiration, extensionList);
         this.quoteCode = quoteCode;
         this.amountType = amountType;
@@ -69,14 +71,14 @@ public class InteropQuoteRequestData extends InteropRequestData {
     }
 
     public InteropQuoteRequestData(@NotNull String transactionCode, @NotNull String accountId, @NotNull InteropAmountType amountType,
-            @NotNull MoneyData amount, @NotNull InteropTransactionRole transactionRole, @NotNull InteropTransactionTypeData transactionType,
-            @NotNull String quoteCode) {
+                                   @NotNull MoneyData amount, @NotNull InteropTransactionRole transactionRole, @NotNull InteropTransactionTypeData transactionType,
+                                   @NotNull String quoteCode) {
         this(transactionCode, null, accountId, amount, transactionRole, transactionType, null, null, null, null, quoteCode, amountType,
                 null);
     }
 
     private InteropQuoteRequestData(@NotNull InteropRequestData other, @NotNull String quoteCode, @NotNull InteropAmountType amountType,
-            MoneyData fees) {
+                                    MoneyData fees) {
         this(other.getTransactionCode(), other.getRequestCode(), other.getAccountId(), other.getAmount(), other.getTransactionRole(),
                 other.getTransactionType(), other.getNote(), other.getGeoCode(), other.getExpiration(), other.getExtensionList(), quoteCode,
                 amountType, fees);
@@ -103,7 +105,7 @@ public class InteropQuoteRequestData extends InteropRequestData {
     }
 
     public static InteropQuoteRequestData validateAndParse(final DataValidatorBuilder dataValidator, JsonObject element,
-            FromJsonHelper jsonHelper) {
+                                                           FromJsonHelper jsonHelper) {
         if (element == null) {
             return null;
         }

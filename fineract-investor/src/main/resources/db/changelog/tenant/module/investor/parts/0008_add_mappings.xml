@@ -75,7 +75,8 @@
 
         <addForeignKeyConstraint baseColumnNames="journal_entry_id"
                                  baseTableName="m_external_asset_owner_transfer_journal_entry_mapping"
-                                 constraintName="FK_ext_asset_owner_transfer_je_mapping_journal_entry_id" deferrable="false"
+                                 constraintName="FK_ext_asset_owner_transfer_je_mapping_journal_entry_id"
+                                 deferrable="false"
                                  initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
                                  referencedTableName="acc_gl_journal_entry" validate="true"/>

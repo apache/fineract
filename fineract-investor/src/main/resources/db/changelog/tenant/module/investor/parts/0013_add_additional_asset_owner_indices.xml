@@ -31,29 +31,34 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently IDX_e_asset_o_transfer_loan_mapping_owner_transfer_id on m_external_asset_owner_transfer_loan_mapping(owner_transfer_id);
+            create index concurrently IDX_e_asset_o_transfer_loan_mapping_owner_transfer_id on
+            m_external_asset_owner_transfer_loan_mapping(owner_transfer_id);
         </sql>
     </changeSet>
 
     <changeSet author="fineract" id="2" runInTransaction="false" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="m_external_asset_owner_transfer_journal_entry_mapping" columnNames="owner_transfer_id"/>
+                <indexExists tableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                             columnNames="owner_transfer_id"/>
             </not>
         </preConditions>
         <sql>
-            create index concurrently IDX_e_asset_o_transfer_journal_entry_mapping_owner_transfer_id on m_external_asset_owner_transfer_journal_entry_mapping(owner_transfer_id);
+            create index concurrently IDX_e_asset_o_transfer_journal_entry_mapping_owner_transfer_id on
+            m_external_asset_owner_transfer_journal_entry_mapping(owner_transfer_id);
         </sql>
     </changeSet>
 
     <changeSet author="fineract" id="3" runInTransaction="false" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists tableName="m_external_asset_owner_transfer_journal_entry_mapping" columnNames="journal_entry_id"/>
+                <indexExists tableName="m_external_asset_owner_transfer_journal_entry_mapping"
+                             columnNames="journal_entry_id"/>
             </not>
         </preConditions>
         <sql>
-            create index concurrently IDX_e_asset_o_transfer_journal_entry_mapping_journal_entry_id on m_external_asset_owner_transfer_journal_entry_mapping(journal_entry_id);
+            create index concurrently IDX_e_asset_o_transfer_journal_entry_mapping_journal_entry_id on
+            m_external_asset_owner_transfer_journal_entry_mapping(journal_entry_id);
         </sql>
     </changeSet>
 
@@ -64,7 +69,8 @@
             </not>
         </preConditions>
         <sql>
-            create index concurrently IDX_e_asset_o_journal_entry_mapping_journal_entry_id on m_external_asset_owner_journal_entry_mapping(journal_entry_id);
+            create index concurrently IDX_e_asset_o_journal_entry_mapping_journal_entry_id on
+            m_external_asset_owner_journal_entry_mapping(journal_entry_id);
         </sql>
     </changeSet>
 </databaseChangeLog>

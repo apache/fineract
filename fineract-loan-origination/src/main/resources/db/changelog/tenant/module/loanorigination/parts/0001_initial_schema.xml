@@ -128,7 +128,8 @@
             </sqlCheck>
         </preConditions>
         <insert tableName="m_code_value">
-            <column name="code_id" valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
+            <column name="code_id"
+                    valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
             <column name="code_value" value="ONLINE"/>
             <column name="order_position" valueNumeric="1"/>
             <column name="is_active" valueBoolean="true"/>
@@ -145,7 +146,8 @@
             </sqlCheck>
         </preConditions>
         <insert tableName="m_code_value">
-            <column name="code_id" valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
+            <column name="code_id"
+                    valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
             <column name="code_value" value="IN_STORE"/>
             <column name="order_position" valueNumeric="2"/>
             <column name="is_active" valueBoolean="true"/>
@@ -162,7 +164,8 @@
             </sqlCheck>
         </preConditions>
         <insert tableName="m_code_value">
-            <column name="code_id" valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
+            <column name="code_id"
+                    valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
             <column name="code_value" value="API"/>
             <column name="order_position" valueNumeric="3"/>
             <column name="is_active" valueBoolean="true"/>
@@ -179,7 +182,8 @@
             </sqlCheck>
         </preConditions>
         <insert tableName="m_code_value">
-            <column name="code_id" valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
+            <column name="code_id"
+                    valueComputed="(SELECT id FROM m_code WHERE code_name = 'LoanOriginationChannelType')"/>
             <column name="code_value" value="AGGREGATOR"/>
             <column name="order_position" valueNumeric="4"/>
             <column name="is_active" valueBoolean="true"/>
@@ -287,7 +291,8 @@
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_loan_originator" baseColumnNames="channel_type_cv_id"
                                  referencedTableName="m_code_value" referencedColumnNames="id"
-                                 constraintName="FK_loan_originator_channel_cv" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+                                 constraintName="FK_loan_originator_channel_cv" onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"/>
     </changeSet>
 
     <!-- Add FK for audit columns on m_loan_originator -->
@@ -296,11 +301,13 @@
             <tableExists tableName="m_loan_originator"/>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_originator"
-                                 constraintName="FK_loan_originator_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_originator_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT"
                                  referencedColumnNames="id" referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_originator"
-                                 constraintName="FK_loan_originator_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_originator_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT"
                                  referencedColumnNames="id" referencedTableName="m_appuser" validate="true"/>
     </changeSet>
@@ -378,7 +385,8 @@
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_loan_originator_mapping" baseColumnNames="loan_id"
                                  referencedTableName="m_loan" referencedColumnNames="id"
-                                 constraintName="FK_loan_originator_mapping_loan" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+                                 constraintName="FK_loan_originator_mapping_loan" onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"/>
     </changeSet>
 
     <changeSet id="loan-origination-017" author="fineract">
@@ -387,7 +395,8 @@
         </preConditions>
         <addForeignKeyConstraint baseTableName="m_loan_originator_mapping" baseColumnNames="originator_id"
                                  referencedTableName="m_loan_originator" referencedColumnNames="id"
-                                 constraintName="FK_loan_originator_mapping_originator" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+                                 constraintName="FK_loan_originator_mapping_originator" onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"/>
     </changeSet>
 
     <!-- Add FK for audit columns on m_loan_originator_mapping -->
@@ -396,11 +405,13 @@
             <tableExists tableName="m_loan_originator_mapping"/>
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_originator_mapping"
-                                 constraintName="FK_loan_originator_mapping_created_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_originator_mapping_created_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT"
                                  referencedColumnNames="id" referencedTableName="m_appuser" validate="true"/>
         <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_originator_mapping"
-                                 constraintName="FK_loan_originator_mapping_modified_by" deferrable="false" initiallyDeferred="false"
+                                 constraintName="FK_loan_originator_mapping_modified_by" deferrable="false"
+                                 initiallyDeferred="false"
                                  onDelete="RESTRICT" onUpdate="RESTRICT"
                                  referencedColumnNames="id" referencedTableName="m_appuser" validate="true"/>
     </changeSet>

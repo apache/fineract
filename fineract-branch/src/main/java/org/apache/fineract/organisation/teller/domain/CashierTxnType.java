@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,18 +48,18 @@ public final class CashierTxnType implements Serializable {
         switch (id) {
             case 101:
                 retVal = ALLOCATE;
-            break;
+                break;
             case 102:
                 retVal = SETTLE;
-            break;
+                break;
             case 103:
                 retVal = INWARD_CASH_TXN;
-            break;
+                break;
             case 104:
                 retVal = OUTWARD_CASH_TXN;
-            break;
+                break;
             default:
-            break;
+                break;
         }
         return retVal;
     }

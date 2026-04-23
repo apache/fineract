@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -39,7 +40,7 @@ public class GroupSavingsIndividualMonitoringWritePlatformServiceImpl implements
 
     @Override
     public GroupSavingsIndividualMonitoring addGSIMAccountInfo(String accountNumber, Group group, BigDecimal parentDeposit,
-            Long childAccountsCount, Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
+                                                               Long childAccountsCount, Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId) {
 
         GroupSavingsIndividualMonitoring glimAccountInfo = GroupSavingsIndividualMonitoring.getInstance(accountNumber, group, parentDeposit,
                 childAccountsCount, isAcceptingChild, loanStatus, applicationId);

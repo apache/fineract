@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,7 +20,9 @@ package org.apache.fineract.integrationtests.common.shares;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.Map;
+
 import org.apache.fineract.integrationtests.common.Utils;
 
 public final class ShareDividendsTransactionHelper {
@@ -37,7 +39,7 @@ public final class ShareDividendsTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createShareProductDividends(final Integer productId, final String dividendJson,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                                      final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, dividendJson, "subResourceId");
     }
@@ -47,7 +49,7 @@ public final class ShareDividendsTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer postCommand(final String command, final Integer productId, final Integer dividendId, String jsonBody,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                      final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "/" + dividendId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(requestSpec, responseSpec, url, jsonBody, "resourceId");
@@ -58,7 +60,7 @@ public final class ShareDividendsTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Object> retrieveDividendDetails(final Integer productId, final Integer dividendId,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+                                                              final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "/" + dividendId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
@@ -68,7 +70,7 @@ public final class ShareDividendsTransactionHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Map<String, Object> retrieveAllDividends(final Integer productId, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                           final ResponseSpecification responseSpec) {
         String url = SHARE_PRODUCT_URL + "/" + productId + "/" + DIVIDEND + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }

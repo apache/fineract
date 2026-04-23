@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.MessageV1;
@@ -66,8 +67,8 @@ public class MessageFactory implements InitializingBean {
     private final ByteBufferConverter byteBufferConverter;
 
     public MessageV1 createMessage(MessageId id, MessageSource source, MessageType type, MessageCategory category,
-            MessageCreatedAt createdAt, MessageBusinessDate businessDate, MessageIdempotencyKey idempotencyKey,
-            MessageDataSchema dataSchema, MessageData data) {
+                                   MessageCreatedAt createdAt, MessageBusinessDate businessDate, MessageIdempotencyKey idempotencyKey,
+                                   MessageDataSchema dataSchema, MessageData data) {
         MessageV1 result = new MessageV1();
         result.setId(id.getId());
         result.setSource(source.getSource());

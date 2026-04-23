@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.junit.jupiter.api.Test;
@@ -2268,11 +2269,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
     }
 
     private void checkInst(final ProjectedAmortizationScheduleModel model, final int index, final int expectedNo,
-            final LocalDate expectedDate, final long expectedCount, final long expectedPaymentsLeft, final Double expectedPayment,
-            final Double expectedForecastPayment, final Double expectedActualPayment, final Double expectedDiscountFactor,
-            final Double expectedNpvValue, final Double expectedBalance, final Double expectedAmortization,
-            final Double expectedNetAmortization, final Double expectedActualAmortization, final Double expectedIncomeModification,
-            final Double expectedDeferredBalance) {
+                           final LocalDate expectedDate, final long expectedCount, final long expectedPaymentsLeft, final Double expectedPayment,
+                           final Double expectedForecastPayment, final Double expectedActualPayment, final Double expectedDiscountFactor,
+                           final Double expectedNpvValue, final Double expectedBalance, final Double expectedAmortization,
+                           final Double expectedNetAmortization, final Double expectedActualAmortization, final Double expectedIncomeModification,
+                           final Double expectedDeferredBalance) {
         final ProjectedPayment inst = model.payments().get(index);
         final String p = "inst " + expectedNo + ": ";
 

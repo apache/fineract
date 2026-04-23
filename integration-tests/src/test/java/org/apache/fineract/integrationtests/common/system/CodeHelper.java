@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,9 +24,11 @@ import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
@@ -59,7 +61,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object createCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String codeName,
-            final String jsonAttributeToGetback) {
+                                    final String jsonAttributeToGetback) {
 
         return Utils.performServerPost(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, getTestCodeAsJSON(codeName),
                 jsonAttributeToGetback);
@@ -70,7 +72,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object updateCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer codeId,
-            final String codeName, final String jsonAttributeToGetback) {
+                                    final String codeName, final String jsonAttributeToGetback) {
 
         return Utils.performServerPut(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 getTestCodeAsJSON(codeName), jsonAttributeToGetback);
@@ -81,7 +83,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object getCodeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer codeId,
-            final String jsonAttributeToGetback) {
+                                     final String jsonAttributeToGetback) {
 
         return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
@@ -93,7 +95,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, Object> getCodeByName(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String codeName) {
+                                                        final String codeName) {
 
         final HashMap<String, Object> code = new HashMap<>();
 
@@ -115,7 +117,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, Object> getOrCreateCodeValueByCodeIdAndCodeName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId, final String codeName, final Integer position) {
+                                                                                  final ResponseSpecification responseSpec, final Integer codeId, final String codeName, final Integer position) {
 
         ArrayList<HashMap<String, Object>> allCodeValues = CodeHelper.getAllCodeValuesByCodeId(requestSpec, responseSpec, codeId);
         HashMap<String, Object> codesByName = filterCodesByName(allCodeValues, codeName);
@@ -152,7 +154,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static HashMap<String, Object> retrieveOrCreateCodeValue(Integer codeId, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                                    final ResponseSpecification responseSpec) {
         Integer codeValueId = null;
         final List<HashMap<String, Object>> codeValuesList = CodeHelper.getCodeValuesForCode(requestSpec, responseSpec, codeId, "");
         /* If Code Values doesn't exist,then create Code value */
@@ -175,7 +177,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<HashMap<String, Object>> getAllCodes(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+                                                                 final ResponseSpecification responseSpec) {
 
         return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 
@@ -186,7 +188,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ArrayList<HashMap<String, Object>> getAllCodeValuesByCodeId(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId) {
+                                                                              final ResponseSpecification responseSpec, final Integer codeId) {
 
         return Utils.performServerGet(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER, "");
@@ -237,7 +239,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object deleteCodeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final String jsonAttributeToGetback) {
+                                        final Integer codeId, final String jsonAttributeToGetback) {
 
         return Utils.performServerDelete(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
@@ -249,7 +251,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createAddressTypeCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String addressTypeName, final Integer position) {
+                                                     final String addressTypeName, final Integer position) {
         HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, ADDRESS_TYPE_CODE_NAME);
         Integer countryCode = (Integer) code.get("id");
         return createCodeValue(requestSpec, responseSpec, countryCode, addressTypeName, position);
@@ -260,7 +262,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createStateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String stateName, final Integer position) {
+                                               final String stateName, final Integer position) {
         HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, STATE_CODE_NAME);
         Integer countryCode = (Integer) code.get("id");
         return createCodeValue(requestSpec, responseSpec, countryCode, stateName, position);
@@ -271,7 +273,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createCountryCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String countryName, final Integer position) {
+                                                 final String countryName, final Integer position) {
         HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, COUNTRY_CODE_NAME);
         Integer countryCode = (Integer) code.get("id");
         return createCodeValue(requestSpec, responseSpec, countryCode, countryName, position);
@@ -282,7 +284,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createChargeOffCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String value, final Integer position) {
+                                                   final String value, final Integer position) {
         HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, CHARGE_OFF_REASONS_CODE_NAME);
         Integer countryCode = (Integer) code.get("id");
         return createCodeValue(requestSpec, responseSpec, countryCode, value, position);
@@ -293,7 +295,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final String codeValueName, final Integer position) {
+                                          final Integer codeId, final String codeValueName, final Integer position) {
         return (Integer) createCodeValue(requestSpec, responseSpec, codeId, codeValueName, position, SUBRESPONSE_ID_ATTRIBUTE_NAME);
     }
 
@@ -302,7 +304,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final String codeValueName, final Integer position, final String jsonAttributeToGetback) {
+                                         final Integer codeId, final String codeValueName, final Integer position, final String jsonAttributeToGetback) {
         String description = null;
         return createCodeValue(requestSpec, responseSpec, codeId, codeValueName, description, position, jsonAttributeToGetback);
     }
@@ -312,8 +314,8 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final String codeValueName, final String description, final Integer position,
-            final String jsonAttributeToGetback) {
+                                         final Integer codeId, final String codeValueName, final String description, final Integer position,
+                                         final String jsonAttributeToGetback) {
 
         return Utils.performServerPost(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER,
@@ -325,7 +327,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static List<HashMap<String, Object>> getCodeValuesForCode(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId, final String jsonAttributeToGetback) {
+                                                                     final ResponseSpecification responseSpec, final Integer codeId, final String jsonAttributeToGetback) {
 
         return Utils.performServerGet(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
@@ -337,7 +339,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object getCodeValueById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
+                                          final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
 
         return Utils.performServerGet(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
@@ -349,7 +351,7 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object deleteCodeValueById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
+                                             final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
 
         return Utils.performServerDelete(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
@@ -361,8 +363,8 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String codeValueName, final Integer position,
-            final String jsonAttributeToGetback) {
+                                         final Integer codeId, final Integer codeValueId, final String codeValueName, final Integer position,
+                                         final String jsonAttributeToGetback) {
         String description = null;
         return updateCodeValue(requestSpec, responseSpec, codeId, codeValueId, codeValueName, description, position,
                 jsonAttributeToGetback);
@@ -373,8 +375,8 @@ public final class CodeHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer codeId, final Integer codeValueId, final String codeValueName, final String description, final Integer position,
-            final String jsonAttributeToGetback) {
+                                         final Integer codeId, final Integer codeValueId, final String codeValueName, final String description, final Integer position,
+                                         final String jsonAttributeToGetback) {
 
         return Utils.performServerPut(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId + "?" + Utils.TENANT_IDENTIFIER,

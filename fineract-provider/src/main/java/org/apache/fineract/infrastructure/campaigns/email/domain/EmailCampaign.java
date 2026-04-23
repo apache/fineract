@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -133,7 +135,7 @@ public class EmailCampaign extends AbstractPersistableCustom<Long> {
     private String previousRunErrorMessage;
 
     public static EmailCampaign instance(final AppUser submittedBy, final Report businessRuleId, final Report stretchyReport,
-            final JsonCommand command) {
+                                         final JsonCommand command) {
 
         final String campaignName = command.stringValueOfParameterNamed(EmailCampaignValidator.campaignName);
         final Long campaignType = command.longValueOfParameterNamed(EmailCampaignValidator.campaignType);

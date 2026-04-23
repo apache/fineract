@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,12 +20,14 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.group;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
+
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
@@ -64,7 +66,7 @@ public class GroupImportHandler implements ImportHandler {
 
     @Autowired
     public GroupImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            IdempotencyKeyGenerator idempotencyKeyGenerator) {
+                              IdempotencyKeyGenerator idempotencyKeyGenerator) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.idempotencyKeyGenerator = idempotencyKeyGenerator;
     }
@@ -80,7 +82,7 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private void readExcelFile(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
-            final List<String> statuses, final String locale, final String dateFormat) {
+                               final List<String> statuses, final String locale, final String dateFormat) {
         Sheet groupsSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(groupsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
@@ -115,7 +117,7 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private GroupGeneralData readGroup(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
-            final String dateFormat) {
+                                       final String dateFormat) {
         String status = ImportHandlerUtils.readAsString(GroupConstants.STATUS_COL, row);
         String officeName = ImportHandlerUtils.readAsString(GroupConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
@@ -167,7 +169,7 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
-            final List<String> statuses, final String dateFormat) {
+                               final List<String> statuses, final String dateFormat) {
         Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -189,7 +191,7 @@ public class GroupImportHandler implements ImportHandler {
                     progressLevel = 1;
                 } else {
                     groupId = Objects.requireNonNull(
-                            ImportHandlerUtils.readAsInt(GroupConstants.GROUP_ID_COL, groupSheet.getRow(groups.get(i).getRowIndex())))
+                                    ImportHandlerUtils.readAsInt(GroupConstants.GROUP_ID_COL, groupSheet.getRow(groups.get(i).getRowIndex())))
                             .toString();
                 }
 
@@ -212,7 +214,7 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private void writeGroupErrorMessage(final Workbook workbook, final String groupId, final String errorMessage, final int progressLevel,
-            final Cell statusCell, final Cell errorReportCell, final Row row) {
+                                        final Cell statusCell, final Cell errorReportCell, final Row row) {
         String status = "";
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;

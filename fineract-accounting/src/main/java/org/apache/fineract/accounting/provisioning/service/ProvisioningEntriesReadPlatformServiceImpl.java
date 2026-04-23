@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
@@ -63,7 +64,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         private LoanProductProvisioningEntryMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
             sqlQuery = new StringBuilder().append(
-                    "select (CASE WHEN loan.loan_type_enum=1 THEN mclient.office_id ELSE mgroup.office_id END) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
+                            "select (CASE WHEN loan.loan_type_enum=1 THEN mclient.office_id ELSE mgroup.office_id END) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
                     .append("GREATEST(" + sqlGenerator.dateDiff("?", "sch.duedate")
                             + ", 0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
                     .append("loan.total_outstanding_derived as outstandingbalance, pcd.liability_account, pcd.expense_account from m_loan_repayment_schedule sch")
@@ -236,7 +237,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             sqlBuilder.append(" offset ").append(offset);
         }
 
-        Object[] whereClauseItemsitems = new Object[] {};
+        Object[] whereClauseItemsitems = new Object[]{};
         return this.provisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), whereClauseItemsitems,
                 mapper);
     }
@@ -277,7 +278,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         ProvisioningEntryData data = null;
         ProvisioningEntryIdDateRowMapper mapper = new ProvisioningEntryIdDateRowMapper();
         try {
-            data = this.jdbcTemplate.queryForObject(mapper.schema(), mapper, new Object[] {});
+            data = this.jdbcTemplate.queryForObject(mapper.schema(), mapper, new Object[]{});
         } catch (EmptyResultDataAccessException e) {
             data = null;
         }

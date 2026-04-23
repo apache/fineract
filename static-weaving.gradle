@@ -51,10 +51,10 @@ project.afterEvaluate {
                 mainClass.set("org.eclipse.persistence.tools.weaving.jpa.StaticWeave")
                 classpath = project.sourceSets.main.runtimeClasspath
                 args = [
-                    "-persistenceinfo",
-                    weavingRoot.absolutePath,
-                    source,
-                    source
+                        "-persistenceinfo",
+                        weavingRoot.absolutePath,
+                        source,
+                        source
                 ]
             }
         }

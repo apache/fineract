@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,11 +19,13 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler.chartofaccounts;
 
 import com.google.gson.GsonBuilder;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -69,7 +71,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
     @Autowired
     public ChartOfAccountsImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            GLAccountRepositoryWrapper glAccountRepository) {
+                                        GLAccountRepositoryWrapper glAccountRepository) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.glAccountRepository = glAccountRepository;
     }
@@ -141,8 +143,8 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
     }
 
     private Count importEntity(final Workbook workbook, final List<GLAccountData> glAccounts, final List<JournalEntryData> glTransactions,
-            final List<CreditDebit> credits, final List<CreditDebit> debits, final boolean flagForOpBal, final String locale,
-            final String dateFormat) {
+                               final List<CreditDebit> credits, final List<CreditDebit> debits, final boolean flagForOpBal, final String locale,
+                               final String dateFormat) {
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
 
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
@@ -212,7 +214,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
     // for opening balance
     private void readExcelFileForOpBal(final Workbook workbook, final List<JournalEntryData> glTransactions,
-            final List<CreditDebit> credits, final List<CreditDebit> debits, final String locale, final String dateFormat) {
+                                       final List<CreditDebit> credits, final List<CreditDebit> debits, final String locale, final String dateFormat) {
 
         Sheet chartOfAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(chartOfAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
@@ -230,7 +232,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
     // for opening balance
     private JournalEntryData readAddJournalEntries(final Row row, final List<CreditDebit> credits, final List<CreditDebit> debits,
-            final String locale, String dateFormat) {
+                                                   final String locale, String dateFormat) {
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
         Long officeId = ImportHandlerUtils.readAsLong(ChartOfAccountsConstants.OFFICE_COL_ID, row);

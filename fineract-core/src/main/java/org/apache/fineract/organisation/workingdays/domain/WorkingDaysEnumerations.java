@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,32 +36,32 @@ public final class WorkingDaysEnumerations {
             case INVALID:
                 optionData = new EnumOptionData(RepaymentRescheduleType.INVALID.getValue().longValue(),
                         RepaymentRescheduleType.INVALID.getCode(), "invalid");
-            break;
+                break;
 
             case SAME_DAY:
                 optionData = new EnumOptionData(RepaymentRescheduleType.SAME_DAY.getValue().longValue(),
                         RepaymentRescheduleType.SAME_DAY.getCode(), "same day");
-            break;
+                break;
 
             case MOVE_TO_NEXT_WORKING_DAY:
                 optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getValue().longValue(),
                         RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getCode(), "move to next working day");
-            break;
+                break;
 
             case MOVE_TO_NEXT_REPAYMENT_MEETING_DAY:
                 optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue().longValue(),
                         RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getCode(), "move to next repayment meeting day");
-            break;
+                break;
 
             case MOVE_TO_PREVIOUS_WORKING_DAY:
                 optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getValue().longValue(),
                         RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getCode(), "move to previous working day");
-            break;
+                break;
 
             case MOVE_TO_NEXT_MEETING_DAY:
                 optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_NEXT_MEETING_DAY.getValue().longValue(),
                         RepaymentRescheduleType.MOVE_TO_NEXT_MEETING_DAY.getCode(), "move to next meeting day");
-            break;
+                break;
         }
 
         return optionData;

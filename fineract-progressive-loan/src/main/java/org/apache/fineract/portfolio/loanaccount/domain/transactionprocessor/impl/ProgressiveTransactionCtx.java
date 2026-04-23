@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -56,25 +57,25 @@ public class ProgressiveTransactionCtx extends TransactionCtx {
     private final List<Long> processedLoanChargeIds;
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
-            ProgressiveLoanInterestScheduleModel model, List<LoanTermVariations> activeLoanTermVariations) {
+                                     Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
+                                     ProgressiveLoanInterestScheduleModel model, List<LoanTermVariations> activeLoanTermVariations) {
         this(currency, installments, charges, overpaymentHolder, changedTransactionDetail, model, Money.zero(currency),
                 activeLoanTermVariations);
     }
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
-            ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount,
-            List<LoanTermVariations> activeLoanTermVariations) {
+                                     Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
+                                     ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount,
+                                     List<LoanTermVariations> activeLoanTermVariations) {
         this(currency, installments, charges, overpaymentHolder, changedTransactionDetail, model, sumOfInterestRefundAmount,
                 activeLoanTermVariations,
                 charges == null ? new ArrayList<>() : charges.stream().map(AbstractPersistableCustom::getId).toList());
     }
 
     public ProgressiveTransactionCtx(MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
-            Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
-            ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount, List<LoanTermVariations> activeLoanTermVariations,
-            List<Long> processedLoanChargeIds) {
+                                     Set<LoanCharge> charges, MoneyHolder overpaymentHolder, ChangedTransactionDetail changedTransactionDetail,
+                                     ProgressiveLoanInterestScheduleModel model, Money sumOfInterestRefundAmount, List<LoanTermVariations> activeLoanTermVariations,
+                                     List<Long> processedLoanChargeIds) {
         super(currency, installments, charges, overpaymentHolder, changedTransactionDetail, activeLoanTermVariations);
         this.sumOfInterestRefundAmount = sumOfInterestRefundAmount;
         this.model = model;

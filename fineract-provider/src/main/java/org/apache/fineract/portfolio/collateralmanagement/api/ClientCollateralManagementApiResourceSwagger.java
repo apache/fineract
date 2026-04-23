@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,17 +19,21 @@
 package org.apache.fineract.portfolio.collateralmanagement.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
+
 import org.apache.fineract.portfolio.collateralmanagement.data.UpdateClientCollateralRequest;
 
 final class ClientCollateralManagementApiResourceSwagger {
 
-    private ClientCollateralManagementApiResourceSwagger() {}
+    private ClientCollateralManagementApiResourceSwagger() {
+    }
 
     @Schema(description = "PostClientCollateralRequest")
     public static final class PostClientCollateralRequest {
 
-        private PostClientCollateralRequest() {}
+        private PostClientCollateralRequest() {
+        }
 
         @Schema(example = "10")
         public BigDecimal quantity;
@@ -43,7 +47,8 @@ final class ClientCollateralManagementApiResourceSwagger {
     @Schema(description = "PostClientCollateralResponse")
     public static final class PostClientCollateralResponse {
 
-        private PostClientCollateralResponse() {}
+        private PostClientCollateralResponse() {
+        }
 
         @Schema(example = "14")
         public Long resourceId;
@@ -55,7 +60,8 @@ final class ClientCollateralManagementApiResourceSwagger {
     @Schema(description = "PutClientCollateralResponse")
     public static final class PutClientCollateralResponse {
 
-        private PutClientCollateralResponse() {}
+        private PutClientCollateralResponse() {
+        }
 
         @Schema(example = "12")
         public Long resourceId;
@@ -67,7 +73,8 @@ final class ClientCollateralManagementApiResourceSwagger {
     @Schema(description = "DeleteClientCollateralResponse")
     public static final class DeleteClientCollateralResponse {
 
-        private DeleteClientCollateralResponse() {}
+        private DeleteClientCollateralResponse() {
+        }
 
         @Schema(example = "12")
         public Long resourceId;

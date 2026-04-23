@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanTransactionFlagsDataV1;
@@ -267,15 +269,17 @@ public class LoanReAgingStepDef extends AbstractStepDef {
         List<String> actualValues = new ArrayList<>();
         for (String headerName : header) {
             switch (headerName) {
-                case "Nr" -> actualValues.add(repaymentPeriod.getPeriod() == null ? null : String.valueOf(repaymentPeriod.getPeriod()));
+                case "Nr" ->
+                        actualValues.add(repaymentPeriod.getPeriod() == null ? null : String.valueOf(repaymentPeriod.getPeriod()));
                 case "Days" ->
-                    actualValues.add(repaymentPeriod.getDaysInPeriod() == null ? null : String.valueOf(repaymentPeriod.getDaysInPeriod()));
+                        actualValues.add(repaymentPeriod.getDaysInPeriod() == null ? null : String.valueOf(repaymentPeriod.getDaysInPeriod()));
                 case "Date" ->
-                    actualValues.add(repaymentPeriod.getDueDate() == null ? null : FORMATTER.format(repaymentPeriod.getDueDate()));
+                        actualValues.add(repaymentPeriod.getDueDate() == null ? null : FORMATTER.format(repaymentPeriod.getDueDate()));
                 case "Paid date" -> actualValues.add(repaymentPeriod.getObligationsMetOnDate() == null ? null
                         : FORMATTER.format(repaymentPeriod.getObligationsMetOnDate()));
-                case "Balance of loan" -> actualValues.add(repaymentPeriod.getPrincipalLoanBalanceOutstanding() == null ? null
-                        : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalLoanBalanceOutstanding().doubleValue()).format());
+                case "Balance of loan" ->
+                        actualValues.add(repaymentPeriod.getPrincipalLoanBalanceOutstanding() == null ? null
+                                : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalLoanBalanceOutstanding().doubleValue()).format());
                 case "Principal due" -> actualValues.add(repaymentPeriod.getPrincipalDue() == null ? null
                         : new Utils.DoubleFormatter(repaymentPeriod.getPrincipalDue().doubleValue()).format());
                 case "Interest" -> actualValues.add(repaymentPeriod.getInterestDue() == null ? null
@@ -304,7 +308,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
 
     @SuppressFBWarnings("SF_SWITCH_NO_DEFAULT")
     private List<String> validateRepaymentScheduleTotal(List<String> header, LoanScheduleData repaymentSchedule,
-            List<String> expectedAmounts) {
+                                                        List<String> expectedAmounts) {
         List<String> actualValues = new ArrayList<>();
         Double paidActual = 0.0;
         List<LoanSchedulePeriodData> periods = repaymentSchedule.getPeriods();
@@ -365,7 +369,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
     }
 
     PostLoansLoanIdTransactionsRequest setReAgeingRequestProperties(PostLoansLoanIdTransactionsRequest request, List<String> headers,
-            List<String> values) {
+                                                                    List<String> values) {
         for (int i = 0; i < headers.size(); i++) {
             String header = headers.get(i).toLowerCase(java.util.Locale.ROOT).trim().replaceAll(" ", "");
             switch (header) {
@@ -382,7 +386,7 @@ public class LoanReAgingStepDef extends AbstractStepDef {
 
     @When("Admin creates a Loan re-aging transaction by Loan external ID with the following data, but fails with {int} error code:")
     public void adminCreatesALoanReAgingTransactionByLoanExternalIDWithTheFollowingDataButFailsWithErrorCode(int errorCode,
-            DataTable table) {
+                                                                                                             DataTable table) {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String loanExternalId = loanResponse.getResourceExternalId();
 

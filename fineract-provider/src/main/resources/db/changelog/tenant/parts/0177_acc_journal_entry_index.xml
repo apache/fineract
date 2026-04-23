@@ -25,7 +25,8 @@
     <changeSet author="fineract" id="1" runInTransaction="false" context="postgresql">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM pg_indexes WHERE tablename='acc_gl_journal_entry' and indexname='idx_acc_gl_journal_entry_transaction_id';
+                SELECT COUNT(*) FROM pg_indexes WHERE tablename='acc_gl_journal_entry' and
+                indexname='idx_acc_gl_journal_entry_transaction_id';
             </sqlCheck>
         </preConditions>
         <sql>
@@ -37,8 +38,8 @@
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM information_schema.statistics
                 WHERE table_schema = DATABASE()
-                  AND table_name = 'acc_gl_journal_entry'
-                  AND index_name = 'idx_acc_gl_journal_entry_transaction_id';
+                AND table_name = 'acc_gl_journal_entry'
+                AND index_name = 'idx_acc_gl_journal_entry_transaction_id';
             </sqlCheck>
         </preConditions>
         <sql>

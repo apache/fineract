@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
@@ -49,6 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.cob.data.LoanDataForExternalTransfer;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -150,7 +152,7 @@ public class ExternalAssetOwnersWriteServiceTest {
     @ParameterizedTest
     @MethodSource("effectiveTransferDataProviderIntermediarySaleTests")
     public void testValidateEffectiveTransferForIntermediarySale(final String testName,
-            final List<ExternalAssetOwnerTransfer> externalAssetOwnerTransferList, final String expectedErrorString) {
+                                                                 final List<ExternalAssetOwnerTransfer> externalAssetOwnerTransferList, final String expectedErrorString) {
         TestContext testContext = new TestContext();
 
         // given
@@ -346,7 +348,7 @@ public class ExternalAssetOwnersWriteServiceTest {
                 .forClass(ExternalAssetOwnerTransfer.class);
 
         lenient().when(
-                testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement))
+                        testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE, jsonCommandElement))
                 .thenReturn(LocalDate.EPOCH);
         lenient().when(testContext.fromApiJsonHelper.extractLocalDateNamed(ExternalTransferRequestParameters.SETTLEMENT_DATE,
                 jsonCommandElement, TestContext.DATE_FORMAT, Locale.GERMANY)).thenReturn(LocalDate.EPOCH);
@@ -570,7 +572,7 @@ public class ExternalAssetOwnersWriteServiceTest {
     @ParameterizedTest
     @MethodSource("invalidFieldsDataProvider")
     public void verifyWhenFieldValueInvalidThenExceptionIsThrown(final String ownerExternalId, final String transferExternalId,
-            final String purchaseRatio, final LocalDate settlementDate) {
+                                                                 final String purchaseRatio, final LocalDate settlementDate) {
         final TestContext testContext = new TestContext();
 
         // given
@@ -708,7 +710,7 @@ public class ExternalAssetOwnersWriteServiceTest {
     @ParameterizedTest
     @MethodSource("invalidTransferStatusDataProvider")
     public void verifyWhenInvalidTransferStatusThenExceptionIsThrown(final ExternalTransferStatus externalTransferStatus,
-            final boolean isDelayedSettlementEnabled, final String expectedExceptionMessage) {
+                                                                     final boolean isDelayedSettlementEnabled, final String expectedExceptionMessage) {
         final TestContext testContext = new TestContext();
 
         // given
@@ -759,7 +761,7 @@ public class ExternalAssetOwnersWriteServiceTest {
     @ParameterizedTest
     @MethodSource("buybackValidationWithDelaySettlementSuccessfulDataProvider")
     void buybackLoanByLoanIdWhenDelaySettlementEnabledSuccess(final List<ExternalTransferStatus> transferStatuses,
-            final ExternalTransferStatus expectedStatus) {
+                                                              final ExternalTransferStatus expectedStatus) {
         // given
         TestContext testContext = new TestContext();
 
@@ -811,7 +813,7 @@ public class ExternalAssetOwnersWriteServiceTest {
     @ParameterizedTest
     @MethodSource("buybackValidationWithDelaySettlementFailureDataProvider")
     void buybackLoanByLoanIdWhenDelaySettlementEnabledFailure(final List<ExternalTransferStatus> transferStatuses,
-            final String expectedExceptionMessage) {
+                                                              final String expectedExceptionMessage) {
         // given
         TestContext testContext = new TestContext();
 
@@ -888,7 +890,7 @@ public class ExternalAssetOwnersWriteServiceTest {
      * @return the {@link ExternalAssetOwnerTransfer} object.
      */
     private ExternalAssetOwnerTransfer createExternalAssetOwnerTransfer(final TestContext testContext,
-            final ExternalTransferStatus status) {
+                                                                        final ExternalTransferStatus status) {
         ExternalAssetOwnerTransfer transfer = new ExternalAssetOwnerTransfer();
         transfer.setExternalId(new ExternalId(RandomStringUtils.randomAlphanumeric(10)));
         transfer.setOwner(new ExternalAssetOwner());
@@ -912,7 +914,7 @@ public class ExternalAssetOwnersWriteServiceTest {
      *            the expected transfer status.
      */
     private void assertAssertOwnerTransferValues(final TestContext testContext, final ExternalAssetOwnerTransfer externalAssetOwnerTransfer,
-            final ExternalTransferStatus expectedTransferStatus) {
+                                                 final ExternalTransferStatus expectedTransferStatus) {
         assertEquals(testContext.loanId, externalAssetOwnerTransfer.getLoanId());
         assertEquals(testContext.externalLoanId, externalAssetOwnerTransfer.getExternalLoanId().getValue());
         assertEquals(testContext.ownerExternalId, externalAssetOwnerTransfer.getOwner().getExternalId().getValue());
@@ -925,7 +927,7 @@ public class ExternalAssetOwnersWriteServiceTest {
         assertEquals(FUTURE_DATE_9999_12_31, externalAssetOwnerTransfer.getEffectiveDateTo());
     }
 
-    @SuppressFBWarnings({ "VA_FORMAT_STRING_USES_NEWLINE" })
+    @SuppressFBWarnings({"VA_FORMAT_STRING_USES_NEWLINE"})
     static class TestContext {
 
         @Mock
@@ -997,7 +999,7 @@ public class ExternalAssetOwnersWriteServiceTest {
             lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_ID, jsonCommandElement))
                     .thenReturn(transferExternalId);
             lenient().when(
-                    fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_GROUP_ID, jsonCommandElement))
+                            fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.TRANSFER_EXTERNAL_GROUP_ID, jsonCommandElement))
                     .thenReturn(transferExternalGroupId);
             lenient().when(fromApiJsonHelper.extractStringNamed(ExternalTransferRequestParameters.PURCHASE_PRICE_RATIO, jsonCommandElement))
                     .thenReturn(PURCHASE_RATIO.toString());

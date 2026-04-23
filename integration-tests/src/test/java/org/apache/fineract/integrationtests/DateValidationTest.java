@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -129,7 +131,8 @@ public class DateValidationTest {
         InteropTransactionRole role = InteropTransactionRole.PAYER;
         String requestBody = buildRequestBody(requestCode, role);
         String response = interopHelper.postTransactionRequest(requestCode, role, requestBody);
-        HashMap<String, Object> map = new Gson().fromJson(response, new TypeToken<HashMap<String, Object>>() {}.getType());
+        HashMap<String, Object> map = new Gson().fromJson(response, new TypeToken<HashMap<String, Object>>() {
+        }.getType());
         List<Map<String, Object>> errors = (List) map.get("errors");
         assertNotNull(errors);
         Map<String, Object> error = errors.get(0);
@@ -167,7 +170,8 @@ public class DateValidationTest {
         final Integer maturityInstructionId = 400;
         String response = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 maturityInstructionId, getCharges());
-        HashMap<String, Object> map = new Gson().fromJson(response, new TypeToken<HashMap<String, Object>>() {}.getType());
+        HashMap<String, Object> map = new Gson().fromJson(response, new TypeToken<HashMap<String, Object>>() {
+        }.getType());
         List<Map<String, Object>> errors = (List) map.get("errors");
         assertNotNull(errors);
         Map<String, Object> error = errors.get(0);
@@ -210,7 +214,7 @@ public class DateValidationTest {
     }
 
     private String applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
-            final Integer maturityInstructionId, final List<HashMap<String, String>> charges) {
+                                                   final Integer maturityInstructionId, final List<HashMap<String, String>> charges) {
         log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.errorResponseSpec) //
                 .withSubmittedOnDate(submittedOnDate).withMaturityInstructionId(maturityInstructionId).withCharges(charges)

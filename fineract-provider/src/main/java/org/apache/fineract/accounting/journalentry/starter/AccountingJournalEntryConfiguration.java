@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -63,11 +63,11 @@ public class AccountingJournalEntryConfiguration {
     @Bean
     @ConditionalOnMissingBean(AccountingProcessorHelper.class)
     public AccountingProcessorHelper accountingProcessorHelper(JournalEntryRepository glJournalEntryRepository,
-            ProductToGLAccountMappingRepository accountMappingRepository,
-            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository, GLClosureRepository closureRepository,
-            GLAccountRepository glAccountRepository, OfficeRepository officeRepository,
-            AccountTransfersReadPlatformService accountTransfersReadPlatformService, ChargeRepositoryWrapper chargeRepositoryWrapper,
-            BusinessEventNotifierService businessEventNotifierService) {
+                                                               ProductToGLAccountMappingRepository accountMappingRepository,
+                                                               FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository, GLClosureRepository closureRepository,
+                                                               GLAccountRepository glAccountRepository, OfficeRepository officeRepository,
+                                                               AccountTransfersReadPlatformService accountTransfersReadPlatformService, ChargeRepositoryWrapper chargeRepositoryWrapper,
+                                                               BusinessEventNotifierService businessEventNotifierService) {
         return new AccountingProcessorHelper(glJournalEntryRepository, accountMappingRepository, financialActivityAccountRepository,
                 closureRepository, glAccountRepository, officeRepository, accountTransfersReadPlatformService, chargeRepositoryWrapper,
                 businessEventNotifierService);
@@ -76,9 +76,9 @@ public class AccountingJournalEntryConfiguration {
     @Bean
     @ConditionalOnMissingBean(JournalEntryReadPlatformService.class)
     public JournalEntryReadPlatformService journalEntryReadPlatformService(JdbcTemplate jdbcTemplate,
-            GLAccountReadPlatformService glAccountReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
-            ColumnValidator columnValidator, FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
+                                                                           GLAccountReadPlatformService glAccountReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
+                                                                           ColumnValidator columnValidator, FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
+                                                                           PaginationHelper paginationHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
         return new JournalEntryReadPlatformServiceImpl(jdbcTemplate, glAccountReadPlatformService, officeReadPlatformService,
                 columnValidator, financialActivityAccountRepositoryWrapper, paginationHelper, sqlGenerator);
     }
@@ -86,19 +86,19 @@ public class AccountingJournalEntryConfiguration {
     @Bean
     @ConditionalOnMissingBean(JournalEntryWritePlatformService.class)
     public JournalEntryWritePlatformService journalEntryWritePlatformService(GLClosureRepository glClosureRepository,
-            GLAccountRepository glAccountRepository, JournalEntryRepository glJournalEntryRepository,
-            OfficeRepositoryWrapper officeRepositoryWrapper, AccountingProcessorForLoanFactory accountingProcessorForLoanFactory,
-            AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
-            AccountingProcessorForSharesFactory accountingProcessorForSharesFactory, AccountingProcessorHelper helper,
-            JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer, AccountingRuleRepository accountingRuleRepository,
-            GLAccountReadPlatformService glAccountReadPlatformService, OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository,
-            PlatformSecurityContext context, PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions,
-            ConfigurationReadPlatformService configurationReadPlatformService, AccountingService accountingService,
-            ExternalAssetOwnerRepository externalAssetOwnerRepository,
-            LoanAmortizationAllocationMappingRepository loanAmortizationAllocationMappingRepository,
-            LoanTransactionRepository loanTransactionRepository) {
+                                                                             GLAccountRepository glAccountRepository, JournalEntryRepository glJournalEntryRepository,
+                                                                             OfficeRepositoryWrapper officeRepositoryWrapper, AccountingProcessorForLoanFactory accountingProcessorForLoanFactory,
+                                                                             AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
+                                                                             AccountingProcessorForSharesFactory accountingProcessorForSharesFactory, AccountingProcessorHelper helper,
+                                                                             JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer, AccountingRuleRepository accountingRuleRepository,
+                                                                             GLAccountReadPlatformService glAccountReadPlatformService, OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository,
+                                                                             PlatformSecurityContext context, PaymentDetailWritePlatformService paymentDetailWritePlatformService,
+                                                                             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
+                                                                             CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions,
+                                                                             ConfigurationReadPlatformService configurationReadPlatformService, AccountingService accountingService,
+                                                                             ExternalAssetOwnerRepository externalAssetOwnerRepository,
+                                                                             LoanAmortizationAllocationMappingRepository loanAmortizationAllocationMappingRepository,
+                                                                             LoanTransactionRepository loanTransactionRepository) {
         return new JournalEntryWritePlatformServiceJpaRepositoryImpl(glClosureRepository, glAccountRepository, glJournalEntryRepository,
                 officeRepositoryWrapper, accountingProcessorForLoanFactory, accountingProcessorForSavingsFactory,
                 accountingProcessorForSharesFactory, helper, fromApiJsonDeserializer, accountingRuleRepository,

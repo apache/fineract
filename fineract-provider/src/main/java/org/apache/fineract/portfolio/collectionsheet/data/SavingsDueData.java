@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -42,13 +43,13 @@ public final class SavingsDueData {
     private String depositAccountType;
 
     public static SavingsDueData instance(final Long savingsId, final String accountId, final Integer accountStatusId,
-            final String productName, final Long productId, final CurrencyData currency, final BigDecimal dueAmount,
-            final String depositAccountType) {
+                                          final String productName, final Long productId, final CurrencyData currency, final BigDecimal dueAmount,
+                                          final String depositAccountType) {
         return new SavingsDueData(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount, depositAccountType);
     }
 
     private SavingsDueData(final Long savingsId, final String accountId, final Integer accountStatusId, final String productName,
-            final Long productId, final CurrencyData currency, final BigDecimal dueAmount, final String depositAccountType) {
+                           final Long productId, final CurrencyData currency, final BigDecimal dueAmount, final String depositAccountType) {
         this.savingsId = savingsId;
         this.accountId = accountId;
         this.accountStatusId = accountStatusId;

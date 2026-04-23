@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,10 +26,12 @@ import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
@@ -49,7 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Test the creation, approval and rejection of a loan reschedule request
  **/
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
 
@@ -189,7 +191,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
      **/
     private void createRequiredEntities() {
         final String minimumDaysBetweenDisbursalAndFirstRepayment = "7"; // &
-                                                                         // days
+        // days
         this.createGroupEntityWithCalendar();
         this.createClientEntity();
         this.associateClientToGroup(this.groupId, this.clientId);

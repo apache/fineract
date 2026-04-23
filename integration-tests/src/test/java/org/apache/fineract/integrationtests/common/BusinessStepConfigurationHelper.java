@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,7 +22,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.data.BusinessStep;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
@@ -53,7 +55,8 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static JobBusinessStepConfigData configuredBusinessStepFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -61,7 +64,8 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static ApiParameterError configuredApiParameterErrorFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<ApiParameterError>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<ApiParameterError>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -69,7 +73,8 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     private static JobBusinessStepDetail availableBusinessStepFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<JobBusinessStepDetail>() {}.getType());
+        return new Gson().fromJson(json, new TypeToken<JobBusinessStepDetail>() {
+        }.getType());
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -77,7 +82,7 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static JobBusinessStepConfigData getConfiguredBusinessStepsByJobName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName) {
+                                                                                final ResponseSpecification responseSpec, String jobName) {
         final String response = Utils.performServerGet(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END);
         log.info("BusinessStepConfigurationHelper Response: {}", response);
@@ -89,7 +94,7 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static JobBusinessStepDetail getAvailableBusinessStepsByJobName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName) {
+                                                                           final ResponseSpecification responseSpec, String jobName) {
         final String response = Utils.performServerGet(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + GET_AVAILABLE_BUSINESS_STEPS_API_URL_END);
         log.info("BusinessStepConfigurationHelper Response: {}", response);
@@ -101,7 +106,7 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static void updateBusinessStepOrder(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            String jobName, String jsonBodyToSend) {
+                                               String jobName, String jsonBodyToSend) {
         String response = Utils.performServerPut(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END, jsonBodyToSend);
         log.info("BusinessStepConfigurationHelper Response: {}", response);
@@ -112,7 +117,7 @@ public final class BusinessStepConfigurationHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static ApiParameterError updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend) {
+                                                                     final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend) {
         String response = Utils.performServerPut(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END, jsonBodyToSend);
         log.info("BusinessStepConfigurationHelper Response: {}", response);

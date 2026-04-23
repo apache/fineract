@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
@@ -116,7 +117,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private List<ProvisioningCriteriaDefinitionData> retrieveProvisioningDefinitions(Long criteriaId) {
         ProvisioningCriteriaDefinitionRowMapper rowMapper = new ProvisioningCriteriaDefinitionRowMapper();
         final String sql = "select " + rowMapper.schema() + " where pc.criteria_id = ?";
-        return this.jdbcTemplate.query(sql, rowMapper, new Object[] { criteriaId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rowMapper, new Object[]{criteriaId}); // NOSONAR
     }
 
     private static final class ProvisioningCriteriaDefinitionRowMapper implements RowMapper<ProvisioningCriteriaDefinitionData> {
@@ -160,7 +161,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private String retrieveCriteriaName(Long criteriaId) {
         ProvisioningCriteriaNameRowMapper rowMapper = new ProvisioningCriteriaNameRowMapper();
         final String sql = "select " + rowMapper.schema() + " from m_provisioning_criteria pc where pc.id = ?";
-        return this.jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { criteriaId }); // NOSONAR
+        return this.jdbcTemplate.queryForObject(sql, rowMapper, new Object[]{criteriaId}); // NOSONAR
     }
 
     private static final class ProvisioningCriteriaNameRowMapper implements RowMapper<String> {

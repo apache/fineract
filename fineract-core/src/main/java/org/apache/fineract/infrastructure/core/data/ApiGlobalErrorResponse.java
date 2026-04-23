@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,9 +31,11 @@ import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -69,10 +71,11 @@ public class ApiGlobalErrorResponse {
 
     private List<ApiParameterError> errors = new ArrayList<>();
 
-    protected ApiGlobalErrorResponse() {}
+    protected ApiGlobalErrorResponse() {
+    }
 
     public static ApiGlobalErrorResponse create(int statusCode, String msgCode, String developerMessage, String defaultUserMessage,
-            List<ApiParameterError> errors) {
+                                                List<ApiParameterError> errors) {
         ApiGlobalErrorResponse response = new ApiGlobalErrorResponse();
         response.setHttpStatusCode(String.valueOf(statusCode));
         response.setUserMessageGlobalisationCode(msgCode);
@@ -132,7 +135,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse domainRuleViolation(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                             final Object... defaultUserMessageArgs) {
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
 
@@ -141,7 +144,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse notImplemented(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                        final Object... defaultUserMessageArgs) {
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
 
@@ -150,7 +153,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse dataIntegrityError(final String globalisationMessageCode, final String defaultUserMessage,
-            final String parameterName, final Object... defaultUserMessageArgs) {
+                                                            final String parameterName, final Object... defaultUserMessageArgs) {
         final List<ApiParameterError> errors = new ArrayList<>();
         final String developerMessage = "The request caused a data integrity issue to be fired by the database.";
         errors.add(ApiParameterError.parameterError(globalisationMessageCode, developerMessage, defaultUserMessage, parameterName,
@@ -160,7 +163,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse notFound(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                  final Object... defaultUserMessageArgs) {
         String msg = "The requested resource is not available.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.resourceIdentifierNotFound(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
@@ -169,7 +172,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse badClientRequest(final String globalisationMessageCode, final String defaultUserMessage,
-            final List<ApiParameterError> errors) {
+                                                          final List<ApiParameterError> errors) {
         return create(SC_BAD_REQUEST, globalisationMessageCode,
                 "The request was invalid. This typically will happen due to validation errors which are provided.", defaultUserMessage,
                 errors);
@@ -184,7 +187,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse serverSideError(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                         final Object... defaultUserMessageArgs) {
         String msg = "An unexpected error occured on the platform server.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
@@ -193,7 +196,7 @@ public class ApiGlobalErrorResponse {
     }
 
     public static ApiGlobalErrorResponse serviceUnavailable(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+                                                            final Object... defaultUserMessageArgs) {
         String msg = "The server is currently unable to handle the request , please try after some time.";
         final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));

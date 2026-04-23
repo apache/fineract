@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,7 +26,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
+
 import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -37,7 +39,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDa
  */
 @Entity
 @Table(name = "m_wc_loan_balance", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "wc_loan_id" }, name = "uq_m_wc_loan_balance_loan_id") })
+        @UniqueConstraint(columnNames = {"wc_loan_id"}, name = "uq_m_wc_loan_balance_loan_id")})
 @Getter
 public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
@@ -73,7 +75,8 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @Column(name = "version")
     private Integer version;
 
-    protected WorkingCapitalLoanBalance() {}
+    protected WorkingCapitalLoanBalance() {
+    }
 
     public static WorkingCapitalLoanBalance createFor(final WorkingCapitalLoan loan) {
         final WorkingCapitalLoanBalance balance = new WorkingCapitalLoanBalance();

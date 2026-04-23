@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +23,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -195,7 +196,7 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     }
 
     private PostChargesResponse createChargeIfNotExists(List<ChargeData> existingCharges, Enum<ChargeProductAppliesTo> appliesTo,
-            String name, Integer chargeTimeType, Integer chargeCalculationType, Double amount, Boolean isActive, Boolean isPenalty)
+                                                        String name, Integer chargeTimeType, Integer chargeCalculationType, Double amount, Boolean isActive, Boolean isPenalty)
             throws Exception {
         ChargeRequest request = defaultChargesRequest(appliesTo, name, chargeTimeType, chargeCalculationType, amount, isActive, isPenalty);
 
@@ -216,7 +217,7 @@ public class ChargeGlobalInitializerStep implements FineractGlobalInitializerSte
     }
 
     public static ChargeRequest defaultChargesRequest(Enum<ChargeProductAppliesTo> appliesTo, String name, Integer chargeTimeType,
-            Integer chargeCalculationType, Double amount, Boolean isActive, Boolean isPenalty) throws Exception {
+                                                      Integer chargeCalculationType, Double amount, Boolean isActive, Boolean isPenalty) throws Exception {
         ChargeRequest request = new ChargeRequest();
         Integer chargeAppliesTo;
 

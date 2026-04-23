@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -332,7 +333,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     @ParameterizedTest
     @MethodSource("loanSaleTransferableDataProvider")
     public void givenLoanSaleTransferable(final boolean isDelayedSettlementEnabled, final ExternalTransferStatus pendingStatus,
-            final ExternalTransferStatus expectedActiveStatus) {
+                                          final ExternalTransferStatus expectedActiveStatus) {
         // given
         final LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         when(loanProduct.getId()).thenReturn(LOAN_PRODUCT_ID);
@@ -405,7 +406,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     @ParameterizedTest
     @MethodSource("loanSaleNotTransferableDataProvider")
     public void givenLoanSaleNotTransferable(final ExternalTransferStatus pendingStatus,
-            final ExternalTransferSubStatus expectedSubStatus) {
+                                             final ExternalTransferSubStatus expectedSubStatus) {
         // given
         final Loan loanForProcessing = Mockito.mock(Loan.class);
         when(loanForProcessing.getId()).thenReturn(1L);
@@ -585,7 +586,7 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     }
 
     private void verifyLoanTransferBusinessEvent(ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor, int index, Loan expectedLoan,
-            ExternalAssetOwnerTransfer expectedAssetOwnerTransfer) {
+                                                 ExternalAssetOwnerTransfer expectedAssetOwnerTransfer) {
         assertTrue(businessEventArgumentCaptor.getAllValues().get(index) instanceof LoanOwnershipTransferBusinessEvent);
         assertEquals(expectedLoan, ((LoanOwnershipTransferBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index)).getLoan());
         assertEquals(expectedAssetOwnerTransfer,
@@ -593,13 +594,13 @@ public class LoanAccountOwnerTransferBusinessStepTest {
     }
 
     private void verifyLoanAccountSnapshotBusinessEvent(ArgumentCaptor<BusinessEvent<?>> businessEventArgumentCaptor, int index,
-            Loan expectedLoan) {
+                                                        Loan expectedLoan) {
         assertTrue(businessEventArgumentCaptor.getAllValues().get(index) instanceof LoanAccountSnapshotBusinessEvent);
         assertEquals(expectedLoan, ((LoanAccountSnapshotBusinessEvent) businessEventArgumentCaptor.getAllValues().get(index)).get());
     }
 
     private void assertCommonFieldsOfPendingAndActiveTransfers(final ExternalAssetOwnerTransfer pendingTransfer,
-            final ExternalAssetOwnerTransfer activeTransfer) {
+                                                               final ExternalAssetOwnerTransfer activeTransfer) {
         assertEquals(pendingTransfer.getOwner(), activeTransfer.getOwner());
         assertEquals(pendingTransfer.getExternalId(), activeTransfer.getExternalId());
         assertEquals(pendingTransfer.getLoanId(), activeTransfer.getLoanId());

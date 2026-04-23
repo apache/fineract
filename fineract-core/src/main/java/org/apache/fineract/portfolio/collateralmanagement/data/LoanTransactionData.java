@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.collateralmanagement.data;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+
 import lombok.Getter;
 
 @Getter
@@ -34,7 +35,7 @@ public final class LoanTransactionData {
     private final OffsetDateTime lastRepaymentDate;
 
     private LoanTransactionData(final Long loanId, final OffsetDateTime lastRepaymentDate, final BigDecimal remainingAmount,
-            final BigDecimal lastRepayment) {
+                                final BigDecimal lastRepayment) {
         this.lastRepayment = lastRepayment;
         this.lastRepaymentDate = lastRepaymentDate;
         this.remainingAmount = remainingAmount;
@@ -42,7 +43,7 @@ public final class LoanTransactionData {
     }
 
     public static LoanTransactionData instance(final Long loanId, final OffsetDateTime lastRepaymentDate, final BigDecimal remainingAmount,
-            final BigDecimal lastRepayment) {
+                                               final BigDecimal lastRepayment) {
         return new LoanTransactionData(loanId, lastRepaymentDate, remainingAmount, lastRepayment);
     }
 }

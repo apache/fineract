@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,10 +20,12 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.fixeddeposit
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -85,7 +87,7 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
     }
 
     private SavingsAccountTransactionData readSavingsTransaction(final Workbook workbook, final Row row, Long savingsAccountId,
-            final String locale, final String dateFormat) {
+                                                                 final String locale, final String dateFormat) {
 
         Long newSavingsAccountId = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row);
         if (newSavingsAccountId != null) {
@@ -117,7 +119,7 @@ public class FixedDepositTransactionImportHandler implements ImportHandler {
     }
 
     public Count importEntity(final Workbook workbook, final List<SavingsAccountTransactionData> savingsTransactions,
-            final String dateFormat, final String locale) {
+                              final String dateFormat, final String locale) {
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_TRANSACTION_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;

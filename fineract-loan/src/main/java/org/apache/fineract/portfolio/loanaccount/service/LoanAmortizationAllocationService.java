@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+
 import org.apache.fineract.portfolio.loanaccount.data.LoanAmortizationAllocationData;
 import org.apache.fineract.portfolio.loanaccount.domain.AmortizationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAmortizationAllocationMapping;
@@ -39,8 +40,8 @@ public interface LoanAmortizationAllocationService {
     BigDecimal calculateAlreadyAmortizedAmount(Long loanTransactionId, Long loanId);
 
     LoanAmortizationAllocationMapping createAmortizationAllocationMappingWithBaseLoanTransaction(LoanTransaction loanTransaction,
-            BigDecimal amount, AmortizationType amortizationType);
+                                                                                                 BigDecimal amount, AmortizationType amortizationType);
 
     void setAmortizationTransactionDataAndSaveAmortizationAllocationMapping(LoanAmortizationAllocationMapping amortizationAllocationMapping,
-            LoanTransaction amortizationTransaction);
+                                                                            LoanTransaction amortizationTransaction);
 }

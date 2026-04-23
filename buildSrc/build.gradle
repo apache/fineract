@@ -54,7 +54,7 @@ dependencies {
     implementation 'com.sun.activation:jakarta.activation'
     implementation 'com.sun.mail:jakarta.mail'
     implementation 'org.freemarker:freemarker'
-    implementation ('com.tmatesoft.svnkit:svnkit') {
+    implementation('com.tmatesoft.svnkit:svnkit') {
         exclude group: 'net.i2p.crypto', module: 'eddsa'
     }
     implementation 'org.bouncycastle:bcprov-jdk18on'

@@ -38,7 +38,7 @@
             </column>
             <column defaultValueComputed="NULL" name="disbursedon_date" type="date"/>
         </addColumn>
-        <modifyDataType tableName="m_wc_loan" columnName="last_closed_business_date" newDataType="date" />
+        <modifyDataType tableName="m_wc_loan" columnName="last_closed_business_date" newDataType="date"/>
     </changeSet>
 
     <!-- Indexes -->
