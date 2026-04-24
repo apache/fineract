@@ -16,33 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.api;
+package org.apache.fineract.portfolio.address.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.Builder;
+import lombok.Data;
 
-/**
- * Created by Chirag Gupta on 01/12/18.
- */
-@SuppressWarnings({ "MemberName" })
-final class ClientAddressApiResourcesSwagger {
+@Data
+@Builder
+public class ClientAddressUpdateResponse implements Serializable {
 
-    private ClientAddressApiResourcesSwagger() {}
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    @Schema(description = "PostClientClientIdAddressesResponse")
-    public static final class PostClientClientIdAddressesResponse {
-
-        private PostClientClientIdAddressesResponse() {}
-
-        @Schema(example = "15")
-        public Long resourceId;
-    }
-
-    @Schema(description = "PutClientClientIdAddressesResponse")
-    public static final class PutClientClientIdAddressesResponse {
-
-        private PutClientClientIdAddressesResponse() {}
-
-        @Schema(example = "67")
-        public Long resourceId;
-    }
+    private Long resourceId;
 }

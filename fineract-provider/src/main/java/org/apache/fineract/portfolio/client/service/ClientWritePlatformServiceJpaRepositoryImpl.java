@@ -61,8 +61,9 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
-import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
+import org.apache.fineract.portfolio.address.service.ClientAddressWriteService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.data.ClientAddressCreateRequest;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
@@ -119,7 +120,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final FromJsonHelper fromApiJsonHelper;
-    private final AddressWritePlatformService addressWritePlatformService;
+    private final ClientAddressWriteService clientAddressWriteService;
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
@@ -317,7 +318,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (isAddressEnabled) {
-                this.addressWritePlatformService.addNewClientAddress(newClient, command);
+                try {
+                    final com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    final com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(command.json());
+                    final com.fasterxml.jackson.databind.JsonNode addressNode = rootNode.get("address");
+                    if (addressNode != null && addressNode.isArray()) {
+                        final List<ClientAddressCreateRequest> addressRequests = objectMapper.convertValue(addressNode,
+                                objectMapper.getTypeFactory().constructCollectionType(List.class, ClientAddressCreateRequest.class));
+                        for (ClientAddressCreateRequest addressRequest : addressRequests) {
+                            addressRequest.setClientId(newClient.getId());
+                            this.clientAddressWriteService.createClientAddress(addressRequest);
+                        }
+                    }
+                } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                    throw new IllegalStateException("Failed to parse address JSON from client creation request", e);
+                }
             }
 
             if (command.arrayOfParameterNamed("familyMembers") != null) {

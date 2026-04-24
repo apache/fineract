@@ -28,29 +28,30 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.component.FetcherRule;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
-public class AddressReadPlatformServiceImpl implements AddressReadPlatformService {
+public class ClientAddressReadServiceImpl implements ClientAddressReadService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService readService;
 
     private static final class AddFieldsMapper implements RowMapper<AddressData> {
 
         public String schema() {
-            return "addr.id as id,client.id as client_id,addr.street as street,addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,"
-                    + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
-                    + "addr.state_province_id as state_province_id, addr.country_id as country_id,addr.postal_code as postal_code,addr.latitude as latitude,"
-                    + "addr.longitude as longitude,addr.created_by as created_by,addr.created_on as created_on,addr.updated_by as updated_by,"
-                    + "addr.updated_on as updated_on from m_address as addr,m_client client";
+            return """
+                    addr.id as id,client.id as client_id,addr.street as street,\
+                    addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,\
+                    addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,\
+                    addr.county_district as county_district,\
+                    addr.state_province_id as state_province_id, addr.country_id as country_id,\
+                    addr.postal_code as postal_code,addr.latitude as latitude,\
+                    addr.longitude as longitude,addr.created_by as created_by,addr.created_on as created_on,\
+                    addr.updated_by as updated_by,\
+                    addr.updated_on as updated_on from m_address as addr,m_client client""";
         }
 
         @Override
@@ -101,13 +102,22 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     private static final class AddMapper implements RowMapper<AddressData> {
 
         public String schema() {
-            return "cv2.code_value as addressType,ca.client_id as client_id,addr.id as id,ca.address_type_id as addresstyp,ca.is_active as is_active,addr.street as street,addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,"
-                    + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
-                    + "addr.state_province_id as state_province_id,cv.code_value as state_name, addr.country_id as country_id,c.code_value as country_name,addr.postal_code as postal_code,addr.latitude as latitude,"
-                    + "addr.longitude as longitude,addr.created_by as created_by,addr.created_on as created_on,addr.updated_by as updated_by,"
-                    + "addr.updated_on as updated_on" + " from m_address addr left join m_code_value cv on addr.state_province_id=cv.id"
-                    + " left join  m_code_value c on addr.country_id=c.id" + " join m_client_address ca on addr.id= ca.address_id"
-                    + " join m_code_value cv2 on ca.address_type_id=cv2.id";
+            return """
+                    cv2.code_value as addressType,ca.client_id as client_id,addr.id as id,\
+                    ca.address_type_id as addresstyp,ca.is_active as is_active,addr.street as street,\
+                    addr.address_line_1 as address_line_1,addr.address_line_2 as address_line_2,\
+                    addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,\
+                    addr.county_district as county_district,\
+                    addr.state_province_id as state_province_id,cv.code_value as state_name, \
+                    addr.country_id as country_id,c.code_value as country_name,addr.postal_code as postal_code,\
+                    addr.latitude as latitude,\
+                    addr.longitude as longitude,addr.created_by as created_by,addr.created_on as created_on,\
+                    addr.updated_by as updated_by,\
+                    addr.updated_on as updated_on\
+                     from m_address addr left join m_code_value cv on addr.state_province_id=cv.id\
+                     left join  m_code_value c on addr.country_id=c.id\
+                     join m_client_address ca on addr.id= ca.address_id\
+                     join m_code_value cv2 on ca.address_type_id=cv2.id""";
 
         }
 
@@ -172,8 +182,6 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     @Override
     public List<AddressData> retrieveAddressFields(final long clientid) {
-        this.context.authenticatedUser();
-
         final AddFieldsMapper rm = new AddFieldsMapper();
         final String sql = "select " + rm.schema() + " where client.id=?";
 
@@ -182,7 +190,6 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     @Override
     public List<AddressData> retrieveAllClientAddress(final long clientid) {
-        this.context.authenticatedUser();
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=?";
         return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
@@ -190,8 +197,6 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     @Override
     public List<AddressData> retrieveAddressbyType(final long clientid, final long typeid) {
-        this.context.authenticatedUser();
-
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=?";
 
@@ -200,7 +205,6 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     @Override
     public List<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid, final String status) {
-        this.context.authenticatedUser();
         boolean temp = Boolean.parseBoolean(status);
 
         final AddMapper rm = new AddMapper();
@@ -211,7 +215,6 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
     @Override
     public List<AddressData> retrieveAddressbyStatus(final long clientid, final String status) {
-        this.context.authenticatedUser();
         boolean temp = Boolean.parseBoolean(status);
 
         final AddMapper rm = new AddMapper();

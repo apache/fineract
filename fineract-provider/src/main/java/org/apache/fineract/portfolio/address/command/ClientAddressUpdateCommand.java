@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.address.service;
+package org.apache.fineract.portfolio.address.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.client.data.ClientAddressUpdateRequest;
 
-public interface AddressWritePlatformService {
-
-    CommandProcessingResult addClientAddress(Long clientId, Long addressTypeId, JsonCommand command);
-
-    CommandProcessingResult addNewClientAddress(Client client, JsonCommand command);
-
-    CommandProcessingResult updateClientAddress(Long clientId, JsonCommand command);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ClientAddressUpdateCommand extends Command<ClientAddressUpdateRequest> {}

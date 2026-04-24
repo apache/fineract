@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
 
-public interface AddressReadPlatformService {
+public interface ClientAddressReadService {
 
     List<AddressData> retrieveAddressFields(long clientid);
 

@@ -56,7 +56,7 @@ public class ClientAddress extends AbstractPersistableCustom<Long> {
 
     }
 
-    public static ClientAddress fromJson(final boolean isActive, final Client client, final Address address, final CodeValue address_type) {
+    public static ClientAddress create(final boolean isActive, final Client client, final Address address, final CodeValue address_type) {
 
         return new ClientAddress(client, address, address_type, isActive);
     }

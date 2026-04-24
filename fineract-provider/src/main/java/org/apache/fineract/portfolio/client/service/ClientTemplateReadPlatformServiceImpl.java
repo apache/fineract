@@ -39,7 +39,7 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.address.data.AddressData;
-import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
+import org.apache.fineract.portfolio.address.service.ClientAddressReadService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
@@ -62,7 +62,7 @@ public class ClientTemplateReadPlatformServiceImpl implements ClientTemplateRead
     // data mappers
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
-    private final AddressReadPlatformService addressReadPlatformService;
+    private final ClientAddressReadService clientAddressReadService;
     private final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
 
@@ -79,7 +79,7 @@ public class ClientTemplateReadPlatformServiceImpl implements ClientTemplateRead
 
         final Boolean isAddressEnabled = configurationDomainService.isAddressEnabled();
         if (isAddressEnabled) {
-            address = this.addressReadPlatformService.retrieveTemplate();
+            address = this.clientAddressReadService.retrieveTemplate();
         }
 
         final ClientFamilyMembersData familyMemberOptions = this.clientFamilyMembersReadPlatformService.retrieveTemplate();
