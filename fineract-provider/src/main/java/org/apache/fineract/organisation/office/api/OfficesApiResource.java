@@ -183,7 +183,9 @@ public class OfficesApiResource {
     @Path("{officeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update Office", description = "")
+    @Operation(summary = "Update Office", description = "Updates an existing office. Only fields that are provided in the request body will be updated. "
+            + "The user must have sufficient privileges to modify the target office. "
+            + "Example Requests:\n" + "\n" + "offices/3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdResponse.class)))
     public String updateOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
@@ -200,7 +202,9 @@ public class OfficesApiResource {
     @Path("/external-id/{externalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update Office", description = "")
+    @Operation(summary = "Update Office", description = "Updates an existing office using its external id. Only fields that are provided in the request body will be updated. "
+            + "The user must have sufficient privileges to modify the target office. "
+            + "Example Requests:\n" + "\n" + "offices/external-id/SYS54-88")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
     public OfficesApiResourceSwagger.PutOfficesOfficeIdResponse updateOfficeWithExternalId(
             @Parameter(description = "externalId") @PathParam("externalId") final String externalId,
