@@ -329,6 +329,9 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_WORKING_DAYS")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/workingdays"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_WORKING_DAYS")
+                    // field configuration
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/fieldconfiguration/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_ADDRESS")
                     // client address (template before wildcard for specificity)
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/client/addresses/template"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_ADDRESS")

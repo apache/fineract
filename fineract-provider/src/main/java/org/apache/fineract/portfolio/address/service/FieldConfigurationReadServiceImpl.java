@@ -21,24 +21,15 @@ package org.apache.fineract.portfolio.address.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
-public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigurationReadPlatformService {
+@RequiredArgsConstructor
+public class FieldConfigurationReadServiceImpl implements FieldConfigurationReadService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
-
-    @Autowired
-    public FieldConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class FieldMapper implements RowMapper<FieldConfigurationData> {
 
@@ -64,8 +55,6 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
 
     @Override
     public List<FieldConfigurationData> retrieveFieldConfiguration(final String entity) {
-        this.context.authenticatedUser();
-
         final FieldMapper rm = new FieldMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 
@@ -74,8 +63,6 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
 
     @Override
     public List<FieldConfigurationData> retrieveFieldConfigurationList(final String entity) {
-        this.context.authenticatedUser();
-
         final FieldMapper rm = new FieldMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 

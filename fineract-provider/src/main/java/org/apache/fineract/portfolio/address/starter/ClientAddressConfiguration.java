@@ -25,6 +25,8 @@ import org.apache.fineract.portfolio.address.service.ClientAddressReadService;
 import org.apache.fineract.portfolio.address.service.ClientAddressReadServiceImpl;
 import org.apache.fineract.portfolio.address.service.ClientAddressWriteService;
 import org.apache.fineract.portfolio.address.service.ClientAddressWriteServiceImpl;
+import org.apache.fineract.portfolio.address.service.FieldConfigurationReadService;
+import org.apache.fineract.portfolio.address.service.FieldConfigurationReadServiceImpl;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepository;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -49,5 +51,11 @@ public class ClientAddressConfiguration {
     @ConditionalOnMissingBean(ClientAddressReadService.class)
     public ClientAddressReadService clientAddressReadService(JdbcTemplate jdbcTemplate, CodeValueReadPlatformService readService) {
         return new ClientAddressReadServiceImpl(jdbcTemplate, readService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldConfigurationReadService.class)
+    public FieldConfigurationReadService fieldConfigurationReadService(JdbcTemplate jdbcTemplate) {
+        return new FieldConfigurationReadServiceImpl(jdbcTemplate);
     }
 }

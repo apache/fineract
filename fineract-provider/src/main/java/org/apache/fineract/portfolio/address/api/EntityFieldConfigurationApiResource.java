@@ -28,9 +28,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
-import org.apache.fineract.portfolio.address.service.FieldConfigurationReadPlatformService;
+import org.apache.fineract.portfolio.address.service.FieldConfigurationReadService;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/fieldconfiguration/{entity}")
@@ -39,18 +38,15 @@ import org.springframework.stereotype.Component;
         + "wherein various entities and subentities can be related.\n" + "Also it gives the user an ability to enable/disable fields,\n"
         + "add regular expression for validation")
 @RequiredArgsConstructor
+@Produces({ MediaType.APPLICATION_JSON })
 public class EntityFieldConfigurationApiResource {
 
-    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
-    private final PlatformSecurityContext context;
-    private final FieldConfigurationReadPlatformService readPlatformServicefld;
+    private final FieldConfigurationReadService fieldConfigurationReadService;
 
     @GET
-    @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves the Entity Field Configuration", description = "It retrieves all the Entity Field Configuration")
     public List<FieldConfigurationData> getAddresses(@PathParam("entity") @Parameter(description = "entity") final String entityname) {
-        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-        return this.readPlatformServicefld.retrieveFieldConfiguration(entityname);
+        return this.fieldConfigurationReadService.retrieveFieldConfiguration(entityname);
     }
 
 }
