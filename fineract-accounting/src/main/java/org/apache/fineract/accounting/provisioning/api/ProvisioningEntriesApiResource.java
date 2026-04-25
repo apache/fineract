@@ -132,7 +132,15 @@ public class ProvisioningEntriesApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List all Provisioning Entries Metadata", operationId = "retrieveAllProvisioningEntries")
+    @Operation(summary = "List all Provisioning Entries Metadata", operationId = "retrieveAllProvisioningEntries", description = """
+            Returns a paginated list of all provisioning entry metadata ordered by created date. \
+            Each entry represents a historical snapshot of loan loss provisioning calculations.
+
+            Example Requests:
+
+            provisioningentries
+
+            provisioningentries?offset=0&limit=10""")
     public Page<ProvisioningEntryData> retrieveAllProvisioningEntries(
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
