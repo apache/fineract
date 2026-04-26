@@ -109,7 +109,8 @@ public class TellerApiResource {
     @Path("{tellerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Update teller", operationId = "updateTeller", description = "")
+    @Operation(summary = "Update teller", operationId = "updateTeller", description = "Updates an existing teller's details such as name, description, status, or operational date range.\n\n"
+            + "Example Requests:\n\n" + "tellers/1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PutTellersRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.PutTellersResponse.class)))
     public CommandProcessingResult updateTeller(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
@@ -132,7 +133,8 @@ public class TellerApiResource {
     @GET
     @Path("{tellerId}/cashiers")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "List Cashiers", operationId = "retrieveAllCashiersForTeller", description = "")
+    @Operation(summary = "List Cashiers", operationId = "retrieveAllCashiersForTeller", description = "Retrieves all cashier assignments for a specific teller, along with the teller and office details.\n\n "
+            + "Example Requests:\n\n" + "tellers/1/cashiers\n\n" + "tellers/1/cashiers?fromdate=20150201&todate=20150301")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersResponse.class)))
     public CashiersForTeller getCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @QueryParam("fromdate") @Parameter(description = "fromdate") final String fromDateStr,
@@ -151,7 +153,8 @@ public class TellerApiResource {
     @GET
     @Path("{tellerId}/cashiers/{cashierId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve a cashier", operationId = "retrieveOneCashierForTeller", description = "")
+    @Operation(summary = "Retrieve a cashier", operationId = "retrieveOneCashierForTeller", description = "Retrieves details of a specific cashier assignment including the assigned staff member, teller, schedule, and working hours.\n\n"
+            + "Example Requests:\n\n" + "tellers/1/cashiers/5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashierIdResponse.class)))
     public CashierData findCashierData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
             @PathParam("cashierId") @Parameter(description = "cashierId") final Long cashierId) {
@@ -161,7 +164,9 @@ public class TellerApiResource {
     @GET
     @Path("{tellerId}/cashiers/template")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Find Cashiers", operationId = "retrieveCashierTemplateForTeller", description = "")
+    @Operation(summary = "Find Cashiers", operationId = "retrieveCashierTemplateForTeller", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for cashier management. "
+            + "The template data returned consists of the teller details and a list of available staff members from the teller's office.\n\n"
+            + "Example Requests:\n\n" + "tellers/1/cashiers/template")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TellerApiResourceSwagger.GetTellersTellerIdCashiersTemplateResponse.class)))
     public CashierData getCashierTemplate(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId) {
 
