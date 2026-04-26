@@ -146,7 +146,13 @@ public class FinancialActivityAccountsApiResource {
     @DELETE
     @Path("{mappingId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Financial Activity to Account Mapping", operationId = "deleteGLAccountMappingFinancialActivityAccount")
+    @Operation(summary = "Delete a Financial Activity to Account Mapping", operationId = "deleteGLAccountMappingFinancialActivityAccount", description = """
+            Deletes an existing mapping between a Financial Activity and a GL Account. \
+            Ensure no active account transfers depend on this mapping before deleting.
+
+            Example Requests:
+
+            financialactivityaccounts/1""")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FinancialActivityAccountsApiResourceSwagger.DeleteFinancialActivityAccountsResponse.class)))
     public CommandProcessingResult deleteGLAccount(@PathParam("mappingId") @Parameter(description = "mappingId") final Long mappingId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteOfficeToGLAccountMapping(mappingId).build();
