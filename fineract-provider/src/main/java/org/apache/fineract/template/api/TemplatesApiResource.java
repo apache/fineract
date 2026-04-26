@@ -176,7 +176,17 @@ public class TemplatesApiResource {
     @PUT
     @Path("{templateId}")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a UGD", description = "")
+    @Operation(summary = "Update a UGD", description = """
+            Updates an existing User Generated Document. \
+            All fields are replaced on update; the client must send the complete template definition including unchanged fields. \
+            Omitting a field will set it to null.
+            
+            Mandatory Fields
+            name, entity, type, text, mappers
+            
+            Example Requests:
+            
+            templates/1""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class)))
     public String saveTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
@@ -191,7 +201,14 @@ public class TemplatesApiResource {
 
     @DELETE
     @Path("{templateId}")
-    @Operation(summary = "Delete a UGD", description = "")
+    @Operation(summary = "Delete a UGD", description = """
+            Permanently removes a User Generated Document. \
+            Note: Ensure no active hooks (e.g., Twilio or Message Gateway) reference this template before deleting, \
+            as those integrations will fail without it.
+            
+            Example Requests:
+            
+            templates/1""")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class)))
     public String deleteTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId) {
 
