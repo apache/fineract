@@ -1789,3 +1789,74 @@ Feature: Credit Balance Refund
       | 01 April 2025    | Disbursement           | 243.79 | 0.0       | 0.0      | 0.0  | 0.0       | 243.79       | false    | false    |
       | 01 April 2025    | Down Payment           | 61.0   | 61.0      | 0.0      | 0.0  | 0.0       | 182.79       | false    | false    |
     Then Loan status will be "ACTIVE"
+
+  @TestRailId:C78812
+  Scenario: Loan ends in invalid state after CBR and backdated Goodwill Credit with both totalOutstanding and totalOverpaid > 0
+    When Admin sets the business date to "02 September 2025"
+    And Admin creates a client with random data
+
+    # Migration loan: submitted & disbursed back-dated to 06 April 2025, 6 monthly installments
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PS3087_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACCRUAL_ACTIVITY_LAST_INSTALLMENT | 06 April 2025     | 1316.49        | 12.2062                | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "06 April 2025" with "1316.49" amount and expected disbursement date on "06 April 2025"
+    And Admin successfully disburse the loan on "06 April 2025" with "1316.49" EUR transaction amount
+
+    # 4 backdated AUTOPAY repayments of 227.31 EUR (still on system date 02 September 2025)
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "06 May 2025" with 227.31 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "06 June 2025" with 227.31 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "06 July 2025" with 227.31 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "06 August 2025" with 227.31 EUR transaction amount and system-generated Idempotency key
+
+    # 5th installment via AUTOPAY on 06 September 2025
+    When Admin sets the business date to "06 September 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "06 September 2025" with 227.31 EUR transaction amount and system-generated Idempotency key
+
+    # 6th installment via REAL_TIME on 02 October 2025
+    When Admin sets the business date to "02 October 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "REPAYMENT" transaction with "REAL_TIME" payment type on "02 October 2025" with 227.00 EUR transaction amount and system-generated Idempotency key
+
+    # 3 MIRs (interestRefundCalculation=false) on 29 October 2025 → loan flips to OVERPAID
+    When Admin sets the business date to "29 October 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 October 2025" with 242.00 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 October 2025" with 242.00 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 October 2025" with 30.49 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+    Then Loan status will be "OVERPAID"
+
+    # 30 October 2025 → CBR 514.49
+    When Admin sets the business date to "30 October 2025"
+    And Admin runs inline COB job for Loan
+    And Admin makes Credit Balance Refund transaction on "30 October 2025" with 514.49 EUR transaction amount
+
+    # 11 December 2025 → INTEREST_REFUND on MIR1 + backdated GOODWILL_CREDIT (txn date 28 October 2025, BEFORE the MIRs)
+    When Admin sets the business date to "11 December 2025"
+    And Admin runs inline COB job for Loan
+    And Admin manually adds Interest Refund for "1"th "MERCHANT_ISSUED_REFUND" transaction made on "29 October 2025" with 0.01 EUR interest refund amount
+    And Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "28 October 2025" with 0.01 EUR transaction amount and system-generated Idempotency key
+
+    # 12 December 2025 → CBR 27.92
+    When Admin sets the business date to "12 December 2025"
+    And Admin runs inline COB job for Loan
+    And Admin makes Credit Balance Refund transaction on "12 December 2025" with 27.92 EUR transaction amount
+
+    # 16 December 2025 → INTEREST_REFUND on MIR2 & MIR3 + another backdated GOODWILL_CREDIT
+    When Admin sets the business date to "16 December 2025"
+    And Admin runs inline COB job for Loan
+    And Admin manually adds Interest Refund for "2"th "MERCHANT_ISSUED_REFUND" transaction made on "29 October 2025" with 0.01 EUR interest refund amount
+    And Admin manually adds Interest Refund for "3"th "MERCHANT_ISSUED_REFUND" transaction made on "29 October 2025" with 0.01 EUR interest refund amount
+    And Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "28 October 2025" with 0.01 EUR transaction amount and system-generated Idempotency key
+
+    # 17 December 2025 → final CBR 0.01 — should fully close the loan
+    When Admin sets the business date to "17 December 2025"
+    And Admin runs inline COB job for Loan
+    And Admin makes Credit Balance Refund transaction on "17 December 2025" with 0.01 EUR transaction amount
+
+    # ===== INVARIANT THE BUG VIOLATES =====
+    # PS-3087: today both fields equal 542.41 and status is OVERPAID.
+    # After fix: outstanding == 0 AND overpaid == 0, status == CLOSED_OBLIGATIONS_MET.
+    Then Loan has 0.0 outstanding amount
+    And Loan has 0.0 overpaid amount
+    And Loan status will be "CLOSED_OBLIGATIONS_MET"
