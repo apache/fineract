@@ -92,7 +92,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
         for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+            LOG.info("{} - {}", entry.getKey(), String.valueOf(entry.getValue()));
         }
         // 1st Dec 13 to 31st March 14 - 365 days, daily compounding using daily
         // balance

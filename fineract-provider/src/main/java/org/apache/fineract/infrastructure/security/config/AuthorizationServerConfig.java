@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.security.filter.BusinessDateFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
+import org.apache.fineract.infrastructure.security.service.TemporaryPasswordAwareAuthenticationProvider;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -56,6 +57,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -166,7 +168,8 @@ public class AuthorizationServerConfig {
                     if (fineractProperties.getSecurity().getTwoFactor().isEnabled()) {
                         auth.anyRequest().hasAuthority("TWOFACTOR_AUTHENTICATED");
                     }
-                }).formLogin(form -> form.loginPage("/login").authenticationDetailsSource(tenantAuthDetailsSource()).permitAll())
+                }).authenticationProvider(customAuthenticationProvider())
+                .formLogin(form -> form.loginPage("/login").authenticationDetailsSource(tenantAuthDetailsSource()).permitAll())
                 .oauth2ResourceServer(
                         resourceServer -> resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter())))
                 .addFilterAfter(tenantAwareAuthenticationFilter(), SecurityContextHolderFilter.class)//
@@ -228,6 +231,14 @@ public class AuthorizationServerConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider customAuthenticationProvider() {
+        DaoAuthenticationProvider authProvider = new TemporaryPasswordAwareAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean

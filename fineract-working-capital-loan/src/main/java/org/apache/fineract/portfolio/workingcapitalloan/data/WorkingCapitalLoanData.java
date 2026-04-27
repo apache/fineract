@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalPaymentAllocationData;
 
@@ -70,6 +71,7 @@ public class WorkingCapitalLoanData implements Serializable {
     private BigDecimal discount;
     private DelinquencyBucketData delinquencyBucket;
     private WorkingCapitalBreachData breach;
+    private WorkingCapitalNearBreachData nearBreach;
     private LocalDate lastClosedBusinessDate;
     private List<WorkingCapitalPaymentAllocationData> paymentAllocation;
     private LoanApplicationTimelineData timeline;

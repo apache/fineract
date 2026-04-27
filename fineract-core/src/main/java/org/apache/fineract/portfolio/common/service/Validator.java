@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.common.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -54,5 +55,22 @@ public final class Validator {
 
         baseDataValidator.accept(dataValidatorBuilder);
         return dataValidationErrors;
+    }
+
+    public static boolean isChanged(final Object newValue, final Object currentValue) {
+        if (newValue == null) {
+            return currentValue != null;
+        }
+        return !newValue.equals(currentValue);
+    }
+
+    public static boolean isBigDecimalChanged(final BigDecimal newValue, final BigDecimal currentValue) {
+        if (newValue == null) {
+            return currentValue != null;
+        }
+        if (currentValue == null) {
+            return true;
+        }
+        return newValue.compareTo(currentValue) != 0;
     }
 }

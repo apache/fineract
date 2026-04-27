@@ -383,6 +383,31 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder percentage() {
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
+
+        if (this.value != null) {
+            final BigDecimal number = new BigDecimal(this.value.toString());
+            if (number.compareTo(BigDecimal.ZERO) <= 0) {
+                String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".not.greater.than.zero";
+                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be greater than 0.";
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
+                        number, 0);
+                this.dataValidationErrors.add(error);
+            }
+            if (number.compareTo(BigDecimal.valueOf(100.0)) > 0) {
+                String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".greater.than.one.hundred";
+                String defaultEnglishMessage = "The parameter `" + this.parameter + "` must be not greater than 100.";
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter,
+                        number, 0);
+                this.dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
+
     /*
      * should be used with .notNull() before it
      */

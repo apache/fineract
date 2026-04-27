@@ -83,6 +83,7 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransaction
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionMerchantIssuedRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionPayoutRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanUndoContractTerminationBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -315,6 +316,27 @@ public class EventCheckHelper {
                 .extractingData(WorkingCapitalLoanTransactionDataV1::getWcLoanId).isEqualTo(loanId)//
                 .extractingBigDecimal(WorkingCapitalLoanTransactionDataV1::getTransactionAmount)
                 .isEqualTo(expectedAmount == null ? disbursementTransaction.getTransactionAmount() : expectedAmount)//
+                .extractingData(WorkingCapitalLoanTransactionDataV1::getReversed).isEqualTo(Boolean.FALSE);
+    }
+
+    public void workingCapitalLoanCreditBalanceRefundTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoansLoanIdResponse body = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+        if (body.getTransactions() == null || body.getTransactions().isEmpty()) {
+            throw new IllegalStateException("No Working Capital Loan transactions found");
+        }
+
+        final GetWorkingCapitalLoanTransactionIdResponse cbrTransaction = body.getTransactions().stream()
+                .filter(t -> t.getType() != null && "loanTransactionType.creditBalanceRefund".equals(t.getType().getCode())
+                        && !Boolean.TRUE.equals(t.getReversed()))
+                .reduce((first, second) -> second)
+                .orElseThrow(() -> new IllegalStateException("Credit balance refund transaction not found"));
+
+        eventAssertion.assertEvent(WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent.class, cbrTransaction.getId())//
+                .extractingData(WorkingCapitalLoanTransactionDataV1::getWcLoanId).isEqualTo(loanId)//
+                .extractingBigDecimal(WorkingCapitalLoanTransactionDataV1::getTransactionAmount)
+                .isEqualTo(expectedAmount == null ? cbrTransaction.getTransactionAmount() : expectedAmount)//
                 .extractingData(WorkingCapitalLoanTransactionDataV1::getReversed).isEqualTo(Boolean.FALSE);
     }
 

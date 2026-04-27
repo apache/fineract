@@ -33,7 +33,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalBreachAmountCalculationType;
 
 @Entity
-@Table(name = "m_wc_breach", uniqueConstraints = { @UniqueConstraint(name = "uq_m_wc_breach_name", columnNames = { "name" }) })
+@Table(name = "m_wc_breach_configuration", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_m_wc_breach_configuration_name", columnNames = { "name" }) })
 @Getter
 @Setter
 @NoArgsConstructor

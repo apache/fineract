@@ -28,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.WorkingCapitalBreachData;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalNearBreachData;
+import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -41,11 +43,17 @@ public class WorkingCapitalBreachInitializeStep implements FineractGlobalInitial
     public static final String DEFAULT_WC_BREACH_AMOUNT_CALCULATION_TYPE = "PERCENTAGE";
     public static final BigDecimal DEFAULT_WC_BREACH_AMOUNT = new BigDecimal("1.23");
 
+    public static final String DEFAULT_WC_NEAR_BREACH_NAME = "Default Working Capital near breach";
+    public static final Integer DEFAULT_WC_NEAR_BREACH_FREQUENCY = 1;
+    public static final String DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE = "MONTHS";
+    public static final BigDecimal DEFAULT_WC_NEAR_BREACH_THRESHOLD = new BigDecimal("72.15");
+
     private final FineractFeignClient fineractClient;
 
     @Override
     public void initialize() {
         setDefaultWCBreach();
+        setDefaultWCNearBreach();
     }
 
     public void setDefaultWCBreach() {
@@ -69,5 +77,28 @@ public class WorkingCapitalBreachInitializeStep implements FineractGlobalInitial
                 .breachAmount(DEFAULT_WC_BREACH_AMOUNT);
 
         executeVoid(() -> fineractClient.workingCapitalBreaches().createWorkingCapitalBreach(defaultWorkingCapitalBreachRequest, Map.of()));
+    }
+
+    public void setDefaultWCNearBreach() {
+        try {
+            List<WorkingCapitalNearBreachData> existingBuckets = fineractClient.workingCapitalNearBreaches()
+                    .retrieveAllWorkingCapitalNearBreaches(Map.of());
+            boolean bucketExists = existingBuckets.stream().anyMatch(b -> DEFAULT_WC_NEAR_BREACH_NAME.equals(b.getName()));
+
+            if (bucketExists) {
+                return;
+            }
+        } catch (Exception e) {
+            log.debug("Could not retrieve existing working capital breaches, will create default breach", e);
+        }
+
+        WorkingCapitalNearBreachRequest defaultWorkingCapitalNearBreachRequest = new WorkingCapitalNearBreachRequest()//
+                .nearBreachName(DEFAULT_WC_NEAR_BREACH_NAME) //
+                .nearBreachFrequency(DEFAULT_WC_NEAR_BREACH_FREQUENCY) //
+                .nearBreachFrequencyType(DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE) //
+                .nearBreachThreshold(DEFAULT_WC_NEAR_BREACH_THRESHOLD); //
+
+        executeVoid(() -> fineractClient.workingCapitalNearBreaches().createWorkingCapitalNearBreach(defaultWorkingCapitalNearBreachRequest,
+                Map.of()));
     }
 }

@@ -60,7 +60,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C70213
   Scenario Outline: Verify Working capital Loan Product create with invalid data shall outcome with error - validation check with zero values - UC6
-    Then Admin failed to create a new Working Capital Loan Product field "<wcp_field_name_zero_value>" with zero incorrect value
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name_zero_value>" with zero incorrect value
 
     Examples:
       | wcp_field_name_zero_value |
@@ -86,7 +86,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C70215
   Scenario Outline: Verify Working capital Loan Product create with invalid data shall outcome with error - validation check with diff values - U8
-    Then Admin failed to create a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
 
     Examples:
       | wcp_field_name           | wcp_invalid_field_value  | wcp_error_message                                                                          |
@@ -191,7 +191,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C72384
   Scenario Outline: Verify WC Loan Product create with invalid delinquency grace data
-    Then Admin failed to create a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
     Examples:
       | wcp_field_name         | wcp_invalid_field_value | wcp_error_message                                                   |
       | delinquencyGraceDays   | "-1"                    | "The parameter `delinquencyGraceDays` must be zero or greater."     |
@@ -215,7 +215,7 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C74470
   Scenario Outline: Verify WC Loan Product create/update with invalid breachId
-    Then Admin failed to create a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin failed to create a new Working Capital Loan Product with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
     When Admin creates a new Working Capital Loan Product
     Then Admin failed to update a new Working Capital Loan Product field "<wcp_field_name>" with invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
     Then Admin deletes a Working Capital Loan Product
@@ -315,3 +315,104 @@ Feature: WorkingCapitalLoanProduct
   @TestRailId:C74461
   Scenario: Verify Working capital Loan Product template accounting rule options contain NONE and CASH_BASED
     Then Admin verifies Working Capital Loan Product template has NONE and CASH_BASED accounting rule options
+
+  @TestRailId:C76707
+  Scenario: Verify WC Loan Product create with breach and update with near breach (breach -> all) - UC1
+    When Admin creates a new Working Capital Loan Product with breachId
+    When Admin updates a Working Capital Loan Product with near breach
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values
+    When Admin deletes WC Near Breach With Values
+
+  @TestRailId:C76708
+  Scenario: Verify WC Loan Product update with breach and near breach valid data (none -> all) - UC2
+    When Admin creates a new Working Capital Loan Product
+    When Admin updates a Working Capital Loan Product with breach and near breach
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values
+    When Admin deletes WC Near Breach With Values
+
+  @TestRailId:C76709
+  Scenario Outline: Verify WC Loan Product create with breach and near breach frequency valid data - UC3
+    When Admin creates a new WCLP with breach <breachFrequency> "<breachFrequencyType>" frequency and near breach <nearBreachFrequency> "<nearBreachFrequencyType>" frequency
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values
+    When Admin deletes WC Near Breach With Values
+
+    Examples:
+      | breachFrequency | breachFrequencyType | nearBreachFrequency | nearBreachFrequencyType |
+      | 2               | MONTHS              | 1                   | MONTHS                  |
+      | 20              | DAYS                | 12                  | DAYS                    |
+      | 3               | YEARS               | 2                   | YEARS                   |
+      | 2               | MONTHS              | 50                  | DAYS                    |
+      | 20              | MONTHS              | 1                   | YEARS                   |
+
+  @TestRailId:C76710
+  Scenario Outline: Verify WC Loan Product update with breach and near breach frequency valid data - UC4
+    When Admin creates a new Working Capital Loan Product
+    When Admin updates a WCLP with breach <breachFrequency> "<breachFrequencyType>" frequency and near breach <nearBreachFrequency> "<nearBreachFrequencyType>" frequency
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values
+    When Admin deletes WC Near Breach With Values
+
+    Examples:
+      | breachFrequency | breachFrequencyType | nearBreachFrequency | nearBreachFrequencyType |
+      | 2               | MONTHS              | 1                   | MONTHS                  |
+      | 20              | DAYS                | 12                  | DAYS                    |
+      | 3               | YEARS               | 2                   | YEARS                   |
+      | 2               | MONTHS              | 50                  | DAYS                    |
+      | 20              | MONTHS              | 1                   | YEARS                   |
+
+  @TestRailId:C76711
+  Scenario Outline: Verify WC Loan Product create failed with breach frequency lower then near breach frequency - UC5
+    When Admin failed to create WCLP with breach <breachFrequency> "<breachFrequencyType>" frequency lower then near breach <nearBreachFrequency> "<nearBreachFrequencyType>" frequency
+
+    Examples:
+      | breachFrequency | breachFrequencyType | nearBreachFrequency | nearBreachFrequencyType |
+      | 1               | MONTHS              | 3                   | MONTHS                  |
+      | 2               | MONTHS              | 2                   | MONTHS                  |
+      | 10              | DAYS                | 12                  | DAYS                    |
+      | 1               | YEARS               | 3                   | YEARS                   |
+      | 2               | MONTHS              | 70                  | DAYS                    |
+      | 10              | MONTHS              | 1                   | YEARS                   |
+
+  @TestRailId:C76712
+  Scenario Outline: Verify WC Loan Product update failed with breach frequency lower then near breach frequency - UC6
+    When Admin creates a new Working Capital Loan Product
+    When Admin failed to update WCLP with breach <breachFrequency> "<breachFrequencyType>" frequency lower then near breach <nearBreachFrequency> "<nearBreachFrequencyType>" frequency
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values
+    When Admin deletes WC Near Breach With Values
+
+    Examples:
+      | breachFrequency | breachFrequencyType | nearBreachFrequency | nearBreachFrequencyType |
+      | 1               | MONTHS              | 3                   | MONTHS                  |
+      | 2               | MONTHS              | 2                   | MONTHS                  |
+      | 10              | DAYS                | 12                  | DAYS                    |
+      | 1               | YEARS               | 3                   | YEARS                   |
+      | 2               | MONTHS              | 70                  | DAYS                    |
+      | 10              | MONTHS              | 1                   | YEARS                   |
+
+  @TestRailId:C76713
+  Scenario: Verify WC Loan Product create failed without breach, but with near breach specified - UC7
+    Then Admin failed to create Working Capital Loan Product without breach, but with near breach specified
+    When Admin deletes WC Near Breach With Values
+
+  @TestRailId:C76714
+  Scenario: Verify WC Loan Product update failed without breach, but with near breach specified - UC8
+    When Admin creates a new Working Capital Loan Product
+    Then Admin failed to update Working Capital Loan Product without breach, but with near breach specified
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Near Breach With Values
+
+  @TestRailId:C76715
+  Scenario Outline: Verify WC Loan Product create/update failed with near breach invalid data - UC9
+    Then Admin failed to create a new Working Capital Loan Product with breach with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    When Admin creates a new Working Capital Loan Product with breachId
+    Then Admin failed to update a new Working Capital Loan Product with breach with field "<wcp_field_name>" invalid data <wcp_invalid_field_value> and got an error <wcp_error_message>
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values
+
+    Examples:
+      | wcp_field_name | wcp_invalid_field_value | wcp_error_message                                      |
+      | nearBreachId   | "0"                     | "Working Capital Near Breach with id 0 was not found." |

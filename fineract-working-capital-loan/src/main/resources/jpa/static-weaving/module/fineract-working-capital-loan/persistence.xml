@@ -169,6 +169,7 @@
         <class>org.apache.fineract.portfolio.workingcapitalloan.domain.ProjectedAmortizationLoanModel</class>
         <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction</class>
         <class>org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation</class>
+        <class>org.apache.fineract.portfolio.workingcapitalloannearbreach.domain.WorkingCapitalNearBreach</class>
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct</class>
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes</class>
         <class>org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule</class>

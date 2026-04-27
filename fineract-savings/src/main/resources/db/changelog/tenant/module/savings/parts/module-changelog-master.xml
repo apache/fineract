@@ -27,4 +27,5 @@
   <include file="parts/2002_add_savings_accrual_permission.xml" relativeToChangelogFile="true" />
   <include file="parts/2003_add_accrued_till_date_to_savings_account.xml" relativeToChangelogFile="true" />
   <include file="parts/2004_add_savings_account_cob_infrastructure.xml" relativeToChangelogFile="true" />
+  <include file="parts/2005_add_external_id_to_savings_transaction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -273,7 +273,7 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2020-12-31  | 2021-01-06   | D00            | 1              | 30             |
 
-  @TestRailId:C7457
+  @TestRailId:C74527
   Scenario: Verify working capital loan delinquency range schedule with (internal) payments - UC1: full expectedAmount repaid on disbursement day
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -295,7 +295,7 @@ Feature: Working Capital Delinquency
     When Admin makes Internal Payment "270.0" on "2026-01-01"
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0        | 0.0             | true                  | 0.0             | 0           |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 

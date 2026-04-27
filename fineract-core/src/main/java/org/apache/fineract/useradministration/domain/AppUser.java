@@ -30,6 +30,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -142,6 +144,17 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         this.passwordResetRequired = required;
     }
 
+    @Getter
+    @Column(name = "temporary_password")
+    private String temporaryPassword;
+
+    @Column(name = "temporary_password_expiry_time")
+    private OffsetDateTime temporaryPasswordExpiryTime;
+
+    @Getter
+    @Column(name = "is_password_reset_enabled", nullable = false)
+    private boolean passwordResetAllowed = false;
+
     public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles, final JsonCommand command) {
 
         final String username = command.stringValueOfParameterNamed("username");
@@ -181,6 +194,9 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         final AppUser appUser = new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire,
                 cannotChangePassword);
         appUser.updateLoginRetryLimitEnabled(resolveLoginRetryLimitEnabled(username, loginRetryLimitEnabled));
+        if (command.parameterExists(AppUserConstants.IS_PASSWORD_RESET_ALLOWED)) {
+            appUser.updatePasswordResetAllowed(command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED));
+        }
         return appUser;
     }
 
@@ -212,6 +228,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         this.cannotChangePassword = cannotChangePassword;
         this.failedLoginAttempts = 0;
         this.loginRetryLimitEnabled = false;
+        this.passwordResetAllowed = false;
     }
 
     public EnumOptionData organisationalRoleData() {
@@ -246,9 +263,39 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         }
 
         this.password = encodePassword;
+        clearTemporaryPassword();
         this.firstTimeLoginRemaining = false;
         this.lastTimePasswordUpdated = DateUtils.getBusinessLocalDate();
 
+    }
+
+    public void updateTemporaryPassword(final String encodedPassword, final OffsetDateTime expiryTime) {
+        this.temporaryPassword = encodedPassword;
+        this.temporaryPasswordExpiryTime = expiryTime;
+    }
+
+    public boolean isTemporaryPasswordExpired() {
+        if (this.temporaryPasswordExpiryTime == null) {
+            return false;
+        }
+        return OffsetDateTime.now(ZoneOffset.UTC).isAfter(this.temporaryPasswordExpiryTime);
+    }
+
+    public boolean hasValidTemporaryPassword() {
+        return StringUtils.isNotBlank(this.temporaryPassword) && !isTemporaryPasswordExpired();
+    }
+
+    public void clearTemporaryPasswordExpiry() {
+        clearTemporaryPassword();
+    }
+
+    public void clearTemporaryPassword() {
+        this.temporaryPassword = null;
+        this.temporaryPasswordExpiryTime = null;
+    }
+
+    public void updatePasswordResetAllowed(final boolean passwordResetAllowed) {
+        this.passwordResetAllowed = passwordResetAllowed && !isSystemUser() && !Boolean.TRUE.equals(this.cannotChangePassword);
     }
 
     public void changeOffice(final Office differentOffice) {
@@ -340,6 +387,13 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
                 actualChanges.put(AppUserConstants.IS_LOGIN_RETRIES_ENABLED, effectiveValue);
                 updateLoginRetryLimitEnabled(effectiveValue);
             }
+        }
+
+        if (command.hasParameter(AppUserConstants.IS_PASSWORD_RESET_ALLOWED)
+                && command.isChangeInBooleanParameterNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED, this.passwordResetAllowed)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED);
+            actualChanges.put(AppUserConstants.IS_PASSWORD_RESET_ALLOWED, newValue);
+            updatePasswordResetAllowed(newValue);
         }
         return actualChanges;
     }

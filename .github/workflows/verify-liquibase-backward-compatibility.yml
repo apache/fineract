@@ -1,12 +1,14 @@
 name: Verify Liquibase Backward Compatibility
 
-on: [pull_request]
+on:
+  workflow_call:
 
 permissions:
   contents: read
 
 jobs:
   liquibase-backward-compatibility-check:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
@@ -39,18 +41,20 @@ jobs:
           fetch-depth: 0
           path: baseline
 
-      - name: Checkout PR merge commit
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          path: current
-
       - name: Set up JDK 21
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           distribution: 'zulu'
           java-version: '21'
+
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
 
       - name: Wait for PostgreSQL
         run: |
@@ -72,19 +76,19 @@ jobs:
           echo "${{ github.event.pull_request.base.sha }}"
           echo "PR head SHA:"
           echo "${{ github.event.pull_request.head.sha }}"
-          echo "GitHub merge SHA:"
-          echo "${{ github.sha }}"
+          echo "GitHub PR merge ref:"
+          echo "refs/pull/${{ github.event.pull_request.number }}/merge"
           echo "Baseline revision:"
           git -C baseline rev-parse HEAD
           git -C baseline log -1 --oneline
           echo "Merged PR revision:"
-          git -C current rev-parse HEAD
-          git -C current log -1 --oneline
+          git rev-parse HEAD
+          git log -1 --oneline
 
       - name: Start backend on base commit
         working-directory: baseline
         run: |
-          ./gradlew :fineract-provider:devRun --args="\
+          ./gradlew --no-daemon :fineract-provider:devRun --args="\
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
           --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
           --spring.datasource.hikari.username=root \
@@ -132,9 +136,8 @@ jobs:
           sleep 10
 
       - name: Start backend on merged PR commit
-        working-directory: current
         run: |
-          ./gradlew :fineract-provider:devRun --args="\
+          ./gradlew --no-daemon :fineract-provider:devRun --args="\
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
           --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
           --spring.datasource.hikari.username=root \
@@ -176,7 +179,6 @@ jobs:
 
       - name: Stop PR backend
         if: always()
-        working-directory: current
         run: |
           kill $(cat backend.pid)
           sleep 10

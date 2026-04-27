@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="wclp-0029-0-copy-missing-wc-delinquency-configuration-data" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_delinquency_payment_rule"/>
+                <tableExists tableName="m_wc_delinquency_configuration"/>
+            </and>
+        </preConditions>
+        <sql>
+            INSERT INTO m_wc_delinquency_configuration
+            (id, created_by, last_modified_by, bucket_id, frequency, frequency_type, minimum_payment, minimum_payment_type, created_on_utc, last_modified_on_utc)
+            SELECT src.id, src.created_by, src.last_modified_by, src.bucket_id, src.frequency, src.frequency_type, src.minimum_payment,
+                   src.minimum_payment_type, src.created_on_utc, src.last_modified_on_utc
+            FROM m_delinquency_payment_rule src
+            WHERE NOT EXISTS (
+                SELECT 1 FROM m_wc_delinquency_configuration dst
+                WHERE dst.id = src.id
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="wclp-0029-0-1-sync-wc-delinquency-configuration-sequence-postgresql" author="fineract" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_delinquency_configuration"/>
+                <sequenceExists sequenceName="m_wc_delinquency_configuration_id_seq"/>
+            </and>
+        </preConditions>
+        <sql>
+            SELECT setval(
+                'm_wc_delinquency_configuration_id_seq',
+                COALESCE((SELECT MAX(id) FROM m_wc_delinquency_configuration), 0) + 1,
+                false
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="wclp-0029-1-drop-legacy-delinquency-payment-rule-table" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_delinquency_configuration"/>
+                <tableExists tableName="m_delinquency_payment_rule"/>
+            </and>
+        </preConditions>
+        <dropTable tableName="m_delinquency_payment_rule"/>
+    </changeSet>
+
+    <changeSet id="wclp-0029-2-drop-legacy-loan-product-breach-fk" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_product_breach"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="m_wc_loan_product" constraintName="FK_m_wc_loan_product_breach"/>
+    </changeSet>
+
+    <changeSet id="wclp-0029-3-drop-legacy-loan-breach-fk" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_breach"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="m_wc_loan" constraintName="FK_m_wc_loan_breach"/>
+    </changeSet>
+
+    <changeSet id="wclp-0029-3-1-copy-missing-wc-breach-configuration-data" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_breach"/>
+                <tableExists tableName="m_wc_breach_configuration"/>
+            </and>
+        </preConditions>
+        <sql>
+            INSERT INTO m_wc_breach_configuration
+            (id, name, breach_frequency, breach_frequency_type, breach_amount_calculation_type, breach_amount)
+            SELECT src.id, src.name, src.breach_frequency, src.breach_frequency_type, src.breach_amount_calculation_type, src.breach_amount
+            FROM m_wc_breach src
+            WHERE NOT EXISTS (
+                SELECT 1 FROM m_wc_breach_configuration dst
+                WHERE dst.id = src.id
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="wclp-0029-3-2-sync-wc-breach-configuration-sequence-postgresql" author="fineract" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_breach_configuration"/>
+                <sequenceExists sequenceName="m_wc_breach_configuration_id_seq"/>
+            </and>
+        </preConditions>
+        <sql>
+            SELECT setval(
+                'm_wc_breach_configuration_id_seq',
+                COALESCE((SELECT MAX(id) FROM m_wc_breach_configuration), 0) + 1,
+                false
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="wclp-0029-4-drop-legacy-breach-table" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_breach_configuration"/>
+                <tableExists tableName="m_wc_breach"/>
+            </and>
+        </preConditions>
+        <dropTable tableName="m_wc_breach"/>
+    </changeSet>
+</databaseChangeLog>

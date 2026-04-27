@@ -152,10 +152,11 @@ public class ApiGlobalErrorResponse {
     public static ApiGlobalErrorResponse dataIntegrityError(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
         final List<ApiParameterError> errors = new ArrayList<>();
-        errors.add(ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage, parameterName, defaultUserMessageArgs));
+        final String developerMessage = "The request caused a data integrity issue to be fired by the database.";
+        errors.add(ApiParameterError.parameterError(globalisationMessageCode, developerMessage, defaultUserMessage, parameterName,
+                defaultUserMessageArgs));
 
-        return create(SC_FORBIDDEN, globalisationMessageCode, "The request caused a data integrity issue to be fired by the database.",
-                defaultUserMessage, errors);
+        return create(SC_FORBIDDEN, globalisationMessageCode, developerMessage, defaultUserMessage, errors);
     }
 
     public static ApiGlobalErrorResponse notFound(final String globalisationMessageCode, final String defaultUserMessage,

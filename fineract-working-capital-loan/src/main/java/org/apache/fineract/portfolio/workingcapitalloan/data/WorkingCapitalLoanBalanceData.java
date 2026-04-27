@@ -42,4 +42,5 @@ public class WorkingCapitalLoanBalanceData implements Serializable {
     private BigDecimal totalPayment;
     private BigDecimal realizedIncome;
     private BigDecimal unrealizedIncome;
+    private BigDecimal overpaymentAmount;
 }

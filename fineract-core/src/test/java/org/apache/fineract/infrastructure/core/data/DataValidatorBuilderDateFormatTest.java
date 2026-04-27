@@ -45,7 +45,7 @@ class DataValidatorBuilderDateFormatTest {
         final List<ApiParameterError> errors = new ArrayList<>();
         new DataValidatorBuilder(errors).resource(RESOURCE).parameter(PARAMETER).value(pattern).validDateTimeFormatPattern();
         assertThat(errors).hasSize(1);
-        assertThat(errors.get(0).getParameterName()).isEqualTo(PARAMETER);
+        assertThat(errors.get(0).getParameterName()).isEqualTo(pattern);
         assertThat(errors.get(0).getDeveloperMessage()).contains("invalid date/time pattern");
     }
 

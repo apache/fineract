@@ -31,6 +31,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.mapper.WorkingCapitalBreachMapper;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.mapper.WorkingCapitalNearBreachMapper;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductConfigurableAttributesData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalPaymentAllocationData;
@@ -45,7 +46,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper(config = MapstructMapperConfig.class, uses = { DelinquencyBucketMapper.class, WorkingCapitalBreachMapper.class })
+@Mapper(config = MapstructMapperConfig.class, uses = { DelinquencyBucketMapper.class, WorkingCapitalBreachMapper.class,
+        WorkingCapitalNearBreachMapper.class })
 public interface WorkingCapitalLoanProductMapper {
 
     @Mapping(target = "fundId", source = "fund.id")
@@ -66,6 +68,7 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "repaymentEvery", source = "relatedDetail.repaymentEvery")
     @Mapping(target = "repaymentFrequencyType", source = "relatedDetail.repaymentFrequencyType", qualifiedByName = "periodFrequencyTypeToStringEnumOptionData")
     @Mapping(target = "breach", source = "breach")
+    @Mapping(target = "nearBreach", source = "nearBreach")
     @Mapping(target = "allowAttributeOverrides", source = "configurableAttributes", qualifiedByName = "configurableAttributesToData")
     @Mapping(target = "delinquencyGraceDays", source = "relatedDetail.delinquencyGraceDays")
     @Mapping(target = "delinquencyStartType", source = "relatedDetail.delinquencyStartType", qualifiedByName = "delinquencyStartTypeToStringEnumOptionData")
@@ -84,6 +87,7 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "delinquencyBucketOptions", ignore = true)
     @Mapping(target = "delinquencyStartTypeOptions", ignore = true)
     @Mapping(target = "delinquencyMinimumPaymentTypeOptions", ignore = true)
+    @Mapping(target = "nearBreachOptions", ignore = true)
     WorkingCapitalLoanProductData toData(WorkingCapitalLoanProduct entity);
 
     List<WorkingCapitalLoanProductData> toDataList(List<WorkingCapitalLoanProduct> entities);

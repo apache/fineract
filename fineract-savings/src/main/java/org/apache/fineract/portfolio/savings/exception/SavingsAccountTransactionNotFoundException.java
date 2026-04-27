@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.portfolio.savings.exception;
 
+import java.util.Objects;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class SavingsAccountTransactionNotFoundException extends AbstractPlatformResourceNotFoundException {
 
@@ -28,4 +31,17 @@ public class SavingsAccountTransactionNotFoundException extends AbstractPlatform
                 savingsId, transactionId);
     }
 
+    public SavingsAccountTransactionNotFoundException(final Long savingsId, final ExternalId transactionExternalId) {
+        super("error.msg.saving.account.trasaction.external.id.invalid",
+                "Savings account with savings identifier " + savingsId + " and trasaction external identifier "
+                        + Objects.requireNonNullElse(transactionExternalId, ExternalId.empty()).getValue() + " does not exist",
+                savingsId, transactionExternalId);
+    }
+
+    public SavingsAccountTransactionNotFoundException(final Long savingsId, final Long transactionId,
+            final EmptyResultDataAccessException e) {
+        super("error.msg.saving.account.trasaction.id.invalid",
+                "Savings account with savings identifier " + savingsId + " and trasaction identifier " + transactionId + " does not exist",
+                savingsId, transactionId, e);
+    }
 }

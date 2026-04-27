@@ -355,13 +355,6 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
         return null;
     }
 
-    @Override
-    @SuppressWarnings("unused")
-    public CommandProcessingResult inactivateCharge(Long clientId, Long clientChargeId) {
-        // functionality not yet supported
-        return null;
-    }
-
     /**
      * Ensures that the charge due date is not on a holiday or a non working day
      *

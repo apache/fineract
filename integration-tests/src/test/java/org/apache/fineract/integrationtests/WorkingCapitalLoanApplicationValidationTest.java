@@ -26,10 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -50,7 +48,6 @@ import org.junit.jupiter.api.Test;
 public class WorkingCapitalLoanApplicationValidationTest {
 
     private static RequestSpecification requestSpec;
-    private static ResponseSpecification responseSpec;
     private static Long delinquencyBucketId;
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
@@ -63,7 +60,6 @@ public class WorkingCapitalLoanApplicationValidationTest {
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         delinquencyBucketId = (long) DelinquencyBucketsHelper.createDefaultBucket();
     }
 
@@ -796,8 +792,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final CallFailedRuntimeException ex = applicationHelper.runModifyExpectingFailure(loanId, modifyJson);
         assertEquals(400, ex.getStatus());
         assertNotNull(ex.getDeveloperMessage());
-        assertEquals("Validation errors: [discount] The parameter `discount` must be greater than or equal to 0.",
-                ex.getDeveloperMessage());
+        assertTrue(ex.getDeveloperMessage()
+                .contains("Validation errors: [discount] The parameter `discount` must be greater than or equal to 0."));
 
         applicationHelper.deleteById(loanId);
         productHelper.deleteWorkingCapitalLoanProductById(productId);

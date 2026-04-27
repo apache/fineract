@@ -26,5 +26,6 @@ public enum WorkingCapitalLoanEvent {
     LOAN_DISBURSED, //
     LOAN_DISBURSAL_UNDO, //
     LOAN_REPAID_IN_FULL, //
-    LOAN_OVERPAID //
+    LOAN_OVERPAID, //
+    LOAN_CREDIT_BALANCE_REFUND_IN_FULL //
 }

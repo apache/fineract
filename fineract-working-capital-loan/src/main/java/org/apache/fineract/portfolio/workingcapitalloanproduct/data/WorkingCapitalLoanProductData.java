@@ -36,6 +36,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
 
 /**
  * Data Transfer Object for Working Capital Loan Product.
@@ -67,6 +68,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private WorkingCapitalBreachData breach;
     private Integer npvDayCount;
     private List<WorkingCapitalPaymentAllocationData> paymentAllocation;
+    private WorkingCapitalNearBreachData nearBreach;
 
     // Term details
     private BigDecimal minPrincipal;
@@ -101,6 +103,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private List<WorkingCapitalBreachData> breachOptions;
     private List<StringEnumOptionData> accountingRuleOptions;
     private Map<String, List<GLAccountData>> accountingMappingOptions;
+    private List<WorkingCapitalNearBreachData> nearBreachOptions;
 
     public WorkingCapitalLoanProductData applyTemplate(final WorkingCapitalLoanProductData productTemplate) {
         setFundOptions(productTemplate.getFundOptions());
@@ -115,6 +118,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
         setAccountingRuleOptions(productTemplate.getAccountingRuleOptions());
         setAccountingMappingOptions(productTemplate.getAccountingMappingOptions());
         setDelinquencyMinimumPaymentTypeOptions(productTemplate.getDelinquencyMinimumPaymentTypeOptions());
+        setNearBreachOptions(productTemplate.getNearBreachOptions());
         return this;
     }
 }

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.JsonObject;
+import java.math.BigDecimal;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.services.WorkingCapitalBreachApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -92,6 +93,10 @@ public class WorkingCapitalBreachHelper {
         return FeignCalls.fail(() -> api().deleteWorkingCapitalBreach(breachId));
     }
 
+    public WorkingCapitalBreachData retrieveWorkingCapitalBreach(final Long breachId) {
+        return FeignCalls.ok(() -> api().retrieveWorkingCapitalBreach(breachId));
+    }
+
     private static <T> T fromJson(final JsonObject json, final Class<T> type) {
         try {
             return OBJECT_MAPPER.readValue(json.toString(), type);
@@ -108,4 +113,14 @@ public class WorkingCapitalBreachHelper {
         }
     }
 
+    public JsonObject breachJson(final String name, final Integer frequency, final String frequencyType, final String amountCalculationType,
+            final BigDecimal amount) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("name", name);
+        json.addProperty("breachFrequency", frequency);
+        json.addProperty("breachFrequencyType", frequencyType);
+        json.addProperty("breachAmountCalculationType", amountCalculationType);
+        json.addProperty("breachAmount", amount);
+        return json;
+    }
 }

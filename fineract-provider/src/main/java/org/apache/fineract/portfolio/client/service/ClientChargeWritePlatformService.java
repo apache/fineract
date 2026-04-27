@@ -39,7 +39,4 @@ public interface ClientChargeWritePlatformService {
     @Transactional
     CommandProcessingResult payCharge(Long clientId, Long clientChargeId, JsonCommand command);
 
-    @Transactional
-    CommandProcessingResult inactivateCharge(Long clientId, Long clientChargeId);
-
 }

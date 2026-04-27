@@ -59,12 +59,12 @@ public final class UserDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private static final Set<String> CREATE_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES,
-                    SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES, AppUserConstants.IS_LOGIN_RETRIES_ENABLED));
-    private static final Set<String> UPDATE_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES,
-                    SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES, AppUserConstants.IS_LOGIN_RETRIES_ENABLED));
+    private static final Set<String> CREATE_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD,
+            REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES, SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES,
+            AppUserConstants.IS_LOGIN_RETRIES_ENABLED, AppUserConstants.IS_PASSWORD_RESET_ALLOWED));
+    private static final Set<String> UPDATE_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD,
+            REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES, SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES,
+            AppUserConstants.IS_LOGIN_RETRIES_ENABLED, AppUserConstants.IS_PASSWORD_RESET_ALLOWED));
     private static final Set<String> CHANGE_PASSWORD_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(PASSWORD, REPEAT_PASSWORD));
     public static final String PASSWORD_NEVER_EXPIRE = "passwordNeverExpire";
 
@@ -135,6 +135,17 @@ public final class UserDataValidator {
                 baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).trueOrFalseRequired(false);
             } else {
                 baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).value(isLoginRetriesEnabled)
+                        .validateForBooleanValue();
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_PASSWORD_RESET_ALLOWED, element)) {
+            final Boolean passwordResetAllowed = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED,
+                    element);
+            if (passwordResetAllowed == null) {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_PASSWORD_RESET_ALLOWED).trueOrFalseRequired(false);
+            } else {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_PASSWORD_RESET_ALLOWED).value(passwordResetAllowed)
                         .validateForBooleanValue();
             }
         }
@@ -258,6 +269,17 @@ public final class UserDataValidator {
                 baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).trueOrFalseRequired(false);
             } else {
                 baseDataValidator.reset().parameter(AppUserConstants.IS_LOGIN_RETRIES_ENABLED).value(isLoginRetriesEnabled)
+                        .validateForBooleanValue();
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_PASSWORD_RESET_ALLOWED, element)) {
+            final Boolean passwordResetAllowed = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_PASSWORD_RESET_ALLOWED,
+                    element);
+            if (passwordResetAllowed == null) {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_PASSWORD_RESET_ALLOWED).trueOrFalseRequired(false);
+            } else {
+                baseDataValidator.reset().parameter(AppUserConstants.IS_PASSWORD_RESET_ALLOWED).value(passwordResetAllowed)
                         .validateForBooleanValue();
             }
         }

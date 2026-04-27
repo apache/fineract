@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,15 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
                     .paymentTypeOptions(paymentTypeReadPlatformService.retrieveAllPaymentTypes())
                     .classificationOptions(codeValueReadPlatformService
                             .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.REPAYMENT_CLASSIFICATION_CODE_NAME))
+                    .build();
+        } else if (WorkingCapitalLoanConstants.CREDIT_BALANCE_REFUND_COMMAND.equals(command)) {
+            final BigDecimal overpaymentAmount = wcLoan.getBalance() != null ? wcLoan.getBalance().getOverpaymentAmount() : null;
+            return WorkingCapitalLoanCommandTemplateData.builder()
+                    .expectedAmount(overpaymentAmount != null ? overpaymentAmount : BigDecimal.ZERO)
+                    .currency(wcLoan.getLoanProduct().getCurrency().toData())
+                    .paymentTypeOptions(paymentTypeReadPlatformService.retrieveAllPaymentTypes())
+                    .classificationOptions(codeValueReadPlatformService
+                            .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.CREDIT_BALANCE_REFUND_CLASSIFICATION_CODE_NAME))
                     .build();
         }
         return null;

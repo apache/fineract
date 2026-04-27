@@ -26,7 +26,11 @@ import org.apache.fineract.test.support.EnumResolver;
 @Getter
 public enum DatatableEntityType {
 
-    LOAN("m_loan");
+    LOAN("m_loan"), //
+    LOAN_PRODUCT("m_product_loan"), //
+    WC_LOAN("m_wc_loan"), //
+    WC_LOAN_PRODUCT("m_wc_loan_product"), //
+    ;
 
     private final String referencedTableName;
 

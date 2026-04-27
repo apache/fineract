@@ -1,0 +1,28 @@
+= Working Capital Loan — Credit Balance Refund (CBR)
+
+== Overview
+
+Credit Balance Refund (CBR) is supported for Working Capital loans when a loan has an overpayment balance.
+
+== Core Behavior
+
+For Working Capital loans:
+
+* Overpayment is tracked in `m_wc_loan_balance.overpayment_amount`
+* `principal_outstanding` is not reduced below zero; excess repayment is tracked as overpayment
+* CBR reduces `overpayment_amount` by the refund amount
+
+== Validation
+
+CBR is allowed only when:
+
+* Loan status is `OVERPAID`
+* `overpayment_amount > 0`
+* Refund amount is positive and does not exceed current `overpayment_amount`
+
+== Status Handling
+
+After CBR:
+
+* If `overpayment_amount > 0`, the loan remains `OVERPAID`
+* If `overpayment_amount = 0` and `principal_outstanding = 0`, status transitions to `CLOSED_OBLIGATIONS_MET`

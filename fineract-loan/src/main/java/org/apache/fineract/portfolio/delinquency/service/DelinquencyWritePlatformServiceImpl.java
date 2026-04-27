@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAccountDelinquencyPauseChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -172,11 +174,8 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                         "Data integrity issue with resource: " + delinquencyBucket.getId());
             }
 
-            // Explicitly handle the minimum payment period and rule relationship
-            if (delinquencyBucket.getMinimumPaymentPeriodAndRule() != null) {
-                DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule = delinquencyBucket.getMinimumPaymentPeriodAndRule();
-                delinquencyMinimumPaymentPeriodAndRuleRepository.delete(minimumPaymentPeriodAndRule);
-            }
+            delinquencyMinimumPaymentPeriodAndRuleRepository.findByBucketId(delinquencyBucket.getId())
+                    .ifPresent(delinquencyMinimumPaymentPeriodAndRuleRepository::delete);
 
             repositoryBucket.delete(delinquencyBucket);
         } else {
@@ -375,18 +374,16 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         if (delinquencyBucket.isEmpty()) {
             DelinquencyBucket newDelinquencyBucket = new DelinquencyBucket(data.getName());
             newDelinquencyBucket.setBucketType(data.getBucketType() != null ? data.getBucketType() : DelinquencyBucketType.REGULAR);
+            repositoryBucket.saveAndFlush(newDelinquencyBucket);
             if (DelinquencyBucketType.WORKING_CAPITAL.equals(newDelinquencyBucket.getBucketType())) {
-                newDelinquencyBucket.setMinimumPaymentPeriodAndRule(new DelinquencyMinimumPaymentPeriodAndRule());
-                newDelinquencyBucket.getMinimumPaymentPeriodAndRule().setBucket(newDelinquencyBucket);
-                newDelinquencyBucket.getMinimumPaymentPeriodAndRule().setFrequency(data.getMinimumPaymentPeriodAndRule().getFrequency());
-                newDelinquencyBucket.getMinimumPaymentPeriodAndRule()
-                        .setMinimumPaymentType(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
-                newDelinquencyBucket.getMinimumPaymentPeriodAndRule()
-                        .setFrequencyType(data.getMinimumPaymentPeriodAndRule().getFrequencyType());
-                newDelinquencyBucket.getMinimumPaymentPeriodAndRule()
-                        .setMinimumPayment(data.getMinimumPaymentPeriodAndRule().getMinimumPayment());
+                final DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule = new DelinquencyMinimumPaymentPeriodAndRule();
+                minimumPaymentPeriodAndRule.setBucket(newDelinquencyBucket);
+                minimumPaymentPeriodAndRule.setFrequency(data.getMinimumPaymentPeriodAndRule().getFrequency());
+                minimumPaymentPeriodAndRule.setMinimumPaymentType(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
+                minimumPaymentPeriodAndRule.setFrequencyType(data.getMinimumPaymentPeriodAndRule().getFrequencyType());
+                minimumPaymentPeriodAndRule.setMinimumPayment(data.getMinimumPaymentPeriodAndRule().getMinimumPayment());
+                delinquencyMinimumPaymentPeriodAndRuleRepository.save(minimumPaymentPeriodAndRule);
             }
-            repositoryBucket.save(newDelinquencyBucket);
 
             setDelinquencyBucketMappings(newDelinquencyBucket, data);
             return newDelinquencyBucket;
@@ -411,46 +408,37 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             changes.put(DelinquencyApiConstants.BUCKET_TYPE_PARAM_NAME, data.getBucketType());
             delinquencyBucket.setBucketType(data.getBucketType());
         }
+        final Optional<DelinquencyMinimumPaymentPeriodAndRule> existingRule = delinquencyMinimumPaymentPeriodAndRuleRepository
+                .findByBucketId(delinquencyBucket.getId());
         if (delinquencyBucket.getBucketType().equals(DelinquencyBucketType.WORKING_CAPITAL)) {
-            if (delinquencyBucket.getMinimumPaymentPeriodAndRule() == null) {
-                delinquencyBucket.setMinimumPaymentPeriodAndRule(new DelinquencyMinimumPaymentPeriodAndRule());
-                delinquencyBucket.getMinimumPaymentPeriodAndRule().setBucket(delinquencyBucket);
+            DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule = existingRule.orElse(null);
+            if (minimumPaymentPeriodAndRule == null) {
+                minimumPaymentPeriodAndRule = new DelinquencyMinimumPaymentPeriodAndRule();
+                minimumPaymentPeriodAndRule.setBucket(delinquencyBucket);
             }
-            if (!data.getMinimumPaymentPeriodAndRule().getFrequency()
-                    .equals(delinquencyBucket.getMinimumPaymentPeriodAndRule().getFrequency())) {
-                delinquencyBucket.getMinimumPaymentPeriodAndRule().setFrequency(data.getMinimumPaymentPeriodAndRule().getFrequency());
-                changes.put(DelinquencyApiConstants.FREQUENCY_PARAM_NAME,
-                        delinquencyBucket.getMinimumPaymentPeriodAndRule().getFrequency());
+            if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getFrequency(), minimumPaymentPeriodAndRule.getFrequency())) {
+                minimumPaymentPeriodAndRule.setFrequency(data.getMinimumPaymentPeriodAndRule().getFrequency());
+                changes.put(DelinquencyApiConstants.FREQUENCY_PARAM_NAME, minimumPaymentPeriodAndRule.getFrequency());
             }
-            if (!data.getMinimumPaymentPeriodAndRule().getFrequencyType()
-                    .equals(delinquencyBucket.getMinimumPaymentPeriodAndRule().getFrequencyType())) {
-                delinquencyBucket.getMinimumPaymentPeriodAndRule()
-                        .setFrequencyType(data.getMinimumPaymentPeriodAndRule().getFrequencyType());
-                changes.put(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME,
-                        delinquencyBucket.getMinimumPaymentPeriodAndRule().getFrequencyType());
+            if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getFrequencyType(), minimumPaymentPeriodAndRule.getFrequencyType())) {
+                minimumPaymentPeriodAndRule.setFrequencyType(data.getMinimumPaymentPeriodAndRule().getFrequencyType());
+                changes.put(DelinquencyApiConstants.FREQUENCY_TYPE_PARAM_NAME, minimumPaymentPeriodAndRule.getFrequencyType());
             }
-            if (!data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType()
-                    .equals(delinquencyBucket.getMinimumPaymentPeriodAndRule().getMinimumPaymentType())) {
-                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME,
-                        delinquencyBucket.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
-                delinquencyBucket.getMinimumPaymentPeriodAndRule()
-                        .setMinimumPaymentType(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
+            if (!Objects.equals(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType(),
+                    minimumPaymentPeriodAndRule.getMinimumPaymentType())) {
+                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_TYPE_PARAM_NAME, minimumPaymentPeriodAndRule.getMinimumPaymentType());
+                minimumPaymentPeriodAndRule.setMinimumPaymentType(data.getMinimumPaymentPeriodAndRule().getMinimumPaymentType());
             }
-            if (data.getMinimumPaymentPeriodAndRule().getMinimumPayment()
-                    .compareTo(delinquencyBucket.getMinimumPaymentPeriodAndRule().getMinimumPayment()) != 0) {
-                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PARAM_NAME,
-                        delinquencyBucket.getMinimumPaymentPeriodAndRule().getMinimumPayment());
-                delinquencyBucket.getMinimumPaymentPeriodAndRule()
-                        .setMinimumPayment(data.getMinimumPaymentPeriodAndRule().getMinimumPayment());
+            if (!MathUtil.isEqualTo(data.getMinimumPaymentPeriodAndRule().getMinimumPayment(),
+                    minimumPaymentPeriodAndRule.getMinimumPayment())) {
+                changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PARAM_NAME, minimumPaymentPeriodAndRule.getMinimumPayment());
+                minimumPaymentPeriodAndRule.setMinimumPayment(data.getMinimumPaymentPeriodAndRule().getMinimumPayment());
             }
+            delinquencyMinimumPaymentPeriodAndRuleRepository.save(minimumPaymentPeriodAndRule);
         } else {
-            if (delinquencyBucket.getMinimumPaymentPeriodAndRule() != null) {
+            if (existingRule.isPresent()) {
                 changes.put(DelinquencyApiConstants.MINIMUM_PAYMENT_PERIOD_AND_RULE_PARAM_NAME, null);
-                DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule = delinquencyBucket.getMinimumPaymentPeriodAndRule();
-                minimumPaymentPeriodAndRule.setBucket(null);
-                delinquencyBucket.setMinimumPaymentPeriodAndRule(null);
-                delinquencyMinimumPaymentPeriodAndRuleRepository.save(minimumPaymentPeriodAndRule);
-                delinquencyMinimumPaymentPeriodAndRuleRepository.delete(minimumPaymentPeriodAndRule);
+                delinquencyMinimumPaymentPeriodAndRuleRepository.delete(existingRule.get());
             }
         }
         if (!changes.isEmpty()) {

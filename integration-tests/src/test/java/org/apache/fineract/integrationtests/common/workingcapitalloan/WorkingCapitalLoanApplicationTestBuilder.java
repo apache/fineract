@@ -49,6 +49,7 @@ public class WorkingCapitalLoanApplicationTestBuilder {
     private Integer repaymentEvery;
     private String repaymentFrequencyType;
     private Long breachId;
+    private Long nearBreachId;
     private Long delinquencyBucketId;
     private List<String> paymentAllocationTypes;
     private Integer delinquencyGraceDays;
@@ -126,6 +127,11 @@ public class WorkingCapitalLoanApplicationTestBuilder {
 
     public WorkingCapitalLoanApplicationTestBuilder withBreachId(final Long breachId) {
         this.breachId = breachId;
+        return this;
+    }
+
+    public WorkingCapitalLoanApplicationTestBuilder withNearBreachId(final Long nearBreachId) {
+        this.nearBreachId = nearBreachId;
         return this;
     }
 
@@ -209,14 +215,13 @@ public class WorkingCapitalLoanApplicationTestBuilder {
         if (delinquencyBucketId != null) {
             json.addProperty("delinquencyBucketId", delinquencyBucketId);
         }
-        if (delinquencyGraceDays != null) {
-            json.addProperty("delinquencyGraceDays", delinquencyGraceDays);
-        }
-        if (delinquencyStartType != null) {
-            json.addProperty("delinquencyStartType", delinquencyStartType);
-        }
+        json.addProperty("delinquencyGraceDays", delinquencyGraceDays);
+        json.addProperty("delinquencyStartType", delinquencyStartType);
         if (breachId != null) {
             json.addProperty("breachId", breachId);
+        }
+        if (nearBreachId != null) {
+            json.addProperty("nearBreachId", nearBreachId);
         }
         if (paymentAllocationTypes != null && !paymentAllocationTypes.isEmpty()) {
             json.add("paymentAllocation", buildPaymentAllocationJson());
@@ -271,6 +276,9 @@ public class WorkingCapitalLoanApplicationTestBuilder {
         }
         if (breachId != null) {
             json.addProperty("breachId", breachId);
+        }
+        if (nearBreachId != null) {
+            json.addProperty("nearBreachId", nearBreachId);
         }
         if (paymentAllocationTypes != null && !paymentAllocationTypes.isEmpty()) {
             json.add("paymentAllocation", buildPaymentAllocationJson());

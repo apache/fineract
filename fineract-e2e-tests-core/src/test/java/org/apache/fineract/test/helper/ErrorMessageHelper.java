@@ -1067,6 +1067,10 @@ public final class ErrorMessageHelper {
         return String.format("Working Capital Breach with id %d was not found.", id);
     }
 
+    public static String workingCapitalNearBreachNotFoundFailure(final Long id) {
+        return String.format("Working Capital Near Breach with id %d was not found.", id);
+    }
+
     public static String workingCapitalBreachDuplicateNameFailure(final Long id) {
         return String.format("Data integrity issue with resource: %d", id);
     }
@@ -1095,7 +1099,23 @@ public final class ErrorMessageHelper {
         return "Failed data validation due to: transaction.date.must.be.equal.disbursement.date.";
     }
 
-    public static String discountOverrideDisallowedByProductFailure() {
+    public static String overrideDisallowedByProductFailure() {
         return "Failed data validation due to: override.not.allowed.by.product.";
+    }
+
+    public static String discountExceedCreatedDiscountFailure() {
+        return "Failed data validation due to: amount.cannot.exceed.created.discount.";
+    }
+
+    public static String nearBreachCannotEnableWithoutBreachFailure() {
+        return "Failed data validation due to: cannot.enable.near.breach.without.breach.";
+    }
+
+    public static String nearBreachMustBeLowerThenBreachFailure() {
+        return "Failed data validation due to: near.breach.frequency.must.be.lower.than.breach.frequency.";
+    }
+
+    public static String nearBreachIdNotFoundFailure(long nearBreachId) {
+        return String.format("Working Capital Near Breach with id %s was not found.", nearBreachId);
     }
 }

@@ -148,7 +148,7 @@ public class UsersApiResource {
     @Operation(summary = "Create a User", operationId = "createUser", description = "Adds new application user.\n" + "\n"
             + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n"
             + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n"
-            + "Optional Fields: \n" + "staffId,passwordNeverExpires,isLoginRetriesEnabled")
+            + "Optional Fields: \n" + "staffId,passwordNeverExpires,isLoginRetriesEnabled,isPasswordResetAllowed")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersResponse.class))) })

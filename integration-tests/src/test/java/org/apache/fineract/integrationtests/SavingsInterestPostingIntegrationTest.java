@@ -101,7 +101,7 @@ public class SavingsInterestPostingIntegrationTest {
             ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
             HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
             for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-                LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+                LOG.info("{} - {}", entry.getKey(), String.valueOf(entry.getValue()));
             }
             assertEquals("0.274", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
             assertEquals("[2021, 11, 2]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");

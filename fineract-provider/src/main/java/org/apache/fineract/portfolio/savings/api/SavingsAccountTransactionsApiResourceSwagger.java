@@ -154,6 +154,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
             public Long accountId;
             @Schema(example = "000000001")
             public String accountNo;
+            @Schema(example = "5dd80a7c-ccba-4446-b378-01eb6f53e871")
+            public String externalId;
             @Schema(example = "[2023, 05, 01]")
             public LocalDate date;
             public GetTransactionsCurrency currency;
@@ -202,6 +204,10 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
+        @Schema(example = "5dd80a7c-ccba-4446-b378-01eb6f53e871")
+        public String externalId;
+        @Schema(example = "true")
+        public Boolean isPostInterestAsOn;
         @Schema(example = "true")
         public String lienAllowed;
         @Schema(example = "String")
@@ -230,6 +236,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
         private PostSavingsAccountBulkReversalTransactionsRequest() {}
 
+        @Schema(example = "5dd80a7c-ccba-4446-b378-01eb6f53e871")
+        public String externalId;
         @Schema(example = "true")
         public String isBulk;
     }

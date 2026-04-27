@@ -28,6 +28,7 @@ public final class AppUserConstants {
     public static final String REPEAT_PASSWORD = "repeatPassword";
     public static final String PASSWORD_NEVER_EXPIRES = "passwordNeverExpires";
     public static final String IS_LOGIN_RETRIES_ENABLED = "isLoginRetriesEnabled";
+    public static final String IS_PASSWORD_RESET_ALLOWED = "isPasswordResetAllowed";
 
     // TODO: Remove hard coding of system user name and make this a configurable parameter
     public static final String SYSTEM_USER_NAME = "system";

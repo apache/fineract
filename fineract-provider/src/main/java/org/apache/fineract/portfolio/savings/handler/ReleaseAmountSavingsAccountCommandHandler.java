@@ -42,7 +42,7 @@ public class ReleaseAmountSavingsAccountCommandHandler implements NewCommandSour
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
         final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.releaseAmount(command.getSavingsId(), transactionId);
+        return this.writePlatformService.releaseAmount(command.getSavingsId(), transactionId, command);
     }
 
 }

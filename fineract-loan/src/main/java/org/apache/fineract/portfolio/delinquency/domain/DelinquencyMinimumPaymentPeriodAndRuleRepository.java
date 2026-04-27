@@ -19,11 +19,12 @@
 
 package org.apache.fineract.portfolio.delinquency.domain;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.CrudRepository;
 
 public interface DelinquencyMinimumPaymentPeriodAndRuleRepository extends JpaRepository<DelinquencyMinimumPaymentPeriodAndRule, Long>,
-        JpaSpecificationExecutor<DelinquencyMinimumPaymentPeriodAndRule>, CrudRepository<DelinquencyMinimumPaymentPeriodAndRule, Long> {
+        JpaSpecificationExecutor<DelinquencyMinimumPaymentPeriodAndRule> {
 
+    Optional<DelinquencyMinimumPaymentPeriodAndRule> findByBucketId(Long bucketId);
 }

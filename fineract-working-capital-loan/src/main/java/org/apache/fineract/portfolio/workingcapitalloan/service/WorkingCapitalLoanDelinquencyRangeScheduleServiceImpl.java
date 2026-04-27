@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -55,6 +56,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository loanDelinquencyRangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository loanDelinquencyActionRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleMapper capitalLoanDelinquencyRangeScheduleMapper;
+    private final DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
 
     @Override
     public void generateInitialPeriod(WorkingCapitalLoan loan) {
@@ -200,7 +202,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         if (bucket == null) {
             return null;
         }
-        return bucket.getMinimumPaymentPeriodAndRule();
+        return minimumPaymentPeriodAndRuleRepository.findByBucketId(bucket.getId()).orElse(null);
     }
 
     private LocalDate calculateToDate(LocalDate fromDate, Integer frequency, DelinquencyFrequencyType frequencyType) {

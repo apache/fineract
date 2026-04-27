@@ -138,10 +138,10 @@ public final class WorkingCapitalLoanDisbursementTestBuilder {
 
     public static String buildRepaymentJson(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final Long classificationId, final String note, final Integer paymentTypeId, final String accountNumber) {
-        return buildRepaymentJson(transactionDate, transactionAmount, classificationId, note, paymentTypeId, accountNumber, null);
+        return buildTransactionJson(transactionDate, transactionAmount, classificationId, note, paymentTypeId, accountNumber, null);
     }
 
-    public static String buildRepaymentJson(final LocalDate transactionDate, final BigDecimal transactionAmount,
+    public static String buildTransactionJson(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final Long classificationId, final String note, final Integer paymentTypeId, final String accountNumber,
             final String externalId) {
         final JsonObject json = new JsonObject();
@@ -173,5 +173,10 @@ public final class WorkingCapitalLoanDisbursementTestBuilder {
             json.addProperty("externalId", externalId);
         }
         return json.toString();
+    }
+
+    public static String buildCreditBalanceRefundJson(final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final Long classificationId, final String note, final Integer paymentTypeId, final String accountNumber) {
+        return buildTransactionJson(transactionDate, transactionAmount, classificationId, note, paymentTypeId, accountNumber, null);
     }
 }

@@ -335,6 +335,26 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION,
                 responseLoanProductsRequestDownPaymentAutoAdvPaymentAllocation);
 
+        // LP2 with Down-payment+autopayment + advanced payment allocation, no installmentAmountInMultiplesOf
+        // (LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF)
+        final String nameDownPaymentAutoAdvPmtAllocNoMultiplesOf = DefaultLoanProduct.LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF
+                .getName();
+        final PostLoanProductsRequest loanProductsRequestDownPaymentAutoAdvPmtAllocNoMultiplesOf = loanProductsRequestFactory
+                .defaultLoanProductsRequestLP2()//
+                .name(nameDownPaymentAutoAdvPmtAllocNoMultiplesOf)//
+                .installmentAmountInMultiplesOf(null)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION.getValue())//
+                .loanScheduleType("PROGRESSIVE")//
+                .paymentAllocation(List.of(//
+                        createPaymentAllocation("DEFAULT", "REAMORTIZATION"), //
+                        createPaymentAllocation("GOODWILL_CREDIT", "NEXT_INSTALLMENT"), //
+                        createPaymentAllocation("MERCHANT_ISSUED_REFUND", "LAST_INSTALLMENT"), //
+                        createPaymentAllocation("PAYOUT_REFUND", "LAST_INSTALLMENT")));//
+        final PostLoanProductsResponse responseLoanProductsRequestDownPaymentAutoAdvPmtAllocNoMultiplesOf = createLoanProductIdempotent(
+                loanProductsRequestDownPaymentAutoAdvPmtAllocNoMultiplesOf);
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF,
+                responseLoanProductsRequestDownPaymentAutoAdvPmtAllocNoMultiplesOf);
+
         // LP2 with Down-payment + advanced payment allocation - no auto downpayment
         // (LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION)
         String name24 = DefaultLoanProduct.LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION.getName();

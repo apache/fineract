@@ -107,8 +107,15 @@ public class InternalExternalEventService {
             var method = payLoadClass.getMethod("fromByteBuffer", ByteBuffer.class);
             var payLoad = method.invoke(null, byteBuffer);
             if (externalEvent.getType().equalsIgnoreCase("BulkBusinessEvent")) {
-                var methodToGetDatas = payLoad.getClass().getMethod("getDatas", (Class<?>) null);
-                var bulkMessages = (List<BulkMessageItemV1>) methodToGetDatas.invoke(payLoad);
+                var methodToGetDatas = payLoad.getClass().getMethod("getDatas");
+
+                Object invokeResult = methodToGetDatas.invoke(payLoad);
+                if (!(invokeResult instanceof List)) {
+                    throw new IllegalStateException("Expected List from getDatas method");
+                }
+
+                List<BulkMessageItemV1> bulkMessages = (List<BulkMessageItemV1>) invokeResult;
+
                 var bulkMessagePayload = new StringBuilder();
                 for (var bulkMessage : bulkMessages) {
                     var bulkMessageData = retrieveBulkMessage(bulkMessage, externalEvent);

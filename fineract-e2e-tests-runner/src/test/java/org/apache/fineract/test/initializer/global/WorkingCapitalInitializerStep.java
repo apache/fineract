@@ -78,7 +78,7 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                 .getName();
         PostAllowAttributeOverrides allowAttributeOverridesDisabled = new PostAllowAttributeOverrides()
                 .delinquencyBucketClassification(false).discountDefault(false).periodPaymentFrequencyType(false)
-                .periodPaymentFrequency(false);
+                .periodPaymentFrequency(false).breach(false);
         final PostWorkingCapitalLoanProductsRequest defaultWCPLDiscountDisallowOverridesRequest = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductRequest() //
                 .name(workingCapitalProductDiscountDisallowOverridesDefaultName) //
@@ -98,6 +98,57 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
         TestContext.GLOBAL.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST_FOR_UPDATE_WCLP,
                 defaultForUpdateWCPLRequest);
         TestContext.GLOBAL.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_FOR_UPDATE_WCLP, responseForUpdateWCPL);
+
+        final String workingCapitalProductDelinquencyRescheduleDefaultName = DefaultWorkingCapitalLoanProduct.WCLP_DELINQUENCY_RESCHEDULE
+                .getName();
+        final PostWorkingCapitalLoanProductsRequest defaultWCPLDelinquencyRescheduleRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .name(workingCapitalProductDelinquencyRescheduleDefaultName);//
+        final PostWorkingCapitalLoanProductsResponse responseDefaultWCPLDelinquencyReschedules = createWorkingCapitalLoanProductIdempotent(
+                defaultWCPLDelinquencyRescheduleRequest);
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_DELINQUENCY_RESCHEDULE,
+                responseDefaultWCPLDelinquencyReschedules);
+
+        final String workingCapitalProductBreachDefaultName = DefaultWorkingCapitalLoanProduct.WCLP_BREACH.getName();
+        final PostWorkingCapitalLoanProductsRequest defaultWCPLBreachRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductBreachRequest() //
+                .name(workingCapitalProductBreachDefaultName);//
+        final PostWorkingCapitalLoanProductsResponse responseDefaultWCPLBreach = createWorkingCapitalLoanProductIdempotent(
+                defaultWCPLBreachRequest);
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_BREACH,
+                responseDefaultWCPLBreach);
+
+        final String workingCapitalProductBreachNearBreachDefaultName = DefaultWorkingCapitalLoanProduct.WCLP_BREACH_NEAR_BREACH.getName();
+        final PostWorkingCapitalLoanProductsRequest defaultWCPLBreachNearBreachRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductBreachNearBreachRequest() //
+                .name(workingCapitalProductBreachNearBreachDefaultName);//
+        final PostWorkingCapitalLoanProductsResponse responseDefaultWCPLBreachNearBreach = createWorkingCapitalLoanProductIdempotent(
+                defaultWCPLBreachNearBreachRequest);
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_BREACH_NEAR_BREACH,
+                responseDefaultWCPLBreachNearBreach);
+
+        final String workingCapitalProductBreachDisallowOverridesDefaultName = DefaultWorkingCapitalLoanProduct.WCLP_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE
+                .getName();
+        final PostWorkingCapitalLoanProductsRequest defaultWCPLBreachDisallowOverridesRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductBreachRequest() //
+                .allowAttributeOverrides(allowAttributeOverridesDisabled) //
+                .name(workingCapitalProductBreachDisallowOverridesDefaultName);//
+        final PostWorkingCapitalLoanProductsResponse responseDefaultWCPLBreachDisallowOverrides = createWorkingCapitalLoanProductIdempotent(
+                defaultWCPLBreachDisallowOverridesRequest);
+        TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_BREACH_DISALLOW_OVERRIDES,
+                responseDefaultWCPLBreachDisallowOverrides);
+
+        final String workingCapitalProductBreachNearBreachDisallowOverridesDefaultName = DefaultWorkingCapitalLoanProduct.WCLP_BREACH_NEAR_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE
+                .getName();
+        final PostWorkingCapitalLoanProductsRequest defaultWCPLBreachNearBreachDisallowOverridesRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductBreachNearBreachRequest() //
+                .allowAttributeOverrides(allowAttributeOverridesDisabled) //
+                .name(workingCapitalProductBreachNearBreachDisallowOverridesDefaultName);//
+        final PostWorkingCapitalLoanProductsResponse responseDefaultWCPLBreachNearBreachDisallowOverrides = createWorkingCapitalLoanProductIdempotent(
+                defaultWCPLBreachNearBreachDisallowOverridesRequest);
+        TestContext.INSTANCE.set(
+                TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_BREACH_NEAR_BREACH_DISALLOW_OVERRIDES,
+                responseDefaultWCPLBreachNearBreachDisallowOverrides);
     }
 
     private PostWorkingCapitalLoanProductsResponse createWorkingCapitalLoanProductIdempotent(

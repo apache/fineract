@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory
 import java.security.GeneralSecurityException
 import java.security.MessageDigest
 import java.security.Security
+import java.util.Locale
 
 class GpgService {
     private static final Logger log = LoggerFactory.getLogger(GpgService.class)
@@ -64,7 +65,7 @@ class GpgService {
                             def k = iterator.next();
 
                             if (k.isEncryptionKey()) {
-                                def keyName = Long.toHexString(k.keyID).toUpperCase()
+                                def keyName = Long.toHexString(k.keyID).toUpperCase(java.util.Locale.ROOT)
 
                                 if(config.keyName.substring(config.keyName.length()-keyName.length()) == keyName) {
                                     publicKey = k;

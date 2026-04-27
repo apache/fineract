@@ -39,6 +39,8 @@ import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryD
 import org.apache.fineract.portfolio.delinquency.data.LoanInstallmentDelinquencyTagData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
@@ -74,6 +76,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
     private final DelinquencyRangeRepository repositoryRange;
     private final DelinquencyBucketRepository repositoryBucket;
+    private final DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
     private final LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory;
     private final DelinquencyRangeMapper mapperRange;
     private final DelinquencyBucketMapper mapperBucket;
@@ -102,7 +105,9 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     @Override
     public List<DelinquencyBucketData> retrieveAllDelinquencyBuckets() {
         final List<DelinquencyBucket> delinquencyRangeList = repositoryBucket.findAll();
-        return mapperBucket.map(delinquencyRangeList);
+        final List<DelinquencyBucketData> result = mapperBucket.map(delinquencyRangeList);
+        result.forEach(this::enrichWorkingCapitalConfiguration);
+        return result;
     }
 
     @Override
@@ -113,7 +118,15 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         final DelinquencyBucket delinquencyBucket = repositoryBucket.getReferenceById(delinquencyBucketId);
         final DelinquencyBucketData delinquencyBucketData = mapperBucket.map(delinquencyBucket);
         delinquencyBucketData.setRanges(mapperRange.map(delinquencyBucket.getRanges()));
+        enrichWorkingCapitalConfiguration(delinquencyBucketData);
         return delinquencyBucketData;
+    }
+
+    private void enrichWorkingCapitalConfiguration(DelinquencyBucketData bucketData) {
+        if (bucketData != null && DelinquencyBucketType.WORKING_CAPITAL.equals(bucketData.getBucketType()) && bucketData.getId() != null) {
+            minimumPaymentPeriodAndRuleRepository.findByBucketId(bucketData.getId())
+                    .ifPresent(rule -> bucketData.setMinimumPaymentPeriodAndRule(mapperBucket.map(rule)));
+        }
     }
 
     @Override

@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthen
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
 import org.apache.fineract.infrastructure.security.service.PlatformUserDetailsChecker;
+import org.apache.fineract.infrastructure.security.service.TemporaryPasswordAwareAuthenticationProvider;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.notification.service.UserNotificationService;
@@ -134,6 +135,7 @@ public class SecurityConfig {
             auth.requestMatchers(API_MATCHER.matcher(HttpMethod.OPTIONS, "/api/**")).permitAll()
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/echo")).permitAll()
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/authentication")).permitAll()
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/password/forgot")).permitAll()
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/instance-mode")).permitAll()
                     // businessdate
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/businessdate/*"))
@@ -453,7 +455,7 @@ public class SecurityConfig {
 
     @Bean(name = "customAuthenticationProvider")
     public DaoAuthenticationProvider authProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        DaoAuthenticationProvider authProvider = new TemporaryPasswordAwareAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         authProvider.setPostAuthenticationChecks(platformUserDetailsChecker);

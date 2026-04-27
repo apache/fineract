@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.delinquency.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,7 +26,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
@@ -51,9 +49,6 @@ public class DelinquencyBucket extends AbstractAuditableWithUTCDateTimeCustom<Lo
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "m_delinquency_bucket_mappings", joinColumns = @JoinColumn(name = "delinquency_bucket_id"), inverseJoinColumns = @JoinColumn(name = "delinquency_range_id"))
     private List<DelinquencyRange> ranges;
-
-    @OneToOne(mappedBy = "bucket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private DelinquencyMinimumPaymentPeriodAndRule minimumPaymentPeriodAndRule;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bucket_type")

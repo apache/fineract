@@ -49,4 +49,10 @@
   <include relativeToChangelogFile="true" file="parts/0025_breach_schedule.xml"/>
   <include relativeToChangelogFile="true" file="parts/0026_wc_loan_repayment_classification_code.xml"/>
   <include relativeToChangelogFile="true" file="parts/0027_wc_loan_repayment_transaction_external_events.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0028_create_wc_delinquency_and_breach_configuration_tables.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0029_drop_legacy_wc_configuration_tables.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0030_wc_loan_credit_balance_refund_classification_code.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0031_wc_loan_credit_balance_refund_external_events.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0032_wc_loan_balance_overpayment_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0033_wc_near_breach_configuration.xml"/>
 </databaseChangeLog>

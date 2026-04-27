@@ -46,7 +46,7 @@ public class WorkingCapitalBreachCRUDTest {
 
     @Test
     public void testCreateRetrieveUpdateDeleteAndListEndpoints() {
-        final JsonObject createBody = breachJson("Default WCL Breach", 15, "DAYS", "PERCENTAGE", BigDecimal.valueOf(7.5));
+        final JsonObject createBody = breachHelper.breachJson("Default WCL Breach", 15, "DAYS", "PERCENTAGE", BigDecimal.valueOf(7.5));
         final Long breachId = breachHelper.create(createBody);
         assertNotNull(breachId);
 
@@ -68,7 +68,7 @@ public class WorkingCapitalBreachCRUDTest {
         }
         assertTrue(found);
 
-        final JsonObject updateBody = breachJson("Updated WCL Breach", 20, "MONTHS", "FLAT", BigDecimal.valueOf(111));
+        final JsonObject updateBody = breachHelper.breachJson("Updated WCL Breach", 20, "MONTHS", "FLAT", BigDecimal.valueOf(111));
         final Long updatedId = breachHelper.update(breachId, updateBody);
         assertEquals(breachId, updatedId);
 
@@ -81,16 +81,5 @@ public class WorkingCapitalBreachCRUDTest {
 
         final Long deletedId = breachHelper.delete(breachId);
         assertEquals(breachId, deletedId);
-    }
-
-    private static JsonObject breachJson(final String name, final Integer frequency, final String frequencyType,
-            final String amountCalculationType, final BigDecimal amount) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("name", name);
-        json.addProperty("breachFrequency", frequency);
-        json.addProperty("breachFrequencyType", frequencyType);
-        json.addProperty("breachAmountCalculationType", amountCalculationType);
-        json.addProperty("breachAmount", amount);
-        return json;
     }
 }

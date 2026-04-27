@@ -209,7 +209,7 @@ public class WorkingCapitalLoanApiResource {
     @Path("external-id/{externalId}/delinquencyrangetags")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan Id", description = "", operationId = "getDelinquencyRangeScheduleTagHistoryById")
+    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan External Id", description = "", operationId = "getDelinquencyRangeScheduleTagHistoryByExternalId")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = WorkingCapitalLoanApiResourceSwagger.GetWorkingCapitalLoanDelinquencyRangeScheduleTagHistoryResponse.class)))) })
     public List<WorkingCapitalLoanDelinquencyTagHistoryData> getDelinquencyRangeScheduleTagHistoryById(

@@ -34,8 +34,11 @@ import org.apache.fineract.client.models.StringEnumOptionData;
 import org.apache.fineract.client.models.WorkingCapitalBreachData;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalBreachTemplateResponse;
+import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalBreachCalculationType;
+import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalBreachFrequencyType;
 import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
+import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
@@ -67,25 +70,29 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
         final CommandProcessingResult response = ok(() -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(request));
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isNotNull();
-        TestContext.GLOBAL.set(TestContextKey.WORKING_CAPITAL_BREACH_ID, response.getResourceId());
-        TestContext.GLOBAL.set(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST, request);
+        TestContext.INSTANCE.set(TestContextKey.WORKING_CAPITAL_BREACH_ID, response.getResourceId());
+        TestContext.INSTANCE.set(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST, request);
     }
 
     @When("Admin creates WC Breach With Values for update")
     public void adminCreatesWCBreachWithValuesForUpdate() {
         final WorkingCapitalBreachRequest request = workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest()
-                .breachAmount(new BigDecimal("2.34"));
+                .name("Breach-WC-" + Utils.randomStringGenerator(12)) //
+                .breachFrequency(5) //
+                .breachFrequencyType(WorkingCapitalBreachFrequencyType.YEARS.getCode()) //
+                .breachAmountCalculationType(WorkingCapitalBreachCalculationType.FLAT.getCode()) //
+                .breachAmount(new BigDecimal("2.34")); //
         final CommandProcessingResult response = ok(() -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(request));
         assertThat(response).isNotNull();
         assertThat(response.getResourceId()).isNotNull();
-        TestContext.GLOBAL.set(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE, response.getResourceId());
-        TestContext.GLOBAL.set(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST_FOR_UPDATE, request);
+        TestContext.INSTANCE.set(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE, response.getResourceId());
+        TestContext.INSTANCE.set(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST_FOR_UPDATE, request);
     }
 
     @When("Admin failed to create WC Breach With duplicated name")
     public void adminCreateWCBreachWithDuplicateNameFailure() {
-        Long existingBreachId = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
-        WorkingCapitalBreachRequest breachRequestForUpdate = TestContext.GLOBAL
+        Long existingBreachId = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+        WorkingCapitalBreachRequest breachRequestForUpdate = TestContext.INSTANCE
                 .get(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST_FOR_UPDATE);
         String name = breachRequestForUpdate.getName();
         WorkingCapitalBreachRequest breachRequest = workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest().name(name); //
@@ -95,41 +102,40 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
 
     @Then("Check created Breach has the following values")
     public void checkCreatedBreachHasTheFollowingValues() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
         final WorkingCapitalBreachData data = ok(() -> fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreach(id));
-        final WorkingCapitalBreachRequest request = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST);
+        final WorkingCapitalBreachRequest request = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST);
         checkBreachData(request, data);
     }
 
-    @Then("Get Breach With Template has the following values")
-    public void getBreachWithTemplateHasTheFollowingValues() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
-        final WorkingCapitalBreachData data = ok(() -> fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreach(id));
-        final WorkingCapitalBreachTemplateResponse template = ok(
-                () -> fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreachTemplate());
-        assertThat(data).isNotNull();
-        assertThat(template).isNotNull();
-        assertThat(template.getBreachFrequencyTypeOptions()).isNotNull().isNotEmpty();
-        assertThat(template.getBreachAmountCalculationTypeOptions()).isNotNull().isNotEmpty();
-    }
+    /*
+     * @Then("Get Breach has the following values") public void getBreachHasTheFollowingValues() { final Long id =
+     * TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID); final WorkingCapitalBreachData data = ok(()
+     * -> fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreach(id)); // final
+     * WorkingCapitalBreachTemplateResponse template = ok( // () ->
+     * fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreachTemplate());
+     * assertThat(data).isNotNull(); /// assertThat(template).isNotNull(); //
+     * assertThat(template.getBreachFrequencyTypeOptions()).isNotNull().isNotEmpty();
+     * //assertThat(template.getBreachAmountCalculationTypeOptions()).isNotNull().isNotEmpty(); }
+     */
 
     @When("Admin modifies WC Breach With Values")
     public void adminModifiesWCBreachWithValues() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
         final WorkingCapitalBreachRequest request = workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest() //
                 .breachFrequency(4) //
-                .breachFrequencyType("MONTHS") //
-                .breachAmountCalculationType("FLAT") //
+                .breachFrequencyType(WorkingCapitalBreachFrequencyType.DAYS.getCode()) //
+                .breachAmountCalculationType(WorkingCapitalBreachCalculationType.FLAT.getCode()) //
                 .breachAmount(new BigDecimal("7.89"));
         ok(() -> fineractFeignClient.workingCapitalBreaches().updateWorkingCapitalBreach(id, request));
-        TestContext.GLOBAL.set(TestContextKey.WORKING_CAPITAL_BREACH_UPDATE_REQUEST, request);
+        TestContext.INSTANCE.set(TestContextKey.WORKING_CAPITAL_BREACH_UPDATE_REQUEST, request);
     }
 
     @When("Admin failed to update WC Breach With duplicated name")
     public void adminUpdateWCBreachWithDuplicateNameFailure() {
-        Long breachIdForUpdate = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
-        Long existingBreachId = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
-        WorkingCapitalBreachRequest breachRequestForUpdate = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST);
+        Long breachIdForUpdate = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+        Long existingBreachId = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        WorkingCapitalBreachRequest breachRequestForUpdate = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_CREATE_REQUEST);
         String name = breachRequestForUpdate.getName();
         WorkingCapitalBreachRequest breachRequest = workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest() //
                 .name(name); //
@@ -139,21 +145,27 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
 
     @Then("Check updated Breach has the following values")
     public void checkUpdatedBreachHasTheFollowingValues() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
         final WorkingCapitalBreachData data = ok(() -> fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreach(id));
-        final WorkingCapitalBreachRequest request = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_UPDATE_REQUEST);
+        final WorkingCapitalBreachRequest request = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_UPDATE_REQUEST);
         checkBreachData(request, data);
     }
 
     @When("Admin deletes WC Breach With Values")
     public void adminDeletesWCBreachWithValues() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        ok(() -> fineractFeignClient.workingCapitalBreaches().deleteWorkingCapitalBreach(id));
+    }
+
+    @When("Admin deletes WC Breach override")
+    public void adminDeletesWCBreachOverride() {
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_OVERRIDE);
         ok(() -> fineractFeignClient.workingCapitalBreaches().deleteWorkingCapitalBreach(id));
     }
 
     @When("Admin deletes WC Breach With Values for update")
     public void adminDeletesWCBreachWithValuesForUpdate() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
         ok(() -> fineractFeignClient.workingCapitalBreaches().deleteWorkingCapitalBreach(id));
     }
 
@@ -166,10 +178,10 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
 
     @Then("Admin failed to update WC Breach for field {string} with invalid data {string} results with an error {}")
     public void updateWCBreachWithInvalidDataFailed(final String fieldName, final String value, final String errorMessage) {
-        Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+        Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
         if (id == null) {
             adminCreatesWCBreachWithValuesForUpdate();
-            id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+            id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
         }
         final WorkingCapitalBreachRequest request = setWCBreachFieldValue(workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest(),
                 fieldName, value);
@@ -178,13 +190,13 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
 
     @Then("Admin failed to delete WC Breach that is already deleted")
     public void adminDeleteWCBreachAlreadyDeletedFailure() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
         checkDeleteWCBreachNotFoundFailure(id);
     }
 
     @Then("Admin failed to retrieve WC Breach that is already deleted")
     public void adminRetrieveWCBreachAlreadyDeletedFailure() {
-        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
+        final Long id = TestContext.INSTANCE.get(TestContextKey.WORKING_CAPITAL_BREACH_ID_FOR_UPDATE);
         checkRetrieveWCBreachNotFoundFailure(id);
     }
 

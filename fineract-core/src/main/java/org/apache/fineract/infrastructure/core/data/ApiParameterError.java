@@ -67,6 +67,12 @@ public final class ApiParameterError {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, "id", null);
     }
 
+    public static ApiParameterError parameterError(final String globalisationMessageCode, final String developerMessage,
+            final String defaultUserMessage, final String parameterName, final Object... defaultUserMessageArgs) {
+        return new ApiParameterError(globalisationMessageCode, developerMessage, defaultUserMessage, defaultUserMessageArgs, parameterName,
+                null);
+    }
+
     public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, null);
@@ -75,6 +81,29 @@ public final class ApiParameterError {
     public static ApiParameterError parameterErrorWithValue(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final String value, final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs, parameterName, value);
+    }
+
+    private ApiParameterError(final String globalisationMessageCode, final String developerMessage, final String defaultUserMessage,
+            final Object[] defaultUserMessageArgs, String parameterName, String value) {
+        this.userMessageGlobalisationCode = globalisationMessageCode;
+        this.developerMessage = developerMessage;
+        this.defaultUserMessage = defaultUserMessage;
+        this.parameterName = parameterName;
+        this.value = value;
+
+        final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
+        if (defaultUserMessageArgs != null) {
+            for (final Object object : defaultUserMessageArgs) {
+                if (object instanceof LocalDate) {
+                    final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
+                    final String formattedDate = dateFormatter.format((LocalDate) object);
+                    messageArgs.add(ApiErrorMessageArg.from(formattedDate));
+                } else {
+                    messageArgs.add(ApiErrorMessageArg.from(object));
+                }
+            }
+        }
+        this.args = messageArgs;
     }
 
     private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs,

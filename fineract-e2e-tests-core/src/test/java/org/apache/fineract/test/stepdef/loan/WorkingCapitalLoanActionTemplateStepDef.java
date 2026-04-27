@@ -49,7 +49,7 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
         final Long loanId = getCreatedLoanId();
 
         final WorkingCapitalLoanCommandTemplateData response = ok(
-                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTemplate1(loanId, templateType));
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanActionTemplate(loanId, templateType));
         testContext().set(TestContextKey.WC_LOAN_ACTION_TEMPLATE_RESPONSE, response);
         log.info("Retrieved WC loan action template for loan ID: {} with templateType: {}", loanId, templateType);
     }
@@ -69,7 +69,7 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
         final Long loanId = getCreatedLoanId();
 
         final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTemplate1(loanId, templateType));
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanActionTemplate(loanId, templateType));
 
         assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
         assertThat(exception.getMessage()).as("Error message should reference the invalid command").contains(templateType);
@@ -81,7 +81,7 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
         final Long loanId = getCreatedLoanId();
 
         final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTemplate1(loanId, (String) null));
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanActionTemplate(loanId, (String) null));
 
         assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
         assertThat(exception.getMessage()).as("Error message should reference unrecognized command").contains("command");
@@ -91,7 +91,7 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
     @Then("Retrieving WC loan action template for non-existent loan id {long} results in a 404 error")
     public void retrieveTemplateForNonExistentLoan(final Long loanId) {
         final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTemplate1(loanId, "approve"));
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanActionTemplate(loanId, "approve"));
 
         assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(404);
         assertThat(exception.getMessage()).as("Error message should indicate loan not found").contains("does not exist");

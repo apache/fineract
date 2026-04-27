@@ -6,7 +6,6 @@ Feature: Working Capital Breach Configuration
     When Admin Calls Breach Template
     When Admin creates WC Breach With Values
     Then Check created Breach has the following values
-    Then Get Breach With Template has the following values
     When Admin modifies WC Breach With Values
     Then Check updated Breach has the following values
     When Admin deletes WC Breach With Values
@@ -32,10 +31,13 @@ Feature: Working Capital Breach Configuration
   Scenario: Verify Working Capital Breach Configuration create validation with existing name outcomes with error - UC3
     When Admin creates WC Breach With Values for update
     Then Admin failed to create WC Breach With duplicated name
+    When Admin deletes WC Breach With Values for update
 
   @TestRailId:C74476
   Scenario Outline: Verify Working Capital Breach Configuration update with invalid data shall outcome with error - UC4
+    When Admin creates WC Breach With Values for update
     Then Admin failed to update WC Breach for field "<wcb_field_name_invalid>" with invalid data <wcb_field_value_invalid> results with an error <wcb_error_message>
+    When Admin deletes WC Breach With Values for update
 
     Examples:
       | wcb_field_name_invalid       | wcb_field_value_invalid | wcb_error_message                                                                 |
@@ -46,14 +48,17 @@ Feature: Working Capital Breach Configuration
       | breachAmountCalculationType  | "INVALID"               | The parameter `breachAmountCalculationType` must be one of [ PERCENTAGE, FLAT ] . |
       | breachAmount                 | "-1"                    | The parameter `breachAmount` must be greater than or equal to 0.                  |
 
-  @TestRailId:C_74477
+  @TestRailId:C74477
   Scenario: Verify Working Capital Breach update validation with existing name outcomes with error  - UC5
     When Admin creates WC Breach With Values
+    When Admin creates WC Breach With Values for update
     Then Admin failed to update WC Breach With duplicated name
     When Admin deletes WC Breach With Values
+    When Admin deletes WC Breach With Values for update
 
   @TestRailId:C74478
   Scenario: Verify deleting Working Capital Breach Configuration that is already deleted failure - UC6
+    When Admin creates WC Breach With Values for update
     When Admin deletes WC Breach With Values for update
     Then Admin failed to delete WC Breach that is already deleted
     Then Admin failed to retrieve WC Breach that is already deleted

@@ -47,6 +47,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.service.WorkingCapitalBreachReadPlatformService;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.service.WorkingCapitalNearBreachReadPlatformService;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.service.WorkingCapitalLoanProductReadPlatformService;
@@ -70,6 +72,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanSummaryMapper workingCapitalLoanSummaryMapper;
     private final WorkingCapitalBreachReadPlatformService breachReadPlatformService;
     private final WorkingCapitalLoanDelinquencyReadPlatformService workingCapitalLoanDelinquencyReadPlatformService;
+    private final WorkingCapitalNearBreachReadPlatformService nearBreachReadPlatformService;
 
     @Override
     public WorkingCapitalLoanTemplateData retrieveTemplate(final Long productId, final Long clientId) {
@@ -80,6 +83,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         final List<StringEnumOptionData> periodFrequencyTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanPeriodFrequencyType.class);
         final List<WorkingCapitalBreachData> breachOptions = breachReadPlatformService.retrieveAll();
+        final List<WorkingCapitalNearBreachData> nearBreachOptions = nearBreachReadPlatformService.retrieveAll();
         final List<StringEnumOptionData> delinquencyStartTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanDelinquencyStartType.class);
         final List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions = ApiFacingEnum
@@ -97,7 +101,8 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                         .repaymentFrequencyType(product.getRepaymentFrequencyType()) //
                         .discount(product.getDiscount()) //
                         .paymentAllocation(product.getPaymentAllocation()) //
-                        .breach(product.getBreach());
+                        .breach(product.getBreach()) //
+                        .nearBreach(product.getNearBreach()); //
             }
         }
         if (clientId != null) {
@@ -112,6 +117,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                 .delinquencyBucketOptions(delinquencyBucketOptions)//
                 .periodFrequencyTypeOptions(periodFrequencyTypeOptions)//
                 .breachOptions(breachOptions)//
+                .nearBreachOptions(nearBreachOptions)//
                 .delinquencyStartTypeOptions(delinquencyStartTypeOptions)//
                 .delinquencyMinimumPaymentTypeOptions(delinquencyMinimumPaymentTypeOptions).build();
     }

@@ -1,14 +1,7 @@
 name: Fineract Cargo & Unit- & Integration tests - MariaDB
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
+  workflow_call:
 
 permissions:
   contents: read
@@ -51,25 +44,20 @@ jobs:
       FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
       - name: Set up JDK 21
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'zulu'
 
-      - name: Cache Gradle dependencies
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
 
       - name: Setup Gradle and Validate Wrapper
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
@@ -89,8 +77,8 @@ jobs:
 
       - name: Initialise databases
         run: |
-          ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants
-          ./gradlew --no-daemon -q createDB -PdbName=fineract_default
+          ./gradlew --no-daemon -q createDB -PdbName=fineract_tenants -x buildJavaSdk
+          ./gradlew --no-daemon -q createDB -PdbName=fineract_default -x buildJavaSdk
 
       - name: Start LocalStack
         run: |
@@ -131,7 +119,7 @@ jobs:
                 test_args=$(for class in ${module_tests[$module]}; do echo --tests "$class"; done | xargs)
 
                 # Run test task for this module
-                if ! ./gradlew "$module:test" $test_args -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer; then
+                if ! ./gradlew --no-daemon "$module:test" $test_args -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer -x buildJavaSdk ; then
                   echo "::error::Tests failed in module $module"
                   FAILED=1
                 fi

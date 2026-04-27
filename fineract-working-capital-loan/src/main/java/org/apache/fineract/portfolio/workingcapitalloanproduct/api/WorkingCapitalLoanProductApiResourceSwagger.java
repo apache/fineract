@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
 
 /**
  * Swagger documentation classes for Working Capital Loan Products API.
@@ -36,6 +37,22 @@ import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapita
 public final class WorkingCapitalLoanProductApiResourceSwagger {
 
     private WorkingCapitalLoanProductApiResourceSwagger() {}
+
+    @Schema(description = "GetWorkingCapitalLoanNearBreach")
+    public static final class GetWorkingCapitalLoanNearBreach {
+
+        private GetWorkingCapitalLoanNearBreach() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "Near Breach ABC")
+        public String name;
+        @Schema(example = "30")
+        public Integer frequency;
+        public StringEnumOptionData frequencyType;
+        @Schema(example = "10.0")
+        public BigDecimal threshold;
+    }
 
     @Schema(description = "PostWorkingCapitalLoanProductsRequest")
     public static final class PostWorkingCapitalLoanProductsRequest {
@@ -102,6 +119,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public Integer delinquencyGraceDays;
         @Schema(example = "LOAN_CREATION", description = "Delinquency start type: LOAN_CREATION or DISBURSEMENT")
         public String delinquencyStartType;
+        @Schema(example = "1")
+        public Long nearBreachId;
 
         // Configurable attributes
         public PostAllowAttributeOverrides allowAttributeOverrides;
@@ -255,6 +274,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public StringEnumOptionData repaymentFrequencyType;
         @Schema(description = "Working capital breach (1:1 parity with delinquencyBucket)")
         public GetWorkingCapitalLoanBreach breach;
+        public GetWorkingCapitalLoanNearBreach nearBreach;
         @Schema(example = "1")
         public Integer delinquencyGraceDays;
         public StringEnumOptionData delinquencyStartType;
@@ -359,6 +379,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public List<StringEnumOptionData> amortizationTypeOptions;
         public List<StringEnumOptionData> periodFrequencyTypeOptions;
         public List<WorkingCapitalBreachData> breachOptions;
+        public List<WorkingCapitalNearBreachData> nearBreachOptions;
         public List<StringEnumOptionData> advancedPaymentAllocationTypes;
         public List<StringEnumOptionData> delinquencyStartTypeOptions;
         public List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions;
@@ -427,6 +448,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         @Schema(example = "1")
         public Integer delinquencyGraceDays;
         public StringEnumOptionData delinquencyStartType;
+        public GetWorkingCapitalLoanNearBreach nearBreach;
 
         // Configurable attributes
         public GetWorkingCapitalLoanProductsResponse.GetConfigurableAttributes allowAttributeOverrides;
@@ -501,6 +523,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public Integer delinquencyGraceDays;
         @Schema(example = "LOAN_CREATION", description = "Delinquency start type: LOAN_CREATION or DISBURSEMENT")
         public String delinquencyStartType;
+        @Schema(example = "1")
+        public Long nearBreachId;
 
         // Configurable attributes
         public PostWorkingCapitalLoanProductsRequest.PostAllowAttributeOverrides allowAttributeOverrides;

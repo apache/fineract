@@ -39,6 +39,8 @@ import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransac
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.data.WorkingCapitalBreachData;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.service.WorkingCapitalBreachReadPlatformService;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.data.WorkingCapitalNearBreachData;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.service.WorkingCapitalNearBreachReadPlatformService;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAccountingRuleType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
@@ -64,6 +66,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
     private final WorkingCapitalBreachReadPlatformService breachReadPlatformService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final WorkingCapitalProductAccountingMappingService wcAccountingMappingService;
+    private final WorkingCapitalNearBreachReadPlatformService nearBreachReadPlatformService;
 
     @Override
     public List<WorkingCapitalLoanProductData> retrieveAllWorkingCapitalLoanProducts() {
@@ -111,6 +114,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .getValuesAsEnumOptionDataList();
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
                 .retrieveAllDelinquencyBuckets();
+        final List<WorkingCapitalNearBreachData> nearBreachOptions = nearBreachReadPlatformService.retrieveAll();
 
         final List<StringEnumOptionData> accountingRuleOptions = WorkingCapitalAccountingRuleType.toStringEnumOptions();
         final Map<String, List<GLAccountData>> accountingMappingOptions = this.accountingDropdownReadPlatformService
@@ -130,6 +134,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                         delinquencyBucketOptions != null && !delinquencyBucketOptions.isEmpty() ? delinquencyBucketOptions : null) //
                 .accountingRuleOptions(accountingRuleOptions) //
                 .accountingMappingOptions(accountingMappingOptions) //
+                .nearBreachOptions(nearBreachOptions) //
                 .build();
     }
 }

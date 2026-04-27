@@ -1,10 +1,11 @@
 name: Fineract Sonarqube
 on:
-  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
   build:
+    if: ${{ github.event_name == 'push' && github.ref_name == 'develop' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -17,20 +18,21 @@ jobs:
         DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         JAVA_BINARIES: .
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
       - name: Set up JDK 21
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'zulu'
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
       - name: Setup Gradle and Validate Wrapper
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
         with:
           validate-wrappers: true
-      - name: Build
-        run: ./gradlew --no-daemon --console=plain :fineract-provider:build -x test -x cucumber
       - name: Sonar
-        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar
+        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar -x buildJavaSdk

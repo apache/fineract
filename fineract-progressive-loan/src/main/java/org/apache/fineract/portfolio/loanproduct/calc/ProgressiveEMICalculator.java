@@ -1130,6 +1130,10 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         Optional<RepaymentPeriod> findLastUnpaidRepaymentPeriod = scheduleModel.repaymentPeriods().stream().filter(rp -> !rp.isFullyPaid())
                 .reduce((first, second) -> second);
+        if (findLastUnpaidRepaymentPeriod.isEmpty() && scheduleModel.getTotalPaidPrincipal().isZero()) {
+            findLastUnpaidRepaymentPeriod = scheduleModel.repaymentPeriods().stream().reduce((first, second) -> second)
+                    .filter(rp -> !rp.getInterestPeriods().isEmpty()).filter(rp -> rp.getOutstandingLoanBalance().isGreaterThanZero());
+        }
 
         findLastUnpaidRepaymentPeriod.ifPresent(repaymentPeriod -> {
             repaymentPeriod.setFutureUnrecognizedInterest(scheduleModel.zero());

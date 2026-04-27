@@ -92,20 +92,23 @@ task cleanupGeneratedJavaFiles() {
     def tempDir = file("$buildDir/generated/temp-java")
     def targetDir = file("$buildDir/generated/java")
 
-    inputs.dir(tempDir)
+    inputs.dir(tempDir).optional()
     outputs.dir(targetDir)
+    onlyIf { tempDir.exists() }
 
     doLast {
-        copy {
-            from tempDir
-            into targetDir
-            filter { line ->
-                line
-                    .replaceAll(", \\)", ")")
-                    .replaceAll(", , @HeaderMap", ", @HeaderMap")
-                    .replaceAll("\\(, ", "(")
+        if (tempDir.exists()) {
+            copy {
+                from tempDir
+                into targetDir
+                filter { line ->
+                    line
+                        .replaceAll(", \\)", ")")
+                        .replaceAll(", , @HeaderMap", ", @HeaderMap")
+                        .replaceAll("\\(, ", "(")
+                }
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
     }
     dependsOn("buildJavaSdk")

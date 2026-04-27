@@ -145,7 +145,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String name;
     }
 
-    @Schema(description = "Request for transaction command: repayment")
+    @Schema(description = "Request for transaction command: repayment or creditBalanceRefund")
     public static final class PostWorkingCapitalLoanTransactionsRequest {
 
         private PostWorkingCapitalLoanTransactionsRequest() {}
@@ -154,11 +154,11 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "28 June 2024", description = "Repayment transaction date")
+        @Schema(example = "28 June 2024", description = "Transaction date")
         public String transactionDate;
-        @Schema(example = "100.0", description = "Repayment amount")
+        @Schema(example = "100.0", description = "Transaction amount")
         public BigDecimal transactionAmount;
-        @Schema(example = "12", description = "Optional code value id for repayment classification")
+        @Schema(example = "12", description = "Optional code value id for transaction classification")
         public Long classificationId;
         @Schema(example = "Repayment note")
         public String note;
@@ -168,7 +168,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
 
-    @Schema(description = "Response for repayment transaction command")
+    @Schema(description = "Response for repayment/creditBalanceRefund transaction command")
     public static final class PostWorkingCapitalLoanTransactionsResponse {
 
         private PostWorkingCapitalLoanTransactionsResponse() {}

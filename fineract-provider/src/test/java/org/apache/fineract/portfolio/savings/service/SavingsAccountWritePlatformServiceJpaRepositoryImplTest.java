@@ -25,12 +25,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,14 +43,18 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
@@ -69,12 +75,16 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeReposito
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -136,6 +146,8 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private SavingsAccountInterestPostingService savingsAccountInterestPostingService;
     @Mock
+    private ExternalIdFactory externalIdFactory;
+    @Mock
     private ErrorHandler errorHandler;
 
     @InjectMocks
@@ -148,6 +160,12 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         validateTransactionsForTransfer = SavingsAccountWritePlatformServiceJpaRepositoryImpl.class
                 .getDeclaredMethod("validateTransactionsForTransfer", SavingsAccount.class, LocalDate.class);
         validateTransactionsForTransfer.setAccessible(true);
+    }
+
+    @AfterEach
+    void tearDown() {
+        ThreadLocalContextUtil.reset();
+        MoneyHelper.clearCache();
     }
 
     @Test
@@ -223,6 +241,163 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(savingsAccount.getTransactions()).thenReturn(List.of(transaction));
 
         assertThatNoException().isThrownBy(() -> validateTransactionsForTransfer.invoke(service, savingsAccount, transferDate));
+    }
+
+    @Test
+    void holdAmount_shouldUpdateTransactionExternalId() {
+        Long savingsId = 1L;
+        LocalDate transactionDate = LocalDate.of(2024, 4, 2);
+        BigDecimal amount = BigDecimal.TEN;
+        ExternalId externalId = new ExternalId("hold-external-id");
+
+        setupTenantContext(transactionDate);
+
+        AppUser submittedBy = mock(AppUser.class);
+        JsonCommand command = mock(JsonCommand.class);
+        SavingsAccount account = mock(SavingsAccount.class);
+        SavingsAccountTransaction transaction = mock(SavingsAccountTransaction.class);
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 0);
+
+        when(context.authenticatedUser()).thenReturn(submittedBy);
+        when(savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
+        when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(transactionDate);
+        when(command.bigDecimalValueOfParameterNamed("transactionAmount")).thenReturn(amount);
+        when(command.booleanPrimitiveValueOfParameterNamed("lienAllowed")).thenReturn(false);
+        when(command.stringValueOfParameterNamed("reasonForBlock")).thenReturn("manual hold");
+        when(command.json()).thenReturn("{\"externalId\":\"hold-external-id\"}");
+        when(externalIdFactory.createFromCommand(command, "externalId")).thenReturn(externalId);
+        when(account.getClient()).thenReturn(null);
+        when(account.group()).thenReturn(null);
+        when(account.getCurrency()).thenReturn(currency);
+        when(account.getAccountBalance()).thenReturn(BigDecimal.valueOf(100));
+        when(account.getSavingsHoldAmount()).thenReturn(null);
+        when(account.officeId()).thenReturn(1L);
+        when(account.clientId()).thenReturn(2L);
+        when(account.groupId()).thenReturn(3L);
+        when(savingsAccountDomainService.handleHold(account, amount, transactionDate, false)).thenReturn(transaction);
+        when(transaction.getTransactionDate()).thenReturn(transactionDate);
+        when(transaction.getId()).thenReturn(44L);
+
+        service.holdAmount(savingsId, command);
+
+        verify(transaction).updateExternalId(externalId);
+        verify(savingsAccountTransactionRepository).saveAndFlush(transaction);
+    }
+
+    @Test
+    void releaseAmount_shouldUpdateTransactionExternalId() {
+        Long savingsId = 1L;
+        Long holdTransactionId = 7L;
+        LocalDate transactionDate = LocalDate.of(2024, 4, 3);
+        ExternalId externalId = new ExternalId("release-external-id");
+
+        setupTenantContext(transactionDate);
+
+        JsonCommand command = mock(JsonCommand.class);
+        SavingsAccount account = mock(SavingsAccount.class);
+        SavingsAccountTransaction holdTransaction = mock(SavingsAccountTransaction.class);
+        SavingsAccountTransaction releaseTransaction = mock(SavingsAccountTransaction.class);
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 0);
+
+        when(context.authenticatedUser()).thenReturn(mock(AppUser.class));
+        when(savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(holdTransactionId, savingsId)).thenReturn(holdTransaction);
+        when(savingsAccountTransactionDataValidator.validateReleaseAmountAndAssembleForm(holdTransaction)).thenReturn(releaseTransaction);
+        when(externalIdFactory.createFromCommand(command, "externalId")).thenReturn(externalId);
+        when(savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
+        when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        when(account.getClient()).thenReturn(null);
+        when(account.group()).thenReturn(null);
+        when(account.getCurrency()).thenReturn(currency);
+        when(account.getAccountBalance()).thenReturn(BigDecimal.valueOf(100));
+        when(account.getSavingsHoldAmount()).thenReturn(BigDecimal.TEN);
+        when(account.officeId()).thenReturn(1L);
+        when(account.clientId()).thenReturn(2L);
+        when(account.groupId()).thenReturn(3L);
+        when(account.getId()).thenReturn(savingsId);
+        when(releaseTransaction.getAmount()).thenReturn(BigDecimal.TEN);
+        when(releaseTransaction.getTransactionDate()).thenReturn(transactionDate);
+        when(releaseTransaction.getId()).thenReturn(88L);
+
+        service.releaseAmount(savingsId, holdTransactionId, command);
+
+        verify(savingsAccountTransactionDataValidator).validateReleaseAmount(command);
+        verify(releaseTransaction).updateExternalId(externalId);
+        verify(savingsAccountTransactionRepository).saveAndFlush(releaseTransaction);
+        verify(holdTransaction).updateReleaseId(88L);
+    }
+
+    @Test
+    void releaseAmount_shouldThrowNotFoundWhenTransactionDoesNotBelongToSavingsAccount() {
+        Long savingsId = 1L;
+        Long holdTransactionId = 7L;
+        JsonCommand command = mock(JsonCommand.class);
+
+        when(context.authenticatedUser()).thenReturn(mock(AppUser.class));
+        when(command.json()).thenReturn("{\"externalId\":\"release-external-id\"}");
+        when(savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(holdTransactionId, savingsId)).thenReturn(null);
+
+        assertThatThrownBy(() -> service.releaseAmount(savingsId, holdTransactionId, command))
+                .isInstanceOf(SavingsAccountTransactionNotFoundException.class);
+    }
+
+    @Test
+    void postInterest_shouldValidateRequestAndUpdateManualInterestPostingExternalId() {
+        Long savingsId = 1L;
+        LocalDate transactionDate = LocalDate.of(2024, 4, 5);
+        ExternalId externalId = new ExternalId("interest-posting-external-id");
+
+        setupTenantContext(transactionDate);
+
+        JsonCommand command = mock(JsonCommand.class);
+        SavingsAccount account = mock(SavingsAccount.class);
+        SavingsAccountTransaction postingTransaction = mock(SavingsAccountTransaction.class);
+        MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 0);
+        List<SavingsAccountTransaction> transactions = new ArrayList<>();
+
+        when(command.getSavingsId()).thenReturn(savingsId);
+        when(command.booleanPrimitiveValueOfParameterNamed("isPostInterestAsOn")).thenReturn(true);
+        when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(transactionDate);
+        when(externalIdFactory.createFromCommand(command, "externalId")).thenReturn(externalId);
+        when(savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
+        when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        when(account.getClient()).thenReturn(null);
+        when(account.group()).thenReturn(null);
+        when(account.getTransactions()).thenReturn(transactions);
+        when(account.accountSubmittedOrActivationDate()).thenReturn(transactionDate.minusDays(1));
+        when(account.getNominalAnnualInterestRate()).thenReturn(BigDecimal.ONE);
+        when(account.allowOverdraft()).thenReturn(false);
+        when(account.findExistingTransactionIds()).thenReturn(new HashSet<>());
+        when(account.findExistingReversedTransactionIds()).thenReturn(new HashSet<>());
+        when(account.getCurrency()).thenReturn(currency);
+        when(account.deriveAccountingBridgeData(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyMap());
+        when(account.officeId()).thenReturn(1L);
+        when(account.clientId()).thenReturn(2L);
+        when(account.groupId()).thenReturn(3L);
+        when(configurationDomainService.isSavingsInterestPostingAtCurrentPeriodEnd()).thenReturn(false);
+        when(configurationDomainService.retrieveFinancialYearBeginningMonth()).thenReturn(1);
+        when(postingTransaction.getId()).thenReturn(null);
+        when(postingTransaction.getDateOf()).thenReturn(transactionDate);
+        when(postingTransaction.getTransactionDate()).thenReturn(transactionDate);
+        when(postingTransaction.isInterestPosting()).thenReturn(true);
+        when(postingTransaction.isManualTransaction()).thenReturn(true);
+
+        Mockito.doAnswer(invocation -> {
+            transactions.add(postingTransaction);
+            return null;
+        }).when(account).postInterest(any(), any(), anyBoolean(), anyBoolean(), any(), any(), anyBoolean(), anyBoolean());
+
+        service.postInterest(command);
+
+        verify(savingsAccountTransactionDataValidator).validatePostInterest(command);
+        verify(postingTransaction).updateExternalId(externalId);
+        verify(savingsAccountTransactionRepository).save(postingTransaction);
+    }
+
+    private void setupTenantContext(final LocalDate businessDate) {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "test", "Test Tenant", "UTC", null));
+        MoneyHelper.initializeTenantRoundingMode("test", 6);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, businessDate)));
     }
 
     @Test

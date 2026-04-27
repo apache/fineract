@@ -1,0 +1,92 @@
+name: Fineract CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-core:
+    uses: ./.github/workflows/build-core.yml
+    secrets: inherit
+
+  build-embeddable-progressive-loan-jar:
+    needs: build-core
+    uses: ./.github/workflows/build-progressive-loan.yml
+    secrets: inherit
+
+  build-docker-image:
+    needs: build-core
+    uses: ./.github/workflows/build-docker.yml
+    secrets: inherit
+
+  build-documentation:
+    needs: build-core
+    uses: ./.github/workflows/build-documentation.yml
+    secrets: inherit
+
+  run-quality-checks:
+    needs: build-core
+    uses: ./.github/workflows/build-quality-checks.yml
+    secrets: inherit
+
+  run-cucumber-tests:
+    needs: build-core
+    uses: ./.github/workflows/build-cucumber.yml
+    secrets: inherit
+
+  run-integrations-tests-on-postgresql:
+    needs: build-core
+    uses: ./.github/workflows/build-postgresql.yml
+    secrets: inherit
+
+  run-integrations-tests-on-mysql:
+    needs: build-core
+    uses: ./.github/workflows/build-mysql.yml
+    secrets: inherit
+
+  run-integrations-tests-on-mariadb:
+    needs: build-core
+    uses: ./.github/workflows/build-mariadb.yml
+    secrets: inherit
+
+  run-e2e-tests:
+    needs: build-core
+    uses: ./.github/workflows/build-e2e-tests.yml
+    secrets: inherit
+
+  run-liquibase-only-on-postgresql:
+    needs: build-core
+    uses: ./.github/workflows/liquibase-only-postgresql.yml
+    secrets: inherit
+
+  run-messaging-smoke-tests:
+    needs: build-core
+    uses: ./.github/workflows/smoke-messaging.yml
+    secrets: inherit
+
+  run-api-backward-compatibility:
+    needs: build-core
+    uses: ./.github/workflows/verify-api-backward-compatibility.yml
+    secrets: inherit
+
+  run-liquibase-backward-compatibility:
+    needs: build-core
+    uses: ./.github/workflows/verify-liquibase-backward-compatibility.yml
+    secrets: inherit
+
+  run-sonarqube:
+    needs: build-core
+    uses: ./.github/workflows/sonarqube.yml
+    secrets: inherit
+
+  run-integration-tests-sequentially-on-postgresql:
+    needs: build-core
+    uses: ./.github/workflows/run-integration-test-sequentially-postgresql.yml
+    secrets: inherit
+
+  publish-dockerhub:
+    needs: build-core
+    uses: ./.github/workflows/publish-dockerhub.yml
+    secrets: inherit

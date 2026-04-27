@@ -1175,7 +1175,9 @@ public class ClientSavingsIntegrationTest {
         }
         transactionDate = transactionDate.withDayOfMonth(1);
         transactionDateValue = dateFormat.format(transactionDate);
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+        validationErrorHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
         accountDetailsPostInterest = Float.parseFloat(summary.get("totalInterestPosted").toString());
@@ -1436,7 +1438,9 @@ public class ClientSavingsIntegrationTest {
         }
         transactionDate = transactionDate.withDayOfMonth(1);
         transactionDateValue = dateFormat.format(transactionDate);
-        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+        validationErrorHelper.postInterestAsOnSavings(savingsId, transactionDateValue);
         accountTransactionDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
         accountDetailsPostInterest = Float.parseFloat(summary.get("totalInterestPosted").toString());

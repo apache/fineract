@@ -1,0 +1,204 @@
+name: Fineract Quality Checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  javadoc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          validate-wrappers: true
+
+      - name: Generate Javadocs
+        run: ./gradlew --no-daemon javadoc -x test -x cucumber -x doc -x buildJavaSdk
+
+      - name: Archive Javadoc reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: javadoc-reports-quality-checks
+          path: '**/build/docs/javadoc/'
+          if-no-files-found: ignore
+          retention-days: 5
+
+  checkstyle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          validate-wrappers: true
+
+      - name: Run Checkstyle
+        run: ./gradlew --no-daemon checkstyleMain checkstyleTest checkstyleJmh -x test -x cucumber -x doc -x javadoc -x javadocJar -x buildJavaSdk
+
+      - name: Archive Checkstyle reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: checkstyle-reports-quality-checks
+          path: '**/build/reports/checkstyle/'
+          if-no-files-found: ignore
+          retention-days: 5
+
+  rat:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          validate-wrappers: true
+
+      - name: Run RAT
+        run: ./gradlew --no-daemon rat -x test -x cucumber -x doc -x javadoc -x javadocJar -x buildJavaSdk
+
+      - name: Archive RAT reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: rat-reports-quality-checks
+          path: '**/build/reports/rat/'
+          if-no-files-found: ignore
+          retention-days: 5
+
+  spotbugs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          validate-wrappers: true
+
+      - name: Run SpotBugs
+        run: ./gradlew --no-daemon spotbugsMain spotbugsTest -x test -x cucumber -x doc -x javadoc -x javadocJar -x buildJavaSdk
+
+      - name: Archive SpotBugs reports
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: spotbugs-reports-quality-checks
+          path: '**/build/reports/spotbugs/'
+          if-no-files-found: ignore
+          retention-days: 5
+
+  spotless:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        run: tar -xf fineract-workspace.tar
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          validate-wrappers: true
+
+      - name: Run Spotless
+        run: ./gradlew --no-daemon spotlessCheck -x test -x cucumber -x doc -x javadoc -x javadocJar -x buildJavaSdk
