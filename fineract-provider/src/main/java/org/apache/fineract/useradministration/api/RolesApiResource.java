@@ -186,7 +186,10 @@ public class RolesApiResource {
     @Path("{roleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Role", description = "")
+    @Operation(summary = "Update a Role", description = "Updates the details of an existing role by its identifier. Only the fields provided in the request body will be updated (partial update). "
+            + "If Maker-Checker is enabled for this action, the update will be held in a pending state until approved by a checker.\n\n"
+            + "Example Requests:\n\n"
+            + "roles/1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdResponse.class))) })
@@ -226,7 +229,10 @@ public class RolesApiResource {
     @Path("{roleId}/permissions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Role's Permissions", description = "")
+    @Operation(summary = "Update a Role's Permissions", description = "Updates the set of permissions associated with an existing role. "
+            + "The request body should contain a map of permission codes with boolean values indicating whether each permission is selected (true) or deselected (false).\n\n"
+            + "Example Requests:\n\n"
+            + "roles/1/permissions")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsResponse.class))) })
