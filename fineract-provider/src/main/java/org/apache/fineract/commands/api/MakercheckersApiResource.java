@@ -115,7 +115,10 @@ public class MakercheckersApiResource {
     @DELETE
     @Path("{auditId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete Maker Checker Entry")
+    @Operation(summary = "Delete Maker Checker Entry", description = "Deletes a pending Maker Checker entry identified by its audit ID. Only entries that are still in a 'pending' state can be deleted. "
+            + "The deletion permanently removes the command from the checker inbox.\n\n"
+            + "Example Requests:\n\n"
+            + "DELETE /makercheckers/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = MakercheckersApiResourceSwagger.PostMakerCheckersResponse.class)))
     public CommandProcessingResult deleteMakerCheckerEntry(@PathParam("auditId") @Parameter(description = "auditId") final Long auditId) {
         final Long id = writePlatformService.deleteEntry(auditId);
