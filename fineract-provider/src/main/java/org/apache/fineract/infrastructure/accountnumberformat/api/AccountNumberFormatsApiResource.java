@@ -152,7 +152,13 @@ public class AccountNumberFormatsApiResource {
     @Path("{accountNumberFormatId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update an Account number format")
+    @Operation(summary = "Update an Account number format", description = """
+            Updates the prefix configuration of an existing account number format. \
+            Account numbers already generated using the previous format remain unchanged.
+            
+            Example Requests:
+            
+            accountnumberformats/1""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsResponse.class)))
     public String update(
