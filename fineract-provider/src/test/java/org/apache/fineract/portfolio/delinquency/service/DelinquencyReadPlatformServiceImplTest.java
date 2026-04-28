@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import static java.time.Month.JANUARY;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
+
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,8 +34,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+
 import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
@@ -42,6 +46,7 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
@@ -64,7 +69,6 @@ class DelinquencyReadPlatformServiceImplTest {
 
     @Mock
     private DelinquencyRangeRepository repositoryRange;
-
     @Mock
     private DelinquencyBucketRepository repositoryBucket;
     @Mock
@@ -73,34 +77,34 @@ class DelinquencyReadPlatformServiceImplTest {
     private DelinquencyRangeMapper mapperRange;
     @Mock
     private DelinquencyBucketMapper mapperBucket;
-
     @Mock
     private LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory;
-
     @Mock
     private LoanRepository loanRepository;
-
     @Mock
     private LoanDelinquencyDomainService loanDelinquencyDomainService;
-
     @Mock
     private LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
-
     @Mock
     private ConfigurationDomainService configurationDomainService;
 
+
+    private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+    @Mock
+    private ConfigurationDomainService configurationDomainService;
     @Mock
     private LoanTransactionRepository loanTransactionRepository;
-
     @Mock
     private PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationServiceDiscovery;
-<<<<<<< HEAD
+
+
 
     @Mock
     private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
-=======
     
->>>>>>> 3264fbce5 (FINERACT-2593: Fix inverted null guard and add self-defensive NPE protection in DelinquencyReadPlatformServiceImpl)
+
+    @Mock
+    private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
     @InjectMocks
     private DelinquencyReadPlatformServiceImpl underTest;
@@ -182,6 +186,37 @@ class DelinquencyReadPlatformServiceImplTest {
                 pausePeriod(true, "2023-01-12", "2023-01-14"), //
                 pausePeriod(false, "2023-01-15", "2023-01-20") //
         );
+    }
+
+    @Test
+    void givenPendingLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndOverAppliedIsNull() {
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanProduct()).thenReturn(null);
+        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
+        when(loan.isApproved()).thenReturn(false);
+        when(loan.isCancelled()).thenReturn(false);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        CollectionData result = underTest.calculateLoanCollectionData(1L);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isNull();
+    }
+
+    @Test
+    void givenActiveLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndOverAppliedIsNull() {
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanProduct()).thenReturn(null);
+        when(loan.isSubmittedAndPendingApproval()).thenReturn(false);
+        when(loan.isApproved()).thenReturn(false);
+        when(loan.isCancelled()).thenReturn(false);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanDelinquencyDomainService.getOverdueCollectionData(any(), any())).thenReturn(CollectionData.template());
+
+        CollectionData result = underTest.calculateLoanCollectionData(1L);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isNull();
     }
 
     @Test
