@@ -214,7 +214,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         BigDecimal approvedWithOverApplied = loan.getApprovedPrincipal();
 
         // If over applied amount is enabled, calculate the maximum allowed amount
-        if (loanProduct.isAllowApprovedDisbursedAmountsOverApplied()) {
+        if (loanProduct != null && loanProduct.isAllowApprovedDisbursedAmountsOverApplied()) {
             if (loanProduct.getOverAppliedCalculationType() != null) {
                 if ("percentage".equalsIgnoreCase(loanProduct.getOverAppliedCalculationType())) {
                     final BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());

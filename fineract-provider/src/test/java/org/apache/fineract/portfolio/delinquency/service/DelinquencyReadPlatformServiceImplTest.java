@@ -17,29 +17,34 @@
  * under the License.
  */
 package org.apache.fineract.portfolio.delinquency.service;
-
-import static java.time.Month.JANUARY;
-import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
-
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static java.time.Month.JANUARY;
+import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import java.util.Optional;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
@@ -56,12 +61,14 @@ import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,22 +94,12 @@ class DelinquencyReadPlatformServiceImplTest {
     private LoanInstallmentDelinquencyTagRepository repositoryLoanInstallmentDelinquencyTag;
     @Mock
     private ConfigurationDomainService configurationDomainService;
-
-
-    private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
-    @Mock
-    private ConfigurationDomainService configurationDomainService;
     @Mock
     private LoanTransactionRepository loanTransactionRepository;
     @Mock
     private PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationServiceDiscovery;
-
-
-
     @Mock
     private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
-    
-
     @Mock
     private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
 
@@ -193,30 +190,48 @@ class DelinquencyReadPlatformServiceImplTest {
         Loan loan = mock(Loan.class);
         when(loan.getLoanProduct()).thenReturn(null);
         when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
-        when(loan.isApproved()).thenReturn(false);
-        when(loan.isCancelled()).thenReturn(false);
+        // REMOVED: when(loan.isApproved()).thenReturn(false); ← unnecessary
+        // REMOVED: when(loan.isCancelled()).thenReturn(false); ← unnecessary
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
         CollectionData result = underTest.calculateLoanCollectionData(1L);
 
         assertThat(result).isNotNull();
-        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isNull();
+        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
     void givenActiveLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndOverAppliedIsNull() {
-        Loan loan = mock(Loan.class);
-        when(loan.getLoanProduct()).thenReturn(null);
-        when(loan.isSubmittedAndPendingApproval()).thenReturn(false);
-        when(loan.isApproved()).thenReturn(false);
-        when(loan.isCancelled()).thenReturn(false);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-        when(loanDelinquencyDomainService.getOverdueCollectionData(any(), any())).thenReturn(CollectionData.template());
+        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+        businessDates.put(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 1));
+        businessDates.put(BusinessDateType.COB_DATE, LocalDate.of(2024, 1, 1));
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
 
-        CollectionData result = underTest.calculateLoanCollectionData(1L);
+        try {
+            Loan loan = mock(Loan.class);
+            when(loan.getLoanProduct()).thenReturn(null);
+            when(loan.isSubmittedAndPendingApproval()).thenReturn(false);
+            when(loan.isApproved()).thenReturn(false);
+            when(loan.isCancelled()).thenReturn(false);
+            when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+            when(loan.getDisbursedAmount()).thenReturn(BigDecimal.valueOf(5000));
+            when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+            when(loanDelinquencyDomainService.getOverdueCollectionData(any(), any())).thenReturn(CollectionData.template());
+            when(loanDelinquencyActionRepository.findByLoanOrderById(any())).thenReturn(List.of());
+            when(configurationDomainService.getNextPaymentDateConfigForLoan()).thenReturn(null);
+            when(possibleNextRepaymentCalculationServiceDiscovery.getService(any())).thenReturn(null);
+            when(loan.getLastPaymentTransaction()).thenReturn(null);
+            when(loan.getLastRepaymentOrDownPaymentTransaction()).thenReturn(null);
+            when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(false);
+            when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
-        assertThat(result).isNotNull();
-        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isNull();
+            CollectionData result = underTest.calculateLoanCollectionData(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
+        } finally {
+            ThreadLocalContextUtil.reset();
+        }
     }
 
     @Test
@@ -240,6 +255,62 @@ class DelinquencyReadPlatformServiceImplTest {
                 pausePeriod(false, "2023-01-13", "2023-01-14"), //
                 pausePeriod(false, "2023-01-15", "2023-01-20") //
         );
+    }
+
+    @Test
+    void givenLoanWithNullProduct_whenHelperCalledDirectly_thenReturnsZero() {
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanProduct()).thenReturn(null);
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+        when(loan.getDisbursedAmount()).thenReturn(BigDecimal.valueOf(5000));
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+
+        BigDecimal result = underTest.calculateAvailableDisbursementAmountWithOverApplied(loan);
+
+        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(5000));
+    }
+
+    @Test
+    void givenLoanWithProductOverApplyDisabled_whenHelperCalledDirectly_thenReturnsApprovedMinusDisbursed() {
+        Loan loan = mock(Loan.class);
+        LoanProduct loanProduct = mock(LoanProduct.class);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.isAllowApprovedDisbursedAmountsOverApplied()).thenReturn(false);
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+        when(loan.getDisbursedAmount()).thenReturn(BigDecimal.valueOf(4000));
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+
+        BigDecimal result = underTest.calculateAvailableDisbursementAmountWithOverApplied(loan);
+
+        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(6000));
+    }
+
+    @Test
+    void givenLoanWithPercentageOverApply_whenHelperCalledDirectly_thenReturnsCalculatedAmount() {
+        // MoneyHelper.getMathContext() requires a tenant context
+        MathContext mathContext = new MathContext(19, RoundingMode.HALF_EVEN);
+        MockedStatic<MoneyHelper> moneyHelperMock = mockStatic(MoneyHelper.class);
+        moneyHelperMock.when(MoneyHelper::getMathContext).thenReturn(mathContext);
+
+        try {
+            Loan loan = mock(Loan.class);
+            LoanProduct loanProduct = mock(LoanProduct.class);
+            when(loan.getLoanProduct()).thenReturn(loanProduct);
+            when(loanProduct.isAllowApprovedDisbursedAmountsOverApplied()).thenReturn(true);
+            when(loanProduct.getOverAppliedCalculationType()).thenReturn("percentage");
+            when(loanProduct.getOverAppliedNumber()).thenReturn(10);
+            when(loan.getProposedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+            when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+            when(loan.getDisbursedAmount()).thenReturn(BigDecimal.ZERO);
+            when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+
+            BigDecimal result = underTest.calculateAvailableDisbursementAmountWithOverApplied(loan);
+
+            // 10000 * (1 + 10/100) = 11000, minus 0 disbursed = 11000
+            assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(11000));
+        } finally {
+            moneyHelperMock.close();
+        }
     }
 
     private void verifyPausePeriods(CollectionData collectionData, DelinquencyPausePeriod... pausePeriods) {
