@@ -129,7 +129,12 @@ public class ReportsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Report", operationId = "createReport", description = "")
+    @Operation(summary = "Create a Report", operationId = "createReport", description = "Creates a new custom (non-core) report definition. "
+            + "The report can be of type Table, Chart, or Pentaho.\n\n"
+            + "Mandatory Fields: \n"
+            + "reportName, reportType\n\n"
+            + "Example Requests:\n\n"
+            + "reports")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostRepostRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.PostReportsResponse.class)))
     public String createReport(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
