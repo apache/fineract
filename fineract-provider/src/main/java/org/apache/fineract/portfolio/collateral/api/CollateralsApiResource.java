@@ -141,7 +141,11 @@ public class CollateralsApiResource {
     @Path("{collateralId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Collateral")
+    @Operation(summary = "Update a Collateral", description = "Updates the details of a collateral pledged against a loan. "
+            + "The collateral type, value, and description can be modified. "
+            + "Collaterals may only be updated when the associated loan is in the 'Submitted and Pending Approval' stage.\n\n"
+            + "Example Requests:\n\n"
+            + "loans/1/collaterals/1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansLoandIdCollateralsCollateralIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CollateralsApiResourceSwagger.PutLoansLoanIdCollateralsCollateralIdResponse.class)))
     public CommandProcessingResult updateCollateral(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
