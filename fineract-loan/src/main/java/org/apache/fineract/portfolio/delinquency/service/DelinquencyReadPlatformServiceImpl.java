@@ -156,7 +156,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
             // If the Loan is not Active yet or is cancelled (rejected or withdrawn), return template data
             if (loan.isSubmittedAndPendingApproval() || loan.isApproved() || loan.isCancelled()) {
-                if (loan.getLoanProduct() == null || loan.getLoanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+                if (loan.getLoanProduct() != null && loan.getLoanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
                     collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
                 }
                 return collectionData;
@@ -173,7 +173,9 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             // loans
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
             collectionData.setAvailableDisbursementAmount(calculateAvailableDisbursementAmount(loan));
-            collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
+            if (loan.getLoanProduct() != null) {
+                collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
+            }
             collectionData.setNextPaymentDueDate(possibleNextRepaymentDate(nextPaymentDueDateConfig, loan));
             PossibleNextRepaymentCalculationService possibleNextRepaymentCalculationService = possibleNextRepaymentCalculationServiceDiscovery
                     .getService(loan);
