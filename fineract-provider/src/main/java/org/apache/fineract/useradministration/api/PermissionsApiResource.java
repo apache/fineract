@@ -100,7 +100,10 @@ public class PermissionsApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Enable/Disable Permissions for Maker Checker", description = "")
+    @Operation(summary = "Enable/Disable Permissions for Maker Checker", description = "Enables or disables the Maker-Checker (4-eye) flag on individual application permissions. "
+            + "The request body should contain a map of permission codes with boolean values indicating whether Maker-Checker is enabled (true) or disabled (false) for each permission.\n\n"
+            + "Example Requests:\n\n"
+            + "permissions")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PermissionsApiResourceSwagger.PutPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })
