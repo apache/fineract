@@ -121,7 +121,11 @@ public class CodeValuesApiResource {
     @Path("{codeId}/codevalues")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Code description", description = "")
+    @Operation(summary = "Create a Code description", description = "Creates a new code value under an existing code category identified by its ID. "
+            + "The code value label must be unique within the parent code. "
+            + "If not provided, 'position' defaults to 0 and 'isActive' defaults to true.\n\n"
+            + "Example Requests:\n\n"
+            + "codes/1/codevalues")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class)))
     public String createCodeValue(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId,
@@ -202,7 +206,12 @@ public class CodeValuesApiResource {
     @Path("name/{codeName}/codevalues")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Code description", operationId = "createCodeValueByCodeName", description = "")
+    @Operation(summary = "Create a Code description", operationId = "createCodeValueByCodeName", description = "Creates a new code value under an existing code category identified by its name. "
+            + "The code name is first resolved to its ID internally. "
+            + "The code value label must be unique within the parent code. "
+            + "If not provided, 'position' defaults to 0 and 'isActive' defaults to true.\n\n"
+            + "Example Requests:\n\n"
+            + "codes/name/Customer Identifier/codevalues")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class)))
     public CommandProcessingResult createCodeValue(@PathParam("codeName") @Parameter(description = "codeName") final String codeName,
