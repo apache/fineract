@@ -233,6 +233,12 @@ public class DocumentApiResource {
     @DELETE
     @Path("{documentId}")
     @Operation(summary = "Remove a Document", description = """
+            Permanently removes a document attached to the specified entity. Both the document metadata and the associated binary file stored in the content store are deleted.
+
+            Example Requests:
+
+            - clients/1/documents/1
+            - loans/1/documents/1
             """)
     @ApiResponse(responseCode = "200", description = "OK")
     public DocumentDeleteResponse deleteDocument(@PathParam(DOCUMENT_API_PARAM_ENTITY_TYPE) final String entityType,
