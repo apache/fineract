@@ -89,7 +89,15 @@ public class ReportMailingJobApiResource {
     @Path("{entityId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Report Mailing Job\n", operationId = "updateReportMailingJob", description = "")
+    @Operation(summary = "Update a Report Mailing Job\n", operationId = "updateReportMailingJob", description = """
+            Updates an existing scheduled report mailing job. \
+            Only the fields provided in the request body will be updated (partial update). \
+            When the recurrence pattern or start date time is changed, the next run date time is automatically recalculated. \
+            Clearing the recurrence pattern removes the next run date time, effectively pausing the job.
+            
+            Example Requests:
+            
+            reportmailingjobs/1""")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ReportMailingJobApiResourceSwagger.PutReportMailingJobsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportMailingJobApiResourceSwagger.PutReportMailingJobsResponse.class)))
     public String updateReportMailingJob(@PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
