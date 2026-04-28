@@ -61,7 +61,12 @@ public class SpmApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @Operation(summary = "List all Surveys", operationId = "fetchAllSurveys", description = "")
+    @Operation(summary = "List all Surveys", operationId = "fetchAllSurveys", description = "Retrieves all survey definitions. "
+            + "Use the optional isActive query parameter to filter only currently valid surveys (where today's date falls between validFrom and validTo). "
+            + "If isActive is not provided or false, all surveys are returned regardless of validity period.\n\n"
+            + "Example Requests:\n\n"
+            + "surveys\n\n"
+            + "surveys?isActive=true")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SurveyData.class)))) })
     public List<SurveyData> fetchAllSurveys(@QueryParam("isActive") final Boolean isActive) {
@@ -85,7 +90,10 @@ public class SpmApiResource {
     @Path("/{id}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @Operation(summary = "Retrieve a Survey", description = "")
+    @Operation(summary = "Retrieve a Survey", description = "Retrieves the complete definition of a survey including its components, questions, and response options. "
+            + "The survey is returned regardless of its active status, allowing review of expired or future surveys.\n\n"
+            + "Example Requests:\n\n"
+            + "surveys/1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SurveyData.class))) })
     public SurveyData findSurvey(@PathParam("id") @Parameter(description = "Enter id") final Long id) {
