@@ -82,7 +82,12 @@ public class PasswordPreferencesApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update password preferences", description = "")
+    @Operation(summary = "Update password preferences", description = "Switches the active password validation policy for the tenant. "
+            + "Only one policy can be active at a time; activating a new policy automatically deactivates the previously active one. "
+            + "Password validation policies are pre-installed and cannot be created or deleted. "
+            + "The selected policy applies to all subsequent user creation and password change operations.\n\n"
+            + "Example Requests:\n\n"
+            + "passwordpreferences")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
