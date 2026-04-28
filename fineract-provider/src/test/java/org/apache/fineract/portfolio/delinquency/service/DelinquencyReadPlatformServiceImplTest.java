@@ -94,9 +94,13 @@ class DelinquencyReadPlatformServiceImplTest {
 
     @Mock
     private PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationServiceDiscovery;
+<<<<<<< HEAD
 
     @Mock
     private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+=======
+    
+>>>>>>> 3264fbce5 (FINERACT-2593: Fix inverted null guard and add self-defensive NPE protection in DelinquencyReadPlatformServiceImpl)
 
     @InjectMocks
     private DelinquencyReadPlatformServiceImpl underTest;
@@ -269,3 +273,4 @@ class DelinquencyReadPlatformServiceImplTest {
     }
 
 }
+
