@@ -173,7 +173,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
             // loans
             collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan, effectiveDelinquencyList);
             collectionData.setAvailableDisbursementAmount(calculateAvailableDisbursementAmount(loan));
-            if (loan.getLoanProduct() != null && loan.getLoanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+            if (loan.getLoanProduct() != null) {
                 collectionData.setAvailableDisbursementAmountWithOverApplied(calculateAvailableDisbursementAmountWithOverApplied(loan));
             }
             collectionData.setNextPaymentDueDate(possibleNextRepaymentDate(nextPaymentDueDateConfig, loan));
