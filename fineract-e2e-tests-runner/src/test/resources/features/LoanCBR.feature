@@ -1790,15 +1790,14 @@ Feature: Credit Balance Refund
       | 01 April 2025    | Down Payment           | 61.0   | 61.0      | 0.0      | 0.0  | 0.0       | 182.79       | false    | false    |
     Then Loan status will be "ACTIVE"
 
-  @TestRailId:C78812
-  Scenario: Loan ends in invalid state after CBR and backdated Goodwill Credit with both totalOutstanding and totalOverpaid > 0
+  Scenario Outline: Verify that Loan ends in correct state after CBR + backdated GoodwillCredit cocktail (<rule> future-installment rule)
     When Admin sets the business date to "02 September 2025"
     And Admin creates a client with random data
 
     # Migration loan: submitted & disbursed back-dated to 06 April 2025, 6 monthly installments
     And Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | LP2_PS3087_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACCRUAL_ACTIVITY_LAST_INSTALLMENT | 06 April 2025     | 1316.49        | 12.2062                | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LoanProduct   | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | <loanProduct> | 06 April 2025     | 1316.49        | 12.2062                | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "06 April 2025" with "1316.49" amount and expected disbursement date on "06 April 2025"
     And Admin successfully disburse the loan on "06 April 2025" with "1316.49" EUR transaction amount
 
@@ -1818,7 +1817,7 @@ Feature: Credit Balance Refund
     And Admin runs inline COB job for Loan
     And Customer makes "REPAYMENT" transaction with "REAL_TIME" payment type on "02 October 2025" with 227.00 EUR transaction amount and system-generated Idempotency key
 
-    # 3 MIRs (interestRefundCalculation=false) on 29 October 2025 → loan flips to OVERPAID
+    # 3 MIRs (interestRefundCalculation=false) on 29 October 2025 -> loan flips to OVERPAID
     When Admin sets the business date to "29 October 2025"
     And Admin runs inline COB job for Loan
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 October 2025" with 242.00 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
@@ -1826,37 +1825,116 @@ Feature: Credit Balance Refund
     And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 October 2025" with 30.49 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
     Then Loan status will be "OVERPAID"
 
-    # 30 October 2025 → CBR 514.49
+    # 30 October 2025 -> CBR 514.49
     When Admin sets the business date to "30 October 2025"
     And Admin runs inline COB job for Loan
     And Admin makes Credit Balance Refund transaction on "30 October 2025" with 514.49 EUR transaction amount
 
-    # 11 December 2025 → INTEREST_REFUND on MIR1 + backdated GOODWILL_CREDIT (txn date 28 October 2025, BEFORE the MIRs)
+    # 11 December 2025 -> INTEREST_REFUND on MIR1 + backdated GOODWILL_CREDIT (txn date 28 October 2025, BEFORE the MIRs)
     When Admin sets the business date to "11 December 2025"
     And Admin runs inline COB job for Loan
     And Admin manually adds Interest Refund for "1"th "MERCHANT_ISSUED_REFUND" transaction made on "29 October 2025" with 0.01 EUR interest refund amount
     And Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "28 October 2025" with 0.01 EUR transaction amount and system-generated Idempotency key
 
-    # 12 December 2025 → CBR 27.92
+    # 12 December 2025 -> CBR 27.92
     When Admin sets the business date to "12 December 2025"
     And Admin runs inline COB job for Loan
     And Admin makes Credit Balance Refund transaction on "12 December 2025" with 27.92 EUR transaction amount
 
-    # 16 December 2025 → INTEREST_REFUND on MIR2 & MIR3 + another backdated GOODWILL_CREDIT
+    # 16 December 2025 -> INTEREST_REFUND on MIR2 & MIR3 + another backdated GOODWILL_CREDIT
     When Admin sets the business date to "16 December 2025"
     And Admin runs inline COB job for Loan
     And Admin manually adds Interest Refund for "2"th "MERCHANT_ISSUED_REFUND" transaction made on "29 October 2025" with 0.01 EUR interest refund amount
     And Admin manually adds Interest Refund for "3"th "MERCHANT_ISSUED_REFUND" transaction made on "29 October 2025" with 0.01 EUR interest refund amount
     And Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "28 October 2025" with 0.01 EUR transaction amount and system-generated Idempotency key
 
-    # 17 December 2025 → final CBR 0.01 — should fully close the loan
+    # 17 December 2025 -> final CBR 0.01 - should fully close the loan
     When Admin sets the business date to "17 December 2025"
     And Admin runs inline COB job for Loan
     And Admin makes Credit Balance Refund transaction on "17 December 2025" with 0.01 EUR transaction amount
-
-    # ===== INVARIANT THE BUG VIOLATES =====
-    # PS-3087: today both fields equal 542.41 and status is OVERPAID.
-    # After fix: outstanding == 0 AND overpaid == 0, status == CLOSED_OBLIGATIONS_MET.
     Then Loan has 0.0 outstanding amount
     And Loan has 0.0 overpaid amount
     And Loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Loan Repayment schedule has 6 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      |    |      | 06 April 2025     |                   | 1316.49         |               |          | 0.0  |           | 0.0    | 0.0    |            |      |             |
+      | 1  | 30   | 06 May 2025       | 06 May 2025       | 1102.39         | 214.1         | 13.21    | 0.0  | 0.0       | 227.31 | 227.31 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 06 June 2025      | 06 June 2025      | 886.51          | 215.88        | 11.43    | 0.0  | 0.0       | 227.31 | 227.31 | 0.0        | 0.0  | 0.0         |
+      | 3  | 30   | 06 July 2025      | 06 July 2025      | 668.09          | 218.42        | 8.89     | 0.0  | 0.0       | 227.31 | 227.31 | 0.0        | 0.0  | 0.0         |
+      | 4  | 31   | 06 August 2025    | 06 August 2025    | 447.71          | 220.38        | 6.93     | 0.0  | 0.0       | 227.31 | 227.31 | 0.0        | 0.0  | 0.0         |
+      | 5  | 31   | 06 September 2025 | 06 September 2025 | 225.04          | 222.67        | 4.64     | 0.0  | 0.0       | 227.31 | 227.31 | 0.0        | 0.0  | 0.0         |
+      | 6  | 30   | 06 October 2025   | 02 October 2025   | 0.0             | 225.04        | 1.96     | 0.0  | 0.0       | 227.0  | 227.0  | 227.0      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid    | In advance | Late | Outstanding |
+      | 1316.49       | 47.06    | 0.0  | 0.0       | 1363.55 | 1363.55 | 227.0      | 0.0  | 0.0         |
+
+    @TestRailId:C78812
+    Examples: LAST_INSTALLMENT future-installment rule (the configuration that originally reproduced PS-3087)
+      | rule             | loanProduct                                                                                       |
+      | LAST_INSTALLMENT | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT |
+
+    @TestRailId:C78853
+    Examples: NEXT_INSTALLMENT future-installment rule (default; must stay unaffected by the fix)
+      | rule             | loanProduct                                                                                    |
+      | NEXT_INSTALLMENT | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACCRUAL_ACTIVITY |
+
+  @TestRailId:C78851
+  Scenario: Verify that backdated GoodwillCredit on fully paid loan followed by CBR closes the loan
+    When Admin sets the business date to "15 December 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT | 01 January 2025   | 300            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "300" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 February 2025" with 100.00 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2025" with 100.00 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 April 2025" with 100.00 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    # Backdated GoodwillCredit dated BEFORE maturity (01 April 2025) on an already-closed loan
+    When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "15 March 2025" with 0.50 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "OVERPAID"
+    And Loan has 0.0 outstanding amount
+    And Loan has 0.5 overpaid amount
+    # CBR equal to overpayment closes the loan; the schedule's last installment must remain intact
+    When Admin makes Credit Balance Refund transaction on "15 April 2025" with 0.5 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Loan has 0.0 outstanding amount
+    And Loan has 0.0 overpaid amount
+    And Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 01 January 2025  |                  | 300.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 31   | 01 February 2025 | 01 February 2025 | 200.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 28   | 01 March 2025    | 01 March 2025    | 100.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 3  | 31   | 01 April 2025    | 01 April 2025    | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 0.5        | 0.0  | 0.0         |
+
+  @TestRailId:C78852
+  Scenario: Verify that Reverse-replay reduces overpayment so an earlier CBR re-runs with principalPortion > 0
+    When Admin sets the business date to "15 December 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT | 01 January 2025   | 300            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 January 2025" with "300" amount and expected disbursement date on "01 January 2025"
+    And Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 February 2025" with 100.00 EUR transaction amount and system-generated Idempotency key
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 March 2025" with 100.00 EUR transaction amount and system-generated Idempotency key
+    # Final repayment overpays by 50 EUR
+    And Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "01 April 2025" with 150.00 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "OVERPAID"
+    And Loan has 50.0 overpaid amount
+    # CBR equals overpayment, after maturity → loan closes
+    When Admin makes Credit Balance Refund transaction on "15 April 2025" with 50 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Loan has 0.0 outstanding amount
+    # Reverse the SECOND repayment → reverse-replay re-runs the CBR with smaller overpayment
+    When Customer undo "1"th repayment on "01 March 2025"
+    Then Loan status will be "ACTIVE"
+    And Loan has 100.0 outstanding amount
+    And Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late  | Outstanding |
+      |    |      | 01 January 2025  |               | 300.0           |               |          | 0.0  |           | 0.0   | 0.0   |            |       |             |
+      | 1  | 31   | 01 February 2025 | 01 March 2025 | 200.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 0.0        | 100.0 | 0.0         |
+      | 2  | 28   | 01 March 2025    | 01 April 2025 | 100.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 0.0        | 100.0 | 0.0         |
+      | 3  | 31   | 01 April 2025    |               | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 50.0  | 0.0        | 0.0   | 50.0        |
+      | 4  | 14   | 15 April 2025    |               | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0   | 0.0        | 0.0   | 50.0        |

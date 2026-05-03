@@ -650,10 +650,16 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     final Money interestAfterRefund = interestRefundService.totalInterestByTransactions(this, loan.getId(), targetDate,
                             modifiedTransactions, unmodifiedTransactionIds, ctx.getActiveLoanTermVariations());
                     final Money newAmount = interestBeforeRefund.minus(progCtx.getSumOfInterestRefundAmount()).minus(interestAfterRefund);
-                    loanTransaction.updateAmount(newAmount.getAmount());
+                    loanTransaction.updateAmount(MathUtil.negativeToZero(newAmount).getAmount());
                 }
                 progCtx.setSumOfInterestRefundAmount(progCtx.getSumOfInterestRefundAmount().add(loanTransaction.getAmount()));
             }
+        }
+        // A zero-amount interest refund has no effect on balances; processing it would incorrectly
+        // zero the overpaymentHolder via handleOverpayment, causing subsequent CBR transactions
+        // to see an empty holder and create phantom outstanding on additional installments.
+        if (!loanTransaction.getAmount(ctx.getCurrency()).isGreaterThanZero()) {
+            return;
         }
         handleRepayment(loanTransaction, ctx);
     }
@@ -952,6 +958,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     } else {
                         // transaction is after maturity date, create an additional installment
                         Loan loan = loanTransaction.getLoan();
+                        // CBR is a credit to the customer. If funded by overpayment, repaidAmount will pay off this
+                        // principal.
+                        // If the CBR is unfunded (e.g. after a reverse-replay), the unfunded portion (transactionAmount
+                        // - repaidAmount)
+                        // correctly becomes a new principal obligation (principalOutstanding).
+                        // Credited principal is added to prevent negative 'Balance of loan' in the schedule.
                         LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, (installments.size() + 1),
                                 pastDueDate, transactionDate, transactionAmount.getAmount(), zeroMoney.getAmount(), zeroMoney.getAmount(),
                                 zeroMoney.getAmount(), false, null);

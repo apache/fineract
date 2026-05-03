@@ -4962,6 +4962,47 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         });
 
         tasks.add(() -> {
+            // LP2 + zero-interest chargeOff behaviour + progressive loan schedule + horizontal + interest recalculation
+            // + accrual activity posting, with LAST_INSTALLMENT future-installment allocation rule baked in for every
+            // advanced-allocation transaction type - exercises code paths that the more common NEXT_INSTALLMENT
+            // configuration does not reach.
+            // (LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT)
+            final String nameLastInst = DefaultLoanProduct.LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT
+                    .getName();
+            final PostLoanProductsRequest loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOffAccLastInstallment = loanProductsRequestFactory
+                    .defaultLoanProductsRequestLP2Emi()//
+                    .multiDisburseLoan(true)//
+                    .disallowExpectedDisbursements(true)//
+                    .maxTrancheCount(500)//
+                    .isInterestRecalculationEnabled(true)//
+                    .preClosureInterestCalculationStrategy(1)//
+                    .rescheduleStrategyMethod(4)//
+                    .interestRecalculationCompoundingMethod(0)//
+                    .recalculationRestFrequencyType(2)//
+                    .recalculationRestFrequencyInterval(1)//
+                    .supportedInterestRefundTypes(supportedInterestRefundTypes).paymentAllocation(List.of(//
+                            createPaymentAllocation("DEFAULT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("MERCHANT_ISSUED_REFUND", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("PAYOUT_REFUND", "LAST_INSTALLMENT"), //
+                            createPaymentAllocation("INTEREST_REFUND", "LAST_INSTALLMENT")))
+                    .name(nameLastInst)//
+                    .shortName(loanProductsRequestFactory.generateShortNameSafely())//
+                    .enableAccrualActivityPosting(true)//
+                    .allowApprovedDisbursedAmountsOverApplied(true)//
+                    .overAppliedCalculationType(OverAppliedCalculationType.FIXED_SIZE.value)//
+                    .overAppliedNumber(1000)//
+                    .enableInstallmentLevelDelinquency(true)//
+                    .interestRecognitionOnDisbursementDate(true)//
+                    .chargeOffBehaviour("ZERO_INTEREST");//
+            final PostLoanProductsResponse responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOffAccLastInstallment = createLoanProductIdempotent(
+                    loanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOffAccLastInstallment);
+            TestContext.INSTANCE.set(
+                    TestContextKey.DEFAULT_LOAN_PRODUCT_CREATE_RESPONSE_LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT,
+                    responseLoanProductsRequestLP2AdvPaymentIntEmiActualActualIntRefundFullZeroIntChargeOffAccLastInstallment);
+        });
+
+        tasks.add(() -> {
             // LP2 with progressive loan schedule + horizontal + interest recalculation daily EMI + 360/30 +
             // multidisbursement with full term tranche enabled
             // Frequency for recalculate Outstanding Principal: Daily, Frequency Interval for recalculation: 1
