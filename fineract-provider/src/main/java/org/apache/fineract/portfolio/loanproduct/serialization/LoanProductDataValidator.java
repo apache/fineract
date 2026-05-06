@@ -1969,7 +1969,7 @@ public final class LoanProductDataValidator {
             validateAutoRepaymentForDownPayment(enableDownPayment, baseDataValidator, element);
         }
 
-        Integer repaymentStartDateType = loanProduct.getRepaymentStartDateType().getValue();
+        Integer repaymentStartDateType = loanProduct.getLoanProductRelatedDetail().getRepaymentStartDateType().getValue();
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element)) {
             repaymentStartDateType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE, element,
                     Locale.getDefault());

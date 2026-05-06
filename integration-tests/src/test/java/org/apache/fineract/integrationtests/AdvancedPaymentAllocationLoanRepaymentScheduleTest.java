@@ -55,7 +55,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.LoanProduct;
+import org.apache.fineract.client.models.LoanProductRelatedDetail;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
@@ -5171,7 +5171,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProductRelatedDetail.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
                     .allowPartialPeriodInterestCalculation(false)//
                     .enableAutoRepaymentForDownPayment(null)//
@@ -5288,7 +5288,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .numberOfRepayments(6)//
                     .repaymentEvery(1)//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProductRelatedDetail.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
                     .allowPartialPeriodInterestCalculation(null)//
                     .enableAutoRepaymentForDownPayment(null)//
@@ -6052,7 +6052,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentFrequencyType(2L)//
                     .chargeOffBehaviour("ZERO_INTEREST")//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProductRelatedDetail.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
                     .enableAccrualActivityPosting(true)//
                     .allowPartialPeriodInterestCalculation(null)//
@@ -6194,7 +6194,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
                     .repaymentFrequencyType(2L)//
                     .chargeOffBehaviour("ZERO_INTEREST")//
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                    .repaymentStartDateType(LoanProductRelatedDetail.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
                     .enableDownPayment(false)//
                     .enableAccrualActivityPosting(true)//
                     .allowPartialPeriodInterestCalculation(null)//

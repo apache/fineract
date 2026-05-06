@@ -38,7 +38,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductBorrowerCycleVariations;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
-import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -502,13 +501,6 @@ public class LoanProductUpdateUtil {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT);
             actualChanges.put(LoanProductConstants.ENABLE_AUTO_REPAYMENT_DOWN_PAYMENT, newValue);
             loanProduct.getLoanProductRelatedDetail().setEnableAutoRepaymentForDownPayment(newValue);
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE,
-                loanProduct.getRepaymentStartDateType().getValue())) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE);
-            actualChanges.put(LoanProductConstants.REPAYMENT_START_DATE_TYPE, newValue);
-            loanProduct.setRepaymentStartDateType(RepaymentStartDateType.fromInt(newValue));
         }
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ENABLE_INSTALLMENT_LEVEL_DELINQUENCY,

@@ -277,6 +277,7 @@ public class LoanAccountData {
     private Boolean enableDownPayment;
     private BigDecimal disbursedAmountPercentageForDownPayment;
     private Boolean enableAutoRepaymentForDownPayment;
+    private EnumOptionData repaymentStartDateType;
     private Boolean interestRecognitionOnDisbursementDate;
 
     private EnumOptionData loanScheduleType;
@@ -444,6 +445,7 @@ public class LoanAccountData {
                 .setFixedPrincipalPercentagePerInstallment(product.getFixedPrincipalPercentagePerInstallment())
                 .setDelinquent(CollectionData.template()).setDisallowExpectedDisbursements(product.getDisallowExpectedDisbursements())
                 .setLoanScheduleType(product.getLoanScheduleType()).setLoanScheduleProcessingType(product.getLoanScheduleProcessingType())
+                .setRepaymentStartDateType(product.getRepaymentStartDateType())
                 .setInterestRecognitionOnDisbursementDate(product.isInterestRecognitionOnDisbursementDate())
                 .setDaysInYearCustomStrategyOptions(product.getDaysInYearCustomStrategyOptions())
                 .setDaysInYearCustomStrategy(product.getDaysInYearCustomStrategy());
@@ -482,14 +484,15 @@ public class LoanAccountData {
             final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud,
             LocalDate lastClosedBusinessDate, LocalDate overpaidOnDate, final boolean chargedOff, final boolean enableDownPayment,
             final BigDecimal disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment,
-            final boolean enableInstallmentLevelDelinquency, final EnumOptionData loanScheduleType,
-            final EnumOptionData loanScheduleProcessingType, final Integer fixedLength, final StringEnumOptionData chargeOffBehaviour,
-            final boolean isInterestRecognitionOnDisbursementDate, final boolean allowFullTermForTranche,
-            final StringEnumOptionData daysInYearCustomStrategy, final boolean enableIncomeCapitalization,
-            final StringEnumOptionData capitalizedIncomeCalculationType, final StringEnumOptionData capitalizedIncomeStrategy,
-            StringEnumOptionData capitalizedIncomeType, final boolean enableBuyDownFee,
-            final StringEnumOptionData buyDownFeeCalculationType, final StringEnumOptionData buyDownFeeStrategy,
-            final StringEnumOptionData buyDownFeeIncomeType, final boolean merchantBuyDownFee) {
+            final EnumOptionData repaymentStartDateType, final boolean enableInstallmentLevelDelinquency,
+            final EnumOptionData loanScheduleType, final EnumOptionData loanScheduleProcessingType, final Integer fixedLength,
+            final StringEnumOptionData chargeOffBehaviour, final boolean isInterestRecognitionOnDisbursementDate,
+            final boolean allowFullTermForTranche, final StringEnumOptionData daysInYearCustomStrategy,
+            final boolean enableIncomeCapitalization, final StringEnumOptionData capitalizedIncomeCalculationType,
+            final StringEnumOptionData capitalizedIncomeStrategy, StringEnumOptionData capitalizedIncomeType,
+            final boolean enableBuyDownFee, final StringEnumOptionData buyDownFeeCalculationType,
+            final StringEnumOptionData buyDownFeeStrategy, final StringEnumOptionData buyDownFeeIncomeType,
+            final boolean merchantBuyDownFee) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -531,7 +534,7 @@ public class LoanAccountData {
                 .setDelinquencyRange(delinquencyRange).setDisallowExpectedDisbursements(disallowExpectedDisbursements).setFraud(fraud)
                 .setLastClosedBusinessDate(lastClosedBusinessDate).setOverpaidOnDate(overpaidOnDate).setChargedOff(chargedOff)
                 .setEnableDownPayment(enableDownPayment).setDisbursedAmountPercentageForDownPayment(disbursedAmountPercentageForDownPayment)
-                .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment)
+                .setEnableAutoRepaymentForDownPayment(enableAutoRepaymentForDownPayment).setRepaymentStartDateType(repaymentStartDateType)
                 .setEnableInstallmentLevelDelinquency(enableInstallmentLevelDelinquency).setLoanScheduleType(loanScheduleType)
                 .setLoanScheduleProcessingType(loanScheduleProcessingType).setFixedLength(fixedLength)
                 .setChargeOffBehaviour(chargeOffBehaviour).setInterestRecognitionOnDisbursementDate(isInterestRecognitionOnDisbursementDate)

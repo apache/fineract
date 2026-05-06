@@ -315,6 +315,7 @@ Feature: LoanRepayment - Part4
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                      | submitted on date | expected disbursement date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | Repayment start date type |
       | LP2_ADV_PYMNT_ZERO_INTEREST_CHARGE_OFF_BEHAVIOUR | 31 January 2024   | 10 February 2024           | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | SUBMITTED_ON_DATE         |
+    Then LoanDetails has repaymentStartDateType field with value: "SUBMITTED_ON_DATE"
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 10 February 2024 |           | 1000.0          |               |          | 0.0  |           | 0.0   |      |            |      | 0.0         |
@@ -356,6 +357,7 @@ Feature: LoanRepayment - Part4
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                | submitted on date | expected disbursement date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | Repayment start date type |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION_REPAYMENT_START_SUBMITTED | 31 January 2024   | 10 February 2024           | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 4                 | MONTHS                | 1              | MONTHS                 | 4                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | DISBURSEMENT_DATE         |
+    Then LoanDetails has repaymentStartDateType field with value: "DISBURSEMENT_DATE"
     Then Loan Repayment schedule has 5 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
       |    |      | 10 February 2024 |           | 1000.0          |               |          | 0.0  |           | 0.0   |      |            |      | 0.0         |

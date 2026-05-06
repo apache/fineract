@@ -271,7 +271,7 @@ public class LoanScheduleAssembler {
         LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
         final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("submittedOnDate", element);
 
-        RepaymentStartDateType repaymentStartDateType = loanProduct.getRepaymentStartDateType();
+        RepaymentStartDateType repaymentStartDateType = loanProduct.getLoanProductRelatedDetail().getRepaymentStartDateType();
         if (this.fromApiJsonHelper.parameterExists("repaymentStartDateType", element)) {
             RepaymentStartDateType paramValue = RepaymentStartDateType
                     .fromInt(this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element));

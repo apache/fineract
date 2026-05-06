@@ -865,6 +865,13 @@ public final class ErrorMessageHelper {
                 expectedToStr);
     }
 
+    public static String wrongRepaymentStartDateType(final Integer actual, final Integer expected) {
+        final String actualToStr = actual.toString();
+        final String expectedToStr = expected.toString();
+        return String.format("Wrong value in LoanDetails/repaymentStartDateType. %nActual value is: %s %nExpected Value is: %s",
+                actualToStr, expectedToStr);
+    }
+
     public static String downpaymentDisabledOnProductErrorCodeMsg() {
         return "The Loan can not override the downpayment properties because in the Loan Product the downpayment is disabled";
     }

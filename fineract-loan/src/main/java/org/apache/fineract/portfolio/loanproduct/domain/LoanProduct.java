@@ -228,9 +228,6 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     @Column(name = "overdue_days_for_repayment_event")
     private Integer overDueDaysForRepaymentEvent;
 
-    @Column(name = "repayment_start_date_type_enum", nullable = false)
-    private RepaymentStartDateType repaymentStartDateType;
-
     public void updateLoanProductInRelatedClasses() {
         if (this.isInterestRecalculationEnabled()) {
             this.productInterestRecalculationDetails.updateProduct(this);
@@ -341,7 +338,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 supportedInterestRefundTypes, chargeOffBehaviour, isInterestRecognitionOnDisbursementDate, daysInYearCustomStrategy,
                 enableIncomeCapitalization, capitalizedIncomeCalculationType, capitalizedIncomeStrategy, capitalizedIncomeType,
                 installmentAmountInMultiplesOf, enableBuyDownFee, buyDownFeeCalculationType, buyDownFeeStrategy, buyDownFeeIncomeType,
-                merchantBuyDownFee);
+                merchantBuyDownFee, repaymentStartDateType);
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
@@ -389,8 +386,6 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
         this.dueDaysForRepaymentEvent = dueDaysForRepaymentEvent;
         this.overDueDaysForRepaymentEvent = overDueDaysForRepaymentEvent;
-        this.repaymentStartDateType = repaymentStartDateType;
-
         this.enableInstallmentLevelDelinquency = enableInstallmentLevelDelinquency;
         validateLoanProductPreSave();
     }
@@ -754,10 +749,6 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     public boolean isEqualAmortization() {
         return loanProductRelatedDetail.isEqualAmortization();
-    }
-
-    public RepaymentStartDateType getRepaymentStartDateType() {
-        return this.repaymentStartDateType == null ? RepaymentStartDateType.INVALID : this.repaymentStartDateType;
     }
 
     public void updateEnableInstallmentLevelDelinquency(boolean enableInstallmentLevelDelinquency) {

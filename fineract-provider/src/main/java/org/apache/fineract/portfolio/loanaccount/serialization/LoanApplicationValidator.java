@@ -1515,7 +1515,7 @@ public final class LoanApplicationValidator {
                 }
             }
 
-            Integer repaymentStartDateType = loan.getRepaymentStartDateType().getValue();
+            Integer repaymentStartDateType = loan.getLoanProductRelatedDetail().getRepaymentStartDateType().getValue();
             if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element)) {
                 repaymentStartDateType = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.REPAYMENT_START_DATE_TYPE, element,
                         Locale.getDefault());

@@ -40,6 +40,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -364,6 +365,14 @@ public class LoanProductRelatedDetailUpdateUtil {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME);
             actualChanges.put(LoanProductConstants.MERCHANT_BUY_DOWN_FEE_PARAM_NAME, newValue);
             loanRepaymentScheduleDetail.setMerchantBuyDownFee(newValue);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE,
+                loanRepaymentScheduleDetail.getRepaymentStartDateType() == null ? null
+                        : loanRepaymentScheduleDetail.getRepaymentStartDateType().getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.REPAYMENT_START_DATE_TYPE);
+            actualChanges.put(LoanProductConstants.REPAYMENT_START_DATE_TYPE, newValue);
+            loanRepaymentScheduleDetail.setRepaymentStartDateType(RepaymentStartDateType.fromInt(newValue));
         }
 
         return actualChanges;

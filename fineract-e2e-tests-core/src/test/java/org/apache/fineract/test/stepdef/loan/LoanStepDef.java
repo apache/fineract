@@ -3470,6 +3470,20 @@ public class LoanStepDef extends AbstractStepDef {
         assertThat(fixedLengthactual).as(ErrorMessageHelper.wrongfixedLength(fixedLengthactual, fieldValue)).isEqualTo(fieldValue);
     }
 
+    @Then("LoanDetails has repaymentStartDateType field with value: {string}")
+    public void checkLoanDetailsRepaymentStartDateTypeField(final String expectedType) {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetails = ok(
+                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        assert loanDetails.getRepaymentStartDateType() != null;
+        assert loanDetails.getRepaymentStartDateType().getId() != null;
+        final Integer actualValue = loanDetails.getRepaymentStartDateType().getId().intValue();
+        final Integer expectedValue = RepaymentStartDateType.valueOf(expectedType).getValue();
+        assertThat(actualValue).as(ErrorMessageHelper.wrongRepaymentStartDateType(actualValue, expectedValue)).isEqualTo(expectedValue);
+    }
+
     @Then("Loan has availableDisbursementAmountWithOverApplied field with value: {double}")
     public void checkLoanDetailsAvailableDisbursementAmountWithOverAppliedField(final double fieldValue) {
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);

@@ -79,7 +79,6 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplica
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanSupportedInterestRefundTypes;
-import org.apache.fineract.portfolio.loanproduct.domain.RepaymentStartDateType;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -432,9 +431,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @Column(name = "allow_full_term_for_tranche", nullable = false)
     private boolean allowFullTermForTranche = false;
 
-    @Column(name = "repayment_start_date_type_enum")
-    private RepaymentStartDateType repaymentStartDateType;
-
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final AccountType loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanRepaymentScheduleTransactionProcessor transactionProcessingStrategy,
@@ -570,7 +566,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
         this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
         this.submittedOnDate = submittedOnDate != null ? submittedOnDate : DateUtils.getBusinessLocalDate();
-        this.repaymentStartDateType = loanApplicationTerms.getRepaymentStartDateType();
+        this.loanRepaymentScheduleDetail.setRepaymentStartDateType(loanApplicationTerms.getRepaymentStartDateType());
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
 
@@ -1847,9 +1843,5 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
     public long getTermsCount() {
         return getRepaymentScheduleInstallments().stream().filter(i -> !i.isDownPayment() && !i.isAdditional()).count();
-    }
-
-    public RepaymentStartDateType getRepaymentStartDateType() {
-        return this.repaymentStartDateType != null ? this.repaymentStartDateType : this.loanProduct.getRepaymentStartDateType();
     }
 }

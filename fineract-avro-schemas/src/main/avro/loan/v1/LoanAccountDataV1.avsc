@@ -826,6 +826,14 @@
         },
         {
             "default": null,
+            "name": "repaymentStartDateType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
             "name": "interestRecognitionOnDisbursementDate",
             "type": [
                 "null",

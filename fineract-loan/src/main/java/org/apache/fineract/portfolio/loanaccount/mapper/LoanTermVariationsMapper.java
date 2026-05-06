@@ -84,7 +84,7 @@ public class LoanTermVariationsMapper {
         RecalculationFrequencyType compoundingFrequencyType = null;
         LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         CalendarHistoryDataWrapper calendarHistoryDataWrapper;
-        RepaymentStartDateType repaymentStartDateType = loan.getRepaymentStartDateType();
+        RepaymentStartDateType repaymentStartDateType = loan.getLoanProductRelatedDetail().getRepaymentStartDateType();
         boolean allowCompoundingOnEod = false;
         if (loan.getLoanProductRelatedDetail().isInterestRecalculationEnabled()) {
             restCalendarInstance = scheduleGeneratorDTO.getCalendarInstanceForInterestRecalculation();

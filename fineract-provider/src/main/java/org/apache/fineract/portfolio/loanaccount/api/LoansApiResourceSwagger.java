@@ -1261,6 +1261,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal disbursedAmountPercentageForDownPayment;
         @Schema(example = "false")
         public Boolean enableAutoRepaymentForDownPayment;
+        @Schema(description = "Seed date for first repayment period: disbursement date vs submitted on date", example = "1")
+        public EnumOptionData repaymentStartDateType;
         @Schema(example = "CUMULATIVE")
         public EnumOptionData loanScheduleType;
         @Schema(example = "HORIZONTAL")
