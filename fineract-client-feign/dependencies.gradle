@@ -19,29 +19,29 @@
 dependencies {
     // Feign dependencies
     implementation(
-            'io.github.openfeign:feign-core:13.6',
-            'io.github.openfeign:feign-jackson:13.6',
-            'io.github.openfeign:feign-slf4j:13.6',
-            'io.github.openfeign:feign-hc5:13.6',
-            'io.github.openfeign:feign-okhttp:13.6',
+            'io.github.openfeign:feign-core:13.12',
+            'io.github.openfeign:feign-jackson:13.12',
+            'io.github.openfeign:feign-slf4j:13.12',
+            'io.github.openfeign:feign-hc5:13.12',
+            'io.github.openfeign:feign-okhttp:13.12',
             'io.github.openfeign.form:feign-form:3.8.0',
-            'org.apache.httpcomponents.client5:httpclient5:5.2.1',
+            'org.apache.httpcomponents.client5:httpclient5:5.6.1',
             'com.squareup.okhttp3:okhttp:4.12.0',
             'com.fasterxml.jackson.core:jackson-databind',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8',
             'jakarta.annotation:jakarta.annotation-api:3.0.0',
-            'io.swagger.core.v3:swagger-annotations-jakarta:2.2.15',
-            'org.apache.commons:commons-lang3:3.12.0',
+            'io.swagger.core.v3:swagger-annotations-jakarta:2.2.49',
+            'org.apache.commons:commons-lang3:3.20.0',
             'org.projectlombok:lombok'
             )
 
     // Test dependencies
     testImplementation(
-            'org.junit.jupiter:junit-jupiter-api:5.11.3',
-            'org.junit.jupiter:junit-jupiter-engine:5.11.3',
-            'org.mockito:mockito-core:5.14.2',
-            'org.assertj:assertj-core:3.26.3',
+            'org.junit.jupiter:junit-jupiter-api:5.14.4',
+            'org.junit.jupiter:junit-jupiter-engine:5.14.4',
+            'org.mockito:mockito-core:5.23.0',
+            'org.assertj:assertj-core:3.27.7',
             'org.wiremock:wiremock-standalone'
             )
 }

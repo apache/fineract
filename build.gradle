@@ -19,7 +19,7 @@
 // TODO: this is work in progress, please follow FINERACT-1171
 buildscript {
     ext {
-        jacocoVersion = '0.8.12'
+        jacocoVersion = '0.8.14'
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
         fineractCustomProjects = []
@@ -99,11 +99,11 @@ buildscript {
 
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.eclipse.persistence:eclipselink:4.0.6'
+        classpath 'org.eclipse.persistence:eclipselink:4.0.9'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
-        classpath 'org.apache.commons:commons-lang3:3.18.0'
-        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.22'
+        classpath 'org.apache.commons:commons-lang3:3.20.0'
+        classpath 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.49'
         classpath 'jakarta.servlet:jakarta.servlet-api:6.1.0'
     }
 }
@@ -184,7 +184,7 @@ allprojects  {
         resolutionStrategy {
             dependencySubstitution {
                 // Substitution is to resolve CVE-2025-12183
-                substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.10.1')
+                substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.0')
             }
         }
     }
@@ -554,7 +554,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:11.0.0'
+        checkstyle 'com.puppycrawl.tools:checkstyle:11.1.0'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.44.1'
     }
 
@@ -584,7 +584,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.35.1"
+        errorprone "com.google.errorprone:error_prone_core:2.49.0"
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -838,10 +838,10 @@ configure(project.fineractCustomProjects) {
                 'org.awaitility:awaitility',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java:7.20.1',
-                'io.cucumber:cucumber-java8:7.20.1',
-                'io.cucumber:cucumber-junit-platform-engine:7.20.1',
-                'io.cucumber:cucumber-spring:7.20.1',
+                'io.cucumber:cucumber-java:7.34.3',
+                'io.cucumber:cucumber-java8:7.34.3',
+                'io.cucumber:cucumber-junit-platform-engine:7.34.3',
+                'io.cucumber:cucumber-spring:7.34.3',
                 )
 
         testCompileOnly('org.projectlombok:lombok')
