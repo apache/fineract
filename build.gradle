@@ -110,29 +110,29 @@ buildscript {
 
 plugins {
     id 'me.qoomon.git-versioning' version '6.4.4'
-    id "org.barfuin.gradle.taskinfo" version "2.2.0"
+    id "org.barfuin.gradle.taskinfo" version "2.2.1"
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'com.diffplug.spotless' version '6.25.0' apply false
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
-    id 'org.zeroturnaround.gradle.jrebel' version '1.2.0' apply false
-    id 'org.springframework.boot' version '3.5.13' apply false
-    id 'net.ltgt.errorprone' version '4.1.0' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.23' apply false
-    id 'com.gorylenko.gradle-git-properties' version '2.4.2' apply false
+    id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
+    id 'org.springframework.boot' version '3.5.14' apply false
+    id 'net.ltgt.errorprone' version '4.4.0' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.49' apply false
+    id 'com.gorylenko.gradle-git-properties' version '2.5.7' apply false
     id 'org.asciidoctor.jvm.convert' version '4.0.5' apply false
     id 'org.asciidoctor.jvm.pdf' version '4.0.5' apply false
-    id 'com.google.cloud.tools.jib' version '3.4.5' apply false
-    id 'org.sonarqube' version '6.0.1.5171'
-    id 'com.github.andygoossens.modernizer' version '1.10.0' apply false
-    id 'com.github.spotbugs' version '6.0.26' apply false
-    id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
+    id 'com.google.cloud.tools.jib' version '3.5.3' apply false
+    id 'org.sonarqube' version '6.3.1.5724'
+    id 'com.github.andygoossens.modernizer' version '1.13.0' apply false
+    id 'com.github.spotbugs' version '6.5.4' apply false
+    id 'se.thinkcode.cucumber-runner' version '0.0.14' apply false
     id "com.github.davidmc24.gradle.plugin.avro-base" version "1.9.1" apply false
-    id 'org.openapi.generator' version '7.8.0' apply false
-    id 'com.gradleup.shadow' version '9.3.2' apply false
-    id 'me.champeau.jmh' version '0.7.1' apply false
-    id 'org.cyclonedx.bom' version '3.1.0' apply false
+    id 'org.openapi.generator' version '7.22.0' apply false
+    id 'com.gradleup.shadow' version '9.4.1' apply false
+    id 'me.champeau.jmh' version '0.7.3' apply false
+    id 'org.cyclonedx.bom' version '3.2.4' apply false
     id 'com.docktape.swagger-brake' version '2.7.0' apply false
 }
 

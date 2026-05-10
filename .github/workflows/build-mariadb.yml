@@ -26,7 +26,7 @@ jobs:
         options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=5s --health-timeout=2s --health-retries=3
 
       mock-oauth2-server:
-        image: ghcr.io/navikt/mock-oauth2-server:3.0.1
+        image: ghcr.io/navikt/mock-oauth2-server:3.0.3
         ports:
           - 9000:9000
         env:
@@ -136,7 +136,7 @@ jobs:
 
       - name: Archive test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-${{ matrix.task }}
           path: '**/build/reports/'
@@ -144,7 +144,7 @@ jobs:
 
       - name: Archive server logs
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: server-logs-${{ matrix.task }}
           path: '**/build/cargo/'

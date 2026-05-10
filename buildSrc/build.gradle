@@ -45,7 +45,7 @@ configurations.all {
     resolutionStrategy {
         dependencySubstitution {
             // Substitution is to resolve CVE-2025-12183
-            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.10.1')
+            substitute module('org.lz4:lz4-java') using module('at.yawk.lz4:lz4-java:1.11.0')
         }
     }
 }

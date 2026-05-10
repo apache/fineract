@@ -20,7 +20,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
         options: --health-cmd="pg_isready -q -d postgres -U root" --health-interval=5s --health-timeout=2s --health-retries=3
       mock-oauth2-server:
-        image: ghcr.io/navikt/mock-oauth2-server:3.0.1
+        image: ghcr.io/navikt/mock-oauth2-server:3.0.3
         ports:
           - 9000:9000
         env:
@@ -82,7 +82,7 @@ jobs:
           ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=postgresql -x buildJavaSdk
       - name: Archive test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results
           retention-days: 5
@@ -93,7 +93,7 @@ jobs:
             oauth2-tests/build/reports/
       - name: Archive server logs
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: server-logs
           retention-days: 5
