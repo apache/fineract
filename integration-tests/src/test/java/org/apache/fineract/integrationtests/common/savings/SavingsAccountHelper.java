@@ -108,6 +108,7 @@ public class SavingsAccountHelper {
     public static final String TRANSACTION_DATE_PLUS_ONE = "02 March 2013";
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String ACCOUNT_TYPE_GROUP = "GROUP";
     public static final Long PAYMENT_TYPE_ID = 1L;
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";

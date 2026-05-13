@@ -224,6 +224,8 @@ final class SavingsAccountsApiResourceSwagger {
         @Schema(example = "1")
         public Long clientId;
         @Schema(example = "1")
+        public Long groupId;
+        @Schema(example = "1")
         public Long productId;
         @Schema(example = "en")
         public String locale;

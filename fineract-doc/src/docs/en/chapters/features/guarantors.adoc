@@ -1,0 +1,236 @@
+= Guarantors
+
+== Overview
+
+Guarantors let a lender require that a borrower, or a third party, pledge savings account funds
+as collateral before a loan can be approved. When the loan product has guarantee fund holding
+enabled, Fineract places a hold on the pledged savings balance at approval time and releases
+that hold as the loan is repaid.
+
+A guarantor record links a loan to a party (client, staff member, external person, or group)
+and optionally to one or more savings accounts whose balances back the guarantee.
+
+== Loan Product Configuration
+
+Guarantor fund holding is opt-in per loan product. The relevant settings are:
+
+[cols="2,3", options="header"]
+|===
+| Field | Description
+
+| `holdGuaranteeFunds`
+| Enables the guarantor fund hold mechanism for this product. When false, guarantors can still
+  be recorded but no balance holds are created and no threshold checks are enforced.
+
+| `mandatoryGuarantee` (%)
+| The minimum total guarantee required as a percentage of principal. The sum of self-guarantee
+  and external-guarantee amounts must reach this percentage before the loan can be approved.
+
+| `minimumGuaranteeFromOwnFunds` (%)
+| The portion of the mandatory guarantee that must come from the borrower's own savings
+  (self-guarantee). Expressed as a percentage of principal.
+
+| `minimumGuaranteeFromGuarantor` (%)
+| The portion that must come from third-party guarantors (external guarantee). Expressed as a
+  percentage of principal.
+|===
+
+All three threshold fields are evaluated together during loan approval. If any threshold is not
+met, the approval is blocked with a validation error.
+
+== Guarantor Types
+
+Each guarantor record has a type that controls how the guarantor entity is resolved.
+
+[cols="1,2", options="header"]
+|===
+| Type | Description
+
+| `CUSTOMER` (1)
+| An existing client in the system. The `entityId` field holds the client ID. When the client
+  ID matches the loan's own client ID, the funding counts as a self-guarantee.
+
+| `STAFF` (2)
+| A staff member in the system. The `entityId` field holds the staff ID.
+
+| `EXTERNAL` (3)
+| A person not in the system. Name, address, and contact fields are captured directly on the
+  guarantor record.
+
+| `GROUP` (4)
+| An existing group in the system. The `entityId` field holds the group ID.
+|===
+
+== Self-Guarantee vs External-Guarantee Classification
+
+When `holdGuaranteeFunds` is enabled, Fineract classifies each pledged savings account funding
+as either a self-guarantee or an external guarantee. The two categories accumulate separately
+and are checked against `minimumGuaranteeFromOwnFunds` and `minimumGuaranteeFromGuarantor`
+respectively.
+
+=== Individual Savings Accounts
+
+For savings accounts that belong to an individual client (no `groupId` set), the classification
+follows the `Guarantor.isSelfGuarantee()` check:
+
+* The guarantor type is `CUSTOMER`.
+* The guarantor's `entityId` equals the loan's `clientId`.
+
+If both conditions are true the funding is self-guarantee; otherwise it is external.
+
+=== Group Savings Accounts
+
+For savings accounts that belong to the group entity itself (`groupId` is set and `clientId`
+is null), the classification is based on the relationship between that savings account and the
+loan. GSIM savings accounts, which have both `groupId` and `clientId` set because they belong
+to an individual group member, do not enter this path. They are handled by the
+`Guarantor.isSelfGuarantee()` check described in the individual savings section above.
+
+[cols="2,2,1", options="header"]
+|===
+| Savings account | Loan type | Classification
+
+| Group savings (`groupId` set, `clientId` null)
+| Pure group loan: `clientId` is null and `groupId` matches the savings account's `groupId`
+| Self-guarantee
+
+| Group savings (`groupId` set, `clientId` null)
+| Pure group loan: `clientId` is null but `groupId` does not match the savings account's `groupId`
+| External guarantee
+
+| Group savings (`groupId` set, `clientId` null)
+| Individual loan: `clientId` is set, no `groupId`
+| External guarantee
+
+| Group savings (`groupId` set, `clientId` null)
+| GLIM (Group Loan Individual Member): both `clientId` and `groupId` are set
+| External guarantee
+|===
+
+The rationale is that a pure group loan is the group borrowing as an entity. When the group's
+own savings account backs that loan, it is the group guaranteeing itself, which is equivalent
+to a self-guarantee. Any other combination means a different party is providing the collateral.
+
+== Fund Lifecycle
+
+Guarantor fund holds are managed automatically in response to business events on the loan.
+
+[cols="2,3", options="header"]
+|===
+| Event | Action
+
+| Loan approved
+| Validates the guarantee thresholds. If validation passes, places a hold on each active
+  guarantor savings account for the pledged amount. Blocks approval if any account has
+  insufficient balance.
+
+| Loan approval undone
+| Releases all holds created at approval time.
+
+| Loan disbursement undone
+| Reverses fund transfers that occurred at disbursement time.
+
+| Repayment posted
+| Releases a proportional share of the held amount based on the repayment received relative
+  to the outstanding principal.
+
+| Transaction adjusted
+| Recalculates and adjusts the released amount to reflect the corrected transaction.
+
+| Loan written off
+| Releases all remaining held funds for all guarantors.
+
+| Write-off undone
+| Re-creates the holds that were released when the loan was written off.
+|===
+
+== Funding Status
+
+Each `GuarantorFundingDetails` record tracks the current status of a savings account pledge.
+
+[cols="1,3", options="header"]
+|===
+| Status | Meaning
+
+| `ACTIVE` (100)
+| The hold is in place and the pledge is actively backing the loan.
+
+| `COMPLETED` (200)
+| The full pledged amount has been released, typically because the loan was repaid.
+
+| `WITHDRAWN` (300)
+| The guarantor has withdrawn from the guarantee and the hold has been released.
+
+| `DELETED` (400)
+| The funding record has been removed.
+|===
+
+Only records in `ACTIVE`, `WITHDRAWN`, or `COMPLETED` status are counted toward the guarantee
+thresholds. `DELETED` records are excluded.
+
+== API Reference
+
+All guarantor operations are scoped under a specific loan:
+
+`/v1/loans/{loanId}/guarantors`
+
+[cols="1,1,3", options="header"]
+|===
+| Method | Path | Description
+
+| `GET`
+| `/template`
+| Returns the template data for creating a new guarantor, including type options and allowed
+  client relationship types.
+
+| `GET`
+| `/`
+| Returns all guarantors for the given loan.
+
+| `GET`
+| `/{guarantorId}`
+| Returns a specific guarantor. Append `?template=true` to include type options.
+
+| `POST`
+| `/`
+| Creates a new guarantor for the loan.
+
+| `PUT`
+| `/{guarantorId}`
+| Updates an existing guarantor record.
+
+| `DELETE`
+| `/{guarantorId}`
+| Removes a guarantor. Pass `?guarantorFundingId=` to remove a specific funding entry only.
+|===
+
+=== Request Body Fields
+
+[cols="2,1,3", options="header"]
+|===
+| Field | Required | Description
+
+| `guarantorTypeId`
+| Yes
+| Integer: `1` (CUSTOMER), `2` (STAFF), `3` (EXTERNAL), `4` (GROUP).
+
+| `entityId`
+| For non-EXTERNAL types
+| ID of the client, staff member, or group acting as guarantor.
+
+| `clientRelationshipTypeId`
+| Yes
+| Code value ID from the `GuarantorRelationship` code table.
+
+| `savingsId`
+| No
+| ID of the savings account to pledge as collateral.
+
+| `amount`
+| No
+| Amount to hold from the pledged savings account.
+
+| `firstname`, `lastname`, `dob`, `addressLine1`, `city`, ...
+| For EXTERNAL type
+| Personal details of the external guarantor.
+|===

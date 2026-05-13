@@ -79,6 +79,7 @@ import org.apache.fineract.client.services.FloatingRatesApi;
 import org.apache.fineract.client.services.GeneralLedgerAccountApi;
 import org.apache.fineract.client.services.GlobalConfigurationApi;
 import org.apache.fineract.client.services.GroupsApi;
+import org.apache.fineract.client.services.GuarantorsApi;
 import org.apache.fineract.client.services.HolidaysApi;
 import org.apache.fineract.client.services.HooksApi;
 import org.apache.fineract.client.services.ImagesApi;
@@ -214,6 +215,7 @@ public final class FineractClient {
     public final GeneralLedgerAccountApi glAccounts;
     public final GlobalConfigurationApi globalConfigurations;
     public final GroupsApi groups;
+    public final GuarantorsApi guarantors;
     public final HolidaysApi holidays;
     public final HooksApi hooks;
     public final ImagesApi images;
@@ -335,6 +337,7 @@ public final class FineractClient {
         glAccounts = retrofit.create(GeneralLedgerAccountApi.class);
         globalConfigurations = retrofit.create(GlobalConfigurationApi.class);
         groups = retrofit.create(GroupsApi.class);
+        guarantors = retrofit.create(GuarantorsApi.class);
         holidays = retrofit.create(HolidaysApi.class);
         hooks = retrofit.create(HooksApi.class);
         images = retrofit.create(ImagesApi.class);

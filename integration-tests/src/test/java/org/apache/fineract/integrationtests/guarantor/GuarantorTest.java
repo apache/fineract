@@ -36,9 +36,24 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import org.apache.fineract.client.models.GuarantorData;
+import org.apache.fineract.client.models.GuarantorFundingData;
+import org.apache.fineract.client.models.PortfolioAccountData;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsResponse;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PostSavingsProductsResponse;
+import org.apache.fineract.client.models.SavingsAccountData;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -47,14 +62,13 @@ import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import retrofit2.Response;
 
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class GuarantorTest {
@@ -665,6 +679,12 @@ public class GuarantorTest {
         assertEquals(expectedBalance, onHoldAmount, "Verifying On Hold Funds");
     }
 
+    private void verifySavingsOnHoldBalance(final Long savingsId, final BigDecimal expectedBalance) {
+        SavingsAccountData savingsData = Calls
+                .ok(FineractClientHelper.getFineractClient().savingsAccounts.retrieveSavingsAccount(savingsId, false, null, "all"));
+        assertEquals(expectedBalance, savingsData.getOnHoldFunds(), "Verifying On Hold Funds");
+    }
+
     @SuppressWarnings({ "rawtypes", "cast" })
     private void verifySavingsBalanceAndOnHoldBalance(final Integer savingsId, final Float expectedBalance, final Float accountBalance) {
         HashMap savingsDetails = (HashMap) this.savingsAccountHelper.getSavingsDetails(savingsId);
@@ -738,7 +758,81 @@ public class GuarantorTest {
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testGuarantor_GROUP_SAVINGS_ACCOUNT_WITH_NON_ZERO_GUARANTEE() {
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        // Create a second client who will act as the guarantor (not the loan borrower)
+        final Integer guarantorClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, guarantorClientID);
+
+        final Integer groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientID.toString());
+        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), guarantorClientID.toString());
+
+        // Create a savings product, then open (submit + approve + activate) a group savings account
+        final Long groupSavingsProductId = Calls
+                .ok(FineractClientHelper.getFineractClient().savingsProducts.createSavingsProduct(new PostSavingsProductsRequest()
+                        .locale("en").name(Utils.uniqueRandomStringGenerator("GROUP_SAVINGS_", 6))
+                        .shortName(Utils.uniqueRandomStringGenerator("", 4)).description("Group savings product for guarantor test")
+                        .currencyCode("USD").digitsAfterDecimal(4).inMultiplesOf(0).nominalAnnualInterestRate(10.0)
+                        .interestCompoundingPeriodType(1) // daily
+                        .interestPostingPeriodType(4) // monthly
+                        .interestCalculationType(1) // daily balance
+                        .interestCalculationDaysInYearType(365).accountingRule(1) // none
+                        .withdrawalFeeForTransfers(false).enforceMinRequiredBalance(false).allowOverdraft(false).withHoldTax(false)))
+                .getResourceId();
+        final Long groupSavingsId = Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts
+                .submitSavingsApplication(new PostSavingsAccountsRequest().groupId(groupId.longValue()).productId(groupSavingsProductId)
+                        .locale("en").dateFormat("dd MMMM yyyy").submittedOnDate(SavingsAccountHelper.CREATED_DATE)))
+                .getSavingsId();
+        Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommandsSavingsAccount(groupSavingsId,
+                new PostSavingsAccountsAccountIdRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .approvedOnDate(SavingsAccountHelper.CREATED_DATE),
+                "approve"));
+        Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommandsSavingsAccount(groupSavingsId,
+                new PostSavingsAccountsAccountIdRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .activatedOnDate(SavingsAccountHelper.CREATED_DATE),
+                "activate"));
+        Calls.ok(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(groupSavingsId,
+                new PostSavingsAccountTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .transactionDate(SavingsAccountHelper.CREATED_DATE).transactionAmount(new BigDecimal("5000"))
+                        .paymentTypeId(SavingsAccountHelper.PAYMENT_TYPE_ID.intValue()),
+                "deposit"));
+
+        // Product: 20% mandatory, 10% min-from-external, 0% min-from-own-funds.
+        // Group savings on a client loan counts as external, so no self-guarantee is needed.
+        final Integer loanProductID = createLoanProductWithHoldFunds("20", "10", "0");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.DAY_OF_MONTH, -7 * 4);
+        final String loanDisbursementDate = dateFormat.format(todaysDate.getTime());
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, loanDisbursementDate);
+        Assertions.assertNotNull(loanID);
+
+        // Without any guarantors, mandatory and external minimums should fail
+        Response<PostLoansLoanIdResponse> approvalErrorResponse = Calls.okR(FineractClientHelper.getFineractClient().loans.stateTransitions(
+                loanID.longValue(),
+                new PostLoansLoanIdRequest().dateFormat("dd MMMM yyyy").locale("en").approvedOnDate(loanDisbursementDate), "approve"));
+        assertFalse(approvalErrorResponse.isSuccessful(), "Loan approval should fail without required guarantors");
+
+        // Add the group savings account as guarantor with 2,500 (25% of 10,000)
+        // The guarantor is a different client (not the borrower), so it counts as external guarantee.
+        // This validates that a group savings account can back a non-self guarantor for a client loan.
+        String guarantorJSON = new GuarantorTestBuilder()
+                .existingCustomerWithGuaranteeAmount(String.valueOf(guarantorClientID), String.valueOf(groupSavingsId), "2500").build();
+        Integer groupGuarantee = this.guarantorHelper.createGuarantor(loanID, guarantorJSON);
+        Assertions.assertNotNull(groupGuarantee);
+        verifySavingsOnHoldBalance(groupSavingsId, null);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        PostLoansLoanIdResponse approvalResponse = this.loanTransactionHelper.approveLoan(loanID.longValue(),
+                new PostLoansLoanIdRequest().dateFormat("dd MMMM yyyy").locale("en").approvedOnDate(loanDisbursementDate));
+        Assertions.assertNotNull(approvalResponse.getLoanId(), "Loan should be approved with group savings guarantor");
+        verifySavingsOnHoldBalance(groupSavingsId, new BigDecimal("2500"));
+    }
+
     @Test
     public void testGuarantorWithGroupSavingsAccount() {
         // Create a group
@@ -753,35 +847,47 @@ public class GuarantorTest {
         LOG.info("Created and associated client with ID: {}", clientInGroupID);
 
         // Create a group savings product
-        final String minBalanceForInterestCalculation = null;
-        final String minRequiredBalance = null;
-        final String enforceMinRequiredBalance = "false";
-        final String minOpeningBalance = "5000.0";
-        final String loanProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation).withMinRequiredBalance(minRequiredBalance)
-                .withEnforceMinRequiredBalance(enforceMinRequiredBalance).withMinimumOpenningBalance(minOpeningBalance).build();
-        final Integer savingsProductID = SavingsProductHelper.createSavingsProduct(loanProductJSON, this.requestSpec, this.responseSpec);
+        PostSavingsProductsResponse savingsProductResponse = Calls.ok(
+                FineractClientHelper.getFineractClient().savingsProducts.createSavingsProduct(new PostSavingsProductsRequest().locale("en")
+                        .name(Utils.uniqueRandomStringGenerator("GROUP_SAVINGS_", 6)).shortName(Utils.uniqueRandomStringGenerator("", 4))
+                        .description("Group savings product for guarantor test").currencyCode("USD").digitsAfterDecimal(4).inMultiplesOf(0)
+                        .nominalAnnualInterestRate(10.0).interestCompoundingPeriodType(1) // daily
+                        .interestPostingPeriodType(4) // monthly
+                        .interestCalculationType(1) // daily balance
+                        .interestCalculationDaysInYearType(365).accountingRule(1) // none
+                        .withdrawalFeeForTransfers(false).enforceMinRequiredBalance(false).allowOverdraft(false).withHoldTax(false)));
+        final Long savingsProductID = savingsProductResponse.getResourceId();
         Assertions.assertNotNull(savingsProductID);
         LOG.info("Created savings product with ID: {}", savingsProductID);
 
         // Create and activate a group savings account
-        final Integer groupSavingsId = this.savingsAccountHelper.applyForSavingsApplication(groupID, savingsProductID, "GROUP");
+        PostSavingsAccountsResponse savingsApplicationResponse = Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts
+                .submitSavingsApplication(new PostSavingsAccountsRequest().groupId(groupID.longValue()).productId(savingsProductID)
+                        .locale("en").dateFormat("dd MMMM yyyy").submittedOnDate(SavingsAccountHelper.TRANSACTION_DATE)));
+        final Long groupSavingsId = savingsApplicationResponse.getSavingsId();
         Assertions.assertNotNull(groupSavingsId);
         LOG.info("Applied for group savings account with ID: {}", groupSavingsId);
 
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(groupSavingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommandsSavingsAccount(groupSavingsId,
+                new PostSavingsAccountsAccountIdRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .approvedOnDate(SavingsAccountHelper.TRANSACTION_DATE),
+                "approve"));
         LOG.info("Approved group savings account");
 
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(groupSavingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        Calls.ok(FineractClientHelper.getFineractClient().savingsAccounts.handleCommandsSavingsAccount(groupSavingsId,
+                new PostSavingsAccountsAccountIdRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .activatedOnDate(SavingsAccountHelper.TRANSACTION_DATE),
+                "activate"));
         LOG.info("Activated group savings account");
 
         // Deposit money into the group savings account
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(groupSavingsId, "5000",
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assertions.assertNotNull(depositTransactionId);
+        PostSavingsAccountTransactionsResponse depositResponse = Calls
+                .ok(FineractClientHelper.getFineractClient().savingsTransactions.createSavingsAccountTransaction(groupSavingsId,
+                        new PostSavingsAccountTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
+                                .transactionDate(SavingsAccountHelper.TRANSACTION_DATE).transactionAmount(new BigDecimal("5000"))
+                                .paymentTypeId(SavingsAccountHelper.PAYMENT_TYPE_ID.intValue()),
+                        "deposit"));
+        Assertions.assertNotNull(depositResponse.getResourceId());
         LOG.info("Deposited 5000 into group savings account");
 
         // Create a client for the loan
@@ -813,9 +919,6 @@ public class GuarantorTest {
         Assertions.assertNotNull(loanID);
         LOG.info("Applied for loan with ID: {}", loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
         // Create self guarantee from loan client's own savings
         String guarantorJSON = new GuarantorTestBuilder()
                 .existingCustomerWithGuaranteeAmount(String.valueOf(loanClientID), String.valueOf(selfSavingsId), "2000").build();
@@ -831,44 +934,47 @@ public class GuarantorTest {
         LOG.info("Created guarantor with ID: {} using group savings account ID: {}", groupSavingsGuarantorId, groupSavingsId);
 
         // Approve and disburse the loan
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(SavingsAccountHelper.TRANSACTION_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        PostLoansLoanIdResponse approvalResponse = this.loanTransactionHelper.approveLoan(loanID.longValue(),
+                new PostLoansLoanIdRequest().dateFormat("dd MMMM yyyy").locale("en").approvedOnDate(SavingsAccountHelper.TRANSACTION_DATE));
+        Assertions.assertNotNull(approvalResponse.getLoanId(), "Loan should be approved");
         LOG.info("Approved loan");
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(SavingsAccountHelper.TRANSACTION_DATE, loanID,
-                "10000");
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        PostLoansLoanIdResponse disbursalResponse = this.loanTransactionHelper.disburseLoan(loanID.longValue(),
+                new PostLoansLoanIdRequest().dateFormat("dd MMMM yyyy").locale("en")
+                        .actualDisbursementDate(SavingsAccountHelper.TRANSACTION_DATE).transactionAmount(new BigDecimal("10000")));
+        Assertions.assertNotNull(disbursalResponse.getLoanId(), "Loan should be disbursed");
         LOG.info("Disbursed loan");
 
         // Retrieve the guarantor and verify the savings account ID is correct
-        List<HashMap> guarantors = this.guarantorHelper.getAllGuarantor(loanID);
+        List<GuarantorData> guarantors = Calls
+                .ok(FineractClientHelper.getFineractClient().guarantors.retrieveGuarantorDetails(loanID.longValue()));
         Assertions.assertNotNull(guarantors);
         Assertions.assertFalse(guarantors.isEmpty(), "Should have at least one guarantor");
         LOG.info("Retrieved {} guarantor(s)", guarantors.size());
 
         boolean foundGuarantorWithCorrectSavingsId = false;
-        for (HashMap guarantor : guarantors) {
-            if (guarantor.get("id").equals(groupSavingsGuarantorId)) {
+        for (GuarantorData guarantor : guarantors) {
+            if (guarantor.getId() != null && guarantor.getId() == (long) groupSavingsGuarantorId) {
                 LOG.info("Found guarantor with ID: {}", groupSavingsGuarantorId);
 
                 // Verify guarantorFundingDetails exists
-                List<HashMap> fundingDetails = (List<HashMap>) guarantor.get("guarantorFundingDetails");
+                List<GuarantorFundingData> fundingDetails = guarantor.getGuarantorFundingDetails();
                 Assertions.assertNotNull(fundingDetails, "Guarantor funding details should not be null");
                 Assertions.assertFalse(fundingDetails.isEmpty(), "Guarantor funding details should not be empty");
                 LOG.info("Found {} funding detail(s)", fundingDetails.size());
 
                 // Verify the savings account in funding details
-                for (HashMap fundingDetail : fundingDetails) {
-                    HashMap account = (HashMap) fundingDetail.get("savingsAccount");
+                for (GuarantorFundingData fundingDetail : fundingDetails) {
+                    PortfolioAccountData account = fundingDetail.getSavingsAccount();
                     Assertions.assertNotNull(account, "Savings account in funding details should not be null");
 
-                    Integer savingsIdFromGuarantor = (Integer) account.get("id");
+                    Long savingsIdFromGuarantor = account.getId();
                     LOG.info("Savings account ID from guarantor: {}, Expected: {}", savingsIdFromGuarantor, groupSavingsId);
 
                     // This is the key assertion - verify that the savings account ID is not 0 and matches the group
                     // savings ID
                     Assertions.assertNotNull(savingsIdFromGuarantor, "Savings account ID should not be null");
-                    Assertions.assertNotEquals(Integer.valueOf(0), savingsIdFromGuarantor,
+                    Assertions.assertNotEquals(0L, savingsIdFromGuarantor,
                             "Savings account ID should not be 0 for group savings guarantor");
                     Assertions.assertEquals(groupSavingsId, savingsIdFromGuarantor,
                             "Savings account ID should match the group savings account ID");

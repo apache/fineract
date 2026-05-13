@@ -125,7 +125,19 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 for (GuarantorFundingDetails guarantorFundingDetails : fundingDetails) {
                     if (guarantorFundingDetails.getStatus().isActive() || guarantorFundingDetails.getStatus().isWithdrawn()
                             || guarantorFundingDetails.getStatus().isCompleted()) {
-                        if (guarantor.isSelfGuarantee()) {
+                        SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
+                        if (savingsAccount.getAccountType().isGroupAccount()) {
+                            // Pure group loan (no clientId) with the same group's savings account → self-guarantee
+                            // Individual loan, GLIM, or different group's savings → external guarantee
+                            if (loan.getClientId() == null && loan.getGroupId() != null
+                                    && loan.getGroupId().equals(savingsAccount.getGroupId())) {
+                                actualSelfAmount = actualSelfAmount.add(guarantorFundingDetails.getAmount())
+                                        .subtract(guarantorFundingDetails.getAmountTransfered());
+                            } else {
+                                actualExtGuarantee = actualExtGuarantee.add(guarantorFundingDetails.getAmount())
+                                        .subtract(guarantorFundingDetails.getAmountTransfered());
+                            }
+                        } else if (guarantor.isSelfGuarantee()) {
                             actualSelfAmount = actualSelfAmount.add(guarantorFundingDetails.getAmount())
                                     .subtract(guarantorFundingDetails.getAmountTransfered());
                         } else {
