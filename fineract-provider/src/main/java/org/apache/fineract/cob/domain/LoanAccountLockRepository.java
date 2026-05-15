@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,5 +49,7 @@ public interface LoanAccountLockRepository
 
     @Override
     void removeByLockOwnerInAndErrorIsNotNullAndLockPlacedOnCobBusinessDateIsNotNull(List<LockOwner> lockOwners);
+
+    void deleteByLockOwnerAndErrorIsNullAndLockPlacedOnCobBusinessDate(LockOwner lockOwner, LocalDate cobBusinessDate);
 
 }

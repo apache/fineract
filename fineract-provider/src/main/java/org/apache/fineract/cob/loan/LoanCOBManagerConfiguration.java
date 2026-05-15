@@ -23,6 +23,7 @@ import static org.apache.fineract.cob.loan.LoanCOBConstant.JOB_NAME;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.conditions.BatchManagerCondition;
+import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -76,6 +77,8 @@ public class LoanCOBManagerConfiguration {
     private BusinessEventNotifierService businessEventNotifierService;
     @Autowired
     private CustomJobParameterResolver customJobParameterResolver;
+    @Autowired
+    private LoanAccountLockRepository loanAccountLockRepository;
 
     @Bean
     @StepScope
@@ -104,6 +107,12 @@ public class LoanCOBManagerConfiguration {
     }
 
     @Bean
+    public Step unlockProcessedLoansStep() {
+        return new StepBuilder("Unlock processed loans - Step", jobRepository).tasklet(unlockProcessedLoansTasklet(), transactionManager)
+                .build();
+    }
+
+    @Bean
     public ResolveLoanCOBCustomJobParametersTasklet resolveCustomJobParametersTasklet() {
         return new ResolveLoanCOBCustomJobParametersTasklet(customJobParameterResolver);
     }
@@ -113,6 +122,11 @@ public class LoanCOBManagerConfiguration {
         return new StayedLockedLoansTasklet(businessEventNotifierService, retrieveIdService);
     }
 
+    @Bean
+    public UnlockProcessedLoansTasklet unlockProcessedLoansTasklet() {
+        return new UnlockProcessedLoansTasklet(loanAccountLockRepository);
+    }
+
     @Bean(name = "loanCOBJob")
     public Job loanCOBJob(LoanCOBPartitioner partitioner) {
         return new JobBuilder(JobName.LOAN_COB.name(), jobRepository) //
@@ -120,6 +134,7 @@ public class LoanCOBManagerConfiguration {
                 .start(resolveCustomJobParametersStep()) //
                 .next(loanCOBStep(partitioner)) //
                 .next(stayedLockedStep()) //
+                .next(unlockProcessedLoansStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
     }
