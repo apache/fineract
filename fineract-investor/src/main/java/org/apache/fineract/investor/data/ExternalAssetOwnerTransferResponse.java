@@ -16,27 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data.request;
+package org.apache.fineract.investor.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
-public class ExternalAssetOwnerRequest implements Serializable {
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ExternalAssetOwnerTransferResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long loanId;
-    private Long transferId;
-    private String settlementDate;
+    private Long resourceId;
+    private String resourceExternalId;
+    private Long subResourceId;
+    private String subResourceExternalId;
+    private Map<String, Object> changes;
+
+    private String locale;
+    private String dateFormat;
+    private LocalDate settlementDate;
     private String ownerExternalId;
+    private String purchasePriceRatio;
     private String transferExternalId;
     private String transferExternalGroupId;
-    private String purchasePriceRatio;
-    private String dateFormat;
-    private String locale;
 }

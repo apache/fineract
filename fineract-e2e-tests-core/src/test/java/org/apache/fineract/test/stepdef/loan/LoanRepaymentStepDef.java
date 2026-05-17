@@ -114,8 +114,10 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         makeRepayment(repaymentType, transactionDate, transactionAmount, previousOwnerId);
     }
 
-    private void makeRepayment(String repaymentType, String transactionDate, double transactionAmount, String transferExternalOwnerId) {
-        eventStore.reset();
+    private void makeRepayment(String repaymentType, String transactionDate, double transactionAmount, String transferExternalOwnerId)
+            throws IOException {
+        // Keep earlier step events available for later assertions in the same scenario,
+        // e.g. COB-generated amortization events verified after the repayment step.
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
@@ -139,7 +141,6 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
     @And("Created user makes {string} repayment on {string} with {double} EUR transaction amount")
     public void makeRepaymentWithGivenUser(String repaymentType, String transactionDate, double transactionAmount) throws IOException {
-        eventStore.reset();
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
@@ -169,7 +170,6 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
 
     @And("Customer makes externalID controlled {string} repayment on {string} with {double} EUR transaction amount")
     public void makeRepaymentByExternalId(String repaymentType, String transactionDate, double transactionAmount) throws IOException {
-        eventStore.reset();
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         String resourceExternalId = loanResponse.getResourceExternalId();
@@ -194,7 +194,6 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     @And("Created user makes externalID controlled {string} repayment on {string} with {double} EUR transaction amount")
     public void makeRepaymentWithGivenUserByExternalId(String repaymentType, String transactionDate, double transactionAmount)
             throws IOException {
-        eventStore.reset();
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         String resourceExternalId = loanResponse.getResourceExternalId();
@@ -647,7 +646,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     }
 
     @When("Loan Pay-off is made on {string} with transfer external owner")
-    public void makeLoanPayOffWithTransferExternalOwner(String transactionDate) {
+    public void makeLoanPayOffWithTransferExternalOwner(String transactionDate) throws IOException {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String transferExternalOwnerId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
         Double transactionAmount = getLoanTransactionAmountToPayOff(loanResponse, transactionDate);
@@ -657,7 +656,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     }
 
     @When("Loan Pay-off is made on {string} with previous transfer external owner")
-    public void makeLoanPayOffWithOtherTransferExternalOwner(String transactionDate) {
+    public void makeLoanPayOffWithOtherTransferExternalOwner(String transactionDate) throws IOException {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         String transferExternalOwnerId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID);
         Double transactionAmount = getLoanTransactionAmountToPayOff(loanResponse, transactionDate);

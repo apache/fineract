@@ -16,27 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.investor.data.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
-public class ExternalAssetOwnerRequest implements Serializable {
+@AllArgsConstructor
+public class ExternalAssetOwnerBuybackRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private Long loanId;
-    private Long transferId;
+
+    @NotBlank(message = "{org.apache.fineract.investor.transfer.settlement-date.not-null}")
     private String settlementDate;
-    private String ownerExternalId;
+
+    @Size(max = 100, message = "{org.apache.fineract.investor.transfer.transfer-external-id.size}")
     private String transferExternalId;
-    private String transferExternalGroupId;
-    private String purchasePriceRatio;
+
+    @Schema(example = "yyyy-MM-dd")
     private String dateFormat;
+
+    @Schema(example = "en")
     private String locale;
 }

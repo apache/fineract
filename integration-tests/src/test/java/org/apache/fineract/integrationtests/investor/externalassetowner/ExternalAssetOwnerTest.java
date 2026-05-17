@@ -26,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ExternalAssetOwnerCreateRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerCreateResponse;
 import org.apache.fineract.client.models.ExternalTransferOwnerData;
-import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
-import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -41,9 +41,9 @@ public class ExternalAssetOwnerTest extends BaseLoanIntegrationTest {
     @Test
     public void testCreateExternalAssetOwnerSuccessfully() {
         final String ownerExternalId = Utils.uniqueRandomStringGenerator("eao", 20);
-        final PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(ownerExternalId);
+        final ExternalAssetOwnerCreateRequest request = new ExternalAssetOwnerCreateRequest().ownerExternalId(ownerExternalId);
 
-        final PostExternalAssetOwnerResponse response = InvestorHelper.createExternalAssetOwner(request);
+        final ExternalAssetOwnerCreateResponse response = InvestorHelper.createExternalAssetOwner(request);
 
         assertNotNull(response);
         assertNotNull(response.getResourceId());
@@ -57,7 +57,7 @@ public class ExternalAssetOwnerTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testCreateExternalAssetOwnerFailsWhenOwnerExternalIdIsNull() {
-        final PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(null);
+        final ExternalAssetOwnerCreateRequest request = new ExternalAssetOwnerCreateRequest().ownerExternalId(null);
 
         final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> InvestorHelper.createExternalAssetOwner(request));
@@ -68,9 +68,9 @@ public class ExternalAssetOwnerTest extends BaseLoanIntegrationTest {
     @Test
     public void testCreateExternalAssetOwnerFailsWhenOwnerExternalIdIsDuplicate() {
         final String ownerExternalId = Utils.uniqueRandomStringGenerator("eao", 20);
-        final PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(ownerExternalId);
+        final ExternalAssetOwnerCreateRequest request = new ExternalAssetOwnerCreateRequest().ownerExternalId(ownerExternalId);
 
-        final PostExternalAssetOwnerResponse firstResponse = InvestorHelper.createExternalAssetOwner(request);
+        final ExternalAssetOwnerCreateResponse firstResponse = InvestorHelper.createExternalAssetOwner(request);
         assertNotNull(firstResponse);
         assertNotNull(firstResponse.getResourceId());
 

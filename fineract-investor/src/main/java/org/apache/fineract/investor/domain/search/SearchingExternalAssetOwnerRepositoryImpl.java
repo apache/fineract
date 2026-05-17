@@ -33,6 +33,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.jpa.CriteriaQueryFactory;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.PagedRequest;
 import org.apache.fineract.investor.domain.ExternalAssetOwner;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerTransfer;
@@ -64,15 +65,15 @@ public class SearchingExternalAssetOwnerRepositoryImpl implements SearchingExter
         Path<ExternalAssetOwnerTransferDetails> details = root.join("externalAssetOwnerTransferDetails", JoinType.LEFT);
         Path<ExternalAssetOwner> owner = root.get("owner");
 
-        Specification<ExternalAssetOwnerTransfer> spec = (r, q, builder) -> {
+        final Specification<ExternalAssetOwnerTransfer> spec = (r, q, builder) -> {
             Path<ExternalAssetOwner> o = r.get("owner");
 
             List<Predicate> predicates = new ArrayList<>();
 
             if (StringUtils.isNotBlank(request.getText())) {
-                String searchLikeValue = "%" + request.getText() + "%";
-                predicates.add(cb.or(cb.like(r.get("externalId"), searchLikeValue), cb.like(o.get("externalId"), searchLikeValue),
-                        cb.like(r.get("externalLoanId"), searchLikeValue)));
+                var externalId = ExternalIdFactory.produce(request.getText());
+                predicates.add(cb.or(cb.equal(r.get("externalId"), externalId), cb.equal(o.get("externalId"), externalId),
+                        cb.equal(r.get("externalLoanId"), externalId)));
             }
 
             if (request.getSubmittedFromDate() != null) {
@@ -106,5 +107,4 @@ public class SearchingExternalAssetOwnerRepositoryImpl implements SearchingExter
         TypedQuery<SearchedExternalAssetOwner> queryToExecute = entityManager.createQuery(query);
         return criteriaQueryFactory.readPage(queryToExecute, ExternalAssetOwnerTransfer.class, pageable, spec);
     }
-
 }

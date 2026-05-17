@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.messaging.event.loan.transaction;
+package org.apache.fineract.investor.data;
 
-import java.util.function.Function;
-import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
-import org.apache.fineract.test.messaging.event.Event;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class LoanAdjustTransactionBusinessEvent implements Event<LoanTransactionAdjustmentDataV1> {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ExternalAssetOwnerLoanProductAttributeResponse implements Serializable {
 
-    @Override
-    public Class<LoanTransactionAdjustmentDataV1> getDataClass() {
-        return LoanTransactionAdjustmentDataV1.class;
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    @Override
-    public Function<LoanTransactionAdjustmentDataV1, Long> getIdExtractor() {
-        return loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getTransactionToAdjust().getId();
-    }
+    private Long resourceId;
+    private Long subResourceId;
 
-    @Override
-    public String getEventName() {
-        return "LoanAdjustTransactionBusinessEvent";
-    }
+    private String locale;
+    private String dateFormat;
+    private String attributeKey;
+    private String attributeValue;
 }

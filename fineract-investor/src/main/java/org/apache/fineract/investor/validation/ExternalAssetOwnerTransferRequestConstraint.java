@@ -16,26 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.messaging.event.loan.transaction;
+package org.apache.fineract.investor.validation;
 
-import java.util.function.Function;
-import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
-import org.apache.fineract.test.messaging.event.Event;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class LoanAdjustTransactionBusinessEvent implements Event<LoanTransactionAdjustmentDataV1> {
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = ExternalAssetOwnerTransferRequestValidator.class)
+public @interface ExternalAssetOwnerTransferRequestConstraint {
 
-    @Override
-    public Class<LoanTransactionAdjustmentDataV1> getDataClass() {
-        return LoanTransactionAdjustmentDataV1.class;
-    }
+    String message() default "{org.apache.fineract.investor.transfer.command.invalid}";
 
-    @Override
-    public Function<LoanTransactionAdjustmentDataV1, Long> getIdExtractor() {
-        return loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getTransactionToAdjust().getId();
-    }
+    Class<?>[] groups() default {};
 
-    @Override
-    public String getEventName() {
-        return "LoanAdjustTransactionBusinessEvent";
-    }
+    Class<? extends Payload>[] payload() default {};
 }
