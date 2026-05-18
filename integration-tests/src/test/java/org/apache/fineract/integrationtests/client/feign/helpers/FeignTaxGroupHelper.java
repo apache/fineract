@@ -24,9 +24,9 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.GetTaxesGroupResponse;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupResponse;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
+import org.apache.fineract.client.models.TaxGroupCreateResponse;
+import org.apache.fineract.client.models.TaxGroupData;
 
 public class FeignTaxGroupHelper {
 
@@ -36,19 +36,19 @@ public class FeignTaxGroupHelper {
         this.fineractClient = fineractClient;
     }
 
-    public PostTaxesGroupResponse createTaxGroup(PostTaxesGroupRequest request) {
+    public TaxGroupCreateResponse createTaxGroup(TaxGroupCreateRequest request) {
         return ok(() -> fineractClient.taxGroup().createTaxGroup(request));
     }
 
-    public GetTaxesGroupResponse retrieveTaxGroup(Long taxGroupId) {
-        return ok(() -> fineractClient.taxGroup().retrieveOneTaxGroup(taxGroupId));
+    public TaxGroupData retrieveTaxGroup(Long taxGroupId) {
+        return ok(() -> fineractClient.taxGroup().retrieveOneTaxGroup(taxGroupId, false));
     }
 
-    public List<GetTaxesGroupResponse> retrieveAllTaxGroups() {
+    public List<TaxGroupData> retrieveAllTaxGroups() {
         return ok(() -> fineractClient.taxGroup().retrieveAllTaxGroups());
     }
 
     public CallFailedRuntimeException retrieveTaxGroupExpectingError(Long taxGroupId) {
-        return fail(() -> fineractClient.taxGroup().retrieveOneTaxGroup(taxGroupId));
+        return fail(() -> fineractClient.taxGroup().retrieveOneTaxGroup(taxGroupId, false));
     }
 }

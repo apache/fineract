@@ -808,7 +808,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final String taxGroupName = rs.getString(TAX_GROUP_NAME);
             TaxGroupData taxGroupData = null;
             if (taxGroupId != null) {
-                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+                taxGroupData = TaxGroupData.builder().id(taxGroupId).name(taxGroupName).build();
             }
 
             final BigDecimal availableBalance = null;
@@ -1353,7 +1353,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final String taxGroupName = rs.getString(TAX_GROUP_NAME);
             TaxGroupData taxGroupData = null;
             if (taxGroupId != null) {
-                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+                taxGroupData = TaxGroupData.builder().id(taxGroupId).name(taxGroupName).build();
             }
 
             return DepositAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,

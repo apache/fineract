@@ -20,21 +20,19 @@ package org.apache.fineract.portfolio.tax.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Map;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.springframework.stereotype.Service;
 
 @Service
+// TODO: migrate all use of this function to TaxUtils.computeTax; leaving for now, too many changes!
+@Deprecated(forRemoval = true)
 public class ChargeTaxApplicationServiceImpl implements ChargeTaxApplicationService {
 
     @Override
     public Map<TaxComponent, BigDecimal> computeTax(final TaxGroup taxGroup, final BigDecimal baseAmount, final LocalDate effectiveDate,
             final int scale) {
-        if (taxGroup == null || baseAmount == null || baseAmount.compareTo(BigDecimal.ZERO) == 0) {
-            return Collections.emptyMap();
-        }
-        return TaxUtils.splitTax(baseAmount, effectiveDate, taxGroup.getTaxGroupMappings(), scale);
+        return TaxUtils.computeTax(taxGroup, baseAmount, effectiveDate, scale);
     }
 }

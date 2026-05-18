@@ -16,25 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.request;
+package org.apache.fineract.portfolio.tax.command;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Set;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.tax.data.TaxGroupUpdateRequest;
 
-@Setter
-@Getter
-@NoArgsConstructor
-public class TaxGroupRequest implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private String name;
-    private String locale;
-    private Set<TaxGroupComponent> taxComponents;
-    private String dateFormat;
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class TaxGroupUpdateCommand extends Command<TaxGroupUpdateRequest> {}

@@ -75,7 +75,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsDropdownReadPlatform
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
+import org.apache.fineract.portfolio.tax.service.TaxReadService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -97,7 +97,7 @@ public class SavingsProductsApiResource {
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final PaymentTypeReadService paymentTypeReadPlatformService;
-    private final TaxReadPlatformService taxReadPlatformService;
+    private final TaxReadService taxReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
 
     @POST

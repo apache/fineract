@@ -21,23 +21,23 @@ package org.apache.fineract.integrationtests.common;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
-import org.apache.fineract.client.models.GetTaxesGroupResponse;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupResponse;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
+import org.apache.fineract.client.models.TaxGroupCreateResponse;
+import org.apache.fineract.client.models.TaxGroupData;
 
 public final class TaxGroupHelper {
 
     private TaxGroupHelper() {}
 
-    public static PostTaxesGroupResponse createTaxGroup(PostTaxesGroupRequest request) {
+    public static TaxGroupCreateResponse createTaxGroup(TaxGroupCreateRequest request) {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().taxGroup().createTaxGroup(request));
     }
 
-    public static GetTaxesGroupResponse retrieveTaxGroup(Long taxGroupId) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().taxGroup().retrieveOneTaxGroup(taxGroupId));
+    public static TaxGroupData retrieveTaxGroup(Long taxGroupId) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().taxGroup().retrieveOneTaxGroup(taxGroupId, false));
     }
 
-    public static List<GetTaxesGroupResponse> retrieveAllTaxGroups() {
+    public static List<TaxGroupData> retrieveAllTaxGroups() {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().taxGroup().retrieveAllTaxGroups());
     }
 }

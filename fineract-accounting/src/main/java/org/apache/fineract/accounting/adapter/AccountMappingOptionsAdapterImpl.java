@@ -16,19 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.service;
+package org.apache.fineract.accounting.adapter;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.springframework.stereotype.Component;
 
-public interface TaxWritePlatformService {
+@Slf4j
+@RequiredArgsConstructor
+@Component
+public class AccountMappingOptionsAdapterImpl implements AccountMappingOptionsAdapter {
 
-    CommandProcessingResult createTaxComponent(JsonCommand command);
+    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
 
-    CommandProcessingResult updateTaxComponent(Long id, JsonCommand command);
-
-    CommandProcessingResult createTaxGroup(JsonCommand command);
-
-    CommandProcessingResult updateTaxGroup(Long id, JsonCommand command);
-
+    @Override
+    public Map<String, List<GLAccountData>> retrieve() {
+        return accountingDropdownReadPlatformService.retrieveAccountMappingOptions();
+    }
 }

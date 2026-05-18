@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.tax.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,104 +26,47 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
+@Builder
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@Getter
 public final class TaxComponentData implements Serializable {
 
-    private final Long id;
-    private final String name;
-    private final BigDecimal percentage;
-    private final EnumOptionData debitAccountType;
-    private final GLAccountData debitAccount;
-    private final EnumOptionData creditAccountType;
-    private final GLAccountData creditAccount;
-    private final LocalDate startDate;
-    private final Collection<TaxComponentHistoryData> taxComponentHistories;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
+    private Long id;
+    private String name;
+    private BigDecimal percentage;
+    private EnumOptionData debitAccountType;
+    private GLAccountData debitAccount;
+    private EnumOptionData creditAccountType;
+    private GLAccountData creditAccount;
+    private LocalDate startDate;
+    private Collection<TaxComponentHistoryData> taxComponentHistories;
     // template options
-    private final Map<String, List<GLAccountData>> glAccountOptions;
-    private final Collection<EnumOptionData> glAccountTypeOptions;
-
-    public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
-            final EnumOptionData debitAccountType, final GLAccountData debitAccount, final EnumOptionData creditAccountType,
-            final GLAccountData creditAccount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
-        final Map<String, List<GLAccountData>> glAccountOptions = null;
-        final Collection<EnumOptionData> glAccountTypeOptions = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
-    }
-
-    public static TaxComponentData lookup(final Long id, final String name) {
-        final BigDecimal percentage = null;
-        final EnumOptionData debitAccountType = null;
-        final GLAccountData debitAccount = null;
-        final EnumOptionData creditAccountType = null;
-        final GLAccountData creditAccount = null;
-        final LocalDate startDate = null;
-        final Collection<TaxComponentHistoryData> taxComponentHistories = null;
-        final Map<String, List<GLAccountData>> glAccountOptions = null;
-        final Collection<EnumOptionData> glAccountTypeOptions = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
-    }
-
-    public static TaxComponentData template(final Map<String, List<GLAccountData>> glAccountOptions,
-            final Collection<EnumOptionData> glAccountTypeOptions) {
-        final Long id = null;
-        final String name = null;
-        final BigDecimal percentage = null;
-        final EnumOptionData debitAccountType = null;
-        final GLAccountData debitAccount = null;
-        final EnumOptionData creditAccountType = null;
-        final GLAccountData creditAccount = null;
-        final LocalDate startDate = null;
-        final Collection<TaxComponentHistoryData> taxComponentHistories = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
-    }
-
-    private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
-            final GLAccountData creditAccount) {
-        this.id = id;
-        this.percentage = percentage;
-        this.name = null;
-        this.debitAccountType = null;
-        this.debitAccount = debitAccount;
-        this.creditAccountType = null;
-        this.creditAccount = creditAccount;
-        this.startDate = null;
-        this.taxComponentHistories = null;
-        this.glAccountOptions = null;
-        this.glAccountTypeOptions = null;
-    }
-
-    public static TaxComponentData createTaxComponent(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
-            final GLAccountData creditAccount) {
-        return new TaxComponentData(id, percentage, debitAccount, creditAccount);
-    }
+    private Map<String, List<GLAccountData>> glAccountOptions;
+    private Collection<EnumOptionData> glAccountTypeOptions;
 
     public BigDecimal getApplicablePercentage(final LocalDate date) {
-        BigDecimal percentage = null;
-        if (occursOnDayFrom(date)) {
-            percentage = getPercentage();
+        if (DateUtils.isAfter(date, startDate)) {
+            return getPercentage();
         } else {
-            for (TaxComponentHistoryData componentHistory : this.taxComponentHistories) {
-                if (componentHistory.occursOnDayFromAndUpToAndIncluding(date)) {
-                    percentage = componentHistory.getPercentage();
-                    break;
+            for (var componentHistory : this.taxComponentHistories) {
+                if (DateUtils.isAfter(date, getStartDate())
+                        && (componentHistory.getEndDate() == null || !DateUtils.isAfter(date, componentHistory.getEndDate()))) {
+                    return componentHistory.getPercentage();
                 }
             }
         }
-        return percentage;
-    }
 
-    private boolean occursOnDayFrom(final LocalDate target) {
-        return DateUtils.isAfter(target, getStartDate());
+        return null;
     }
-
 }

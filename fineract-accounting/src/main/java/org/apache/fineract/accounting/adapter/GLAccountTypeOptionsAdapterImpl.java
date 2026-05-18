@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.request;
+package org.apache.fineract.accounting.adapter;
 
-import java.io.Serial;
-import java.io.Serializable;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.springframework.stereotype.Component;
 
-@Setter
-@Getter
-@NoArgsConstructor
-public class TaxGroupComponent implements Serializable {
+@Slf4j
+@RequiredArgsConstructor
+@Component
+public class GLAccountTypeOptionsAdapterImpl implements GLAccountTypeOptionsAdapter {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
 
-    private Long taxComponentId;
-    private String startDate;
+    @Override
+    public List<EnumOptionData> retrieve() {
+        return accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions();
+    }
 }

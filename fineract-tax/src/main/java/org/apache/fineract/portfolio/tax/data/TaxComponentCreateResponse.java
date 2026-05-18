@@ -16,26 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.handler;
+package org.apache.fineract.portfolio.tax.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.tax.service.TaxWritePlatformService;
-import org.springframework.stereotype.Service;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
-@Service
+@Builder
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@CommandType(entity = "TAXGROUP", action = "CREATE")
-public class CreateTaxGroupCommandHandler implements NewCommandSourceHandler {
+@FieldNameConstants
+public class TaxComponentCreateResponse implements Serializable {
 
-    private final TaxWritePlatformService taxWritePlatformService;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.taxWritePlatformService.createTaxGroup(jsonCommand);
-    }
-
+    private Long resourceId;
 }

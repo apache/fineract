@@ -16,24 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.domain;
+package org.apache.fineract.portfolio.tax.command;
 
-import org.apache.fineract.portfolio.tax.exception.TaxComponentNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.tax.data.TaxGroupCreateRequest;
 
-@Component
-public class TaxComponentRepositoryWrapper {
-
-    private final TaxComponentRepository repository;
-
-    @Autowired
-    public TaxComponentRepositoryWrapper(final TaxComponentRepository repository) {
-        this.repository = repository;
-    }
-
-    public TaxComponent findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id).orElseThrow(() -> new TaxComponentNotFoundException(id));
-    }
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class TaxGroupCreateCommand extends Command<TaxGroupCreateRequest> {}

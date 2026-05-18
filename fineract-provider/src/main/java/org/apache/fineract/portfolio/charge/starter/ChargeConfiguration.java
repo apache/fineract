@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
-import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
+import org.apache.fineract.portfolio.tax.service.TaxReadService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +57,7 @@ public class ChargeConfiguration {
     public ChargeReadPlatformService chargeReadPlatformService(CurrencyReadPlatformService currencyReadPlatformService,
             ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, JdbcTemplate jdbcTemplate,
             DropdownReadPlatformService dropdownReadPlatformService, FineractEntityAccessUtil fineractEntityAccessUtil,
-            AccountingDropdownReadPlatformService accountingDropdownReadPlatformService, TaxReadPlatformService taxReadPlatformService,
+            AccountingDropdownReadPlatformService accountingDropdownReadPlatformService, TaxReadService taxReadPlatformService,
             ConfigurationDomainServiceJpa configurationDomainServiceJpa, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         return new ChargeReadPlatformServiceImpl(currencyReadPlatformService, chargeDropdownReadPlatformService, jdbcTemplate,
                 dropdownReadPlatformService, fineractEntityAccessUtil, accountingDropdownReadPlatformService, taxReadPlatformService,

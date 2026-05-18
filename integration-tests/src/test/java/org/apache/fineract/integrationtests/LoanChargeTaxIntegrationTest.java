@@ -30,16 +30,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
-import org.apache.fineract.client.models.GetTaxesGroupResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesComponentsResponse;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupResponse;
-import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxComponentCreateResponse;
+import org.apache.fineract.client.models.TaxGroupComponentData;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
+import org.apache.fineract.client.models.TaxGroupCreateResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
@@ -72,10 +71,10 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
      * Creates a TaxComponent with the given percentage and a fixed start date in the past so it is always active during
      * integration test runs.
      */
-    private PostTaxesComponentsResponse createTaxComponent(float percentage) {
-        PostTaxesComponentsRequest request = new PostTaxesComponentsRequest().name(Utils.uniqueRandomStringGenerator("TAX_COMP_", 6))
-                .percentage(percentage).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LOCALE);
-        PostTaxesComponentsResponse response = TaxComponentHelper.createTaxComponent(request);
+    private TaxComponentCreateResponse createTaxComponent(float percentage) {
+        var request = new TaxComponentCreateRequest().name(Utils.uniqueRandomStringGenerator("TAX_COMP_", 6))
+                .percentage(BigDecimal.valueOf(percentage)).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LOCALE);
+        var response = TaxComponentHelper.createTaxComponent(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -84,14 +83,14 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     /**
      * Wraps a list of already-created TaxComponent IDs into a TaxGroup.
      */
-    private PostTaxesGroupResponse createTaxGroup(Long... taxComponentIds) {
-        Set<PostTaxesGroupTaxComponents> components = new HashSet<>();
+    private TaxGroupCreateResponse createTaxGroup(Long... taxComponentIds) {
+        Set<TaxGroupComponentData> components = new HashSet<>();
         for (Long id : taxComponentIds) {
-            components.add(new PostTaxesGroupTaxComponents().taxComponentId(id).startDate(TAX_START_DATE));
+            components.add(new TaxGroupComponentData().taxComponentId(id).startDate(TAX_START_DATE));
         }
-        PostTaxesGroupRequest request = new PostTaxesGroupRequest().name(Utils.uniqueRandomStringGenerator("TAX_GRP_", 6))
-                .taxComponents(components).dateFormat(DATE_FORMAT).locale(LOCALE);
-        PostTaxesGroupResponse response = TaxGroupHelper.createTaxGroup(request);
+        var request = new TaxGroupCreateRequest().name(Utils.uniqueRandomStringGenerator("TAX_GRP_", 6)).taxComponents(components)
+                .dateFormat(DATE_FORMAT).locale(LOCALE);
+        var response = TaxGroupHelper.createTaxGroup(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -101,11 +100,11 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
      * Creates a TaxComponent with the given percentage, linked to the provided GL account as credit account (tax
      * liability). The credit account determines where the tax portion is posted in accounting.
      */
-    private PostTaxesComponentsResponse createTaxComponent(float percentage, Long creditAccountId) {
-        PostTaxesComponentsRequest request = new PostTaxesComponentsRequest().name(Utils.uniqueRandomStringGenerator("TAX_COMP_", 6))
-                .percentage(percentage).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LOCALE).creditAccountId(creditAccountId)
-                .creditAccountType(2);
-        PostTaxesComponentsResponse response = TaxComponentHelper.createTaxComponent(request);
+    private TaxComponentCreateResponse createTaxComponent(float percentage, Long creditAccountId) {
+        var request = new TaxComponentCreateRequest().name(Utils.uniqueRandomStringGenerator("TAX_COMP_", 6))
+                .percentage(BigDecimal.valueOf(percentage)).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LOCALE)
+                .creditAccountId(creditAccountId).creditAccountType(2);
+        var response = TaxComponentHelper.createTaxComponent(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -178,8 +177,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     public void testLoanChargeAmount_remainsUnchanged_whenTaxGroupIsConfigured() {
         runAt(LOAN_DATE, () -> {
             // Given – tax infrastructure
-            PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f);
-            PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+            var taxComponent = createTaxComponent(10.0f);
+            var taxGroup = createTaxGroup(taxComponent.getResourceId());
 
             // Given – charge definition with 10 % tax group, base = 100
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
@@ -220,9 +219,9 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     public void testLoanChargeAmount_remainsUnchanged_multipleComponents() {
         runAt(LOAN_DATE, () -> {
             // Given – two tax components in the same group
-            PostTaxesComponentsResponse comp1 = createTaxComponent(10.0f);
-            PostTaxesComponentsResponse comp2 = createTaxComponent(5.0f);
-            PostTaxesGroupResponse taxGroup = createTaxGroup(comp1.getResourceId(), comp2.getResourceId());
+            var comp1 = createTaxComponent(10.0f);
+            var comp2 = createTaxComponent(5.0f);
+            var taxGroup = createTaxGroup(comp1.getResourceId(), comp2.getResourceId());
 
             PostChargesResponse chargeResponse = createFlatLoanCharge(200.0, taxGroup.getResourceId());
 
@@ -285,8 +284,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void testChargeDefinition_hasTaxGroupPopulated() {
         // Given – tax infrastructure (no loan needed for this test)
-        PostTaxesComponentsResponse taxComponent = createTaxComponent(16.0f);
-        PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+        var taxComponent = createTaxComponent(16.0f);
+        var taxGroup = createTaxGroup(taxComponent.getResourceId());
 
         // When – create charge linked to the tax group
         PostChargesResponse chargeResponse = createFlatLoanCharge(50.0, taxGroup.getResourceId());
@@ -311,11 +310,11 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void testTaxGroupRetrieval_includesExpectedComponent() {
         // Given
-        PostTaxesComponentsResponse taxComponent = createTaxComponent(12.0f);
-        PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+        var taxComponent = createTaxComponent(12.0f);
+        var taxGroup = createTaxGroup(taxComponent.getResourceId());
 
         // When
-        GetTaxesGroupResponse retrieved = TaxGroupHelper.retrieveTaxGroup(taxGroup.getResourceId());
+        var retrieved = TaxGroupHelper.retrieveTaxGroup(taxGroup.getResourceId());
 
         // Then
         assertNotNull(retrieved);
@@ -336,11 +335,11 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void testTaxGroup_appearsInRetrieveAllList() {
         // Given
-        PostTaxesComponentsResponse taxComponent = createTaxComponent(8.0f);
-        PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+        var taxComponent = createTaxComponent(8.0f);
+        var taxGroup = createTaxGroup(taxComponent.getResourceId());
 
         // When
-        List<GetTaxesGroupResponse> allGroups = TaxGroupHelper.retrieveAllTaxGroups();
+        var allGroups = TaxGroupHelper.retrieveAllTaxGroups();
 
         // Then
         assertNotNull(allGroups);
@@ -360,8 +359,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     public void testLoanChargeTax_appliedIndependentlyToEachLoan() {
         runAt(LOAN_DATE, () -> {
             // Given – shared charge definition with 10 % tax
-            PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f);
-            PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+            var taxComponent = createTaxComponent(10.0f);
+            var taxGroup = createTaxGroup(taxComponent.getResourceId());
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
             Long chargeDefinitionId = chargeResponse.getResourceId();
 
@@ -415,8 +414,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             Account taxLiabilityAccount = accountHelper.createLiabilityAccount("taxLiability_cash");
 
             // Given – tax infrastructure linked to the tax liability account
-            PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f, taxLiabilityAccount.getAccountID().longValue());
-            PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+            var taxComponent = createTaxComponent(10.0f, taxLiabilityAccount.getAccountID().longValue());
+            var taxGroup = createTaxGroup(taxComponent.getResourceId());
 
             // Given – flat charge of 100 with 10 % tax, due on the loan start date
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
@@ -476,8 +475,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             Account taxLiabilityAccount = accountHelper.createLiabilityAccount("taxLiability_accrual");
 
             // Given – tax infrastructure linked to the tax liability account
-            PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f, taxLiabilityAccount.getAccountID().longValue());
-            PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+            var taxComponent = createTaxComponent(10.0f, taxLiabilityAccount.getAccountID().longValue());
+            var taxGroup = createTaxGroup(taxComponent.getResourceId());
 
             // Given – flat charge of 100 with 10 % tax, due on the loan start date
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
@@ -525,8 +524,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
     public void testLoanChargeList_containsOriginalAmount() {
         runAt(LOAN_DATE, () -> {
             // Given
-            PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f);
-            PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
+            var taxComponent = createTaxComponent(10.0f);
+            var taxGroup = createTaxGroup(taxComponent.getResourceId());
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
             Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();

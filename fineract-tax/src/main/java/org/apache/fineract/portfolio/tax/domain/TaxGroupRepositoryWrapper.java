@@ -18,19 +18,19 @@
  */
 package org.apache.fineract.portfolio.tax.domain;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.tax.exception.TaxGroupNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
+// TODO: we should not expose direct access to storage to any outside package, only via service interfaces!
+@Deprecated(forRemoval = true)
 public class TaxGroupRepositoryWrapper {
 
     private final TaxGroupRepository repository;
-
-    @Autowired
-    public TaxGroupRepositoryWrapper(final TaxGroupRepository repository) {
-        this.repository = repository;
-    }
 
     public TaxGroup findOneWithNotFoundDetection(final Long id) {
         return this.repository.findById(id).orElseThrow(() -> new TaxGroupNotFoundException(id));

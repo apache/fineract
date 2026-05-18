@@ -16,32 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.request;
+package org.apache.fineract.accounting.adapter;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class TaxComponentRequest implements Serializable {
+@FunctionalInterface
+public interface AccountMappingOptionsAdapter {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private String name;
-    private BigDecimal percentage;
-    private Integer debitAccountType;
-    private Long debitAccountId;
-    private Integer creditAccountType;
-    private Long creditAccountId;
-    private String startDate;
-    private String dateFormat;
-    private String locale;
+    Map<String, List<GLAccountData>> retrieve();
 }

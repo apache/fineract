@@ -18,26 +18,35 @@
  */
 package org.apache.fineract.portfolio.tax.data;
 
+import jakarta.validation.constraints.AssertTrue;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class TaxGroupData implements Serializable {
+@FieldNameConstants
+public class TaxGroupComponentData implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private String name;
-    private Collection<TaxGroupMappingsData> taxAssociations;
-    // template options
-    private Collection<TaxComponentData> taxComponents;
+    private Long taxComponentId;
+    private String startDate;
+    private String endDate;
+
+    @AssertTrue(message = "{org.apache.fineract.portfolio.tax.group.tax-component-id.valid}")
+    public boolean isTaxComponentIdValid() {
+        if (id == null) {
+            return taxComponentId != null && taxComponentId > 0;
+        }
+        return taxComponentId == null || taxComponentId > 0;
+    }
 }

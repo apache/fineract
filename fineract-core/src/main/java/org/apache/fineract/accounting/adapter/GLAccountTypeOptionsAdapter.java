@@ -16,23 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.api;
+package org.apache.fineract.accounting.adapter;
 
-public interface TaxApiConstants {
+import java.util.List;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
-    String nameParamName = "name";
-    String percentageParamName = "percentage";
-    String debitAccountTypeParamName = "debitAccountType";
-    String debitAccountIdParamName = "debitAccountId";
-    String creditAccountTypeParamName = "creditAccountType";
-    String creditAccountIdParamName = "creditAccountId";
+@FunctionalInterface
+public interface GLAccountTypeOptionsAdapter {
 
-    String startDateParamName = "startDate";
-    String endDateParamName = "endDate";
-
-    String chargeIncludesTaxParamName = "chargeIncludesTax";
-    String taxComponentsParamName = "taxComponents";
-    String idParamName = "id";
-    String taxComponentIdParamName = "taxComponentId";
-
+    List<EnumOptionData> retrieve();
 }

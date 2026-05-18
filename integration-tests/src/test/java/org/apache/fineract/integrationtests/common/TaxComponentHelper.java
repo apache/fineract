@@ -20,19 +20,19 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import org.apache.fineract.client.models.GetTaxesComponentsResponse;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesComponentsResponse;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxComponentCreateResponse;
+import org.apache.fineract.client.models.TaxComponentData;
 
 public final class TaxComponentHelper {
 
     private TaxComponentHelper() {}
 
-    public static PostTaxesComponentsResponse createTaxComponent(PostTaxesComponentsRequest request) {
+    public static TaxComponentCreateResponse createTaxComponent(TaxComponentCreateRequest request) {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().taxComponents().createTaxComponent(request));
     }
 
-    public static GetTaxesComponentsResponse retrieveTaxComponent(Long taxComponentId) {
+    public static TaxComponentData retrieveTaxComponent(Long taxComponentId) {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().taxComponents().retrieveOneTaxComponent(taxComponentId));
     }
 }

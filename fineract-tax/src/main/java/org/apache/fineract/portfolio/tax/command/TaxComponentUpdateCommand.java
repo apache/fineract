@@ -16,28 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.service;
+package org.apache.fineract.portfolio.tax.command;
 
-import java.util.List;
-import org.apache.fineract.portfolio.tax.data.TaxComponentData;
-import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.tax.data.TaxComponentUpdateRequest;
 
-public interface TaxReadPlatformService {
-
-    TaxComponentData retrieveTaxComponentData(Long id);
-
-    TaxComponentData retrieveTaxComponentTemplate();
-
-    TaxGroupData retrieveTaxGroupData(Long id);
-
-    TaxGroupData retrieveTaxGroupWithTemplate(Long id);
-
-    TaxGroupData retrieveTaxGroupTemplate();
-
-    List<TaxComponentData> retrieveAllTaxComponents();
-
-    List<TaxGroupData> retrieveAllTaxGroups();
-
-    List<TaxGroupData> retrieveTaxGroupsForLookUp();
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class TaxComponentUpdateCommand extends Command<TaxComponentUpdateRequest> {}

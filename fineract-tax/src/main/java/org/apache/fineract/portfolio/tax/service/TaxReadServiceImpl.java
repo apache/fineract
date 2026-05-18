@@ -21,25 +21,31 @@ package org.apache.fineract.portfolio.tax.service;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.adapter.AccountMappingOptionsAdapter;
+import org.apache.fineract.accounting.adapter.GLAccountTypeOptionsAdapter;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
-import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepository;
-import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
+import org.apache.fineract.portfolio.tax.exception.TaxComponentNotFoundException;
+import org.apache.fineract.portfolio.tax.exception.TaxGroupNotFoundException;
 import org.apache.fineract.portfolio.tax.mapper.TaxComponentMapper;
 import org.apache.fineract.portfolio.tax.mapper.TaxGroupMapper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
-public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
+@Service
+@ConditionalOnMissingBean(value = TaxReadService.class, ignored = TaxReadServiceImpl.class)
+public class TaxReadServiceImpl implements TaxReadService {
 
-    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
+    private final AccountMappingOptionsAdapter accountMappingOptionsAdapter;
+    private final GLAccountTypeOptionsAdapter glAccountTypeOptionsAdapter;
     private final TaxComponentRepository taxComponentRepository;
-    private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
     private final TaxComponentMapper taxComponentMapper;
     private final TaxGroupRepository taxGroupRepository;
-    private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
     private final TaxGroupMapper taxGroupMapper;
 
     @Override
@@ -49,13 +55,13 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxComponentData retrieveTaxComponentData(final Long id) {
-        return taxComponentMapper.map(taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id));
+        return taxComponentMapper.map(taxComponentRepository.findById(id).orElseThrow(() -> new TaxComponentNotFoundException(id)));
     }
 
     @Override
     public TaxComponentData retrieveTaxComponentTemplate() {
-        return TaxComponentData.template(this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions(),
-                this.accountingDropdownReadPlatformService.retrieveGLAccountTypeOptions());
+        return TaxComponentData.builder().glAccountOptions(accountMappingOptionsAdapter.retrieve())
+                .glAccountTypeOptions(glAccountTypeOptionsAdapter.retrieve()).build();
     }
 
     @Override
@@ -65,19 +71,20 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     @Override
     public TaxGroupData retrieveTaxGroupData(final Long id) {
-        return taxGroupMapper.map(taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id));
+        return taxGroupMapper.map(taxGroupRepository.findById(id).orElseThrow(() -> new TaxGroupNotFoundException(id)));
     }
 
     @Override
     public TaxGroupData retrieveTaxGroupWithTemplate(final Long id) {
         TaxGroupData taxGroupData = retrieveTaxGroupData(id);
-        taxGroupData = TaxGroupData.template(taxGroupData, retrieveTaxComponentsForLookUp());
+        taxGroupData = TaxGroupData.builder().id(taxGroupData.getId()).name(taxGroupData.getName())
+                .taxAssociations(taxGroupData.getTaxAssociations()).taxComponents(retrieveTaxComponentsForLookUp()).build();
         return taxGroupData;
     }
 
     @Override
     public TaxGroupData retrieveTaxGroupTemplate() {
-        return TaxGroupData.template(retrieveTaxComponentsForLookUp());
+        return TaxGroupData.builder().taxComponents(retrieveTaxComponentsForLookUp()).build();
     }
 
     private Collection<TaxComponentData> retrieveTaxComponentsForLookUp() {

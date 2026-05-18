@@ -21,18 +21,13 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.GetTaxesComponentsResponse;
-import org.apache.fineract.client.models.GetTaxesGroupResponse;
-import org.apache.fineract.client.models.GetTaxesGroupTaxAssociations;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesComponentsResponse;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupResponse;
-import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxGroupComponentData;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTaxComponentHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTaxGroupHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -58,7 +53,7 @@ public class TaxesTest {
     public void createTaxComponentTest() {
         Long taxComponentId = createTaxComponentWithLiabilityToCredit("taxComponent");
 
-        GetTaxesComponentsResponse taxComponentDetails = taxComponentHelper.retrieveTaxComponent(taxComponentId);
+        var taxComponentDetails = taxComponentHelper.retrieveTaxComponent(taxComponentId);
         Assertions.assertNotNull(taxComponentDetails);
         Assertions.assertNotNull(taxComponentDetails.getId());
         Assertions.assertEquals(taxComponentId, taxComponentDetails.getId());
@@ -73,24 +68,24 @@ public class TaxesTest {
 
     @Test
     public void createTaxGroupTest() {
-        List<GetTaxesGroupResponse> allTaxGroups = taxGroupHelper.retrieveAllTaxGroups();
+        var allTaxGroups = taxGroupHelper.retrieveAllTaxGroups();
         Assertions.assertNotNull(allTaxGroups);
 
         final Long taxComponentId = createTaxComponentWithLiabilityToCredit("taxComponent");
 
-        final Set<PostTaxesGroupTaxComponents> taxComponentsSet = new HashSet<>();
-        taxComponentsSet.add(new PostTaxesGroupTaxComponents().taxComponentId(taxComponentId).startDate("01 January 2023"));
-        final PostTaxesGroupRequest taxGroupRequest = new PostTaxesGroupRequest().name(Utils.randomStringGenerator("TAX_GRP_", 4))
-                .taxComponents(taxComponentsSet).dateFormat("dd MMMM yyyy").locale("en");
-        final PostTaxesGroupResponse taxGroupResponse = taxGroupHelper.createTaxGroup(taxGroupRequest);
+        final Set<TaxGroupComponentData> taxComponentsSet = new HashSet<>();
+        taxComponentsSet.add(new TaxGroupComponentData().taxComponentId(taxComponentId).startDate("01 January 2023"));
+        var taxGroupRequest = new TaxGroupCreateRequest().name(Utils.randomStringGenerator("TAX_GRP_", 4)).taxComponents(taxComponentsSet)
+                .dateFormat("dd MMMM yyyy").locale("en");
+        var taxGroupResponse = taxGroupHelper.createTaxGroup(taxGroupRequest);
         Assertions.assertNotNull(taxGroupResponse);
         Assertions.assertNotNull(taxGroupResponse.getResourceId());
 
-        final GetTaxesGroupResponse taxGroupDetails = taxGroupHelper.retrieveTaxGroup(taxGroupResponse.getResourceId());
+        var taxGroupDetails = taxGroupHelper.retrieveTaxGroup(taxGroupResponse.getResourceId());
         Assertions.assertNotNull(taxGroupDetails);
         Assertions.assertEquals(taxGroupResponse.getResourceId(), taxGroupDetails.getId());
         Assertions.assertFalse(taxGroupDetails.getTaxAssociations().isEmpty());
-        GetTaxesGroupTaxAssociations taxAssociation = taxGroupDetails.getTaxAssociations().iterator().next();
+        var taxAssociation = taxGroupDetails.getTaxAssociations().iterator().next();
         Assertions.assertNotNull(taxAssociation);
         Assertions.assertEquals(taxComponentId, taxAssociation.getTaxComponent().getId());
 
@@ -102,12 +97,12 @@ public class TaxesTest {
     private Long createTaxComponentWithLiabilityToCredit(final String taxComponentPrefix) {
         final Account taxComponentGlAccount = AccountHelper.createLiabilityGlAccount(taxComponentPrefix);
 
-        final PostTaxesComponentsRequest taxComponentRequest = new PostTaxesComponentsRequest()
-                .name(Utils.randomStringGenerator(taxComponentPrefix, 4)).percentage(12.0f).startDate("01 January 2023")
+        var taxComponentRequest = new TaxComponentCreateRequest().name(Utils.randomStringGenerator(taxComponentPrefix, 4))
+                .percentage(BigDecimal.valueOf(12.0f)).startDate("01 January 2023")
                 .creditAccountType(Integer.valueOf(taxComponentGlAccount.getAccountType().toString()))
                 .creditAccountId(taxComponentGlAccount.getAccountID().longValue()).dateFormat(Utils.DATE_FORMAT).locale(Utils.LOCALE);
 
-        final PostTaxesComponentsResponse taxComponentRespose = taxComponentHelper.createTaxComponent(taxComponentRequest);
+        var taxComponentRespose = taxComponentHelper.createTaxComponent(taxComponentRequest);
         Assertions.assertNotNull(taxComponentRespose);
         Assertions.assertNotNull(taxComponentRespose.getResourceId());
 
@@ -117,12 +112,12 @@ public class TaxesTest {
     private Long createTaxComponentWithLiabilityToDebit(final String taxComponentPrefix) {
         final Account taxComponentGlAccount = AccountHelper.createLiabilityGlAccount(taxComponentPrefix);
 
-        final PostTaxesComponentsRequest taxComponentRequest = new PostTaxesComponentsRequest()
-                .name(Utils.randomStringGenerator(taxComponentPrefix, 4)).percentage(12.0f).startDate("01 January 2023")
+        var taxComponentRequest = new TaxComponentCreateRequest().name(Utils.randomStringGenerator(taxComponentPrefix, 4))
+                .percentage(BigDecimal.valueOf(12.0f)).startDate("01 January 2023")
                 .debitAccountType(Integer.valueOf(taxComponentGlAccount.getAccountType().toString()))
                 .debitAccountId(taxComponentGlAccount.getAccountID().longValue()).dateFormat(Utils.DATE_FORMAT).locale(Utils.LOCALE);
 
-        final PostTaxesComponentsResponse taxComponentRespose = taxComponentHelper.createTaxComponent(taxComponentRequest);
+        var taxComponentRespose = taxComponentHelper.createTaxComponent(taxComponentRequest);
         Assertions.assertNotNull(taxComponentRespose);
         Assertions.assertNotNull(taxComponentRespose.getResourceId());
 

@@ -41,10 +41,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxGroupComponentData;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
@@ -2184,13 +2184,13 @@ public class ClientSavingsIntegrationTest {
     }
 
     private Integer createTaxGroup(final String percentage) {
-        final PostTaxesComponentsRequest componentRequest = new PostTaxesComponentsRequest()
-                .name(Utils.randomStringGenerator("Tax_component_Name_", 5)).percentage(Float.parseFloat(percentage))
-                .startDate("01 January 2013").dateFormat("dd MMMM yyyy").locale("en");
+        var componentRequest = new TaxComponentCreateRequest().name(Utils.randomStringGenerator("Tax_component_Name_", 5))
+                .percentage(BigDecimal.valueOf(Float.parseFloat(percentage))).startDate("01 January 2013").dateFormat("dd MMMM yyyy")
+                .locale("en");
         final var componentResponse = TaxComponentHelper.createTaxComponent(componentRequest);
-        final PostTaxesGroupRequest groupRequest = new PostTaxesGroupRequest().name(Utils.randomStringGenerator("Tax_group_Name_", 5))
-                .dateFormat("dd MMMM yyyy").locale("en").taxComponents(Set.of(
-                        new PostTaxesGroupTaxComponents().taxComponentId(componentResponse.getResourceId()).startDate("01 January 2013")));
+        var groupRequest = new TaxGroupCreateRequest().name(Utils.randomStringGenerator("Tax_group_Name_", 5)).dateFormat("dd MMMM yyyy")
+                .locale("en").taxComponents(
+                        Set.of(new TaxGroupComponentData().taxComponentId(componentResponse.getResourceId()).startDate("01 January 2013")));
         return TaxGroupHelper.createTaxGroup(groupRequest).getResourceId().intValue();
     }
 

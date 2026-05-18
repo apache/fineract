@@ -526,7 +526,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final Long taxGroupId = JdbcSupport.getLongDefaultToNullIfZero(rs, "taxGroupId");
                     TaxGroupData taxGroupData = null;
                     if (taxGroupId != null) {
-                        taxGroupData = TaxGroupData.lookup(taxGroupId, null);
+                        taxGroupData = TaxGroupData.builder().id(taxGroupId).build();
                     }
 
                     final BigDecimal nominalAnnualInterestRate = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
@@ -666,8 +666,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final GLAccountData creditAccount = GLAccountData.createFrom(creditId);
 
                     if (taxComponentId != null) {
-                        final TaxComponentData taxComponent = TaxComponentData.createTaxComponent(taxComponentId, percentage, debitAccount,
-                                creditAccount);
+                        final TaxComponentData taxComponent = TaxComponentData.builder().id(taxComponentId).percentage(percentage)
+                                .debitAccount(debitAccount).creditAccount(creditAccount).build();
                         savingsAccountTransactionData.setTaxDetails(new TaxDetailsData(taxComponent, amount));
                     }
 
@@ -976,7 +976,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String taxGroupName = rs.getString("taxGroupName");
             TaxGroupData taxGroupData = null;
             if (taxGroupId != null) {
-                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+                taxGroupData = TaxGroupData.builder().id(taxGroupId).name(taxGroupName).build();
             }
 
             return SavingsAccountData.instance(id, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,

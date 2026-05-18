@@ -203,7 +203,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             final String taxGroupName = rs.getString("taxGroupName");
             TaxGroupData taxGroupData = null;
             if (taxGroupId != null) {
-                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+                taxGroupData = TaxGroupData.builder().id(taxGroupId).name(taxGroupName).build();
             }
 
             return DepositProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,

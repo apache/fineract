@@ -80,7 +80,7 @@ import org.apache.fineract.portfolio.savings.service.DepositsDropdownReadPlatfor
 import org.apache.fineract.portfolio.savings.service.SavingsDropdownReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
+import org.apache.fineract.portfolio.tax.service.TaxReadService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -109,7 +109,7 @@ public class RecurringDepositProductsApiResource {
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final PaymentTypeReadService paymentTypeReadPlatformService;
-    private final TaxReadPlatformService taxReadPlatformService;
+    private final TaxReadService taxReadPlatformService;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })

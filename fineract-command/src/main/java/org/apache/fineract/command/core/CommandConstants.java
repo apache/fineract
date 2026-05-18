@@ -26,7 +26,8 @@ public final class CommandConstants {
     public static final String COMMAND_HTTP_HEADER_REQUEST_ID = "x-fineract-request-id";
     public static final String COMMAND_HTTP_HEADER_TENANT_ID = "Fineract-Platform-TenantId";
     public static final String COMMAND_HTTP_HEADER_IP = "IP";
-    public static final int COMMAND_HOOK_ORDER_HEADERS = 10;
-    public static final int COMMAND_HOOK_ORDER_TIMESTAMP = 11;
-    public static final int COMMAND_HOOK_ORDER_USERNAME = 12;
+    public static final int COMMAND_HOOK_ORDER_VALIDATION = 10;
+    public static final int COMMAND_HOOK_ORDER_HEADERS = 11;
+    public static final int COMMAND_HOOK_ORDER_TIMESTAMP = 12;
+    public static final int COMMAND_HOOK_ORDER_USERNAME = 13;
 }

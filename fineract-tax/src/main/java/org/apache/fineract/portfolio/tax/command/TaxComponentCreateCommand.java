@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.tax.service;
+package org.apache.fineract.portfolio.tax.command;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Map;
-import org.apache.fineract.portfolio.tax.domain.TaxComponent;
-import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.tax.data.TaxComponentCreateRequest;
 
-// TODO: migrate all use of this function to TaxUtils.computeTax; leaving for now, too many changes!
-@Deprecated(forRemoval = true)
-public interface ChargeTaxApplicationService {
-
-    Map<TaxComponent, BigDecimal> computeTax(TaxGroup taxGroup, BigDecimal baseAmount, LocalDate effectiveDate, int scale);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class TaxComponentCreateCommand extends Command<TaxComponentCreateRequest> {}

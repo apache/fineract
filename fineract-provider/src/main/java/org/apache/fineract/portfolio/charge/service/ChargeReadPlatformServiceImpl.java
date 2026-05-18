@@ -45,7 +45,7 @@ import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
+import org.apache.fineract.portfolio.tax.service.TaxReadService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -65,7 +65,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
-    private final TaxReadPlatformService taxReadPlatformService;
+    private final TaxReadService taxReadPlatformService;
     private final ConfigurationDomainServiceJpa configurationDomainServiceJpa;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -375,7 +375,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final String taxGroupName = rs.getString("taxGroupName");
             TaxGroupData taxGroupData = null;
             if (taxGroupId != null) {
-                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+                taxGroupData = TaxGroupData.builder().id(taxGroupId).name(taxGroupName).build();
             }
 
             final boolean isFreeWithdrawal = rs.getBoolean("isFreeWithdrawal");

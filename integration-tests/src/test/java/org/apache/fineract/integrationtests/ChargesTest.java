@@ -32,11 +32,9 @@ import java.util.Set;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesComponentsResponse;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupResponse;
-import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxGroupComponentData;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
 import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -365,19 +363,17 @@ public class ChargesTest {
     public void testChargeCreationWithTaxGroup() {
         final ChargesHelper chargesHelper = new ChargesHelper();
 
-        final PostTaxesComponentsRequest taxComponentRequest = new PostTaxesComponentsRequest()
-                .name(Utils.randomStringGenerator("TAX_COM_", 4)).percentage(12.0f).startDate("01 January 2023").dateFormat("dd MMMM yyyy")
-                .locale("en");
+        var taxComponentRequest = new TaxComponentCreateRequest().name(Utils.randomStringGenerator("TAX_COM_", 4))
+                .percentage(BigDecimal.valueOf(12.0f)).startDate("01 January 2023").dateFormat("dd MMMM yyyy").locale("en");
 
-        final PostTaxesComponentsResponse taxComponentRespose = TaxComponentHelper.createTaxComponent(taxComponentRequest);
+        var taxComponentRespose = TaxComponentHelper.createTaxComponent(taxComponentRequest);
         Assertions.assertNotNull(taxComponentRequest);
 
-        final Set<PostTaxesGroupTaxComponents> taxComponentsSet = new HashSet<>();
-        taxComponentsSet
-                .add(new PostTaxesGroupTaxComponents().taxComponentId(taxComponentRespose.getResourceId()).startDate("01 January 2023"));
-        final PostTaxesGroupRequest taxGroupRequest = new PostTaxesGroupRequest().name(Utils.randomStringGenerator("TAX_GRP_", 4))
-                .taxComponents(taxComponentsSet).dateFormat("dd MMMM yyyy").locale("en");
-        final PostTaxesGroupResponse taxGroupResponse = TaxGroupHelper.createTaxGroup(taxGroupRequest);
+        final Set<TaxGroupComponentData> taxComponentsSet = new HashSet<>();
+        taxComponentsSet.add(new TaxGroupComponentData().taxComponentId(taxComponentRespose.getResourceId()).startDate("01 January 2023"));
+        var taxGroupRequest = new TaxGroupCreateRequest().name(Utils.randomStringGenerator("TAX_GRP_", 4)).taxComponents(taxComponentsSet)
+                .dateFormat("dd MMMM yyyy").locale("en");
+        var taxGroupResponse = TaxGroupHelper.createTaxGroup(taxGroupRequest);
         Assertions.assertNotNull(taxGroupResponse);
 
         final PostChargesResponse feeCharge = chargesHelper.createCharges(

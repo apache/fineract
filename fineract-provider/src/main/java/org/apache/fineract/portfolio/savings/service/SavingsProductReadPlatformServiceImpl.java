@@ -205,7 +205,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final String taxGroupName = rs.getString("taxGroupName");
             TaxGroupData taxGroupData = null;
             if (taxGroupId != null) {
-                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+                taxGroupData = TaxGroupData.builder().id(taxGroupId).name(taxGroupName).build();
             }
 
             final Boolean isDormancyTrackingActive = rs.getBoolean("isDormancyTrackingActive");

@@ -24,17 +24,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 
 @Entity
-@Getter
 @Table(name = "m_tax_group_mappings")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class TaxGroupMappings extends AbstractAuditableCustom {
 
     @ManyToOne
@@ -51,63 +53,7 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
-    protected TaxGroupMappings() {}
-
-    private TaxGroupMappings(final TaxComponent taxComponent, final LocalDate startDate, final LocalDate endDate) {
-        this.taxComponent = taxComponent;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
-
-    public static TaxGroupMappings createTaxGroupMappings(final TaxComponent taxComponent, final LocalDate startDate) {
-        final LocalDate endDate = null;
-        return new TaxGroupMappings(taxComponent, startDate, endDate);
-
-    }
-
-    public static TaxGroupMappings createTaxGroupMappings(final Long id, final TaxComponent taxComponent, final LocalDate endDate) {
-        final LocalDate startDate = null;
-        TaxGroupMappings groupMappings = new TaxGroupMappings(taxComponent, startDate, endDate);
-        groupMappings.setId(id);
-        return groupMappings;
-
-    }
-
-    public void update(final LocalDate endDate, final List<Map<String, Object>> changes) {
-        if (endDate != null && this.endDate == null) {
-            this.endDate = endDate;
-            Map<String, Object> map = new HashMap<>(2);
-            map.put(TaxApiConstants.endDateParamName, endDate);
-            map.put(TaxApiConstants.taxComponentIdParamName, this.getTaxComponent().getId());
-            changes.add(map);
-        }
-    }
-
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        return DateUtils.isAfter(target, startDate()) && (endDate == null || !DateUtils.isAfter(target, endDate()));
-    }
-
-    public TaxComponent getTaxComponent() {
-        return this.taxComponent;
-    }
-
-    public LocalDate getEndDate() {
-        return this.endDate;
-    }
-
-    public LocalDate startDate() {
-        return this.startDate;
-    }
-
-    public LocalDate endDate() {
-        return this.endDate;
-    }
-
-    public TaxGroup getTaxGroup() {
-        return taxGroup;
-    }
-
-    public void setTaxGroup(TaxGroup taxGroup) {
-        this.taxGroup = taxGroup;
+        return DateUtils.isAfter(target, startDate) && (endDate == null || !DateUtils.isAfter(target, endDate));
     }
 }

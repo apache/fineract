@@ -25,6 +25,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -40,9 +41,9 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesGroupRequest;
-import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxGroupComponentData;
+import org.apache.fineract.client.models.TaxGroupCreateRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -3100,14 +3101,13 @@ public class RecurringDepositTest {
     }
 
     private Integer createTaxGroup(final String percentage, final Account liabilityAccountForTax) {
-        final PostTaxesComponentsRequest componentRequest = new PostTaxesComponentsRequest()
-                .name(Utils.randomStringGenerator("Tax_component_Name_", 5)).percentage(Float.parseFloat(percentage))
-                .startDate("01 January 2013").dateFormat("dd MMMM yyyy").locale("en").creditAccountType(2)
-                .creditAccountId(liabilityAccountForTax.getAccountID().longValue());
+        var componentRequest = new TaxComponentCreateRequest().name(Utils.randomStringGenerator("Tax_component_Name_", 5))
+                .percentage(BigDecimal.valueOf(Float.parseFloat(percentage))).startDate("01 January 2013").dateFormat("dd MMMM yyyy")
+                .locale("en").creditAccountType(2).creditAccountId(liabilityAccountForTax.getAccountID().longValue());
         final var componentResponse = TaxComponentHelper.createTaxComponent(componentRequest);
-        final PostTaxesGroupRequest groupRequest = new PostTaxesGroupRequest().name(Utils.randomStringGenerator("Tax_group_Name_", 5))
-                .dateFormat("dd MMMM yyyy").locale("en").taxComponents(Set.of(
-                        new PostTaxesGroupTaxComponents().taxComponentId(componentResponse.getResourceId()).startDate("01 January 2013")));
+        var groupRequest = new TaxGroupCreateRequest().name(Utils.randomStringGenerator("Tax_group_Name_", 5)).dateFormat("dd MMMM yyyy")
+                .locale("en").taxComponents(
+                        Set.of(new TaxGroupComponentData().taxComponentId(componentResponse.getResourceId()).startDate("01 January 2013")));
         return TaxGroupHelper.createTaxGroup(groupRequest).getResourceId().intValue();
     }
 

@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.portfolio.tax.data;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class TaxGroupData implements Serializable {
+@FieldNameConstants
+public class TaxGroupCreateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    @NotBlank(message = "{org.apache.fineract.portfolio.tax.group.name.not-empty}")
     private String name;
-    private Collection<TaxGroupMappingsData> taxAssociations;
-    // template options
-    private Collection<TaxComponentData> taxComponents;
+    private String locale;
+    @NotEmpty(message = "{org.apache.fineract.portfolio.tax.group.tax-components.not-empty}")
+    @Valid
+    private Set<TaxGroupComponentData> taxComponents;
+    private String dateFormat;
 }

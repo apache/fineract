@@ -18,15 +18,26 @@
  */
 package org.apache.fineract.portfolio.tax.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Map;
-import org.apache.fineract.portfolio.tax.domain.TaxComponent;
-import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import java.util.List;
+import org.apache.fineract.portfolio.tax.data.TaxComponentData;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 
-// TODO: migrate all use of this function to TaxUtils.computeTax; leaving for now, too many changes!
-@Deprecated(forRemoval = true)
-public interface ChargeTaxApplicationService {
+public interface TaxReadService {
 
-    Map<TaxComponent, BigDecimal> computeTax(TaxGroup taxGroup, BigDecimal baseAmount, LocalDate effectiveDate, int scale);
+    TaxComponentData retrieveTaxComponentData(Long id);
+
+    TaxComponentData retrieveTaxComponentTemplate();
+
+    TaxGroupData retrieveTaxGroupData(Long id);
+
+    TaxGroupData retrieveTaxGroupWithTemplate(Long id);
+
+    TaxGroupData retrieveTaxGroupTemplate();
+
+    List<TaxComponentData> retrieveAllTaxComponents();
+
+    List<TaxGroupData> retrieveAllTaxGroups();
+
+    List<TaxGroupData> retrieveTaxGroupsForLookUp();
+
 }

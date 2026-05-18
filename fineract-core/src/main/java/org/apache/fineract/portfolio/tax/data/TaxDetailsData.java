@@ -18,19 +18,23 @@
  */
 package org.apache.fineract.portfolio.tax.data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@AllArgsConstructor
+@Builder
+@Data
 @NoArgsConstructor
-public class TaxDetailsData {
+@AllArgsConstructor
+public class TaxDetailsData implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private TaxComponentData taxComponent;
-
-    @Setter
     private BigDecimal amount;
 }

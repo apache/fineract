@@ -655,7 +655,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
         }
         TaxGroupData taxGroupData = null;
         if (this.taxGroup != null) {
-            taxGroupData = TaxGroupData.lookup(taxGroup.getId(), taxGroup.getName());
+            taxGroupData = TaxGroupData.builder().id(taxGroup.getId()).name(taxGroup.getName()).build();
         }
 
         PaymentTypeData paymentTypeData = null;

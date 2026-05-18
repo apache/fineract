@@ -162,7 +162,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CHARGE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENTIDENTIFIER;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT_COLLATERAL_PRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CODE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CODEVALUE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_COLLATERAL;
@@ -205,14 +204,12 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOANCHARGE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOANPRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_AVAILABLE_DISBURSEMENT_AMOUNT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_COLLATERAL_PRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_LOAN_ORIGINATOR;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_OFFICE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_OFFICETRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ORGANISATIONCREDITBUREAU;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PERIODICACCRUALACCOUNTING;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PERMISSION;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PRODUCTMIX;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PROVISIONCATEGORY;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PROVISIONCRITERIA;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_PROVISIONENTRIES;
@@ -232,8 +229,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SMSCAMPAIGN;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_STANDINGINSTRUCTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SURVEY;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TAXCOMPONENT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TAXGROUP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TELLER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TWOFACTOR_ACCESSTOKEN;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TWOFACTOR_CONFIGURATION;
@@ -2276,47 +2271,12 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateClientCollateralProduct(final Long clientId, final Long collateralId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_CLIENT_COLLATERAL_PRODUCT;
-        this.entityId = collateralId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/collateral/" + collateralId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteLoanCollateral(final Long loanId, final Long collateralId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_LOAN_COLLATERAL_PRODUCT;
-        this.entityId = collateralId;
-        this.loanId = loanId;
-        this.href = "/loans/" + loanId + "/collateral/" + collateralId;
-        return this;
-    }
-
     public CommandWrapperBuilder deleteCollateral(final Long loanId, final Long collateralId) {
         this.actionName = ACTION_DELETE;
         this.entityName = ENTITY_COLLATERAL;
         this.entityId = collateralId;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/collaterals/" + collateralId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteClientCollateralProduct(final Long collateralId, final Long clientId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_CLIENT_COLLATERAL_PRODUCT;
-        this.entityId = collateralId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/collateral-management/" + collateralId;
-        return this;
-    }
-
-    public CommandWrapperBuilder addClientCollateralProduct(final Long clientId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_CLIENT_COLLATERAL_PRODUCT;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/collateral-management";
         return this;
     }
 
@@ -2495,38 +2455,6 @@ public class CommandWrapperBuilder {
         this.entityId = clientId;
         this.clientId = clientId;
         this.href = "/clients/" + clientId + "?command=updateSavingsAccount";
-        return this;
-    }
-
-    public CommandWrapperBuilder createProductMix(final Long productId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_PRODUCTMIX;
-        this.entityId = null;
-        this.productId = productId;
-        this.href = "/loanproducts/" + productId + "/productmix";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateProductMix(final Long productId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_PRODUCTMIX;
-        this.entityId = null;
-        this.productId = productId;
-        this.href = "/loanproducts/" + productId + "/productmix";
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteProductMix(final Long productId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_PRODUCTMIX;
-        this.entityId = null;
-        this.productId = productId;
-        this.href = "/loanproducts/" + productId + "/productmix";
-        return this;
-    }
-
-    public CommandWrapperBuilder withProduct(final Long productId) {
-        this.productId = productId;
         return this;
     }
 
@@ -3336,38 +3264,6 @@ public class CommandWrapperBuilder {
         this.actionName = command.toUpperCase(Locale.ROOT);
         this.entityId = accountId;
         this.href = "/accounts/" + accountType + "/" + accountId + "?command=" + command;
-        return this;
-    }
-
-    public CommandWrapperBuilder createTaxComponent() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_TAXCOMPONENT;
-        this.entityId = null;
-        this.href = "/taxes/component";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateTaxComponent(final Long taxComponentId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_TAXCOMPONENT;
-        this.entityId = taxComponentId;
-        this.href = "/taxes/component/" + taxComponentId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createTaxGroup() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_TAXGROUP;
-        this.entityId = null;
-        this.href = "/taxes/group";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateTaxGroup(final Long taxGroupId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_TAXGROUP;
-        this.entityId = taxGroupId;
-        this.href = "/taxes/group/" + taxGroupId;
         return this;
     }
 

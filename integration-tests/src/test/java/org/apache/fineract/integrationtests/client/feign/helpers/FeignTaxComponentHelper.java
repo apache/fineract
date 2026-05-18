@@ -23,9 +23,9 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.GetTaxesComponentsResponse;
-import org.apache.fineract.client.models.PostTaxesComponentsRequest;
-import org.apache.fineract.client.models.PostTaxesComponentsResponse;
+import org.apache.fineract.client.models.TaxComponentCreateRequest;
+import org.apache.fineract.client.models.TaxComponentCreateResponse;
+import org.apache.fineract.client.models.TaxComponentData;
 
 public class FeignTaxComponentHelper {
 
@@ -35,11 +35,11 @@ public class FeignTaxComponentHelper {
         this.fineractClient = fineractClient;
     }
 
-    public PostTaxesComponentsResponse createTaxComponent(PostTaxesComponentsRequest request) {
+    public TaxComponentCreateResponse createTaxComponent(TaxComponentCreateRequest request) {
         return ok(() -> fineractClient.taxComponents().createTaxComponent(request));
     }
 
-    public GetTaxesComponentsResponse retrieveTaxComponent(Long taxComponentId) {
+    public TaxComponentData retrieveTaxComponent(Long taxComponentId) {
         return ok(() -> fineractClient.taxComponents().retrieveOneTaxComponent(taxComponentId));
     }
 
