@@ -97,7 +97,8 @@ public class RolesApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Roles", description = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n" + "roles?fields=name")
+    @Operation(summary = "List Roles", tags = { "Roles" }, description = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n"
+            + "roles?fields=name")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesResponse.class)))) })
     public String retrieveAllRoles(@Context final UriInfo uriInfo) {
@@ -113,7 +114,7 @@ public class RolesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a New Role", description = "Mandatory Fields\n" + "name, description")
+    @Operation(summary = "Create a New Role", tags = { "Roles" }, description = "Mandatory Fields\n" + "name, description")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesResponse.class))) })
@@ -132,7 +133,8 @@ public class RolesApiResource {
     @GET
     @Path("{roleId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Role", description = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n" + "roles/1?fields=name")
+    @Operation(summary = "Retrieve a Role", tags = { "Roles" }, description = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n"
+            + "roles/1?fields=name")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdResponse.class))) })
     public String retrieveRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId, @Context final UriInfo uriInfo) {
@@ -158,9 +160,10 @@ public class RolesApiResource {
     @Path("{roleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Enable Role | Disable Role", description = "Description : Enable role in case role is disabled. | Disable the role in case role is not associated with any users.\n\n\n\n"
-            + "\n\n" + "Example Request:   https://DomainName/api/v1/roles/{roleId}?command=enable" + "\n\n\n\n" + "\n\n"
-            + "https://DomainName/api/v1/roles/{roleId}?command=disable")
+    @Operation(summary = "Enable Role | Disable Role", tags = {
+            "Roles" }, description = "Description : Enable role in case role is disabled. | Disable the role in case role is not associated with any users.\n\n\n\n"
+                    + "\n\n" + "Example Request:   https://DomainName/api/v1/roles/{roleId}?command=enable" + "\n\n\n\n" + "\n\n"
+                    + "https://DomainName/api/v1/roles/{roleId}?command=disable")
     @Parameters({ @Parameter(description = "No Request Body", name = "No Request Body") })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesRoleIdResponse.class))) })
@@ -186,7 +189,7 @@ public class RolesApiResource {
     @Path("{roleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Role", description = "")
+    @Operation(summary = "Update a Role", tags = { "Roles" }, description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdResponse.class))) })
@@ -206,7 +209,8 @@ public class RolesApiResource {
     @GET
     @Path("{roleId}/permissions")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Role's Permissions", description = "Example Requests:\n" + "\n" + "roles/1/permissions")
+    @Operation(summary = "Retrieve a Role's Permissions", tags = { "Roles" }, description = "Example Requests:\n" + "\n"
+            + "roles/1/permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdPermissionsResponse.class))) })
     public String retrieveRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
@@ -226,7 +230,7 @@ public class RolesApiResource {
     @Path("{roleId}/permissions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Role's Permissions", description = "")
+    @Operation(summary = "Update a Role's Permissions", tags = { "Roles" }, description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsResponse.class))) })
@@ -252,7 +256,8 @@ public class RolesApiResource {
     @DELETE
     @Path("{roleId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Role", description = "Description : Delete the role in case role is not associated with any users.")
+    @Operation(summary = "Delete a Role", tags = {
+            "Roles" }, description = "Description : Delete the role in case role is not associated with any users.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.DeleteRolesRoleIdResponse.class))) })
     public String deleteRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId) {

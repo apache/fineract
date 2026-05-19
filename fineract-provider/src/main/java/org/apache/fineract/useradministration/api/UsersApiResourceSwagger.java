@@ -135,7 +135,6 @@ final class UsersApiResourceSwagger {
         public Boolean passwordNeverExpires;
         @Schema(example = "true")
         public Boolean isLoginRetriesEnabled;
-        public Boolean isPasswordResetAllowed;
     }
 
     @Schema(description = "PostUsersResponse")
@@ -217,7 +216,6 @@ final class UsersApiResourceSwagger {
         public Boolean sendPasswordToEmail;
         @Schema(example = "true")
         public Boolean isLoginRetriesEnabled;
-        public Boolean isPasswordResetAllowed;
     }
 
     @Schema(description = "PutUsersUserIdResponse")

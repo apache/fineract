@@ -90,8 +90,8 @@ public class UsersApiResource {
     private final BulkImportWorkbookService bulkImportWorkbookService;
 
     @GET
-    @Operation(summary = "Retrieve list of users", operationId = "retrieveAllUsers", description = "Example Requests:\n" + "\n" + "users\n"
-            + "\n" + "\n" + "users?fields=id,username,email,officeName")
+    @Operation(summary = "Retrieve list of users", operationId = "retrieveAllUsers", tags = { "Users" }, description = "Example Requests:\n"
+            + "\n" + "users\n" + "\n" + "\n" + "users?fields=id,username,email,officeName")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersResponse.class)))) })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -107,8 +107,8 @@ public class UsersApiResource {
 
     @GET
     @Path("{userId}")
-    @Operation(summary = "Retrieve a User", operationId = "retrieveOneUser", description = "Example Requests:\n" + "\n" + "users/1\n" + "\n"
-            + "\n" + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")
+    @Operation(summary = "Retrieve a User", operationId = "retrieveOneUser", tags = { "Users" }, description = "Example Requests:\n" + "\n"
+            + "users/1\n" + "\n" + "\n" + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersUserIdResponse.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -129,8 +129,9 @@ public class UsersApiResource {
 
     @GET
     @Path("template")
-    @Operation(summary = "Retrieve User Details Template", operationId = "retrieveTemplateUser", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "users/template")
+    @Operation(summary = "Retrieve User Details Template", operationId = "retrieveTemplateUser", tags = {
+            "Users" }, description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+                    + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "users/template")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersTemplateResponse.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -145,10 +146,11 @@ public class UsersApiResource {
     }
 
     @POST
-    @Operation(summary = "Create a User", operationId = "createUser", description = "Adds new application user.\n" + "\n"
+    @Operation(summary = "Create a User", operationId = "createUser", tags = { "Users" }, description = "Adds new application user.\n"
+            + "\n"
             + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n"
             + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n"
-            + "Optional Fields: \n" + "staffId,passwordNeverExpires,isLoginRetriesEnabled,isPasswordResetAllowed")
+            + "Optional Fields: \n" + "staffId,passwordNeverExpires,isLoginRetriesEnabled")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PostUsersResponse.class))) })
@@ -168,7 +170,7 @@ public class UsersApiResource {
 
     @PUT
     @Path("{userId}")
-    @Operation(summary = "Update a User", operationId = "updateUser", description = "Updates the user")
+    @Operation(summary = "Update a User", operationId = "updateUser", tags = { "Users" }, description = "Updates the user")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdResponse.class))) })
@@ -189,7 +191,8 @@ public class UsersApiResource {
 
     @POST
     @Path("{userId}/pwd")
-    @Operation(summary = "Change the password of a User", operationId = "changePasswordUser", description = "When updating a password you must provide the repeatPassword parameter also.")
+    @Operation(summary = "Change the password of a User", operationId = "changePasswordUser", tags = {
+            "Users" }, description = "When updating a password you must provide the repeatPassword parameter also.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdResponse.class))) })
@@ -210,7 +213,8 @@ public class UsersApiResource {
 
     @DELETE
     @Path("{userId}")
-    @Operation(summary = "Delete a User", operationId = "deleteUser", description = "Removes the user and the associated roles and permissions.")
+    @Operation(summary = "Delete a User", operationId = "deleteUser", tags = {
+            "Users" }, description = "Removes the user and the associated roles and permissions.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class))) })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -228,6 +232,7 @@ public class UsersApiResource {
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
+    @Operation(summary = "Download users template", description = "Returns an Excel template for bulk importing users.", tags = { "Users" })
     public Response getUserTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,
             @QueryParam("dateFormat") final String dateFormat) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.USERS.toString(), officeId, staffId, dateFormat);
@@ -238,6 +243,8 @@ public class UsersApiResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Upload users template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
+    @Operation(summary = "Upload users template", description = "Uploads a filled Excel template to create multiple users in bulk.", tags = {
+            "Users" })
     public String postUsersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {

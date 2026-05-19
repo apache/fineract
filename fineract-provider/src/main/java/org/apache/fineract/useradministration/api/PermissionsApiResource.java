@@ -72,7 +72,7 @@ public class PermissionsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Application Permissions", description = "ARGUMENTS\n"
+    @Operation(summary = "List Application Permissions", tags = { "Permissions" }, description = "ARGUMENTS\n"
             + "makerCheckerableoptional, Values are true, false. Default is false.\n"
             + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n"
             + "\n"
@@ -100,7 +100,7 @@ public class PermissionsApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Enable/Disable Permissions for Maker Checker", description = "")
+    @Operation(summary = "Enable/Disable Permissions for Maker Checker", tags = { "Permissions" }, description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PermissionsApiResourceSwagger.PutPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })

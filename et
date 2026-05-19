@@ -1,0 +1,288 @@
+warning: in the working copy of 'fineract-provider/src/main/java/org/apache/fineract/notification/api/NotificationApiResource.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PasswordPreferencesApiResource.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PermissionsApiResource.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'fineract-provider/src/main/java/org/apache/fineract/useradministration/api/RolesApiResource.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResource.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResourceSwagger.java', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PasswordPreferencesApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PasswordPreferencesApiResource.java[m
+[1mindex c214d3e80..ab714d5df 100644[m
+[1m--- a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PasswordPreferencesApiResource.java[m
+[1m+++ b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PasswordPreferencesApiResource.java[m
+[36m@@ -30,10 +30,7 @@[m [mimport io.swagger.v3.oas.annotations.tags.Tag;[m
+ import jakarta.ws.rs.Consumes;[m
+ import jakarta.ws.rs.GET;[m
+ import jakarta.ws.rs.PUT;[m
+[31m-import io.swagger.v3.oas.annotations.Operation;[m
+[31m-import io.swagger.v3.oas.annotations.tags.Tag;[m
+ import jakarta.ws.rs.Path;[m
+[31m-[m
+ import jakarta.ws.rs.Produces;[m
+ import jakarta.ws.rs.core.Context;[m
+ import jakarta.ws.rs.core.MediaType;[m
+[36m@@ -70,7 +67,8 @@[m [mpublic class PasswordPreferencesApiResource {[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class))) })[m
+[31m-    @Operation(summary = "List Password Preferences", description = "Returns the password policies and their current status (active/inactive).", tags = {"Password preferences"})[m
+[32m+[m[32m    @Operation(summary = "List Password Preferences", description = "Returns the password policies and their current status (active/inactive).", tags = {[m
+[32m+[m[32m            "Password preferences" })[m
+     public String retrieve(@Context final UriInfo uriInfo) {[m
+ [m
+         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);[m
+[36m@@ -86,7 +84,7 @@[m [mpublic class PasswordPreferencesApiResource {[m
+     @PUT[m
+     @Consumes({ MediaType.APPLICATION_JSON })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Update password preferences", tags = {"Password preferences"}, description = "")[m
+[32m+[m[32m    @Operation(summary = "Update password preferences", tags = { "Password preferences" }, description = "")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)))[m
+     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })[m
+     public String update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {[m
+[36m@@ -104,8 +102,8 @@[m [mpublic class PasswordPreferencesApiResource {[m
+     @GET[m
+     @Path("/template")[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "List Application Password validation policies", tags = {"Password preferences"}, description = "ARGUMENTS\n" + "Example Requests:\n" + "\n"[m
+[31m-            + "passwordpreferences")[m
+[32m+[m[32m    @Operation(summary = "List Application Password validation policies", tags = { "Password preferences" }, description = "ARGUMENTS\n"[m
+[32m+[m[32m            + "Example Requests:\n" + "\n" + "passwordpreferences")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class)))) })[m
+     public String template(@Context final UriInfo uriInfo) {[m
+[1mdiff --git a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PermissionsApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PermissionsApiResource.java[m
+[1mindex 42828e959..7ff236309 100644[m
+[1m--- a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PermissionsApiResource.java[m
+[1m+++ b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/PermissionsApiResource.java[m
+[36m@@ -30,10 +30,7 @@[m [mimport io.swagger.v3.oas.annotations.tags.Tag;[m
+ import jakarta.ws.rs.Consumes;[m
+ import jakarta.ws.rs.GET;[m
+ import jakarta.ws.rs.PUT;[m
+[31m-import io.swagger.v3.oas.annotations.Operation;[m
+[31m-import io.swagger.v3.oas.annotations.tags.Tag;[m
+ import jakarta.ws.rs.Path;[m
+[31m-[m
+ import jakarta.ws.rs.Produces;[m
+ import jakarta.ws.rs.core.Context;[m
+ import jakarta.ws.rs.core.MediaType;[m
+[36m@@ -75,7 +72,7 @@[m [mpublic class PermissionsApiResource {[m
+ [m
+     @GET[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "List Application Permissions", tags = {"Permissions"}, description = "ARGUMENTS\n"[m
+[32m+[m[32m    @Operation(summary = "List Application Permissions", tags = { "Permissions" }, description = "ARGUMENTS\n"[m
+             + "makerCheckerableoptional, Values are true, false. Default is false.\n"[m
+             + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n"[m
+             + "\n"[m
+[36m@@ -103,7 +100,7 @@[m [mpublic class PermissionsApiResource {[m
+     @PUT[m
+     @Consumes({ MediaType.APPLICATION_JSON })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Enable/Disable Permissions for Maker Checker", tags = {"Permissions"}, description = "")[m
+[32m+[m[32m    @Operation(summary = "Enable/Disable Permissions for Maker Checker", tags = { "Permissions" }, description = "")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PermissionsApiResourceSwagger.PutPermissionsRequest.class)))[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })[m
+[1mdiff --git a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/RolesApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/RolesApiResource.java[m
+[1mindex 3374ac389..d456b7262 100644[m
+[1m--- a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/RolesApiResource.java[m
+[1m+++ b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/RolesApiResource.java[m
+[36m@@ -33,10 +33,7 @@[m [mimport jakarta.ws.rs.DELETE;[m
+ import jakarta.ws.rs.GET;[m
+ import jakarta.ws.rs.POST;[m
+ import jakarta.ws.rs.PUT;[m
+[31m-import io.swagger.v3.oas.annotations.Operation;[m
+[31m-import io.swagger.v3.oas.annotations.tags.Tag;[m
+ import jakarta.ws.rs.Path;[m
+[31m-[m
+ import jakarta.ws.rs.PathParam;[m
+ import jakarta.ws.rs.Produces;[m
+ import jakarta.ws.rs.QueryParam;[m
+[36m@@ -100,7 +97,8 @@[m [mpublic class RolesApiResource {[m
+ [m
+     @GET[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "List Roles", tags = {"Roles"}, description = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n" + "roles?fields=name")[m
+[32m+[m[32m    @Operation(summary = "List Roles", tags = { "Roles" }, description = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n"[m
+[32m+[m[32m            + "roles?fields=name")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesResponse.class)))) })[m
+     public String retrieveAllRoles(@Context final UriInfo uriInfo) {[m
+[36m@@ -116,7 +114,7 @@[m [mpublic class RolesApiResource {[m
+     @POST[m
+     @Consumes({ MediaType.APPLICATION_JSON })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Create a New Role", tags = {"Roles"}, description = "Mandatory Fields\n" + "name, description")[m
+[32m+[m[32m    @Operation(summary = "Create a New Role", tags = { "Roles" }, description = "Mandatory Fields\n" + "name, description")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesRequest.class)))[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesResponse.class))) })[m
+[36m@@ -135,7 +133,8 @@[m [mpublic class RolesApiResource {[m
+     @GET[m
+     @Path("{roleId}")[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Retrieve a Role", tags = {"Roles"}, description = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n" + "roles/1?fields=name")[m
+[32m+[m[32m    @Operation(summary = "Retrieve a Role", tags = { "Roles" }, description = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n"[m
+[32m+[m[32m            + "roles/1?fields=name")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdResponse.class))) })[m
+     public String retrieveRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId, @Context final UriInfo uriInfo) {[m
+[36m@@ -161,9 +160,10 @@[m [mpublic class RolesApiResource {[m
+     @Path("{roleId}")[m
+     @Consumes({ MediaType.APPLICATION_JSON })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Enable Role | Disable Role", tags = {"Roles"}, description = "Description : Enable role in case role is disabled. | Disable the role in case role is not associated with any users.\n\n\n\n"[m
+[31m-            + "\n\n" + "Example Request:   https://DomainName/api/v1/roles/{roleId}?command=enable" + "\n\n\n\n" + "\n\n"[m
+[31m-            + "https://DomainName/api/v1/roles/{roleId}?command=disable")[m
+[32m+[m[32m    @Operation(summary = "Enable Role | Disable Role", tags = {[m
+[32m+[m[32m            "Roles" }, description = "Description : Enable role in case role is disabled. | Disable the role in case role is not associated with any users.\n\n\n\n"[m
+[32m+[m[32m                    + "\n\n" + "Example Request:   https://DomainName/api/v1/roles/{roleId}?command=enable" + "\n\n\n\n" + "\n\n"[m
+[32m+[m[32m                    + "https://DomainName/api/v1/roles/{roleId}?command=disable")[m
+     @Parameters({ @Parameter(description = "No Request Body", name = "No Request Body") })[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PostRolesRoleIdResponse.class))) })[m
+[36m@@ -189,7 +189,7 @@[m [mpublic class RolesApiResource {[m
+     @Path("{roleId}")[m
+     @Consumes({ MediaType.APPLICATION_JSON })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Update a Role", tags = {"Roles"}, description = "")[m
+[32m+[m[32m    @Operation(summary = "Update a Role", tags = { "Roles" }, description = "")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdRequest.class)))[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdResponse.class))) })[m
+[36m@@ -209,7 +209,8 @@[m [mpublic class RolesApiResource {[m
+     @GET[m
+     @Path("{roleId}/permissions")[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Retrieve a Role's Permissions", tags = {"Roles"}, description = "Example Requests:\n" + "\n" + "roles/1/permissions")[m
+[32m+[m[32m    @Operation(summary = "Retrieve a Role's Permissions", tags = { "Roles" }, description = "Example Requests:\n" + "\n"[m
+[32m+[m[32m            + "roles/1/permissions")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdPermissionsResponse.class))) })[m
+     public String retrieveRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,[m
+[36m@@ -229,7 +230,7 @@[m [mpublic class RolesApiResource {[m
+     @Path("{roleId}/permissions")[m
+     @Consumes({ MediaType.APPLICATION_JSON })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Update a Role's Permissions", tags = {"Roles"}, description = "")[m
+[32m+[m[32m    @Operation(summary = "Update a Role's Permissions", tags = { "Roles" }, description = "")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsRequest.class)))[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.PutRolesRoleIdPermissionsResponse.class))) })[m
+[36m@@ -255,7 +256,8 @@[m [mpublic class RolesApiResource {[m
+     @DELETE[m
+     @Path("{roleId}")[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[31m-    @Operation(summary = "Delete a Role", tags = {"Roles"}, description = "Description : Delete the role in case role is not associated with any users.")[m
+[32m+[m[32m    @Operation(summary = "Delete a Role", tags = {[m
+[32m+[m[32m            "Roles" }, description = "Description : Delete the role in case role is not associated with any users.")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.DeleteRolesRoleIdResponse.class))) })[m
+     public String deleteRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId) {[m
+[1mdiff --git a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResource.java b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResource.java[m
+[1mindex 595267f09..db9187adf 100644[m
+[1m--- a/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResource.java[m
+[1m+++ b/fineract-provider/src/main/java/org/apache/fineract/useradministration/api/UsersApiResource.java[m
+[36m@@ -32,10 +32,7 @@[m [mimport jakarta.ws.rs.DELETE;[m
+ import jakarta.ws.rs.GET;[m
+ import jakarta.ws.rs.POST;[m
+ import jakarta.ws.rs.PUT;[m
+[31m-import io.swagger.v3.oas.annotations.Operation;[m
+[31m-import io.swagger.v3.oas.annotations.tags.Tag;[m
+ import jakarta.ws.rs.Path;[m
+[31m-[m
+ import jakarta.ws.rs.PathParam;[m
+ import jakarta.ws.rs.Produces;[m
+ import jakarta.ws.rs.QueryParam;[m
+[36m@@ -93,8 +90,8 @@[m [mpublic class UsersApiResource {[m
+     private final BulkImportWorkbookService bulkImportWorkbookService;[m
+ [m
+     @GET[m
+[31m-    @Operation(summary = "Retrieve list of users", operationId = "retrieveAllUsers", tags = {"Users"}, description = "Example Requests:\n" + "\n" + "users\n"[m
+[31m-            + "\n" + "\n" + "users?fields=id,username,email,officeName")[m
+[32m+[m[32m    @Operation(summary = "Retrieve list of users", operationId = "retrieveAllUsers", tags = { "Users" }, description = "Example Requests:\n"[m
+[32m+[m[32m            + "\n" + "users\n" + "\n" + "\n" + "users?fields=id,username,email,officeName")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersResponse.class)))) })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[36m@@ -110,8 +107,8 @@[m [mpublic class UsersApiResource {[m
+ [m
+     @GET[m
+     @Path("{userId}")[m
+[31m-    @Operation(summary = "Retrieve a User", operationId = "retrieveOneUser", tags = {"Users"}, description = "Example Requests:\n" + "\n" + "users/1\n" + "\n"[m
+[31m-            + "\n" + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")[m
+[32m+[m[32m    @Operation(summary = "Retrieve a User", operationId = "retrieveOneUser", tags = { "Users" }, description = "Example Requests:\n" + "\n"[m
+[32m+[m[32m            + "users/1\n" + "\n" + "\n" + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersUserIdResponse.class))) })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[36m@@ -132,8 +129,9 @@[m [mpublic class UsersApiResource {[m
+ [m
+     @GET[m
+     @Path("template")[m
+[31m-    @Operation(summary = "Retrieve User Details Template", operationId = "retrieveTemplateUser", tags = {"Users"}, description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"[m
+[31m-            + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "users/template")[m
+[32m+[m[32m    @Operation(summary = "Retrieve User Details Template", operationId = "retrieveTemplateUser", tags = {[m
+[32m+[m[32m            "Users" }, description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"[m
+[32m+[m[32m                    + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "users/template")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.GetUsersTemplateResponse.class))) })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[36m@@ -148,7 +146,8 @@[m [mpublic class UsersApiResource {[m
+     }[m
+ [m
+     @POST[m
+[31m-    @Operation(summary = "Create a User", operationId = "createUser", tags = {"Users"}, description = "Adds new application user.\n" + "\n"[m
+[32m+[m[32m    @Operation(summary = "Create a User", operationId = "createUser", tags = { "Users" }, description = "Adds new application user.\n"[m
+[32m+[m[32m            + "\n"[m
+             + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n"[m
+             + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n"[m
+             + "Optional Fields: \n" + "staffId,passwordNeverExpires,isLoginRetriesEnabled")[m
+[36m@@ -171,7 +170,7 @@[m [mpublic class UsersApiResource {[m
+ [m
+     @PUT[m
+     @Path("{userId}")[m
+[31m-    @Operation(summary = "Update a User", operationId = "updateUser", tags = {"Users"}, description = "Updates the user")[m
+[32m+[m[32m    @Operation(summary = "Update a User", operationId = "updateUser", tags = { "Users" }, description = "Updates the user")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdRequest.class)))[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.PutUsersUserIdResponse.class))) })[m
+[36m@@ -192,7 +191,8 @@[m [mpublic class UsersApiResource {[m
+ [m
+     @POST[m
+     @Path("{userId}/pwd")[m
+[31m-    @Operation(summary = "Change the password of a User", operationId = "changePasswordUser", tags = {"Users"}, description = "When updating a password you must provide the repeatPassword parameter also.")[m
+[32m+[m[32m    @Operation(summary = "Change the password of a User", operationId = "changePasswordUser", tags = {[m
+[32m+[m[32m            "Users" }, description = "When updating a password you must provide the repeatPassword parameter also.")[m
+     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdRequest.class)))[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.ChangePwdUsersUserIdResponse.class))) })[m
+[36m@@ -213,7 +213,8 @@[m [mpublic class UsersApiResource {[m
+ [m
+     @DELETE[m
+     @Path("{userId}")[m
+[31m-    @Operation(summary = "Delete a User", operationId = "deleteUser", tags = {"Users"}, description = "Removes the user and the associated roles and permissions.")[m
+[32m+[m[32m    @Operation(summary = "Delete a User", operationId = "deleteUser", tags = {[m
+[32m+[m[32m            "Users" }, description = "Removes the user and the associated roles and permissions.")[m
+     @ApiResponses({[m
+             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class))) })[m
+     @Produces({ MediaType.APPLICATION_JSON })[m
+[36m@@ -231,7 +232,7 @@[m [mpublic class UsersApiResource {[m
+     @GET[m
+     @Path("downloadtemplate")[m
+     @Produces("application/vnd.ms-excel")[m
+[31m-    @Operation(summary = "Download users template", description = "Returns an Excel template for bulk importing users.", tags = {"Users"})[m
+[32m+[m[32m    @Operation(summary = "Download users template", description = "Returns an Excel template for bulk importing users.", tags = { "Users" })[m
+     public Response getUserTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,[m
+             @QueryParam("dateFormat") final String dateFormat) {[m
+         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.USERS.toString(), officeId, staffId, dateFormat);[m
+[36m@@ -242,8 +243,8 @@[m [mpublic class UsersApiResource {[m
+     @Consumes(MediaType.MULTIPART_FORM_DATA)[m
+     @RequestBody(description = "Upload users template", content = {[m
+             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })[m
+[31m-    @Operation(summary = "Upload users template", description = "Uploads a filled Excel template to create multiple users in bulk.", [m
+[31m-    tags = {"Users"})[m
+[32m+[m[32m    @Operation(summary = "Upload users template", description = "Uploads a filled Excel template to create multiple users in bulk.", tags = {[m
+[32m+[m[32m            "Users" })[m
+     public String postUsersTemplate(@FormDataParam("file") InputStream uploadedInputStream,[m
+             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,[m
+             @FormDataParam("dateFormat") final String dateFormat) {[m
