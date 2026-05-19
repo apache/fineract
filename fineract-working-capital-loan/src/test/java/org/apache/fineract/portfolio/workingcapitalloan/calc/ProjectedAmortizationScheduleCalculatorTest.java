@@ -29,8 +29,16 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ProjectedAmortizationScheduleCalculatorTest {
@@ -41,12 +49,24 @@ class ProjectedAmortizationScheduleCalculatorTest {
     private static final BigDecimal DISCOUNT_FEE = new BigDecimal("1000");
     private static final BigDecimal NET_DISBURSEMENT = new BigDecimal("9000");
     private static final BigDecimal TPV = new BigDecimal("100000");
-    private static final BigDecimal RATE = new BigDecimal("0.18");
+    private static final BigDecimal RATE = new BigDecimal("18");
     private static final int DAY_COUNT = 360;
     private static final LocalDate EXPECTED_DISBURSEMENT_DATE = LocalDate.of(2019, 1, 1);
     private static final int TERM = 200;
 
     private final ProjectedAmortizationScheduleCalculator calculator = new DefaultProjectedAmortizationScheduleCalculator();
+
+    @BeforeEach
+    void setBusinessDate() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "UTC", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, EXPECTED_DISBURSEMENT_DATE)));
+    }
+
+    @AfterEach
+    void resetContext() {
+        ThreadLocalContextUtil.reset();
+    }
 
     @Test
     void testAddDisbursement_term10_discountFee50_netDisbursement450_then430() {
@@ -515,7 +535,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testNoDiscountLoan_term180_discountFee0_netDisbursement9000() {
         final BigDecimal zeroDiscount = BigDecimal.ZERO;
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(zeroDiscount, NET_DISBURSEMENT, TPV,
-                RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY);
+                RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(180, model.originalPaymentNumber(), "loanTerm = ceil(9000/50) = 180");
         assertEquals(BigDecimal.ZERO, model.effectiveInterestRate(), "EIR should be 0 when no discount fee");
@@ -1772,8 +1792,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 0, 0, EXPECTED_DISBURSEMENT_DATE, 0, -9000.00, null, null, 1.00000000, -9000.00, 9000.00, null, null, null, null,
                 1000.00);
 
-        checkInst(model, 1, 1, LocalDate.of(2019, 1, 2), 0, 50.00, 50.00, 0.00, 1.00000000, 0.00, 8959.61, 9.61, 9.61, 0.00, null, 1000.00);
-        checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 0, 50.00, 50.00, 0.00, 1.00000000, 0.00, 8919.18, 9.57, 9.61, 0.00, null, 1000.00);
+        checkInst(model, 1, 1, LocalDate.of(2019, 1, 2), 0, 50.00, 50.00, null, 1.00000000, 0.00, 8959.61, 9.61, 0.00, null, null, 1000.00);
+        checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 0, 50.00, 50.00, null, 1.00000000, 0.00, 8919.18, 9.57, 0.00, null, null, 1000.00);
         checkInst(model, 3, 3, LocalDate.of(2019, 1, 4), 0, 50.00, 50.00, 50.00, 1.00000000, 50.00, 8878.70, 9.52, 9.61, 9.61, 0.09,
                 990.39);
 
@@ -2239,7 +2259,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     @Test
     void testApplyRateChange_sameDayAsDisburse() {
         final ProjectedAmortizationScheduleModel model = generateModel();
-        model.applyRateChange(new BigDecimal("0.15"), EXPECTED_DISBURSEMENT_DATE);
+        model.applyRateChange(new BigDecimal("15"), EXPECTED_DISBURSEMENT_DATE);
 
         assertFalse(model.rateSegments().isEmpty());
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
@@ -2249,7 +2269,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testApplyRateChange_8daysAfterDisburse() {
         final ProjectedAmortizationScheduleModel model = generateModel();
         final LocalDate rateChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(8);
-        model.applyRateChange(new BigDecimal("0.15"), rateChangeDate);
+        model.applyRateChange(new BigDecimal("15"), rateChangeDate);
 
         assertFalse(model.rateSegments().isEmpty());
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
@@ -2259,12 +2279,12 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testApplyRateChange_twiceWithDateGap() {
         final ProjectedAmortizationScheduleModel model = generateModel();
 
-        model.applyRateChange(new BigDecimal("0.15"), EXPECTED_DISBURSEMENT_DATE);
+        model.applyRateChange(new BigDecimal("15"), EXPECTED_DISBURSEMENT_DATE);
         assertNotNull(model.rateSegments());
         assertFalse(model.rateSegments().isEmpty());
 
         final LocalDate secondChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(8);
-        model.applyRateChange(new BigDecimal("0.11"), secondChangeDate);
+        model.applyRateChange(new BigDecimal("11"), secondChangeDate);
 
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
     }
@@ -2276,7 +2296,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("500"));
 
         final LocalDate rateChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(8);
-        model.applyRateChange(new BigDecimal("0.15"), rateChangeDate);
+        model.applyRateChange(new BigDecimal("15"), rateChangeDate);
 
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
     }
@@ -2285,7 +2305,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testApplyRateChange_nearEndOfTerm() {
         final ProjectedAmortizationScheduleModel model = generateModel();
         final LocalDate rateChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(195);
-        model.applyRateChange(new BigDecimal("0.15"), rateChangeDate);
+        model.applyRateChange(new BigDecimal("15"), rateChangeDate);
 
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
     }
@@ -2296,7 +2316,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final int originalTerm = model.originalPaymentNumber();
         final LocalDate rateChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(250);
 
-        model.applyRateChange(new BigDecimal("0.15"), rateChangeDate);
+        model.applyRateChange(new BigDecimal("15"), rateChangeDate);
 
         // Past-term rate change should succeed — segment starts clamped at originalPaymentNumber
         assertFalse(model.rateSegments().isEmpty(), "should have a rate segment");
@@ -2309,7 +2329,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testApplyRateChange_beforeDisburseDate() {
         final ProjectedAmortizationScheduleModel model = generateModel();
         assertThrows(IllegalArgumentException.class, () -> {
-            model.applyRateChange(new BigDecimal("0.15"), EXPECTED_DISBURSEMENT_DATE.minusDays(1));
+            model.applyRateChange(new BigDecimal("15"), EXPECTED_DISBURSEMENT_DATE.minusDays(1));
         });
     }
 

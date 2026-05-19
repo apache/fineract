@@ -30,7 +30,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements WorkingCapitalLoanDiscountFeeAmortizationService {
 
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
+    private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final ExternalIdFactory externalIdFactory;
     private final ProjectedAmortizationScheduleRepositoryWrapper scheduleRepositoryWrapper;
@@ -51,6 +54,7 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
         final BigDecimal scheduleAmortization = calculateScheduleAmortization(loan);
         if (MathUtil.isZero(scheduleAmortization)) {
             log.debug("Skipping discount fee amortization for WC loan [{}] - no amortization on schedule", loan.getId());
+            syncIncomeBalances(loan, scheduleAmortization);
             return;
         }
 
@@ -68,6 +72,8 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
         transactionRepository.saveAndFlush(amortizationTxn);
         loan.getTransactions().add(amortizationTxn);
 
+        syncIncomeBalances(loan, scheduleAmortization);
+
         accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, false);
 
         log.debug("Posted discount fee amortization of {} for WC loan [{}]", amortizationAmount, loan.getId());
@@ -83,5 +89,19 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
         return loan.getTransactions().stream()
                 .filter(txn -> txn.getTypeOf() == LoanTransactionType.DISCOUNT_FEE_AMORTIZATION && !txn.isReversed())
                 .map(WorkingCapitalLoanTransaction::getTransactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private void syncIncomeBalances(final WorkingCapitalLoan loan, final BigDecimal scheduleAmortization) {
+        final BigDecimal discount = loan.getLoanProductRelatedDetails() != null && loan.getLoanProductRelatedDetails().getDiscount() != null
+                ? loan.getLoanProductRelatedDetails().getDiscount()
+                : BigDecimal.ZERO;
+        final BigDecimal realizedIncome = scheduleAmortization.max(BigDecimal.ZERO).min(discount);
+        final BigDecimal unrealizedIncome = discount.subtract(realizedIncome).max(BigDecimal.ZERO);
+
+        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
+                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
+        balance.setRealizedIncome(realizedIncome);
+        balance.setUnrealizedIncome(unrealizedIncome);
+        balanceRepository.saveAndFlush(balance);
     }
 }

@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
+import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,5 +31,8 @@ public interface WorkingCapitalLoanTransactionRelationRepository
         extends JpaRepository<WorkingCapitalLoanTransactionRelation, Long>, CrudRepository<WorkingCapitalLoanTransactionRelation, Long> {
 
     Optional<WorkingCapitalLoanTransactionRelation> findByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(
+            WorkingCapitalLoanTransaction relatedDisbursementTransaction, boolean reversed, LoanTransactionType transactionType);
+
+    List<WorkingCapitalLoanTransactionRelation> findAllByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(
             WorkingCapitalLoanTransaction relatedDisbursementTransaction, boolean reversed, LoanTransactionType transactionType);
 }

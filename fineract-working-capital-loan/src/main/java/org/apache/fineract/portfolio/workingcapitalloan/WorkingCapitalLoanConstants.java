@@ -49,6 +49,8 @@ public final class WorkingCapitalLoanConstants {
     public static final String REPAYMENT_LOAN_COMMAND = "repayment";
     public static final String GOODWILL_CREDIT_LOAN_COMMAND = "goodwillCredit";
     public static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
+    public static final String DISCOUNT_FEE_LOAN_COMMAND = "discountFee";
+    public static final String DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND = "discountFeeAdjustment";
 
     // Approval / Rejection / Undo-approval parameters
     public static final String RESOURCE_NAME = WCL_RESOURCE_NAME;
@@ -67,6 +69,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String DISBURSEMENT_CLASSIFICATION_CODE_NAME = "working_capital_loan_disbursement_classification";
     public static final String REPAYMENT_CLASSIFICATION_CODE_NAME = "working_capital_loan_repayment_classification";
     public static final String CREDIT_BALANCE_REFUND_CLASSIFICATION_CODE_NAME = "working_capital_loan_credit_balance_refund_classification";
+    public static final String DISCOUNT_FEE_ADJUSTMENT_CLASSIFICATION_CODE_NAME = "working_capital_loan_discount_fee_adjustment_classification";
     public static final String paymentDetailsParamName = "paymentDetails";
     public static final String paymentTypeIdParamName = "paymentTypeId";
     public static final String accountNumberParamName = "accountNumber";

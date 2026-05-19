@@ -309,9 +309,9 @@ public class WorkingCapitalLoanProductCRUDTest {
                 .withPrincipalAmountMin(BigDecimal.valueOf(1000)) //
                 .withPrincipalAmountDefault(BigDecimal.valueOf(5000)) //
                 .withPrincipalAmountMax(BigDecimal.valueOf(10000)) //
-                .withMinPeriodPaymentRate(BigDecimal.valueOf(0.5)) //
-                .withPeriodPaymentRate(BigDecimal.valueOf(1.0)) //
-                .withMaxPeriodPaymentRate(BigDecimal.valueOf(2.0)) //
+                .withMinPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withMaxPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withDiscount(BigDecimal.valueOf(0.1)) //
                 .withRepaymentEvery(60) //
                 .withRepaymentFrequencyType("DAYS") //
@@ -396,9 +396,9 @@ public class WorkingCapitalLoanProductCRUDTest {
                 .withPrincipalAmountMin(BigDecimal.valueOf(1000)) //
                 .withPrincipalAmountDefault(BigDecimal.valueOf(5000)) //
                 .withPrincipalAmountMax(BigDecimal.valueOf(10000)) //
-                .withMinPeriodPaymentRate(BigDecimal.valueOf(0.5)) //
-                .withPeriodPaymentRate(BigDecimal.valueOf(1.0)) //
-                .withMaxPeriodPaymentRate(BigDecimal.valueOf(2.0)) //
+                .withMinPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withMaxPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withDiscount(BigDecimal.valueOf(0.1)) //
                 .withRepaymentEvery(30) //
                 .withRepaymentFrequencyType("DAYS") //
@@ -482,11 +482,14 @@ public class WorkingCapitalLoanProductCRUDTest {
             assertEquals(0, BigDecimal.valueOf(10000).compareTo(retrieved.getMaxPrincipal()));
         }
         if (retrieved.getMinPeriodPaymentRate() != null) {
-            assertEquals(0, BigDecimal.valueOf(0.5).compareTo(retrieved.getMinPeriodPaymentRate()));
+            assertEquals(0, WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT
+                    .compareTo(retrieved.getMinPeriodPaymentRate()));
         }
-        assertEquals(0, BigDecimal.valueOf(1.0).compareTo(retrieved.getPeriodPaymentRate()));
+        assertEquals(0,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT.compareTo(retrieved.getPeriodPaymentRate()));
         if (retrieved.getMaxPeriodPaymentRate() != null) {
-            assertEquals(0, BigDecimal.valueOf(2.0).compareTo(retrieved.getMaxPeriodPaymentRate()));
+            assertEquals(0, WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT
+                    .compareTo(retrieved.getMaxPeriodPaymentRate()));
         }
         if (retrieved.getDiscount() != null) {
             assertEquals(0, BigDecimal.valueOf(0.1).compareTo(retrieved.getDiscount()));

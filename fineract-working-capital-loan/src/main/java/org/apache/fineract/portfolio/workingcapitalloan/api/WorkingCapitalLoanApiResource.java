@@ -302,8 +302,6 @@ public class WorkingCapitalLoanApiResource {
             commandRequest = builder.disburseWorkingCapitalLoanApplication(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "undodisbursal")) {
             commandRequest = builder.undoWorkingCapitalLoanApplicationDisbursal(resolvedLoanId).build();
-        } else if (CommandParameterUtil.is(commandParam, "discountfee")) {
-            commandRequest = builder.discountWorkingCapitalLoanApplicationDisbursal(resolvedLoanId).build();
         }
 
         if (commandRequest == null) {

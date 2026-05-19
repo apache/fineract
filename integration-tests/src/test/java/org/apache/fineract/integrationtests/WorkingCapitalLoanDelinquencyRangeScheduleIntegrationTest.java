@@ -129,7 +129,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleIntegrationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(10000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(11000)) //
                 .buildSubmitJson());
         assertNotNull(loanId);
@@ -176,7 +176,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleIntegrationTest {
                     .withClientId(clientId) //
                     .withProductId(productId) //
                     .withPrincipal(principal) //
-                    .withPeriodPaymentRate(BigDecimal.ONE) //
+                    .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                     .withTotalPayment(BigDecimal.valueOf(10000)) //
                     .buildSubmitJson());
 

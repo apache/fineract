@@ -86,6 +86,16 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
                     .classificationOptions(codeValueReadPlatformService
                             .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.CREDIT_BALANCE_REFUND_CLASSIFICATION_CODE_NAME))
                     .build();
+        } else if (WorkingCapitalLoanConstants.DISCOUNT_FEE_LOAN_COMMAND.equals(command)) {
+            return WorkingCapitalLoanCommandTemplateData.builder().currency(wcLoan.getLoanProduct().getCurrency().toData())
+                    .classificationOptions(codeValueReadPlatformService
+                            .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.DISBURSEMENT_CLASSIFICATION_CODE_NAME))
+                    .build();
+        } else if (WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND.equals(command)) {
+            return WorkingCapitalLoanCommandTemplateData.builder().currency(wcLoan.getLoanProduct().getCurrency().toData())
+                    .classificationOptions(codeValueReadPlatformService
+                            .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_CLASSIFICATION_CODE_NAME))
+                    .build();
         }
         return null;
     }

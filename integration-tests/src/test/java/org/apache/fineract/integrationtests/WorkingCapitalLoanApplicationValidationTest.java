@@ -68,7 +68,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final Long productId = createProduct();
         final Long clientId = createClient();
         final String json = buildSubmitJsonWithoutField(new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(5500)).buildSubmitJson(), "clientId");
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -83,7 +84,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final Long productId = createProduct();
         final Long clientId = createClient();
         final String json = buildSubmitJsonWithoutField(new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(5500)).buildSubmitJson(), "productId");
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -98,7 +100,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final Long productId = createProduct();
         final Long clientId = createClient();
         final String json = buildSubmitJsonWithoutField(new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(5500)).buildSubmitJson(), "principalAmount");
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -113,7 +116,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final Long productId = createProduct();
         final Long clientId = createClient();
         final String json = buildSubmitJsonWithoutField(new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(5500)).buildSubmitJson(), "periodPaymentRate");
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -128,7 +132,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final Long productId = createProduct();
         final Long clientId = createClient();
         final String json = buildSubmitJsonWithoutField(new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(5500)).buildSubmitJson(), "totalPayment");
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -143,7 +148,8 @@ public class WorkingCapitalLoanApplicationValidationTest {
         final Long productId = createProduct();
         final Long clientId = createClient();
         final String json = buildSubmitJsonWithoutField(new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(5500)).buildSubmitJson(), "expectedDisbursementDate");
 
         final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(json);
@@ -162,7 +168,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(-100)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson();
 
@@ -182,7 +188,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.ZERO) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson();
 
@@ -222,7 +228,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.valueOf(-1)) //
                 .buildSubmitJson();
@@ -244,7 +250,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withFundId(-1L) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson();
 
@@ -263,7 +269,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDelinquencyBucketId(-1L) //
                 .buildSubmitJson();
@@ -284,7 +290,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withBreachId(0L) //
                 .buildSubmitJson();
@@ -304,7 +310,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withBreachId(Long.MAX_VALUE) //
                 .buildSubmitJson();
@@ -326,7 +332,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withSubmittedOnNote(longNote) //
                 .buildSubmitJson();
@@ -341,13 +347,15 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testSubmitWithPrincipalBelowProductMin() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.ONE, BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final String json = new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(500)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(550)) //
                 .buildSubmitJson();
 
@@ -361,13 +369,15 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testSubmitWithPrincipalAboveProductMax() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.ONE, BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final String json = new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(25000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(27500)) //
                 .buildSubmitJson();
 
@@ -381,13 +391,15 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testSubmitWithPeriodPaymentRateBelowProductMin() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.valueOf(0.5), BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final String json = new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.valueOf(0.2)) //
+                .withPeriodPaymentRate(BigDecimal.valueOf(2)) //
                 .withTotalPayment(BigDecimal.valueOf(5100)) //
                 .buildSubmitJson();
 
@@ -401,13 +413,15 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testSubmitWithPeriodPaymentRateAboveProductMax() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.valueOf(0.5), BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final String json = new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.valueOf(3)) //
+                .withPeriodPaymentRate(BigDecimal.valueOf(30)) //
                 .withTotalPayment(BigDecimal.valueOf(6500)) //
                 .buildSubmitJson();
 
@@ -431,7 +445,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.ONE) //
                 .buildSubmitJson();
@@ -457,7 +471,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.ONE) //
                 .buildSubmitJson();
@@ -483,7 +497,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withBreachId(breachId) //
                 .buildSubmitJson();
@@ -509,7 +523,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withAccountNo(accountNo) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -518,7 +532,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withAccountNo(accountNo) //
                 .withPrincipal(BigDecimal.valueOf(6000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(6600)) //
                 .buildSubmitJson();
 
@@ -541,7 +555,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withExternalId(externalId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -550,7 +564,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withExternalId(externalId) //
                 .withPrincipal(BigDecimal.valueOf(6000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(6600)) //
                 .buildSubmitJson();
 
@@ -573,7 +587,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withSubmittedOnDate(submittedOn) //
                 .withExpectedDisbursementDate(expectedDisbursement) //
@@ -594,7 +608,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -615,7 +629,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -637,13 +651,15 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testModifyWithPrincipalBelowProductMin() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.ONE, BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final Long loanId = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -660,13 +676,15 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testModifyWithPrincipalAboveProductMax() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.ONE, BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final Long loanId = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -683,17 +701,19 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testModifyWithPeriodPaymentRateBelowProductMin() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.valueOf(0.5), BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final Long loanId = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
-        final String modifyJson = new WorkingCapitalLoanApplicationTestBuilder().withPeriodPaymentRate(BigDecimal.valueOf(0.2))
+        final String modifyJson = new WorkingCapitalLoanApplicationTestBuilder().withPeriodPaymentRate(BigDecimal.valueOf(2))
                 .buildModifyJson();
         final CallFailedRuntimeException ex = applicationHelper.runModifyExpectingFailure(loanId, modifyJson);
         assertEquals(400, ex.getStatus());
@@ -707,17 +727,19 @@ public class WorkingCapitalLoanApplicationValidationTest {
 
     @Test
     public void testModifyWithPeriodPaymentRateAboveProductMax() {
-        final Long productId = createProductWithMinMax(1000, 20000, BigDecimal.valueOf(0.5), BigDecimal.valueOf(2));
+        final Long productId = createProductWithMinMax(1000, 20000,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MIN_PERIOD_PAYMENT_RATE_PERCENT,
+                WorkingCapitalLoanProductTestBuilder.DEFAULT_MAX_PERIOD_PAYMENT_RATE_PERCENT);
         final Long clientId = createClient();
         final Long loanId = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
-        final String modifyJson = new WorkingCapitalLoanApplicationTestBuilder().withPeriodPaymentRate(BigDecimal.valueOf(3))
+        final String modifyJson = new WorkingCapitalLoanApplicationTestBuilder().withPeriodPaymentRate(BigDecimal.valueOf(30))
                 .buildModifyJson();
         final CallFailedRuntimeException ex = applicationHelper.runModifyExpectingFailure(loanId, modifyJson);
         assertEquals(400, ex.getStatus());
@@ -737,7 +759,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -760,7 +782,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -784,7 +806,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -810,7 +832,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -837,7 +859,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -862,7 +884,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withExternalId(externalId1) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
         final Long loanId2 = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
@@ -870,7 +892,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withExternalId(externalId2) //
                 .withPrincipal(BigDecimal.valueOf(6000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(6600)) //
                 .buildSubmitJson());
 
@@ -893,7 +915,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
 
@@ -918,7 +940,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withAccountNo(accountNo1) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
         final Long loanId2 = applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
@@ -926,7 +948,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withProductId(productId) //
                 .withAccountNo(accountNo2) //
                 .withPrincipal(BigDecimal.valueOf(6000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(6600)) //
                 .buildSubmitJson());
 
@@ -990,7 +1012,7 @@ public class WorkingCapitalLoanApplicationValidationTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.ZERO) //
                 .buildSubmitJson();

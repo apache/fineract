@@ -8,11 +8,11 @@ Feature: WorkingCapitalAmortizationSchedule
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100          | 1                 | 0        |
-    When Admin generates a projected amortization schedule with discountFeeAmount 1000.0, netDisbursementAmount 9000.0, totalPaymentValue 100000.0, periodPaymentRate 0.18, npvDayCount 360, expectedDisbursementDate "2019-01-01"
+    When Admin generates a projected amortization schedule with discountFeeAmount 1000.0, netDisbursementAmount 9000.0, totalPaymentValue 100000.0, periodPaymentRate 18, npvDayCount 360, expectedDisbursementDate "2019-01-01"
     And Admin retrieves the projected amortization schedule
     Then The retrieved amortization schedule has the following summary fields:
       | discountFeeAmount | netDisbursementAmount | totalPaymentValue | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
-      | 1000.00           | 9000.00               | 100000.00         | 0.18              | 360         | 50.00                 | 200                   |
+      | 1000.00           | 9000.00               | 100000.00         | 18                | 360         | 50.00                 | 200                   |
     And The retrieved amortization schedule has payments with the following details:
       | paymentNo | date       | expectedPaymentAmount | discountFactor | npvValue | balance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | incomeModification | deferredBalance |
       | 0         | 2019-01-01 | -9000.00              | 1              | -9000.00 | 9000.00 |                            |                     |                          |                    | 1000.00         |
@@ -228,11 +228,11 @@ Feature: WorkingCapitalAmortizationSchedule
     Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
 
-    When Admin generates a projected amortization schedule with discountFeeAmount 1000.0, netDisbursementAmount 9000.0, totalPaymentValue 1000.0, periodPaymentRate 18, npvDayCount 360, expectedDisbursementDate "2019-01-01"
+    When Admin generates a projected amortization schedule with discountFeeAmount 1000.0, netDisbursementAmount 9000.0, totalPaymentValue 100000.0, periodPaymentRate 18, npvDayCount 360, expectedDisbursementDate "2019-01-01"
     And Admin retrieves the projected amortization schedule
     Then The retrieved amortization schedule has the following summary fields:
       | discountFeeAmount | netDisbursementAmount | totalPaymentValue | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
-      | 1000.00           | 9000.00               | 1000.00           | 18                | 360         | 50.00                 | 200                   |
+      | 1000.00           | 9000.00               | 100000.00         | 18                | 360         | 50.00                 | 200                   |
     And The retrieved amortization schedule has payments with the following details:
       | paymentNo | date       | expectedPaymentAmount | discountFactor | npvValue | balance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | incomeModification | deferredBalance |
       | 0         | 2019-01-01 | -9000.00              | 1              | -9000.00 | 9000.00 |                            |                     |                          |                    | 1000.00         |
@@ -443,33 +443,33 @@ Feature: WorkingCapitalAmortizationSchedule
     And Admin retrieves the projected amortization schedule
     Then The retrieved amortization schedule has the following summary fields:
       | discountFeeAmount | netDisbursementAmount | totalPaymentValue | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
-      | 1000.00           | 9000.00               | 1000.00           | 18                | 360         | 50.00                 | 200                   |
+      | 1000.00           | 9000.00               | 100000.00         | 18                | 360         | 50.00                 | 200                   |
     And The retrieved amortization schedule has payments with the following details:
       | paymentNo | date       | expectedPaymentAmount | discountFactor | npvValue | balance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | incomeModification | deferredBalance |
       | 0         | 2019-01-01 | -9000.00              |                | -9000.00 | 9000.00 |                            |                     |                          |                    | 1000.00         |
-      | 1         | 2019-01-02 | 50.00                 |                | 49.95    | 8959.61 | 9.61                       |                     |                          |                    | 1000.00         |
-      | 2         | 2019-01-03 | 50.00                 |                | 49.89    | 8919.18 | 9.57                       |                     |                          |                    | 1000.00         |
-      | 3         | 2019-01-04 | 50.00                 |                | 49.84    | 8878.70 | 9.52                       |                     |                          |                    | 1000.00         |
-      | 4         | 2019-01-05 | 50.00                 |                | 49.79    | 8838.18 | 9.48                       |                     |                          |                    | 1000.00         |
-      | 5         | 2019-01-06 | 50.00                 |                | 49.73    | 8797.62 | 9.44                       |                     |                          |                    | 1000.00         |
-      | 6         | 2019-01-07 | 50.00                 |                | 49.68    | 8757.01 | 9.39                       |                     |                          |                    | 1000.00         |
-      | 7         | 2019-01-08 | 50.00                 |                | 49.63    | 8716.36 | 9.35                       |                     |                          |                    | 1000.00         |
-      | 8         | 2019-01-09 | 50.00                 |                | 49.57    | 8675.67 | 9.31                       |                     |                          |                    | 1000.00         |
-      | 9         | 2019-01-10 | 50.00                 |                | 49.52    | 8634.94 | 9.26                       |                     |                          |                    | 1000.00         |
-      | 10        | 2019-01-11 | 50.00                 |                | 49.47    | 8594.16 | 9.22                       |                     |                          |                    | 1000.00         |
-      | 11        | 2019-01-12 | 50.00                 |                | 49.42    | 8553.33 | 9.18                       |                     |                          |                    | 1000.00         |
-      | 12        | 2019-01-13 | 50.00                 |                | 49.36    | 8512.47 | 9.13                       |                     |                          |                    | 1000.00         |
-      | 13        | 2019-01-14 | 50.00                 |                | 49.31    | 8471.56 | 9.09                       |                     |                          |                    | 1000.00         |
-      | 14        | 2019-01-15 | 50.00                 |                | 49.26    | 8430.60 | 9.05                       |                     |                          |                    | 1000.00         |
-      | 15        | 2019-01-16 | 50.00                 |                | 49.21    | 8389.61 | 9.00                       |                     |                          |                    | 1000.00         |
-      | 16        | 2019-01-17 | 50.00                 |                | 49.15    | 8348.56 | 8.96                       |                     |                          |                    | 1000.00         |
-      | 17        | 2019-01-18 | 50.00                 |                | 49.10    | 8307.48 | 8.91                       |                     |                          |                    | 1000.00         |
-      | 18        | 2019-01-19 | 50.00                 |                | 49.05    | 8266.35 | 8.87                       |                     |                          |                    | 1000.00         |
-      | 19        | 2019-01-20 | 50.00                 |                | 49.00    | 8225.18 | 8.83                       |                     |                          |                    | 1000.00         |
-      | 20        | 2019-01-21 | 50.00                 |                | 48.94    | 8183.96 | 8.78                       |                     |                          |                    | 1000.00         |
-      | 21        | 2019-01-22 | 50.00                 |                | 48.89    | 8142.70 | 8.74                       |                     |                          |                    | 1000.00         |
-      | 22        | 2019-01-23 | 50.00                 |                | 48.84    | 8101.39 | 8.69                       |                     |                          |                    | 1000.00         |
-      | 23        | 2019-01-24 | 50.00                 |                | 48.79    | 8060.04 | 8.65                       |                     |                          |                    | 1000.00         |
+      | 1         | 2019-01-02 | 50.00                 |                | 0.00     | 8959.61 | 9.61                       |                     |                          |                    | 1000.00         |
+      | 2         | 2019-01-03 | 50.00                 |                | 0.00     | 8919.18 | 9.57                       |                     |                          |                    | 1000.00         |
+      | 3         | 2019-01-04 | 50.00                 |                | 0.00     | 8878.70 | 9.52                       |                     |                          |                    | 1000.00         |
+      | 4         | 2019-01-05 | 50.00                 |                | 0.00     | 8838.18 | 9.48                       |                     |                          |                    | 1000.00         |
+      | 5         | 2019-01-06 | 50.00                 |                | 0.00     | 8797.62 | 9.44                       |                     |                          |                    | 1000.00         |
+      | 6         | 2019-01-07 | 50.00                 |                | 0.00     | 8757.01 | 9.39                       |                     |                          |                    | 1000.00         |
+      | 7         | 2019-01-08 | 50.00                 |                | 0.00     | 8716.36 | 9.35                       |                     |                          |                    | 1000.00         |
+      | 8         | 2019-01-09 | 50.00                 |                | 0.00     | 8675.67 | 9.31                       |                     |                          |                    | 1000.00         |
+      | 9         | 2019-01-10 | 50.00                 |                | 0.00     | 8634.94 | 9.26                       |                     |                          |                    | 1000.00         |
+      | 10        | 2019-01-11 | 50.00                 |                | 0.00     | 8594.16 | 9.22                       |                     |                          |                    | 1000.00         |
+      | 11        | 2019-01-12 | 50.00                 |                | 0.00     | 8553.33 | 9.18                       |                     |                          |                    | 1000.00         |
+      | 12        | 2019-01-13 | 50.00                 |                | 0.00     | 8512.47 | 9.13                       |                     |                          |                    | 1000.00         |
+      | 13        | 2019-01-14 | 50.00                 |                | 0.00     | 8471.56 | 9.09                       |                     |                          |                    | 1000.00         |
+      | 14        | 2019-01-15 | 50.00                 |                | 0.00     | 8430.60 | 9.05                       |                     |                          |                    | 1000.00         |
+      | 15        | 2019-01-16 | 50.00                 |                | 0.00     | 8389.61 | 9.00                       |                     |                          |                    | 1000.00         |
+      | 16        | 2019-01-17 | 50.00                 |                | 0.00     | 8348.56 | 8.96                       |                     |                          |                    | 1000.00         |
+      | 17        | 2019-01-18 | 50.00                 |                | 0.00     | 8307.48 | 8.91                       |                     |                          |                    | 1000.00         |
+      | 18        | 2019-01-19 | 50.00                 |                | 0.00     | 8266.35 | 8.87                       |                     |                          |                    | 1000.00         |
+      | 19        | 2019-01-20 | 50.00                 |                | 0.00     | 8225.18 | 8.83                       |                     |                          |                    | 1000.00         |
+      | 20        | 2019-01-21 | 50.00                 |                | 0.00     | 8183.96 | 8.78                       |                     |                          |                    | 1000.00         |
+      | 21        | 2019-01-22 | 50.00                 |                | 0.00     | 8142.70 | 8.74                       |                     |                          |                    | 1000.00         |
+      | 22        | 2019-01-23 | 50.00                 |                | 0.00     | 8101.39 | 8.69                       |                     |                          |                    | 1000.00         |
+      | 23        | 2019-01-24 | 50.00                 |                | 0.00     | 8060.04 | 8.65                       |                     |                          |                    | 1000.00         |
       | 24        | 2019-01-25 | 47.22                 |                | 47.17    | 8020.77 | 7.95                       |                     |                          |                    | 1000.00         |
       | 25        | 2019-01-26 | 47.22                 |                | 47.13    | 7981.46 | 7.91                       |                     |                          |                    | 1000.00         |
       | 26        | 2019-01-27 | 47.22                 |                | 47.08    | 7942.11 | 7.87                       |                     |                          |                    | 1000.00         |

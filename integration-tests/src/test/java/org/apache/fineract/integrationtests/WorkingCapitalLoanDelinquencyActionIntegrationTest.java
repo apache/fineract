@@ -447,7 +447,8 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
 
     private Long submitAndApproveLoanWithExternalId(final Long clientId, final Long productId, final String externalId) {
         final WorkingCapitalLoanApplicationTestBuilder builder = new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
-                .withProductId(productId).withPrincipal(BigDecimal.valueOf(10000)).withPeriodPaymentRate(BigDecimal.ONE)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(10000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
                 .withTotalPayment(BigDecimal.valueOf(10000));
         if (externalId != null) {
             builder.withExternalId(externalId);

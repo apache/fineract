@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -29,13 +31,12 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleCalculator;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
-import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedPayment;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
-import org.apache.fineract.portfolio.workingcapitalloan.data.RepaymentAmortizationData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,7 +67,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 request.getPeriodPaymentRate(), //
                 request.getNpvDayCount(), //
                 request.getExpectedDisbursementDate(), //
-                mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan));
+                mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
@@ -74,6 +75,14 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     @Override
     public void generateAndSaveAmortizationScheduleOnDisbursement(final WorkingCapitalLoan loan, final BigDecimal disbursedAmount,
             final LocalDate disbursementDate) {
+        final ProjectedAmortizationScheduleModel model = generateProjectedAmortizationScheduleModel(loan, disbursedAmount,
+                disbursementDate);
+        scheduleRepositoryWrapper.writeModel(loan, model);
+    }
+
+    @NonNull
+    private ProjectedAmortizationScheduleModel generateProjectedAmortizationScheduleModel(final WorkingCapitalLoan loan,
+            final BigDecimal disbursedAmount, final LocalDate disbursementDate) {
         Validate.notNull(loan, "loan must not be null");
         Validate.notNull(disbursedAmount, "disbursedAmount must not be null");
         Validate.notNull(disbursementDate, "disbursementDate must not be null");
@@ -93,10 +102,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(periodPaymentRate, "periodPaymentRate must not be null");
         Validate.notNull(npvDayCount, "npvDayCount must not be null");
 
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(discount, disbursedAmount,
-                totalPayment, periodPaymentRate, npvDayCount, disbursementDate, mc,
-                WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan));
-        scheduleRepositoryWrapper.writeModel(loan, model);
+        return ProjectedAmortizationScheduleModel.generate(discount, disbursedAmount, totalPayment, periodPaymentRate, npvDayCount,
+                disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
     }
 
     @Override
@@ -157,13 +164,12 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
 
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(discount, netDisbursementAmount,
                 totalPayment, periodPaymentRate, npvDayCount, expectedDisbursementDate, mc,
-                WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan));
+                WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
 
     @Override
-    public RepaymentAmortizationData applyRepayment(final WorkingCapitalLoan loan, final LocalDate transactionDate,
-            final BigDecimal repaymentAmount) {
+    public void applyRepayment(final WorkingCapitalLoan loan, final LocalDate transactionDate, final BigDecimal repaymentAmount) {
         Validate.notNull(loan, "loan must not be null");
         Validate.notNull(transactionDate, "transactionDate must not be null");
         Validate.notNull(repaymentAmount, "repaymentAmount must not be null");
@@ -173,25 +179,10 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .readModel(loan.getId(), mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan))
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
-        final BigDecimal previousTotalAmortized = sumRunningNpv(model);
-        final LocalDate scheduleRepaymentDate = model.normalizePaymentDateForSchedule(transactionDate);
         model.applyPayment(transactionDate, repaymentAmount);
-        model.recalculateNetAmortizationAndDeferredBalanceFrom(scheduleRepaymentDate);
-        final BigDecimal totalAmortized = sumRunningNpv(model);
+        model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
-        return new RepaymentAmortizationData(totalAmortized.subtract(previousTotalAmortized, mc), totalAmortized);
-    }
-
-    private BigDecimal sumRunningNpv(final ProjectedAmortizationScheduleModel model) {
-        final MathContext mc = MoneyHelper.getMathContext();
-        BigDecimal result = BigDecimal.ZERO;
-        for (ProjectedPayment payment : model.projectedPayments()) {
-            if (payment.paymentNo() > 0 && payment.npvValue() != null && payment.npvValue().getAmount() != null) {
-                result = result.add(payment.npvValue().getAmount(), mc);
-            }
-        }
-        return result;
     }
 
     @Override
@@ -214,6 +205,34 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         calculator.applyRateChange(model, newRate, modelRateChangeDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
+    }
+
+    @Override
+    public void applyDiscountFeeAdjustment(final WorkingCapitalLoan loan, final LocalDate adjustmentTransactionDate) {
+        Validate.notNull(loan, "loan must not be null");
+        Validate.notNull(adjustmentTransactionDate, "adjustmentTransactionDate must not be null");
+
+        final MathContext mc = MoneyHelper.getMathContext();
+        final CurrencyData currency = WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan);
+        final ProjectedAmortizationScheduleModel currentModel = scheduleRepositoryWrapper.readModel(loan.getId(), mc, currency)
+                .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
+
+        final List<ProjectedAmortizationScheduleModel.ActualPayment> preservedPayments = currentModel.snapshotActualPayments();
+
+        final BigDecimal disbursedAmount = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
+                && loan.getDisbursementDetails().getFirst().getActualAmount() != null
+                        ? loan.getDisbursementDetails().getFirst().getActualAmount()
+                        : BigDecimal.ZERO;
+        final LocalDate disbursementDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
+                ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
+                : null;
+
+        final ProjectedAmortizationScheduleModel restatedModel = generateProjectedAmortizationScheduleModel(loan, disbursedAmount,
+                disbursementDate);
+        preservedPayments.stream().sorted(Comparator.comparing(ProjectedAmortizationScheduleModel.ActualPayment::date))
+                .forEach(payment -> restatedModel.applyPayment(payment.date(), payment.amount().getAmount()));
+
+        scheduleRepositoryWrapper.writeModel(loan, restatedModel);
     }
 
     private LocalDate resolveLoanDisbursementDate(final WorkingCapitalLoan loan) {

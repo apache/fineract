@@ -483,5 +483,5 @@ Feature: Working Capital Loan Credit Balance Refund
       | field                | value   |
       | principalOutstanding | 0.00    |
       | overpaymentAmount    | 100.00  |
-      | totalPaidPrincipal   | 9000.00 |
+      | totalPaidPrincipal   | 9100.00 |
 

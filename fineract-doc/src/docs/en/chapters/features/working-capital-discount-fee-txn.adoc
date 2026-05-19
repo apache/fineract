@@ -66,3 +66,91 @@ Schedule & balance updates:
 - Amortization Schedule
 
 * Discount Fee transaction cannot exist without its related disbursement
+
+=== 7. Discount Fee Adjustment
+
+A **Discount Fee Adjustment** reduces the loan-level discount (origination fee) that was established by an existing, non-reversed **Discount Fee** transaction. Behaviour is aligned with other *adjustment* transaction types (e.g. Capitalized Income Adjustment): linked parent transaction, allocation row, schedule restate, and business event.
+
+==== Purpose
+
+* Correct a discount fee amount
+* Recalculate EIR and amortisation schedule
+
+==== Applicability
+
+* **Working Capital Loan** only (same as Discount Fee)
+* Loan must be **Active**
+* Parent transaction must be an active (non-reversed) **Discount Fee** transaction
+
+==== Transaction behaviour
+
+* Creates a separate transaction of type `DISCOUNT_FEE_ADJUSTMENT`
+* Linked to the original Discount Fee transaction via `relatedResourceId` (in the request body) and a `RELATED` loan transaction relation
+* **Multiple adjustments** are allowed against the same Discount Fee transaction until the remaining adjustable amount is zero
+* Reduces `loanProductRelatedDetails.discount` by the adjustment amount
+
+==== Validation rules
+
+[cols="2,3"]
+|===
+| Rule | Detail
+
+| Amount
+| Mandatory; must be **> 0**
+
+| Maximum amount
+| Must not exceed *remaining discount* = original discount fee amount minus sum of prior non-reversed adjustments
+
+| Transaction date
+| Optional in request; defaults to the parent Discount Fee date if omitted
+
+| Date vs discount fee
+| Must **not** be before the parent Discount Fee transaction date
+
+| Backdating
+| **Not allowed** — transaction date must be on or after the current business date
+
+| Loan status
+| Adjustment allowed only for **Active** loans
+
+| Parent transaction
+| `relatedResourceId` must reference a non-reversed **Discount Fee** transaction
+|===
+
+==== Allocation
+
+* An allocation row is stored in `m_wc_loan_transaction_allocation`
+* Adjustment amount is allocated entirely to **principal portion** (same pattern as Discount Fee)
+
+==== Schedule impact
+
+On adjustment the system:
+
+. Regenerates the projected amortization schedule using the updated loan discount and disbursement data
+. Re-applies all recorded **actual repayments** (preserved from the previous model)
+. Updates loan balances
+
+==== Business event
+
+* `WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent` — posted after a successful adjustment
+
+== API Endpoints
+
+* *Endpoint*: `POST /v1/working-capital-loans/{loanId}/transactions?command=discountFeeAdjustment`
+* *Alternative*: `POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command=discountFeeAdjustment`
+
+[source,json]
+----
+{
+  "transactionAmount": 50.0,
+  "relatedResourceId": 99,
+  "transactionDate": "10 January 2026",
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "note": "Reduce discount fee",
+  "externalId": "WC-DISC-ADJ-001"
+}
+----
+
+* `relatedResourceId` — **Discount Fee** transaction id (not disbursement id)
+* `transactionAmount` — amount to reduce from the current loan discount (capped by remaining adjustable discount)

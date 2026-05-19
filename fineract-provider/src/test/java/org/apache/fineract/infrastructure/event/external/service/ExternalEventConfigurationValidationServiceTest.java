@@ -116,6 +116,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "SavingsAccountsStayedLockedBusinessEvent", "SavingsAccountForceWithdrawalBusinessEvent",
                 "WorkingCapitalLoanDisbursalTransactionBusinessEvent", "WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent",
                 "WorkingCapitalLoanRepaymentTransactionBusinessEvent", "WorkingCapitalLoanDiscountFeeTransactionBusinessEvent",
+                "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent",
                 "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent");
 
         List<FineractPlatformTenant> tenants = Arrays

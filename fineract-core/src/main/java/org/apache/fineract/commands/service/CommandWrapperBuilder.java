@@ -75,6 +75,7 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_DISBURSETOSAVINGS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_DISBURSEWITHOUTAUTODOWNPAYMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_DISCOUNTFEE;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_DISCOUNTFEEADJUSTMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_DOWNPAYMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ENABLE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_EXECUTE;
@@ -845,11 +846,19 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder discountWorkingCapitalLoanApplicationDisbursal(final Long loanId) {
+    public CommandWrapperBuilder discountFeeWorkingCapitalLoanTransaction(final Long loanId) {
         this.actionName = ACTION_DISCOUNTFEE;
         this.entityName = ENTITY_WORKINGCAPITALLOAN;
         this.entityId = loanId;
-        this.href = "/workingcapitalloans/" + loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions?command=discountFee";
+        return this;
+    }
+
+    public CommandWrapperBuilder discountFeeAdjustmentWorkingCapitalLoanTransaction(final Long loanId) {
+        this.actionName = ACTION_DISCOUNTFEEADJUSTMENT;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions?command=discountFeeAdjustment";
         return this;
     }
 

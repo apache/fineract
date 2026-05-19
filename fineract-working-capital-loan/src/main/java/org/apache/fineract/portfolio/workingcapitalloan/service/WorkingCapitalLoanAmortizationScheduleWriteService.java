@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
-import org.apache.fineract.portfolio.workingcapitalloan.data.RepaymentAmortizationData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
 public interface WorkingCapitalLoanAmortizationScheduleWriteService {
@@ -34,9 +33,15 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void regenerateAmortizationScheduleOnUndoDisbursal(WorkingCapitalLoan loan);
 
-    RepaymentAmortizationData applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
+    void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan);
 
     void regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan, BigDecimal newRate);
+
+    /**
+     * After a discount fee adjustment: regenerates the projected schedule with the new loan-level discount (as on
+     * disbursement generation) and re-applies recorded actual repayments only.
+     */
+    void applyDiscountFeeAdjustment(WorkingCapitalLoan loan, LocalDate adjustmentTransactionDate);
 }

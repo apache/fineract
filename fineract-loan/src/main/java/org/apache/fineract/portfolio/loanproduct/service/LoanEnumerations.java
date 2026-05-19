@@ -353,6 +353,8 @@ public final class LoanEnumerations {
             case DISCOUNT_FEE_AMORTIZATION ->
                 new LoanTransactionEnumData(LoanTransactionType.DISCOUNT_FEE_AMORTIZATION.getValue().longValue(),
                         LoanTransactionType.DISCOUNT_FEE_AMORTIZATION.getCode(), "Discount Fee Amortization");
+            case DISCOUNT_FEE_ADJUSTMENT -> new LoanTransactionEnumData(LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT.getValue().longValue(),
+                    LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT.getCode(), "Discount Fee Adjustment");
         };
     }
 

@@ -145,7 +145,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String name;
     }
 
-    @Schema(description = "Request for transaction command: repayment or creditBalanceRefund")
+    @Schema(description = "Request for transaction command: repayment, creditBalanceRefund, discountFee, or discountFeeAdjustment")
     public static final class PostWorkingCapitalLoanTransactionsRequest {
 
         private PostWorkingCapitalLoanTransactionsRequest() {}
@@ -156,6 +156,8 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "28 June 2024", description = "Transaction date")
         public String transactionDate;
+        @Schema(example = "42", description = "Disbursement transaction id for discountFee; discount fee transaction id for discountFeeAdjustment")
+        public Long relatedResourceId;
         @Schema(example = "100.0", description = "Transaction amount")
         public BigDecimal transactionAmount;
         @Schema(example = "12", description = "Optional code value id for transaction classification")
@@ -168,7 +170,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
 
-    @Schema(description = "Response for repayment/creditBalanceRefund transaction command")
+    @Schema(description = "Response for repayment, creditBalanceRefund, discountFee, or discountFeeAdjustment transaction command")
     public static final class PostWorkingCapitalLoanTransactionsResponse {
 
         private PostWorkingCapitalLoanTransactionsResponse() {}

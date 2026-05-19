@@ -699,6 +699,12 @@ public class ExternalEventConfigurationHelper {
         workingCapitalLoanDiscountDisbursalTransactionBusinessEvent.put("enabled", false);
         defaults.add(workingCapitalLoanDiscountDisbursalTransactionBusinessEvent);
 
+        Map<String, Object> workingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent = new HashMap<>();
+        workingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent.put("type",
+                "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent");
+        workingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent);
+
         return defaults;
     }
 

@@ -88,7 +88,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.valueOf(100)) //
                 .buildSubmitJson());
@@ -151,7 +151,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.valueOf(100)) //
                 .buildSubmitJson());
@@ -262,7 +262,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .buildSubmitJson());
@@ -342,7 +342,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withDiscount(BigDecimal.valueOf(100)) //
                 .buildSubmitJson());
@@ -386,7 +386,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withExternalId(externalId) //
                 .buildSubmitJson());
@@ -413,7 +413,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .withExternalId(externalId) //
                 .buildSubmitJson());
@@ -432,7 +432,7 @@ public class WorkingCapitalLoanApprovalRejectionTest {
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
-                .withPeriodPaymentRate(BigDecimal.ONE) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPayment(BigDecimal.valueOf(5500)) //
                 .buildSubmitJson());
     }

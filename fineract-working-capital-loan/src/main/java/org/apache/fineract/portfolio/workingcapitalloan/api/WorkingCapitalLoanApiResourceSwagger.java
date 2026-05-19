@@ -530,8 +530,6 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public String externalId;
         @Schema(description = "Payment details (Account No, Cheque No, Routing Code, Receipt No, Bank code)")
         public PostWorkingCapitalLoansLoanIdDisbursementPaymentDetails paymentDetails;
-        @Schema(description = "Related resource ID for transaction, e.g., related transaction ID")
-        public Long relatedResourceId;
     }
 
     @Schema(description = "Request for updating discount on a disbursed Working Capital Loan")
