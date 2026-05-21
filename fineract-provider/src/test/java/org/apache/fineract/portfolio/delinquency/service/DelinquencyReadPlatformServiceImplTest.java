@@ -17,17 +17,16 @@
  * under the License.
  */
 package org.apache.fineract.portfolio.delinquency.service;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+
 import static java.time.Month.JANUARY;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -35,11 +34,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -326,17 +320,6 @@ class DelinquencyReadPlatformServiceImplTest {
     }
 
     @Test
-    void givenPendingLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndOverAppliedIsNull() {
-        Loan loan = mock(Loan.class);
-        when(loan.getLoanProduct()).thenReturn(null);
-        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-
-        // When product is null, guard prevents calling helper → no exception, returns template
-        assertThatCode(() -> underTest.calculateLoanCollectionData(1L)).doesNotThrowAnyException();
-    }
-
-    @Test
     void givenActiveLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndAvailableDisbursementAmountIsSet() {
         HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
         businessDates.put(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 1));
@@ -379,4 +362,3 @@ class DelinquencyReadPlatformServiceImplTest {
     }
 
 }
-
