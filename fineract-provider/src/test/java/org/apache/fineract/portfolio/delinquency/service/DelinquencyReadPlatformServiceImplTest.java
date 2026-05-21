@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.delinquency.service;
 import static java.time.Month.JANUARY;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -32,12 +31,9 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
@@ -180,53 +176,6 @@ class DelinquencyReadPlatformServiceImplTest {
     }
 
     @Test
-    void givenPendingLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndOverAppliedIsNull() {
-        Loan loan = mock(Loan.class);
-        when(loan.getLoanProduct()).thenReturn(null);
-        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-
-        CollectionData result = underTest.calculateLoanCollectionData(1L);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
-    }
-
-    @Test
-    void givenActiveLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndOverAppliedIsNull() {
-        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
-        businessDates.put(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 1));
-        businessDates.put(BusinessDateType.COB_DATE, LocalDate.of(2024, 1, 1));
-        ThreadLocalContextUtil.setBusinessDates(businessDates);
-
-        try {
-            Loan loan = mock(Loan.class);
-            when(loan.getLoanProduct()).thenReturn(null);
-            when(loan.isSubmittedAndPendingApproval()).thenReturn(false);
-            when(loan.isApproved()).thenReturn(false);
-            when(loan.isCancelled()).thenReturn(false);
-            when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
-            when(loan.getDisbursedAmount()).thenReturn(BigDecimal.valueOf(5000));
-            when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
-            when(loanDelinquencyDomainService.getOverdueCollectionData(any(), any())).thenReturn(CollectionData.template());
-            when(loanDelinquencyActionRepository.findByLoanOrderById(any())).thenReturn(List.of());
-            when(configurationDomainService.getNextPaymentDateConfigForLoan()).thenReturn(null);
-            when(possibleNextRepaymentCalculationServiceDiscovery.getService(any())).thenReturn(null);
-            when(loan.getLastPaymentTransaction()).thenReturn(null);
-            when(loan.getLastRepaymentOrDownPaymentTransaction()).thenReturn(null);
-            when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(false);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-
-            CollectionData result = underTest.calculateLoanCollectionData(1L);
-
-            assertThat(result).isNotNull();
-            assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
-        } finally {
-            ThreadLocalContextUtil.reset();
-        }
-    }
-
-    @Test
     public void testMultiplePausesWithoutResumeCurrentBusinessDateIsNotOverlappingWithAnyOfThePauses() {
         // given
         CollectionData collectionData = CollectionData.template();
@@ -318,45 +267,43 @@ class DelinquencyReadPlatformServiceImplTest {
     }
 
     @Test
-    void givenActiveLoanWithNullProduct_whenCalculateLoanCollectionData_thenNoExceptionAndAvailableDisbursementAmountIsSet() {
-        HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
-        businessDates.put(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 1, 1));
-        businessDates.put(BusinessDateType.COB_DATE, LocalDate.of(2024, 1, 1));
-        ThreadLocalContextUtil.setBusinessDates(businessDates);
+    void givenPendingLoanWithOverApplyDisabled_whenCalculateLoanCollectionData_thenOverAppliedAmountNotSet() {
+        Loan loan = mock(Loan.class);
+        LoanProduct loanProduct = mock(LoanProduct.class);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.isAllowApprovedDisbursedAmountsOverApplied()).thenReturn(false);
+        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
-        try {
-            Loan loan = mock(Loan.class);
-            when(loan.getLoanProduct()).thenReturn(null);
-            when(loan.isSubmittedAndPendingApproval()).thenReturn(false);
-            when(loan.isApproved()).thenReturn(false);
-            when(loan.isCancelled()).thenReturn(false);
+        CollectionData result = underTest.calculateLoanCollectionData(1L);
 
-            // calculateAvailableDisbursementAmount() is always called for active loans
-            when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
-            when(loan.getDisbursedAmount()).thenReturn(BigDecimal.valueOf(5000));
-            LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
-            when(detail.isEnableIncomeCapitalization()).thenReturn(false);
-            when(loan.getLoanRepaymentScheduleDetail()).thenReturn(detail);
+        assertThat(result).isNotNull();
+        // over-apply disabled → helper not called → field stays at template default
+        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
 
-            when(loanDelinquencyDomainService.getOverdueCollectionData(any(), any())).thenReturn(CollectionData.template());
-            when(loanDelinquencyActionRepository.findByLoanOrderById(any())).thenReturn(List.of());
-            when(configurationDomainService.getNextPaymentDateConfigForLoan()).thenReturn(null);
-            when(possibleNextRepaymentCalculationServiceDiscovery.getService(any())).thenReturn(null);
-            when(loan.getLastPaymentTransaction()).thenReturn(null);
-            when(loan.getLastRepaymentOrDownPaymentTransaction()).thenReturn(null);
-            when(loan.isEnableInstallmentLevelDelinquency()).thenReturn(false);
-            when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+    @Test
+    void givenPendingLoanWithOverApplyEnabled_whenCalculateLoanCollectionData_thenOverAppliedAmountIsSet() {
+        Loan loan = mock(Loan.class);
+        LoanProduct loanProduct = mock(LoanProduct.class);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.isAllowApprovedDisbursedAmountsOverApplied()).thenReturn(true);
+        when(loanProduct.getOverAppliedCalculationType()).thenReturn("flat");
+        when(loanProduct.getOverAppliedNumber()).thenReturn(500);
+        when(loan.getProposedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+        when(loan.getDisbursedAmount()).thenReturn(BigDecimal.ZERO);
+        LoanProductRelatedDetail detail = mock(LoanProductRelatedDetail.class);
+        when(detail.isEnableIncomeCapitalization()).thenReturn(false);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(detail);
+        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
-            CollectionData result = underTest.calculateLoanCollectionData(1L);
+        CollectionData result = underTest.calculateLoanCollectionData(1L);
 
-            assertThat(result).isNotNull();
-            // calculateAvailableDisbursementAmount = 10000 - 5000 = 5000
-            assertThat(result.getAvailableDisbursementAmount()).isEqualByComparingTo(BigDecimal.valueOf(5000));
-
-            assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
-        } finally {
-            ThreadLocalContextUtil.reset();
-        }
+        assertThat(result).isNotNull();
+        // flat over-apply: 10000 + 500 = 10500, minus 0 disbursed = 10500
+        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.valueOf(10500));
     }
 
 }
