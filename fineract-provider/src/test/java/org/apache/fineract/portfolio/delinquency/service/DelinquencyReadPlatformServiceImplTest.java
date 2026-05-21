@@ -184,8 +184,6 @@ class DelinquencyReadPlatformServiceImplTest {
         Loan loan = mock(Loan.class);
         when(loan.getLoanProduct()).thenReturn(null);
         when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
-        // REMOVED: when(loan.isApproved()).thenReturn(false); ← unnecessary
-        // REMOVED: when(loan.isCancelled()).thenReturn(false); ← unnecessary
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
         CollectionData result = underTest.calculateLoanCollectionData(1L);
@@ -354,7 +352,7 @@ class DelinquencyReadPlatformServiceImplTest {
             assertThat(result).isNotNull();
             // calculateAvailableDisbursementAmount = 10000 - 5000 = 5000
             assertThat(result.getAvailableDisbursementAmount()).isEqualByComparingTo(BigDecimal.valueOf(5000));
-            // LoanProduct is null → over-applied helper skipped → field stays at template default
+            
             assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
         } finally {
             ThreadLocalContextUtil.reset();
