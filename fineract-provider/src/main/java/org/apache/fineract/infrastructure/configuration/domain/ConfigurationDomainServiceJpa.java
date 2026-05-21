@@ -596,4 +596,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public boolean isBlockTransactionsOnClosedOverpaidLoansEnabled() {
         return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.BLOCK_TRANSACTIONS_ON_CLOSED_OVERPAID_LOANS).isEnabled();
     }
+
+    @Override
+    public boolean isIdempotencyValidationEnabled() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.ENABLE_IDEMPOTENCY_VALIDATION).isEnabled();
+    }
 }

@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.filters.CallerIpTrackingFilter;
@@ -120,6 +121,9 @@ public class AuthorizationServerConfig {
 
     @Autowired
     private BusinessDateReadPlatformService businessDateReadPlatformService;
+
+    @Autowired
+    private ConfigurationDomainService configurationDomainService;
 
     @Autowired
     ProgressiveLoanModelCheckerFilter progressiveLoanModelCheckerFilter;
@@ -306,7 +310,8 @@ public class AuthorizationServerConfig {
     }
 
     public IdempotencyStoreFilter idempotencyStoreFilter() {
-        return new IdempotencyStoreFilter(fineractRequestContextHolder, idempotencyStoreHelper, fineractProperties);
+        return new IdempotencyStoreFilter(fineractRequestContextHolder, idempotencyStoreHelper, fineractProperties,
+                configurationDomainService);
     }
 
     public CorrelationHeaderFilter correlationHeaderFilter() {

@@ -27,9 +27,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.springframework.lang.NonNull;
@@ -43,10 +45,12 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
     private final FineractRequestContextHolder fineractRequestContextHolder;
     private final IdempotencyStoreHelper helper;
     private final FineractProperties fineractProperties;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
+        warnIfIdempotencyKeyHeaderMissing(request);
         Mutable<ContentCachingResponseWrapper> wrapper = new MutableObject<>();
         if (helper.isAllowedContentTypeRequest(request)) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));
@@ -65,6 +69,23 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
         }
         if (wrapper.get() != null) {
             wrapper.get().copyBodyToResponse();
+        }
+    }
+
+    private void warnIfIdempotencyKeyHeaderMissing(HttpServletRequest request) {
+        if (!configurationDomainService.isIdempotencyValidationEnabled()) {
+            return;
+        }
+        if (!helper.isAllowedContentTypeRequest(request)) {
+            return;
+        }
+        String headerName = fineractProperties.getIdempotencyKeyHeaderName();
+        if (StringUtils.isNotBlank(request.getHeader(headerName))) {
+            return;
+        }
+        if (log.isWarnEnabled()) {
+            log.warn("Idempotency key header [{}] is missing. Clients should provide it to avoid unintended duplicate command processing.",
+                    headerName);
         }
     }
 

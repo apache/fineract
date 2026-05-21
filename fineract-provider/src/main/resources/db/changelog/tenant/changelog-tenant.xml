@@ -255,4 +255,5 @@
     <include file="parts/0234_add_missing_processing_result_enum_values.xml" relativeToChangelogFile="true" />
     <include file="parts/0235_transaction_summary_reports_buydown_fee_allocation.xml" relativeToChangelogFile="true" />
     <include file="parts/0236_transaction_summary_reports_fix_for_cap_income_amortization_duplicates.xml" relativeToChangelogFile="true" />
+    <include file="parts/0237_add_enable_idempotency_validation_config.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
