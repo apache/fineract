@@ -352,7 +352,7 @@ class DelinquencyReadPlatformServiceImplTest {
             assertThat(result).isNotNull();
             // calculateAvailableDisbursementAmount = 10000 - 5000 = 5000
             assertThat(result.getAvailableDisbursementAmount()).isEqualByComparingTo(BigDecimal.valueOf(5000));
-            
+
             assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
         } finally {
             ThreadLocalContextUtil.reset();
