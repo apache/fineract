@@ -538,7 +538,12 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 transaction.reverse();
             });
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
-            throw new UnsupportedOperationException("Undo Loan to Savings Account Transfer is not implemented");
+            accountTransferDetails.getAccountTransferTransactions().forEach(transaction -> {
+                this.savingsAccountWritePlatformService.undoTransaction(transaction.getToSavingsTransaction().getSavingsAccount().getId(),
+                        transaction.getToSavingsTransaction().getId(), true);
+                this.loanAccountDomainService.reverseTransfer(transaction.getFromLoanTransaction());
+                transaction.reverse();
+            });
         }
 
         final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder() //

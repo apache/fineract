@@ -74,6 +74,24 @@ public class AccountTransferStepDef extends AbstractStepDef {
         ok(() -> fineractClient.accountTransfers().accountTransferOperation(response.getResourceId(), "undo"));
     }
 
+    @When("Initiate account transfer from loan to savings on {string} for {double}")
+    public void initiateLoanToSavingsTransfer(String date, double amount) {
+        PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+        long clientId = clientResponse.getClientId();
+        long savingsId = ((PostSavingsAccountsResponse) testContext().get(TestContextKey.EUR_SAVINGS_ACCOUNT_CREATE_RESPONSE))
+                .getSavingsId();
+        long loanId = ((PostLoansResponse) testContext().get(TestContextKey.LOAN_CREATE_RESPONSE)).getLoanId();
+
+        AccountTransferRequest request = new AccountTransferRequest().fromClientId(String.valueOf(clientId))
+                .fromAccountId(String.valueOf(loanId)).fromAccountType(LOAN_ACCOUNT_TYPE).fromOfficeId("1")
+                .toClientId(String.valueOf(clientId)).toAccountId(String.valueOf(savingsId)).toAccountType(SAVINGS_ACCOUNT_TYPE)
+                .toOfficeId("1").transferDate(date).transferAmount(String.valueOf(amount)).transferDescription("Transfer")
+                .dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+
+        PostAccountTransfersResponse response = ok(() -> fineractClient.accountTransfers().createAccountTransfer(request));
+        testContext().set("accountTransferResponse", response);
+    }
+
     @When("Undo the last account transfer it fails with error: it is already reverted")
     public void undoAccountTransferFail() {
         PostAccountTransfersResponse response = testContext().get("accountTransferResponse");
