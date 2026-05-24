@@ -5352,11 +5352,39 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
     private PostLoanProductsResponse createLoanProductIdempotent(PostLoanProductsRequest loanProductRequest) {
         String productName = loanProductRequest.getName();
         log.debug("Attempting to create loan product: {}", productName);
+
+        // First, check if product already exists
+        PostLoanProductsResponse existingResponse = findExistingProduct(productName);
+        if (existingResponse != null) {
+            return existingResponse;
+        }
+
+        // Try to create
+        log.debug("Creating new loan product: {}", productName);
+        try {
+            PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(loanProductRequest, Map.of()));
+            log.debug("Successfully created loan product '{}' with ID: {}", productName, response.getResourceId());
+            return response;
+        } catch (Exception e) {
+            // On failure (e.g., race condition with parallel thread or shortName collision from previous run),
+            // re-check if the product now exists before propagating the error
+            log.warn("Failed to create loan product '{}', re-checking if it was created concurrently", productName, e);
+            PostLoanProductsResponse retryResponse = findExistingProduct(productName);
+            if (retryResponse != null) {
+                log.info("Loan product '{}' found on retry with ID: {}", productName, retryResponse.getResourceId());
+                return retryResponse;
+            }
+            // If still not found, propagate the original error
+            log.error("FAILED to create loan product '{}' and it doesn't exist in database", productName);
+            throw e;
+        }
+    }
+
+    private PostLoanProductsResponse findExistingProduct(String productName) {
         try {
             List<GetLoanProductsResponse> existingProducts = fineractClient.loanProducts().retrieveAllLoanProducts(Map.of());
             GetLoanProductsResponse existingProduct = existingProducts.stream().filter(p -> productName.equals(p.getName())).findFirst()
                     .orElse(null);
-
             if (existingProduct != null) {
                 log.debug("Loan product '{}' already exists with ID: {}", productName, existingProduct.getId());
                 PostLoanProductsResponse response = new PostLoanProductsResponse();
@@ -5366,15 +5394,6 @@ public class LoanProductGlobalInitializerStep implements FineractGlobalInitializ
         } catch (Exception e) {
             log.warn("Error checking if loan product '{}' exists", productName, e);
         }
-
-        log.debug("Creating new loan product: {}", productName);
-        try {
-            PostLoanProductsResponse response = ok(() -> fineractClient.loanProducts().createLoanProduct(loanProductRequest, Map.of()));
-            log.debug("Successfully created loan product '{}' with ID: {}", productName, response.getResourceId());
-            return response;
-        } catch (Exception e) {
-            log.error("FAILED to create loan product '{}'", productName, e);
-            throw e;
-        }
+        return null;
     }
 }

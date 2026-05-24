@@ -261,13 +261,14 @@ public class AccountingProcessorHelper {
                 }
             }
 
-            if (!isAccountTransfer) {
-                isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
+            boolean localIsAccountTransfer = isAccountTransfer;
+            if (!localIsAccountTransfer) {
+                localIsAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.SAVINGS);
             }
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount, isAccountTransfer,
-                    taxPayments);
+                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount,
+                    localIsAccountTransfer, taxPayments);
 
             newSavingsTransactions.add(transaction);
 
