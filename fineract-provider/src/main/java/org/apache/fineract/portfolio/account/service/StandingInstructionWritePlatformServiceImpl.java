@@ -123,17 +123,26 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         return PortfolioAccountType.SAVINGS.equals(fromAccountType) && PortfolioAccountType.SAVINGS.equals(toAccountType);
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult update(final Long id, final JsonCommand command) {
-        this.standingInstructionDataValidator.validateForUpdate(command);
-        AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id)
+        final AccountTransferStandingInstruction standingInstructionForUpdate = this.standingInstructionRepository.findById(id)
                 .orElseThrow(() -> new StandingInstructionNotFoundException(id));
-        final Map<String, Object> actualChanges = standingInstructionsForUpdate.update(command);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(id) //
-                .with(actualChanges) //
-                .build();
+
+        this.standingInstructionDataValidator.validateForUpdate(command, standingInstructionForUpdate);
+
+        final Map<String, Object> actualChanges = standingInstructionForUpdate.update(command);
+        if (!actualChanges.isEmpty()) {
+            try {
+                this.standingInstructionRepository.saveAndFlush(standingInstructionForUpdate);
+            } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+                final Throwable throwable = dve.getMostSpecificCause();
+                handleDataIntegrityIssues(command, throwable, dve);
+                return CommandProcessingResult.empty();
+            }
+        }
+
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(id).with(actualChanges).build();
     }
 
     @Override

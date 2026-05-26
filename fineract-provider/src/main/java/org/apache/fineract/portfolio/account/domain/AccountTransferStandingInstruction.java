@@ -19,6 +19,9 @@
 package org.apache.fineract.portfolio.account.domain;
 
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.ACCOUNT_TRANSFER_NOT_ALLOWED_FOR_LOAN_ERROR_CODE;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.AMOUNT_NOT_ALLOWED_FOR_DUES_ERROR_CODE;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
@@ -44,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -54,6 +58,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 @Entity
 @Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name" }, name = "name") })
+@Getter
 public class AccountTransferStandingInstruction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
@@ -97,7 +102,7 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     private Integer recurrenceOnMonth;
 
     @Column(name = "last_run_date")
-    private LocalDate latsRunDate;
+    private LocalDate lastRunDate;
 
     protected AccountTransferStandingInstruction() {
 
@@ -205,13 +210,13 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
+            if (!java.util.Objects.equals(this.recurrenceOnDay, dayOfMonthValue)) {
                 actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthValue();
-            if (!this.recurrenceOnMonth.equals(monthOfYear)) {
+            if (!java.util.Objects.equals(this.recurrenceOnMonth, monthOfYear)) {
                 actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnMonth = monthOfYear;
             }
@@ -222,6 +227,46 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             actualChanges.put(recurrenceIntervalParamName, newValue);
             this.recurrenceInterval = newValue;
         }
+
+        if (StandingInstructionType.fromInt(this.instructionType).isDuesAmoutTransfer()) {
+            if (this.amount != null) {
+                actualChanges.put(amountParamName, null);
+                this.amount = null;
+            }
+        }
+
+        if (AccountTransferRecurrenceType.fromInt(this.recurrenceType).isDuesRecurrence()) {
+            if (this.recurrenceFrequency != null) {
+                actualChanges.put(recurrenceFrequencyParamName, null);
+                this.recurrenceFrequency = null;
+            }
+            if (this.recurrenceInterval != null) {
+                actualChanges.put(recurrenceIntervalParamName, null);
+                this.recurrenceInterval = null;
+            }
+            if (this.recurrenceOnDay != null) {
+                actualChanges.put(recurrenceOnMonthDayParamName, null);
+                this.recurrenceOnDay = null;
+            }
+            if (this.recurrenceOnMonth != null) {
+                this.recurrenceOnMonth = null;
+            }
+        }
+
+        if (this.recurrenceFrequency != null) {
+            final PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(this.recurrenceFrequency);
+
+            if (frequencyType.isDaily() || frequencyType.isWeekly()) {
+                if (this.recurrenceOnDay != null) {
+                    actualChanges.put(recurrenceOnMonthDayParamName, null);
+                    this.recurrenceOnDay = null;
+                }
+                if (this.recurrenceOnMonth != null) {
+                    this.recurrenceOnMonth = null;
+                }
+            }
+        }
+
         validateDependencies(baseDataValidator);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -258,13 +303,19 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             baseDataValidator.reset().parameter(amountParamName).value(this.amount).notNull();
         }
 
+        if (StandingInstructionType.fromInt(this.instructionType).isDuesAmoutTransfer()) {
+            if (this.amount != null) {
+                baseDataValidator.reset().parameter(amountParamName).failWithCode(AMOUNT_NOT_ALLOWED_FOR_DUES_ERROR_CODE);
+            }
+        }
+
         String errorCode = null;
         if (this.accountTransferDetails.transferType().isAccountTransfer()
                 && (this.accountTransferDetails.fromSavingsAccount() == null || this.accountTransferDetails.toSavingsAccount() == null)) {
-            errorCode = "not.account.transfer";
+            errorCode = ACCOUNT_TRANSFER_NOT_ALLOWED_FOR_LOAN_ERROR_CODE;
         } else if (this.accountTransferDetails.transferType().isLoanRepayment()
                 && (this.accountTransferDetails.fromSavingsAccount() == null || this.accountTransferDetails.toLoanAccount() == null)) {
-            errorCode = "not.loan.repayment";
+            errorCode = NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE;
         }
         if (errorCode != null) {
             baseDataValidator.reset().parameter(transferTypeParamName).failWithCode(errorCode);
@@ -272,8 +323,8 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
 
     }
 
-    public void updateLatsRunDate(LocalDate latsRunDate) {
-        this.latsRunDate = latsRunDate;
+    public void updateLastRunDate(LocalDate lastRunDate) {
+        this.lastRunDate = lastRunDate;
     }
 
     public void updateStatus(Integer status) {
