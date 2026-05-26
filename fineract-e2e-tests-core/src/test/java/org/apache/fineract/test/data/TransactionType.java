@@ -44,6 +44,7 @@ public enum TransactionType {
     INTEREST_REFUND("interestRefund"), //
     WRITE_OFF("writeOff"), //
     DISCOUNT_FEE_AMORTIZATION("discountFeeAmortization"), //
+    DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT("discountFeeAmortizationAdjustment"), //
     ;
 
     public final String value;

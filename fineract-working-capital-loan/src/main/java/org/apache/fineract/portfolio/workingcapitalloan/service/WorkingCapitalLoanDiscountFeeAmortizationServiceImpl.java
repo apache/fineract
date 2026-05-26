@@ -58,25 +58,34 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
             return;
         }
 
-        final BigDecimal alreadyPosted = calculateAlreadyPostedAmount(loan);
-        final BigDecimal amortizationAmount = scheduleAmortization.subtract(alreadyPosted);
+        final BigDecimal alreadyRecognized = calculateAlreadyRecognizedAmount(loan);
+        final BigDecimal delta = scheduleAmortization.subtract(alreadyRecognized);
 
-        if (!MathUtil.isGreaterThanZero(amortizationAmount)) {
+        if (MathUtil.isZero(delta)) {
             log.debug("Skipping discount fee amortization for WC loan [{}] - no new amount to amortize (schedule={}, posted={})",
-                    loan.getId(), scheduleAmortization, alreadyPosted);
+                    loan.getId(), scheduleAmortization, alreadyRecognized);
+            syncIncomeBalances(loan, scheduleAmortization);
             return;
         }
 
-        final WorkingCapitalLoanTransaction amortizationTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan,
-                amortizationAmount, transactionDate, externalIdFactory.create());
-        transactionRepository.saveAndFlush(amortizationTxn);
-        loan.getTransactions().add(amortizationTxn);
+        final boolean isChargedOff = false;
+        if (MathUtil.isGreaterThanZero(delta)) {
+            final WorkingCapitalLoanTransaction amortizationTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan, delta,
+                    transactionDate, externalIdFactory.create());
+            transactionRepository.saveAndFlush(amortizationTxn);
+            loan.getTransactions().add(amortizationTxn);
+            accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, isChargedOff);
+        } else {
+            final BigDecimal adjustmentAmount = delta.negate();
+            final WorkingCapitalLoanTransaction adjustmentTxn = WorkingCapitalLoanTransaction.discountFeeAmortizationAdjustment(loan,
+                    adjustmentAmount, transactionDate, externalIdFactory.create());
+            transactionRepository.saveAndFlush(adjustmentTxn);
+            loan.getTransactions().add(adjustmentTxn);
+            accountingProcessor.postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, adjustmentTxn, isChargedOff);
+        }
 
+        log.debug("Posted discount fee amortization of {} for WC loan [{}]", delta, loan.getId());
         syncIncomeBalances(loan, scheduleAmortization);
-
-        accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, false);
-
-        log.debug("Posted discount fee amortization of {} for WC loan [{}]", amortizationAmount, loan.getId());
     }
 
     private BigDecimal calculateScheduleAmortization(final WorkingCapitalLoan loan) {
@@ -85,10 +94,20 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
                 .map(ProjectedAmortizationScheduleModel::totalActualAmortization).orElse(BigDecimal.ZERO);
     }
 
-    private BigDecimal calculateAlreadyPostedAmount(final WorkingCapitalLoan loan) {
-        return loan.getTransactions().stream()
-                .filter(txn -> txn.getTypeOf() == LoanTransactionType.DISCOUNT_FEE_AMORTIZATION && !txn.isReversed())
-                .map(WorkingCapitalLoanTransaction::getTransactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    private BigDecimal calculateAlreadyRecognizedAmount(final WorkingCapitalLoan loan) {
+        BigDecimal amortization = BigDecimal.ZERO;
+        BigDecimal adjustment = BigDecimal.ZERO;
+        for (final WorkingCapitalLoanTransaction txn : loan.getTransactions()) {
+            if (txn.isReversed()) {
+                continue;
+            }
+            if (txn.getTypeOf() == LoanTransactionType.DISCOUNT_FEE_AMORTIZATION) {
+                amortization = amortization.add(txn.getTransactionAmount());
+            } else if (txn.getTypeOf() == LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT) {
+                adjustment = adjustment.add(txn.getTransactionAmount());
+            }
+        }
+        return amortization.subtract(adjustment);
     }
 
     private void syncIncomeBalances(final WorkingCapitalLoan loan, final BigDecimal scheduleAmortization) {
