@@ -66,4 +66,7 @@ public class JournalEntrySummary extends AbstractAuditableWithUTCDateTimeCustom<
     @Column(name = "job_execution_id", nullable = false)
     private Long jobExecutionId;
 
+    @Column(name = "originator_external_ids", length = 1000)
+    private String originatorExternalIds;
+
 }

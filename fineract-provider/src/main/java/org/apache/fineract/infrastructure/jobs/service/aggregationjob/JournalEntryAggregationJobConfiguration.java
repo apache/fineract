@@ -22,6 +22,7 @@ import static org.apache.fineract.infrastructure.jobs.service.aggregationjob.Jou
 import static org.apache.fineract.infrastructure.jobs.service.aggregationjob.JournalEntryAggregationJobConstant.JOB_TRACKING_STEP_NAME;
 
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.data.JournalEntryAggregationSummaryData;
@@ -59,6 +60,8 @@ public class JournalEntryAggregationJobConfiguration {
     private JournalEntryAggregationTrackingTasklet journalEntryAggregationTrackingTasklet;
     @Autowired
     private TenantDataSourceFactory tenantDataSourceFactory;
+    @Autowired
+    private DatabaseTypeResolver databaseTypeResolver;
 
     @Bean
     public Step journalEntryAggregationSummaryStep() {
@@ -70,7 +73,7 @@ public class JournalEntryAggregationJobConfiguration {
 
     @Bean
     public JournalEntryAggregationJobReader journalEntryAggregationJobReader() {
-        return new JournalEntryAggregationJobReader(tenantDataSourceFactory);
+        return new JournalEntryAggregationJobReader(tenantDataSourceFactory, databaseTypeResolver);
     }
 
     @Bean

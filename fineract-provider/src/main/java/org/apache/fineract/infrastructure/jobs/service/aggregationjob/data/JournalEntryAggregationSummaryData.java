@@ -41,4 +41,5 @@ public class JournalEntryAggregationSummaryData {
     private Boolean manualEntry;
     private String currencyCode;
     private Long jobExecutionId;
+    private String originatorExternalIds;
 }

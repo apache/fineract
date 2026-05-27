@@ -104,6 +104,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         originatorHelper = new FeignLoanOriginatorHelper(fineractClient());
 
         todaysDate = Utils.getLocalDateOfTenant().toString();
+        String uniqueSuffix = Utils.randomStringGenerator("", 6);
 
         originalBusinessSteps = ok(
                 () -> fineractClient().businessStepConfiguration().retrieveAllConfiguredBusinessStep("LOAN_CLOSE_OF_BUSINESS"))
@@ -112,12 +113,12 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
 
         configureBusinessSteps();
 
-        assetAccount = accountHelper.createAssetAccount("TrialBal");
-        feePenaltyAccount = accountHelper.createAssetAccount("TrialBalFP");
-        transferAccount = accountHelper.createAssetAccount("TrialBalTR");
-        expenseAccount = accountHelper.createExpenseAccount("TrialBalEXP");
-        incomeAccount = accountHelper.createIncomeAccount("TrialBalINC");
-        overpaymentAccount = accountHelper.createLiabilityAccount("TrialBalOP");
+        assetAccount = accountHelper.createAssetAccount("TrBal" + uniqueSuffix);
+        feePenaltyAccount = accountHelper.createAssetAccount("TrBalFP" + uniqueSuffix);
+        transferAccount = accountHelper.createAssetAccount("TrBalTR" + uniqueSuffix);
+        expenseAccount = accountHelper.createExpenseAccount("TrBalEX" + uniqueSuffix);
+        incomeAccount = accountHelper.createIncomeAccount("TrBalIN" + uniqueSuffix);
+        overpaymentAccount = accountHelper.createLiabilityAccount("TrBalOP" + uniqueSuffix);
 
         setupFinancialActivityMapping();
     }
@@ -273,6 +274,45 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
 
             assertTrue(hasOriginatorIdEntry, "Report must contain entries for originator external ids '" + originatorExternalId
                     + "'. Actual rows: " + report.getData());
+        });
+    }
+
+    @Test
+    @Order(6)
+    public void testOriginatorExternalIdsPersistedViaAggregationJobAppearInSnapshotPath() {
+        runWithBusinessDate("2020-04-01", () -> {
+            // Arrange: create a loan with an originator attached, disburse on 2020-04-01
+            Long clientId = createClient("01 April 2020");
+            String originatorExternalId = UUID.randomUUID().toString();
+            Long loanId = createAndDisburseLoan(clientId, "01 April 2020", "01 April 2020", null, originatorExternalId);
+            assertNotNull(loanId);
+
+            // Act step 1: advance to 2020-04-02 and run Loan COB
+            // This creates acc_gl_journal_entry rows with submitted_on_date = 2020-04-01
+            advanceBusinessDateAndRunCob("2020-04-02");
+
+            // Act step 2: advance to 2020-04-03 and run the Journal Entry Aggregation job.
+            // The job's upper bound is businessDate - 1 = 2020-04-02, so 2020-04-01 entries
+            // are within range and get written into m_journal_entry_aggregation_summary
+            // with originator_external_ids populated (our new change).
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2020-04-03");
+            schedulerHelper.executeAndAwaitJob("Journal Entry Aggregation");
+
+            // Assert: run the report for 2020-04-04. The aggregation job ran with business
+            // date 2020-04-03, storing aggregated_on_date_to = 2020-04-02. The aggregated_date
+            // CTE filters WHERE aggregated_on_date_to < '${endDate}', so endDate must be strictly
+            // after 2020-04-02 for the snapshot to activate. Migration 0236 then makes
+            // summary_snapshot_baseline_data read originator_external_ids instead of NULL.
+            RunReportsResponse report = runReport("2020-04-04");
+            assertNotNull(report.getData());
+            assertFalse(report.getData().isEmpty(), "Report must contain data after aggregation job has run");
+
+            int originatorColIdx = findColumnIndex(report, "originator_external_ids");
+            boolean hasOriginatorViaSnapshot = report.getData().stream()
+                    .anyMatch(row -> originatorExternalId.equals(String.valueOf(row.getRow().get(originatorColIdx))));
+
+            assertTrue(hasOriginatorViaSnapshot, "Report must contain originator '" + originatorExternalId
+                    + "' sourced from aggregation snapshot (summary_snapshot_baseline_data path). " + "Actual rows: " + report.getData());
         });
     }
 

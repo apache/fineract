@@ -84,6 +84,7 @@ public class JournalEntryAggregationWriterServiceImpl implements JournalEntryAgg
         entrySummary.setExternalOwnerId(summaryDTO.getExternalOwnerId());
         entrySummary.setAggregatedOnDate(summaryDTO.getAggregatedOnDate());
         entrySummary.setJobExecutionId(summaryDTO.getJobExecutionId());
+        entrySummary.setOriginatorExternalIds(summaryDTO.getOriginatorExternalIds());
         return entrySummary;
     }
 

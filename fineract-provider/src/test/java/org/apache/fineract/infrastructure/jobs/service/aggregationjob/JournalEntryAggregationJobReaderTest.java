@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.data.JournalEntryAggregationSummaryData;
 import org.junit.jupiter.api.AfterEach;
@@ -55,6 +56,8 @@ public class JournalEntryAggregationJobReaderTest {
     private FineractPlatformTenantConnection fineractPlatformTenantConnection;
     @Mock
     private TenantDataSourceFactory tenantDataSourceFactory;
+    @Mock
+    private DatabaseTypeResolver databaseTypeResolver;
     @Mock
     private JobExecution jobExecution;
     @Mock
@@ -89,7 +92,7 @@ public class JournalEntryAggregationJobReaderTest {
         setupResultSetMocks();
 
         // Act
-        reader = new JournalEntryAggregationJobReader(tenantDataSourceFactory);
+        reader = new JournalEntryAggregationJobReader(tenantDataSourceFactory, databaseTypeResolver);
         JournalEntryAggregationSummaryData result = invokeMapRowMethod(resultSet, 1);
 
         // Assert
@@ -101,6 +104,7 @@ public class JournalEntryAggregationJobReaderTest {
         assertEquals("USD", result.getCurrencyCode(), "Currency code should match");
         assertEquals(LocalDate.of(2023, 6, 15), result.getAggregatedOnDate(), "Aggregated date should match");
         assertEquals(Long.valueOf(500L), result.getExternalOwnerId(), "Asset owner should match");
+        assertEquals("ext-001, ext-002", result.getOriginatorExternalIds(), "Originator external ids should match");
         assertEquals(new BigDecimal("1000.00"), result.getDebitAmount(), "Debit amount should match");
         assertEquals(Boolean.FALSE, result.getManualEntry(), "Manual entry should be false");
         assertEquals(ThreadLocalContextUtil.getBusinessDate(), result.getSubmittedOnDate(), "Submitted on date should match business date");
@@ -112,11 +116,13 @@ public class JournalEntryAggregationJobReaderTest {
         setupResultSetMocksWithNullOwner();
 
         // Act
-        reader = new JournalEntryAggregationJobReader(tenantDataSourceFactory);
+        reader = new JournalEntryAggregationJobReader(tenantDataSourceFactory, databaseTypeResolver);
         JournalEntryAggregationSummaryData result = invokeMapRowMethod(resultSet, 1);
 
         // Assert
         assertEquals(Long.valueOf(0L), result.getExternalOwnerId(), "Asset owner should be 0 when null in resultset");
+        org.junit.jupiter.api.Assertions.assertNull(result.getOriginatorExternalIds(),
+                "Originator external ids should be null when not in resultset");
     }
 
     private void setupResultSetMocks() throws SQLException {
@@ -126,6 +132,7 @@ public class JournalEntryAggregationJobReaderTest {
         when(resultSet.getDate("aggregatedOnDate")).thenReturn(Date.valueOf(LocalDate.of(2023,6,15)));
         when(resultSet.findColumn("externalOwner")).thenReturn(5);
         when(resultSet.getLong(5)).thenReturn(500L);
+        when(resultSet.getString("originatorExternalIds")).thenReturn("ext-001, ext-002");
         when(resultSet.getLong("officeId")).thenReturn(1L);
         when(resultSet.getLong("entityTypeEnum")).thenReturn(1L);
         when(resultSet.getBigDecimal("debitAmount")).thenReturn(new BigDecimal("1000.00"));
