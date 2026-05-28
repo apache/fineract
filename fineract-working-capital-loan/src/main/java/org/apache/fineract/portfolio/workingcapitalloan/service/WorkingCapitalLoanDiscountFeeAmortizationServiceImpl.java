@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -50,14 +51,9 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
 
     @Override
     @Transactional
-    public void processDiscountFeeAmortization(final WorkingCapitalLoan loan, final LocalDate transactionDate) {
+    public Optional<WorkingCapitalLoanTransaction> processDiscountFeeAmortization(final WorkingCapitalLoan loan,
+            final LocalDate transactionDate) {
         final BigDecimal scheduleAmortization = calculateScheduleAmortization(loan);
-        if (MathUtil.isZero(scheduleAmortization)) {
-            log.debug("Skipping discount fee amortization for WC loan [{}] - no amortization on schedule", loan.getId());
-            syncIncomeBalances(loan, scheduleAmortization);
-            return;
-        }
-
         final BigDecimal alreadyRecognized = calculateAlreadyRecognizedAmount(loan);
         final BigDecimal delta = scheduleAmortization.subtract(alreadyRecognized);
 
@@ -65,27 +61,28 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
             log.debug("Skipping discount fee amortization for WC loan [{}] - no new amount to amortize (schedule={}, posted={})",
                     loan.getId(), scheduleAmortization, alreadyRecognized);
             syncIncomeBalances(loan, scheduleAmortization);
-            return;
+            return Optional.empty();
         }
 
         final boolean isChargedOff = false;
+        final WorkingCapitalLoanTransaction postedTxn;
         if (MathUtil.isGreaterThanZero(delta)) {
-            final WorkingCapitalLoanTransaction amortizationTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan, delta,
-                    transactionDate, externalIdFactory.create());
-            transactionRepository.saveAndFlush(amortizationTxn);
-            loan.getTransactions().add(amortizationTxn);
-            accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, isChargedOff);
+            postedTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan, delta, transactionDate, externalIdFactory.create());
+            transactionRepository.saveAndFlush(postedTxn);
+            loan.getTransactions().add(postedTxn);
+            accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, postedTxn, isChargedOff);
         } else {
             final BigDecimal adjustmentAmount = delta.negate();
-            final WorkingCapitalLoanTransaction adjustmentTxn = WorkingCapitalLoanTransaction.discountFeeAmortizationAdjustment(loan,
-                    adjustmentAmount, transactionDate, externalIdFactory.create());
-            transactionRepository.saveAndFlush(adjustmentTxn);
-            loan.getTransactions().add(adjustmentTxn);
-            accountingProcessor.postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, adjustmentTxn, isChargedOff);
+            postedTxn = WorkingCapitalLoanTransaction.discountFeeAmortizationAdjustment(loan, adjustmentAmount, transactionDate,
+                    externalIdFactory.create());
+            transactionRepository.saveAndFlush(postedTxn);
+            loan.getTransactions().add(postedTxn);
+            accountingProcessor.postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, postedTxn, isChargedOff);
         }
 
         log.debug("Posted discount fee amortization of {} for WC loan [{}]", delta, loan.getId());
         syncIncomeBalances(loan, scheduleAmortization);
+        return Optional.of(postedTxn);
     }
 
     private BigDecimal calculateScheduleAmortization(final WorkingCapitalLoan loan) {

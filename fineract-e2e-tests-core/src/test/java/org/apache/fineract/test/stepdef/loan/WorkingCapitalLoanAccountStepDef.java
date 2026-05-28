@@ -41,6 +41,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1332,6 +1333,22 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set("DISCOUNT", synthetic);
     }
 
+    @When("Admin undo the last Discount fee adjustment on Working Capital loan account")
+    public void undoLastDiscountFeeAdjustmentWCLoan() {
+        final Long loanId = getCreatedLoanId();
+        final GetWorkingCapitalLoansLoanIdResponse loan = retrieveLoanDetails(loanId);
+        Assertions.assertNotNull(loan.getTransactions());
+        final GetWorkingCapitalLoanTransactionIdResponse adjustmentTxn = loan.getTransactions().stream()
+                .filter(t -> t.getType() != null && "loanTransactionType.discountFeeAdjustment".equals(t.getType().getCode()))
+                .filter(t -> !Boolean.TRUE.equals(t.getReversed()))
+                .max(Comparator.comparing(GetWorkingCapitalLoanTransactionIdResponse::getId))
+                .orElseThrow(() -> new IllegalStateException("Active discount fee adjustment transaction not found on loan"));
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(adjustmentTxn.getId());
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId,
+                "undoDiscountFeeAdjustment", request));
+    }
+
     @And("Add Discount fee adjustment with {string} amount on Working Capital loan account failed due to exceeding discount amount")
     public void addDiscountFeeAdjustmentExceededFailure(final String adjustmentAmount) {
         addDiscountFeeAdjustmentFailedCheck(adjustmentAmount, null, ErrorMessageHelper.discountAdjustmentExceedFailure());
@@ -1343,9 +1360,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 ErrorMessageHelper.discountAdjustmentBeforeDiscountDateFailure());
     }
 
-    @Then("Add Discount fee adjustment with {string} amount and transaction date {string} on Working Capital loan account failed due to backdated transaction date")
-    public void addDiscountFeeAdjustmentBackdatedFailure(final String adjustmentAmount, final String transactionDate) {
-        addDiscountFeeAdjustmentFailedCheck(adjustmentAmount, transactionDate, ErrorMessageHelper.discountAdjustmentBackdatedFailure());
+    @Then("Add Discount fee adjustment with {string} amount and transaction date {string} on Working Capital loan account failed due to future transaction date")
+    public void addDiscountFeeAdjustmentFutureDateFailure(final String adjustmentAmount, final String transactionDate) {
+        addDiscountFeeAdjustmentFailedCheck(adjustmentAmount, transactionDate, ErrorMessageHelper.discountAdjustmentFutureDateFailure());
     }
 
     @And("Working Capital Loan has transactions:")

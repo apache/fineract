@@ -38,6 +38,7 @@ public final class CommandWrapperConstants {
     public static final String ACTION_DISBURSALUNDO = "DISBURSALUNDO";
     public static final String ACTION_DISCOUNTFEE = "DISCOUNTFEE";
     public static final String ACTION_DISCOUNTFEEADJUSTMENT = "DISCOUNTFEEADJUSTMENT";
+    public static final String ACTION_UNDODISCOUNTFEEADJUSTMENT = "UNDODISCOUNTFEEADJUSTMENT";
     public static final String ACTION_ACTIVATE = "ACTIVATE";
     public static final String ACTION_CLOSE = "CLOSE";
     public static final String ACTION_WITHDRAW = "WITHDRAW";

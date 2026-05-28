@@ -1232,19 +1232,6 @@ Feature: Working Capital Discount
     Then Admin adds Discount fee with "12" amount on Working Capital loan account for last disbursement
     Then Add Discount fee adjustment with "2" amount and transaction date "31 December 2025" on Working Capital loan account failed due to transaction date before discount fee date
 
-  Scenario: Discount fee adjustment fails when transaction date is before business date - UC19
-    When Admin sets the business date to "01 January 2026"
-    And Admin creates a client with random data
-    And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100          | 1                 |          |
-    Then Working capital loan creation was successful
-    Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
-    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
-    Then Admin adds Discount fee with "12" amount on Working Capital loan account for last disbursement
-    When Admin sets the business date to "20 January 2026"
-    Then Add Discount fee adjustment with "2" amount and transaction date "15 January 2026" on Working Capital loan account failed due to backdated transaction date
-
   Scenario: Verify amortization schedule after discount fee adjustment - EIR discount adjustment S1
     When Admin sets the business date to "01 January 2019"
     And Admin creates a client with random data

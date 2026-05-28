@@ -21,10 +21,14 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<WorkingCapitalLoanTransaction, Long> {
 
@@ -37,4 +41,16 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     Optional<WorkingCapitalLoanTransaction> findByWcLoan_IdAndExternalId(Long wcLoanId, ExternalId externalId);
 
     boolean existsByExternalId(ExternalId externalId);
+
+    @Query("""
+            SELECT DISTINCT txn FROM WorkingCapitalLoanTransaction txn
+            JOIN txn.loanTransactionRelations rel
+            WHERE rel.toTransaction.id = :relatedTransactionId
+              AND rel.relationType = :relationType
+              AND txn.reversed = false
+              AND txn.transactionType IN :transactionTypes
+            """)
+    List<WorkingCapitalLoanTransaction> findActiveByRelatedToTransactionAndTransactionTypeIn(
+            @Param("relatedTransactionId") Long relatedTransactionId, @Param("relationType") LoanTransactionRelationTypeEnum relationType,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
 }

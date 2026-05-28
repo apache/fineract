@@ -208,9 +208,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     }
 
     @Override
-    public void applyDiscountFeeAdjustment(final WorkingCapitalLoan loan, final LocalDate adjustmentTransactionDate) {
+    public void applyDiscountFeeAdjustment(final WorkingCapitalLoan loan) {
         Validate.notNull(loan, "loan must not be null");
-        Validate.notNull(adjustmentTransactionDate, "adjustmentTransactionDate must not be null");
 
         final MathContext mc = MoneyHelper.getMathContext();
         final CurrencyData currency = WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan);

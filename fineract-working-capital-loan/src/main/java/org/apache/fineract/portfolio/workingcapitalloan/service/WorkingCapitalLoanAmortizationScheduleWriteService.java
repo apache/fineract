@@ -43,5 +43,5 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
      * After a discount fee adjustment: regenerates the projected schedule with the new loan-level discount (as on
      * disbursement generation) and re-applies recorded actual repayments only.
      */
-    void applyDiscountFeeAdjustment(WorkingCapitalLoan loan, LocalDate adjustmentTransactionDate);
+    void applyDiscountFeeAdjustment(WorkingCapitalLoan loan);
 }

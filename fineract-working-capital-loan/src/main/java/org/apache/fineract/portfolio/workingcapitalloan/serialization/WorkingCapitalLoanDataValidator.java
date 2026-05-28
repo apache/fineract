@@ -188,10 +188,6 @@ public class WorkingCapitalLoanDataValidator {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.before.discount.fee.date");
             }
-            if (DateUtils.isBefore(effectiveTransactionDate, DateUtils.getBusinessLocalDate())) {
-                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
-                        .failWithCode("backdated.not.allowed");
-            }
         }
 
         final Integer classificationId = this.fromApiJsonHelper
@@ -225,8 +221,35 @@ public class WorkingCapitalLoanDataValidator {
         }
         validatePaymentDetails(baseDataValidator, element);
         if (loan.getLoanStatus() == null || !loan.getLoanStatus().isActive()) {
-            baseDataValidator.reset().parameter("loanStatus").failWithCode("adjustment.only.allowed.for.active.loan");
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("adjustment.only.allowed.for.active.loan");
         }
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateUndoDiscountAdjustmentTransaction(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction adjustmentTransaction) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (adjustmentTransaction.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedResourceIdParamName)
+                    .failWithCode("discount.adjustment.transaction.invalid");
+        }
+        if (adjustmentTransaction.isReversed()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.relatedResourceIdParamName)
+                    .failWithCode("discount.adjustment.already.reversed");
+        }
+        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isActive()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("undo.discount.adjustment.only.allowed.for.active.loan");
+        }
+        if (loan.getLoanProductRelatedDetails() == null) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanProductRelatedDetailsParamName)
+                    .failWithCode("discount.not.available");
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -620,13 +643,14 @@ public class WorkingCapitalLoanDataValidator {
         if (LoanTransactionType.REPAYMENT.equals(goodwillCredit)) {
             if (loan.getLoanStatus() != LoanStatus.ACTIVE && loan.getLoanStatus() != LoanStatus.OVERPAID) {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
-                        "Repayment is allowed only for active/overpaid loans", "loanStatus");
+                        "Repayment is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
             }
         } else if (LoanTransactionType.GOODWILL_CREDIT.equals(goodwillCredit)) {
             if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
                     && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
-                        "Goodwill Credit is allowed only for active/closed obligations met/overpaid loans", "loanStatus");
+                        "Goodwill Credit is allowed only for active/closed obligations met/overpaid loans",
+                        WorkingCapitalLoanConstants.loanStatusParamName);
             }
         }
     }
@@ -727,7 +751,8 @@ public class WorkingCapitalLoanDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         if (loan.getLoanStatus() != LoanStatus.ACTIVE) {
-            baseDataValidator.reset().parameter("loanStatus").failWithCode("rate.change.not.allowed.for.non.active.loan");
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("rate.change.not.allowed.for.non.active.loan");
         }
 
         final BigDecimal periodPaymentRate = this.fromApiJsonHelper

@@ -184,7 +184,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @Path("{loanId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionById", summary = "Execute Working Capital Loan transaction", description = "Supported command query parameter: repayment, creditBalanceRefund, discountFee, discountFeeAdjustment")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionById", summary = "Execute Working Capital Loan transaction", description = "Supported command query parameter: repayment, creditBalanceRefund, discountFee, discountFeeAdjustment, undoDiscountFeeAdjustment")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsResponse.class))) })
@@ -199,7 +199,7 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @Path("external-id/{loanExternalId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "executeWorkingCapitalLoanTransactionByExternalId", summary = "Execute Working Capital Loan transaction by external id", description = "Supported command query parameter: repayment, creditBalanceRefund, discountFee, discountFeeAdjustment")
+    @Operation(operationId = "executeWorkingCapitalLoanTransactionByExternalId", summary = "Execute Working Capital Loan transaction by external id", description = "Supported command query parameter: repayment, creditBalanceRefund, discountFee, discountFeeAdjustment, undoDiscountFeeAdjustment")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.PostWorkingCapitalLoanTransactionsResponse.class))) })
@@ -229,6 +229,8 @@ public class WorkingCapitalLoanTransactionsApiResource {
             commandRequest = builder.discountFeeWorkingCapitalLoanTransaction(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND)) {
             commandRequest = builder.discountFeeAdjustmentWorkingCapitalLoanTransaction(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.DISCOUNT_FEE_ADJUSTMENT_UNDO_LOAN_COMMAND)) {
+            commandRequest = builder.undoDiscountFeeAdjustmentWorkingCapitalLoanTransaction(resolvedLoanId).build();
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

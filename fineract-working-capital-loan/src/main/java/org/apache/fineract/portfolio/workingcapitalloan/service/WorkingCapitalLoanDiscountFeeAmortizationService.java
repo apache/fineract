@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 
 public interface WorkingCapitalLoanDiscountFeeAmortizationService {
 
-    void processDiscountFeeAmortization(WorkingCapitalLoan loan, LocalDate transactionDate);
+    Optional<WorkingCapitalLoanTransaction> processDiscountFeeAmortization(WorkingCapitalLoan loan, LocalDate transactionDate);
 }
