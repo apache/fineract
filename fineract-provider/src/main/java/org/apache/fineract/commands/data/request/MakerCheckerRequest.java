@@ -21,10 +21,12 @@ package org.apache.fineract.commands.data.request;
 import jakarta.ws.rs.QueryParam;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Setter
 @Getter
@@ -43,9 +45,9 @@ public class MakerCheckerRequest implements Serializable {
     @QueryParam("makerId")
     private Long makerId;
     @QueryParam("makerDateTimeFrom")
-    private ZonedDateTime makerDateTimeFrom;
+    private String makerDateTimeFrom;
     @QueryParam("makerDateTimeTo")
-    private ZonedDateTime makerDateTimeTo;
+    private String makerDateTimeTo;
     @QueryParam("clientId")
     private Long clientId;
     @QueryParam("loanid")
@@ -56,4 +58,16 @@ public class MakerCheckerRequest implements Serializable {
     private Long groupId;
     @QueryParam("savingsAccountId")
     private Long savingsAccountId;
+    @QueryParam("dateFormat")
+    private String dateFormat;
+    @QueryParam("locale")
+    private String locale;
+
+    public OffsetDateTime getMakerDateTimeFrom() {
+        return DateUtils.convertDateTimeStringToOffsetDateTime(makerDateTimeFrom, dateFormat, locale, LocalTime.MIN);
+    }
+
+    public OffsetDateTime getMakerDateTimeTo() {
+        return DateUtils.convertDateTimeStringToOffsetDateTime(makerDateTimeTo, dateFormat, locale, LocalTime.MAX);
+    }
 }

@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.lang.NonNull;
 
 public final class DateUtils {
@@ -456,6 +457,36 @@ public final class DateUtils {
             } else {
                 LocalDate date = LocalDate.from(parsed);
                 return LocalDateTime.of(date, fallbackTime);
+            }
+        } catch (final DateTimeParseException e) {
+            final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
+                    "The parameter date (" + dateTimeStr + ") format is invalid", "date", dateTimeStr));
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
+        }
+    }
+
+    public static OffsetDateTime convertDateTimeStringToOffsetDateTime(String dateTimeStr, String dateFormat, String localeStr,
+            LocalTime fallbackTime) {
+        if (Strings.isEmpty(dateTimeStr)) {
+            return null;
+        }
+        final Locale locale = localeStr == null ? null : JsonParserHelper.localeFromString(localeStr);
+        DateTimeFormatter formatter = getDateFormatter(dateFormat, locale);
+        TemporalAccessor parsed = formatter.parse(dateTimeStr);
+
+        boolean hasTime = parsed.isSupported(ChronoField.HOUR_OF_DAY) && parsed.isSupported(ChronoField.MINUTE_OF_HOUR);
+        boolean hasOffset = parsed.isSupported(ChronoField.OFFSET_SECONDS);
+
+        try {
+            if (hasTime && hasOffset) {
+                return OffsetDateTime.from(parsed);
+            } else if (hasTime) {
+                LocalDateTime localDateTime = LocalDateTime.from(parsed);
+                return localDateTime.atOffset(ZoneOffset.UTC);
+            } else {
+                LocalDate date = LocalDate.from(parsed);
+                LocalDateTime localDateTime = LocalDateTime.of(date, fallbackTime);
+                return localDateTime.atOffset(ZoneOffset.UTC);
             }
         } catch (final DateTimeParseException e) {
             final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
