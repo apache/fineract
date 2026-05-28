@@ -48,6 +48,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
     private final TenantDetailsService tenantDetailsService;
     private final JobRegisterService jobRegisterService;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
+    private final ScheduledJobReadService scheduledJobReadService;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -74,7 +75,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
                 jobDetails.setTriggerMisfired(false);
                 schedularWritePlatformService.saveOrUpdate(jobDetails);
             }
-            final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
+            final SchedulerDetail schedulerDetail = scheduledJobReadService.retrieveSchedulerDetail();
             if (schedulerDetail.isResetSchedulerOnBootup()) {
                 schedulerDetail.setSuspended(false);
                 schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);

@@ -20,12 +20,13 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 import io.github.resilience4j.retry.annotation.Retry;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.jobs.data.JobDetailDataValidator;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.jobs.data.JobUpdateRequest;
+import org.apache.fineract.infrastructure.jobs.data.JobUpdateResponse;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;
@@ -33,12 +34,12 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistoryRepo
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class SchedularWritePlatformServiceJpaRepositoryImpl implements SchedularWritePlatformService {
 
     private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
@@ -46,18 +47,6 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
 
     private final SchedulerDetailRepository schedulerDetailRepository;
-
-    private final JobDetailDataValidator dataValidator;
-
-    @Autowired
-    public SchedularWritePlatformServiceJpaRepositoryImpl(final ScheduledJobDetailRepository scheduledJobDetailsRepository,
-            final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository, final JobDetailDataValidator dataValidator,
-            final SchedulerDetailRepository schedulerDetailRepository) {
-        this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
-        this.scheduledJobRunHistoryRepository = scheduledJobRunHistoryRepository;
-        this.schedulerDetailRepository = schedulerDetailRepository;
-        this.dataValidator = dataValidator;
-    }
 
     @Override
     public List<ScheduledJobDetail> retrieveAllJobs(final String nodeId) {
@@ -92,8 +81,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         return version;
     }
 
-    @Override
-    public ScheduledJobDetail findByJobId(final Long jobId) {
+    private ScheduledJobDetail findByJobId(final Long jobId) {
         return this.scheduledJobDetailsRepository.findByJobId(jobId);
     }
 
@@ -103,7 +91,6 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         this.schedulerDetailRepository.save(schedulerDetail);
     }
 
-    @Override
     public SchedulerDetail retriveSchedulerDetail() {
         SchedulerDetail schedulerDetail = null;
         final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAllSchedulerDetails();
@@ -115,22 +102,32 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     @Transactional
     @Override
-    public CommandProcessingResult updateJobDetail(final Long jobId, final JsonCommand command) {
-        this.dataValidator.validateForUpdate(command.json());
-        final ScheduledJobDetail scheduledJobDetail = findByJobId(jobId);
-        if (scheduledJobDetail == null) {
-            throw new JobNotFoundException(String.valueOf(jobId));
+    public JobUpdateResponse updateJobDetail(JobUpdateRequest request) {
+        ScheduledJobDetail job = findByJobId(request.getJobId());
+        if (job == null) {
+            throw new JobNotFoundException(String.valueOf(request.getJobId()));
         }
-        final Map<String, Object> changes = scheduledJobDetail.update(command);
-        if (!changes.isEmpty()) {
-            this.scheduledJobDetailsRepository.saveAndFlush(scheduledJobDetail);
-        }
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(jobId) //
-                .with(changes) //
-                .build();
 
+        Map<String, Object> changes = new LinkedHashMap<>();
+
+        if (request.getDisplayName() != null && !request.getDisplayName().trim().equals(job.getJobDisplayName())) {
+            job.setJobDisplayName(StringUtils.defaultIfEmpty(request.getDisplayName().trim(), null));
+            changes.put("displayName", request.getDisplayName().trim());
+        }
+        if (request.getCronExpression() != null && !request.getCronExpression().trim().equals(job.getCronExpression())) {
+            job.setCronExpression(StringUtils.defaultIfEmpty(request.getCronExpression().trim(), null));
+            changes.put("cronExpression", request.getCronExpression().trim());
+        }
+        if (request.getActive() != null && request.getActive() != job.isActiveSchedular()) {
+            job.setActiveSchedular(request.getActive());
+            changes.put("active", request.getActive());
+        }
+
+        if (!changes.isEmpty()) {
+            scheduledJobDetailsRepository.saveAndFlush(job);
+        }
+
+        return JobUpdateResponse.builder().resourceId(job.getId()).changes(changes).build();
     }
 
     // Annotation/aspect order matters here: the resilience4j @Retry aspect (default order
