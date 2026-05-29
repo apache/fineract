@@ -106,6 +106,7 @@ import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -1203,13 +1204,11 @@ public class LoansApiResource {
 
             fundOptions = this.fundReadPlatformService.retrieveAllFunds();
             repaymentStrategyOptions = this.dropdownReadPlatformService.retrieveTransactionProcessingStrategies();
-            if (product.getMultiDisburseLoan()) {
-                chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
-                        new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
-            } else {
-                chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
-                        new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
-            }
+            final ChargeTimeType[] excludeChargeTimes = product.getMultiDisburseLoan()
+                    ? new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT }
+                    : new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT };
+            chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(ChargeAppliesTo.LOAN, resolvedLoanId,
+                    excludeChargeTimes);
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
             Long officeId = loanBasicDetails.getClientOfficeId();
