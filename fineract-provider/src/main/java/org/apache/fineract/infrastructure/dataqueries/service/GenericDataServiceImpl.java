@@ -93,6 +93,32 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @Override
+    public GenericResultsetData fillGenericResultSet(final String sql, final Object... args) {
+        try {
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, args);
+
+            final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
+
+            final SqlRowSetMetaData rsmd = rs.getMetaData();
+            for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                final String columnName = rsmd.getColumnName(i + 1);
+                final String columnType = rsmd.getColumnTypeName(i + 1);
+
+                final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType,
+                        databaseTypeResolver.databaseType());
+                columnHeaders.add(columnHeader);
+            }
+
+            final List<ResultsetRowData> resultsetDataRows = fillResultsetRowData(rs, columnHeaders);
+
+            return new GenericResultsetData(columnHeaders, resultsetDataRows);
+        } catch (DataAccessException e) {
+            log.error("Reporting error: {}", e.getMessage());
+            throw ErrorHandler.getMappable(e, "error.msg.report.unknown.data.integrity.issue", e.getClass().getName(), null, e);
+        }
+    }
+
+    @Override
     public List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(final String tableName) {
         final SqlRowSet columnDefinitions = getTableMetaData(tableName);
         final List<IndexDetail> indexDefinitions = getDatatableIndexData(tableName);
