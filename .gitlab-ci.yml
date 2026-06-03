@@ -12,7 +12,7 @@ sincronizar_con_github:
     - git config --global user.email "ci@gitlab.com"
     
     # 2. Añadir el GitHub original como "upstream"
-    - git remote add upstream https://github.com/autor/proyecto-original.git
+    - git remote add upstream https://github.com/apache/fineract.git
     
     # 3. Descargar las novedades de ambos remotos
     - git fetch origin
