@@ -5,7 +5,7 @@ sincronizar_con_github:
   stage: sync
   image: alpine:latest
   before_script:
-    - apk add --no-missing git
+    - apk add --no-cache git
   script:
     # 1. Configurar identidad básica de Git
     - git config --global user.name "GitLab CI"
