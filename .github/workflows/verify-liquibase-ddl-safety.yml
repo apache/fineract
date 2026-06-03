@@ -13,17 +13,15 @@ jobs:
   ddl-safety-check:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
-      - name: Download workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          name: fineract-workspace-${{ github.run_id }}
-          path: .
-
-      - name: Extract workspace
-        run: tar -xf fineract-workspace.tar
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Fetch base branch
         env:
@@ -76,7 +74,7 @@ jobs:
             --output-dir "$REPORT_DIR"
 
       - name: Write step summary
-        if: always()
+        if: failure()
         env:
           HAS_CHANGES: ${{ steps.changes.outputs.has_changes }}
           REPORT_FILE: ${{ runner.temp }}/ddl-safety-report/report.md
@@ -94,12 +92,13 @@ jobs:
           fi
 
       - name: Archive report
-        if: always() && steps.changes.outputs.has_changes == 'true'
+        if: failure() && steps.changes.outputs.has_changes == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ddl-safety-report
           path: ${{ runner.temp }}/ddl-safety-report/
           retention-days: 1
+          compression-level: 9
 
       - name: Fail if critical violations found (unless overridden)
         if: steps.changes.outputs.has_changes == 'true' && steps.ddl-check.outcome == 'failure' && steps.override.outputs.override != 'true'

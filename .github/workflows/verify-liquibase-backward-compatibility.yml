@@ -13,7 +13,7 @@ jobs:
   liquibase-backward-compatibility-check:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 90
 
     services:
       postgresql:
@@ -34,8 +34,19 @@ jobs:
       DB_PASSWORD: postgres
       DB_NAME: fineract_default
       TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
     steps:
+      - name: Checkout PR commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build Fineract
+        uses: ./.github/actions/setup-and-build-fineract
+
       - name: Checkout base commit
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -45,20 +56,10 @@ jobs:
           fetch-depth: 0
           path: baseline
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+      - name: Build baseline Fineract
+        uses: ./.github/actions/setup-and-build-fineract
         with:
-          distribution: 'zulu'
-          java-version: '21'
-
-      - name: Download workspace
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: fineract-workspace-${{ github.run_id }}
-          path: .
-
-      - name: Extract workspace
-        run: tar -xf fineract-workspace.tar
+          working-directory: baseline
 
       - name: Wait for PostgreSQL
         run: |
@@ -138,7 +139,7 @@ jobs:
           done
 
       - name: Stop baseline backend
-        if: always()
+        if: failure()
         working-directory: baseline
         run: |
           kill $(cat backend.pid)
@@ -187,7 +188,7 @@ jobs:
           done
 
       - name: Stop PR backend
-        if: always()
+        if: failure()
         run: |
           kill $(cat backend.pid)
           sleep 10
