@@ -1,0 +1,23 @@
+stages:
+  - sync
+
+sincronizar_con_github:
+  stage: sync
+  image: alpine:latest
+  before_script:
+    - apk add --no-missing git
+  script:
+    # 1. Configurar identidad básica de Git
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@gitlab.com"
+    # 2. Añadir el GitHub original como una fuente remota llamada "upstream"
+    - git remote add upstream https://github.com/autor/proyecto-original.git
+    # 3. Descargar las novedades de GitHub
+    - git fetch upstream
+    # 4. Asegurarnos de estar en la rama principal y fusionar los cambios de GitHub
+    - git checkout main || git checkout master
+    - git merge upstream/main --allow-unrelated-histories -m "Sincronización automática desde GitHub"
+    # 5. Subir los cambios actualizados de vuelta a tu GitLab
+    - git push https://oauth2:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git HEAD:main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"  # Esto asegura que solo corra cuando tú lo programes
