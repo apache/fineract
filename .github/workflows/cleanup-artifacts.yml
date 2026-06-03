@@ -1,0 +1,42 @@
+name: Delete all artifacts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup-artifacts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Delete all artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          artifact_ids="$(gh api --paginate "repos/${REPOSITORY}/actions/artifacts" \
+            --jq '.artifacts[].id')"
+
+          if [ -z "$artifact_ids" ]; then
+            echo "No artifacts found."
+            echo "## Artifact cleanup" >> "$GITHUB_STEP_SUMMARY"
+            echo "No artifacts found." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          deleted=0
+          while IFS= read -r artifact_id; do
+            [ -n "$artifact_id" ] || continue
+            gh api --method DELETE "repos/${REPOSITORY}/actions/artifacts/${artifact_id}"
+            deleted=$((deleted + 1))
+            echo "Deleted artifact ${artifact_id}."
+          done <<< "$artifact_ids"
+
+          echo "Deleted ${deleted} artifact(s)."
+          echo "## Artifact cleanup" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deleted ${deleted} artifact(s)." >> "$GITHUB_STEP_SUMMARY"
