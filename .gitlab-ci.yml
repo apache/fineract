@@ -12,17 +12,17 @@ sincronizar_con_github:
     - git config --global user.email "ci@gitlab.com"
     
     # 2. Añadir el GitHub original como "upstream"
-    - git remote add upstream1 https://github.com/apache/fineract.git
+    - git remote add upstream https://github.com/apache/fineract.git
     
     # 3. Descargar las novedades de ambos remotos
     - git fetch origin
-    - git fetch upstream1
+    - git fetch upstream
     
     # 4. Solución al error: Crear la rama local 'develop' apuntando explícitamente a 'origin/develop'
     - git checkout -B develop origin/develop
     
     # 5. Fusionar los cambios que vienen de GitHub
-    - git merge upstream1/develop --allow-unrelated-histories -m "Sincronización automática desde GitHub"
+    - git merge upstream/develop --allow-unrelated-histories -m "Sincronización automática desde GitHub"
     
     # 6. Subir los cambios actualizados a GitLab
     - git push https://gitlab-token:${GITLAB_TOKEN_SYNC}@gitlab.com/${CI_PROJECT_PATH}.git HEAD:develop
