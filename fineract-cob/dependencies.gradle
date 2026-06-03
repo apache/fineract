@@ -75,12 +75,6 @@ dependencies {
     implementation ('jakarta.xml.bind:jakarta.xml.bind-api') {
         exclude group: 'jakarta.activation'
     }
-    implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
-        exclude group: 'org.hibernate'
-    }
-    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
-        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
-    }
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
         exclude group: 'com.sun.activation'
     }
@@ -107,7 +101,6 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    testImplementation( 'io.github.classgraph:classgraph')
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -124,8 +117,4 @@ dependencies {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
     }
     testImplementation ('org.mockito:mockito-inline')
-    implementation('org.apache.avro:avro')
-    implementation(
-            project(path: ':fineract-avro-schemas')
-            )
 }

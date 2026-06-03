@@ -71,5 +71,4 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit'
     implementation 'com.squareup.retrofit2:converter-jackson'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'com.squareup.okhttp3:okhttp'
 }

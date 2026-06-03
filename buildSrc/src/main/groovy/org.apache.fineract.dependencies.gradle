@@ -77,9 +77,6 @@ dependencyManagement {
         dependency ('org.apache.tika:tika-core:3.3.0') {
             exclude 'commons-logging:commons-logging'
         }
-        dependency ('org.apache.tika:tika-core:3.3.0') {
-            exclude 'commons-logging:commons-logging'
-        }
         dependency ('org.apache.tika:tika-parser-miscoffice-module:3.3.0') {
             exclude 'org.bouncycastle:bcprov-jdk15on'
             exclude 'org.bouncycastle:bcjmail-jdk15on'
@@ -143,7 +140,6 @@ dependencyManagement {
         dependency 'joda-time:joda-time:2.14.2'
 
         dependency 'io.github.classgraph:classgraph:4.8.184'
-        dependency 'org.awaitility:awaitility:4.3.0'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.9.8'
         dependency 'javax.cache:cache-api:1.1.1'
         dependency 'org.mock-server:mockserver-junit-jupiter:5.14.0'
@@ -230,7 +226,6 @@ dependencyManagement {
         dependencySet(group: 'org.apache.poi', version: '5.5.1') {
             entry 'poi'
             entry 'poi-ooxml'
-            entry 'poi-ooxml-schemas'
         }
 
         dependencySet(group: 'io.rest-assured', version: '5.5.7') {
