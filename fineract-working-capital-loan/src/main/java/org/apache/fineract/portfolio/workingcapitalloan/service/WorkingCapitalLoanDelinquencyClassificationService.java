@@ -20,10 +20,12 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.time.LocalDate;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
 public interface WorkingCapitalLoanDelinquencyClassificationService {
 
-    void classifyDelinquency(WorkingCapitalLoan loanId, LocalDate businessDate, DelinquencyBucket delinquencyBucket);
+    void instantClassifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate);
+
+    void classifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate);
+
 }

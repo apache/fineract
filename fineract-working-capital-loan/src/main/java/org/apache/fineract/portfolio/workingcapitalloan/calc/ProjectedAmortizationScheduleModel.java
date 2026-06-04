@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -292,6 +293,21 @@ public final class ProjectedAmortizationScheduleModel {
         }
         actualPayments.add(new ActualPayment(allocationDate, money(amount)));
         rebuildPayments();
+    }
+
+    public void undoPayment(final LocalDate paymentDate, final BigDecimal amount) {
+        Objects.requireNonNull(paymentDate, "paymentDate");
+        Objects.requireNonNull(amount, "amount");
+        final int firstPeriodDayOffset = hasDisbursementDatePayment() || paymentDate.equals(expectedDisbursementDate) ? 0 : 1;
+        final LocalDate allocationDate = calculateAllocationDate(paymentDate, firstPeriodDayOffset);
+        Optional<ActualPayment> first = actualPayments.stream()
+                .filter(p -> p.date.equals(allocationDate) && p.amount.getAmount().compareTo(amount) == 0).findFirst();
+        if (first.isEmpty()) {
+            throw new IllegalStateException("payment not found: date=" + paymentDate + " with amount=" + amount);
+        }
+        actualPayments.remove(first.get());
+        rebuildPayments();
+        recalculateNetAmortizationAndDeferredBalanceFrom(paymentDate);
     }
 
     private void updateCalculatedTillDate(final LocalDate actionDate) {

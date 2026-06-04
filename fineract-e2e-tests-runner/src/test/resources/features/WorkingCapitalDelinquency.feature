@@ -249,7 +249,7 @@ Feature: Working Capital Delinquency
 # --- No delinquency tag history ---
     When Admin sets the business date to "05 December 2020"
     And Admin runs inline COB job for Working Capital Loan
-    When Admin makes Internal Payment "30.0" on "2020-12-05"
+    And Customer makes repayment on "05 December 2020" with 30.0 transaction amount on Working Capital loan
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 # --- Delinquency tag history with 1 range ---
@@ -264,7 +264,7 @@ Feature: Working Capital Delinquency
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2020-12-31  |              | D00            | 1              | 30             |
-    When Admin makes Internal Payment "54.0" on "2021-01-06"
+    And Customer makes repayment on "06 January 2021" with 54.0 transaction amount on Working Capital loan
     Then Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2020-12-31  | 2021-01-06   | D00            | 1              | 30             |
@@ -293,7 +293,7 @@ Feature: Working Capital Delinquency
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin runs inline COB job for Working Capital Loan by loanId
-    When Admin makes Internal Payment "270.0" on "2026-01-01"
+    And Customer makes repayment on "01 January 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
@@ -326,7 +326,7 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid ---
     When Admin sets the business date to "02 January 2026"
-    And Admin makes Internal Payment "270.0" on "2026-01-02"
+    And Customer makes repayment on "02 January 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
@@ -367,7 +367,7 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid ---
     When Admin sets the business date to "30 January 2026"
-    And Admin makes Internal Payment "270.0" on "2026-01-30"
+    And Customer makes repayment on "30 January 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
@@ -416,7 +416,7 @@ Feature: Working Capital Delinquency
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-01-31  |              | D00            | 1              | 30             |
-    And Admin makes Internal Payment "270.0" on "2026-01-31"
+    And Customer makes repayment on "31 January 2026" with 270.0 transaction amount on Working Capital loan
 #   --- Check ---
     When Admin sets the business date to "01 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -454,8 +454,8 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid in 2 payments on the same day---
     When Admin sets the business date to "02 January 2026"
-    And Admin makes Internal Payment "170.0" on "2026-01-02"
-    And Admin makes Internal Payment "100.0" on "2026-01-02"
+    And Customer makes repayment on "02 January 2026" with 170.0 transaction amount on Working Capital loan
+    And Customer makes repayment on "02 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
@@ -496,14 +496,14 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Full expectedAmount paid in 2 payments on different days---
     When Admin sets the business date to "02 January 2026"
-    And Admin makes Internal Payment "170.0" on "2026-01-02"
+    And Customer makes repayment on "02 January 2026" with 170.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 170.0      | 100.0             | null                  | null             | null           |
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
     When Admin sets the business date to "15 January 2026"
-    And Admin makes Internal Payment "100.0" on "2026-01-15"
+    And Customer makes repayment on "15 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
@@ -544,7 +544,7 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
 #   --- Partial expectedAmount paid ---
     When Admin sets the business date to "02 January 2026"
-    And Admin makes Internal Payment "170.0" on "2026-01-02"
+    And Customer makes repayment on "02 January 2026" with 170.0 transaction amount on Working Capital loan
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 170.0      | 100.0             | null                  | null             | null           |
@@ -596,7 +596,7 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-31  |              | D00            | 1              | 30             |
     #   --- Partial expectedAmount paid ---
     When Admin sets the business date to "10 February 2026"
-    And Admin makes Internal Payment "170.0" on "2026-02-10"
+    And Customer makes repayment on "10 February 2026" with 170.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
@@ -632,7 +632,7 @@ Feature: Working Capital Delinquency
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
     #   --- expectedAmount overpaid ---
     When Admin sets the business date to "10 January 2026"
-    And Admin makes Internal Payment "370.0" on "2026-01-10"
+    And Customer makes repayment on "10 January 2026" with 370.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
@@ -685,7 +685,7 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-31  |              | D00            | 1              | 30             |
     #   --- expectedAmount overpaid ---
     When Admin sets the business date to "10 February 2026"
-    And Admin makes Internal Payment "370.0" on "2026-02-10"
+    And Customer makes repayment on "10 February 2026" with 370.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
@@ -743,7 +743,7 @@ Feature: Working Capital Delinquency
       | 1            | 2026-01-31  |              | D00            | 1              | 30             |
     #   --- expectedAmount overpaid ---
     When Admin sets the business date to "10 May 2026"
-    And Admin makes Internal Payment "1500.0" on "2026-05-10"
+    And Customer makes repayment on "10 May 2026" with 1500.0 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |

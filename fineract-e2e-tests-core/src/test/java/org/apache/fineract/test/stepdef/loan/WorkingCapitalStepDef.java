@@ -30,7 +30,6 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,7 +48,6 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanDelinquencyRangeSc
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsTemplateResponse;
-import org.apache.fineract.client.models.InternalWorkingCapitalLoanPaymentRequest;
 import org.apache.fineract.client.models.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
 import org.apache.fineract.client.models.PostPaymentAllocation;
@@ -1055,13 +1053,6 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     private Long getWorkingCapitalLoanResourceId() {
         PostWorkingCapitalLoansResponse response = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         return response.getResourceId();
-    }
-
-    @When("Admin makes Internal Payment {string} on {string}")
-    public void internalPayWCLoan(String amount, String transactionDate) {
-        Long resourceId = getWorkingCapitalLoanResourceId();
-        fineractFeignClient.workingCapitalLoans().payment(resourceId, new InternalWorkingCapitalLoanPaymentRequest()
-                .amount(BigDecimal.valueOf(Double.parseDouble(amount))).transactionDate(LocalDate.parse(transactionDate)));
     }
 
     @Then("Delinquency Tag History for Working Capital loan has lines:")

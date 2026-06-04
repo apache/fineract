@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.workingcapitalloan.handler;
 
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_UNDO;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_WORKINGCAPITALLOAN;
+import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_WORKINGCAPITALLOANTRANSACTION;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = ENTITY_WORKINGCAPITALLOAN, action = ACTION_UNDO)
+@CommandType(entity = ENTITY_WORKINGCAPITALLOANTRANSACTION, action = ACTION_UNDO)
 public class UndoWorkingCapitalLoanTransactionCommandHandler implements NewCommandSourceHandler {
 
     private final WorkingCapitalLoanWritePlatformService writePlatformService;

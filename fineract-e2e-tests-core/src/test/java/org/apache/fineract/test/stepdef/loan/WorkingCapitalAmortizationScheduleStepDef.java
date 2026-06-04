@@ -84,7 +84,12 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
 
     @Then("The retrieved amortization schedule has payments with the following details:")
     public void verifyRetrievedPaymentDetails(final DataTable dataTable) {
-        verifyPaymentDetails(dataTable);
+        verifyPaymentDetails(dataTable, null);
+    }
+
+    @Then("The retrieved amortization schedule has payments with the following details in first {string} lines:")
+    public void verifyRetrievedPaymentDetailsFirstNLines(final String firstNLines, final DataTable dataTable) {
+        verifyPaymentDetails(dataTable, Integer.valueOf(firstNLines));
     }
 
     private void verifySummaryFields(final DataTable dataTable) {
@@ -105,11 +110,13 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         assertions.assertAll();
     }
 
-    private void verifyPaymentDetails(final DataTable dataTable) {
+    private void verifyPaymentDetails(final DataTable dataTable, final Integer firstNLines) {
         final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
         assertThat(response).as("Amortization schedule response").isNotNull();
 
-        final List<ProjectedAmortizationSchedulePaymentData> actualPayments = response.getPayments();
+        final List<ProjectedAmortizationSchedulePaymentData> actualPayments = firstNLines != null
+                ? response.getPayments().subList(0, firstNLines)
+                : response.getPayments();
         assertThat(actualPayments).as("payments list").isNotNull();
 
         final List<Map<String, String>> expectedRows = dataTable.asMaps();

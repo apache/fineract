@@ -209,4 +209,32 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         @Schema(example = "repayment-ext-001")
         public String resourceExternalId;
     }
+
+    @Schema(description = "Request for working capital loan transaction command execution")
+    public static final class ExecuteWorkingCapitalLoanTransactionCommandRequest {
+
+        private ExecuteWorkingCapitalLoanTransactionCommandRequest() {}
+
+        @Schema(example = "loan-ext-001")
+        public String reversalExternalId;
+    }
+
+    @Schema(description = "Response for working capital loan transaction command execution")
+    public static final class ExecuteWorkingCapitalLoanTransactionCommandResponse {
+
+        private ExecuteWorkingCapitalLoanTransactionCommandResponse() {}
+
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "2")
+        public Long clientId;
+        @Schema(example = "3")
+        public Long loanId;
+        @Schema(example = "loan-ext-001")
+        public String loanExternalId;
+        @Schema(example = "4")
+        public Long resourceId;
+        @Schema(example = "repayment-ext-001")
+        public String resourceExternalId;
+    }
 }

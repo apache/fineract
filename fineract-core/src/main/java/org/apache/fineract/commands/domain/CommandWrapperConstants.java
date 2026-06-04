@@ -183,6 +183,7 @@ public final class CommandWrapperConstants {
     public static final String ENTITY_LOANPRODUCT = "LOANPRODUCT";
     public static final String ENTITY_WORKINGCAPITALLOANPRODUCT = "WORKINGCAPITALLOANPRODUCT";
     public static final String ENTITY_WORKINGCAPITALLOAN = "WORKINGCAPITALLOAN";
+    public static final String ENTITY_WORKINGCAPITALLOANTRANSACTION = "ENTITY_WORKINGCAPITALLOANTRANSACTION";
     public static final String ENTITY_CLIENTIDENTIFIER = "CLIENTIDENTIFIER";
     public static final String ENTITY_CLIENT = "CLIENT";
     public static final String ENTITY_DATATABLE = "DATATABLE";

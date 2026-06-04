@@ -39,6 +39,7 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.EnumOptionData;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
@@ -47,7 +48,6 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
-import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
@@ -490,8 +490,8 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     public void revertLastWcChargeAdjustment() {
         final Long loanId = getLoanId();
         final GetWorkingCapitalLoanTransactionIdResponse adjustmentTxn = getLastChargeAdjustmentTransaction(loanId, false);
-        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest();
-        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandById(loanId,
+        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
                 adjustmentTxn.getId(), "undo", request));
         log.debug("Reverted WC charge adjustment transaction id={} on loan {}", adjustmentTxn.getId(), loanId);
     }
@@ -500,12 +500,12 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     public void revertAlreadyRevertedWcChargeAdjustmentFails(final DataTable table) {
         final Long loanId = getLoanId();
         final GetWorkingCapitalLoanTransactionIdResponse adjustmentTxn = getLastChargeAdjustmentTransaction(loanId, null);
-        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest();
         final Map<String, String> expectedData = table.asMaps().get(0);
         final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
         final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
         final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
-                .executeWorkingCapitalLoanTransactionCommandById(loanId, adjustmentTxn.getId(), "undo", request));
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, adjustmentTxn.getId(), "undo", request));
         assertHttpStatus(exception, expectedHttpCode);
         assertErrorMessage(exception, expectedErrorMessage);
         log.info("Verified reverting already reversed WC charge adjustment failed with status {} and message: {}", expectedHttpCode,
