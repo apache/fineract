@@ -22,7 +22,7 @@ import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class InlineCOBLoanItemListener extends AbstractLoanItemListener {
+public class InlineCOBLoanItemListener extends AbstractItemListener {
 
     public InlineCOBLoanItemListener(LockingService lockingService, TransactionTemplate requiresNewTransactionTemplate) {
         super(lockingService, requiresNewTransactionTemplate);
@@ -31,5 +31,10 @@ public class InlineCOBLoanItemListener extends AbstractLoanItemListener {
     @Override
     protected LockOwner getLockOwner() {
         return LockOwner.LOAN_INLINE_COB_PROCESSING;
+    }
+
+    @Override
+    protected String getAccountTypeLabel() {
+        return "Loan";
     }
 }

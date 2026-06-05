@@ -70,7 +70,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * so takes part in scan mode, instead of surfacing at commit, outside the write, where Batch fails the step.
  * <p>
  * A failure that can be put down to one account - its loading, its business steps, or the flush of a chunk of that
- * account alone - is raised as a {@link COBAccountFailedException} naming it, so that {@code AbstractLoanItemListener}
+ * account alone - is raised as a {@link COBAccountFailedException} naming it, so that {@code AbstractItemListener}
  * records the failure on that account's lock and not on its chunk's, also where no scan follows to single it out.
  */
 @RequiredArgsConstructor
@@ -140,8 +140,8 @@ public abstract class AbstractCOBItemWriter<I extends AbstractPersistableCustom<
     }
 
     /**
-     * Saves any COB error still waiting for its transaction's cleanup (see {@code AbstractLoanItemListener}), so that
-     * none is left behind on this thread when the step ends.
+     * Saves any COB error still waiting for its transaction's cleanup (see {@code AbstractItemListener}), so that none
+     * is left behind on this thread when the step ends.
      */
     @Override
     public ExitStatus afterStep(@NonNull StepExecution stepExecution) {

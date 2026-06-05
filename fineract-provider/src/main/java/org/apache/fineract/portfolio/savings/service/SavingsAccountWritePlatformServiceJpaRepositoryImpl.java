@@ -121,6 +121,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrap
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnExceptionType;
 import org.apache.fineract.portfolio.savings.exception.PostInterestClosingDateException;
@@ -1527,6 +1528,83 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt, false);
         }
         return isDue(savingsAccountCharge, transactionDate) ? savingsAccountCharge.getDueDate() : null;
+    }
+
+    @Transactional
+    @Override
+    public void applyChargeDue(final SavingsAccount account, final SavingsAccountCharge charge) {
+        assertBelongsTo(account, charge);
+        // Same rule as the id-based variant: the batch pays on the business date, every instalment that fell due.
+        final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MM yyyy").withZone(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate lastPaidDueDate = null;
+        while (isDue(charge, transactionDate)) {
+            final LocalDate dueDate = charge.getDueDate();
+            assertDueDateAdvanced(charge, dueDate, lastPaidDueDate);
+            if (!hasBalanceFor(account, charge.amoutOutstanding(), transactionDate)) {
+                log.warn("Skipped due savings charge {} of account {}, instalment due {}: insufficient balance", charge.getId(),
+                        account.getId(), dueDate);
+                return;
+            }
+            payCharge(charge, transactionDate, charge.amoutOutstanding(), fmt, false);
+            lastPaidDueDate = dueDate;
+        }
+    }
+
+    @Transactional
+    @Override
+    public void applyAnnualFee(final SavingsAccount account, final SavingsAccountCharge charge) {
+        assertBelongsTo(account, charge);
+        // Same rule as the id-based variant: each missed instalment is paid as of its own due date.
+        final LocalDate currentDate = DateUtils.getBusinessLocalDate();
+        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MM yyyy").withZone(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate lastPaidDueDate = null;
+        while (DateUtils.isBefore(charge.getDueDate(), currentDate)) {
+            final LocalDate dueDate = charge.getDueDate();
+            assertDueDateAdvanced(charge, dueDate, lastPaidDueDate);
+            if (!hasBalanceFor(account, charge.amount(), dueDate)) {
+                log.warn("Skipped annual fee {} of account {}, instalment due {}: insufficient balance", charge.getId(), account.getId(),
+                        dueDate);
+                return;
+            }
+            payCharge(charge, dueDate, charge.amount(), fmt, false);
+            lastPaidDueDate = dueDate;
+        }
+    }
+
+    private void assertBelongsTo(final SavingsAccount account, final SavingsAccountCharge charge) {
+        // payCharge(..) works on charge.savingsAccount(): it has to be the very instance the caller holds, otherwise
+        // the
+        // payment would land on a second copy of the account, which is what this variant exists to avoid.
+        if (charge.savingsAccount() != account) {
+            throw new IllegalArgumentException(
+                    "Savings charge " + charge.getId() + " does not belong to the given savings account " + account.getId());
+        }
+    }
+
+    private void assertDueDateAdvanced(final SavingsAccountCharge charge, final LocalDate dueDate, final LocalDate lastPaidDueDate) {
+        if (lastPaidDueDate != null && !DateUtils.isAfter(dueDate, lastPaidDueDate)) {
+            throw new IllegalStateException(
+                    "Savings charge " + charge.getId() + " instalment due date did not advance beyond " + lastPaidDueDate);
+        }
+    }
+
+    /**
+     * The affordability check payCharge(..) itself runs before it touches the account, done up front so an unaffordable
+     * charge can be skipped without leaving a half-applied payment on the managed entity. Rejections raised once the
+     * payment is applied (minimum balance, held funds) still propagate: inside the caller's transaction they cannot be
+     * undone, so the account's COB has to fail rather than commit them.
+     */
+    private boolean hasBalanceFor(final SavingsAccount account, final BigDecimal amount, final LocalDate transactionDate) {
+        final List<SavingsAccountTransaction> lastTransaction = this.savingsAccountTransactionRepository
+                .findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(account.getId(), transactionDate,
+                        PageRequest.of(0, 1, Sort.by("dateOf", "id").descending()));
+        try {
+            account.validateAccountBalanceDoesNotViolateOverdraft(lastTransaction, amount);
+            return true;
+        } catch (final InsufficientAccountBalanceException e) {
+            return false;
+        }
     }
 
     private boolean isDue(final SavingsAccountCharge charge, final LocalDate transactionDate) {

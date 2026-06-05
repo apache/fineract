@@ -59,4 +59,14 @@ public interface SavingsAccountTransactionRepository
     @Query("select sat from SavingsAccountTransaction sat where sat.savingsAccount.id = :savingsId and sat.dateOf <= :transactionDate and sat.reversed=false")
     List<SavingsAccountTransaction> findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(@Param("savingsId") Long savingsId,
             @Param("transactionDate") LocalDate transactionDate, Pageable pageable);
+
+    @Query("""
+            SELECT MAX(sat.dateOf) FROM SavingsAccountTransaction sat
+            WHERE sat.savingsAccount.id = :savingsId
+              AND sat.typeOf IN :transactionTypes
+              AND sat.reversed = false
+              AND sat.reversalTransaction = false
+            """)
+    LocalDate findLastTransactionDateBySavingsIdAndTypes(@Param("savingsId") Long savingsId,
+            @Param("transactionTypes") List<Integer> transactionTypes);
 }

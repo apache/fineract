@@ -24,7 +24,7 @@ import org.apache.fineract.cob.domain.LockingService;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
-public class ChunkProcessingLoanItemListener extends AbstractLoanItemListener {
+public class ChunkProcessingLoanItemListener extends AbstractItemListener {
 
     public ChunkProcessingLoanItemListener(LockingService lockingService, TransactionTemplate requiresNewTransactionTemplate) {
         super(lockingService, requiresNewTransactionTemplate);
@@ -33,6 +33,11 @@ public class ChunkProcessingLoanItemListener extends AbstractLoanItemListener {
     @Override
     protected LockOwner getLockOwner() {
         return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    }
+
+    @Override
+    protected String getAccountTypeLabel() {
+        return "Loan";
     }
 
 }
