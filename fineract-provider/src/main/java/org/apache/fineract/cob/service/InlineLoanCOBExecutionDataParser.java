@@ -35,10 +35,20 @@ public class InlineLoanCOBExecutionDataParser {
 
     private final FromJsonHelper jsonHelper;
 
+    public static final String LOAN_IDS_PARAMETER_NAME = "loanIds";
+
     public List<Long> parseExecution(JsonCommand command) {
+        return parseExecution(command, LOAN_IDS_PARAMETER_NAME);
+    }
+
+    /**
+     * Parses the account ids from the JSON array with the given name, so that account types other than loans can use
+     * their own request field (e.g. {@code savingsIds}).
+     */
+    public List<Long> parseExecution(JsonCommand command, String idsParameterName) {
         JsonObject element = extractJsonObject(command);
-        String[] loanArray = jsonHelper.extractArrayNamed("loanIds", element);
-        return Arrays.stream(loanArray).map(Long::parseLong).toList();
+        String[] accountIds = jsonHelper.extractArrayNamed(idsParameterName, element);
+        return Arrays.stream(accountIds).map(Long::parseLong).toList();
     }
 
     private JsonObject extractJsonObject(JsonCommand command) {

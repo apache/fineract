@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Stream;
+import org.apache.fineract.cob.savings.SavingsCOBWorkerConfiguration;
 import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBWorkerConfiguration;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,7 +41,7 @@ import org.springframework.core.task.TaskExecutor;
  * <p>
  * COB therefore registers no task executor at all, and this is deliberately not configurable: the thread pool size
  * reads like a throughput dial but decides transactional semantics. This test fails if a {@link TaskExecutor} bean is
- * reintroduced on either COB worker configuration, which is how concurrency would come back.
+ * reintroduced on any COB worker configuration, which is how concurrency would come back.
  * <p>
  * Do not relax this until FINERACT-2684 establishes that every COB business step is idempotent under a second pass.
  */
@@ -49,7 +50,8 @@ public class CobSequentialProcessingTest {
     private static Stream<Arguments> cobWorkerConfigurations() {
         return Stream.of(//
                 Arguments.of(LoanCOBWorkerConfiguration.class), //
-                Arguments.of(WorkingCapitalLoanCOBWorkerConfiguration.class));
+                Arguments.of(WorkingCapitalLoanCOBWorkerConfiguration.class), //
+                Arguments.of(SavingsCOBWorkerConfiguration.class));
     }
 
     @ParameterizedTest(name = "{0} must not expose a TaskExecutor bean")
