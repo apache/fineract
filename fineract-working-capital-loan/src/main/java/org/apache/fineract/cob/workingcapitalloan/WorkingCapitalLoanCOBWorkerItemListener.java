@@ -20,10 +20,10 @@ package org.apache.fineract.cob.workingcapitalloan;
 
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
-import org.apache.fineract.cob.listener.AbstractLoanItemListener;
+import org.apache.fineract.cob.listener.AbstractItemListener;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class WorkingCapitalLoanCOBWorkerItemListener extends AbstractLoanItemListener {
+public class WorkingCapitalLoanCOBWorkerItemListener extends AbstractItemListener {
 
     public WorkingCapitalLoanCOBWorkerItemListener(LockingService lockingService, TransactionTemplate requiresNewTransactionTemplate) {
         super(lockingService, requiresNewTransactionTemplate);
@@ -32,6 +32,11 @@ public class WorkingCapitalLoanCOBWorkerItemListener extends AbstractLoanItemLis
     @Override
     protected LockOwner getLockOwner() {
         return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    }
+
+    @Override
+    protected String getAccountTypeLabel() {
+        return "Loan";
     }
 
 }

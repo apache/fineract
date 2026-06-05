@@ -18,11 +18,12 @@
  */
 package org.apache.fineract.cob.loan;
 
+import org.apache.fineract.cob.AbstractAccountItemReader;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.step.StepExecution;
 
-public class LoanItemReader extends AbstractLoanItemReader {
+public class LoanItemReader extends AbstractAccountItemReader {
 
     private final BeforeStepLockingItemReaderHelper beforeStepLockingItemReaderHelper;
 

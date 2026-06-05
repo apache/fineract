@@ -39,7 +39,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Records COB failures on the account locks, so that the accounts stay locked with the reason attached and a later run
- * can take them over.
+ * can take them over. Account-agnostic: concrete account types (loan, savings, ...) supply the {@link LockOwner} and
+ * the label used in the error messages.
  * <p>
  * The items are account ids (see {@code AbstractCOBItemWriter}).
  * <p>
@@ -77,40 +78,41 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractLoanItemListener
+public abstract class AbstractItemListener
         implements ItemReadListener<Long>, ItemWriteListener<Long>, SkipListener<Long, Long>, ChunkListener<Long, Long> {
 
-    private static final String CHUNK_FAILED = "Loan (id: %d) was rolled back with its failed chunk";
-    private static final String WRITING_FAILED = "Loan (id: %d) writing is failed";
-    private static final String READING_FAILED = "Loan (id: %d) reading is failed";
+    private static final String CHUNK_FAILED = " (id: %d) was rolled back with its failed chunk";
+    private static final String WRITING_FAILED = " (id: %d) writing is failed";
+    private static final String READING_FAILED = " (id: %d) reading is failed";
 
-    private final LockingService loanLockingService;
+    private final LockingService lockingService;
     private final TransactionTemplate requiresNewTransactionTemplate;
 
-    private void updateAccountLockWithError(List<Long> loanIds, String msg, Throwable e) {
+    private void updateAccountLockWithError(List<Long> accountIds, String msg, Throwable e) {
         // The failure of the account itself, rather than the wrappers that only name the account or report the retry.
         Throwable failure = COBAccountFailedException.find(e).map(Throwable::getCause).orElse(e);
         String stacktrace = ThrowableSerialization.serialize(failure);
         LockOwner lockOwner = getLockOwner();
-        AfterTransactionWork.runAfterCompletion(() -> saveErrors(loanIds, lockOwner, msg, stacktrace));
+        String message = getAccountTypeLabel() + msg;
+        AfterTransactionWork.runAfterCompletion(() -> saveErrors(accountIds, lockOwner, message, stacktrace));
     }
 
-    private void saveErrors(List<Long> loanIds, LockOwner lockOwner, String msg, String stacktrace) {
+    private void saveErrors(List<Long> accountIds, LockOwner lockOwner, String msg, String stacktrace) {
         try {
             requiresNewTransactionTemplate.executeWithoutResult(status -> {
-                for (Long loanId : loanIds) {
-                    loanLockingService.updateLockError(loanId, lockOwner, String.format(msg, loanId), stacktrace);
+                for (Long accountId : accountIds) {
+                    lockingService.updateLockError(accountId, lockOwner, String.format(msg, accountId), stacktrace);
                 }
             });
         } catch (RuntimeException saveFailure) {
-            log.error("Could not save the COB error on the locks of loans {}", loanIds, saveFailure);
+            log.error("Could not save the COB error on the locks of accounts {}", accountIds, saveFailure);
         }
     }
 
     @Override
     public void onReadError(@NonNull Exception e) {
         if (e instanceof LockedReadException ee) {
-            log.warn("Error was triggered during reading of Loan (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
+            log.warn("Error was triggered during reading of account (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
             updateAccountLockWithError(List.of(ee.getId()), READING_FAILED, e);
         } else {
             log.error("Could not handle read error", e);
@@ -118,9 +120,9 @@ public abstract class AbstractLoanItemListener
     }
 
     @Override
-    public void onWriteError(@NonNull Exception e, @NonNull Chunk<? extends Long> loanIds) {
-        List<Long> ids = List.copyOf(loanIds.getItems());
-        log.warn("Error was triggered during writing of Loans (ids={}) due to: {}", ids, ThrowableSerialization.serialize(e));
+    public void onWriteError(@NonNull Exception e, @NonNull Chunk<? extends Long> accountIds) {
+        List<Long> ids = List.copyOf(accountIds.getItems());
+        log.warn("Error was triggered during writing of accounts (ids={}) due to: {}", ids, ThrowableSerialization.serialize(e));
         if (e instanceof RetryException) {
             // Scan mode follows, or, if the failure cannot be skipped, onChunkError.
             return;
@@ -132,9 +134,9 @@ public abstract class AbstractLoanItemListener
      * Called when scan mode skips an account whose business steps or write failed on their own.
      */
     @Override
-    public void onSkipInWrite(@NonNull Long loanId, @NonNull Throwable e) {
-        log.warn("Skipping was triggered during writing of Loan (id={}) due to: {}", loanId, ThrowableSerialization.serialize(e));
-        updateAccountLockWithError(List.of(loanId), WRITING_FAILED, e);
+    public void onSkipInWrite(@NonNull Long accountId, @NonNull Throwable e) {
+        log.warn("Skipping was triggered during writing of account (id={}) due to: {}", accountId, ThrowableSerialization.serialize(e));
+        updateAccountLockWithError(List.of(accountId), WRITING_FAILED, e);
     }
 
     @Override
@@ -173,5 +175,12 @@ public abstract class AbstractLoanItemListener
     }
 
     protected abstract LockOwner getLockOwner();
+
+    /**
+     * Noun for the account type in the lock error messages (e.g. {@code "Loan"}, {@code "Savings"}).
+     */
+    protected String getAccountTypeLabel() {
+        return "Account";
+    }
 
 }

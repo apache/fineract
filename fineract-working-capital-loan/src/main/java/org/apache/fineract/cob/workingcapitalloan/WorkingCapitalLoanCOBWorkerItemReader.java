@@ -30,8 +30,8 @@ import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.infrastructure.item.ItemReader;
 
 /**
- * Hands the ids of the loans to close to the writer, which loads each loan itself; see {@code AbstractLoanItemReader}
- * for why reading touches no database.
+ * Hands the ids of the loans to close to the writer, which loads each loan itself; see
+ * {@code AbstractAccountItemReader} for why reading touches no database.
  */
 @RequiredArgsConstructor
 public class WorkingCapitalLoanCOBWorkerItemReader implements ItemReader<Long>, StepExecutionListener {

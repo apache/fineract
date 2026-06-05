@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -46,6 +47,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -83,6 +85,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeReposito
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
@@ -193,6 +196,50 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     void tearDown() {
         ThreadLocalContextUtil.reset();
         MoneyHelper.clearCache();
+    }
+
+    @Test
+    void applyChargeDueOnHeldAccount_insufficientBalance_skipsWithoutTouchingTheAccount() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 2, 2))));
+        SavingsAccount account = mock(SavingsAccount.class);
+        when(account.getId()).thenReturn(1L);
+        SavingsAccountCharge charge = dueChargeOf(account, LocalDate.of(2024, 1, 31), new BigDecimal("100"));
+        doThrow(new InsufficientAccountBalanceException("transactionAmount", BigDecimal.ZERO, null, new BigDecimal("100"))).when(account)
+                .validateAccountBalanceDoesNotViolateOverdraft(any(), any());
+
+        service.applyChargeDue(account, charge);
+
+        // skipped before the payment is applied: nothing on the entity, nothing persisted
+        verify(account, never()).payCharge(any(), any(), any(), any(), anyBoolean(), any());
+        verify(savingAccountRepositoryWrapper, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void applyChargeDueOnHeldAccount_chargeOfAnotherAccount_isRejectedBeforeAnyPayment() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2024, 2, 2))));
+        SavingsAccount account = mock(SavingsAccount.class);
+        when(account.getId()).thenReturn(1L);
+        SavingsAccount otherAccount = mock(SavingsAccount.class);
+        SavingsAccountCharge charge = dueChargeOf(otherAccount, LocalDate.of(2024, 1, 31), new BigDecimal("100"));
+
+        assertThatThrownBy(() -> service.applyChargeDue(account, charge)).isInstanceOf(IllegalArgumentException.class);
+
+        verify(otherAccount, never()).payCharge(any(), any(), any(), any(), anyBoolean(), any());
+        verify(savingAccountRepositoryWrapper, never()).saveAndFlush(any());
+    }
+
+    private static SavingsAccountCharge dueChargeOf(SavingsAccount account, LocalDate dueDate, BigDecimal outstanding) {
+        SavingsAccountCharge charge = mock(SavingsAccountCharge.class);
+        when(charge.getId()).thenReturn(7L);
+        when(charge.savingsAccount()).thenReturn(account);
+        when(charge.isNotFullyPaid()).thenReturn(true);
+        when(charge.getDueDate()).thenReturn(dueDate);
+        when(charge.amoutOutstanding()).thenReturn(outstanding);
+        return charge;
     }
 
     @Test
