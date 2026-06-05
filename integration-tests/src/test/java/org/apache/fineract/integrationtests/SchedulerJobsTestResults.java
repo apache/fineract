@@ -47,12 +47,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetHolidaysResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
+import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -742,9 +745,10 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
         Float toSavingsBalanceAfter = (Float) toSavingsSummaryAfter.get("accountBalance");
 
-        final HashMap standingInstructionData = standingInstructionsHelper.getStandingInstructionById(standingInstructionId.toString());
-        Float expectedFromSavingsBalance = fromSavingsBalanceBefore - (Float) standingInstructionData.get("amount");
-        Float expectedToSavingsBalance = toSavingsBalanceBefore + (Float) standingInstructionData.get("amount");
+        final GetStandingInstructionsStandingInstructionIdResponse standingInstructionData = standingInstructionsHelper
+                .getStandingInstructionById(standingInstructionId.longValue());
+        Float expectedFromSavingsBalance = fromSavingsBalanceBefore - standingInstructionData.getAmount();
+        Float expectedToSavingsBalance = toSavingsBalanceBefore + standingInstructionData.getAmount();
 
         Assertions.assertEquals(expectedFromSavingsBalance, fromSavingsBalanceAfter,
                 "Verifying From Savings Balance after Successful completion of Scheduler Job");
@@ -752,13 +756,13 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 "Verifying To Savings Balance after Successful completion of Scheduler Job");
         Integer fromAccountType = PortfolioAccountType.SAVINGS.getValue();
         Integer transferType = AccountTransferType.ACCOUNT_TRANSFER.getValue();
-        List<HashMap> standingInstructionHistoryData = standingInstructionsHelper.getStandingInstructionHistory(fromSavingsId,
-                fromAccountType, clientID, transferType);
+        Set<GetStandingInstructionHistoryPageItemsResponse> standingInstructionHistoryData = standingInstructionsHelper
+                .getStandingInstructionHistory(fromSavingsId, fromAccountType, clientID, transferType);
         Assertions.assertEquals(1, standingInstructionHistoryData.size(),
                 "Verifying the no of standing instruction transactions logged for the client");
-        HashMap loggedTransaction = standingInstructionHistoryData.get(0);
+        GetStandingInstructionHistoryPageItemsResponse loggedTransaction = standingInstructionHistoryData.iterator().next();
 
-        Assertions.assertEquals((Float) standingInstructionData.get("amount"), (Float) loggedTransaction.get("amount"),
+        Assertions.assertEquals(standingInstructionData.getAmount(), loggedTransaction.getAmount(),
                 "Verifying transferred amount and logged transaction amounts");
     }
 

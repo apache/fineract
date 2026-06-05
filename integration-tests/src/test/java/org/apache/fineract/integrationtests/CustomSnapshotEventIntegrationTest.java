@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.Gson;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
@@ -307,18 +306,10 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
 
     }
 
-    public static String getExternalEventConfigurationsForUpdateJSON() {
-        Map<String, Map<String, Boolean>> configurationsForUpdate = new HashMap<>();
-        Map<String, Boolean> configurations = new HashMap<>();
-        configurations.put("CentersCreateBusinessEvent", true);
-        configurations.put("ClientActivateBusinessEvent", true);
-        configurationsForUpdate.put("externalEventConfigurations", configurations);
-        return new Gson().toJson(configurationsForUpdate);
-    }
-
     private void enableLoanAccountCustomSnapshotBusinessEvent() {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanAccountCustomSnapshotBusinessEvent\":true}}\n");
+                responseSpec, new ExternalEventConfigurationUpdateRequest()
+                        .externalEventConfigurations(Map.of("LoanAccountCustomSnapshotBusinessEvent", true)));
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey("LoanAccountCustomSnapshotBusinessEvent"));
         Assertions.assertTrue(updatedConfigurations.get("LoanAccountCustomSnapshotBusinessEvent"));
@@ -326,7 +317,8 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
 
     private void disableLoanAccountCustomSnapshotBusinessEvent() {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanAccountCustomSnapshotBusinessEvent\":false}}\n");
+                responseSpec, new ExternalEventConfigurationUpdateRequest()
+                        .externalEventConfigurations(Map.of("LoanAccountCustomSnapshotBusinessEvent", false)));
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey("LoanAccountCustomSnapshotBusinessEvent"));
         Assertions.assertFalse(updatedConfigurations.get("LoanAccountCustomSnapshotBusinessEvent"));

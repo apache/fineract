@@ -55,9 +55,15 @@ public class LoanTransactionBusinessEvent extends BusinessEvent {
         Object feePortion = externalEvent.getPayLoad().get("feeChargesPortion");
         Object penaltyPortion = externalEvent.getPayLoad().get("penaltyChargesPortion");
 
-        return super.verify(externalEvent, formatter) && Objects.equals(amount, getAmount())
-                && Objects.equals(outstandingLoanBalance, getOutstandingLoanBalance())
-                && Objects.equals(principalPortion, getPrincipalPortion()) && Objects.equals(interestPortion, getInterestPortion())
-                && Objects.equals(feePortion, getFeeChargesPortion()) && Objects.equals(penaltyPortion, getPenaltyChargesPortion());
+        Double amt = amount instanceof Number ? ((Number) amount).doubleValue() : null;
+        Double olb = outstandingLoanBalance instanceof Number ? ((Number) outstandingLoanBalance).doubleValue() : null;
+        Double pp = principalPortion instanceof Number ? ((Number) principalPortion).doubleValue() : null;
+        Double ip = interestPortion instanceof Number ? ((Number) interestPortion).doubleValue() : null;
+        Double fp = feePortion instanceof Number ? ((Number) feePortion).doubleValue() : null;
+        Double pep = penaltyPortion instanceof Number ? ((Number) penaltyPortion).doubleValue() : null;
+        return super.verify(externalEvent, formatter) && Objects.equals(amt, getAmount())
+                && Objects.equals(olb, getOutstandingLoanBalance()) && Objects.equals(pp, getPrincipalPortion())
+                && Objects.equals(ip, getInterestPortion()) && Objects.equals(fp, getFeeChargesPortion())
+                && Objects.equals(pep, getPenaltyChargesPortion());
     }
 }

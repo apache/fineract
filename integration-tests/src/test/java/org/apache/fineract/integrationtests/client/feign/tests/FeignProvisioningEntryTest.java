@@ -20,21 +20,17 @@ package org.apache.fineract.integrationtests.client.feign.tests;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
+import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
 import org.apache.fineract.client.models.PostProvisioningEntriesResponse;
 import org.apache.fineract.client.models.ProvisionEntryRequest;
+import org.apache.fineract.client.models.ProvisioningCategoryData;
 import org.apache.fineract.client.models.ProvisioningEntryData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningTransactionHelper;
 import org.junit.jupiter.api.Test;
@@ -43,12 +39,6 @@ public class FeignProvisioningEntryTest extends FeignLoanTestBase {
 
     @Test
     public void testRetrieveProvisioningEntryWithNoActiveLoansDoesNotReturn500() {
-        // Set up REST spec for legacy helpers
-        Utils.initializeRESTAssured();
-        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
         // Create a loan product to satisfy criteria validation,
         // but do NOT disburse any loans — so m_loanproduct_provisioning_entry
@@ -59,16 +49,17 @@ public class FeignProvisioningEntryTest extends FeignLoanTestBase {
         ArrayList<Integer> loanProducts = new ArrayList<>();
         loanProducts.add(loanProductId.intValue());
 
-        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
-        AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
-        ArrayList categories = transactionHelper.retrieveAllProvisioningCategories();
-        Account liability = accountHelper.createLiabilityAccount();
-        Account expense = accountHelper.createExpenseAccount();
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
+        List<ProvisioningCategoryData> categories = transactionHelper.retrieveAllProvisioningCategories();
 
-        Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense);
-        String criteriaJson = new Gson().toJson(requestCriteria);
-        Integer criteriaId = transactionHelper.createProvisioningCriteria(criteriaJson);
-        assertNotNull(criteriaId);
+        Account liability = accountHelper.createLiabilityAccount("Liability_" + Utils.randomStringGenerator("", 5));
+        Account expense = accountHelper.createExpenseAccount("Expense_" + Utils.randomStringGenerator("", 5));
+
+        PostProvisioningCriteriaRequest criteriaRequest = ProvisioningHelper.buildProvisioningCriteriaRequest(loanProducts, categories,
+                liability, expense);
+        PostProvisioningCriteriaResponse createdCriteria = transactionHelper.createProvisioningCriteria(criteriaRequest);
+        assertNotNull(createdCriteria.getResourceId());
+        Long criteriaId = createdCriteria.getResourceId();
 
         // Create the provisioning entry
         String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());

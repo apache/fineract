@@ -18,42 +18,71 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.client.models.ExternalEventConfigurationItemResponse;
+import org.apache.fineract.client.models.ExternalEventConfigurationResponse;
+import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
+import org.apache.fineract.client.models.ExternalEventConfigurationUpdateResponse;
 
 public class ExternalEventConfigurationHelper {
 
-    private static final String EXTERNAL_EVENT_CONFIGURATION = "externalEventConfiguration";
-    private static final String EXTERNAL_EVENT_CONFIGURATION_RESPONSE = "externalEventConfigurations";
-
     protected ExternalEventConfigurationHelper() {}
 
-    private static final String EXTERNAL_EVENT_CONFIGURATION_URL = "/fineract-provider/api/v1/externalevents/configuration?"
-            + Utils.TENANT_IDENTIFIER;
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example:
-    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static ArrayList<Map<String, Object>> getAllExternalEventConfigurations(RequestSpecification requestSpec,
             ResponseSpecification responseSpec) {
-        Map<String, ArrayList<Map<String, Object>>> response = Utils.performServerGet(requestSpec, responseSpec,
-                EXTERNAL_EVENT_CONFIGURATION_URL, "");
-        return response.get(EXTERNAL_EVENT_CONFIGURATION);
+        ExternalEventConfigurationResponse response = ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().externalEventConfiguration().getExternalEventConfigurations());
+        ArrayList<Map<String, Object>> configurations = new ArrayList<>();
+        if (response.getExternalEventConfiguration() != null) {
+            for (ExternalEventConfigurationItemResponse item : response.getExternalEventConfiguration()) {
+                configurations.add(toMap(item));
+            }
+        }
+        return configurations;
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example:
-    // org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
+    public static ArrayList<Map<String, Object>> getDefaultExternalEventConfigurations() {
+        ArrayList<Map<String, Object>> defaults = getAllExternalEventConfigurations(null, null);
+        for (Map<String, Object> defaultConfiguration : defaults) {
+            defaultConfiguration.put("enabled", false);
+        }
+        return defaults;
+    }
+
+    public static ExternalEventConfigurationUpdateRequest getExternalEventConfigurationsForUpdateRequest() {
+        return new ExternalEventConfigurationUpdateRequest()
+                .externalEventConfigurations(Map.of("CentersCreateBusinessEvent", true, "ClientActivateBusinessEvent", true));
+    }
+
     public static Map<String, Boolean> updateExternalEventConfigurations(RequestSpecification requestSpec,
-            ResponseSpecification responseSpec, String json) {
-        Map<String, Map<String, Boolean>> response = Utils.performServerPut(requestSpec, responseSpec, EXTERNAL_EVENT_CONFIGURATION_URL,
-                json, "changes");
-        return response.get(EXTERNAL_EVENT_CONFIGURATION_RESPONSE);
+            ResponseSpecification responseSpec, ExternalEventConfigurationUpdateRequest request) {
+        ExternalEventConfigurationUpdateResponse response = ok(() -> FineractFeignClientHelper.getFineractFeignClient()
+                .externalEventConfiguration().updateExternalEventConfigurations(request));
+        Map<String, Boolean> updatedConfigurations = new HashMap<>();
+        Object configurations = response.getChanges().get("externalEventConfigurations");
+        if (configurations instanceof Map<?, ?> configurationMap) {
+            for (Map.Entry<?, ?> entry : configurationMap.entrySet()) {
+                updatedConfigurations.put(String.valueOf(entry.getKey()), (Boolean) entry.getValue());
+            }
+        }
+        return updatedConfigurations;
+    }
+
+    public static void resetDefaultConfigurations(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        updateExternalEventConfigurations(requestSpec, responseSpec, new ExternalEventConfigurationUpdateRequest()
+                .externalEventConfigurations(Map.of("CentersCreateBusinessEvent", false, "ClientActivateBusinessEvent", false)));
+    }
+
+    private static Map<String, Object> toMap(ExternalEventConfigurationItemResponse item) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", item.getType());
+        map.put("enabled", item.getEnabled());
+        return map;
     }
 }

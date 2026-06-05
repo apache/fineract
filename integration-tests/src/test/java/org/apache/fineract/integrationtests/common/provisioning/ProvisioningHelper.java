@@ -18,16 +18,24 @@
  */
 package org.apache.fineract.integrationtests.common.provisioning;
 
-import com.google.gson.Gson;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import org.apache.fineract.client.models.LoanProductData;
+import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.ProvisionEntryRequest;
+import org.apache.fineract.client.models.ProvisioningCategoryData;
+import org.apache.fineract.client.models.ProvisioningCriteriaDefinitionData;
+import org.apache.fineract.client.models.PutProvisioningCriteriaRequest;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
@@ -35,99 +43,95 @@ public final class ProvisioningHelper {
 
     private static final SecureRandom rand = new SecureRandom();
 
-    private ProvisioningHelper() {
+    private ProvisioningHelper() {}
 
+    public static PostProvisioningCriteriaRequest buildProvisioningCriteriaRequest(List<Integer> loanProductIds,
+            List<ProvisioningCategoryData> categories, Account liability, Account expense) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        String formattedDate = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
+        String criteriaName = "General Provisioning Criteria" + formattedDate + rand.nextLong();
+
+        List<ProvisioningCriteriaDefinitionData> definitions = buildDefinitions(categories, liability, expense);
+
+        return new PostProvisioningCriteriaRequest().criteriaName(criteriaName).loanProducts(buildLoanProducts(loanProductIds))
+                .definitions(definitions);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    public static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
+    public static PutProvisioningCriteriaRequest buildUpdateProvisioningCriteriaRequest(List<Integer> loanProductIds,
+            List<ProvisioningCategoryData> categories, Account liability, Account expense,
+            List<ProvisioningCriteriaDefinitionData> existingDefinitions) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        String formattedDate = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
+        String criteriaName = "General Provisioning Criteria" + formattedDate + rand.nextLong();
+
+        List<ProvisioningCriteriaDefinitionData> definitions = buildDefinitions(categories, liability, expense);
+        // The server requires each definition's existing id to be present in the update payload, so it can
+        // match and update the correct row (see ProvisioningCriteria#update). Propagate ids by matching on
+        // categoryId, since the new definitions are built fresh and don't carry the persisted id.
+        for (ProvisioningCriteriaDefinitionData definition : definitions) {
+            existingDefinitions.stream().filter(existing -> existing.getCategoryId().equals(definition.getCategoryId())).findFirst()
+                    .ifPresent(existing -> definition.id(existing.getId()));
+        }
+
+        return new PutProvisioningCriteriaRequest().criteriaName(criteriaName).loanProducts(buildLoanProducts(loanProductIds))
+                .definitions(definitions);
+    }
+
+    private static List<LoanProductData> buildLoanProducts(List<Integer> loanProductIds) {
+        List<LoanProductData> list = new ArrayList<>();
+        for (Integer id : loanProductIds) {
+            LoanProductData product = new LoanProductData();
+            product.setId(id.longValue());
+            list.add(product);
+        }
+        return list;
+    }
+
+    private static List<ProvisioningCriteriaDefinitionData> buildDefinitions(List<ProvisioningCategoryData> categories, Account liability,
             Account expense) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("loanProducts", addLoanProducts(loanProducts));
-        map.put("definitions", addProvisioningCategories(categories, liability, expense));
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        String formattedString = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
-
-        String criteriaName = "General Provisioning Criteria" + formattedString + rand.nextLong();
-        map.put("criteriaName", criteriaName);
-        map.put("locale", "en");
-        return map;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String createProvisioningEntryJson() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("createjournalentries", Boolean.FALSE);
-        map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        map.put("date", simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant())));
-        String provisioningEntryCreateJson = new Gson().toJson(map);
-        return provisioningEntryCreateJson;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String createProvisioningEntryJsonWithJournalsEnabled() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("createjournalentries", Boolean.TRUE);
-        map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        map.put("date", simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant())));
-        String provisioningEntryCreateJson = new Gson().toJson(map);
-        return provisioningEntryCreateJson;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static ArrayList<HashMap<String, Integer>> addLoanProducts(ArrayList<Integer> loanProducts) {
-        ArrayList<HashMap<String, Integer>> list = new ArrayList<>();
-        for (int i = 0; i < loanProducts.size(); i++) {
-            HashMap<String, Integer> map = new HashMap<>();
-            map.put("id", loanProducts.get(i));
-            list.add(map);
-        }
-        return list;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static ArrayList<HashMap<String, Object>> addProvisioningCategories(ArrayList categories, Account liability, Account expense) {
-        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
-        int minStart = 0;
-        int maxStart = 30;
-
+        List<ProvisioningCriteriaDefinitionData> definitions = new ArrayList<>();
         for (int i = 0; i < categories.size(); i++) {
-            HashMap<String, Object> map = new HashMap<>();
-            HashMap category = (HashMap) categories.get(i);
-            map.put("categoryId", category.get("id"));
-            map.put("categoryName", category.get("categoryName"));
-            map.put("minAge", (i * 30) + 1);
-            if (i == categories.size() - 1) {
-                map.put("maxAge", 90000);
-            } else {
-                map.put("maxAge", (i + 1) * 30);
-            }
-            map.put("provisioningPercentage", Float.valueOf((float) ((i + 1) * 5.5)));
-            map.put("liabilityAccount", liability.getAccountID());
-            map.put("expenseAccount", expense.getAccountID());
-            list.add(map);
+            ProvisioningCategoryData category = categories.get(i);
+            definitions.add(new ProvisioningCriteriaDefinitionData().categoryId(category.getId()).categoryName(category.getCategoryName())
+                    .minAge((long) ((i * 30) + 1)).maxAge(i == categories.size() - 1 ? 90000L : (long) ((i + 1) * 30))
+                    .provisioningPercentage(BigDecimal.valueOf((i + 1) * 5.5)).liabilityAccount(liability.getAccountID().longValue())
+                    .expenseAccount(expense.getAccountID().longValue()));
         }
-        return list;
+        return definitions;
+    }
+
+    public static PostProvisioningCriteriaResponse createProvisioningCriteria(List<Integer> loanProductIds,
+            List<ProvisioningCategoryData> categories, Account liability, Account expense) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        String formattedDate = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
+        String criteriaName = "General Provisioning Criteria" + formattedDate + rand.nextLong();
+
+        List<ProvisioningCriteriaDefinitionData> definitions = new ArrayList<>();
+        for (int i = 0; i < categories.size(); i++) {
+            ProvisioningCategoryData category = categories.get(i);
+            definitions.add(new ProvisioningCriteriaDefinitionData().categoryId(category.getId()).categoryName(category.getCategoryName())
+                    .minAge((long) ((i * 30) + 1)).maxAge(i == categories.size() - 1 ? 90000L : (long) ((i + 1) * 30))
+                    .provisioningPercentage(BigDecimal.valueOf((i + 1) * 5.5)).liabilityAccount(liability.getAccountID().longValue())
+                    .expenseAccount(expense.getAccountID().longValue()));
+        }
+
+        final PostProvisioningCriteriaRequest request = new PostProvisioningCriteriaRequest().criteriaName(criteriaName)
+                .loanProducts(buildLoanProducts(loanProductIds)).definitions(definitions);
+
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCriteria().createProvisioningCriteria(request));
+    }
+
+    public static ProvisionEntryRequest createProvisioningEntryRequest() {
+        return createProvisioningEntryRequest(false);
+    }
+
+    public static ProvisionEntryRequest createProvisioningEntryRequestWithJournalsEnabled() {
+        return createProvisioningEntryRequest(true);
+    }
+
+    private static ProvisionEntryRequest createProvisioningEntryRequest(boolean createJournalEntries) {
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        return new ProvisionEntryRequest().createjournalentries(createJournalEntries).locale("en").dateFormat("dd MMMM yyyy")
+                .date(simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant())));
     }
 }

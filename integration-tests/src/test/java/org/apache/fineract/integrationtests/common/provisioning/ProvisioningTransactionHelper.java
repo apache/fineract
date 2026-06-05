@@ -18,133 +18,92 @@
  */
 package org.apache.fineract.integrationtests.common.provisioning;
 
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.Map;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
+import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.DeleteProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.GetProvisioningCriteriaCriteriaIdResponse;
+import org.apache.fineract.client.models.PageLoanProductProvisioningEntryData;
 import org.apache.fineract.client.models.PageProvisioningEntryData;
-import org.apache.fineract.client.util.Calls;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.PostProvisioningEntriesResponse;
+import org.apache.fineract.client.models.ProvisionEntryRequest;
+import org.apache.fineract.client.models.ProvisioningCategoryData;
+import org.apache.fineract.client.models.ProvisioningEntryData;
+import org.apache.fineract.client.models.PutProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PutProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.PutProvisioningEntriesRequest;
+import org.apache.fineract.client.models.PutProvisioningEntriesResponse;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 
 public class ProvisioningTransactionHelper {
 
-    private static final String PROVISIONING_CATEGORY_URL = "/fineract-provider/api/v1/provisioningcategory?" + Utils.TENANT_IDENTIFIER;
+    public ProvisioningTransactionHelper() {}
 
-    private static final String CREATE_PROVISIONING_CRITERIA_URL = "/fineract-provider/api/v1/provisioningcriteria?"
-            + Utils.TENANT_IDENTIFIER;
-    private static final String CREATE_PROVISIONING_ENTRY_URL = "/fineract-provider/api/v1/provisioningentries?" + Utils.TENANT_IDENTIFIER;
-
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification responseSpec;
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public ProvisioningTransactionHelper(RequestSpecification requestSpec, ResponseSpecification responeSpec) {
-        this.requestSpec = requestSpec;
-        this.responseSpec = responeSpec;
+    public List<ProvisioningCategoryData> retrieveAllProvisioningCategories() {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCategory().retrieveAll8());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public ArrayList retrieveAllProvisioningCategories() {
-        return Utils.performServerGet(requestSpec, responseSpec, PROVISIONING_CATEGORY_URL, "");
+    public PostProvisioningCriteriaResponse createProvisioningCriteria(final PostProvisioningCriteriaRequest request) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCriteria().createProvisioningCriteria(request));
     }
 
-    public Integer createProvisioningCategory(final String provisioningCategoryJson) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, PROVISIONING_CATEGORY_URL, provisioningCategoryJson,
-                "resourceId");
+    public GetProvisioningCriteriaCriteriaIdResponse retrieveProvisioningCriteria(final Long criteriaId) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCriteria()
+                .retrieveOneProvisioningCriteria(criteriaId));
     }
 
-    public Integer deleteProvisioningCategory(final Integer categoryId) {
-        final String url = "/fineract-provider/api/v1/provisioningcategory/" + categoryId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, url, "resourceId");
+    public PutProvisioningCriteriaResponse updateProvisioningCriteria(final Long criteriaId, final PutProvisioningCriteriaRequest request) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCriteria().updateProvisioningCriteria(criteriaId,
+                request));
     }
 
-    public Object deleteProvisioningCategoryExpectingError(final ResponseSpecification errorResponseSpec, final Integer categoryId) {
-        final String url = "/fineract-provider/api/v1/provisioningcategory/" + categoryId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerDelete(this.requestSpec, errorResponseSpec, url, CommonConstants.RESPONSE_ERROR);
+    public CommandProcessingResult createProvisioningCategory(final String categoryJson) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCategory().createProvisioningCategory(categoryJson));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer createProvisioningCriteria(final String provsioningCriteriaJson) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_PROVISIONING_CRITERIA_URL, provsioningCriteriaJson,
-                "resourceId");
+    public CommandProcessingResult deleteProvisioningCategory(final Long categoryId) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCategory().deleteProvisioningCategory(categoryId));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Map retrieveProvisioningCriteria(final Integer criteriaId) {
-        String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    public CallFailedRuntimeException deleteProvisioningCategoryExpectingError(final Long categoryId) {
+        try {
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCategory().deleteProvisioningCategory(categoryId));
+            return null;
+        } catch (CallFailedRuntimeException e) {
+            return e;
+        }
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer updateProvisioningCriteria(final Integer criteriaId, final String provsioningCriteriaJson) {
-        String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, url, provsioningCriteriaJson, "resourceId");
+    public DeleteProvisioningCriteriaResponse deleteProvisioningCriteria(final Long criteriaId) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningCriteria().deleteProvisioningCriteria(criteriaId));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer deleteProvisioningCriteria(final Integer criteriaId) {
-        String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, url, "resourceId");
+    public PostProvisioningEntriesResponse createProvisioningEntries(final ProvisionEntryRequest request) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningEntries().createProvisioningEntries(request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer createProvisioningEntries(final String provsioningCriteriaJson) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_PROVISIONING_ENTRY_URL, provsioningCriteriaJson,
-                "resourceId");
+    public PutProvisioningEntriesResponse updateProvisioningEntry(final String command, final Long entryId,
+            PutProvisioningEntriesRequest request) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningEntries().modifyProvisioningEntry(entryId, command,
+                request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Integer updateProvisioningEntry(final String command, final Integer entryId, String jsonBody) {
-        String url = "/fineract-provider/api/v1/provisioningentries/" + entryId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(requestSpec, responseSpec, url, jsonBody, "resourceId");
+    public ProvisioningEntryData retrieveProvisioningEntry(final Long provisioningEntry) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningEntries()
+                .retrieveOneProvisioningEntry(provisioningEntry));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Map retrieveProvisioningEntry(final Integer provisioningEntry) {
-        String url = "/fineract-provider/api/v1/provisioningentries/" + provisioningEntry + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "");
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Map retrieveProvisioningEntries(final Integer provisioningEntry) {
-        String url = "/fineract-provider/api/v1/provisioningentries/entries?entryId=" + provisioningEntry + "&" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    public PageLoanProductProvisioningEntryData retrieveProvisioningEntries(final Long provisioningEntry) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningEntries()
+                .retrieveProvisioningEntriesLoanProducts(provisioningEntry, null, null, null, null, null));
     }
 
     public PageProvisioningEntryData retrieveAllProvisioningEntries() {
-        return Calls.ok(FineractClientHelper.getFineractClient().provisioningEntries.retrieveAllProvisioningEntries(null, null));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().provisioningEntries()
+                .retrieveAllProvisioningEntries((Integer) null, (Integer) null));
     }
-
 }

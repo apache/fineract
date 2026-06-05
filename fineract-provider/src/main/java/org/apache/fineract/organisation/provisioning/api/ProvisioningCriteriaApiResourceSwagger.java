@@ -42,7 +42,7 @@ final class ProvisioningCriteriaApiResourceSwagger {
         @Schema(example = "High Risk Products Criteria")
         public String criteriaName;
         public Collection<LoanProductData> loanProducts;
-        public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
+        public Collection<ProvisioningCriteriaDefinitionData> definitions;
     }
 
     @Schema(description = "PostProvisioningCriteriaResponse")
@@ -85,7 +85,7 @@ final class ProvisioningCriteriaApiResourceSwagger {
         @Schema(example = "mifos")
         public String createdBy;
         public Collection<LoanProductData> loanProducts;
-        public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
+        public Collection<ProvisioningCriteriaDefinitionData> definitions;
     }
 
     @Schema(description = "PutProvisioningCriteriaRequest")
@@ -98,7 +98,7 @@ final class ProvisioningCriteriaApiResourceSwagger {
         @Schema(example = "High Risk Products Criteria")
         public String criteriaName;
         public Collection<LoanProductData> loanProducts;
-        public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
+        public Collection<ProvisioningCriteriaDefinitionData> definitions;
     }
 
     @Schema(description = "PutProvisioningCriteriaResponse")

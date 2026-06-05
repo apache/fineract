@@ -62,7 +62,6 @@ public final class ObjectMapperFactory {
 
         // Disable FAIL_ON_EMPTY_BEANS for empty responses
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-
         return mapper;
     }
 

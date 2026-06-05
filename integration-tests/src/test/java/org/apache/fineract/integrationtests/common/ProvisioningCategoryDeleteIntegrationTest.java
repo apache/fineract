@@ -18,15 +18,19 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import com.google.gson.Gson;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.ProvisioningCategoryData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -42,84 +46,76 @@ import org.junit.jupiter.api.Test;
  * (create-validation run on a body-less DELETE, a transient entity with a null id, and an in-use check querying a
  * non-existent table); these tests exercise both the success and the in-use-rejected paths end to end.
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ProvisioningCategoryDeleteIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
     private AccountHelper accountHelper;
     private LoanTransactionHelper loanTransactionHelper;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        var requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        var responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void testDeleteUnusedProvisioningCategorySucceeds() {
-        final ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
 
         final String categoryName = Utils.randomStringGenerator("PROV_CAT_", 6);
-        final Integer categoryId = transactionHelper.createProvisioningCategory("{\"categoryname\":\"" + categoryName + "\"}");
-        Assertions.assertNotNull(categoryId);
+        CommandProcessingResult createResult = transactionHelper.createProvisioningCategory("{\"categoryname\":\"" + categoryName + "\"}");
+        assertNotNull(createResult.getResourceId());
+        final Long categoryId = createResult.getResourceId();
 
-        // An unused category must delete cleanly. Regression guard: the in-use check previously queried a
-        // non-existent table (m_loanproduct_provisioning_details) and failed on every database.
-        final Integer deletedId = transactionHelper.deleteProvisioningCategory(categoryId);
-        Assertions.assertEquals(categoryId, deletedId);
+        // An unused category must delete cleanly.
+        CommandProcessingResult deleteResult = transactionHelper.deleteProvisioningCategory(categoryId);
+        Assertions.assertEquals(categoryId, deleteResult.getResourceId());
 
-        final ArrayList categories = transactionHelper.retrieveAllProvisioningCategories();
-        for (Object category : categories) {
-            Assertions.assertNotEquals(categoryId, ((Map) category).get("id"));
+        List<ProvisioningCategoryData> categories = transactionHelper.retrieveAllProvisioningCategories();
+        for (ProvisioningCategoryData category : categories) {
+            Assertions.assertNotEquals(categoryId, category.getId());
         }
     }
 
     @Test
     public void testDeleteProvisioningCategoryInUseIsRejected() {
-        final ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
 
-        // A brand-new category, referenced from a criteria below — so the test never touches the seed categories.
         final String categoryName = Utils.randomStringGenerator("PROV_CAT_", 6);
-        final Integer categoryId = transactionHelper.createProvisioningCategory("{\"categoryname\":\"" + categoryName + "\"}");
-        Assertions.assertNotNull(categoryId);
+        CommandProcessingResult createResult = transactionHelper.createProvisioningCategory("{\"categoryname\":\"" + categoryName + "\"}");
+        assertNotNull(createResult.getResourceId());
+        final Long categoryId = createResult.getResourceId();
 
         final Integer loanProductId = createLoanProduct();
-        Assertions.assertNotNull(loanProductId);
-        final ArrayList<Integer> loanProducts = new ArrayList<>();
+        assertNotNull(loanProductId);
+        final List<Integer> loanProducts = new ArrayList<>();
         loanProducts.add(loanProductId);
         final Account liability = accountHelper.createLiabilityAccount();
         final Account expense = accountHelper.createExpenseAccount();
 
-        // Reference only the fresh category under test, so the criteria is valid regardless of any pre-existing
-        // provisioning data on the tenant (and so the test stays isolated from the seed categories).
-        final ArrayList allCategories = transactionHelper.retrieveAllProvisioningCategories();
-        final ArrayList categoriesUnderTest = new ArrayList();
-        for (Object category : allCategories) {
-            if (categoryId.equals(((Map) category).get("id"))) {
-                categoriesUnderTest.add(category);
-            }
-        }
-        final Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categoriesUnderTest, liability, expense);
-        final Integer criteriaId = transactionHelper.createProvisioningCriteria(new Gson().toJson(requestCriteria));
-        Assertions.assertNotNull(criteriaId);
+        // Reference only the fresh category under test.
+        List<ProvisioningCategoryData> allCategories = transactionHelper.retrieveAllProvisioningCategories();
+        List<ProvisioningCategoryData> categoriesUnderTest = allCategories.stream().filter(c -> categoryId.equals(c.getId())).toList();
 
-        // Delete must be rejected with the domain-rule violation (HTTP 403), NOT a SQL/table error.
-        final ResponseSpecification errorSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final ArrayList<HashMap> error = (ArrayList<HashMap>) transactionHelper.deleteProvisioningCategoryExpectingError(errorSpec,
-                categoryId);
-        Assertions.assertEquals("error.msg.provisioningcategory.cannot.be.deleted.it.is.already.used.in.loanproduct",
-                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        PostProvisioningCriteriaRequest criteriaRequest = ProvisioningHelper.buildProvisioningCriteriaRequest(loanProducts,
+                categoriesUnderTest, liability, expense);
+        PostProvisioningCriteriaResponse criteriaResponse = transactionHelper.createProvisioningCriteria(criteriaRequest);
+        assertNotNull(criteriaResponse.getResourceId());
+
+        // Delete must be rejected with the domain-rule violation (HTTP 403).
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> transactionHelper.deleteProvisioningCategory(categoryId));
+        Assertions.assertEquals(403, exception.getStatus());
+        Assertions.assertTrue(exception.getDeveloperMessage().contains("cannot be deleted, it is already used in loan product"));
 
         // Once the referencing criteria is removed, the category can be deleted.
-        transactionHelper.deleteProvisioningCriteria(criteriaId);
-        final Integer deletedId = transactionHelper.deleteProvisioningCategory(categoryId);
-        Assertions.assertEquals(categoryId, deletedId);
+        transactionHelper.deleteProvisioningCriteria(criteriaResponse.getResourceId());
+        CommandProcessingResult deleteResult = transactionHelper.deleteProvisioningCategory(categoryId);
+        Assertions.assertEquals(categoryId, deleteResult.getResourceId());
     }
 
     private Integer createLoanProduct() {

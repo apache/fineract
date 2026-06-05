@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -30,9 +29,19 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.fineract.client.models.GetProvisioningCriteriaCriteriaIdResponse;
+import org.apache.fineract.client.models.PageLoanProductProvisioningEntryData;
 import org.apache.fineract.client.models.PageProvisioningEntryData;
+import org.apache.fineract.client.models.PostProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PostProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.PostProvisioningEntriesResponse;
+import org.apache.fineract.client.models.ProvisionEntryRequest;
+import org.apache.fineract.client.models.ProvisioningCategoryData;
+import org.apache.fineract.client.models.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.client.models.ProvisioningEntryData;
+import org.apache.fineract.client.models.PutProvisioningCriteriaRequest;
+import org.apache.fineract.client.models.PutProvisioningCriteriaResponse;
+import org.apache.fineract.client.models.PutProvisioningEntriesRequest;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -50,7 +59,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class ProvisioningIntegrationTest {
 
@@ -77,7 +85,7 @@ public class ProvisioningIntegrationTest {
 
     @Test
     public void testCreateProvisioningCriteria() {
-        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
         ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
@@ -107,49 +115,47 @@ public class ProvisioningIntegrationTest {
             Assertions.assertNotNull(loanID);
         }
 
-        ArrayList categories = transactionHelper.retrieveAllProvisioningCategories();
+        List<ProvisioningCategoryData> categories = transactionHelper.retrieveAllProvisioningCategories();
         Assertions.assertTrue(categories.size() > 0);
         Account liability = accountHelper.createLiabilityAccount();
         Account expense = accountHelper.createExpenseAccount();
-        Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense);
-        String provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
-        Integer criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
-        Assertions.assertNotNull(criteriaId);
+        PostProvisioningCriteriaRequest criteriaRequest = ProvisioningHelper.buildProvisioningCriteriaRequest(loanProducts, categories,
+                liability, expense);
+        PostProvisioningCriteriaResponse createdCriteria = transactionHelper.createProvisioningCriteria(criteriaRequest);
+        Assertions.assertNotNull(createdCriteria.getResourceId());
+        Long criteriaId = createdCriteria.getResourceId();
 
-        Map newCriteria = transactionHelper.retrieveProvisioningCriteria(criteriaId);
-        validateProvisioningCriteria(requestCriteria, newCriteria);
+        GetProvisioningCriteriaCriteriaIdResponse newCriteria = transactionHelper.retrieveProvisioningCriteria(criteriaId);
+        validateProvisioningCriteria(criteriaRequest, newCriteria);
 
-        ArrayList definitions = (ArrayList) newCriteria.get("definitions");
-        for (int i = 0; i < definitions.size(); i++) {
-            Map criteriadefinition = (Map) definitions.get(i);
-            criteriadefinition.put("provisioningPercentage", Float.valueOf((float) 20.0));
-        }
-        newCriteria.put("locale", "en");
-        String updateCriteriaString = new Gson().toJson(newCriteria);
-        Integer criteriaId1 = transactionHelper.updateProvisioningCriteria(criteriaId, updateCriteriaString);
-        Map updatedCriteria = transactionHelper.retrieveProvisioningCriteria(criteriaId1);
-        validateProvisioningCriteria(newCriteria, updatedCriteria);
+        PutProvisioningCriteriaRequest updateRequest = ProvisioningHelper.buildUpdateProvisioningCriteriaRequest(loanProducts, categories,
+                liability, expense, newCriteria.getDefinitions());
+        PutProvisioningCriteriaResponse updatedCriteriaResponse = transactionHelper.updateProvisioningCriteria(criteriaId, updateRequest);
+        GetProvisioningCriteriaCriteriaIdResponse updatedCriteria = transactionHelper
+                .retrieveProvisioningCriteria(updatedCriteriaResponse.getResourceId());
+        validateProvisioningCriteria(updateRequest, updatedCriteria);
 
-        transactionHelper.deleteProvisioningCriteria(criteriaId1);
+        transactionHelper.deleteProvisioningCriteria(criteriaId);
 
         categories = transactionHelper.retrieveAllProvisioningCategories();
         liability = accountHelper.createLiabilityAccount();
         expense = accountHelper.createExpenseAccount();
-        requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense);
-        provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
-        criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
-        Assertions.assertNotNull(criteriaId);
+        criteriaRequest = ProvisioningHelper.buildProvisioningCriteriaRequest(loanProducts, categories, liability, expense);
+        createdCriteria = transactionHelper.createProvisioningCriteria(criteriaRequest);
+        Assertions.assertNotNull(createdCriteria.getResourceId());
+        criteriaId = createdCriteria.getResourceId();
 
-        String provisioningEntryJson = ProvisioningHelper.createProvisioningEntryJson();
-        Integer provisioningEntryId = transactionHelper.createProvisioningEntries(provisioningEntryJson);
+        ProvisionEntryRequest provisioningEntryRequest = ProvisioningHelper.createProvisioningEntryRequest();
+        PostProvisioningEntriesResponse createdEntry = transactionHelper.createProvisioningEntries(provisioningEntryRequest);
+        Long provisioningEntryId = createdEntry.getResourceId();
         Assertions.assertNotNull(provisioningEntryId);
 
-        transactionHelper.updateProvisioningEntry("recreateprovisioningentry", provisioningEntryId, "");
-        transactionHelper.updateProvisioningEntry("createjournalentry", provisioningEntryId, "");
-        Map entry = transactionHelper.retrieveProvisioningEntry(provisioningEntryId);
-        Assertions.assertTrue((Boolean) entry.get("journalEntry"));
-        Map provisioningEntry = transactionHelper.retrieveProvisioningEntries(provisioningEntryId);
-        Assertions.assertTrue(((ArrayList) provisioningEntry.get("pageItems")).size() > 0);
+        transactionHelper.updateProvisioningEntry("recreateprovisioningentry", provisioningEntryId, new PutProvisioningEntriesRequest());
+        transactionHelper.updateProvisioningEntry("createjournalentry", provisioningEntryId, new PutProvisioningEntriesRequest());
+        ProvisioningEntryData entry = transactionHelper.retrieveProvisioningEntry(provisioningEntryId);
+        Assertions.assertTrue(entry.getJournalEntry());
+        PageLoanProductProvisioningEntryData provisioningEntry = transactionHelper.retrieveProvisioningEntries(provisioningEntryId);
+        Assertions.assertTrue(provisioningEntry.getPageItems().size() > 0);
     }
 
     private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
@@ -163,50 +169,32 @@ public class ProvisioningIntegrationTest {
         collaterals.add(collaterals(collateralId, quantity));
     }
 
-    private void validateProvisioningCriteria(Map requestCriteria, Map newCriteria) {
-
-        // criteria name validation
-        String requestCriteriaName = (String) requestCriteria.get("criteriaName");
-        String criteriaName = (String) newCriteria.get("criteriaName");
-        Assertions.assertEquals(criteriaName, requestCriteriaName);
-
-        // loan products validation
-        ArrayList requestProducts = (ArrayList) requestCriteria.get("loanProducts");
-        ArrayList products = (ArrayList) newCriteria.get("loanProducts");
-        Assertions.assertEquals(products.size(), requestProducts.size());
-
-        ArrayList requestedDefinitions = (ArrayList) requestCriteria.get("definitions");
-        ArrayList newdefintions = (ArrayList) newCriteria.get("definitions");
-        Assertions.assertEquals(newdefintions.size(), requestedDefinitions.size());
-        for (int i = 0; i < newdefintions.size(); i++) {
-            Map requestedMap = (Map) requestedDefinitions.get(i);
-            Object requestedCategoryId = requestedMap.get("categoryId");
-            boolean found = false;
-            for (int j = 0; j < newdefintions.size(); j++) {
-                Map newMap = (Map) newdefintions.get(j);
-                Object newCategoryId = newMap.get("categoryId");
-                if (requestedCategoryId.equals(newCategoryId)) {
-                    found = true;
-                    checkProperty("categoryId", requestedMap, newMap);
-                    checkProperty("categoryName", requestedMap, newMap);
-                    checkProperty("minAge", requestedMap, newMap);
-                    checkProperty("maxAge", requestedMap, newMap);
-                    checkProperty("provisioningPercentage", requestedMap, newMap);
-                    checkProperty("liabilityAccount", requestedMap, newMap);
-                    checkProperty("expenseAccount", requestedMap, newMap);
-                    break; // internal loop
-                }
-            }
+    private void validateProvisioningCriteria(PostProvisioningCriteriaRequest request, GetProvisioningCriteriaCriteriaIdResponse response) {
+        Assertions.assertEquals(request.getCriteriaName(), response.getCriteriaName());
+        Assertions.assertEquals(request.getLoanProducts().size(), response.getLoanProducts().size());
+        List<ProvisioningCriteriaDefinitionData> requestDefinitions = request.getDefinitions();
+        List<ProvisioningCriteriaDefinitionData> responseDefinitions = response.getDefinitions();
+        Assertions.assertEquals(requestDefinitions.size(), responseDefinitions.size());
+        for (ProvisioningCriteriaDefinitionData requestDef : requestDefinitions) {
+            boolean found = responseDefinitions.stream().anyMatch(d -> d.getCategoryId().equals(requestDef.getCategoryId()));
             if (!found) {
-                Assertions.fail("No Category found with Id:" + requestedCategoryId);
+                Assertions.fail("No Category found with Id:" + requestDef.getCategoryId());
             }
         }
     }
 
-    private void checkProperty(String propertyName, Map requestMap, Map newMap) {
-        Object requested = requestMap.get(propertyName);
-        Object modified = newMap.get(propertyName);
-        Assertions.assertEquals(requested, modified);
+    private void validateProvisioningCriteria(PutProvisioningCriteriaRequest request, GetProvisioningCriteriaCriteriaIdResponse response) {
+        Assertions.assertEquals(request.getCriteriaName(), response.getCriteriaName());
+        Assertions.assertEquals(request.getLoanProducts().size(), response.getLoanProducts().size());
+        List<ProvisioningCriteriaDefinitionData> requestDefinitions = request.getDefinitions();
+        List<ProvisioningCriteriaDefinitionData> responseDefinitions = response.getDefinitions();
+        Assertions.assertEquals(requestDefinitions.size(), responseDefinitions.size());
+        for (ProvisioningCriteriaDefinitionData requestDef : requestDefinitions) {
+            boolean found = responseDefinitions.stream().anyMatch(d -> d.getCategoryId().equals(requestDef.getCategoryId()));
+            if (!found) {
+                Assertions.fail("No Category found with Id:" + requestDef.getCategoryId());
+            }
+        }
     }
 
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
@@ -251,7 +239,7 @@ public class ProvisioningIntegrationTest {
     }
 
     private boolean isAlreadyProvisioningEntriesCreated() throws ParseException {
-        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+        ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper();
         PageProvisioningEntryData entries = transactionHelper.retrieveAllProvisioningEntries();
 
         boolean provisioningetryAlreadyCreated = false;
