@@ -22,6 +22,7 @@ import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.cob.data.COBIdAndExternalIdAndAccountNo;
 import org.apache.fineract.cob.data.COBIdAndLastClosedBusinessDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.savings.data.SavingsAccrualData;
@@ -155,4 +156,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("select coalesce(co.id, go.id) from SavingsAccount sa left join sa.client c left join c.office co left join sa.group g left join g.office go where sa.id = :savingsAccountId")
     Long findOfficeIdBySavingsAccountId(@Param("savingsAccountId") Long savingsAccountId);
+
+    @Query("select sa.id, sa.externalId, sa.accountNumber from SavingsAccountLock lock left join SavingsAccount sa on lock.loanId = sa.id where lock.lockPlacedOnCobBusinessDate = :cobBusinessDate")
+    List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(@Param("cobBusinessDate") LocalDate cobBusinessDate);
 }

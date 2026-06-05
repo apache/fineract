@@ -87,7 +87,6 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
     private final TransactionTemplate requiresNewTransactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
-    private final RetrieveIdService retrieveIdService;
     private final FineractProperties fineractProperties;
     private final RetryConfigurationAssembler retryConfigurationAssembler;
 
@@ -95,10 +94,39 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
 
     public abstract T createAccountLock(Long loanId, LockOwner loanInlineCobProcessing, LocalDate businessDate);
 
+    /**
+     * Returns the given accounts that are behind the COB date (or were never COB'd), with their last closed business
+     * date. Each account type supplies its own query.
+     */
+    protected abstract List<COBIdAndLastClosedBusinessDate> retrieveAccountIdsBehindDateOrNull(LocalDate cobBusinessDate,
+            List<Long> accountIds);
+
+    /**
+     * Owner of the locks this inline COB places. Defaults to the loan owner, which the loan and working capital loan
+     * lock tables share; account types with their own owners override it.
+     */
+    protected LockOwner getInlineLockOwner() {
+        return LockOwner.LOAN_INLINE_COB_PROCESSING;
+    }
+
+    /**
+     * Account type used in user-facing messages (e.g. {@code "loan"}, {@code "savings"}).
+     */
+    protected String getAccountTypeName() {
+        return "loan";
+    }
+
+    /**
+     * Parses the account ids from the inline COB request body. Defaults to the {@code loanIds} array.
+     */
+    protected List<Long> parseAccountIds(JsonCommand command) {
+        return dataParser.parseExecution(command);
+    }
+
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public CommandProcessingResult executeInlineJob(JsonCommand command, String jobName) throws AccountLockCannotBeOverruledException {
-        List<Long> loanIds = dataParser.parseExecution(command);
+        List<Long> loanIds = parseAccountIds(command);
         validateLoanIdsListSize(loanIds);
         execute(loanIds, jobName);
         return new CommandProcessingResultBuilder() //
@@ -228,8 +256,8 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
                 String stacktrace = ThrowableSerialization.serialize(failure);
                 List<List<Long>> partitions = Lists.partition(new ArrayList<>(lockAttempts.keySet()),
                         fineractProperties.getQuery().getInClauseParameterSizeLimit());
-                partitions.forEach(partition -> loanAccountLockRepository
-                        .findAllByLoanIdInAndLockOwner(partition, LockOwner.LOAN_INLINE_COB_PROCESSING).forEach(lock -> {
+                partitions.forEach(partition -> loanAccountLockRepository.findAllByLoanIdInAndLockOwner(partition, getInlineLockOwner())
+                        .forEach(lock -> {
                             if (StringUtils.isNotBlank(lock.getError())) {
                                 return;
                             }
@@ -262,8 +290,8 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
     private List<COBIdAndLastClosedBusinessDate> getLoansToBeProcessed(List<Long> loanIds, LocalDate cobBusinessDate) {
         List<COBIdAndLastClosedBusinessDate> loanIdAndLastClosedBusinessDates = new ArrayList<>();
         List<List<Long>> partitions = Lists.partition(loanIds, fineractProperties.getQuery().getInClauseParameterSizeLimit());
-        partitions.forEach(partition -> loanIdAndLastClosedBusinessDates
-                .addAll(retrieveIdService.retrieveLoanIdsBehindDateOrNull(cobBusinessDate, partition)));
+        partitions.forEach(
+                partition -> loanIdAndLastClosedBusinessDates.addAll(retrieveAccountIdsBehindDateOrNull(cobBusinessDate, partition)));
         return loanIdAndLastClosedBusinessDates;
     }
 
@@ -280,7 +308,7 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
                     alreadyLockedLoanIds.add(loanId);
                 }
             } else {
-                loanAccountLocks.add(createAccountLock(loanId, LockOwner.LOAN_INLINE_COB_PROCESSING, businessDate));
+                loanAccountLocks.add(createAccountLock(loanId, getInlineLockOwner(), businessDate));
             }
         });
         if (!alreadyLockedLoanIds.isEmpty()) {
@@ -317,7 +345,7 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
             List<T> loanAccountLocks = getLoanAccountLocks(loanIds, businessDate);
             loanAccountLocks.forEach(loanAccountLock -> {
                 try {
-                    loanAccountLock.setNewLockOwner(LockOwner.LOAN_INLINE_COB_PROCESSING);
+                    loanAccountLock.setNewLockOwner(getInlineLockOwner());
                     // An overrulable lock carries the error of the attempt that gave it up. This attempt owns it now,
                     // so clear that error instead of reporting a later failure under the previous one.
                     loanAccountLock.setError(null, null);
@@ -355,7 +383,7 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
     private void validateLoanIdsListSize(List<Long> loanIds) {
         int inlineLoanCobRequestItemLimit = fineractProperties.getApi().getBodyItemSizeLimit().getInlineLoanCob();
         if (loanIds.size() > inlineLoanCobRequestItemLimit) {
-            String userMessage = "Size of the loan IDs list cannot be over " + inlineLoanCobRequestItemLimit;
+            String userMessage = "Size of the " + getAccountTypeName() + " IDs list cannot be over " + inlineLoanCobRequestItemLimit;
             throw new PlatformRequestBodyItemLimitValidationException(userMessage);
         }
     }

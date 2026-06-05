@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.cob.savings.InlineSavingsCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.InlineWorkingCapitalLoanCOBExecutorServiceImpl;
 
@@ -29,7 +30,8 @@ import org.apache.fineract.cob.service.InlineWorkingCapitalLoanCOBExecutorServic
 public enum InlineJobType {
 
     LOAN_COB("LOAN_COB", "INLINE_LOAN_COB", InlineLoanCOBExecutorServiceImpl.class), WC_LOAN_COB("WC_LOAN_COB",
-            "INLINE_WORKING_CAPITAL_LOAN_COB", InlineWorkingCapitalLoanCOBExecutorServiceImpl.class);
+            "INLINE_WORKING_CAPITAL_LOAN_COB", InlineWorkingCapitalLoanCOBExecutorServiceImpl.class), SAVINGS_COB("SAVINGS_COB",
+                    "INLINE_SAVINGS_COB", InlineSavingsCOBExecutorServiceImpl.class);
 
     private final String jobName;
     @Getter

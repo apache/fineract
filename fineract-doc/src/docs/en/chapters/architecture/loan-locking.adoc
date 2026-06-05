@@ -32,5 +32,5 @@ To remove these, the Loan COB job runs a final step `unlockProcessedLoansStep` (
 * `lock_placed_on_cob_business_date IS NOT NULL`
 * the referenced loan's `last_closed_business_date` equals the lock's `lock_placed_on_cob_business_date` (i.e. all business steps for that COB date completed)
 
-The same mechanism is wired into the Working Capital Loan COB job via `UnlockProcessedWorkingCapitalLoansTasklet`. Locks that carry an `error` are intentionally left in place – they still represent a loan that needs manual fixing and `bypass_enabled` handling continues to apply.
+The same mechanism is wired into the Working Capital Loan COB job via `UnlockProcessedWorkingCapitalLoansTasklet`. The Savings COB job uses it as well via `UnlockProcessedSavingsTasklet`, against `m_savings_account_locks` and the `SAVINGS_COB_CHUNK_PROCESSING` / `SAVINGS_INLINE_COB_PROCESSING` owners. Locks that carry an `error` are intentionally left in place – they still represent a loan that needs manual fixing and `bypass_enabled` handling continues to apply.
 
