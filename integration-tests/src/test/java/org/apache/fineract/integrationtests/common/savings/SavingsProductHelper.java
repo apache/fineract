@@ -26,17 +26,21 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 @SuppressWarnings("unused")
 public class SavingsProductHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
     private static final String CREATE_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
     private static final Gson GSON = new JSON().getGson();
@@ -174,7 +178,7 @@ public class SavingsProductHelper {
         }
 
         String savingsProductCreateJson = new Gson().toJson(map);
-        LOG.info("{}", savingsProductCreateJson);
+        log.info("{}", savingsProductCreateJson);
         return savingsProductCreateJson;
     }
 
@@ -464,6 +468,15 @@ public class SavingsProductHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
+    // ----------------------------------------------------------------------------------------------------------------
+    // fineract-client (Feign) based, strongly-typed API. Preferred replacement for the JSON/RestAssured method above.
+    // ----------------------------------------------------------------------------------------------------------------
+
+    public static PostSavingsProductsResponse createSavingsProduct(final PostSavingsProductsRequest request) {
+        final FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        return FeignCalls.ok(() -> client.savingsProduct().createSavingsProduct(request));
+    }
+
     @Deprecated(forRemoval = true)
     public static Integer updateSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, Integer productId) {
@@ -477,7 +490,7 @@ public class SavingsProductHelper {
     @Deprecated(forRemoval = true)
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedProductID) {
-        LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
+        log.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
         assertEquals(generatedProductID, responseSavingsProductID, "ERROR IN CREATING THE Savings Product");
@@ -497,7 +510,7 @@ public class SavingsProductHelper {
     @Deprecated(forRemoval = true)
     public static GetSavingsProductsProductIdResponse getSavingsProductById(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
-        LOG.info("-------------------- RETRIEVING SAVINGS DEPOSIT PRODUCT BY ID --------------------------");
+        log.info("-------------------- RETRIEVING SAVINGS DEPOSIT PRODUCT BY ID --------------------------");
         final String GET_PRODUCT_BY_ID_URL = SAVINGS_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_BY_ID_URL);
         return GSON.fromJson(response, GetSavingsProductsProductIdResponse.class);
@@ -505,7 +518,7 @@ public class SavingsProductHelper {
 
     @Deprecated(forRemoval = true)
     public static String retrieveAllSavingsProducts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        LOG.info("-------------------- RETRIEVING ALL SAVINGS PRODUCTS --------------------------");
+        log.info("-------------------- RETRIEVING ALL SAVINGS PRODUCTS --------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL);
     }
 

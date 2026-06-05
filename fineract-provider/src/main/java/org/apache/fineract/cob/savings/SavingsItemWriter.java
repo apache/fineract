@@ -18,19 +18,17 @@
  */
 package org.apache.fineract.cob.savings;
 
-import java.util.List;
+import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.domain.LockingService;
 
-public interface SavingsLockingService {
+public class SavingsItemWriter extends AbstractSavingsItemWriter {
 
-    void upgradeLock(List<Long> accountsToLock, SavingsLockOwner lockOwner);
+    public SavingsItemWriter(LockingService savingsLockingService) {
+        super(savingsLockingService);
+    }
 
-    void deleteBySavingsIdInAndLockOwner(List<Long> savingsIds, SavingsLockOwner lockOwner);
-
-    List<SavingsAccountLock> findAllBySavingsIdIn(List<Long> savingsIds);
-
-    SavingsAccountLock findBySavingsIdAndLockOwner(Long savingsId, SavingsLockOwner lockOwner);
-
-    List<SavingsAccountLock> findAllBySavingsIdInAndLockOwner(List<Long> savingsIds, SavingsLockOwner lockOwner);
-
-    void applyLock(List<Long> savingsIds, SavingsLockOwner lockOwner);
+    @Override
+    protected LockOwner getLockOwner() {
+        return LockOwner.SAVINGS_COB_CHUNK_PROCESSING;
+    }
 }

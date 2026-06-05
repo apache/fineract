@@ -39,3 +39,4 @@ include::working-capital-accrual-deferred-revenue-amortization-accounting.adoc[l
 include::working-capital-eir-calculation-accounting.adoc[leveloffset=+1]
 include::working-capital-loan-start-dates.adoc[leveloffset=+1]
 include::working-capital-mark-as-fraud.adoc[leveloffset=+1]
+include::savings-cob.adoc[leveloffset=+1]
