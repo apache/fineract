@@ -25,9 +25,17 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.domain.LockingService;
+import org.apache.fineract.cob.savings.InlineCOBSavingsItemProcessor;
+import org.apache.fineract.cob.savings.InlineCOBSavingsItemReader;
+import org.apache.fineract.cob.savings.RetrieveSavingsIdService;
+import org.apache.fineract.cob.savings.SavingsItemProcessor;
+import org.apache.fineract.cob.savings.SavingsItemReader;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -57,12 +65,23 @@ class CobStepListenerRegistrationTest {
         BeforeStepLockingItemReaderHelper lockingHelper = mock(BeforeStepLockingItemReaderHelper.class);
         COBBusinessStepService businessStepService = mock(COBBusinessStepService.class);
         ProgressiveLoanModelProcessingService modelProcessingService = mock(ProgressiveLoanModelProcessingService.class);
+        SavingsAccountRepository savingsAccountRepository = mock(SavingsAccountRepository.class);
+        SavingsAccountAssembler savingsAccountAssembler = mock(SavingsAccountAssembler.class);
+        RetrieveSavingsIdService retrieveSavingsIdService = mock(RetrieveSavingsIdService.class);
+        LockingService savingsLockingService = mock(LockingService.class);
 
         return Stream.of(//
                 Arguments.of("LoanItemReader", new LoanItemReader(loanRepository, lockingHelper)), //
                 Arguments.of("InlineCOBLoanItemReader", new InlineCOBLoanItemReader(loanRepository)), //
                 Arguments.of("LoanItemProcessor", new LoanItemProcessor(businessStepService, modelProcessingService)), //
-                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)));
+                Arguments.of("InlineCOBLoanItemProcessor", new InlineCOBLoanItemProcessor(businessStepService, modelProcessingService)), //
+                Arguments.of("SavingsItemReader",
+                        new SavingsItemReader(savingsAccountRepository, savingsAccountAssembler, retrieveSavingsIdService,
+                                savingsLockingService)), //
+                Arguments.of("InlineCOBSavingsItemReader",
+                        new InlineCOBSavingsItemReader(savingsAccountRepository, savingsAccountAssembler)), //
+                Arguments.of("SavingsItemProcessor", new SavingsItemProcessor(businessStepService)), //
+                Arguments.of("InlineCOBSavingsItemProcessor", new InlineCOBSavingsItemProcessor(businessStepService)));
     }
 
     @ParameterizedTest(name = "{0} registers exactly once as a step listener")
