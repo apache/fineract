@@ -80,6 +80,8 @@ public class FineractProperties {
 
     private FineractNotificationProperties notification;
 
+    private FineractPhoneProperties phone;
+
     private FineractLoanProperties loan;
 
     private FineractSamplingProperties sampling;
@@ -493,6 +495,13 @@ public class FineractProperties {
     public static class UserNotificationSystemProperties {
 
         private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractPhoneProperties {
+
+        private String regex = "^\\+?[0-9]{7,15}$";
     }
 
     @Getter

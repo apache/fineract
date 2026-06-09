@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -44,6 +45,9 @@ class ClientDataValidatorTest {
     @Mock
     private ConfigurationReadPlatformService configurationReadPlatformService;
 
+    @Mock
+    private FineractProperties fineractProperties;
+
     private ClientDataValidator validator;
 
     @BeforeEach
@@ -51,7 +55,12 @@ class ClientDataValidatorTest {
         FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
         when(configurationReadPlatformService.retrieveGlobalConfiguration(anyString()))
                 .thenReturn(new GlobalConfigurationPropertyData().setEnabled(false));
-        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService);
+
+        FineractProperties.FineractPhoneProperties phoneProperties = new FineractProperties.FineractPhoneProperties();
+        phoneProperties.setRegex("^\\+?[0-9]{7,15}$");
+        when(fineractProperties.getPhone()).thenReturn(phoneProperties);
+
+        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService, fineractProperties);
     }
 
     private static String validMinimalCreateJson(String dateFormat) {
