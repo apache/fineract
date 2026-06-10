@@ -87,6 +87,7 @@ public class FineractProperties {
     private FineractModulesProperties module;
 
     private FineractSqlValidationProperties sqlValidation;
+    private FineractInputValidationProperties inputValidation;
 
     private FineractCache cache;
 
@@ -692,6 +693,40 @@ public class FineractProperties {
     @Getter
     @Setter
     public static class FineractSqlValidationPatternProperties {
+
+        private String name;
+        private String pattern;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractInputValidationProperties {
+
+        private List<FineractInputValidationPatternProperties> patterns;
+        private List<FineractInputValidationProfileProperties> profiles;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractInputValidationProfileProperties {
+
+        private String name;
+        private String description;
+        private List<FineractInputValidationPatternReferenceProperties> patternRefs;
+        private Boolean enabled = true;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractInputValidationPatternReferenceProperties {
+
+        private String name;
+        private Integer order;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractInputValidationPatternProperties {
 
         private String name;
         private String pattern;
