@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.report.service;
+package org.apache.fineract.infrastructure.security.service;
 
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
+import org.apache.fineract.infrastructure.security.exception.InputValidationException;
 
-public interface ReportingProcessService {
+public interface InputValidator {
 
-    Response processRequest(String reportName, MultivaluedMap<String, String> queryParams);
-
-    List<ReportExportType> getAvailableExportTargets();
-
-    Map<String, String> getReportParams(String reportName, MultivaluedMap<String, String> queryParams);
+    /**
+     * Validates the given input against the named profile. Throws {@link InputValidationException} if the input does
+     * not match any pattern registered in the profile.
+     *
+     * @param profile
+     *            the validation profile name (e.g. "number", "date")
+     * @param input
+     *            the value to validate
+     * @throws InputValidationException
+     *             if the input fails validation
+     */
+    void validate(String profile, String input) throws InputValidationException;
 }

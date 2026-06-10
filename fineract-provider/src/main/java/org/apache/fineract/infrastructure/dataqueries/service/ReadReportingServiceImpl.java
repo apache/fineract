@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,17 +32,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -52,6 +57,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportType;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
+import org.apache.fineract.infrastructure.report.service.ReportParameterTypeResolver;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
@@ -70,12 +76,23 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ReadReportingServiceImpl implements ReadReportingService {
 
+    /**
+     * Server-controlled placeholders resolved from the authenticated session. These are never user-supplied and must be
+     * substituted as plain strings before building the prepared statement. They must NOT become {@code ?} bind
+     * variables.
+     */
+    private static final Set<String> SERVER_PARAMS = Set.of("currentUserHierarchy", "currentUserId", "currentDate");
+
+    /** Matches any {@code ${placeholderName}} token in a report SQL template. */
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
+
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
     private final SqlInjectionPreventerService sqlInjectionPreventerService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractProperties fineractProperties;
+    private final ReportParameterTypeResolver reportParameterTypeResolver;
 
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams) {
@@ -113,9 +130,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     LogParameterEscapeUtil.escapeLogParameter(type));
         }
 
-        final String sql = getSQLtoRun(name, type, queryParams);
+        final PreparedQuery preparedQuery = getSQLtoRun(name, type, queryParams);
 
-        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(preparedQuery.sql(),
+                preparedQuery.params().toArray());
 
         final long elapsed = System.currentTimeMillis() - startTime;
         if (log.isDebugEnabled()) {
@@ -125,28 +143,111 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 
-    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
+    private Object castParamValue(String value, String formatType) {
+        if (value == null) {
+            return null;
+        }
+        if ("NUMBER".equalsIgnoreCase(formatType) || "INTEGER".equalsIgnoreCase(formatType)) {
+            try {
+                if (value.contains(".")) {
+                    return new BigDecimal(value);
+                }
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                throw new PlatformDataIntegrityException("error.msg.report.invalid.numeric.parameter",
+                        "Parameter value '" + value + "' is not a valid number", e);
+            }
+        }
+        if ("DATE".equalsIgnoreCase(formatType)) {
+            return java.sql.Date.valueOf(value);
+        }
+        return value;
+    }
+
+    private PreparedQuery buildPreparedQuery(final String name, final Map<String, String> queryParams, final String sql) {
+        final Map<String, String> paramFormatTypes = this.reportParameterTypeResolver.loadParamFormatTypes(name);
+        final List<Object> paramValues = new ArrayList<>();
+        final Matcher matcher = PLACEHOLDER_PATTERN.matcher(sql);
+        final StringBuilder preparedSql = new StringBuilder();
+
+        while (matcher.find()) {
+            final String paramName = matcher.group(1);
+            if (SERVER_PARAMS.contains(paramName)) {
+                matcher.appendReplacement(preparedSql, Matcher.quoteReplacement(matcher.group(0)));
+            } else if (queryParams.containsKey(paramName)) {
+                matcher.appendReplacement(preparedSql, "?");
+                paramValues.add(castParamValue(queryParams.get(paramName), paramFormatTypes.get(paramName)));
+            } else {
+                matcher.appendReplacement(preparedSql, Matcher.quoteReplacement(matcher.group(0)));
+                log.warn("Report '{}' contains placeholder '{}' with no matching parameter", name, paramName);
+            }
+        }
+        matcher.appendTail(preparedSql);
+        return new PreparedQuery(this.genericDataService.wrapSQL(preparedSql.toString()), paramValues);
+    }
+
+    /**
+     * Builds a {@link PreparedQuery} from the stored report SQL template.
+     *
+     * <p>
+     * Processing order:
+     * <ol>
+     * <li>Server-controlled placeholders ({@code ${currentUserHierarchy}}, {@code ${currentUserId}},
+     * {@code ${currentDate}}) are resolved from the authenticated session and substituted as plain strings — they are
+     * not user input.</li>
+     * <li>SQL function aliases ({@code NOW()}, {@code curdate()}, {@code CURRENT_DATE}) are replaced with tenant-aware
+     * equivalents.</li>
+     * <li>Remaining {@code ${...}} placeholders (user-supplied report parameters) are replaced with {@code ?} bind
+     * variables left-to-right via a single regex pass. Values are collected in the same left-to-right order into
+     * {@code paramValues} so that JDBC receives them in the correct position. User values are never concatenated into
+     * the SQL string.</li>
+     * </ol>
+     */
+    private PreparedQuery getSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
 
         String sql = getSql(name, type);
 
-        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-            sql = this.genericDataService.replace(sql, entry.getKey(), entry.getValue());
-        }
-
+        // Step 1 — resolve server-controlled placeholders as plain strings (not user input)
         final AppUser currentUser = this.context.authenticatedUser();
-        // Allows sql query to restrict data by office hierarchy if required
         sql = this.genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
-        // Allows sql query to restrict data by current user Id if required
-        // (typically used to return report lists containing only reports
-        // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
         sql = this.genericDataService.replace(sql, "${currentDate}", sqlGenerator.currentBusinessDate());
-        sql = StringUtils.replaceIgnoreCase(sql, "NOW()", sqlGenerator.currentTenantDateTime());
-        sql = StringUtils.replaceIgnoreCase(sql, "curdate()", sqlGenerator.currentBusinessDate());
-        sql = StringUtils.replaceIgnoreCase(sql, "CURRENT_DATE", sqlGenerator.currentBusinessDate());
-        sql = this.genericDataService.wrapSQL(sql);
 
-        return sql;
+        // Step 2 — replace SQL function aliases with tenant-aware equivalents (case-insensitive, literal match)
+        sql = Pattern.compile(Pattern.quote("NOW()"), Pattern.CASE_INSENSITIVE).matcher(sql)
+                .replaceAll(Matcher.quoteReplacement(sqlGenerator.currentTenantDateTime()));
+        sql = Pattern.compile(Pattern.quote("curdate()"), Pattern.CASE_INSENSITIVE).matcher(sql)
+                .replaceAll(Matcher.quoteReplacement(sqlGenerator.currentBusinessDate()));
+        sql = Pattern.compile(Pattern.quote("CURRENT_DATE"), Pattern.CASE_INSENSITIVE).matcher(sql)
+                .replaceAll(Matcher.quoteReplacement(sqlGenerator.currentBusinessDate()));
+
+        // Step 2.5a — resolve display-literal placeholders: '${param}' AS alias
+        // These are not filter values so direct substitution is safe.
+        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            if (entry.getKey().startsWith("${")) {
+                String paramName = entry.getKey().substring(2, entry.getKey().length() - 1);
+                // Replace display-literal pattern: '${param}' followed by AS
+                sql = sql.replaceAll("'" + Pattern.quote("${" + paramName + "}") + "'(\\s+AS\\s+)",
+                        "'" + Matcher.quoteReplacement(entry.getValue()) + "'$1");
+            }
+        }
+
+        // Step 2.5b — strip remaining quotes around filter placeholders
+        sql = sql.replaceAll("'(\\$\\{\\w+})'", "$1");
+        sql = sql.replaceAll("\"(\\$\\{\\w+})\"", "$1");
+        sql = sql.replaceAll("\"(-?\\d+)\"", "$1");
+
+        // Step 3 — normalise queryParams keys from "${paramName}" to "paramName" for buildPreparedQuery
+        final Map<String, String> normalisedParams = new HashMap<>();
+        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith("${") && key.endsWith("}")) {
+                key = key.substring(2, key.length() - 1);
+            }
+            normalisedParams.put(key, entry.getValue());
+        }
+
+        return buildPreparedQuery(name, normalisedParams, sql);
     }
 
     private String getSql(final String name, final String type) {
@@ -475,25 +576,29 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final long startTime = System.currentTimeMillis();
         log.debug("STARTING REPORT: {}   Type: {}", name, type);
 
-        final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
+        final PreparedQuery preparedQuery = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
-        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(preparedQuery.sql(),
+                preparedQuery.params().toArray());
 
         final long elapsed = System.currentTimeMillis() - startTime;
         log.debug("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
         return result;
     }
 
-    private String sqlToRunForSmsEmailCampaign(final String name, final String type, final Map<String, String> queryParams) {
+    /**
+     * Builds a {@link PreparedQuery} for SMS/email campaign reports. Security context is not available in this path
+     * (called from background jobs), so server-controlled placeholders are not resolved here. User-supplied parameters
+     * are bound as {@code ?} variables — never concatenated into the SQL string.
+     */
+    private PreparedQuery sqlToRunForSmsEmailCampaign(final String name, final String type, final Map<String, String> queryParams) {
         String sql = getSql(name, type);
 
-        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-            sql = this.genericDataService.replace(sql, "${" + entry.getKey() + "}", entry.getValue());
-        }
+        sql = sql.replaceAll("'(\\$\\{[^}]+\\})'", "$1");
+        sql = sql.replaceAll("\"(\\$\\{[^}]+\\})\"", "$1");
+        sql = sql.replaceAll("\"(-?\\d+)\"", "$1");
 
-        sql = this.genericDataService.wrapSQL(sql);
-
-        return sql;
+        return buildPreparedQuery(name, queryParams, sql);
     }
 
     @Override
