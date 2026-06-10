@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.report.service;
+package org.apache.fineract.infrastructure.security.exception;
 
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface ReportingProcessService {
+public class InputValidationException extends AbstractPlatformDomainRuleException {
 
-    Response processRequest(String reportName, MultivaluedMap<String, String> queryParams);
-
-    List<ReportExportType> getAvailableExportTargets();
-
-    Map<String, String> getReportParams(String reportName, MultivaluedMap<String, String> queryParams);
+    public InputValidationException(final String message) {
+        super("error.msg.input.validation", "Input validation error: " + message);
+    }
 }

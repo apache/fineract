@@ -16,19 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.report.service;
+package org.apache.fineract.infrastructure.dataqueries.service;
 
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
 import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.dataqueries.data.ReportExportType;
 
-public interface ReportingProcessService {
-
-    Response processRequest(String reportName, MultivaluedMap<String, String> queryParams);
-
-    List<ReportExportType> getAvailableExportTargets();
-
-    Map<String, String> getReportParams(String reportName, MultivaluedMap<String, String> queryParams);
+/**
+ * Holds a SQL string with {@code ?} bind-variable placeholders alongside the ordered list of parameter values to be
+ * passed to JDBC. User-supplied report parameters are never concatenated into the SQL string — they are always
+ * represented as {@code ?} and bound via JDBC, eliminating SQL-injection at the execution layer.
+ */
+public record PreparedQuery(String sql, List<Object> params) {
 }
