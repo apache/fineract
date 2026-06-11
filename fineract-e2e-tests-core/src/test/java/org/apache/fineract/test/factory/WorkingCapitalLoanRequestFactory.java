@@ -118,9 +118,11 @@ public class WorkingCapitalLoanRequestFactory {
                 .locale(DEFAULT_LOCALE);//
     }
 
-    public PostWorkingCapitalLoansBreachActionRequest defaultWorkingCapitalLoansBreachActionRequest(String action) {
+    public PostWorkingCapitalLoansBreachActionRequest defaultWorkingCapitalLoansBreachActionRequest(final String action) {
         return new PostWorkingCapitalLoansBreachActionRequest()//
                 .action(action)//
+                .startDate(DATE_SUBMIT_STRING)//
+                .endDate(DATE_SUBMIT_STRING)//
                 .dateFormat(DATE_FORMAT)//
                 .locale(DEFAULT_LOCALE);//
     }

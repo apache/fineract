@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -49,13 +50,17 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
         final WorkingCapitalLoan workingCapitalLoan = loanRepository.findById(workingCapitalLoanId)
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(workingCapitalLoanId));
 
-        final WorkingCapitalLoanBreachAction action = validator.validateAndParse(command, workingCapitalLoan);
+        final List<WorkingCapitalLoanBreachAction> existing = actionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
+
+        final WorkingCapitalLoanBreachAction action = validator.validateAndParse(command, workingCapitalLoan, existing);
         action.setWorkingCapitalLoan(workingCapitalLoan);
 
         final WorkingCapitalLoanBreachAction saved = actionRepository.saveAndFlush(action);
         log.debug("Created WC loan breach action {} for loan {}", action.getAction(), workingCapitalLoanId);
 
-        if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(action.getAction())) {
+        if (WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction())) {
+            breachScheduleService.recalculatePeriodsForPauses(workingCapitalLoan);
+        } else if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(action.getAction())) {
             breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan, action);
         }
 

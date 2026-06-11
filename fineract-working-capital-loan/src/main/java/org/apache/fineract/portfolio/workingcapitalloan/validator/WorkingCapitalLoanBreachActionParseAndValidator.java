@@ -19,13 +19,18 @@
 package org.apache.fineract.portfolio.workingcapitalloan.validator;
 
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.ACTION;
+import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.DATE_FORMAT;
+import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.END_DATE;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.FREQUENCY;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.FREQUENCY_TYPE;
+import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.LOCALE;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.MINIMUM_PAYMENT;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.MINIMUM_PAYMENT_TYPE;
+import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.START_DATE;
 
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.validator.ParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -43,55 +49,84 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalBreachAmountCalculationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndValidator {
 
+    private static final String PAUSE_ACTION = "pause";
     private static final String RESCHEDULE_ACTION = "reschedule";
 
     private final FromJsonHelper jsonHelper;
+    private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
 
-    public WorkingCapitalLoanBreachAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan) {
+    public WorkingCapitalLoanBreachAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan,
+            final List<WorkingCapitalLoanBreachAction> existing) {
         final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("workingCapitalLoanBreachAction");
-        final WorkingCapitalLoanBreachAction parsedAction = parseCommand(command, dataValidator);
-        validateLoanIsActive(workingCapitalLoan, dataValidator);
+        final JsonElement json = command.parsedJson();
 
-        if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(parsedAction.getAction())) {
-            validateReschedule(parsedAction, workingCapitalLoan, dataValidator);
-        } else if (parsedAction.getAction() != null) {
-            dataValidator.reset().parameter(ACTION).value(parsedAction.getAction()).failWithCode("invalid.action");
+        final String actionString = jsonHelper.extractStringNamed(ACTION, json);
+        dataValidator.reset().parameter(ACTION).value(actionString).notBlank();
+        if (StringUtils.isNotBlank(actionString)) {
+            dataValidator.reset().parameter(ACTION).value(actionString).isOneOfTheseStringValues(PAUSE_ACTION, RESCHEDULE_ACTION);
         }
-
         throwExceptionIfValidationWarningsExist(dataValidator);
-        return parsedAction;
+
+        validateLoanIsActive(dataValidator, workingCapitalLoan);
+
+        if (RESCHEDULE_ACTION.equalsIgnoreCase(actionString)) {
+            return parseAndValidateReschedule(json, workingCapitalLoan, dataValidator);
+        }
+        return parseAndValidatePause(json, workingCapitalLoan, existing, dataValidator);
     }
 
-    private WorkingCapitalLoanBreachAction parseCommand(final JsonCommand command, final DataValidatorBuilder dataValidator) {
-        final JsonElement json = command.parsedJson();
+    private WorkingCapitalLoanBreachAction parseAndValidatePause(final JsonElement json, final WorkingCapitalLoan workingCapitalLoan,
+            final List<WorkingCapitalLoanBreachAction> existing, final DataValidatorBuilder dataValidator) {
+        final LocalDate startDate = extractDate(json, START_DATE);
+        dataValidator.reset().parameter(START_DATE).value(startDate).notNull();
+
+        final LocalDate endDate = extractDate(json, END_DATE);
+        dataValidator.reset().parameter(END_DATE).value(endDate).notNull();
+
+        validateBreachConfigurationExists(dataValidator, workingCapitalLoan);
+        validateStartBeforeEnd(dataValidator, startDate, endDate);
+        validateNotBeforeScheduleStart(dataValidator, startDate, workingCapitalLoan);
+        validateNoOverlap(dataValidator, startDate, endDate, existing);
+
+        throwExceptionIfValidationWarningsExist(dataValidator);
+
         final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
-        action.setAction(extractAction(json, dataValidator));
+        action.setAction(WorkingCapitalLoanBreachActionType.PAUSE);
+        action.setStartDate(startDate);
+        action.setEndDate(endDate);
+        return action;
+    }
+
+    private WorkingCapitalLoanBreachAction parseAndValidateReschedule(final JsonElement json, final WorkingCapitalLoan workingCapitalLoan,
+            final DataValidatorBuilder dataValidator) {
+        final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
+        action.setAction(WorkingCapitalLoanBreachActionType.RESCHEDULE);
         action.setStartDate(DateUtils.getBusinessLocalDate());
         action.setMinimumPayment(extractBigDecimal(json, MINIMUM_PAYMENT));
         action.setMinimumPaymentType(extractMinimumPaymentType(json, dataValidator));
         action.setFrequency(extractInteger(json, FREQUENCY));
         action.setFrequencyType(extractFrequencyType(json, dataValidator));
+
+        validateReschedule(action, workingCapitalLoan, dataValidator);
+
+        throwExceptionIfValidationWarningsExist(dataValidator);
         return action;
     }
 
-    private WorkingCapitalLoanBreachActionType extractAction(final JsonElement json, final DataValidatorBuilder dataValidator) {
-        final String actionString = jsonHelper.extractStringNamed(ACTION, json);
-        dataValidator.reset().parameter(ACTION).value(actionString).notBlank();
-        if (StringUtils.isNotBlank(actionString)) {
-            dataValidator.reset().parameter(ACTION).value(actionString).isOneOfTheseStringValues(RESCHEDULE_ACTION);
-        }
-        if (RESCHEDULE_ACTION.equalsIgnoreCase(actionString)) {
-            return WorkingCapitalLoanBreachActionType.RESCHEDULE;
-        }
-        return null;
+    private LocalDate extractDate(final JsonElement json, final String paramName) {
+        final String dateFormat = jsonHelper.extractStringNamed(DATE_FORMAT, json);
+        final String locale = jsonHelper.extractStringNamed(LOCALE, json);
+        return jsonHelper.extractLocalDateNamed(paramName, json, dateFormat, JsonParserHelper.localeFromString(locale));
     }
 
     private BigDecimal extractBigDecimal(final JsonElement json, final String paramName) {
@@ -135,11 +170,62 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         }
     }
 
+    private void validateLoanIsActive(final DataValidatorBuilder dataValidator, final WorkingCapitalLoan workingCapitalLoan) {
+        if (!workingCapitalLoan.getLoanStatus().isActive()) {
+            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active");
+        }
+    }
+
+    private void validateBreachConfigurationExists(final DataValidatorBuilder dataValidator, final WorkingCapitalLoan workingCapitalLoan) {
+        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
+        if (details == null || details.getBreach() == null) {
+            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.configuration");
+        }
+    }
+
+    private void validateStartBeforeEnd(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate) {
+        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
+            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.be.after.startDate");
+        }
+    }
+
+    private void validateNotBeforeScheduleStart(final DataValidatorBuilder dataValidator, final LocalDate startDate,
+            final WorkingCapitalLoan workingCapitalLoan) {
+        loanRepository.findFirstActualDisbursementDate(workingCapitalLoan.getId())
+                .map(disbursementDate -> disbursementDate.plusDays(getBreachGraceDays(workingCapitalLoan)))
+                .ifPresent(scheduleStartDate -> dataValidator.reset().parameter(START_DATE).value(startDate)
+                        .validateDateAfterOrEqual(scheduleStartDate));
+    }
+
+    private int getBreachGraceDays(final WorkingCapitalLoan workingCapitalLoan) {
+        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
+        if (details == null || details.getBreachGraceDays() == null) {
+            return 0;
+        }
+        return details.getBreachGraceDays();
+    }
+
+    private void validateNoOverlap(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate,
+            final List<WorkingCapitalLoanBreachAction> existing) {
+        if (startDate == null || endDate == null) {
+            return;
+        }
+        final boolean overlaps = existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction()))
+                .anyMatch(action -> isOverlapping(startDate, endDate, action));
+        if (overlaps) {
+            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("overlapping.pause.periods");
+        }
+    }
+
+    private boolean isOverlapping(final LocalDate startDate, final LocalDate endDate, final WorkingCapitalLoanBreachAction other) {
+        return startDate.isBefore(other.getEndDate()) && other.getStartDate().isBefore(endDate);
+    }
+
     private void validateReschedule(final WorkingCapitalLoanBreachAction action, final WorkingCapitalLoan workingCapitalLoan,
             final DataValidatorBuilder dataValidator) {
         validateLoanIsDisbursed(workingCapitalLoan, dataValidator);
         validateScheduleExists(workingCapitalLoan, dataValidator);
-        validateBreachConfigured(workingCapitalLoan, dataValidator);
+        validateBreachConfigurationExists(dataValidator, workingCapitalLoan);
 
         final boolean hasPaymentGroup = action.getMinimumPayment() != null || action.getMinimumPaymentType() != null;
         final boolean hasFrequencyGroup = action.getFrequency() != null || action.getFrequencyType() != null;
@@ -152,12 +238,6 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         }
         if (hasFrequencyGroup) {
             validateFrequencyGroupProvided(action, dataValidator);
-        }
-    }
-
-    private void validateLoanIsActive(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
-        if (!workingCapitalLoan.getLoanStatus().isActive()) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active");
         }
     }
 
@@ -174,13 +254,6 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
                 .findByLoanIdOrderByPeriodNumberAsc(workingCapitalLoan.getId());
         if (periods.isEmpty()) {
             dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.schedule");
-        }
-    }
-
-    private void validateBreachConfigured(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
-        if (workingCapitalLoan.getLoanProductRelatedDetails() == null
-                || workingCapitalLoan.getLoanProductRelatedDetails().getBreach() == null) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.configuration");
         }
     }
 

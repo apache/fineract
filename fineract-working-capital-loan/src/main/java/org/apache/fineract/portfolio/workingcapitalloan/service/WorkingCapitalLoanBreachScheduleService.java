@@ -43,4 +43,6 @@ public interface WorkingCapitalLoanBreachScheduleService {
     void evaluateBreach(WorkingCapitalLoan loan, LocalDate businessDate);
 
     void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction rescheduleAction);
+
+    void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
 }

@@ -30,8 +30,12 @@ public final class WorkingCapitalLoanBreachActionApiResourceSwagger {
 
         private PostWorkingCapitalLoansBreachActionRequest() {}
 
-        @Schema(example = "reschedule", description = "Breach action type: reschedule")
+        @Schema(example = "pause", description = "Breach action type: pause, reschedule")
         public String action;
+        @Schema(example = "2024-01-01", description = "Pause start date (required for pause action)")
+        public String startDate;
+        @Schema(example = "2024-01-31", description = "Pause end date (required for pause action)")
+        public String endDate;
         @Schema(example = "33.33", description = "Minimum payment value (required together with minimumPaymentType)")
         public BigDecimal minimumPayment;
         @Schema(example = "PERCENTAGE", description = "Minimum payment type: PERCENTAGE, FLAT (required together with minimumPayment)")
