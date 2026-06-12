@@ -300,6 +300,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         CommandProcessingResult result = null;
         int count = 0;
         for (Loan loan : childLoans) {
+            this.context.validateAccessRights(loan.getOffice().getHierarchy());
             result = disburseLoan(loan.getId(), command, false);
             if (result.getLoanId() != null) {
                 count++;
@@ -326,6 +327,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanTransactionValidator.validateDisbursement(command, isAccountTransfer, loanId);
 
         Loan loan = loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
 
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
             List<LoanDisbursementDetails> filteredList = loan.getDisbursementDetails().stream()
@@ -750,6 +752,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         for (final SingleDisbursalCommand singleLoanDisbursalCommand : disbursalCommand) {
             Loan loan = this.loanAssembler.assembleFrom(singleLoanDisbursalCommand.getLoanId());
+            this.context.validateAccessRights(loan.getOffice().getHierarchy());
             final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
 
             // validate ActualDisbursement Date Against Expected Disbursement
@@ -859,6 +862,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         CommandProcessingResult result = null;
         int count = 0;
         for (Loan loan : childLoans) {
+            this.context.validateAccessRights(loan.getOffice().getHierarchy());
             result = undoLoanDisbursal(loan.getId(), command);
             if (result.getLoanId() != null) {
                 count++;
@@ -878,6 +882,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult undoLoanDisbursal(final Long loanId, final JsonCommand command) {
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -1040,7 +1045,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Long loanId = command.getLoanId();
         Loan loan = this.loanAssembler.assembleFrom(loanId);
-
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         businessEventNotifierService.notifyPreBusinessEvent(new LoanTransactionInterestPaymentWaiverPreBusinessEvent(loan));
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -1122,6 +1127,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             changes.put(LoanApiConstants.externalIdParameterName, txnExternalId);
         }
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
+
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final Boolean isHolidayValidationDone = false;
         final HolidayDetailDTO holidayDetailDto = null;
@@ -1164,6 +1171,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (final SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
             if (singleLoanRepaymentCommand != null) {
                 Loan loan = this.loanAssembler.assembleFrom(singleLoanRepaymentCommand.getLoanId());
+                this.context.validateAccessRights(loan.getOffice().getHierarchy());
                 final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
                         singleLoanRepaymentCommand.getTransactionDate());
                 final WorkingDays workingDays = this.workingDaysRepository.findOne();
@@ -1184,6 +1192,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (final SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
             if (singleLoanRepaymentCommand != null) {
                 final Loan loan = this.loanAssembler.assembleFrom(singleLoanRepaymentCommand.getLoanId());
+                this.context.validateAccessRights(loan.getOffice().getHierarchy());
                 final PaymentDetail paymentDetail = singleLoanRepaymentCommand.getPaymentDetail();
                 ExternalId externalId = singleLoanRepaymentCommand.getExternalId();
                 if (externalId.isEmpty() && configurationDomainService.isExternalIdAutoGenerationEnabled()) {
@@ -1213,6 +1222,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         if (loan.getStatus().isClosed() && loan.getLoanSubStatus() != null && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED)) {
             final String defaultUserMessage = "The loan cannot reopened as it is foreclosed.";
             throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage, loanId);
@@ -1296,6 +1306,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
             throw new PlatformServiceUnavailableException("error.msg.loan.transfer.transaction.update.not.allowed",
                     "Loan transaction:" + transactionId + " chargeback not allowed as it involves in account transfer", transactionId);
@@ -1403,6 +1414,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         loanTransactionValidator.validateTransaction(loan, LoanTransactionType.WAIVE_INTEREST, command.json());
         checkClientOrGroupActive(loan);
 
@@ -1478,6 +1490,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("dateFormat", command.dateFormat());
         LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         if (command.hasParameter("writeoffReasonId")) {
             Long writeoffReasonId = command.longValueOfParameterNamed("writeoffReasonId");
             CodeValue writeoffReason = this.codeValueRepository
@@ -1555,6 +1568,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionValidator.validateTransactionWithNoAmount(command.json());
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         if (loan.isChargedOff() && DateUtils.isBefore(transactionDate, loan.getChargedOffOnDate())) {
@@ -1650,6 +1664,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionValidator.validateTransactionWithNoAmount(command.json());
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -1816,6 +1831,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate dateOfLoanOfficerAssignment = command.localDateValueOfParameterNamed("assignmentDate");
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
         if (!loan.hasLoanOfficer(fromLoanOfficer)) {
@@ -1860,6 +1876,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         for (final Long loanId : listLoanIds) {
             final Loan loan = this.loanAssembler.assembleFrom(loanId);
+            this.context.validateAccessRights(loan.getOffice().getHierarchy());
             businessEventNotifierService.notifyPreBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
             checkClientOrGroupActive(loan);
 
@@ -1888,6 +1905,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate dateOfLoanOfficerUnassigned = command.localDateValueOfParameterNamed("unassignedDate");
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
 
         if (loan.getLoanOfficer() == null) {
@@ -1948,6 +1966,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // loop through each loan to reschedule the repayment dates
         for (final Loan loan : loans) {
             if (loan != null) {
+                this.context.validateAccessRights(loan.getOffice().getHierarchy());
                 if (loan.getExpectedFirstRepaymentOnDate() != null && loan.getExpectedFirstRepaymentOnDate().equals(presentMeetingDate)) {
                     final String defaultUserMessage = "Meeting calendar date update is not supported since its a first repayment date";
                     throw new CalendarParameterUpdateNotSupportedException("meeting.for.first.repayment.date", defaultUserMessage,
@@ -2156,6 +2175,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult undoWriteOff(Long loanId) {
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         if (!loan.isClosedWrittenOff()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.status.not.written.off.update.not.allowed",
@@ -2244,6 +2264,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command) {
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -2337,6 +2358,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final JsonCommand command) {
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         if (loan.isChargedOff()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.charged.off",
@@ -2356,6 +2378,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Retry(name = "recalculateInterest", fallbackMethod = "fallbackRecalculateInterest")
     public void recalculateInterest(final long loanId) {
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         recalculateInterest(loan);
     }
 
@@ -2393,6 +2416,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult recoverFromGuarantor(final Long loanId) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         this.guarantorDomainService.transferFundsFromGuarantor(loan);
         return new CommandProcessingResultBuilder() //
                 .withLoanId(loanId) //
@@ -2494,6 +2518,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionValidator.validateNewRefundTransaction(command.json());
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         final String noteText = command.stringValueOfParameterNamedAllowingNull("note");
@@ -2539,6 +2564,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionValidator.validateMarkAsFraudLoan(command.json());
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         final Map<String, Object> changes = new LinkedHashMap<>();
         final boolean fraud = command.booleanPrimitiveValueOfParameterNamed(LoanApiConstants.FRAUD_ATTRIBUTE_NAME);
         if (loan.isFraud() != fraud) {
@@ -2626,6 +2652,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command) {
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         final LocalDate recalculateFromDate = loan.getLastRepaymentDate();
         validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(loan);
         checkClientOrGroupActive(loan);
@@ -2670,6 +2697,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final String json = command.json();
         final JsonElement element = fromApiJsonHelper.parse(json);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.transactionDateParamName, element);
         final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
         this.loanTransactionValidator.validateLoanForeclosure(command.json());
@@ -2719,6 +2747,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final AppUser currentUser = getAppUserIfPresent();
 
         Loan loan = loanAssembler.assembleFrom(command.getLoanId());
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         final Long loanId = loan.getId();
         if (!loan.isOpen()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.active",
@@ -2815,6 +2844,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanTransactionValidator.validateUndoChargeOff(command.json());
         final Long loanId = command.getLoanId();
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         checkClientOrGroupActive(loan);
         if (!loan.isOpen()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.is.not.active",
@@ -2887,6 +2917,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put(LoanApiConstants.externalIdParameterName, txnExternalId);
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         // Build loan schedule generator dto
         LocalDate recalculateFrom = loan.isInterestBearingAndInterestRecalculationEnabled() ? transactionDate : null;
         final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom, null);
@@ -2960,6 +2991,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan == null) {
             throw new LoanNotFoundException(loanId);
         }
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
         final LoanTransaction targetTransaction = this.loanTransactionRepository.findByIdAndLoanId(transactionId, loanId)
                 .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId, loanId));
 
