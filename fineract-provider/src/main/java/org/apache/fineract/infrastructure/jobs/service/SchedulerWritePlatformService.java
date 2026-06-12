@@ -18,24 +18,17 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import java.util.List;
 import org.apache.fineract.infrastructure.jobs.data.JobUpdateRequest;
 import org.apache.fineract.infrastructure.jobs.data.JobUpdateResponse;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 
-public interface SchedularWritePlatformService {
-
-    List<ScheduledJobDetail> retrieveAllJobs(String nodeId);
-
-    ScheduledJobDetail findByJobKey(String triggerKey);
+public interface SchedulerWritePlatformService {
 
     void saveOrUpdate(ScheduledJobDetail scheduledJobDetails);
 
     void saveOrUpdate(ScheduledJobDetail scheduledJobDetails, ScheduledJobRunHistory scheduledJobRunHistory);
-
-    Long fetchMaxVersionBy(String triggerKey);
 
     JobUpdateResponse updateJobDetail(JobUpdateRequest request);
 

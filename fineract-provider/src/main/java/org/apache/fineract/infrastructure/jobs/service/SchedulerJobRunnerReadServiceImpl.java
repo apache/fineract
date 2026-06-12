@@ -33,10 +33,12 @@ import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistoryRepository;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.exception.OperationNotAllowedException;
+import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -53,9 +55,11 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     private final JdbcTemplate jdbcTemplate;
     private final ColumnValidator columnValidator;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final ScheduledJobDetailRepository jobDetailRepository; // Handles all job entity queries now
+    private final ScheduledJobDetailRepository jobDetailRepository;
+    private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
     private final SchedulerDetailRepository schedulerDetailRepository;
     private final PaginationHelper paginationHelper;
+    private final SqlValidator sqlValidator;
 
     @Override
     public ScheduledJobDetail findByJobId(final Long jobId) {
@@ -90,8 +94,30 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     @Override
+    public List<ScheduledJobDetail> retrieveAllJobs(final String nodeId) {
+        return this.jobDetailRepository.findAllJobs(Integer.parseInt(nodeId));
+    }
+
+    @Override
+    public ScheduledJobDetail findByJobKey(final String jobKey) {
+        return this.jobDetailRepository.findByJobKey(jobKey);
+    }
+
+    @Override
+    public Long fetchMaxVersionBy(final String jobKey) {
+        Long version = 0L;
+        final Long versionFromDB = this.scheduledJobRunHistoryRepository.findMaxVersionByJobKey(jobKey);
+        if (versionFromDB != null) {
+            version = versionFromDB;
+        }
+        return version;
+    }
+
+    @Override
     public Page<JobDetailHistoryData> retrieveJobHistory(@NonNull IdTypeResolver.IdType idType, String identifier,
             SearchParameters searchParameters) {
+        sqlValidator.validate(searchParameters.getOrderBy());
+        sqlValidator.validate(searchParameters.getSortOrder());
         if (!isJobExist(idType, identifier)) {
             throw new JobNotFoundException(idType, identifier);
         }

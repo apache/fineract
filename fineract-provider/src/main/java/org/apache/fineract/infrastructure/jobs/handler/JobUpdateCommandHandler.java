@@ -28,23 +28,21 @@ import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.infrastructure.jobs.data.JobUpdateRequest;
 import org.apache.fineract.infrastructure.jobs.data.JobUpdateResponse;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
-import org.apache.fineract.infrastructure.jobs.service.SchedularWritePlatformService;
+import org.apache.fineract.infrastructure.jobs.service.SchedulerWritePlatformService;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JobUpdateCommandHandler implements CommandHandler<JobUpdateRequest, JobUpdateResponse> {
 
-    private final SchedularWritePlatformService schedularWritePlatformService;
+    private final SchedulerWritePlatformService schedulerWritePlatformService;
     private final JobRegisterService jobRegisterService;
 
     @Retry(name = "commandJobUpdate", fallbackMethod = "fallback")
     @Override
-    @Transactional
     public JobUpdateResponse handle(Command<JobUpdateRequest> command) {
-        JobUpdateResponse response = schedularWritePlatformService.updateJobDetail(command.getPayload());
+        JobUpdateResponse response = schedulerWritePlatformService.updateJobDetail(command.getPayload());
 
         Map<String, Object> changes = response.getChanges();
         if (changes != null && (changes.containsKey("cronExpression") || changes.containsKey("active"))) {

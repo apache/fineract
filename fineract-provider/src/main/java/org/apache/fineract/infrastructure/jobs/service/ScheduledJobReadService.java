@@ -18,12 +18,19 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 
 public interface ScheduledJobReadService {
 
     ScheduledJobDetail findByJobId(Long jobId);
+
+    List<ScheduledJobDetail> retrieveAllJobs(String nodeId);
+
+    ScheduledJobDetail findByJobKey(String jobKey);
+
+    Long fetchMaxVersionBy(String triggerKey);
 
     SchedulerDetail retrieveSchedulerDetail();
 }

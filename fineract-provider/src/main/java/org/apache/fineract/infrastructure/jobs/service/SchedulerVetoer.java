@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SchedulerVetoer {
 
-    private final SchedularWritePlatformService schedularService;
+    private final SchedulerWritePlatformService schedulerService;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     // Intentionally NOT @Transactional: the only write happens in
@@ -53,7 +53,7 @@ public class SchedulerVetoer {
         if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
         }
-        boolean vetoJob = schedularService.processJobDetailForExecution(jobKey, triggerType);
+        boolean vetoJob = schedulerService.processJobDetailForExecution(jobKey, triggerType);
         if (vetoJob) {
             log.warn(
                     "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",

@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefreshedEvent> {
 
     private final FineractProperties fineractProperties;
-    private final SchedularWritePlatformService schedularWritePlatformService;
+    private final SchedulerWritePlatformService schedulerWritePlatformService;
     private final TenantDetailsService tenantDetailsService;
     private final JobRegisterService jobRegisterService;
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
@@ -64,8 +64,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
             HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
             ThreadLocalContextUtil.setBusinessDates(businessDates);
-            final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
-                    .retrieveAllJobs(fineractProperties.getNodeId());
+            final List<ScheduledJobDetail> scheduledJobDetails = scheduledJobReadService.retrieveAllJobs(fineractProperties.getNodeId());
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
                 try {
                     jobRegisterService.scheduleJob(jobDetails);
@@ -73,12 +72,12 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
                     log.warn("{}", e.getMessage());
                 }
                 jobDetails.setTriggerMisfired(false);
-                schedularWritePlatformService.saveOrUpdate(jobDetails);
+                schedulerWritePlatformService.saveOrUpdate(jobDetails);
             }
             final SchedulerDetail schedulerDetail = scheduledJobReadService.retrieveSchedulerDetail();
             if (schedulerDetail.isResetSchedulerOnBootup()) {
                 schedulerDetail.setSuspended(false);
-                schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
+                schedulerWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
             ThreadLocalContextUtil.reset();
         }

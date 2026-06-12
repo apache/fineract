@@ -72,7 +72,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private static final HashMap<String, Scheduler> SCHEDULERS = new HashMap<>(4);
 
-    private final SchedularWritePlatformService schedularWritePlatformService;
+    private final SchedulerWritePlatformService schedulerWritePlatformService;
     private final SchedulerJobListener schedulerJobListener;
     private final SchedulerTriggerListener globalSchedulerTriggerListener;
     private final FineractProperties fineractProperties;
@@ -131,11 +131,11 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 scheduler.deleteJob(jobKey);
             }
             scheduleJob(scheduledJobDetail);
-            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            this.schedulerWritePlatformService.saveOrUpdate(scheduledJobDetail);
         } catch (final Exception throwable) {
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetail.setErrorLog(stackTrace);
-            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            this.schedulerWritePlatformService.saveOrUpdate(scheduledJobDetail);
         }
     }
 
@@ -144,7 +144,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final SchedulerDetail schedulerDetail = this.scheduledJobReadService.retrieveSchedulerDetail();
         if (!schedulerDetail.isSuspended()) {
             schedulerDetail.setSuspended(true);
-            this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
+            this.schedulerWritePlatformService.updateSchedulerDetail(schedulerDetail);
         }
     }
 
@@ -153,9 +153,9 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final SchedulerDetail schedulerDetail = this.scheduledJobReadService.retrieveSchedulerDetail();
         if (schedulerDetail.isSuspended()) {
             schedulerDetail.setSuspended(false);
-            this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
+            this.schedulerWritePlatformService.updateSchedulerDetail(schedulerDetail);
             if (schedulerDetail.isExecuteInstructionForMisfiredJobs()) {
-                final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService
+                final List<ScheduledJobDetail> scheduledJobDetails = this.scheduledJobReadService
                         .retrieveAllJobs(fineractProperties.getNodeId());
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
                     if (jobDetail.isTriggerMisfired()) {
@@ -180,7 +180,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                             }
                         }
                         jobDetail.setTriggerMisfired(false);
-                        this.schedularWritePlatformService.saveOrUpdate(jobDetail);
+                        this.schedulerWritePlatformService.saveOrUpdate(jobDetail);
                     }
                 }
             }
@@ -195,7 +195,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             rescheduleJob(scheduledJobDetail);
         } else {
             scheduledJobDetail.setMismatchedJob(true);
-            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            this.schedulerWritePlatformService.saveOrUpdate(scheduledJobDetail);
             throw new JobNodeIdMismatchingException(nodeIdStored, fineractProperties.getNodeId());
         }
     }
@@ -213,7 +213,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             executeJob(scheduledJobDetail, null, jobParameterDTOSet);
         } else {
             scheduledJobDetail.setMismatchedJob(true);
-            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            this.schedulerWritePlatformService.saveOrUpdate(scheduledJobDetail);
             throw new JobNodeIdMismatchingException(nodeIdStored, fineractProperties.getNodeId());
         }
     }

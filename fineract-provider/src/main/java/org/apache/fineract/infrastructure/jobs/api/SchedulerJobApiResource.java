@@ -191,7 +191,6 @@ public class SchedulerJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Job", description = "Updates the details of a job.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK")
     public String updateJobDetailByShortName(
             @PathParam("shortName") @Parameter(required = true, description = SchedulerJobApiConstants.SHORT_NAME_PARAM) final String shortName,
             @Parameter(hidden = true) final String jsonRequestBody) {

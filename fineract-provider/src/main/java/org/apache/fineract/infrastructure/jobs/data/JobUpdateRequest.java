@@ -47,13 +47,13 @@ public class JobUpdateRequest implements Serializable {
     private Boolean active;
 
     @JsonIgnore
-    @AssertTrue(message = "{org.apache.fineract.infrastructure.jobs.update.at-least-one-field}")
+    @AssertTrue(message = "{org.apache.fineract.infrastructure.job.update.assertion.at-least-one}")
     public boolean isAtLeastOneFieldPresent() {
         return displayName != null || cronExpression != null || active != null;
     }
 
     @JsonIgnore
-    @AssertTrue(message = "{org.apache.fineract.infrastructure.jobs.cron-expression.invalid}")
+    @AssertTrue(message = "{org.apache.fineract.infrastructure.job.update.assertion.cron-expression}")
     public boolean isCronExpressionValid() {
         return cronExpression == null || CronExpression.isValidExpression(cronExpression.trim());
     }

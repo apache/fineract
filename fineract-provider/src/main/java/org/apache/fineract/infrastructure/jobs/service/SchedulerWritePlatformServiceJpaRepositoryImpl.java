@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.jobs.service;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -35,12 +34,11 @@ import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class SchedularWritePlatformServiceJpaRepositoryImpl implements SchedularWritePlatformService {
+public class SchedulerWritePlatformServiceJpaRepositoryImpl implements SchedulerWritePlatformService {
 
     private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
 
@@ -48,15 +46,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     private final SchedulerDetailRepository schedulerDetailRepository;
 
-    @Override
-    public List<ScheduledJobDetail> retrieveAllJobs(final String nodeId) {
-        return this.scheduledJobDetailsRepository.findAllJobs(Integer.parseInt(nodeId));
-    }
-
-    @Override
-    public ScheduledJobDetail findByJobKey(final String jobKey) {
-        return this.scheduledJobDetailsRepository.findByJobKey(jobKey);
-    }
+    private final ScheduledJobReadService scheduledJobReadService;
 
     @Transactional
     @Override
@@ -72,38 +62,15 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     }
 
     @Override
-    public Long fetchMaxVersionBy(final String jobKey) {
-        Long version = 0L;
-        final Long versionFromDB = this.scheduledJobRunHistoryRepository.findMaxVersionByJobKey(jobKey);
-        if (versionFromDB != null) {
-            version = versionFromDB;
-        }
-        return version;
-    }
-
-    private ScheduledJobDetail findByJobId(final Long jobId) {
-        return this.scheduledJobDetailsRepository.findByJobId(jobId);
-    }
-
-    @Override
     @Transactional
     public void updateSchedulerDetail(final SchedulerDetail schedulerDetail) {
         this.schedulerDetailRepository.save(schedulerDetail);
     }
 
-    public SchedulerDetail retriveSchedulerDetail() {
-        SchedulerDetail schedulerDetail = null;
-        final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAllSchedulerDetails();
-        if (schedulerDetailList != null) {
-            schedulerDetail = schedulerDetailList.get(0);
-        }
-        return schedulerDetail;
-    }
-
     @Transactional
     @Override
     public JobUpdateResponse updateJobDetail(JobUpdateRequest request) {
-        ScheduledJobDetail job = findByJobId(request.getJobId());
+        ScheduledJobDetail job = scheduledJobDetailsRepository.findByJobId(request.getJobId());
         if (job == null) {
             throw new JobNotFoundException(String.valueOf(request.getJobId()));
         }
@@ -130,16 +97,9 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         return JobUpdateResponse.builder().resourceId(job.getId()).changes(changes).build();
     }
 
-    // Annotation/aspect order matters here: the resilience4j @Retry aspect (default order
-    // LOWEST_PRECEDENCE - 3) wraps Spring's transaction interceptor (LOWEST_PRECEDENCE), so each
-    // retry attempt re-enters the transaction interceptor. Combined with REQUIRES_NEW, every
-    // attempt runs in a brand-new transaction with a fresh DB snapshot. This is what lets a
-    // serialization failure (e.g. Postgres 40001 under the pool's REPEATABLE_READ default) recover:
-    // on retry the competing node's job-claim is already committed and visible, so we veto correctly
-    // instead of failing. The caller (SchedulerVetoer#veto) must stay non-transactional for this.
-    @Retry(name = "processJobDetailForExecution", fallbackMethod = "fallbackProcessJobDetailForExecution")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
+    @Retry(name = "processJobDetailForExecution", fallbackMethod = "fallbackProcessJobDetailForExecution")
     public boolean processJobDetailForExecution(final String jobKey, final String triggerType) {
         boolean isStopExecution = false;
         final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
@@ -147,7 +107,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
                 && scheduledJobDetail.getNextRunTime().after(new Date()))) {
             isStopExecution = true;
         }
-        final SchedulerDetail schedulerDetail = retriveSchedulerDetail();
+        final SchedulerDetail schedulerDetail = scheduledJobReadService.retrieveSchedulerDetail();
         if (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON) && schedulerDetail.isSuspended()) {
             scheduledJobDetail.setTriggerMisfired(true);
             isStopExecution = true;
