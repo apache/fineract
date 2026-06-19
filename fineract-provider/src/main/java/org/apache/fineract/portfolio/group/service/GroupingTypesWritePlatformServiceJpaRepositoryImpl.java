@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.group.service;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -69,6 +70,8 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -256,23 +259,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.CENTER, centerId);
 
         businessEventNotifierService.notifyPostBusinessEvent(new CentersCreateBusinessEvent(commandProcessingResult));
-
-        return commandProcessingResult;
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult createGroup(final Long centerId, final JsonCommand command) {
-
-        if (centerId != null) {
-            this.fromApiJsonDeserializer.validateForCreateCenterGroup(command);
-        } else {
-            this.fromApiJsonDeserializer.validateForCreateGroup(command);
-        }
-
-        CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.GROUP, centerId);
-
-        businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
 
         return commandProcessingResult;
     }
@@ -943,5 +929,128 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 }
             }
         }
+    }
+
+    @Transactional
+    @Override
+    public GroupCreateResponse createGroup(final GroupCreateRequest request) {
+        try {
+            final Long centerId = request.getCenterId();
+
+            Long officeId;
+            Group parentGroup = null;
+            if (centerId == null) {
+                officeId = request.getOfficeId();
+            } else {
+                parentGroup = this.groupRepository.findOneWithNotFoundDetection(centerId);
+                officeId = parentGroup.officeId();
+            }
+
+            final Office groupOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
+            final LocalDate activationDate = parseDate(request.getActivationDate(), request.getDateFormat(), request.getLocale());
+            final GroupLevel groupLevel = this.groupLevelRepository.findById(GroupTypes.GROUP.getId()).orElse(null);
+
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
+
+            Staff staff = null;
+            final Long staffId = request.getStaffId();
+            if (staffId != null) {
+                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+            }
+
+            final Set<Client> clientMembers = assembleSetOfClients(officeId, request.getClientMembers());
+            final Set<Group> groupMembers = Collections.emptySet();
+
+            final boolean active = Boolean.TRUE.equals(request.getActive());
+
+            LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
+            if (active && activationDate != null && DateUtils.isAfter(submittedOnDate, activationDate)) {
+                submittedOnDate = activationDate;
+            }
+            if (request.getSubmittedOnDate() != null && !request.getSubmittedOnDate().isBlank()) {
+                submittedOnDate = parseDate(request.getSubmittedOnDate(), request.getDateFormat(), request.getLocale());
+            }
+
+            final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, request.getName(), request.getExternalId(),
+                    active, activationDate, clientMembers, groupMembers, submittedOnDate, null, null);
+
+            if (newGroup.isActive()) {
+                this.groupRepository.saveAndFlush(newGroup);
+                if (newGroup.isGroup()) {
+                    validateGroupRulesBeforeActivation(newGroup);
+                }
+            }
+
+            this.groupRepository.save(newGroup);
+            generateAccountNumber(newGroup);
+            newGroup.generateHierarchy();
+            this.groupRepository.saveAndFlush(newGroup);
+            newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
+
+            if (request.getDatatables() != null && !request.getDatatables().isEmpty()) {
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(), EntityTables.GROUP.getName(),
+                        newGroup.getId(), null, request.getDatatables());
+            }
+
+            this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                    StatusEnum.CREATE.getValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
+
+            businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(newGroup));
+
+            return GroupCreateResponse.builder().resourceId(newGroup.getId()).officeId(groupOffice.getId()).groupId(newGroup.getId())
+                    .build();
+
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleGroupDataIntegrityIssuesTyped(request.getName(), request.getExternalId(), dve.getMostSpecificCause(), dve,
+                    GroupTypes.GROUP);
+            return GroupCreateResponse.builder().build();
+        } catch (final PersistenceException dve) {
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleGroupDataIntegrityIssuesTyped(request.getName(), request.getExternalId(), throwable, dve, GroupTypes.GROUP);
+            return GroupCreateResponse.builder().build();
+        }
+    }
+
+    private Set<Client> assembleSetOfClients(final Long groupOfficeId, final Set<Long> clientMemberIds) {
+        final Set<Client> clientMembers = new HashSet<>();
+        if (clientMemberIds == null || clientMemberIds.isEmpty()) {
+            return clientMembers;
+        }
+        for (final Long clientId : clientMemberIds) {
+            final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            if (!client.isOfficeIdentifiedBy(groupOfficeId)) {
+                final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
+                throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId.toString(), groupOfficeId);
+            }
+            clientMembers.add(client);
+        }
+        return clientMembers;
+    }
+
+    private void handleGroupDataIntegrityIssuesTyped(final String name, final String externalId, final Throwable realCause,
+            final Exception dve, final GroupTypes groupingType) {
+        final String resource = groupingType.equals(GroupTypes.CENTER) ? "center" : "group";
+        if (realCause != null && realCause.getMessage() != null) {
+            if (realCause.getMessage().contains("external_id")) {
+                throw new PlatformDataIntegrityException("error.msg." + resource + ".duplicate.externalId",
+                        "Group with externalId `" + externalId + "` already exists", "externalId", externalId);
+            } else if (realCause.getMessage().contains("name")) {
+                throw new PlatformDataIntegrityException("error.msg." + resource + ".duplicate.name",
+                        "Group with name `" + name + "` already exists", "name", name);
+            }
+        }
+        log.error("Error occured.", dve);
+        throw new PlatformDataIntegrityException("error.msg." + resource + ".unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + (realCause != null ? realCause.getMessage() : dve.getMessage()));
+    }
+
+    private LocalDate parseDate(final String value, final String dateFormat, final String locale) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        final String pattern = (dateFormat != null && !dateFormat.isBlank()) ? dateFormat : "yyyy-MM-dd";
+        final java.util.Locale resolvedLocale = (locale != null && !locale.isBlank()) ? java.util.Locale.forLanguageTag(locale)
+                : java.util.Locale.ENGLISH;
+        return LocalDate.parse(value, java.time.format.DateTimeFormatter.ofPattern(pattern, resolvedLocale));
     }
 }
