@@ -18,27 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "CREATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class CreateGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupCreateCommandHandler implements CommandHandler<GroupCreateRequest, GroupCreateResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupCreate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public GroupCreateResponse handle(Command<GroupCreateRequest> command) {
+        return groupingTypesWritePlatformService.createGroup(command.getPayload());
+    }
 
-        final Long centerId = command.longValueOfParameterNamed("centerId");
-        return this.groupWritePlatformService.createGroup(centerId, command);
+    @Override
+    public GroupCreateResponse fallback(Command<GroupCreateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
