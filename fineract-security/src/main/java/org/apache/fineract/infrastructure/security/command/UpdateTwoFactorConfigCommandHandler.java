@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.security.command;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -26,7 +27,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.security.data.TwoFactorConfigurationValidator;
 import org.apache.fineract.infrastructure.security.service.TwoFactorConfigurationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,17 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "TWOFACTOR_CONFIGURATION", action = "UPDATE")
 @ConditionalOnProperty("fineract.security.2fa.enabled")
+@RequiredArgsConstructor
 public class UpdateTwoFactorConfigCommandHandler implements NewCommandSourceHandler {
 
     private final TwoFactorConfigurationService configurationService;
     private final TwoFactorConfigurationValidator dataValidator;
-
-    @Autowired
-    public UpdateTwoFactorConfigCommandHandler(TwoFactorConfigurationService configurationService,
-            TwoFactorConfigurationValidator dataValidator) {
-        this.configurationService = configurationService;
-        this.dataValidator = dataValidator;
-    }
 
     @Transactional
     @Override

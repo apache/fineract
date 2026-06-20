@@ -18,25 +18,21 @@
  */
 package org.apache.fineract.adhocquery.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.service.AdHocWritePlatformService;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "ADHOC", action = "CREATE")
+@RequiredArgsConstructor
 public class CreateAdHocCommandHandler implements NewCommandSourceHandler {
 
     private final AdHocWritePlatformService writePlatformService;
-
-    @Autowired
-    public CreateAdHocCommandHandler(final AdHocWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
 
     @Transactional
     @Override

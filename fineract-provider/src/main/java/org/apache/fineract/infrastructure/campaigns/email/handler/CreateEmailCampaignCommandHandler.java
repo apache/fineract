@@ -18,25 +18,21 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "EMAIL_CAMPAIGN", action = "CREATE")
+@RequiredArgsConstructor
 public class CreateEmailCampaignCommandHandler implements NewCommandSourceHandler {
 
     private EmailCampaignWritePlatformService emailCampaignWritePlatformService;
-
-    @Autowired
-    public CreateEmailCampaignCommandHandler(final EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
-        this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
-    }
 
     @Transactional
     @Override
