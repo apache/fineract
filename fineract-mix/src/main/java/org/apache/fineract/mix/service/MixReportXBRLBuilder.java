@@ -50,7 +50,6 @@ public class MixReportXBRLBuilder {
 
     private final MixReportXBRLNamespaceReadService readNamespaceService;
 
-    // TODO: we should do this with JAXB
     public String build(final MixReportXBRLData xbrlData) {
         return this.build(xbrlData.getResultMap(), xbrlData.getStartDate(), xbrlData.getEndDate(), xbrlData.getCurrency());
     }

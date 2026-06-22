@@ -44,12 +44,13 @@ public class MixReportApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_XML })
     @Operation(summary = "Retrieve Mix XBRL report", operationId = "retrieveMixReport")
-    public String retrieveXBRLReport(@QueryParam("startDate") final Date startDate, @QueryParam("endDate") final Date endDate,
-            @QueryParam("currency") final String currency) {
+    public jakarta.ws.rs.core.Response retrieveXBRLReport(@QueryParam("startDate") final Date startDate,
+            @QueryParam("endDate") final Date endDate, @QueryParam("currency") final String currency) {
 
         final var data = xbrlResultService.getXBRLResult(startDate, endDate, currency);
 
-        // TODO: make this type safe?
-        return this.xbrlBuilder.build(data);
+        String xmlPayload = this.xbrlBuilder.build(data);
+
+        return jakarta.ws.rs.core.Response.ok().entity(xmlPayload).type(MediaType.APPLICATION_XML_TYPE).build();
     }
 }
