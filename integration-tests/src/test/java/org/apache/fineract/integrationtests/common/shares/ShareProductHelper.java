@@ -39,10 +39,10 @@ public class ShareProductHelper {
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String LOCALE = "en_GB";
-    private static final String DIGITS_AFTER_DECIMAL = "4";
-    private static final String IN_MULTIPLES_OF = "0";
     private static final String USD = "USD";
 
+    private String digitsAfterDecimal = "4";
+    private String inMultiplesOf = "0";
     private String productName = Utils.uniqueRandomStringGenerator("SHARE_PRODUCT_", 6);
     private String shortName = Utils.uniqueRandomStringGenerator("", 4);
     private String description = Utils.randomStringGenerator("", 20);
@@ -76,8 +76,8 @@ public class ShareProductHelper {
         map.put("description", this.description);
         map.put("currencyCode", this.currencyCode);
         map.put("locale", LOCALE);
-        map.put("digitsAfterDecimal", DIGITS_AFTER_DECIMAL);
-        map.put("inMultiplesOf", IN_MULTIPLES_OF);
+        map.put("digitsAfterDecimal", this.digitsAfterDecimal);
+        map.put("inMultiplesOf", this.inMultiplesOf);
         map.put("totalShares", this.totalShares);
         map.put("sharesIssued", this.sharesIssued);
         map.put("unitPrice", this.unitPrice);
@@ -146,6 +146,16 @@ public class ShareProductHelper {
         return this;
     }
 
+    public ShareProductHelper withDigitsAfterDecimal(int digitsAfterDecimal) {
+        this.digitsAfterDecimal = String.valueOf(digitsAfterDecimal);
+        return this;
+    }
+
+    public ShareProductHelper withInMultiplesOf(int inMultiplesOf) {
+        this.inMultiplesOf = String.valueOf(inMultiplesOf);
+        return this;
+    }
+
     @SuppressWarnings("unchecked")
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
@@ -165,10 +175,10 @@ public class ShareProductHelper {
         Assertions.assertEquals(this.currencyCode, currencyCode);
 
         String digitsAfterDecimal = String.valueOf(currency.get("decimalPlaces"));
-        Assertions.assertEquals(DIGITS_AFTER_DECIMAL, digitsAfterDecimal);
+        Assertions.assertEquals(this.digitsAfterDecimal, digitsAfterDecimal);
 
         String inMultiplesOf = String.valueOf(currency.get("inMultiplesOf"));
-        Assertions.assertEquals(IN_MULTIPLES_OF, inMultiplesOf);
+        Assertions.assertEquals(this.inMultiplesOf, inMultiplesOf);
 
         String totalShares = String.valueOf(shareProductData.get("totalShares"));
         Assertions.assertEquals(this.totalShares, totalShares);

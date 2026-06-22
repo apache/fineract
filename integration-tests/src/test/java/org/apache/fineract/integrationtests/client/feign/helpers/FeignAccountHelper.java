@@ -44,6 +44,10 @@ public class FeignAccountHelper {
         return createAccount(name, "2", "LIABILITY");
     }
 
+    public Account createEquityAccount(String name) {
+        return createAccount(name, "3", "EQUITY");
+    }
+
     public Account createIncomeAccount(String name) {
         return createAccount(name, "4", "INCOME");
     }

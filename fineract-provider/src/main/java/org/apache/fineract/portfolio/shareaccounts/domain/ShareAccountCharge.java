@@ -374,7 +374,7 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
     }
 
     public BigDecimal deriveChargeAmount(BigDecimal transactionAmount, final MonetaryCurrency currency) {
-        BigDecimal toReturnAmount = amountOrPercentage;
+        BigDecimal toReturnAmount;
         if (ChargeCalculationType.fromInt(this.chargeCalculation) == ChargeCalculationType.PERCENT_OF_AMOUNT) {
             toReturnAmount = Money.of(currency, percentageOf(transactionAmount, this.percentage)).getAmount();
             this.amountPercentageAppliedTo = transactionAmount;
@@ -384,7 +384,8 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
             this.amountWaived = null;
             this.amountWrittenOff = null;
         } else {
-            this.amount = this.amountOrPercentage;
+            this.amount = Money.of(currency, this.amountOrPercentage).getAmount();
+            toReturnAmount = this.amount;
             this.amountOutstanding = calculateOutstanding();
             this.amountWaived = null;
             this.amountWrittenOff = null;
@@ -393,7 +394,7 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
     }
 
     public BigDecimal updateChargeDetailsForAdditionalSharesRequest(final BigDecimal transactionAmount, final MonetaryCurrency currency) {
-        BigDecimal toReturnAmount = amountOrPercentage;
+        BigDecimal toReturnAmount;
         if (ChargeCalculationType.fromInt(this.chargeCalculation) == ChargeCalculationType.PERCENT_OF_AMOUNT) {
             toReturnAmount = Money.of(currency, percentageOf(transactionAmount, this.percentage)).getAmount();
             this.amountPercentageAppliedTo = this.amountPercentageAppliedTo.add(transactionAmount);
@@ -402,7 +403,9 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
             this.amountWaived = null;
             this.amountWrittenOff = null;
         } else {
-            this.amount = this.amount.add(this.amountOrPercentage);
+            BigDecimal roundedAmount = Money.of(currency, this.amountOrPercentage).getAmount();
+            toReturnAmount = roundedAmount;
+            this.amount = this.amount.add(roundedAmount);
             this.amountOutstanding = calculateOutstanding();
             this.amountWaived = null;
             this.amountWrittenOff = null;

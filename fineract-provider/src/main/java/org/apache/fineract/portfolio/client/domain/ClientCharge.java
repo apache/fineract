@@ -26,7 +26,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -34,7 +33,6 @@ import org.apache.fineract.organisation.monetary.domain.OrganisationCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
 @Table(name = "m_client_charge")
@@ -94,12 +92,8 @@ public class ClientCharge extends AbstractPersistableCustom<Long> {
         //
     }
 
-    public static ClientCharge createNew(final Client client, final Charge charge, final JsonCommand command) {
-        BigDecimal amount = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
-        final LocalDate dueDate = command.localDateValueOfParameterNamed(ClientApiConstants.dueAsOfDateParamName);
+    public static ClientCharge createNew(final Client client, final Charge charge, final BigDecimal amount, final LocalDate dueDate) {
         final boolean status = true;
-        // Derive from charge definition if not passed in as a parameter
-        amount = (amount == null) ? charge.getAmount() : amount;
         return new ClientCharge(client, charge, amount, dueDate, status);
     }
 
