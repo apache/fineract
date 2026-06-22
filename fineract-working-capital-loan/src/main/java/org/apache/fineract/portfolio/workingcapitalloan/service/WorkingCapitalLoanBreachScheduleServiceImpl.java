@@ -242,12 +242,15 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
             return;
         }
         final WorkingCapitalBreach breach = breachOpt.get();
+        final Optional<WorkingCapitalLoanBreachAction> latestReschedule = findLatestRescheduleAction(loan.getId());
+        final Integer effectiveFrequency = resolveFrequency(latestReschedule.orElse(null), breach);
+        final WorkingCapitalLoanPeriodFrequencyType effectiveFreqType = resolveFrequencyType(latestReschedule.orElse(null), breach);
         final List<WorkingCapitalLoanBreachAction> recordedPauses = findRecordedPauses(loan.getId());
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         LocalDate fromDate = periods.getFirst().getFromDate();
         for (final WorkingCapitalLoanBreachSchedule period : periods) {
             period.setFromDate(fromDate);
-            period.setToDate(calculateToDate(fromDate, breach.getBreachFrequency(), breach.getBreachFrequencyType()));
+            period.setToDate(calculateToDate(fromDate, effectiveFrequency, effectiveFreqType));
             applyRecordedPauses(period, recordedPauses);
             recomputeBreach(period, businessDate);
             fromDate = period.getToDate().plusDays(1);
@@ -261,7 +264,6 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) == 0) {
             period.setBreach(false);
         } else if (businessDate.isAfter(period.getToDate())) {
-            // COB evaluates with effective date businessDate-1, so breach is set only after the toDate has passed
             period.setBreach(true);
         } else {
             period.setBreach(null);
@@ -279,9 +281,8 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         for (final WorkingCapitalLoanBreachAction pause : pauseActions) {
             final LocalDate pauseStart = pause.getStartDate();
             final LocalDate pauseEnd = pause.getEndDate();
-            // Apply only if the pause overlaps this period's date range
-            if (pauseEnd.isAfter(period.getFromDate()) && !pauseStart.isAfter(period.getToDate())) {
-                final long pauseDays = ChronoUnit.DAYS.between(pauseStart, pauseEnd);
+            if (!pauseEnd.isBefore(period.getFromDate()) && !pauseStart.isAfter(period.getToDate())) {
+                final long pauseDays = ChronoUnit.DAYS.between(pauseStart, pauseEnd) + 1;
                 period.setToDate(period.getToDate().plusDays(pauseDays));
                 if (period.getFromDate().isAfter(pauseStart)) {
                     period.setFromDate(period.getFromDate().plusDays(pauseDays));

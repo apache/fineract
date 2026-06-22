@@ -184,8 +184,8 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private void validateStartBeforeEnd(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate) {
-        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
-            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.be.after.startDate");
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.be.on.or.after.startDate");
         }
     }
 
@@ -218,7 +218,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private boolean isOverlapping(final LocalDate startDate, final LocalDate endDate, final WorkingCapitalLoanBreachAction other) {
-        return startDate.isBefore(other.getEndDate()) && other.getStartDate().isBefore(endDate);
+        return !startDate.isAfter(other.getEndDate()) && !other.getStartDate().isAfter(endDate);
     }
 
     private void validateReschedule(final WorkingCapitalLoanBreachAction action, final WorkingCapitalLoan workingCapitalLoan,
