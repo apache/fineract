@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -59,6 +61,9 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final WorkingCapitalLoanPaymentAllocationProcessor allocationProcessor;
+    private final WorkingCapitalLoanAllocationRequestFactory allocationRequestFactory;
+    private final WorkingCapitalLoanAllocationApplier allocationApplier;
+    private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
 
     @Override
@@ -112,10 +117,14 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final List<PrincipalPayment> principalPayments = new ArrayList<>();
         final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations = new ArrayList<>();
         for (final WorkingCapitalLoanTransaction txn : replayable) {
-            final WorkingCapitalLoanPaymentAllocationProcessor.AllocationResult result = allocationProcessor.allocate(loan, balance,
-                    charges, txn.getTransactionDate(), txn.getTransactionAmount());
-            updatedAllocations.add(applyAllocation(txn, allocationsByTxnId.get(txn.getId()), result));
-            principalPayments.add(new PrincipalPayment(txn.getTransactionDate(), result.principalPortion()));
+            // Build the request from the live (running) balance/charges so the decision is made against the
+            // remaining outstanding after the previously replayed transactions; the balance is then refreshed onto it.
+            final WorkingCapitalLoanAllocationRequest request = allocationRequestFactory.build(loan, balance, charges,
+                    txn.getTransactionDate(), txn.getTransactionAmount());
+            final WorkingCapitalLoanAllocationPlan plan = allocationProcessor.plan(request);
+            updatedAllocations.add(allocationApplier.apply(txn, allocationsByTxnId.get(txn.getId()), plan, charges));
+            balanceUpdater.apply(balance, plan);
+            principalPayments.add(new PrincipalPayment(txn.getTransactionDate(), plan.principalPortion()));
         }
 
         allocationRepository.saveAll(updatedAllocations);
@@ -125,19 +134,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         // The amortization schedule depends only on the principal paid per day, which can shift when the principal
         // portions are re-allocated; rebuild it from the recomputed portions.
         amortizationScheduleWriteService.rebuildScheduleFromPrincipalPayments(loan, principalPayments);
-    }
-
-    private WorkingCapitalLoanTransactionAllocation applyAllocation(final WorkingCapitalLoanTransaction txn,
-            final WorkingCapitalLoanTransactionAllocation existing,
-            final WorkingCapitalLoanPaymentAllocationProcessor.AllocationResult result) {
-        if (existing == null) {
-            return WorkingCapitalLoanTransactionAllocation.forPortions(txn, result.principalPortion(), result.feeChargesPortion(),
-                    result.penaltyChargesPortion());
-        }
-        existing.setPrincipalPortion(result.principalPortion());
-        existing.setFeeChargesPortion(result.feeChargesPortion());
-        existing.setPenaltyChargesPortion(result.penaltyChargesPortion());
-        return existing;
     }
 
     private boolean isRepaymentLike(final LoanTransactionType type) {

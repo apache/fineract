@@ -20,62 +20,63 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.loanproduct.domain.DueType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationTransactionType;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPaymentAllocationRule;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan.ChargeAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest.ChargeBalance;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
 import org.springframework.stereotype.Component;
 
 /**
- * Allocates a repayment-like amount across penalty charges, fee charges and principal following the payment allocation
- * order configured on the loan (copied from the product at creation). The same allocation is used by the forward
- * repayment flow and by {@link WorkingCapitalLoanTransactionReprocessingService} when transactions are replayed in a
- * changed chronological order.
+ * Decides how a repayment-like amount splits across penalty charges, fee charges and principal, following the payment
+ * allocation order configured on the loan. The same decision is used by the forward repayment flow and by
+ * {@link WorkingCapitalLoanTransactionReprocessingService} when transactions are replayed in a changed chronological
+ * order.
  *
  * <p>
- * The processor mutates the passed {@link WorkingCapitalLoanCharge charges} (amount paid / paid flag) and
- * {@link WorkingCapitalLoanBalance balance} (principal/fee/penalty paid, overpayment) in place; persistence is the
- * caller's responsibility. When the loan has no configured allocation order the amount falls back to principal-only,
- * preserving the original behaviour for products that do not use charge allocation.
+ * This is a pure function: a {@link WorkingCapitalLoanAllocationRequest} goes in and a
+ * {@link WorkingCapitalLoanAllocationPlan} comes out. It does not touch JPA entities and has no side effects -
+ * materializing the plan (charge balances, amortization schedule, balance buckets) is the caller's responsibility.
  */
 @Component
 public class WorkingCapitalLoanPaymentAllocationProcessor {
 
-    /**
-     * @param charges
-     *            active charges of the loan, ordered oldest due date first (so the oldest outstanding charge is settled
-     *            first within a bucket)
-     */
-    public AllocationResult allocate(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance,
-            final List<WorkingCapitalLoanCharge> charges, final LocalDate transactionDate, final BigDecimal amount) {
-        BigDecimal remaining = MathUtil.nullToZero(amount);
+    public WorkingCapitalLoanAllocationPlan plan(final WorkingCapitalLoanAllocationRequest request) {
+        BigDecimal remaining = MathUtil.nullToZero(request.amount());
+        BigDecimal runningPrincipalOutstanding = MathUtil.nullToZero(request.principalOutstanding());
+        final BigDecimal[] runningChargeOutstanding = request.charges().stream().map(charge -> MathUtil.nullToZero(charge.outstanding()))
+                .toArray(BigDecimal[]::new);
+
         BigDecimal principalPortion = BigDecimal.ZERO;
         BigDecimal feePortion = BigDecimal.ZERO;
         BigDecimal penaltyPortion = BigDecimal.ZERO;
+        final List<ChargeAllocation> chargeAllocations = new ArrayList<>();
 
-        for (final WorkingCapitalPaymentAllocationType allocationType : resolveAllocationOrder(loan)) {
+        for (final WorkingCapitalPaymentAllocationType allocationType : request.allocationOrder()) {
             if (!MathUtil.isGreaterThanZero(remaining)) {
                 break;
             }
             final DueType dueType = allocationType.getDueType();
             switch (allocationType.getAllocationType()) {
                 case PRINCIPAL -> {
-                    final BigDecimal applied = allocateToPrincipal(balance, remaining);
+                    final BigDecimal applied = remaining.min(runningPrincipalOutstanding).max(BigDecimal.ZERO);
                     principalPortion = principalPortion.add(applied);
+                    runningPrincipalOutstanding = runningPrincipalOutstanding.subtract(applied);
                     remaining = remaining.subtract(applied);
                 }
                 case FEE -> {
-                    final BigDecimal applied = allocateToCharges(charges, false, dueType, transactionDate, remaining, balance);
+                    final BigDecimal applied = allocateToCharges(request.charges(), runningChargeOutstanding, false, dueType,
+                            request.transactionDate(), remaining, chargeAllocations);
                     feePortion = feePortion.add(applied);
                     remaining = remaining.subtract(applied);
                 }
                 case PENALTY -> {
-                    final BigDecimal applied = allocateToCharges(charges, true, dueType, transactionDate, remaining, balance);
+                    final BigDecimal applied = allocateToCharges(request.charges(), runningChargeOutstanding, true, dueType,
+                            request.transactionDate(), remaining, chargeAllocations);
                     penaltyPortion = penaltyPortion.add(applied);
                     remaining = remaining.subtract(applied);
                 }
@@ -85,77 +86,39 @@ public class WorkingCapitalLoanPaymentAllocationProcessor {
         }
 
         final BigDecimal overpayment = remaining.max(BigDecimal.ZERO);
-        balance.setOverpaymentAmount(MathUtil.nullToZero(balance.getOverpaymentAmount()).add(overpayment));
-        return new AllocationResult(principalPortion, feePortion, penaltyPortion, overpayment);
+        return new WorkingCapitalLoanAllocationPlan(principalPortion, feePortion, penaltyPortion, overpayment, chargeAllocations);
     }
 
-    private BigDecimal allocateToPrincipal(final WorkingCapitalLoanBalance balance, final BigDecimal remaining) {
-        final BigDecimal outstanding = MathUtil.nullToZero(balance.getPrincipalOutstanding());
-        final BigDecimal applied = remaining.min(outstanding).max(BigDecimal.ZERO);
-        balance.setPrincipalPaid(MathUtil.nullToZero(balance.getPrincipalPaid()).add(applied));
-        return applied;
-    }
-
-    private BigDecimal allocateToCharges(final List<WorkingCapitalLoanCharge> charges, final boolean penalty, final DueType dueType,
-            final LocalDate transactionDate, final BigDecimal remaining, final WorkingCapitalLoanBalance balance) {
+    private BigDecimal allocateToCharges(final List<ChargeBalance> charges, final BigDecimal[] runningChargeOutstanding,
+            final boolean penalty, final DueType dueType, final LocalDate transactionDate, final BigDecimal remaining,
+            final List<ChargeAllocation> chargeAllocations) {
         BigDecimal available = remaining;
         BigDecimal totalApplied = BigDecimal.ZERO;
-        for (final WorkingCapitalLoanCharge charge : charges) {
+        for (int i = 0; i < charges.size(); i++) {
             if (!MathUtil.isGreaterThanZero(available)) {
                 break;
             }
-            if (charge.isPenaltyCharge() != penalty || !matchesDueType(charge, dueType, transactionDate)) {
+            final ChargeBalance charge = charges.get(i);
+            if (charge.penalty() != penalty || !matchesDueType(charge, dueType, transactionDate)) {
                 continue;
             }
-            final BigDecimal outstanding = charge.getAmountOutstanding();
+            final BigDecimal outstanding = runningChargeOutstanding[i];
             if (!MathUtil.isGreaterThanZero(outstanding)) {
                 continue;
             }
             final BigDecimal applied = available.min(outstanding);
-            charge.setAmountPaid(MathUtil.nullToZero(charge.getAmountPaid()).add(applied));
-            if (!MathUtil.isGreaterThanZero(charge.getAmountOutstanding())) {
-                charge.setPaid(true);
-            }
+            runningChargeOutstanding[i] = outstanding.subtract(applied);
+            chargeAllocations.add(new ChargeAllocation(charge.chargeId(), penalty, applied));
             available = available.subtract(applied);
             totalApplied = totalApplied.add(applied);
-        }
-        if (MathUtil.isGreaterThanZero(totalApplied)) {
-            if (penalty) {
-                balance.setPenaltyPaid(MathUtil.nullToZero(balance.getPenaltyPaid()).add(totalApplied));
-            } else {
-                balance.setFeePaid(MathUtil.nullToZero(balance.getFeePaid()).add(totalApplied));
-            }
         }
         return totalApplied;
     }
 
-    private boolean matchesDueType(final WorkingCapitalLoanCharge charge, final DueType dueType, final LocalDate transactionDate) {
-        final LocalDate dueDate = charge.getDueDate();
+    private boolean matchesDueType(final ChargeBalance charge, final DueType dueType, final LocalDate transactionDate) {
+        final LocalDate dueDate = charge.dueDate();
         // A charge with no due date is treated as already due; otherwise "due" means on/before the transaction date.
         final boolean isDue = dueDate == null || !dueDate.isAfter(transactionDate);
         return dueType == DueType.DUE ? isDue : !isDue;
-    }
-
-    private List<WorkingCapitalPaymentAllocationType> resolveAllocationOrder(final WorkingCapitalLoan loan) {
-        final List<WorkingCapitalLoanPaymentAllocationRule> rules = loan.getPaymentAllocationRules();
-        if (rules != null && !rules.isEmpty()) {
-            final WorkingCapitalLoanPaymentAllocationRule repaymentRule = findRule(rules, PaymentAllocationTransactionType.REPAYMENT);
-            final WorkingCapitalLoanPaymentAllocationRule rule = repaymentRule != null ? repaymentRule
-                    : findRule(rules, PaymentAllocationTransactionType.DEFAULT);
-            if (rule != null && rule.getAllocationTypes() != null && !rule.getAllocationTypes().isEmpty()) {
-                return rule.getAllocationTypes();
-            }
-        }
-        // No configured order: keep the legacy principal-only behaviour.
-        return List.of(WorkingCapitalPaymentAllocationType.DUE_PRINCIPAL);
-    }
-
-    private WorkingCapitalLoanPaymentAllocationRule findRule(final List<WorkingCapitalLoanPaymentAllocationRule> rules,
-            final PaymentAllocationTransactionType transactionType) {
-        return rules.stream().filter(rule -> transactionType.equals(rule.getTransactionType())).findFirst().orElse(null);
-    }
-
-    public record AllocationResult(BigDecimal principalPortion, BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion,
-            BigDecimal overpaymentPortion) {
     }
 }
