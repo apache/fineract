@@ -2333,15 +2333,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder closeGroup(final Long groupId) {
-        this.actionName = ACTION_CLOSE;
-        this.entityName = ENTITY_GROUP;
-        this.entityId = groupId;
-        this.groupId = groupId;
-        this.href = "/groups/" + groupId + "?command=close";
-        return this;
-    }
-
     public CommandWrapperBuilder createCollateral(final Long loanId) {
         this.actionName = ACTION_CREATE;
         this.entityName = ENTITY_COLLATERAL;

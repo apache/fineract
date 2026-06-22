@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupCloseRequest;
+import org.apache.fineract.portfolio.group.data.GroupCloseResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "UPDATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class UpdateGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupCloseCommandHandler implements CommandHandler<GroupCloseRequest, GroupCloseResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupClose", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public GroupCloseResponse handle(Command<GroupCloseRequest> command) {
+        return groupingTypesWritePlatformService.closeGroup(command.getPayload());
+    }
 
-        return this.groupWritePlatformService.updateGroup(command.entityId(), command);
+    @Override
+    public GroupCloseResponse fallback(Command<GroupCloseRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,8 +71,14 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
+import org.apache.fineract.portfolio.group.data.GroupCloseRequest;
+import org.apache.fineract.portfolio.group.data.GroupCloseResponse;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
 import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -331,13 +338,51 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         return updateGroupingType(centerId, command, GroupTypes.CENTER);
     }
 
-    @Transactional
     @Override
-    public CommandProcessingResult updateGroup(final Long groupId, final JsonCommand command) {
+    @Transactional
+    public GroupUpdateResponse updateGroup(final GroupUpdateRequest request) {
 
-        this.fromApiJsonDeserializer.validateForUpdateGroup(command, groupId);
+        final Group group = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
 
-        return updateGroupingType(groupId, command, GroupTypes.GROUP);
+        final String groupHierarchy = group.getOffice().getHierarchy();
+
+        this.context.validateAccessRights(groupHierarchy);
+
+        final Map<String, Object> changes = new HashMap<>();
+
+        if (StringUtils.isNotBlank(request.getName()) && !Objects.equals(request.getName(), group.getName())) {
+
+            group.setName(request.getName());
+            changes.put(GroupUpdateRequest.Fields.name, request.getName());
+        }
+
+        if (!Objects.equals(request.getExternalId(), group.getExternalId())) {
+
+            group.setExternalId(request.getExternalId());
+            changes.put(GroupUpdateRequest.Fields.externalId, request.getExternalId());
+        }
+
+        if (request.getStaffId() != null) {
+
+            final Staff newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(request.getStaffId(), groupHierarchy);
+
+            group.updateStaff(newStaff);
+
+            changes.put(GroupUpdateRequest.Fields.staffId, request.getStaffId());
+        }
+
+        if (request.getCenterId() != null) {
+
+            final Group parentGroup = this.groupRepository.findOneWithNotFoundDetection(request.getCenterId());
+
+            group.setParent(parentGroup);
+            group.generateHierarchy();
+
+            changes.put(GroupUpdateRequest.Fields.centerId, request.getCenterId());
+        }
+
+        return GroupUpdateResponse.builder().resourceId(group.getId()).groupId(group.getId()).officeId(group.officeId()).changes(changes)
+                .build();
     }
 
     private CommandProcessingResult updateGroupingType(final Long groupId, final JsonCommand command, final GroupTypes groupingType) {
@@ -533,9 +578,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteGroup(final Long groupId) {
+    public GroupDeleteResponse deleteGroup(final GroupDeleteRequest request) {
         try {
-
+            final Long groupId = request.getGroupId();
             final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
             if (groupForDelete.isNotPending()) {
@@ -545,15 +590,19 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final List<Note> relatedNotes = this.noteRepository.findByGroup(groupForDelete);
             this.noteRepository.deleteAllInBatch(relatedNotes);
 
+            final Long officeId = groupForDelete.officeId();
+            final Long deletedGroupId = groupForDelete.getId();
+
             this.groupRepository.delete(groupForDelete);
             this.groupRepository.flush();
-            return new CommandProcessingResultBuilder() //
-                    .withOfficeId(groupForDelete.getId()) //
-                    .withGroupId(groupForDelete.officeId()) //
-                    .withEntityId(groupForDelete.getId()) //
+
+            return GroupDeleteResponse.builder() //
+                    .resourceId(deletedGroupId) //
+                    .officeId(officeId) //
+                    .groupId(deletedGroupId) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             log.error("Error occured.", throwable);
             throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
@@ -561,16 +610,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     @Override
-    public CommandProcessingResult closeGroup(final Long groupId, final JsonCommand command) {
-        this.fromApiJsonDeserializer.validateForGroupClose(command);
+    @Transactional
+    public GroupCloseResponse closeGroup(final GroupCloseRequest request) {
+        final Long groupId = request.getGroupId();
         final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        final LocalDate closureDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.closureDateParamName);
-        final Long closureReasonId = command.longValueOfParameterNamed(GroupingTypesApiConstants.closureReasonIdParamName);
 
-        final AppUser currentUser = this.context.authenticatedUser();
+        final LocalDate closureDate = parseDate(request.getClosureDate(), request.getDateFormat(), request.getLocale());
 
         final CodeValue closureReason = this.codeValueRepository
-                .findOneByCodeNameAndIdWithNotFoundDetection(GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
+                .findOneByCodeNameAndIdWithNotFoundDetection(GroupingTypesApiConstants.GROUP_CLOSURE_REASON, request.getClosureReasonId());
 
         if (group.hasActiveClients()) {
             final String errorMessage = group.getGroupLevel().getLevelName()
@@ -584,14 +632,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getValue(),
                 EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
 
-        group.close(currentUser, closureReason, closureDate);
+        group.close(null, closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(group);
 
-        return new CommandProcessingResultBuilder() //
-                .withGroupId(groupId) //
-                .withEntityId(groupId) //
-                .build();
+        return GroupCloseResponse.builder().resourceId(groupId).groupId(groupId).build();
     }
 
     private void validateLoansAndSavingsForGroupOrCenterClose(final Group groupOrCenter, final LocalDate closureDate) {

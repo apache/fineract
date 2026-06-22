@@ -18,25 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "DELETE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class DeleteGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupDeleteCommandHandler implements CommandHandler<GroupDeleteRequest, GroupDeleteResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupDelete", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.deleteGroup(command.entityId());
+    @Transactional
+    public GroupDeleteResponse handle(Command<GroupDeleteRequest> command) {
+        return groupingTypesWritePlatformService.deleteGroup(command.getPayload());
+    }
+
+    @Override
+    public GroupDeleteResponse fallback(Command<GroupDeleteRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
