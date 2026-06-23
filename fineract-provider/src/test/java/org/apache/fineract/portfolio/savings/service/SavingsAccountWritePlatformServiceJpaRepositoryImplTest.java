@@ -75,6 +75,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeReposito
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
@@ -153,6 +154,10 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     private ExternalIdFactory externalIdFactory;
     @Mock
     private ErrorHandler errorHandler;
+    @Mock
+    private SavingsHelper savingsHelper;
+    @Mock
+    private SavingsAccountChargeProcessingService savingsAccountChargeProcessingService;
 
     @InjectMocks
     private SavingsAccountWritePlatformServiceJpaRepositoryImpl service;
@@ -451,7 +456,8 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(configurationDomainService.retrieveFinancialYearBeginningMonth()).thenReturn(1);
         when(savingsAccountTransactionRepository.findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(anyLong(), any(LocalDate.class),
                 any())).thenReturn(Collections.emptyList());
-        when(savingsAccount.payCharge(any(), any(), any(), any(), anyBoolean(), any())).thenReturn(chargeTransaction);
+        when(savingsAccountChargeProcessingService.payCharge(any(), any(), any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(chargeTransaction);
 
         // When
         CommandProcessingResult result = service.payCharge(savingsAccountId, chargeId, command);

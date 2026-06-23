@@ -31,7 +31,9 @@ import org.springframework.stereotype.Component;
 @Component
 public final class SavingsAccountTransactionSummaryWrapper {
 
-    public BigDecimal calculateTotalDeposits(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    private SavingsAccountTransactionSummaryWrapper() {}
+
+    public static BigDecimal calculateTotalDeposits(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if ((transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed())
@@ -42,7 +44,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalWithdrawals(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalWithdrawals(final MonetaryCurrency currency,
+            final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isWithdrawal() && transaction.isNotReversed() && !transaction.isReversalTransaction()) {
@@ -52,7 +55,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalInterestPosted(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalInterestPosted(final MonetaryCurrency currency,
+            final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isInterestPostingAndNotReversed() && transaction.isNotReversed() && !transaction.isReversalTransaction()) {
@@ -62,7 +66,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalInterestPosted(final MonetaryCurrency currency, final BigDecimal currentInterestPosted,
+    public static BigDecimal calculateTotalInterestPosted(final MonetaryCurrency currency, final BigDecimal currentInterestPosted,
             final List<SavingsAccountTransaction> savingsAccountTransactions) {
         Money total = Money.of(currency, currentInterestPosted);
         for (final SavingsAccountTransaction transaction : savingsAccountTransactions) {
@@ -73,7 +77,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalWithdrawalFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalWithdrawalFees(final MonetaryCurrency currency,
+            final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isWithdrawalFeeAndNotReversed() && transaction.isNotReversed() && !transaction.isReversalTransaction()) {
@@ -83,7 +88,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalAnnualFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalAnnualFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isAnnualFeeAndNotReversed() && transaction.isNotReversed() && !transaction.isReversalTransaction()) {
@@ -93,7 +98,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalFeesCharge(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalFeesCharge(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isFeeChargeAndNotReversed() && !transaction.isReversalTransaction()) {
@@ -103,7 +108,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalFeesChargeWaived(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalFeesChargeWaived(final MonetaryCurrency currency,
+            final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isWaiveFeeChargeAndNotReversed() && !transaction.isReversalTransaction()) {
@@ -113,7 +119,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalPenaltyCharge(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalPenaltyCharge(final MonetaryCurrency currency,
+            final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isPenaltyChargeAndNotReversed() && !transaction.isReversalTransaction()) {
@@ -123,7 +130,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalPenaltyChargeWaived(final MonetaryCurrency currency,
+    public static BigDecimal calculateTotalPenaltyChargeWaived(final MonetaryCurrency currency,
             final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
@@ -134,7 +141,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency, BigDecimal overdraftPosted,
+    public static BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency, BigDecimal overdraftPosted,
             List<SavingsAccountTransaction> transactions) {
         Money total = Money.of(currency, overdraftPosted);
         for (final SavingsAccountTransaction transaction : transactions) {
@@ -145,7 +152,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isOverdraftInterestAndNotReversed() && !transaction.isReversalTransaction()) {
@@ -155,7 +162,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-    public BigDecimal calculateTotalWithholdTaxWithdrawal(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
+    public static BigDecimal calculateTotalWithholdTaxWithdrawal(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isWithHoldTaxAndNotReversed() && !transaction.isReversalTransaction()) {

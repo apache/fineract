@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountPostInterestService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +63,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final SavingsAccountPostInterestService savingsAccountPostInterestService;
+    private final SavingsHelper savingsHelper;
+    private final SavingsAccountTransactionService savingsAccountTransactionService;
 
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
@@ -71,7 +74,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
             final BusinessEventNotifierService businessEventNotifierService,
-            final SavingsAccountPostInterestService savingsAccountPostInterestService) {
+            final SavingsAccountPostInterestService savingsAccountPostInterestService, final SavingsHelper savingsHelper,
+            final SavingsAccountTransactionService savingsAccountTransactionService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -81,6 +85,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
         this.savingsAccountPostInterestService = savingsAccountPostInterestService;
+        this.savingsHelper = savingsHelper;
+        this.savingsAccountTransactionService = savingsAccountTransactionService;
     }
 
     @Transactional
@@ -113,8 +119,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, null, accountType);
         UUID refNo = UUID.randomUUID();
-        final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, transactionBooleanValues.isApplyWithdrawFee(),
-                backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
+        final SavingsAccountTransaction withdrawal = this.savingsAccountTransactionService.withdraw(account, transactionDTO,
+                transactionBooleanValues.isApplyWithdrawFee(), backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
         final MathContext mc = MathContext.DECIMAL64;
 
         final LocalDate today = DateUtils.getBusinessLocalDate();
@@ -126,7 +132,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         } else {
             account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer(),
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
-                    postReversals);
+                    postReversals, savingsHelper.fetchPostInterestTransactionIds(account.getId()));
         }
 
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
@@ -135,8 +141,12 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
 
+        final Long forceWithdrawalLimit = this.configurationDomainService.isForceWithdrawalOnSavingsAccountEnabled()
+                ? this.configurationDomainService.retrieveForceWithdrawalOnSavingsAccountLimit()
+                : null;
         account.validateAccountBalanceConstraints(transactionAmount, transactionBooleanValues.isExceptionForBalanceCheck(),
-                depositAccountOnHoldTransactions, backdatedTxnsAllowedTill, transactionBooleanValues.isForceWithdrawal());
+                depositAccountOnHoldTransactions, backdatedTxnsAllowedTill, transactionBooleanValues.isForceWithdrawal(),
+                forceWithdrawalLimit);
 
         saveTransactionToGenerateTransactionId(withdrawal);
         if (backdatedTxnsAllowedTill) {
@@ -196,8 +206,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, null, accountType);
         UUID refNo = UUID.randomUUID();
-        final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType, backdatedTxnsAllowedTill,
-                relaxingDaysConfigForPivotDate, refNo.toString());
+        final SavingsAccountTransaction deposit = this.savingsAccountTransactionService.deposit(account, transactionDTO,
+                savingsAccountTransactionType, backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
         final LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
 
@@ -209,7 +219,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                     postReversals);
         } else {
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
+                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals,
+                    savingsHelper.fetchPostInterestTransactionIds(account.getId()));
         }
 
         saveTransactionToGenerateTransactionId(deposit);
@@ -328,7 +339,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                         backdatedTxnsAllowedTill, postReversals);
             } else {
                 account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
+                        financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals,
+                        savingsHelper.fetchPostInterestTransactionIds(account.getId()));
             }
             account.validatePivotDateTransaction(savingsAccountTransaction.getTransactionDate(), backdatedTxnsAllowedTill,
                     relaxingDaysConfigForPivotDate, "savingsaccount");

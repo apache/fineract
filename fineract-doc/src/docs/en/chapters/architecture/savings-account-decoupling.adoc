@@ -1,0 +1,167 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Decoupling the Savings Account Entity
+
+This section documents the architectural direction taken for the `SavingsAccount` JPA entity (module `fineract-savings`): turning a large entity that orchestrated other collaborators into a thin domain object that holds state and enforces its own invariants, while orchestration and cross-entity validation move out into dedicated services and validators.
+
+The reference change is `FINERACT-2652` — _Decouple SavingsAccount from injected collaborators_.
+
+== Motivation
+
+Historically `org.apache.fineract.portfolio.savings.domain.SavingsAccount` called services and helpers from inside the JPA entity (payment processing, charge calculation, activation orchestration, transfers). This coupled the persistence model to application services, made the entity hard to test in isolation and blurred the boundary between _domain state_ and _application orchestration_.
+
+The goal of the refactoring is an entity that owns **state and invariants only**; all orchestration and cross-entity validation lives **outside** the entity in plain services and validator classes.
+
+[NOTE]
+====
+This is an in-progress, incremental effort. Each increment keeps the public REST behaviour unchanged and is verified with `gradlew.sh :fineract-savings:compileJava :fineract-provider:compileJava` before formatting with `gradlew.sh :fineract-savings:spotlessApply`.
+====
+
+== Principles
+
+* *State + invariants stay on the entity.* Field values, status transitions expressed as in-memory state, and simple invariants remain on `SavingsAccount`.
+* *Orchestration moves to services.* One service per concern, located in `org.apache.fineract.portfolio.savings.service`. Each method takes the `SavingsAccount account` as its first parameter instead of being a method _on_ the account.
+* *Validation moves to validator classes.* Cross-entity / command validation is not inlined in services and is not a method on the entity; it lives in dedicated validators that the service invokes before mutating state.
+* *Polymorphism is preserved with overridable hooks.* Behaviour that the deposit subclasses (`FixedDepositAccount`, `RecurringDepositAccount`) specialise stays polymorphic through small overridable hook methods on the entity (base no-op, subclass overrides), so services avoid `instanceof` branching.
+* *Lombok at class level.* The entities use class-level `@Getter @Setter`; Lombok skips generation when a custom accessor already exists, so hand-written getters keep working.
+
+== Concern-to-service map
+
+The collaborators that used to be injected into (or called from) the entity are now grouped by concern into the following services and validator. All live in `fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/service`.
+
+[cols="2,3,2"]
+|===
+|*Service / Validator* |*Responsibility (extracted from `SavingsAccount`)* |*Type*
+
+|`SavingsAccountTransactionService`
+|`deposit(...)` and `withdraw(...)` transaction orchestration.
+|Service
+
+|`SavingsAccountChargeProcessingService`
+|`addCharge` / `removeCharge` / `waiveCharge` / `payCharge` / `payWithdrawalFee` and `setSubStatusInactive` charge primitives.
+|Service
+
+|`SavingsAccountApplicationService`
+|Application lifecycle: `approveApplication`, `undoApplicationApproval`, `rejectApplication`, `applicantWithdrawsFromApplication`, `activate`.
+|Service
+
+|`SavingsAccountBlockingService`
+|`block` / `unblock`, `blockCredits` / `unblockCredits`, `blockDebits` / `unblockDebits` and their reversals.
+|Service
+
+|`SavingsAccountActivationService`
+|`processAccountUponActivation` and recurring-deposit activation (`processRecurringDepositActivation`).
+|Service
+
+|`SavingsAccountApplicationDataValidator`
+|Command/cross-entity validation for the application lifecycle (e.g. `validateActivation`).
+|Validator
+|===
+
+== Service contracts
+
+Each service is a plain class exposing an interface; the account is passed in as the first argument.
+
+.SavingsAccountApplicationService — lifecycle orchestration
+[source,java]
+----
+include::{rootdir}/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountApplicationService.java[lines=32..44]
+----
+
+.SavingsAccountBlockingService — credit/debit blocking
+[source,java]
+----
+include::{rootdir}/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountBlockingService.java[lines=28..40]
+----
+
+The validator is invoked by the service _before_ any state mutation:
+
+.SavingsAccountApplicationDataValidator.validateActivation
+[source,java]
+----
+include::{rootdir}/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/service/SavingsAccountApplicationDataValidator.java[lines=44..44]
+----
+
+== Wiring
+
+Beans are declared as plain classes in `SavingsConfiguration` (each guarded with `@ConditionalOnMissingBean` so deployments can override them). Note how services compose other services by constructor injection rather than the entity reaching out to them.
+
+.SavingsConfiguration — bean definitions for the extracted services
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/savings/starter/SavingsConfiguration.java[lines=366..406]
+----
+
+== Collaboration before and after
+
+.Before — the entity orchestrates injected collaborators
+[plantuml,format=svg]
+....
+@startuml
+skinparam componentStyle rectangle
+class SavingsAccount {
+  + deposit()
+  + payCharge()
+  + activate()
+  + block()
+  - calls helpers/services directly
+}
+SavingsAccount --> "SavingsHelper" : injected
+SavingsAccount --> "charge logic" : inline
+SavingsAccount --> "validation" : inline
+@enduml
+....
+
+.After — services orchestrate, the entity holds state
+[plantuml,format=svg]
+....
+@startuml
+skinparam componentStyle rectangle
+class SavingsAccount <<entity: state + invariants>>
+
+class SavingsAccountTransactionService
+class SavingsAccountChargeProcessingService
+class SavingsAccountApplicationService
+class SavingsAccountBlockingService
+class SavingsAccountActivationService
+class SavingsAccountApplicationDataValidator <<validator>>
+
+SavingsAccountTransactionService --> SavingsAccount : mutates
+SavingsAccountChargeProcessingService --> SavingsAccount : mutates
+SavingsAccountApplicationService --> SavingsAccountApplicationDataValidator : validates
+SavingsAccountApplicationService --> SavingsAccount : mutates
+SavingsAccountBlockingService --> SavingsAccount : mutates
+SavingsAccountActivationService --> SavingsAccount : mutates
+SavingsAccountTransactionService --> SavingsAccountChargeProcessingService : composes
+@enduml
+....
+
+== Polymorphism via overridable hooks
+
+Methods specialised by the deposit subclasses (for example deposit validation and activation) remain polymorphic. The base entity exposes an overridable hook (a no-op by default) that the subclass overrides; the service calls the hook instead of switching on the concrete type. For example `RecurringDepositAccount` overrides `validateDepositTransaction(...)`, and the transaction service relies on that override rather than on `instanceof`.
+
+[IMPORTANT]
+====
+Where the subclass-specific behaviour is _pure validation_, it may instead live in the validator (guarded by `instanceof`) rather than as an entity hook. Choose the hook when behaviour must mutate subclass state; choose the validator when it only inspects.
+====
+
+== Where to extend next
+
+The same pattern applies to the remaining entity responsibilities still pending extraction: `modifyApplication` (polymorphic), `close`, `undoTransaction`, and the `validateFor*` / `validateAccountValuesWithProduct` / `validateInterestPostingAndCompoundingPeriodTypes` validations. New work on `SavingsAccount` should add a sibling service/validator rather than reintroduce orchestration on the entity.

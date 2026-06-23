@@ -47,7 +47,7 @@ public final class SavingsHelper {
 
     private static final CompoundInterestHelper COMPOUND_INTEREST_HELPER = new CompoundInterestHelper();
 
-    public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
+    public static List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
             final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn) {
 
@@ -95,7 +95,7 @@ public final class SavingsHelper {
         return postingPeriods;
     }
 
-    private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
+    private static LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
             Integer financialYearBeginningMonth, final int anniversaryDayOfMonth) {
 
@@ -192,11 +192,11 @@ public final class SavingsHelper {
         return periodEndDate;
     }
 
-    private LocalDate adjustToAnniversaryDay(final LocalDate date, final int anniversaryDay) {
+    private static LocalDate adjustToAnniversaryDay(final LocalDate date, final int anniversaryDay) {
         return date.withDayOfMonth(Math.min(anniversaryDay, date.lengthOfMonth()));
     }
 
-    public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+    public static Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
             LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest) {
         return COMPOUND_INTEREST_HELPER.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
                 immediateWithdrawalOfInterest);

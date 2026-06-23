@@ -568,7 +568,6 @@ public class InteropServiceImpl implements InteropService {
     private SavingsAccount validateAndGetSavingAccount(@NonNull InteropRequestData request) {
         // TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
-        savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper, configurationDomainService);
 
         ApplicationCurrency requestCurrency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
         if (!savingsAccount.getCurrency().getCode().equals(requestCurrency.getCode())) {

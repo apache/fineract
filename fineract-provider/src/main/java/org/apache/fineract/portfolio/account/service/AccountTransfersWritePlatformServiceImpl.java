@@ -294,7 +294,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                             backdatedTxnsAllowedTill);
                 } else {
                     fromSavingsAccount = accountTransferDTO.getFromSavingsAccount();
-                    this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
                 }
                 if (accountTransferDTO.getLoan() == null) {
                     toLoanAccount = this.loanAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
@@ -304,7 +303,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
             } else {
                 fromSavingsAccount = accountTransferDetails.fromSavingsAccount();
-                this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
                 toLoanAccount = accountTransferDetails.toLoanAccount();
             }
 
@@ -365,19 +363,15 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                             backdatedTxnsAllowedTill);
                 } else {
                     fromSavingsAccount = accountTransferDTO.getFromSavingsAccount();
-                    this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
                 }
                 if (accountTransferDTO.getToSavingsAccount() == null) {
                     toSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId(), false);
                 } else {
                     toSavingsAccount = accountTransferDTO.getToSavingsAccount();
-                    this.savingsAccountAssembler.setHelpers(toSavingsAccount);
                 }
             } else {
                 fromSavingsAccount = accountTransferDetails.fromSavingsAccount();
-                this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
                 toSavingsAccount = accountTransferDetails.toSavingsAccount();
-                this.savingsAccountAssembler.setHelpers(toSavingsAccount);
             }
 
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
@@ -419,7 +413,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             } else {
                 fromLoanAccount = accountTransferDetails.fromLoanAccount();
                 toSavingsAccount = accountTransferDetails.toSavingsAccount();
-                this.savingsAccountAssembler.setHelpers(toSavingsAccount);
             }
             LoanTransaction loanTransaction = null;
 

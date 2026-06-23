@@ -20,11 +20,16 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
+import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 
 /**
  * Default implementation of {@link SavingsAccountActivationService}. The bodies of {@code processAccountUponActivation}
@@ -36,13 +41,34 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 public class SavingsAccountActivationServiceImpl implements SavingsAccountActivationService {
 
     private final SavingsAccountPostInterestService savingsAccountPostInterestService;
+    private final SavingsHelper savingsHelper;
+    private final SavingsAccountChargeProcessingService savingsAccountChargeProcessingService;
+    private final SavingsAccountTransactionService savingsAccountTransactionService;
+
+    @Override
+    public void processRecurringDepositActivation(final RecurringDepositAccount account, final DateTimeFormatter fmt,
+            final boolean postReversals, final Long relaxingDaysConfigForPivotDate) {
+        final Money minRequiredOpeningBalance = Money.of(account.getCurrency(), account.getMinRequiredOpeningBalance());
+        final boolean backdatedTxnsAllowedTill = false;
+        final String refNo = null;
+        if (minRequiredOpeningBalance.isGreaterThanZero()) {
+            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, account.getActivatedOnDate(),
+                    minRequiredOpeningBalance.getAmount(), null, null, account.getAccountTypes());
+            this.savingsAccountTransactionService.deposit(account, transactionDTO, backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate,
+                    refNo);
+
+            // update existing transactions so derived balance fields are correct.
+            account.recalculateDailyBalances(Money.zero(account.getCurrency()), DateUtils.getBusinessLocalDate(), backdatedTxnsAllowedTill,
+                    postReversals);
+        }
+    }
 
     @Override
     public void processAccountUponActivation(final SavingsAccount account, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
             final Integer financialYearBeginningMonth) {
         // update annual fee due date
         for (SavingsAccountCharge charge : account.charges()) {
-            charge.updateToNextDueDateFrom(account.getActivationDate());
+            charge.updateToNextDueDateFrom(account.getActivatedOnDate());
         }
 
         // auto pay the activation time charges (No need of checking the pivot date
@@ -59,8 +85,9 @@ public class SavingsAccountActivationServiceImpl implements SavingsAccountActiva
         for (SavingsAccountCharge savingsAccountCharge : account.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
                 isSavingsChargeApplied = true;
-                account.payCharge(savingsAccountCharge, savingsAccountCharge.getAmountOutstanding(account.getCurrency()),
-                        account.getActivationDate(), backdatedTxnsAllowedTill, refNo.toString());
+                this.savingsAccountChargeProcessingService.payCharge(account, savingsAccountCharge,
+                        savingsAccountCharge.getAmountOutstanding(account.getCurrency()), account.getActivatedOnDate(),
+                        backdatedTxnsAllowedTill, refNo.toString());
             }
         }
 
@@ -68,7 +95,7 @@ public class SavingsAccountActivationServiceImpl implements SavingsAccountActiva
             final MathContext mc = MathContext.DECIMAL64;
             boolean isInterestTransfer = false;
             LocalDate postInterestAsOnDate = null;
-            if (account.isBeforeLastPostingPeriod(account.getActivationDate(), backdatedTxnsAllowedTill)) {
+            if (account.isBeforeLastPostingPeriod(account.getActivatedOnDate(), backdatedTxnsAllowedTill)) {
                 final LocalDate today = DateUtils.getBusinessLocalDate();
                 savingsAccountPostInterestService.postInterest(account, mc, today, isInterestTransfer,
                         isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestAsOnDate,
@@ -76,7 +103,8 @@ public class SavingsAccountActivationServiceImpl implements SavingsAccountActiva
             } else {
                 final LocalDate today = DateUtils.getBusinessLocalDate();
                 account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth, postInterestAsOnDate, backdatedTxnsAllowedTill, postReversals);
+                        financialYearBeginningMonth, postInterestAsOnDate, backdatedTxnsAllowedTill, postReversals,
+                        savingsHelper.fetchPostInterestTransactionIds(account.getId()));
             }
         }
     }

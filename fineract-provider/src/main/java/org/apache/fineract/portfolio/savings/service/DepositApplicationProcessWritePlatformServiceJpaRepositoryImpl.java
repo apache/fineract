@@ -90,6 +90,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
+import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
@@ -106,6 +107,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final FixedDepositAccountRepository fixedDepositAccountRepository;
     private final RecurringDepositAccountRepository recurringDepositAccountRepository;
     private final DepositAccountAssembler depositAccountAssembler;
+    private final SavingsAccountApplicationService savingsAccountApplicationService;
+    private final SavingsHelper savingsHelper;
     private final DepositAccountDataValidator depositAccountDataValidator;
     private final AccountNumberGenerator accountNumberGenerator;
     private final ClientRepositoryWrapper clientRepository;
@@ -169,10 +172,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final boolean isPreMatureClosure = false;
 
             account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+                    financialYearBeginningMonth, savingsHelper.fetchPostInterestTransactionIds(account.getId()));
             this.fixedDepositAccountRepository.saveAndFlush(account);
 
-            if (account.isAccountNumberRequiresAutoGeneration()) {
+            if (StringUtils.isBlank(command.stringValueOfParameterNamed(DepositsApiConstants.accountNoParamName))) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
                 account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
@@ -228,7 +231,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             this.recurringDepositAccountRepository.save(account);
 
-            if (account.isAccountNumberRequiresAutoGeneration()) {
+            if (StringUtils.isBlank(command.stringValueOfParameterNamed(DepositsApiConstants.accountNoParamName))) {
                 final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(EntityAccountType.SAVINGS);
                 account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
@@ -248,7 +251,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             account.generateSchedule(frequencyType, frequency, calendar);
             final boolean isPreMatureClosure = false;
             account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+                    financialYearBeginningMonth, savingsHelper.fetchPostInterestTransactionIds(account.getId()));
             account.validateApplicableInterestRate();
             savingAccountRepository.save(account);
             businessEventNotifierService.notifyPostBusinessEvent(new RecurringDepositAccountCreateBusinessEvent(account));
@@ -353,7 +356,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 final MathContext mc = MathContext.DECIMAL64;
                 final boolean isPreMatureClosure = false;
                 account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                        savingsHelper.fetchPostInterestTransactionIds(account.getId()));
                 this.savingAccountRepository.save(account);
             }
 
@@ -450,7 +454,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 account.generateSchedule(frequencyType, frequency, calendar);
                 final boolean isPreMatureClosure = false;
                 account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth);
+                        financialYearBeginningMonth, savingsHelper.fetchPostInterestTransactionIds(account.getId()));
                 account.validateApplicableInterestRate();
                 this.savingAccountRepository.save(account);
 
@@ -600,7 +604,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command);
+        final Map<String, Object> changes = this.savingsAccountApplicationService.approveApplication(savingsAccount, currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -635,7 +639,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.undoApplicationApproval();
+        final Map<String, Object> changes = this.savingsAccountApplicationService.undoApplicationApproval(savingsAccount);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -670,7 +674,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command);
+        final Map<String, Object> changes = this.savingsAccountApplicationService.rejectApplication(savingsAccount, currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -704,7 +708,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command);
+        final Map<String, Object> changes = this.savingsAccountApplicationService.applicantWithdrawsFromApplication(savingsAccount,
+                currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 

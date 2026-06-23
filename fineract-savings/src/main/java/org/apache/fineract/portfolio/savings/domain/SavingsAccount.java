@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
@@ -57,7 +55,6 @@ import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,10 +67,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -93,12 +90,10 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
-import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeNotFoundException;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
-import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -135,6 +130,8 @@ import org.springframework.util.CollectionUtils;
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
 @SuppressWarnings({ "MemberName" })
+@Getter
+@Setter
 public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long> implements IDepositAccountType {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccount.class);
@@ -317,12 +314,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     private Set<SavingsOfficerAssignmentHistory> savingsOfficerHistory = new HashSet<>();
 
     @Transient
-    protected boolean accountNumberRequiresAutoGeneration = false;
-    @Transient
-    protected SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
-    @Transient
-    protected SavingsHelper savingsHelper;
-    @Transient
     protected List<SavingsAccountTransaction> savingsAccountTransactions = new ArrayList<>();
 
     @Column(name = "deposit_type_enum", insertable = false, updatable = false)
@@ -348,8 +339,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     private BigDecimal savingsOnHoldAmount;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true, fetch = FetchType.LAZY)
     protected List<InteropIdentifier> identifiers = new ArrayList<>();
-
-    public transient ConfigurationDomainService configurationDomainService;
 
     protected SavingsAccount() {
         //
@@ -410,7 +399,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         this.savingsOfficer = savingsOfficer;
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
-            this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
@@ -454,27 +442,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         this.taxGroup = product.getTaxGroup();
     }
 
-    /**
-     * Used after fetching/hydrating a {@link SavingsAccount} object to inject helper services/components used for
-     * update summary details after events/transactions on a {@link SavingsAccount}.
-     */
-    public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final SavingsHelper savingsHelper, final ConfigurationDomainService configurationDomainService) {
-        this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
-        this.savingsHelper = savingsHelper;
-        this.configurationDomainService = configurationDomainService;
-    }
-
     public void setSavingsAccountTransactions(final List<SavingsAccountTransaction> savingsAccountTransactions) {
         this.savingsAccountTransactions.addAll(savingsAccountTransactions);
     }
 
     public List<SavingsAccountTransaction> getSavingsAccountTransactionsWithPivotConfig() {
         return this.savingsAccountTransactions;
-    }
-
-    public ExternalId getExternalId() {
-        return externalId;
     }
 
     public boolean isNotActive() {
@@ -507,10 +480,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public boolean isClosed() {
         return SavingsAccountStatusType.fromInt(this.status).isClosed();
-    }
-
-    public List<InteropIdentifier> getIdentifiers() {
-        return identifiers;
     }
 
     public List<SavingsAccountTransaction> findWithHoldTransactions() {
@@ -693,7 +662,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate,
             boolean isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
+            final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final boolean postReversals,
+            final Collection<Long> interestPostTransactions) {
 
         // no openingBalance concept supported yet but probably will to allow for
         // migrations.
@@ -728,12 +698,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             if (postInterestOnDate != null) {
                 postedAsOnDates.add(postInterestOnDate);
             }
-            final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
+            final List<LocalDateInterval> postingPeriodIntervals = SavingsHelper.determineInterestPostingPeriods(
                     getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType, financialYearBeginningMonth,
                     postedAsOnDates);
 
             Money periodStartingBalance;
-            if (this.startInterestCalculationDate != null && !this.getStartInterestCalculationDate().equals(this.getActivationDate())) {
+            if (this.startInterestCalculationDate != null && !this.getStartInterestCalculationDate().equals(this.getActivatedOnDate())) {
                 LocalDate startInterestCalculationDate = this.startInterestCalculationDate;
                 SavingsAccountTransaction transaction = null;
                 if (backdatedTxnsAllowedTill) {
@@ -755,7 +725,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                     .fromInt(this.interestCalculationType);
             final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
             final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(mc);
-            final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
             final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
             final Money minOverdraftForInterestCalculation = Money.of(getCurrency(), this.minOverdraftForInterestCalculation);
 
@@ -788,17 +757,16 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
                 allPostingPeriods.add(postingPeriod);
             }
 
-            this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, getLockedInUntilDate(),
+            SavingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, getLockedInUntilDate(),
                     isTransferInterestToOtherAccount());
 
             this.summary.updateFromInterestPeriodSummaries(this.currency, allPostingPeriods);
         }
 
         if (backdatedTxnsAllowedTill) {
-            this.summary.updateSummaryWithPivotConfig(this.currency, this.savingsAccountTransactionSummaryWrapper, null,
-                    this.savingsAccountTransactions);
+            this.summary.updateSummaryWithPivotConfig(this.currency, null, this.savingsAccountTransactions);
         } else {
-            this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+            this.summary.updateSummary(this.currency, this.transactions);
         }
 
         return allPostingPeriods;
@@ -984,87 +952,14 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO, final boolean backdatedTxnsAllowedTill,
-            final Long relaxingDaysConfigForPivotDate, final String refNo) {
-        return deposit(transactionDTO, SavingsAccountTransactionType.DEPOSIT, backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate,
-                refNo);
-    }
-
-    public SavingsAccountTransaction dividendPayout(final SavingsAccountTransactionDTO transactionDTO,
-            final boolean backdatedTxnsAllowedTill, final Long relaxingDaysConfigForPivotDate) {
-        String refNo = null;
-        return deposit(transactionDTO, SavingsAccountTransactionType.DIVIDEND_PAYOUT, backdatedTxnsAllowedTill,
-                relaxingDaysConfigForPivotDate, refNo);
-    }
-
-    public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO,
-            final SavingsAccountTransactionType savingsAccountTransactionType, final boolean backdatedTxnsAllowedTill,
-            final Long relaxingDaysConfigForPivotDate, final String refNo) {
-        final String resourceTypeName = depositAccountType().resourceName();
-        if (isNotActive()) {
-            final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
-            final ApiParameterError error = ApiParameterError.parameterError(
-                    "error.msg." + resourceTypeName + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate",
-                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (DateUtils.isDateInTheFuture(transactionDTO.getTransactionDate())) {
-            final String defaultUserMessage = "Transaction date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg." + resourceTypeName + ".transaction.in.the.future",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (DateUtils.isBefore(transactionDTO.getTransactionDate(), getActivationDate())) {
-            final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()),
-                    getActivationDate().format(transactionDTO.getFormatter())).toArray();
-            final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
-            final ApiParameterError error = ApiParameterError.parameterError(
-                    "error.msg." + resourceTypeName + ".transaction.before.activation.date", defaultUserMessage, "transactionDate",
-                    defaultUserArgs);
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        validatePivotDateTransaction(transactionDTO.getTransactionDate(), backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate,
-                resourceTypeName);
-
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_DEPOSIT, transactionDTO.getTransactionDate());
-
-        final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
-
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount, savingsAccountTransactionType, refNo);
-
-        if (backdatedTxnsAllowedTill) {
-            addTransactionToExisting(transaction);
-        } else {
-            this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
-            addTransaction(transaction);
-        }
-
-        if (this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
-                || this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())) {
-            this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
-        }
-
-        if (backdatedTxnsAllowedTill) {
-            this.summary.updateSummaryWithPivotConfig(this.currency, this.savingsAccountTransactionSummaryWrapper, transaction,
-                    this.savingsAccountTransactions);
-        }
-
-        return transaction;
+    /**
+     * Sub-type specific validation hook run before a deposit is recorded by the transaction service. The base savings
+     * account imposes no extra rules; {@code RecurringDepositAccount} overrides this to enforce its maturity and
+     * deposit-start-date constraints. Kept on the entity (rather than the service) so the polymorphic rule lives with
+     * the type that owns it.
+     */
+    public void validateDepositTransaction(final SavingsAccountTransactionDTO transactionDTO) {
+        // no-op for plain savings accounts
     }
 
     public void validatePivotDateTransaction(LocalDate transactionDate, final boolean backdatedTxnsAllowedTill,
@@ -1072,7 +967,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (backdatedTxnsAllowedTill) {
             if (this.getSummary().getInterestPostedTillDate() != null && DateUtils.isBefore(transactionDate,
                     getSummary().getInterestPostedTillDate().minusDays(relaxingDaysConfigForPivotDate))) {
-                final Object[] defaultUserArgs = Arrays.asList(transactionDate, getActivationDate()).toArray();
+                final Object[] defaultUserArgs = Arrays.asList(transactionDate, getActivatedOnDate()).toArray();
                 final String defaultUserMessage = "Transaction date cannot be before transactions pivot date.";
                 final ApiParameterError error = ApiParameterError.parameterError(
                         "error.msg." + resourceTypeName + ".transaction.before.pivot.date", defaultUserMessage, "transactionDate",
@@ -1086,22 +981,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    public LocalDate getActivationDate() {
-        return this.activatedOnDate;
-    }
-
-    public AppUser getActivatedBy() {
-        return this.activatedBy;
-    }
-
-    public LocalDate getWithdrawnOnDate() {
-        return this.withdrawnOnDate;
-    }
-
-    public AppUser getWithdrawnBy() {
-        return this.withdrawnBy;
-    }
-
     // startInterestCalculationDate is set during migration so that there is no
     // interference with interest posting of previous system
     public LocalDate getStartInterestCalculationDate() {
@@ -1109,96 +988,9 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (this.startInterestCalculationDate != null) {
             startInterestCalculationLocalDate = this.startInterestCalculationDate;
         } else {
-            startInterestCalculationLocalDate = getActivationDate();
+            startInterestCalculationLocalDate = getActivatedOnDate();
         }
         return startInterestCalculationLocalDate;
-    }
-
-    public void setStartInterestCalculationDate(LocalDate startInterestCalculationDate) {
-        this.startInterestCalculationDate = startInterestCalculationDate;
-    }
-
-    public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee,
-            final boolean backdatedTxnsAllowedTill, final Long relaxingDaysConfigForPivotDate, String refNo) {
-        if (!isTransactionsAllowed()) {
-
-            final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (DateUtils.isDateInTheFuture(transactionDTO.getTransactionDate())) {
-            final String defaultUserMessage = "Transaction date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (DateUtils.isBefore(transactionDTO.getTransactionDate(), getActivationDate())) {
-            final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()),
-                    getActivationDate().format(transactionDTO.getFormatter())).toArray();
-            final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.before.activation.date",
-                    defaultUserMessage, "transactionDate", defaultUserArgs);
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (isAccountLocked(transactionDTO.getTransactionDate())) {
-            final String defaultUserMessage = "Withdrawal is not allowed. No withdrawals are allowed until after "
-                    + getLockedInUntilDate().format(transactionDTO.getFormatter());
-            final ApiParameterError error = ApiParameterError.parameterError(
-                    "error.msg.savingsaccount.transaction.withdrawals.blocked.during.lockin.period", defaultUserMessage, "transactionDate",
-                    transactionDTO.getTransactionDate().format(transactionDTO.getFormatter()),
-                    getLockedInUntilDate().format(transactionDTO.getFormatter()));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        validatePivotDateTransaction(transactionDTO.getTransactionDate(), backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate,
-                "savingsaccount");
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_WITHDRAWAL, transactionDTO.getTransactionDate());
-
-        if (applyWithdrawFee) {
-            // auto pay withdrawal fee
-            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getPaymentDetail(),
-                    backdatedTxnsAllowedTill, refNo);
-        }
-
-        final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
-                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney, refNo);
-
-        if (backdatedTxnsAllowedTill) {
-            addTransactionToExisting(transaction);
-        } else {
-            this.accrualsForSavingsReverse(transactionDTO, backdatedTxnsAllowedTill);
-            addTransaction(transaction);
-        }
-
-        if (this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
-                || this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())) {
-            this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
-        }
-        if (backdatedTxnsAllowedTill) {
-            this.summary.updateSummaryWithPivotConfig(this.currency, this.savingsAccountTransactionSummaryWrapper, transaction,
-                    this.savingsAccountTransactions);
-        }
-        return transaction;
     }
 
     public BigDecimal calculateWithdrawalFee(final BigDecimal transactionAmount) {
@@ -1211,105 +1003,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             }
         }
         return result;
-    }
-
-    private void payWithdrawalFee(final BigDecimal transactionAmount, final LocalDate transactionDate, final PaymentDetail paymentDetail,
-            final boolean backdatedTxnsAllowedTill, final String refNo) {
-        for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee() && charge.isActive()) {
-
-                if (charge.getFreeWithdrawalCount() == null) {
-                    charge.setFreeWithdrawalCount(0);
-                }
-
-                if (charge.isEnablePaymentType() && charge.isEnableFreeWithdrawal()) { // discount transaction to
-                                                                                       // specific paymentType
-                    if (paymentDetail != null && paymentDetail.getPaymentType() != null
-                            && paymentDetail.getPaymentType().getName().equals(charge.getCharge().getPaymentType().getName())) {
-                        resetFreeChargeDaysCount(charge, transactionAmount, transactionDate, refNo);
-                    }
-                } else if (charge.isEnablePaymentType()) { // normal charge-transaction to specific paymentType
-                    if (paymentDetail != null && paymentDetail.getPaymentType() != null
-                            && paymentDetail.getPaymentType().getName().equals(charge.getCharge().getPaymentType().getName())) {
-                        charge.updateWithdralFeeAmount(transactionAmount);
-                        this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill,
-                                refNo);
-                    }
-                } else if (!charge.isEnablePaymentType() && charge.isEnableFreeWithdrawal()) { // discount transaction
-                                                                                               // irrespective of
-                                                                                               // PaymentTypes.
-                    resetFreeChargeDaysCount(charge, transactionAmount, transactionDate, refNo);
-
-                } else { // normal-withdraw
-                    charge.updateWithdralFeeAmount(transactionAmount);
-                    this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill,
-                            refNo);
-                }
-            }
-        }
-    }
-
-    private void resetFreeChargeDaysCount(SavingsAccountCharge charge, final BigDecimal transactionAmount, final LocalDate transactionDate,
-            final String refNo) {
-        LocalDate resetDate = charge.getResetChargeDate();
-
-        Integer restartPeriod = charge.getRestartFrequency();
-        if (charge.getRestartFrequencyEnum() == 2) { // calculation for months
-            LocalDate localDate = DateUtils.getBusinessLocalDate();
-
-            LocalDate resetLocalDate;
-            if (resetDate == null) {
-                resetLocalDate = this.activatedOnDate;
-            } else {
-                resetLocalDate = resetDate;
-            }
-
-            LocalDate gapIntervalMonth = resetLocalDate.plusMonths(restartPeriod);
-
-            YearMonth gapYearMonth = YearMonth.from(gapIntervalMonth);
-            YearMonth localYearMonth = YearMonth.from(localDate);
-            if (localYearMonth.isBefore(gapYearMonth)) {
-                countValidation(charge, transactionAmount, transactionDate, refNo);
-            } else {
-                discountCharge(1, charge);
-            }
-        } else { // calculation for days
-            long completedDays;
-
-            if (resetDate == null) {
-                completedDays = DAYS.between(DateUtils.getBusinessLocalDate(), this.activatedOnDate);
-
-            } else {
-                completedDays = DAYS.between(DateUtils.getBusinessLocalDate(), resetDate);
-            }
-
-            int totalDays = (int) completedDays;
-
-            if (totalDays < restartPeriod) {
-                countValidation(charge, transactionAmount, transactionDate, refNo);
-            } else {
-                discountCharge(1, charge);
-            }
-        }
-    }
-
-    private void countValidation(SavingsAccountCharge charge, final BigDecimal transactionAmount, final LocalDate transactionDate,
-            final String refNo) {
-        boolean backdatedTxnsAllowedTill = false;
-        if (charge.getFreeWithdrawalCount() < charge.getFrequencyFreeWithdrawalCharge()) {
-            final Integer count = charge.getFreeWithdrawalCount() + 1;
-            charge.setFreeWithdrawalCount(count);
-            charge.updateNoWithdrawalFee();
-        } else {
-            charge.updateWithdralFeeAmount(transactionAmount);
-            this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill, refNo);
-        }
-    }
-
-    private void discountCharge(Integer freeWithdrawalCount, SavingsAccountCharge charge) {
-        charge.setFreeWithdrawalCount(freeWithdrawalCount);
-        charge.setDiscountDueDate(DateUtils.getBusinessLocalDate());
-        charge.updateNoWithdrawalFee();
     }
 
     public boolean isBeforeLastPostingPeriod(final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill) {
@@ -1336,7 +1029,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public void validateAccountBalanceConstraints(final BigDecimal transactionAmount, final boolean isException,
             final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions, final boolean backdatedTxnsAllowedTill,
-            final boolean isForceWithdrawal) {
+            final boolean isForceWithdrawal, final Long forceWithdrawalLimit) {
 
         List<SavingsAccountTransaction> transactionsSortedByDate = backdatedTxnsAllowedTill ? retrieveSortedTransactions()
                 : retrieveListOfTransactions();
@@ -1365,7 +1058,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             // enforceMinRequiredBalance
             if (!isException && transaction.canProcessBalanceCheck() && !isOverdraft()) {
                 if (violatesMinRequiredBalance(runningBalance, minRequiredBalance)
-                        && !isForceWithdrawalAllowed(isForceWithdrawal, runningBalance)) {
+                        && !isForceWithdrawalAllowed(isForceWithdrawal, runningBalance, forceWithdrawalLimit)) {
                     throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
                             transactionAmount);
                 }
@@ -1379,7 +1072,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         // and should be checked after processing all transactions
         if (isOverdraft()) {
             if (violatesMinRequiredBalance(runningBalance, minRequiredBalance)
-                    && !isForceWithdrawalAllowed(isForceWithdrawal, runningBalance)) {
+                    && !isForceWithdrawalAllowed(isForceWithdrawal, runningBalance, forceWithdrawalLimit)) {
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         }
@@ -1438,17 +1131,17 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
      *            whether the current transaction is a force withdrawal
      * @param runningBalance
      *            the current running balance of the account
+     * @param forceWithdrawalLimit
+     *            the configured negative balance limit when force withdrawal on savings accounts is enabled, or
+     *            {@code null} when it is disabled; resolved by the caller so the entity stays free of configuration
+     *            lookups
      * @return true if force withdrawal is enabled and the running balance is within the allowed negative limit
      */
-    private boolean isForceWithdrawalAllowed(final boolean isForceWithdrawal, final Money runningBalance) {
-        if (!isForceWithdrawal || this.configurationDomainService == null) {
+    private boolean isForceWithdrawalAllowed(final boolean isForceWithdrawal, final Money runningBalance, final Long forceWithdrawalLimit) {
+        if (!isForceWithdrawal || forceWithdrawalLimit == null) {
             return false;
         }
-        if (!this.configurationDomainService.isForceWithdrawalOnSavingsAccountEnabled()) {
-            return false;
-        }
-        Long limit = this.configurationDomainService.retrieveForceWithdrawalOnSavingsAccountLimit();
-        BigDecimal limitBd = BigDecimal.valueOf(limit);
+        BigDecimal limitBd = BigDecimal.valueOf(forceWithdrawalLimit);
         if (limitBd.compareTo(BigDecimal.ZERO) > 0) {
             limitBd = limitBd.negate();
         }
@@ -1525,12 +1218,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    protected boolean isAccountLocked(final LocalDate transactionDate) {
+    public boolean isAccountLocked(final LocalDate transactionDate) {
         return DateUtils.isBefore(transactionDate, getLockedInUntilDate());
-    }
-
-    public LocalDate getLockedInUntilDate() {
-        return this.lockedInUntilDate;
     }
 
     public BigDecimal getAccountBalance() {
@@ -1878,11 +1567,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public void updateAccountNo(final String newAccountNo) {
         this.accountNumber = newAccountNo;
-        this.accountNumberRequiresAutoGeneration = false;
-    }
-
-    public boolean isAccountNumberRequiresAutoGeneration() {
-        return this.accountNumberRequiresAutoGeneration;
     }
 
     public Long productId() {
@@ -1921,15 +1605,20 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return office;
     }
 
-    public Staff getSavingsOfficer() {
-        return this.savingsOfficer;
-    }
-
     public Boolean getEnforceMinRequiredBalance() {
         return this.enforceMinRequiredBalance;
     }
 
+    // Kept explicitly: the getXxx() accessor above makes Lombok @Getter skip the isXxx() form for these boolean fields.
+    public boolean isEnforceMinRequiredBalance() {
+        return this.enforceMinRequiredBalance;
+    }
+
     public Boolean getLienAllowed() {
+        return this.lienAllowed;
+    }
+
+    public boolean isLienAllowed() {
         return this.lienAllowed;
     }
 
@@ -1957,16 +1646,8 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return id;
     }
 
-    public GroupSavingsIndividualMonitoring getGsim() {
-        return gsim;
-    }
-
     public Long getSavingsProductId() {
         return this.savingsProduct().getId();
-    }
-
-    public void setGsim(GroupSavingsIndividualMonitoring gsim) {
-        this.gsim = gsim;
     }
 
     public Long hasSavingsOfficerId() {
@@ -2049,22 +1730,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return lastAssignmentRecordLatestEndDate;
     }
 
-    public LocalDate getSubmittedOnDate() {
-        return submittedOnDate;
-    }
-
-    public LocalDate getApprovedOnDate() {
-        return approvedOnDate;
-    }
-
-    public LocalDate getRejectedOnDate() {
-        return rejectedOnDate;
-    }
-
-    public AppUser getRejectedBy() {
-        return this.rejectedBy;
-    }
-
     public void removeSavingsOfficer(final LocalDate unassignDate) {
         final SavingsOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
 
@@ -2098,10 +1763,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    public MonetaryCurrency getCurrency() {
-        return this.currency;
-    }
-
     public void validateNewApplicationState(final String resourceName) {
         // validateWithdrawalFeeDetails();
         // validateAnnualFeeDetails();
@@ -2132,134 +1793,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-    }
-
-    public Client getClient() {
-        return this.client;
-    }
-
-    public BigDecimal getNominalAnnualInterestRate() {
-        return this.nominalAnnualInterestRate;
-    }
-
-    public Integer getInterestCompoundingPeriodType() {
-        return this.interestCompoundingPeriodType;
-    }
-
-    public Integer getInterestPostingPeriodType() {
-        return this.interestPostingPeriodType;
-    }
-
-    public Integer getInterestCalculationType() {
-        return this.interestCalculationType;
-    }
-
-    public BigDecimal getNominalAnnualInterestRateOverdraft() {
-        return this.nominalAnnualInterestRateOverdraft;
-    }
-
-    public Map<String, Object> approveApplication(final AppUser currentUser, final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.approvalAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        this.status = SavingsAccountStatusType.APPROVED.getValue();
-        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
-
-        // only do below if status has changed in the 'approval' case
-        final LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
-        final String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
-
-        this.approvedOnDate = approvedOn;
-        this.approvedBy = currentUser;
-        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
-        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.approvedOnDateParamName, approvedOnDateChange);
-
-        final LocalDate submittalDate = getSubmittedOnDate();
-        if (DateUtils.isBefore(approvedOn, submittalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.format(submittalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName).value(submittalDateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        if (DateUtils.isAfterBusinessDate(approvedOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_APPROVED, approvedOn);
-
-        // FIXME - kw - support field officer history for savings accounts
-        // if (this.fieldOfficer != null) {
-        // final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory =
-        // LoanOfficerAssignmentHistory.createNew(this,
-        // this.fieldOfficer, approvedOn);
-        // this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
-        // }
-        if (this.savingsOfficer != null) {
-            final SavingsOfficerAssignmentHistory savingsOfficerAssignmentHistory = SavingsOfficerAssignmentHistory.createNew(this,
-                    this.savingsOfficer, approvedOn);
-            this.savingsOfficerHistory.add(savingsOfficerAssignmentHistory);
-        }
-        return actualChanges;
-    }
-
-    public Map<String, Object> undoApplicationApproval() {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.undoApprovalAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        this.status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue();
-        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
-
-        this.approvedOnDate = null;
-        this.approvedBy = null;
-        this.rejectedOnDate = null;
-        this.rejectedBy = null;
-        this.withdrawnOnDate = null;
-        this.withdrawnBy = null;
-        this.closedOnDate = null;
-        this.closedBy = null;
-        actualChanges.put(SavingsApiConstants.approvedOnDateParamName, "");
-
-        // FIXME - kw - support field officer history for savings accounts
-        // this.loanOfficerHistory.clear();
-
-        return actualChanges;
     }
 
     public void undoTransaction(final Long transactionId) {
@@ -2345,7 +1878,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    private LocalDate findLatestAnnualFeeTransactionDueDate() {
+    public LocalDate findLatestAnnualFeeTransactionDueDate() {
         LocalDate nextDueDate = null;
 
         LocalDate lastAnnualFeeTransactionDate = null;
@@ -2389,215 +1922,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     }
 
-    public Map<String, Object> rejectApplication(final AppUser currentUser, final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.rejectAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        this.status = SavingsAccountStatusType.REJECTED.getValue();
-        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
-
-        final LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
-        final String rejectedOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
-
-        this.rejectedOnDate = rejectedOn;
-        this.rejectedBy = currentUser;
-        this.withdrawnOnDate = null;
-        this.withdrawnBy = null;
-        this.closedOnDate = rejectedOn;
-        this.closedBy = currentUser;
-
-        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
-        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.rejectedOnDateParamName, rejectedOnAsString);
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, rejectedOnAsString);
-
-        final LocalDate submittalDate = getSubmittedOnDate();
-        if (DateUtils.isBefore(rejectedOn, submittalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.format(submittalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(submittalDateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        if (DateUtils.isAfterBusinessDate(rejectedOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(rejectedOn)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_REJECTED, rejectedOn);
-
-        return actualChanges;
-    }
-
-    public Map<String, Object> applicantWithdrawsFromApplication(final AppUser currentUser, final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.withdrawnByApplicantAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        this.status = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue();
-        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
-
-        final LocalDate withdrawnOn = command.localDateValueOfParameterNamed(SavingsApiConstants.withdrawnOnDateParamName);
-        final String withdrawnOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.withdrawnOnDateParamName);
-
-        this.rejectedOnDate = null;
-        this.rejectedBy = null;
-        this.withdrawnOnDate = withdrawnOn;
-        this.withdrawnBy = currentUser;
-        this.closedOnDate = withdrawnOn;
-        this.closedBy = currentUser;
-
-        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
-        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.withdrawnOnDateParamName, withdrawnOnAsString);
-        actualChanges.put(SavingsApiConstants.closedOnDateParamName, withdrawnOnAsString);
-
-        final LocalDate submittalDate = getSubmittedOnDate();
-        if (DateUtils.isBefore(withdrawnOn, submittalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String submittalDateAsString = formatter.format(submittalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(submittalDateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        if (DateUtils.isAfterBusinessDate(withdrawnOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(withdrawnOn)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_WITHDRAWAL_BY_CUSTOMER, withdrawnOn);
-
-        return actualChanges;
-    }
-
-    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.activateAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
-        final LocalDate activationDate = command.localDateValueOfParameterNamed(SavingsApiConstants.activatedOnDateParamName);
-
-        this.status = SavingsAccountStatusType.ACTIVE.getValue();
-        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
-        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
-        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
-        actualChanges.put(SavingsApiConstants.activatedOnDateParamName, activationDate.format(fmt));
-
-        this.rejectedOnDate = null;
-        this.rejectedBy = null;
-        this.withdrawnOnDate = null;
-        this.withdrawnBy = null;
-        this.closedOnDate = null;
-        this.closedBy = null;
-        this.activatedOnDate = activationDate;
-        this.activatedBy = currentUser;
-        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationDate());
-
-        /*
-         * if (annualFeeSettingsSet()) { updateToNextAnnualFeeDueDateFrom(getActivationLocalDate()); }
-         */
-        if (this.client != null && this.client.isActivatedAfter(activationDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.format(this.client.getActivationDate());
-            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (this.group != null && this.group.isActivatedAfter(activationDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.format(this.client.getActivationDate());
-            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.group.activation.date");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        final LocalDate approvalDate = getApprovedOnDate();
-        if (DateUtils.isBefore(activationDate, approvalDate)) {
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.format(approvalDate);
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.approval.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (DateUtils.isAfterBusinessDate(activationDate)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(activationDate)
-                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_ACTIVATE, activationDate);
-
-        return actualChanges;
-    }
-
     public Money activateWithBalance() {
         return Money.of(this.currency, this.minRequiredOpeningBalance);
     }
@@ -2614,7 +1938,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         this.closedBy = null;
         this.activatedOnDate = appliedonDate;
         this.activatedBy = appliedBy;
-        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationDate());
+        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivatedOnDate());
     }
 
     public Map<String, Object> close(final AppUser currentUser, final JsonCommand command) {
@@ -2636,7 +1960,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
 
-        if (DateUtils.isBefore(closedDate, getActivationDate())) {
+        if (DateUtils.isBefore(closedDate, getActivatedOnDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.activation.date");
             if (!dataValidationErrors.isEmpty()) {
@@ -2684,7 +2008,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return actualChanges;
     }
 
-    protected void validateActivityNotBeforeClientOrGroupTransferDate(final SavingsEvent event, final LocalDate activityDate) {
+    public void validateActivityNotBeforeClientOrGroupTransferDate(final SavingsEvent event, final LocalDate activityDate) {
         if (this.client != null) {
             final LocalDate clientOfficeJoiningDate = this.client.getOfficeJoiningDate();
             if (DateUtils.isBefore(activityDate, clientOfficeJoiningDate)) {
@@ -2699,7 +2023,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    private LocalDate calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
+    public LocalDate calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
 
         LocalDate lockedInUntilLocalDate = null;
         final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
@@ -2730,30 +2054,10 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.group;
     }
 
-    public boolean isWithdrawalFeeApplicableForTransfer() {
-        return this.withdrawalFeeApplicableForTransfer;
-    }
-
     public void activateAccountBasedOnBalance() {
         if (getStatus().isClosed() && !this.summary.getAccountBalance(getCurrency()).isZero()) {
             this.status = SavingsAccountStatusType.ACTIVE.getValue();
         }
-    }
-
-    public LocalDate getClosedOnDate() {
-        return this.closedOnDate;
-    }
-
-    public AppUser getClosedBy() {
-        return this.closedBy;
-    }
-
-    public SavingsAccountSummary getSummary() {
-        return this.summary;
-    }
-
-    public List<SavingsAccountTransaction> getTransactions() {
-        return this.transactions;
     }
 
     public void addTransaction(final SavingsAccountTransaction transaction) {
@@ -2762,10 +2066,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public void addTransactionToExisting(final SavingsAccountTransaction transaction) {
         this.savingsAccountTransactions.add(transaction);
-    }
-
-    public void setStatus(final Integer status) {
-        this.status = status;
     }
 
     private Set<SavingsAccountCharge> associateChargesWithThisSavingsAccount(final Set<SavingsAccountCharge> savingsAccountCharges) {
@@ -2795,296 +2095,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.currency.getCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
-    public void removeCharge(final SavingsAccountCharge charge) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (isClosed()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("delete.transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (isActive() || isApproved()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("delete.transaction.invalid.account.is.active");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        this.charges.remove(charge);
-    }
-
-    public void waiveCharge(final Long savingsAccountChargeId, final boolean backdatedTxnsAllowedTill) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (isClosed()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (isNotActive()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        final SavingsAccountCharge savingsAccountCharge = getCharge(savingsAccountChargeId);
-
-        if (savingsAccountCharge.isNotActive()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (savingsAccountCharge.isWithdrawalFee()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.waiver.of.withdrawal.fee.not.supported");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        // validate charge is not already paid or waived
-        if (savingsAccountCharge.isWaived()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        } else if (savingsAccountCharge.isPaid()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.paid");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        // waive charge
-        final Money amountWaived = savingsAccountCharge.waive(getCurrency());
-        handleWaiverChargeTransactions(savingsAccountCharge, amountWaived, backdatedTxnsAllowedTill);
-    }
-
-    public void addCharge(final DateTimeFormatter formatter, final SavingsAccountCharge savingsAccountCharge,
-            final Charge chargeDefinition) {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (isClosed()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (!hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
-            baseDataValidator.reset()
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.currency.and.charge.currency.not.same");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        final LocalDate chargeDueDate = savingsAccountCharge.getDueDate();
-
-        if (savingsAccountCharge.isOnSpecifiedDueDate()) {
-            if (DateUtils.isBefore(chargeDueDate, getActivationDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationDate().format(formatter))
-                        .failWithCodeNoParameterAddedToErrorCode("before.activationDate");
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            } else if (DateUtils.isBefore(chargeDueDate, getSubmittedOnDate())) {
-                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getSubmittedOnDate().format(formatter))
-                        .failWithCodeNoParameterAddedToErrorCode("before.submittedOnDate");
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (savingsAccountCharge.isSavingsActivation() && !(isSubmittedAndPendingApproval() || (isApproved() && isNotActive()))) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.valid.account.status.cannot.add.activation.time.charge");
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        // Only one annual fee is supported per account
-        if (savingsAccountCharge.isAnnualFee()) {
-            if (this.isAnnualFeeExists()) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.annual.fee.per.account.not.supported");
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-
-        }
-
-        if (savingsAccountCharge.isAnnualFee() || savingsAccountCharge.isMonthlyFee() || savingsAccountCharge.isWeeklyFee()) {
-            // update due date
-            if (isActive()) {
-                savingsAccountCharge.updateToNextDueDateFrom(getActivationDate());
-            } else if (isApproved()) {
-                savingsAccountCharge.updateToNextDueDateFrom(getApprovedOnDate());
-            }
-        }
-
-        // activation charge and withdrawal charges not required this validation
-        if (savingsAccountCharge.isOnSpecifiedDueDate()) {
-            validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLY_CHARGE, chargeDueDate);
-        }
-
-        // add new charge to savings account
-        this.charges.add(savingsAccountCharge);
-
-    }
-
-    private boolean isAnnualFeeExists() {
-        for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isAnnualFee()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final BigDecimal amountPaid,
-            final LocalDate transactionDate, final DateTimeFormatter formatter, final boolean backdatedTxnsAllowedTill,
-            final String refNo) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (isClosed()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (isNotActive()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (savingsAccountCharge.isNotActive()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        if (DateUtils.isBefore(transactionDate, getActivationDate())) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationDate().format(formatter))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.before.activationDate");
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (DateUtils.isDateInTheFuture(transactionDate)) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.format(formatter))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (savingsAccountCharge.isSavingsActivation()) {
-            baseDataValidator.reset()
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.not.valid.cannot.pay.activation.time.charge.is.automated");
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (savingsAccountCharge.isAnnualFee()) {
-            final LocalDate annualFeeDueDate = savingsAccountCharge.getDueDate();
-            if (annualFeeDueDate == null) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.annualfee.settings");
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-
-            if (DateUtils.isBefore(transactionDate, annualFeeDueDate)) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.before.dueDate");
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-
-            LocalDate currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
-            if (DateUtils.isEqual(currentAnnualFeeNextDueDate, transactionDate)) {
-                baseDataValidator.reset().parameter("dueDate").value(transactionDate.format(formatter))
-                        .failWithCodeNoParameterAddedToErrorCode("transaction.exists.on.date");
-
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        // validate charge is not already paid or waived
-        if (savingsAccountCharge.isWaived()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        } else if (savingsAccountCharge.isPaid()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.paid");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        final Money chargePaid = Money.of(currency, amountPaid);
-        if (!savingsAccountCharge.getAmountOutstanding(getCurrency()).isGreaterThanOrEqualTo(chargePaid)) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        return this.payCharge(savingsAccountCharge, chargePaid, transactionDate, backdatedTxnsAllowedTill, refNo);
-    }
-
-    public SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid,
-            final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill, String refNo) {
-        savingsAccountCharge.pay(getCurrency(), amountPaid);
-        return handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, backdatedTxnsAllowedTill, refNo);
-    }
-
-    private SavingsAccountTransaction handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
-            final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill, final String refNo) {
-        SavingsAccountTransaction chargeTransaction;
-
-        if (savingsAccountCharge.isWithdrawalFee()) {
-            chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount, refNo);
-        } else if (savingsAccountCharge.isAnnualFee()) {
-            chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount);
-        } else {
-            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
-        }
-
-        handleChargeTransactions(savingsAccountCharge, chargeTransaction, backdatedTxnsAllowedTill);
-        return chargeTransaction;
-    }
-
-    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
-            boolean backdatedTxnsAllowedTill) {
-        final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
-                DateUtils.getBusinessLocalDate(), transactionAmount);
-        handleChargeTransactions(savingsAccountCharge, chargeTransaction, backdatedTxnsAllowedTill);
-    }
-
-    private void handleChargeTransactions(final SavingsAccountCharge savingsAccountCharge, final SavingsAccountTransaction transaction,
-            final boolean backdatedTxnsAllowedTill) {
-        // Provide a link between transaction and savings charge for which
-        // amount is waived.
-        final SavingsAccountChargePaidBy chargePaidBy = SavingsAccountChargePaidBy.instance(transaction, savingsAccountCharge,
-                transaction.getAmount(this.currency).getAmount());
-        transaction.getSavingsAccountChargesPaid().add(chargePaidBy);
-        if (backdatedTxnsAllowedTill) {
-            this.savingsAccountTransactions.add(transaction);
-            this.summary.updateSummaryWithPivotConfig(this.currency, this.savingsAccountTransactionSummaryWrapper, transaction,
-                    this.savingsAccountTransactions);
-        } else {
-            this.transactions.add(transaction);
-        }
-    }
-
-    private SavingsAccountCharge getCharge(final Long savingsAccountChargeId) {
+    public SavingsAccountCharge getCharge(final Long savingsAccountChargeId) {
         SavingsAccountCharge charge = null;
         for (final SavingsAccountCharge existingCharge : this.charges) {
             if (existingCharge.getId().equals(savingsAccountChargeId)) {
@@ -3128,7 +2139,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     }
 
     public LocalDate accountSubmittedOrActivationDate() {
-        return getActivationDate() == null ? getSubmittedOnDate() : getActivationDate();
+        return getActivatedOnDate() == null ? getSubmittedOnDate() : getActivatedOnDate();
     }
 
     protected boolean isTransferInterestToOtherAccount() {
@@ -3136,7 +2147,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     }
 
     public boolean accountSubmittedAndActivationOnSameDate() {
-        return getActivationDate() != null && DateUtils.isEqual(getActivationDate(), getSubmittedOnDate());
+        return getActivatedOnDate() != null && DateUtils.isEqual(getActivatedOnDate(), getSubmittedOnDate());
 
     }
 
@@ -3187,14 +2198,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         }
     }
 
-    public AppUser getSubmittedBy() {
-        return this.submittedBy;
-    }
-
-    public AppUser getApprovedBy() {
-        return this.approvedBy;
-    }
-
     public boolean allowDeposit() {
         return true;
     }
@@ -3228,7 +2231,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         if (transactionDate == null) {
             return true;
         }
-        if (DateUtils.isDateInTheFuture(transactionDate) || DateUtils.isBefore(transactionDate, getActivationDate())) {
+        if (DateUtils.isDateInTheFuture(transactionDate) || DateUtils.isBefore(transactionDate, getActivatedOnDate())) {
             return false;
         }
         if (transactionType.isCredit()) {
@@ -3272,10 +2275,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return savingsAccountCharge;
     }
 
-    public String getAccountNumber() {
-        return this.accountNumber;
-    }
-
     private Money minRequiredBalanceDerived(final MonetaryCurrency currency) {
         Money minReqBalance = Money.zero(currency);
         if (this.enforceMinRequiredBalance) {
@@ -3313,23 +2312,15 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return getAccountBalance().subtract(this.getOnHoldFunds()).subtract(this.getSavingsHoldAmount());
     }
 
-    public TaxGroup getTaxGroup() {
-        return this.taxGroup;
-    }
-
     public boolean withHoldTax() {
         return this.withHoldTax;
-    }
-
-    public void setWithHoldTax(boolean withHoldTax) {
-        this.withHoldTax = withHoldTax;
     }
 
     protected boolean applyWithholdTaxForDepositAccounts(final LocalDate interestPostingUpToDate, boolean recalucateDailyBalance,
             final boolean backdatedTxnsAllowedTill) {
         final List<SavingsAccountTransaction> withholdTransactions = findWithHoldTransactions();
         SavingsAccountTransaction withholdTransaction = findTransactionFor(interestPostingUpToDate, withholdTransactions);
-        final BigDecimal totalInterestPosted = this.savingsAccountTransactionSummaryWrapper.calculateTotalInterestPosted(this.currency,
+        final BigDecimal totalInterestPosted = SavingsAccountTransactionSummaryWrapper.calculateTotalInterestPosted(this.currency,
                 this.transactions);
         if (withholdTransaction == null && this.withHoldTax()) {
             boolean isWithholdTaxAdded = createWithHoldTransaction(totalInterestPosted, interestPostingUpToDate, backdatedTxnsAllowedTill);
@@ -3342,20 +2333,23 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return recalucateDailyBalance;
     }
 
-    public void setSubStatusInactive(final boolean backdatedTxnsAllowedTill) {
+    /**
+     * Flags the account as inactive (dormant-charge bearing). The charge processing and balance recalculation that
+     * accompany the transition are orchestrated by the service layer, so the entity only owns the status mutation.
+     */
+    public void markSubStatusInactive() {
         this.sub_status = SavingsAccountSubStatusEnum.INACTIVE.getValue();
-        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-        for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isSavingsNoActivity() && charge.isActive()) {
-                charge.updateWithdralFeeAmount(this.getAccountBalance());
-                UUID refNo = UUID.randomUUID();
-                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, backdatedTxnsAllowedTill,
-                        refNo.toString());
-            }
+    }
+
+    /**
+     * Clears a previously set inactive/dormant sub-status when activity resumes on the account (e.g. a deposit or
+     * withdrawal). No-op when the account is not in one of those sub-statuses.
+     */
+    public void resetDormancySubStatusOnTransaction() {
+        if (this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
+                || this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())) {
+            this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
         }
-        boolean postReversals = false;
-        recalculateDailyBalances(Money.zero(this.currency), transactionDate, backdatedTxnsAllowedTill, postReversals);
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
 
     public void setSubStatusDormant() {
@@ -3375,7 +2369,7 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
             this.transactions.add(transaction);
         }
         recalculateDailyBalances(Money.zero(this.currency), transactionDate, false, postReversals);
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+        this.summary.updateSummary(this.currency, this.transactions);
     }
 
     public void loadLazyCollections() {
@@ -3388,194 +2382,11 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
     }
 
     public void updateSavingsAccountSummary(final List<SavingsAccountTransaction> transactions) {
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, transactions);
+        this.summary.updateSummary(this.currency, transactions);
     }
 
     public void updateReason(final String reasonForBlock) {
         this.reasonForBlock = reasonForBlock;
-    }
-
-    public Map<String, Object> block() {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.blockAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-
-            if (!dataValidationErrors.isEmpty()) {
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-        }
-
-        this.sub_status = SavingsAccountSubStatusEnum.BLOCK.getValue();
-        actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
-
-        return actualChanges;
-    }
-
-    public Map<String, Object> unblock() {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.unblockAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-
-        }
-
-        final SavingsAccountSubStatusEnum currentSubStatus = SavingsAccountSubStatusEnum.fromInt(this.sub_status);
-        if (!SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("not.in.blocked.state");
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
-        actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
-        return actualChanges;
-    }
-
-    public Map<String, Object> blockCredits(Integer currentSubstatus) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.blockCreditsAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-        }
-        if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(SavingsAccountSubStatusEnum.fromInt(currentSubstatus))) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
-                    .value(SavingsAccountSubStatusEnum.fromInt(currentSubstatus)).failWithCodeNoParameterAddedToErrorCode("currently.set");
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        if (SavingsAccountSubStatusEnum.BLOCK_DEBIT.hasStateOf(SavingsAccountSubStatusEnum.fromInt(currentSubstatus))) {
-            this.sub_status = SavingsAccountSubStatusEnum.BLOCK.getValue();
-        } else {
-            this.sub_status = SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue();
-        }
-        actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
-
-        return actualChanges;
-    }
-
-    public Map<String, Object> unblockCredits() {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.unblockCreditsAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-        }
-
-        final SavingsAccountSubStatusEnum currentSubStatus = SavingsAccountSubStatusEnum.fromInt(this.sub_status);
-        if (!(SavingsAccountSubStatusEnum.BLOCK_CREDIT.hasStateOf(currentSubStatus)
-                || SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus))) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("credits.are.not.blocked");
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
-            this.sub_status = SavingsAccountSubStatusEnum.BLOCK_DEBIT.getValue();
-        } else {
-            this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
-        }
-        actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
-        return actualChanges;
-    }
-
-    public Map<String, Object> blockDebits(Integer currentSubstatus) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.blockDebitsAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-
-        }
-        if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(SavingsAccountSubStatusEnum.fromInt(currentSubstatus))) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
-                    .value(SavingsAccountSubStatusEnum.fromInt(currentSubstatus)).failWithCodeNoParameterAddedToErrorCode("currently.set");
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        if (SavingsAccountSubStatusEnum.BLOCK_CREDIT.hasStateOf(SavingsAccountSubStatusEnum.fromInt(currentSubstatus))) {
-            this.sub_status = SavingsAccountSubStatusEnum.BLOCK.getValue();
-        } else {
-            this.sub_status = SavingsAccountSubStatusEnum.BLOCK_DEBIT.getValue();
-        }
-        actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
-
-        return actualChanges;
-    }
-
-    public Map<String, Object> unblockDebits() {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType().resourceName() + SavingsApiConstants.unblockDebitsAction);
-
-        final SavingsAccountStatusType currentStatus = getStatus();
-        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
-
-            baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-
-        }
-
-        final SavingsAccountSubStatusEnum currentSubStatus = SavingsAccountSubStatusEnum.fromInt(this.sub_status);
-        if (!(SavingsAccountSubStatusEnum.BLOCK_DEBIT.hasStateOf(currentSubStatus)
-                || SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus))) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
-                    .failWithCodeNoParameterAddedToErrorCode("debits.are.not.blocked");
-        }
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
-            this.sub_status = SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue();
-        } else {
-            this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
-        }
-        actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
-        return actualChanges;
     }
 
     public SavingsAccountStatusType getStatus() {
@@ -3584,6 +2395,10 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public Integer getSubStatus() {
         return this.sub_status;
+    }
+
+    public void setSubStatus(final Integer subStatus) {
+        this.sub_status = subStatus;
     }
 
     public void validateForAccountBlock() {
@@ -3653,10 +2468,6 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return accountType;
     }
 
-    public void setAccountType(Integer accountType) {
-        this.accountType = accountType;
-    }
-
     private boolean isOverdraft() {
         return allowOverdraft;
     }
@@ -3665,76 +2476,12 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
         return this.groupId();
     }
 
-    public Integer getInterestCalculationDaysInYearType() {
-        return this.interestCalculationDaysInYearType;
-    }
-
-    public BigDecimal getMinRequiredOpeningBalance() {
-        return this.minRequiredOpeningBalance;
-    }
-
-    public Integer getLockinPeriodFrequency() {
-        return this.lockinPeriodFrequency;
-    }
-
-    public Integer getLockinPeriodFrequencyType() {
-        return this.lockinPeriodFrequencyType;
-    }
-
     public boolean isWithdrawalFeeForTransfer() {
         return this.withdrawalFeeApplicableForTransfer;
     }
 
-    public boolean isAllowOverdraft() {
-        return this.allowOverdraft;
-    }
-
-    public BigDecimal getOverdraftLimit() {
-        return this.overdraftLimit;
-    }
-
-    public BigDecimal getMinOverdraftForInterestCalculation() {
-        return this.minOverdraftForInterestCalculation;
-    }
-
-    public BigDecimal getMinRequiredBalance() {
-        return this.minRequiredBalance;
-    }
-
-    public boolean isEnforceMinRequiredBalance() {
-        return this.enforceMinRequiredBalance;
-    }
-
-    public BigDecimal getMaxAllowedLienLimit() {
-        return this.maxAllowedLienLimit;
-    }
-
-    public boolean isLienAllowed() {
-        return this.lienAllowed;
-    }
-
-    public BigDecimal getMinBalanceForInterestCalculation() {
-        return this.minBalanceForInterestCalculation;
-    }
-
     public int getVersion() {
         return this.version;
-    }
-
-    public boolean isWithHoldTax() {
-        return this.withHoldTax;
-    }
-
-    public void setAccruedTillDate(LocalDate accruedTillDate) {
-        this.accruedTillDate = accruedTillDate;
-    }
-
-    public LocalDate getLastClosedBusinessDate() {
-        return this.lastClosedBusinessDate;
-    }
-
-    public void setLastClosedBusinessDate(LocalDate lastClosedBusinessDate) {
-        this.lastClosedBusinessDate = lastClosedBusinessDate;
     }
 
     public List<SavingsAccountTransactionDetailsForPostingPeriod> toSavingsAccountTransactionDetailsForPostingPeriodList(

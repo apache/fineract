@@ -267,7 +267,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         if (postInterestOnDate != null) {
             postedAsOnDates.add(postInterestOnDate);
         }
-        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
+        final List<LocalDateInterval> postingPeriodIntervals = SavingsHelper.determineInterestPostingPeriods(
                 savingsAccountData.getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType,
                 financialYearBeginningMonth, postedAsOnDates);
 
@@ -342,7 +342,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             }
         }
 
-        this.savingsHelper.calculateInterestForAllPostingPeriods(monetaryCurrency, allPostingPeriods,
+        SavingsHelper.calculateInterestForAllPostingPeriods(monetaryCurrency, allPostingPeriods,
                 getLockedInUntilLocalDate(savingsAccountData), false);
 
         savingsAccountData.getSummary().updateFromInterestPeriodSummaries(monetaryCurrency, allPostingPeriods);

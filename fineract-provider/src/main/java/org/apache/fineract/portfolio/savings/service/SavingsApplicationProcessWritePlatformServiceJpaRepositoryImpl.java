@@ -95,6 +95,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
+    private final SavingsAccountApplicationService savingsAccountApplicationService;
     private final SavingsAccountDataValidator savingsAccountDataValidator;
     private final AccountNumberGenerator accountNumberGenerator;
     private final ClientRepositoryWrapper clientRepository;
@@ -144,13 +145,15 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command, submittedBy);
             this.savingAccountRepository.save(account);
+            final boolean requiresAutoGeneration = StringUtils
+                    .isBlank(command.stringValueOfParameterNamed(SavingsApiConstants.accountNoParamName));
             String accountNumber = "";
             GroupSavingsIndividualMonitoring gsimAccount = null;
             BigDecimal applicationId = BigDecimal.ZERO;
             Boolean isLastChildApplication = false;
 
             // gsim
-            if (account.isAccountNumberRequiresAutoGeneration()) {
+            if (requiresAutoGeneration) {
 
                 final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(EntityAccountType.SAVINGS);
@@ -227,7 +230,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     }
                 } else {
                     // for applications other than GSIM
-                    generateAccountNumber(account);
+                    generateAccountNumber(account, requiresAutoGeneration);
                 }
             }
             // end of gsim
@@ -260,8 +263,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
     }
 
-    private void generateAccountNumber(final SavingsAccount account) {
-        if (account.isAccountNumberRequiresAutoGeneration()) {
+    private void generateAccountNumber(final SavingsAccount account, final boolean requiresAutoGeneration) {
+        if (requiresAutoGeneration) {
             final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
             account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
@@ -453,7 +456,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
                 StatusEnum.APPROVE.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
-        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command);
+        final Map<String, Object> changes = this.savingsAccountApplicationService.approveApplication(savingsAccount, currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -514,7 +517,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.undoApplicationApproval();
+        final Map<String, Object> changes = this.savingsAccountApplicationService.undoApplicationApproval(savingsAccount);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -575,7 +578,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
                 StatusEnum.REJECTED.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
-        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command);
+        final Map<String, Object> changes = this.savingsAccountApplicationService.rejectApplication(savingsAccount, currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -611,7 +614,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVINGS.getName(),
                 StatusEnum.WITHDRAWN.getValue(), EntityTables.SAVINGS.getForeignKeyColumnNameOnDatatable(), savingsAccount.productId());
 
-        final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command);
+        final Map<String, Object> changes = this.savingsAccountApplicationService.applicantWithdrawsFromApplication(savingsAccount,
+                currentUser, command);
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -675,7 +679,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 existingReversedTransactionIds);
         this.savingAccountRepository.saveAndFlush(account);
 
-        generateAccountNumber(account);
+        // accounts created through this flow never carry a user-supplied account number, so generation is always
+        // required
+        generateAccountNumber(account, true);
         // post journal entries for activation charges
         this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
 

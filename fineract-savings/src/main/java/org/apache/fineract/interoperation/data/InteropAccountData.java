@@ -113,7 +113,7 @@ public class InteropAccountData extends CommandProcessingResult {
 
         return new InteropAccountData(account.getExternalId().getValue(), product.getId().toString(), product.getName(),
                 product.getShortName(), account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(),
-                account.getStatus(), subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationDate(),
+                account.getStatus(), subStatus, account.getAccountType(), account.depositAccountType(), account.getActivatedOnDate(),
                 calcStatusUpdateOn(account), account.getWithdrawnOnDate(), account.retrieveLastTransactionDate(), ids,
                 account.getClient().getId());
     }
@@ -125,8 +125,8 @@ public class InteropAccountData extends CommandProcessingResult {
         if (account.getWithdrawnOnDate() != null) {
             return account.getWithdrawnOnDate();
         }
-        if (account.getActivationDate() != null) {
-            return account.getActivationDate();
+        if (account.getActivatedOnDate() != null) {
+            return account.getActivatedOnDate();
         }
         if (account.getRejectedOnDate() != null) {
             return account.getRejectedOnDate();

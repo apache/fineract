@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import java.time.format.DateTimeFormatter;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 /**
@@ -30,5 +32,12 @@ public interface SavingsAccountActivationService {
 
     void processAccountUponActivation(SavingsAccount account, boolean isSavingsInterestPostingAtCurrentPeriodEnd,
             Integer financialYearBeginningMonth);
+
+    /**
+     * Recurring-deposit specific activation step: posts the mandatory minimum opening balance as a deposit and
+     * recalculates the running balances. Extracted from {@code RecurringDepositAccount.processAccountUponActivation}.
+     */
+    void processRecurringDepositActivation(RecurringDepositAccount account, DateTimeFormatter fmt, boolean postReversals,
+            Long relaxingDaysConfigForPivotDate);
 
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.domain;
+package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,6 +24,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.transaction.annotation.Transactional;
 

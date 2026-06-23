@@ -86,7 +86,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
                 SavingsAccount savingsAccount = savingsAccountAssembler.assembleFrom(savingsAccrual.getId(), false);
                 LocalDate fromDate = savingsAccrual.getAccruedTill();
                 if (fromDate == null) {
-                    fromDate = savingsAccount.getActivationDate();
+                    fromDate = savingsAccount.getActivatedOnDate();
                 }
                 log.debug("Processing savings account {} from date {} till date {}", savingsAccrual.getAccountNo(), fromDate, tillDate);
                 addAccrualTransactions(savingsAccount, fromDate, tillDate, financialYearBeginningMonth,
@@ -120,7 +120,7 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(savingsAccount.getInterestCalculationDaysInYearType());
 
-        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(fromDate, tillDate,
+        final List<LocalDateInterval> postingPeriodIntervals = SavingsHelper.determineInterestPostingPeriods(fromDate, tillDate,
                 postingPeriodType, financialYearBeginningMonth, postedAsOnTransactionDates);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();

@@ -16,6 +16,8 @@ include::principles.adoc[leveloffset=+1]
 
 include::design.adoc[leveloffset=+1]
 
+include::savings-account-decoupling.adoc[leveloffset=+1]
+
 include::persistence.adoc[leveloffset=+1]
 
 include::idempotency.adoc[leveloffset=+1]
