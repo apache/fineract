@@ -3299,6 +3299,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     private void verifyJournalEntries(List<GetWorkingCapitalLoanTransactionIdResponse> transactions, Long loanId, DataTable table) {
         List<List<JournalEntryTransactionItem>> journalLinesActualList = getWorkingCapitalJournalLinesActualList(transactions);
+        log.debug("journalLinesActualList: {}", journalLinesActualList);
         journalEntriesStepDef.checkJournalEntryData(journalLinesActualList, loanId, table);
     }
 
@@ -3324,9 +3325,53 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @When("Customer undo {string}th {string} transaction made on {string} on Working Capital loan")
     public void undoWorkingCapitalLoanTransaction(String nthItemStr, String transactionType, String transactionDate) throws IOException {
-        // TODO: Implement undo transaction for working capital loans when backend support is available
-        // ("[BE] WC - Transaction Type- Repayment- Backdated and Undo Repayment")
-        throw new UnsupportedOperationException("Undo transaction for working capital loans is not yet implemented");
+        final Long loanId = getCreatedLoanId();
+        final GetWorkingCapitalLoanTransactionsResponse response = retrieveLoanTransactions(loanId);
+        final List<GetWorkingCapitalLoanTransactionIdResponse> actualTransactions = response.getContent();
+
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final String expectedCode = "loanTransactionType." + resolvedType.getValue();
+        int nthItem = Integer.parseInt(nthItemStr) - 1;
+
+        GetWorkingCapitalLoanTransactionIdResponse target = actualTransactions.stream()
+                .filter(t -> t.getType() != null && expectedCode.equals(t.getType().getCode())
+                        && transactionDate.equals(FORMATTER.format(t.getTransactionDate())) && !Boolean.TRUE.equals(t.getReversed()))
+                .toList().get(nthItem);
+
+        String reversalExternalId = Utils.randomStringGenerator("wcl-reversal-ext-id", 8);
+        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .reversalExternalId(reversalExternalId);
+
+        ExecuteWorkingCapitalLoanTransactionCommandResponse undo = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "undo", request));
+        Assertions.assertNotNull(undo);
+    }
+
+    @When("Customer tries to undo {string}th {string} transaction made on {string} on Working Capital loan and gets error:")
+    public void undoWorkingCapitalLoanTransactionExpectError(String nthItemStr, String transactionType, String transactionDate,
+            DataTable table) throws IOException {
+        final Long loanId = getCreatedLoanId();
+        final GetWorkingCapitalLoanTransactionsResponse response = retrieveLoanTransactions(loanId);
+        final List<GetWorkingCapitalLoanTransactionIdResponse> actualTransactions = response.getContent();
+
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final String expectedCode = "loanTransactionType." + resolvedType.getValue();
+        int nthItem = Integer.parseInt(nthItemStr) - 1;
+
+        GetWorkingCapitalLoanTransactionIdResponse target = actualTransactions.stream().filter(t -> t.getType() != null
+                && expectedCode.equals(t.getType().getCode()) && transactionDate.equals(FORMATTER.format(t.getTransactionDate()))).toList()
+                .get(nthItem);
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, target.getId(), "undo", request));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertValidationError(exception, expectedErrorMessage);
     }
 
     public void updatePeriodPaymentRateFailed(String periodPaymentRate, String errorMessage) {
@@ -3409,5 +3454,4 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         throw new IllegalStateException(String.format("Code [%s] with code value [%s] cannot be found", codeName, codeValueName));
     }
-
 }
