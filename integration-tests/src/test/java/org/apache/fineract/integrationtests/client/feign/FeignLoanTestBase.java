@@ -193,6 +193,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.withdrawLoan(loanId, request);
     }
 
+    protected PostLoansLoanIdResponse moveLoanState(Long loanId, PostLoansLoanIdRequest request, String command) {
+        return loanHelper.moveLoanState(loanId, request, command);
+    }
+
     protected PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return loanHelper.closeLoan(loanId, request);
     }

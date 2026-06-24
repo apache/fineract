@@ -131,6 +131,10 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loans().stateTransitions(loanId, request, Map.of("command", "withdrawnByApplicant")));
     }
 
+    public PostLoansLoanIdResponse moveLoanState(Long loanId, PostLoansLoanIdRequest request, String command) {
+        return ok(() -> fineractClient.loans().stateTransitions(loanId, request, Map.of("command", command)));
+    }
+
     public PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "close")));
     }
