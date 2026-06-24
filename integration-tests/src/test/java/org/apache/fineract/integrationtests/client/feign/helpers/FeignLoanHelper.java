@@ -28,6 +28,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
@@ -325,6 +326,12 @@ public class FeignLoanHelper {
 
     public CommandProcessingResult addAndDeleteDisbursementDetail(Long loanId, PostAddAndDeleteDisbursementDetailRequest request) {
         return ok(() -> fineractClient.loanDisbursementDetails().addAndDeleteDisbursementDetail(loanId, request));
+    }
+
+    public CommandProcessingResult addAndDeleteDisbursementDetail(Long loanId, List<DisbursementDetail> disbursementDetails) {
+        return addAndDeleteDisbursementDetail(loanId, new PostAddAndDeleteDisbursementDetailRequest().locale("en")//
+                .dateFormat("dd MMMM yyyy")//
+                .disbursementData(disbursementDetails));
     }
 
     public String getDisbursementDetail(Long loanId, Long disbursementId) {

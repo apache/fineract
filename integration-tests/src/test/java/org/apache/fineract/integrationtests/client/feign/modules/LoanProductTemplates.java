@@ -350,8 +350,30 @@ public interface LoanProductTemplates {
                 .principalVariationsForBorrowerCycle(List.of())//
                 .interestRateVariationsForBorrowerCycle(List.of())//
                 .numberOfRepaymentVariationsForBorrowerCycle(List.of())//
-                .accountingRule(1)//
+                .accountingRule(3)//
                 .canUseForTopup(false)//
+                .fundSourceAccountId(getLiabilityAccountId("fundSource"))//
+                .loanPortfolioAccountId(getAssetAccountId("loansReceivable"))//
+                .transfersInSuspenseAccountId(getAssetAccountId("suspense"))//
+                .interestOnLoanAccountId(getIncomeAccountId("interestIncome"))//
+                .incomeFromFeeAccountId(getIncomeAccountId("feeIncome"))//
+                .incomeFromPenaltyAccountId(getIncomeAccountId("penaltyIncome"))//
+                .incomeFromRecoveryAccountId(getIncomeAccountId("recoveries"))//
+                .writeOffAccountId(getExpenseAccountId("writtenOff"))//
+                .overpaymentLiabilityAccountId(getLiabilityAccountId("overpayment"))//
+                .receivableInterestAccountId(getAssetAccountId("interestReceivable"))//
+                .receivableFeeAccountId(getAssetAccountId("feeReceivable"))//
+                .receivablePenaltyAccountId(getAssetAccountId("penaltyReceivable"))//
+                .goodwillCreditAccountId(getExpenseAccountId("goodwillExpense"))//
+                .incomeFromGoodwillCreditInterestAccountId(getIncomeAccountId("interestIncomeChargeOff"))//
+                .incomeFromGoodwillCreditFeesAccountId(getIncomeAccountId("feeChargeOff"))//
+                .incomeFromGoodwillCreditPenaltyAccountId(getIncomeAccountId("feeChargeOff"))//
+                .incomeFromChargeOffInterestAccountId(getIncomeAccountId("interestIncomeChargeOff"))//
+                .incomeFromChargeOffFeesAccountId(getIncomeAccountId("feeChargeOff"))//
+                .incomeFromChargeOffPenaltyAccountId(getIncomeAccountId("penaltyChargeOff"))//
+                .chargeOffExpenseAccountId(getExpenseAccountId("chargeOff"))//
+                .chargeOffFraudExpenseAccountId(getExpenseAccountId("chargeOffFraud"))//
+                .enableAccrualActivityPosting(false)//
                 .dateFormat(LoanTestData.DATETIME_PATTERN)//
                 .locale(LoanTestData.LOCALE)//
                 .multiDisburseLoan(true)//

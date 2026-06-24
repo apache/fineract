@@ -61,8 +61,12 @@ public class FeignTransactionHelper {
 
     public Long chargeOff(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         PostLoansLoanIdTransactionsResponse response = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "chargeOff")));
+                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "charge-off")));
         return response.getResourceId();
+    }
+
+    public PostLoansLoanIdTransactionsResponse undoChargeOff(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "undo-charge-off")));
     }
 
     public Long addChargeback(Long loanId, Long transactionId, PostLoansLoanIdTransactionsRequest request) {
@@ -87,6 +91,24 @@ public class FeignTransactionHelper {
         PostLoansLoanIdTransactionsResponse response = ok(
                 () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "undoReAge")));
         return response.getResourceId();
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(
+                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "merchantIssuedRefund")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makePayoutRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "payoutRefund")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeGoodwillCredit(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "goodwillCredit")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request,
+                Map.of("command", "interestPaymentWaiver")));
     }
 
     public void undoRepayment(Long loanId, Long transactionId, String transactionDate) {

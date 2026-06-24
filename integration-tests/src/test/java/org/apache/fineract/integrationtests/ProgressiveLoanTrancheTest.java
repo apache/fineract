@@ -25,28 +25,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.DisbursementDetail;
 import org.apache.fineract.client.models.GetLoansLoanIdDisbursementDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ProgressiveLoanTrancheTest extends BaseLoanIntegrationTest {
+public class ProgressiveLoanTrancheTest extends FeignLoanTestBase {
 
     @Test
     public void testProgressiveLoanTrancheDisbursement() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().disallowExpectedDisbursements(false).allowApprovedDisbursedAmountsOverApplied(null)
-                        .overAppliedCalculationType(null).overAppliedNumber(null));
+        final Long loanProductId = createLoanProduct(create4IProgressive().disallowExpectedDisbursements(false)
+                .allowApprovedDisbursedAmountsOverApplied(null).overAppliedCalculationType(null).overAppliedNumber(null));
 
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
         runAt("20 December 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "20 December 2024",
-                    500.0, 7.0, 6, (request) -> request.disbursementData(List.of(new PostLoansDisbursementData()
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "20 December 2024", 500.0, 7.0, 6,
+                    (request) -> request.disbursementData(List.of(new PostLoansDisbursementData()
                             .expectedDisbursementDate("20 December 2024").principal(BigDecimal.valueOf(100.0)))));
 
             loanIdRef.set(loanId);
@@ -62,7 +59,7 @@ public class ProgressiveLoanTrancheTest extends BaseLoanIntegrationTest {
                 disburseLoan(loanId, BigDecimal.valueOf(100), "20 January 2025");
             });
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             ArrayList<DisbursementDetail> disbursementDetails = new ArrayList<>();
             for (GetLoansLoanIdDisbursementDetails disbursementDetail : loanDetails.getDisbursementDetails()) {
@@ -72,7 +69,7 @@ public class ProgressiveLoanTrancheTest extends BaseLoanIntegrationTest {
             disbursementDetails
                     .add(new DisbursementDetail().expectedDisbursementDate("20 January 2025").principal(BigDecimal.valueOf(100.0)));
 
-            loanTransactionHelper.addAndDeleteDisbursementDetail(loanId, disbursementDetails);
+            addAndDeleteDisbursementDetail(loanId, disbursementDetails);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "20 January 2025");
         });
