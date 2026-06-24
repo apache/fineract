@@ -315,6 +315,19 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return transactionHelper.makeCreditBalanceRefund(loanId, request);
     }
 
+    protected PostLoansLoanIdTransactionsResponse createManualInterestRefund(Long loanId, Long targetTransactionId, String transactionDate,
+            Double amount, String externalId) {
+        return transactionHelper.createManualInterestRefund(loanId, targetTransactionId, transactionDate, amount, externalId);
+    }
+
+    protected void undoLoanApproval(Long loanId) {
+        undoApproval(loanId);
+    }
+
+    protected void rejectLoan(Long loanId, String rejectedOnDate) {
+        rejectLoan(loanId, LoanRequestBuilders.rejectLoan(rejectedOnDate));
+    }
+
     protected void verifyJournalEntries(Long loanId, LoanTestData.Journal... expectedEntries) {
         journalHelper.verifyJournalEntries(loanId, expectedEntries);
     }

@@ -134,4 +134,15 @@ public class FeignTransactionHelper {
         return ok(
                 () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "creditBalanceRefund")));
     }
+
+    public PostLoansLoanIdTransactionsResponse createManualInterestRefund(Long loanId, Long targetTransactionId, String transactionDate,
+            Double amount, String externalId) {
+        PostLoansLoanIdTransactionsTransactionIdRequest request = new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .transactionAmount(amount).dateFormat("dd MMMM yyyy").locale("en");
+        if (externalId != null) {
+            request.externalId(externalId);
+        }
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, targetTransactionId, request,
+                Map.of("command", "interest-refund")));
+    }
 }
