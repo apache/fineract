@@ -170,6 +170,15 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "all", "exclude", "guarantors,futureSchedule")));
     }
 
+    public GetLoansLoanIdResponse getLoanDetailsByExternalId(String loanExternalId) {
+        return ok(() -> fineractClient.loans().retrieveLoanByExternalId(loanExternalId, false, "all", null, null));
+    }
+
+    public PostLoansLoanIdResponse disburseLoanWithAmount(Long loanId, String date, double amount) {
+        return disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(date).transactionAmount(BigDecimal.valueOf(amount))
+                .dateFormat("dd MMMM yyyy").locale("en"));
+    }
+
     public GetLoansLoanIdResponse getLoanDetailsWithAssociations(Long loanId, String associations) {
         return ok(() -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", associations)));
     }

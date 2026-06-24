@@ -35,8 +35,9 @@ public class DaysInYearCustomStrategyTest extends FeignLoanTestBase {
 
     @Test
     public void test_HttpError_for_ValidationError_DaysInYearsCustomStrategy() {
-        Assertions.assertThrows(CallFailedRuntimeException.class, () -> createLoanProduct(
+        CallFailedRuntimeException exception = Assertions.assertThrows(CallFailedRuntimeException.class, () -> createLoanProduct(
                 create4IProgressive().daysInYearType(DAYS_IN_YEAR_360).daysInYearCustomStrategy(FEB_29_PERIOD_ONLY)));
+        Assertions.assertEquals(403, exception.getStatus());
     }
 
     @Test

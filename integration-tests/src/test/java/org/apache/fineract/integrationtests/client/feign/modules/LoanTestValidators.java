@@ -43,6 +43,33 @@ public final class LoanTestValidators {
 
     private LoanTestValidators() {}
 
+    public static void verifyTransactions(GetLoansLoanIdResponse loanDetails, LoanTestData.Transaction... transactions) {
+        if (transactions == null || transactions.length == 0) {
+            assertTrue(loanDetails.getTransactions() == null || loanDetails.getTransactions().isEmpty(), "No transaction is expected");
+            return;
+        }
+        assertNotNull(loanDetails.getTransactions());
+        assertEquals(transactions.length, loanDetails.getTransactions().size(), "Number of transactions");
+
+        Arrays.stream(transactions).forEach(tr -> {
+            boolean found = loanDetails.getTransactions().stream()
+                    .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
+                            && Objects.equals(item.getType().getValue(), tr.type)
+                            && Objects.equals(item.getDate(), LocalDate.parse(tr.date, DATE_FORMATTER)));
+
+            assertTrue(found, "Required transaction not found: " + tr);
+
+            if (tr.reversed != null) {
+                GetLoansLoanIdTransactions tx = loanDetails.getTransactions().stream()
+                        .filter(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
+                                && Objects.equals(item.getType().getValue(), tr.type)
+                                && Objects.equals(item.getDate(), LocalDate.parse(tr.date, DATE_FORMATTER)))
+                        .findFirst().orElseThrow();
+                assertEquals(tr.reversed, tx.getManuallyReversed(), "Transaction is not reversed: " + tr);
+            }
+        });
+    }
+
     public static void verifyTransactions(GetLoansLoanIdResponse loanDetails, LoanTestData.TransactionExt... transactions) {
         if (transactions == null || transactions.length == 0) {
             assertNull(loanDetails.getTransactions(), "No transaction is expected");
@@ -60,20 +87,17 @@ public final class LoanTestValidators {
                 return;
             }
 
-            boolean found = transactionsByDate.stream().anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
-                    && Objects.equals(item.getType().getValue(), tr.type)
-                    && (tr.outstandingPrincipal == null
-                            || Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal))
-                    && (tr.principalPortion == null
-                            || Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion))
-                    && (tr.interestPortion == null || Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion))
-                    && (tr.feePortion == null || Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion))
-                    && (tr.penaltyPortion == null
-                            || Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion))
-                    && (tr.overpaymentPortion == null
-                            || Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion))
-                    && (tr.unrecognizedPortion == null
-                            || Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion)));
+            boolean found = transactionsByDate.stream()
+                    .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
+                            && Objects.equals(item.getType().getValue(), tr.type)
+                            && Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal)
+                            && Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion)
+                            && Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion)
+                            && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion)
+                            && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion)
+                            && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion)
+                            && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion)
+                            && (tr.reversed == null || Objects.equals(item.getManuallyReversed(), tr.reversed)));
 
             if (!found) {
                 StringBuilder errorMessage = new StringBuilder();

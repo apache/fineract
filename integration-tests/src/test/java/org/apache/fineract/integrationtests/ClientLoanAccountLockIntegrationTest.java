@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
-import static org.apache.fineract.client.feign.util.FeignCalls.ok;
-
 import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import org.apache.fineract.client.models.LockRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;

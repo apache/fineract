@@ -117,6 +117,40 @@ public class FeignTransactionHelper {
                 .transactionAmount(amount).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), Map.of("command", command)));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "repayment")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "repayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "charge-off")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request,
+                "merchantIssuedRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request,
+                "creditBalanceRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(String loanExternalId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanExternalId(loanExternalId, transactionId, request,
+                Map.of("command", "undo")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(String loanExternalId, String transactionExternalId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanAndTransactionExternalId(loanExternalId,
+                transactionExternalId, request, "chargeback"));
+    }
+
     public void undoRepayment(Long loanId, Long transactionId, String transactionDate) {
         reverseLoanTransaction(loanId, transactionId, transactionDate);
     }

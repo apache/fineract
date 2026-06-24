@@ -210,7 +210,7 @@ public class LoanRepaymentTest extends FeignLoanTestBase {
                     journalEntry(45.16, getAccounts().getInterestReceivableAccount(), "CREDIT"),
                     journalEntry(45.16, getAccounts().getInterestReceivableAccount(), "DEBIT"),
                     journalEntry(45.16, getAccounts().getInterestIncomeAccount(), "CREDIT"),
-                    journalEntry(1000.0, getAccounts().getFundSource(), "CREDIT")
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "CREDIT")
 
             );
         });
@@ -292,7 +292,7 @@ public class LoanRepaymentTest extends FeignLoanTestBase {
                     journalEntry(100.0, getAccounts().getInterestReceivableAccount(), "CREDIT"),
                     journalEntry(100.0, getAccounts().getInterestReceivableAccount(), "DEBIT"),
                     journalEntry(100.0, getAccounts().getInterestIncomeAccount(), "CREDIT"),
-                    journalEntry(1000.0, getAccounts().getFundSource(), "CREDIT")
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "CREDIT")
 
             );
         });

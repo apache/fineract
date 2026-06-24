@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.integrationtests.client.feign;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,11 +34,13 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -49,6 +55,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
@@ -69,7 +76,9 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccount
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestValidators;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeAll;
@@ -302,6 +311,62 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return transactionHelper.makeLoanRepayment(loanId, command, date, amount);
     }
 
+    protected PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.makeLoanRepayment(loanId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse makeLoanRepayment(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.makeLoanRepayment(loanExternalId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse chargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.chargeOffLoan(loanId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(String loanExternalId,
+            PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.makeMerchantIssuedRefund(loanExternalId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(String loanExternalId,
+            PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.makeCreditBalanceRefund(loanExternalId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse reverseLoanTransaction(String loanExternalId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return transactionHelper.reverseLoanTransaction(loanExternalId, transactionId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(String loanExternalId, String transactionExternalId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return transactionHelper.chargebackLoanTransaction(loanExternalId, transactionExternalId, request);
+    }
+
+    protected GetLoansLoanIdResponse getLoanDetails(String loanExternalId) {
+        return loanHelper.getLoanDetailsByExternalId(loanExternalId);
+    }
+
+    protected void disburseLoanWithAmount(Long loanId, String date, double amount) {
+        loanHelper.disburseLoanWithAmount(loanId, date, amount);
+    }
+
+    protected void reverseRepayment(Long loanId, Long transactionId, String transactionDate) {
+        reverseLoanTransaction(loanId, transactionId, transactionDate);
+    }
+
+    protected void updateGlobalConfiguration(String configName, PutGlobalConfigurationsRequest request) {
+        globalConfigurationHelper.updateGlobalConfiguration(configName, request);
+    }
+
+    protected void runPeriodicAccrualAccounting(String date) {
+        PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(date);
+    }
+
+    protected GetJournalEntriesTransactionIdResponse getJournalEntries(String transactionId) {
+        return journalHelper.getJournalEntries(transactionId);
+    }
+
     protected PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
         return transactionHelper.reverseLoanTransaction(loanId, transactionId, transactionDate);
     }
@@ -334,14 +399,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected Long getTransactionId(Long loanId, String type, String date) {
         GetLoansLoanIdResponse loan = getLoanDetails(loanId);
-        return loan.getTransactions().stream()
-                .filter(tr -> java.util.Objects.equals(tr.getType().getValue(), type)
-                        && java.util.Objects.equals(tr.getDate(), LocalDate.parse(date, dateTimeFormatter)))
-                .findAny().orElseThrow().getId();
+        return loan.getTransactions().stream().filter(tr -> Objects.equals(tr.getType().getValue(), type)
+                && Objects.equals(tr.getDate(), LocalDate.parse(date, dateTimeFormatter))).findAny().orElseThrow().getId();
     }
 
-    protected org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId,
-            String transactionExternalId) {
+    protected GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId, String transactionExternalId) {
         return transactionHelper.getLoanTransactionDetails(loanId, transactionExternalId);
     }
 
@@ -373,8 +435,8 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         if (amountToPrepayLoan != null && amountToPrepayLoan > 0) {
             PostLoansLoanIdTransactionsResponse repayment = transactionHelper.makeLoanRepayment(loanId, "repayment", date,
                     amountToPrepayLoan);
-            org.junit.jupiter.api.Assertions.assertNotNull(repayment);
-            org.junit.jupiter.api.Assertions.assertNotNull(repayment.getResourceId());
+            assertNotNull(repayment);
+            assertNotNull(repayment.getResourceId());
             repaymentId = repayment.getResourceId();
         }
         verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
@@ -419,7 +481,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected void verifyLoanStatus(GetLoansLoanIdResponse loanDetails, LoanStatus loanStatus) {
-        org.junit.jupiter.api.Assertions.assertEquals(loanStatus.getCode(), loanDetails.getStatus().getCode());
+        assertEquals(loanStatus.getCode(), loanDetails.getStatus().getCode());
     }
 
     protected void verifyLoanStatus(long loanId, LoanStatus loanStatus) {
@@ -579,8 +641,13 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return new LoanTestData.TransactionExt(principalAmount, type, date, null, null, null, null, null, null, null, true);
     }
 
-    protected LoanTestData.TransactionExt transaction(double amount, String type, String date) {
-        return new LoanTestData.TransactionExt(amount, type, date, null, null, null, null, null, null, null, false);
+    protected LoanTestData.Transaction transaction(double amount, String type, String date) {
+        return new LoanTestData.Transaction(amount, type, date, null);
+    }
+
+    protected void verifyTransactions(Long loanId, LoanTestData.Transaction... transactions) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        LoanTestValidators.verifyTransactions(loanDetails, transactions);
     }
 
     protected void verifyTransactions(Long loanId, LoanTestData.TransactionExt... transactions) {
@@ -740,15 +807,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected void validateLoanSummaryBalances(GetLoansLoanIdResponse loanDetails, Double totalOutstanding, Double totalRepayment,
             Double principalOutstanding, Double principalPaid, Double totalOverpaid) {
-        org.junit.jupiter.api.Assertions.assertEquals(totalOutstanding,
-                org.apache.fineract.integrationtests.common.Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
-        org.junit.jupiter.api.Assertions.assertEquals(totalRepayment,
-                org.apache.fineract.integrationtests.common.Utils.getDoubleValue(loanDetails.getSummary().getTotalRepayment()));
-        org.junit.jupiter.api.Assertions.assertEquals(principalOutstanding,
-                org.apache.fineract.integrationtests.common.Utils.getDoubleValue(loanDetails.getSummary().getPrincipalOutstanding()));
-        org.junit.jupiter.api.Assertions.assertEquals(principalPaid,
-                org.apache.fineract.integrationtests.common.Utils.getDoubleValue(loanDetails.getSummary().getPrincipalPaid()));
-        org.junit.jupiter.api.Assertions.assertEquals(totalOverpaid,
-                org.apache.fineract.integrationtests.common.Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
+        assertEquals(totalOutstanding, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
+        assertEquals(totalRepayment, Utils.getDoubleValue(loanDetails.getSummary().getTotalRepayment()));
+        assertEquals(principalOutstanding, Utils.getDoubleValue(loanDetails.getSummary().getPrincipalOutstanding()));
+        assertEquals(principalPaid, Utils.getDoubleValue(loanDetails.getSummary().getPrincipalPaid()));
+        assertEquals(totalOverpaid, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
     }
 }
