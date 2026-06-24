@@ -84,7 +84,7 @@ is never a live entity. This inverts the dependency: both the caller and the own
 `fineract-core`, neither on the other.
 
 ----
-        accounting  ──depends on──►  fineract-core (ChargeReadService)  ◄──implements──  charge
+        accounting  --depends on-->  fineract-core (ChargeReadService)  <--implements--  charge
 ----
 
 === Writes: `fineract-command` commands and events
