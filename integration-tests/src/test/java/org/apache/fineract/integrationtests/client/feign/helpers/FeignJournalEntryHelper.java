@@ -48,6 +48,23 @@ public class FeignJournalEntryHelper {
         return ok(() -> fineractClient.journalEntries().retrieveAllJournalEntries(Map.of("transactionId", transactionId)));
     }
 
+    public GetJournalEntriesTransactionIdResponse getJournalEntries(String transactionId) {
+        return getJournalEntriesByTransactionId(transactionId);
+    }
+
+    public void verifyTRJournalEntries(Long transactionId, LoanTestData.Journal... entries) {
+        assertNotNull(transactionId, "transactionId is null");
+        GetJournalEntriesTransactionIdResponse journalEntries = getJournalEntries("L" + transactionId);
+        assertEquals(entries.length, journalEntries.getPageItems().size());
+        for (LoanTestData.Journal journalEntry : entries) {
+            boolean found = journalEntries.getPageItems().stream()
+                    .anyMatch(item -> Objects.equals(item.getAmount(), journalEntry.amount)
+                            && Objects.equals(item.getGlAccountId(), journalEntry.account.getAccountID().longValue())
+                            && Objects.requireNonNull(item.getEntryType()).getValue().equals(journalEntry.type));
+            assertTrue(found, "Required journal entry not found: " + journalEntry);
+        }
+    }
+
     public void verifyJournalEntries(Long loanId, LoanTestData.Journal... expectedEntries) {
         GetJournalEntriesTransactionIdResponse journalEntries = getJournalEntriesForLoan(loanId);
         assertNotNull(journalEntries);

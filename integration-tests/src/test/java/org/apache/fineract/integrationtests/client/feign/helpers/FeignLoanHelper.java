@@ -57,6 +57,8 @@ import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequ
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignLoanHelper {
@@ -133,6 +135,11 @@ public class FeignLoanHelper {
 
     public PostLoansLoanIdResponse moveLoanState(Long loanId, PostLoansLoanIdRequest request, String command) {
         return ok(() -> fineractClient.loans().stateTransitions(loanId, request, Map.of("command", command)));
+    }
+
+    public PutLoansLoanIdResponse markAsFraud(Long loanId, boolean fraud) {
+        return ok(() -> fineractClient.loans().modifyLoanApplication(loanId, new PutLoansLoanIdRequest().fraud(fraud),
+                Map.of("command", "markAsFraud")));
     }
 
     public PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {

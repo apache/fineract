@@ -25,128 +25,95 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.models.PutLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class LoanAccountFraudTest extends BaseLoanIntegrationTest {
+public class LoanAccountFraudTest extends FeignLoanTestBase {
 
     private static final double AMOUNT = 100.0;
-    private static final String COMMAND = "markAsFraud";
-    private LocalDate todaysDate;
-    private String operationDate;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.todaysDate = Utils.getLocalDateOfTenant();
-        this.operationDate = Utils.dateFormatter.format(this.todaysDate);
-    }
 
     @Test
     public void testMarkLoanAsFraud() {
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        String operationDate = Utils.dateFormatter.format(todaysDate);
+
         runAt(operationDate, () -> {
 
             final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper
-                    .applyLoan(applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate, AMOUNT, 1));
-            Integer loanId = postLoansResponse.getLoanId().intValue();
+            PostLoansRequest applyRequest = applyLoanRequest(clientId, loanProductId, operationDate, AMOUNT, 1);
+            Long loanId = applyForLoan(applyRequest);
 
-            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
 
-            // Default values Not Null and False
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
 
-            String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-            PutLoansLoanIdResponse putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, true);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
             String statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
-            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "false");
-            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, false);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
-            // Approve the Loan active
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(AMOUNT, operationDate));
-            assertNotNull(approvedLoanResult);
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(AMOUNT, operationDate));
 
-            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, true);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
-            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "false");
-            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, false);
 
-            // Default values Not Null and False
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
             statusCode = getLoansLoanIdResponse.getStatus().getCode();
             log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
 
-            disburseLoan(loanId.longValue(), BigDecimal.valueOf(AMOUNT), operationDate);
+            disburseLoan(loanId, BigDecimal.valueOf(AMOUNT), operationDate);
 
-            // Mark On the Fraud
-            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, true);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
 
-            // Mark Off the Fraud
-            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "false");
-            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, this.responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, false);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.FALSE, getLoansLoanIdResponse.getFraud());
 
-            payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-            putLoansLoanIdResponse = loanTransactionHelper.modifyLoanCommand(loanId, COMMAND, payload, responseSpec);
-            assertNotNull(putLoansLoanIdResponse);
+            changeLoanFraudState(loanId, true);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());
@@ -155,7 +122,7 @@ public class LoanAccountFraudTest extends BaseLoanIntegrationTest {
 
             undoDisbursement(loanId);
 
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
             assertNotNull(getLoansLoanIdResponse.getFraud());
             assertEquals(Boolean.TRUE, getLoansLoanIdResponse.getFraud());

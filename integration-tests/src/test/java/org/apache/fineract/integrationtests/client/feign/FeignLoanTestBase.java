@@ -328,6 +328,27 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         rejectLoan(loanId, LoanRequestBuilders.rejectLoan(rejectedOnDate));
     }
 
+    protected void changeLoanFraudState(Long loanId, boolean fraudState) {
+        loanHelper.markAsFraud(loanId, fraudState);
+    }
+
+    protected Long getTransactionId(Long loanId, String type, String date) {
+        GetLoansLoanIdResponse loan = getLoanDetails(loanId);
+        return loan.getTransactions().stream()
+                .filter(tr -> java.util.Objects.equals(tr.getType().getValue(), type)
+                        && java.util.Objects.equals(tr.getDate(), LocalDate.parse(date, dateTimeFormatter)))
+                .findAny().orElseThrow().getId();
+    }
+
+    protected org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId,
+            String transactionExternalId) {
+        return transactionHelper.getLoanTransactionDetails(loanId, transactionExternalId);
+    }
+
+    protected void verifyTRJournalEntries(Long transactionId, LoanTestData.Journal... expectedEntries) {
+        journalHelper.verifyTRJournalEntries(transactionId, expectedEntries);
+    }
+
     protected void verifyJournalEntries(Long loanId, LoanTestData.Journal... expectedEntries) {
         journalHelper.verifyJournalEntries(loanId, expectedEntries);
     }
@@ -448,6 +469,14 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected LoanTestData.Journal credit(Long glAccountId, double amount) {
         return LoanTestData.Journal.credit(glAccountId, amount);
+    }
+
+    protected LoanTestData.Journal debit(Account account, double amount) {
+        return new LoanTestData.Journal(amount, account, "DEBIT");
+    }
+
+    protected LoanTestData.Journal credit(Account account, double amount) {
+        return new LoanTestData.Journal(amount, account, "CREDIT");
     }
 
     protected PostLoansLoanIdTransactionsRequest repayment(double amount, String date) {
