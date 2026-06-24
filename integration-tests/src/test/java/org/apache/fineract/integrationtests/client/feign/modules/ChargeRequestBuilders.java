@@ -50,6 +50,10 @@ public final class ChargeRequestBuilders {
                 .chargeTimeType(CHARGE_TIME_TYPE_DISBURSEMENT);
     }
 
+    public static ChargeRequest loanDisbursementPercentageFee(double percentage) {
+        return loanDisbursementPercentageFee(percentage, DEFAULT_CURRENCY);
+    }
+
     public static ChargeRequest loanDisbursementPercentageFee(double percentage, String currencyCode) {
         return baseLoanCharge(percentage, currencyCode)//
                 .chargeTimeType(CHARGE_TIME_TYPE_DISBURSEMENT)//

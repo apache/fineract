@@ -21,9 +21,12 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
@@ -54,20 +57,31 @@ public class FeignJournalEntryHelper {
         assertEquals(expectedEntries.length, actualEntries.size(),
                 "Expected " + expectedEntries.length + " journal entries but found " + actualEntries.size());
 
-        for (int i = 0; i < expectedEntries.length; i++) {
-            LoanTestData.Journal expected = expectedEntries[i];
-            JournalEntryTransactionItem actual = actualEntries.get(i);
-
-            Double expectedAmount = expected.amount;
-            Double actualAmount = actual.getAmount();
-            assertEquals(0, Double.compare(expectedAmount, actualAmount),
-                    "Journal entry " + i + " amount mismatch: expected " + expectedAmount + " but got " + actualAmount);
-            assertEquals(expected.account.getAccountID().longValue(), actual.getGlAccountId(), "Journal entry " + i + " account mismatch");
-            assertEquals(expected.type, actual.getEntryType().getValue(), "Journal entry " + i + " type mismatch");
+        for (LoanTestData.Journal expected : expectedEntries) {
+            boolean found = actualEntries.stream()
+                    .anyMatch(item -> Objects.equals(item.getAmount(), expected.amount)
+                            && Objects.equals(item.getGlAccountId(), expected.account.getAccountID().longValue())
+                            && Objects.requireNonNull(item.getEntryType()).getValue().equals(expected.type));
+            assertTrue(found, "Required journal entry not found: " + expected);
         }
     }
 
     public void verifyJournalEntriesSequentially(Long loanId, LoanTestData.Journal... expectedEntries) {
-        verifyJournalEntries(loanId, expectedEntries);
+        GetJournalEntriesTransactionIdResponse journalEntries = getJournalEntriesForLoan(loanId);
+        assertNotNull(journalEntries);
+        assertNotNull(journalEntries.getPageItems());
+
+        List<JournalEntryTransactionItem> sortedEntries = journalEntries.getPageItems().stream()
+                .sorted(Comparator.comparing(JournalEntryTransactionItem::getId)).toList();
+        for (int i = 0; i < expectedEntries.length && i < sortedEntries.size(); i++) {
+            LoanTestData.Journal expected = expectedEntries[i];
+            JournalEntryTransactionItem item = sortedEntries.get(i);
+            boolean found = Objects.equals(item.getAmount(), expected.amount)
+                    && Objects.equals(item.getGlAccountId(), expected.account.getAccountID().longValue())
+                    && Objects.requireNonNull(item.getEntryType()).getValue().equals(expected.type);
+            assertTrue(found, "Journal entry mismatch at position " + i + ". Wanted: " + expected + " Actual: " + item);
+        }
+        assertEquals(expectedEntries.length, journalEntries.getPageItems().size(),
+                "There were more journal entries expected than actually present.");
     }
 }

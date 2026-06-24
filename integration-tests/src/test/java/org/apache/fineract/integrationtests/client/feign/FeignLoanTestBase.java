@@ -67,6 +67,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccount
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestValidators;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeAll;
@@ -298,6 +299,30 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected void verifyJournalEntriesSequentially(Long loanId, LoanTestData.Journal... expectedEntries) {
         journalHelper.verifyJournalEntriesSequentially(loanId, expectedEntries);
+    }
+
+    protected LoanTestData.Journal journalEntry(double amount, Account account, String type) {
+        return "DEBIT".equals(type) ? LoanTestData.Journal.debit(account.getAccountID().longValue(), amount)
+                : LoanTestData.Journal.credit(account.getAccountID().longValue(), amount);
+    }
+
+    protected GetLoansLoanIdTransactionsTemplateResponse getPrepayAmount(Long loanId, String date) {
+        return transactionHelper.getPrepaymentAmount(loanId, date, LoanTestData.DATETIME_PATTERN);
+    }
+
+    protected Long verifyPrepayAmountByRepayment(Long loanId, String date) {
+        GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepayAmount(loanId, date);
+        Double amountToPrepayLoan = prepayAmount.getAmount();
+        Long repaymentId = null;
+        if (amountToPrepayLoan != null && amountToPrepayLoan > 0) {
+            PostLoansLoanIdTransactionsResponse repayment = transactionHelper.makeLoanRepayment(loanId, "repayment", date,
+                    amountToPrepayLoan);
+            org.junit.jupiter.api.Assertions.assertNotNull(repayment);
+            org.junit.jupiter.api.Assertions.assertNotNull(repayment.getResourceId());
+            repaymentId = repayment.getResourceId();
+        }
+        verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
+        return repaymentId;
     }
 
     protected void runAt(String date, Runnable action) {
@@ -614,6 +639,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         }
         Long chargeId = chargesHelper.createCharge(chargeRequest).getResourceId();
         return loanHelper.addSpecifiedDueDateCharge(loanId, chargeId, amount, dueDate);
+    }
+
+    protected Long createDisbursementPercentageCharge(double percentageAmount) {
+        return chargesHelper.createCharge(ChargeRequestBuilders.loanDisbursementPercentageFee(percentageAmount)).getResourceId();
     }
 
     protected Long createDisbursementPercentageCharge(double percentageAmount, String currencyCode) {
