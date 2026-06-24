@@ -60,16 +60,20 @@ public final class LoanTestValidators {
                 return;
             }
 
-            boolean found = transactionsByDate.stream()
-                    .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
-                            && Objects.equals(item.getType().getValue(), tr.type)
-                            && Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal)
-                            && Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion)
-                            && Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion)
-                            && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion)
-                            && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion)
-                            && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion)
-                            && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion));
+            boolean found = transactionsByDate.stream().anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
+                    && Objects.equals(item.getType().getValue(), tr.type)
+                    && (tr.outstandingPrincipal == null
+                            || Objects.equals(Utils.getDoubleValue(item.getOutstandingLoanBalance()), tr.outstandingPrincipal))
+                    && (tr.principalPortion == null
+                            || Objects.equals(Utils.getDoubleValue(item.getPrincipalPortion()), tr.principalPortion))
+                    && (tr.interestPortion == null || Objects.equals(Utils.getDoubleValue(item.getInterestPortion()), tr.interestPortion))
+                    && (tr.feePortion == null || Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion))
+                    && (tr.penaltyPortion == null
+                            || Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion))
+                    && (tr.overpaymentPortion == null
+                            || Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion))
+                    && (tr.unrecognizedPortion == null
+                            || Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion)));
 
             if (!found) {
                 StringBuilder errorMessage = new StringBuilder();

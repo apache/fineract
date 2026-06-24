@@ -111,6 +111,11 @@ public class FeignTransactionHelper {
                 Map.of("command", "interestPaymentWaiver")));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, String command, String date, Double amount) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest()
+                .transactionAmount(amount).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), Map.of("command", command)));
+    }
+
     public void undoRepayment(Long loanId, Long transactionId, String transactionDate) {
         PostLoansLoanIdTransactionsTransactionIdRequest request = new PostLoansLoanIdTransactionsTransactionIdRequest();
         request.setTransactionDate(transactionDate);

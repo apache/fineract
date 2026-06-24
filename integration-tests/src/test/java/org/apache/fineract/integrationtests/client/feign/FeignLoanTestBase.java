@@ -267,6 +267,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return transactionHelper.makeInterestPaymentWaiver(loanId, request);
     }
 
+    protected PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, String command, String date, Double amount) {
+        return transactionHelper.makeLoanRepayment(loanId, command, date, amount);
+    }
+
     protected void verifyJournalEntries(Long loanId, LoanTestData.Journal... expectedEntries) {
         journalHelper.verifyJournalEntries(loanId, expectedEntries);
     }
@@ -485,8 +489,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected PostLoanProductsRequest createOnePeriod30DaysPeriodicAccrualProduct(double interestRatePerPeriod) {
-        // Delegates to the canonical periodic-accrual template (accountingRule = ACCRUAL_PERIODIC with GL accounts),
-        // matching the legacy BaseLoanIntegrationTest behavior required for charge recognition/accrual assertions.
         return onePeriod30DaysPeriodicAccrual(interestRatePerPeriod);
     }
 
