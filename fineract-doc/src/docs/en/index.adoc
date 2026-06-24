@@ -67,6 +67,8 @@ include::faq.adoc[leveloffset=+1]
 
 include::glossary.adoc[leveloffset=+1]
 
+include::modularization.adoc[leveloffset=+1]
+
 // See https://docs.asciidoctor.org/asciidoc/latest/sections/user-index/ .
 // Limit this to PDF because the HTML backend can't (yet) create an index.
 // Also, we don't yet have any indexed terms, so it might make more sense to remove the index even for PDF.
