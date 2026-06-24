@@ -117,11 +117,21 @@ public class FeignTransactionHelper {
     }
 
     public void undoRepayment(Long loanId, Long transactionId, String transactionDate) {
-        PostLoansLoanIdTransactionsTransactionIdRequest request = new PostLoansLoanIdTransactionsTransactionIdRequest();
-        request.setTransactionDate(transactionDate);
-        request.setTransactionAmount(0.0);
-        request.setDateFormat("dd MMMM yyyy");
-        request.setLocale("en");
-        ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, transactionId, request, Map.of("command", "undo")));
+        reverseLoanTransaction(loanId, transactionId, transactionDate);
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, transactionId, request, Map.of("command", "undo")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
+        return reverseLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .dateFormat("dd MMMM yyyy").transactionDate(transactionDate).transactionAmount(0.0).locale("en"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(
+                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "creditBalanceRefund")));
     }
 }

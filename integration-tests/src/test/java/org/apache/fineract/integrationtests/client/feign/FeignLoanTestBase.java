@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
@@ -59,6 +60,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSchedulerHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignTransactionHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanProductTemplates;
@@ -87,6 +89,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     protected static FeignChargesHelper chargesHelper;
     protected static FeignCodeHelper codeHelper;
     protected static FeignGlobalConfigurationHelper globalConfigurationHelper;
+    protected static FeignSchedulerHelper schedulerHelper;
     protected static LoanTestAccounts accounts;
 
     @BeforeAll
@@ -101,6 +104,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         chargesHelper = new FeignChargesHelper(client);
         codeHelper = new FeignCodeHelper(client);
         globalConfigurationHelper = new FeignGlobalConfigurationHelper(client);
+        schedulerHelper = new FeignSchedulerHelper(client);
     }
 
     protected LoanTestAccounts getAccounts() {
@@ -240,6 +244,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.waiveLoanCharge(loanId, loanChargeId, request);
     }
 
+    protected void waiveLoanCharge(Long loanId, Long loanChargeId, Integer installmentNumber) {
+        waiveLoanCharge(loanId, loanChargeId,
+                new PostLoansLoanIdChargesChargeIdRequest().locale(LoanTestData.LOCALE).installmentNumber(installmentNumber.longValue()));
+    }
+
     protected PostLoansLoanIdChargesChargeIdResponse payLoanCharge(Long loanId, Long loanChargeId,
             PostLoansLoanIdChargesChargeIdRequest request) {
         return loanHelper.payLoanCharge(loanId, loanChargeId, request);
@@ -291,6 +300,19 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, String command, String date, Double amount) {
         return transactionHelper.makeLoanRepayment(loanId, command, date, amount);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
+        return transactionHelper.reverseLoanTransaction(loanId, transactionId, transactionDate);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return transactionHelper.reverseLoanTransaction(loanId, transactionId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.makeCreditBalanceRefund(loanId, request);
     }
 
     protected void verifyJournalEntries(Long loanId, LoanTestData.Journal... expectedEntries) {
