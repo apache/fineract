@@ -31,19 +31,17 @@ import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 @AllArgsConstructor
 public class WorkingCapitalLoanCollectionData {
 
+    private Long pastDueDays;
     private Long delinquentDays;
     private LocalDate delinquentDate;
     private BigDecimal delinquentAmount;
 
     public List<DelinquencyPausePeriod> delinquencyPausePeriods;
-    public List<WorkingCapitalLoanRangeScheduleDelinquencyData> rangeLevelDelinquency;
+    public List<WorkingCapitalLoanRangeScheduleDelinquencyData> installmentLevelDelinquency;
 
     private BigDecimal delinquentPrincipal;
-    private BigDecimal delinquentFee;
-    private BigDecimal delinquentPenalty;
 
     public static WorkingCapitalLoanCollectionData initializeEmptyData() {
-        return new WorkingCapitalLoanCollectionData(0L, null, BigDecimal.ZERO, null, new ArrayList<>(), BigDecimal.ZERO, BigDecimal.ZERO,
-                BigDecimal.ZERO);
+        return new WorkingCapitalLoanCollectionData(0L, 0L, null, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), BigDecimal.ZERO);
     }
 }

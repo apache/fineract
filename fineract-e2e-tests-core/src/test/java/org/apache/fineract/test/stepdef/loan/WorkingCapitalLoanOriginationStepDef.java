@@ -37,7 +37,6 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.GetLoanOriginatorsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdOriginatorData;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.LoanOriginatorsResponse;
@@ -279,7 +278,6 @@ public class WorkingCapitalLoanOriginationStepDef extends AbstractStepDef {
         final String expectedExternalId = getExternalId(TestContextKey.ORIGINATOR_EXTERNAL_ID);
         final String expectedOriginatorTypeName = testContext().get(TestContextKey.ORIGINATOR_TYPE_NAME);
         final String expectedChannelTypeName = testContext().get(TestContextKey.ORIGINATOR_CHANNEL_TYPE_NAME);
-        final long originatorId = getOriginatorId(TestContextKey.ORIGINATOR_CREATE_RESPONSE);
 
         final List<GetWorkingCapitalLoansLoanIdOriginatorData> originators = retrieveLoanDetails().getOriginators();
         assertThat(originators).as("Originators in WC loan details").isNotNull().isNotEmpty();
@@ -288,15 +286,14 @@ public class WorkingCapitalLoanOriginationStepDef extends AbstractStepDef {
                         () -> new AssertionError("Originator with externalId " + expectedExternalId + " not found in WC loan details"));
 
         assertThat(originator.getId()).as("Originator id in WC loan details").isNotNull();
+        assertThat(originator.getExternalId()).as("Originator externalId in WC loan details").isEqualTo(expectedExternalId);
         assertThat(originator.getName()).as("Originator name in WC loan details").isNotNull();
         assertThat(originator.getStatus()).as("Originator status in WC loan details").isEqualTo("ACTIVE");
-
-        final GetLoanOriginatorsResponse originatorDetails = ok(
-                () -> fineractClient.loanOriginators().retrieveOneLoanOriginator(originatorId));
-        assertThat(originatorDetails.getOriginatorType()).as("Originator type").isNotNull();
-        assertThat(originatorDetails.getOriginatorType().getName()).as("Originator type name").isEqualTo(expectedOriginatorTypeName);
-        assertThat(originatorDetails.getChannelType()).as("Channel type").isNotNull();
-        assertThat(originatorDetails.getChannelType().getName()).as("Channel type name").isEqualTo(expectedChannelTypeName);
+        assertThat(originator.getOriginatorType()).as("Originator type in WC loan details").isNotNull();
+        assertThat(originator.getOriginatorType().getName()).as("Originator type name in WC loan details")
+                .isEqualTo(expectedOriginatorTypeName);
+        assertThat(originator.getChannelType()).as("Channel type in WC loan details").isNotNull();
+        assertThat(originator.getChannelType().getName()).as("Channel type name in WC loan details").isEqualTo(expectedChannelTypeName);
     }
 
     @Then("Working capital loan details has originator with name {string}")

@@ -498,8 +498,9 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         final List<String> values = new ArrayList<>();
         for (final String field : fields) {
             switch (field) {
-                case "product.name" -> values.add(loan.getProduct() == null ? null : loan.getProduct().getName());
-                case "submittedOnDate" -> values.add(loan.getSubmittedOnDate() == null ? null : loan.getSubmittedOnDate().toString());
+                case "product.name" -> values.add(loan.getLoanProductName());
+                case "submittedOnDate" -> values.add(loan.getTimeline() == null || loan.getTimeline().getSubmittedOnDate() == null ? null
+                        : loan.getTimeline().getSubmittedOnDate().toString());
                 case "expectedDisbursementDate" ->
                     values.add(loan.getDisbursementDetails() == null || loan.getDisbursementDetails().isEmpty() ? null
                             : loan.getDisbursementDetails().getFirst().getExpectedDisbursementDate().toString());
@@ -512,14 +513,14 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
                         : new Utils.DoubleFormatter(loan.getApprovedPrincipal().doubleValue()).format());
                 case "totalPaymentVolume" -> values.add(loan.getTotalPaymentVolume() == null ? null
                         : new Utils.DoubleFormatter(loan.getTotalPaymentVolume().doubleValue()).format());
-                case "periodPaymentRate" -> values.add(loan.getPeriodPaymentRate() == null ? null
-                        : new Utils.DoubleFormatter(loan.getPeriodPaymentRate().doubleValue()).format());
-                case "discount" ->
-                    values.add(loan.getDiscount() == null ? "null" : new Utils.DoubleFormatter(loan.getDiscount().doubleValue()).format());
-                case "discountProposed" -> values.add(loan.getDiscountProposed() == null ? "null"
-                        : new Utils.DoubleFormatter(loan.getDiscountProposed().doubleValue()).format());
-                case "discountApproved" -> values.add(loan.getDiscountApproved() == null ? "null"
-                        : new Utils.DoubleFormatter(loan.getDiscountApproved().doubleValue()).format());
+                case "periodPaymentRate" -> values.add(
+                        loan.getPaymentRate() == null ? null : new Utils.DoubleFormatter(loan.getPaymentRate().doubleValue()).format());
+                case "discount" -> values.add(
+                        loan.getDiscountFee() == null ? "null" : new Utils.DoubleFormatter(loan.getDiscountFee().doubleValue()).format());
+                case "discountProposed" -> values.add(loan.getProposedDiscountFee() == null ? "null"
+                        : new Utils.DoubleFormatter(loan.getProposedDiscountFee().doubleValue()).format());
+                case "discountApproved" -> values.add(loan.getApprovedDiscountFee() == null ? "null"
+                        : new Utils.DoubleFormatter(loan.getApprovedDiscountFee().doubleValue()).format());
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", field));
             }
         }

@@ -28,6 +28,8 @@ import org.mapstruct.Mapping;
 @Mapper(config = MapstructMapperConfig.class)
 public interface WorkingCapitalLoanDisbursementDetailMapper {
 
+    @Mapping(target = "loanId", source = "wcLoan.id")
+    @Mapping(target = "principal", source = "expectedAmount")
     @Mapping(target = "disbursedByUsername", source = "disbursedBy.username")
     @Mapping(target = "disbursedByFirstname", source = "disbursedBy.firstname")
     @Mapping(target = "disbursedByLastname", source = "disbursedBy.lastname")

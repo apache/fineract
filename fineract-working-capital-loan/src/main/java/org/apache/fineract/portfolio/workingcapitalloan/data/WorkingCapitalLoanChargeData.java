@@ -98,8 +98,7 @@ public final class WorkingCapitalLoanChargeData {
     }
 
     public static WorkingCapitalLoanChargeData template(final List<ChargeData> chargeOptions) {
-        return WorkingCapitalLoanChargeData.builder().chargeOptions(chargeOptions).externalLoanId(ExternalId.empty())
-                .externalLoanId(ExternalId.empty()).build();
+        return WorkingCapitalLoanChargeData.builder().chargeOptions(chargeOptions).build();
     }
 
 }

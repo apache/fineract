@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -61,6 +62,7 @@ import org.apache.fineract.portfolio.workingcapitalloannearbreach.service.Workin
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalLoanProductData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.service.WorkingCapitalLoanProductReadPlatformService;
+import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +88,9 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
     private final Optional<WorkingCapitalLoanOriginatorReadPlatformService> originatorReadService;
+    private final WorkingCapitalLoanChargeReadPlatformService chargeReadPlatformService;
+    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
+    private final AppUserRepository appUserRepository;
 
     @Override
     public WorkingCapitalLoanTemplateData retrieveTemplate(final Long productId, final Long clientId) {
@@ -109,10 +114,10 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                         .fundId(product.getFundId()) //
                         .fundName(product.getFundName()) //
                         .currency(product.getCurrency()) //
-                        .periodPaymentRate(product.getPeriodPaymentRate()) //
+                        .paymentRate(product.getPeriodPaymentRate()) //
                         .repaymentEvery(product.getRepaymentEvery()) //
                         .repaymentFrequencyType(product.getRepaymentFrequencyType()) //
-                        .discount(product.getDiscount()) //
+                        .discountFee(product.getDiscount()) //
                         .paymentAllocation(product.getPaymentAllocation()) //
                         .breach(product.getBreach()) //
                         .nearBreach(product.getNearBreach()) //
@@ -175,7 +180,10 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         WorkingCapitalLoanData data = this.mapper.toData(loan);
         WorkingCapitalLoanCollectionData collectionData = workingCapitalLoanDelinquencyReadPlatformService.getCollectionData(loanId,
                 ThreadLocalContextUtil.getBusinessDate());
-        data.setCollectionData(collectionData);
+        data.setDelinquent(collectionData);
+        data.setCharges(chargeReadPlatformService.retrieveLoanCharges(loanId));
+        enrichWithFullCurrency(data);
+        enrichWithSubmittedBy(loan, data);
         enrichWithRateAndTerm(loan, data);
         enrichWithStartDates(loan, data);
         enrichWithOriginators(loanId, data);
@@ -187,13 +195,37 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         return retrieveOne(repository.findIdByExternalId(externalId));
     }
 
+    private void enrichWithFullCurrency(final WorkingCapitalLoanData data) {
+        final CurrencyData currency = data.getCurrency();
+        if (currency == null || currency.getCode() == null) {
+            return;
+        }
+        final CurrencyData appCurrency = applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency.getCode()).toData();
+        final CurrencyData fullCurrency = new CurrencyData(currency.getCode(), appCurrency.getName(), currency.getDecimalPlaces(),
+                currency.getInMultiplesOf(), appCurrency.getDisplaySymbol(), appCurrency.getNameCode());
+        data.setCurrency(fullCurrency);
+        Optional.ofNullable(data.getSummary()).ifPresent(summary -> summary.setCurrency(fullCurrency));
+    }
+
+    private void enrichWithSubmittedBy(final WorkingCapitalLoan loan, final WorkingCapitalLoanData data) {
+        if (data.getTimeline() == null) {
+            return;
+        }
+        loan.getCreatedBy().flatMap(appUserRepository::findById).ifPresent(user -> {
+            data.getTimeline().setSubmittedByUsername(user.getUsername());
+            data.getTimeline().setSubmittedByFirstname(user.getFirstname());
+            data.getTimeline().setSubmittedByLastname(user.getLastname());
+        });
+    }
+
     private void enrichWithRateAndTerm(final WorkingCapitalLoan loan, final WorkingCapitalLoanData data) {
         final MathContext mc = MoneyHelper.getMathContext();
         final CurrencyData currency = WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan);
         scheduleRepositoryWrapper.readModel(loan.getId(), mc, currency).ifPresent(model -> {
             final BigDecimal dailyEir = model.effectiveInterestRate();
-            data.setTotalNoPayments(model.effectiveTotalTerm());
+            data.setNumberOfRepayments(model.effectiveTotalTerm());
             data.setPeriodPaymentAmount(model.expectedPaymentAmount() != null ? model.expectedPaymentAmount().getAmount() : null);
+            data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
             data.setDailyEir(dailyEir);
             if (dailyEir != null) {
                 data.setCalculatedAnnualEir(BigDecimal.ONE.add(dailyEir, mc).pow(365, mc).subtract(BigDecimal.ONE, mc));

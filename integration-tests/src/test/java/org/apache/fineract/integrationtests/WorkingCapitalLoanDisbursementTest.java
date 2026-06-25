@@ -301,24 +301,22 @@ public class WorkingCapitalLoanDisbursementTest {
             assertStatus(data, "loanStatusType.active");
             assertNotNull(data.getBalance(), "GET loan after disburse should include balance");
             assertEqualBigDecimal(transactionAmount.add(discountAmount), data.getBalance().getPrincipalOutstanding());
-            assertEqualBigDecimal(discountAmount, data.getDiscount());
+            assertEqualBigDecimal(discountAmount, data.getDiscountFee());
             assertEquals(loanId, data.getId());
-            assertNotNull(data.getClient());
-            assertNotNull(data.getProduct());
+            assertNotNull(data.getClientId());
+            assertNotNull(data.getLoanProductId());
 
             if (data.getTimeline() != null) {
                 assertNotNull(data.getTimeline().getActualDisbursementDate());
                 assertDateEquals(currentDate, data.getTimeline().getActualDisbursementDate());
                 assertNotNull(data.getTimeline().getApprovedOnDate());
                 assertNull(data.getTimeline().getActualMaturityDate(), "Expected actualMaturityDate to be null after disbursement");
-                assertNotNull(data.getTimeline().getDisbursementDetails(), "timeline should include disbursementDetails list");
-                assertFalse(data.getTimeline().getDisbursementDetails().isEmpty(), "timeline disbursementDetails should not be empty");
             }
             assertNotNull(data.getDisbursementDetails(), "GET loan after disburse should include disbursementDetails array");
             assertFalse(data.getDisbursementDetails().isEmpty(), "disbursementDetails should not be empty");
             final GetDisbursementDetail disbursement = data.getDisbursementDetails().getFirst();
             assertNotNull(disbursement.getExpectedDisbursementDate(), "disbursementDetails should include expectedDisbursementDate");
-            assertNotNull(disbursement.getExpectedAmount(), "disbursementDetails should include expectedAmount");
+            assertNotNull(disbursement.getPrincipal(), "disbursementDetails should include principal");
             assertDateEquals(currentDate, disbursement.getActualDisbursementDate());
             assertEqualBigDecimal(transactionAmount, disbursement.getActualAmount());
 

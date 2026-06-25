@@ -594,7 +594,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     approvedByFirstname, approvedByLastname, expectedDisbursementDate, actualDisbursementDate, disbursedByUsername,
                     disbursedByFirstname, disbursedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname,
                     actualMaturityDate, expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname,
-                    chargedOffOnDate, chargedOffByUsername, chargedOffByFirstname, chargedOffByLastname, null);
+                    chargedOffOnDate, chargedOffByUsername, chargedOffByFirstname, chargedOffByLastname);
 
             return new LoanAccountSummaryData(id, accountNo, parentAccountNumber, externalId, productId, loanProductName,
                     shortLoanProductName, loanStatus, currency, loanType, loanCycle, timeline, inArrears, originalLoan, loanBalance,

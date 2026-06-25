@@ -37,8 +37,9 @@ import lombok.Setter;
 public class WorkingCapitalLoanDisbursementDetailData {
 
     private Long id;
+    private Long loanId;
     private LocalDate expectedDisbursementDate;
-    private BigDecimal expectedAmount;
+    private BigDecimal principal;
     private LocalDate expectedMaturityDate;
     private LocalDate actualDisbursementDate;
     private BigDecimal actualAmount;

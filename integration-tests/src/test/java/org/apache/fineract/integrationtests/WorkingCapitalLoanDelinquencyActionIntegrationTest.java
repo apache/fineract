@@ -460,7 +460,7 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
 
         final LocalDate submittedOnDate = FeignCalls
                 .ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId))
-                .getSubmittedOnDate();
+                .getTimeline().getSubmittedOnDate();
         applicationHelper.approveById(loanId, WorkingCapitalLoanApplicationTestBuilder.buildApproveRequest(submittedOnDate));
         return loanId;
     }

@@ -77,7 +77,7 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
 
         GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
         assertNotNull(loan);
-        assertEquals(0, BigDecimal.valueOf(17).compareTo(loan.getPeriodPaymentRate()));
+        assertEquals(0, BigDecimal.valueOf(17).compareTo(loan.getPaymentRate()));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
         assertTrue(firstChange.getReversed(), "Previous rate change should be auto-reversed");
 
         GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-        assertEquals(0, BigDecimal.valueOf(15).compareTo(loan.getPeriodPaymentRate()));
+        assertEquals(0, BigDecimal.valueOf(15).compareTo(loan.getPaymentRate()));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
             wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(11)));
 
             GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(0, BigDecimal.valueOf(11).compareTo(loan.getPeriodPaymentRate()),
+            assertEquals(0, BigDecimal.valueOf(11).compareTo(loan.getPaymentRate()),
                     "Rate should be updated to 11 after second rate change");
 
             List<WorkingCapitalLoanPeriodPaymentRateChangeData> history = wcLoanHelper.getRateChangeHistory(loanId);
@@ -170,7 +170,7 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
             wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15)));
 
             GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(0, BigDecimal.valueOf(15).compareTo(loan.getPeriodPaymentRate()),
+            assertEquals(0, BigDecimal.valueOf(15).compareTo(loan.getPaymentRate()),
                     "Rate should be updated to 15 after past-term rate change");
         });
     }

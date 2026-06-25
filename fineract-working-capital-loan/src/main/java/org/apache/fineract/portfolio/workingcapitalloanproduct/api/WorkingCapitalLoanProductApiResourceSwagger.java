@@ -355,6 +355,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
             public Long id;
             @Schema(example = "Bucket 1")
             public String name;
+            @Schema(example = "WORKING_CAPITAL")
+            public String bucketType;
             public List<GetDelinquencyRange> ranges;
 
             @Schema(description = "GetDelinquencyRange")
