@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.portfolio.floatingrates.domain;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,18 +28,22 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
-import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodRequest;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateRequest;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateRequest;
 
 @Entity
 @Table(name = "m_floating_rates", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
@@ -85,35 +86,41 @@ public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         }
     }
 
-    public static FloatingRate createNew(JsonCommand command) {
+    public static FloatingRate createNew(final FloatingRateRequest request) {
 
-        final String name = command.stringValueOfParameterNamed("name");
-        final boolean isBaseLendingRate = command.parameterExists("isBaseLendingRate")
-                && command.booleanPrimitiveValueOfParameterNamed("isBaseLendingRate");
-        final boolean isActive = !command.parameterExists("isActive") || command.booleanPrimitiveValueOfParameterNamed("isActive");
-        final List<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(command);
+        final String name = request.getName();
+        final boolean isBaseLendingRate = Boolean.TRUE.equals(request.getIsBaseLendingRate());
+        final boolean isActive = request.getIsActive() == null || request.getIsActive();
+        final List<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(request.getRatePeriods());
 
         return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods);
     }
 
-    private static List<FloatingRatePeriod> getRatePeriods(final JsonCommand command) {
-        if (!command.parameterExists("ratePeriods")) {
+    private static List<FloatingRatePeriod> getRatePeriods(final List<FloatingRatePeriodRequest> ratePeriodRequests) {
+        if (ratePeriodRequests == null) {
             return null;
         }
-        List<FloatingRatePeriod> ratePeriods = new ArrayList<>();
-        JsonArray arrayOfParameterNamed = command.arrayOfParameterNamed("ratePeriods");
-        for (final JsonElement ratePeriod : arrayOfParameterNamed) {
-            final JsonObject ratePeriodObject = ratePeriod.getAsJsonObject();
-            final JsonParserHelper helper = new JsonParserHelper();
-            final LocalDate fromDate = helper.extractLocalDateNamed("fromDate", ratePeriod, new HashSet<String>());
-            final BigDecimal interestRate = ratePeriodObject.get("interestRate").getAsBigDecimal();
-            final boolean isDifferentialToBaseLendingRate = helper.parameterExists("isDifferentialToBaseLendingRate", ratePeriod)
-                    && ratePeriodObject.get("isDifferentialToBaseLendingRate").getAsBoolean();
+        final List<FloatingRatePeriod> ratePeriods = new ArrayList<>();
+        for (final FloatingRatePeriodRequest ratePeriod : ratePeriodRequests) {
+            final LocalDate fromDate = parseDate(ratePeriod.getFromDate(), ratePeriod.getDateFormat(), ratePeriod.getLocale());
+            final BigDecimal interestRate = ratePeriod.getInterestRate();
+            final boolean isDifferentialToBaseLendingRate = Boolean.TRUE.equals(ratePeriod.getIsDifferentialToBaseLendingRate());
             final boolean isActive = true;
             ratePeriods.add(new FloatingRatePeriod(fromDate, interestRate, isDifferentialToBaseLendingRate, isActive));
         }
 
         return ratePeriods;
+    }
+
+    private static LocalDate parseDate(final String value, final String dateFormat, final String locale) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        if (StringUtils.isBlank(dateFormat)) {
+            return LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE);
+        }
+        final Locale loc = StringUtils.isBlank(locale) ? Locale.getDefault() : Locale.forLanguageTag(locale.replace('_', '-'));
+        return LocalDate.parse(value, new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern(dateFormat).toFormatter(loc));
     }
 
     public String getName() {
@@ -132,32 +139,29 @@ public class FloatingRate extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return this.floatingRatePeriods;
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final FloatingRateUpdateRequest request) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if (command.isChangeInStringParameterNamed("name", this.name)) {
-            final String newValue = command.stringValueOfParameterNamed("name");
-            actualChanges.put("name", newValue);
-            this.name = newValue;
+        if (request.getName() != null && !request.getName().equals(this.name)) {
+            this.name = request.getName();
+            actualChanges.put("name", this.name);
         }
 
-        if (command.isChangeInBooleanParameterNamed("isBaseLendingRate", this.isBaseLendingRate)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("isBaseLendingRate");
-            actualChanges.put("isBaseLendingRate", newValue);
-            this.isBaseLendingRate = newValue;
+        if (request.getIsBaseLendingRate() != null && request.getIsBaseLendingRate() != this.isBaseLendingRate) {
+            this.isBaseLendingRate = request.getIsBaseLendingRate();
+            actualChanges.put("isBaseLendingRate", this.isBaseLendingRate);
         }
 
-        if (command.isChangeInBooleanParameterNamed("isActive", this.isActive)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("isActive");
-            actualChanges.put("isActive", newValue);
-            this.isActive = newValue;
+        if (request.getIsActive() != null && request.getIsActive() != this.isActive) {
+            this.isActive = request.getIsActive();
+            actualChanges.put("isActive", this.isActive);
         }
 
-        final List<FloatingRatePeriod> newRatePeriods = getRatePeriods(command);
+        final List<FloatingRatePeriod> newRatePeriods = getRatePeriods(request.getRatePeriods());
         if (newRatePeriods != null && !newRatePeriods.isEmpty()) {
             updateRatePeriods(newRatePeriods);
-            actualChanges.put("ratePeriods", command.jsonFragment("ratePeriods"));
+            actualChanges.put("ratePeriods", request.getRatePeriods());
         }
 
         return actualChanges;

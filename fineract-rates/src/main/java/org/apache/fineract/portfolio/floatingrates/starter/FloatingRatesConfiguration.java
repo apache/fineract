@@ -20,8 +20,8 @@ package org.apache.fineract.portfolio.floatingrates.starter;
 
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.floatingrates.serialization.FloatingRateDataValidator;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWritePlatformService;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWritePlatformServiceImpl;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWriteService;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWriteServiceImpl;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,9 +39,9 @@ public class FloatingRatesConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FloatingRateWritePlatformService.class)
-    public FloatingRateWritePlatformService floatingRateWritePlatformService(FloatingRateDataValidator fromApiJsonDeserializer,
+    @ConditionalOnMissingBean(FloatingRateWriteService.class)
+    public FloatingRateWriteService floatingRateWriteService(FloatingRateDataValidator floatingRateDataValidator,
             FloatingRateRepositoryWrapper floatingRateRepository) {
-        return new FloatingRateWritePlatformServiceImpl(fromApiJsonDeserializer, floatingRateRepository);
+        return new FloatingRateWriteServiceImpl(floatingRateDataValidator, floatingRateRepository);
     }
 }

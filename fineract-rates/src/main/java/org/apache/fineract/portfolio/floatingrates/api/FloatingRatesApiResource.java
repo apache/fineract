@@ -35,15 +35,17 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.floatingrates.command.FloatingRateCreateCommand;
+import org.apache.fineract.portfolio.floatingrates.command.FloatingRateUpdateCommand;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateCreateResponse;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateRequest;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateRequest;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateResponse;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -55,9 +57,8 @@ public class FloatingRatesApiResource {
 
     private static final String RESOURCE_NAME = "FLOATINGRATE";
     private final PlatformSecurityContext context;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final DefaultToApiJsonSerializer<FloatingRateData> toApiJsonSerializer;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
+    private final CommandDispatcher dispatcher;
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -66,10 +67,11 @@ public class FloatingRatesApiResource {
             + "Mandatory Fields: name\n" + "Optional Fields: isBaseLendingRate, isActive, ratePeriods")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FloatingRateRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FloatingRatesApiResourceSwagger.PostFloatingRatesResponse.class)))
-    public CommandProcessingResult createFloatingRate(@Parameter(hidden = true) final FloatingRateRequest floatingRateRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createFloatingRate()
-                .withJson(toApiJsonSerializer.serialize(floatingRateRequest)).build();
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public FloatingRateCreateResponse createFloatingRate(@Parameter(hidden = true) final FloatingRateRequest floatingRateRequest) {
+        final FloatingRateCreateCommand command = new FloatingRateCreateCommand();
+        command.setPayload(floatingRateRequest);
+        final Supplier<FloatingRateCreateResponse> response = dispatcher.dispatch(command);
+        return response.get();
     }
 
     @GET
@@ -97,13 +99,16 @@ public class FloatingRatesApiResource {
     @Operation(summary = "Update Floating Rate", operationId = "updateFloatingRate", description = "Updates new Floating Rate. Rate Periods in the past cannot be modified. All the future rateperiods would be replaced with the new ratePeriods data sent.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FloatingRateRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdResponse.class)))
-    public CommandProcessingResult updateFloatingRate(
+    public FloatingRateUpdateResponse updateFloatingRate(
             @PathParam("floatingRateId") @Parameter(description = "floatingRateId") final Long floatingRateId,
             @Parameter(hidden = true) final FloatingRateRequest floatingRateRequest) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFloatingRate(floatingRateId)
-                .withJson(toApiJsonSerializer.serialize(floatingRateRequest)).build();
-
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final FloatingRateUpdateRequest updateRequest = FloatingRateUpdateRequest.builder().id(floatingRateId)
+                .name(floatingRateRequest.getName()).isBaseLendingRate(floatingRateRequest.getIsBaseLendingRate())
+                .isActive(floatingRateRequest.getIsActive()).ratePeriods(floatingRateRequest.getRatePeriods()).build();
+        final FloatingRateUpdateCommand command = new FloatingRateUpdateCommand();
+        command.setPayload(updateRequest);
+        final Supplier<FloatingRateUpdateResponse> response = dispatcher.dispatch(command);
+        return response.get();
     }
 
 }

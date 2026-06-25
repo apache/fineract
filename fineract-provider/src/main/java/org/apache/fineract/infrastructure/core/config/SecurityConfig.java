@@ -413,6 +413,11 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructionrunhistory"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
 
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/floatingrates"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_FLOATINGRATE")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/floatingrates/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE")
+
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));

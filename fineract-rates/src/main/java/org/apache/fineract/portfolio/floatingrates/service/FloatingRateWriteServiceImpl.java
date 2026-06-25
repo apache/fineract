@@ -23,11 +23,12 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateCreateResponse;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateRequest;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateRequest;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateResponse;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.floatingrates.serialization.FloatingRateDataValidator;
@@ -35,64 +36,56 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
 @Slf4j
-public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePlatformService {
+@RequiredArgsConstructor
+public class FloatingRateWriteServiceImpl implements FloatingRateWriteService {
 
-    private final FloatingRateDataValidator fromApiJsonDeserializer;
+    private final FloatingRateDataValidator floatingRateDataValidator;
     private final FloatingRateRepositoryWrapper floatingRateRepository;
 
     @Transactional
     @Override
-    public CommandProcessingResult createFloatingRate(final JsonCommand command) {
+    public FloatingRateCreateResponse create(final FloatingRateRequest request) {
         try {
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
-            final FloatingRate newFloatingRate = FloatingRate.createNew(command);
+            this.floatingRateDataValidator.validateForCreate(request);
+            final FloatingRate newFloatingRate = FloatingRate.createNew(request);
             this.floatingRateRepository.saveAndFlush(newFloatingRate);
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(newFloatingRate.getId()) //
-                    .build();
+            return FloatingRateCreateResponse.builder().resourceId(newFloatingRate.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+            handleDataIntegrityIssues(request.getName(), dve.getMostSpecificCause(), dve);
+            return FloatingRateCreateResponse.builder().build();
         } catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleDataIntegrityIssues(request.getName(), throwable, dve);
+            return FloatingRateCreateResponse.builder().build();
         }
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult updateFloatingRate(final JsonCommand command) {
+    public FloatingRateUpdateResponse update(final FloatingRateUpdateRequest request) {
         try {
-            final FloatingRate floatingRateForUpdate = this.floatingRateRepository.findOneWithNotFoundDetection(command.entityId());
-            this.fromApiJsonDeserializer.validateForUpdate(command.json(), floatingRateForUpdate);
-            final Map<String, Object> changes = floatingRateForUpdate.update(command);
+            final FloatingRate floatingRateForUpdate = this.floatingRateRepository.findOneWithNotFoundDetection(request.getId());
+            this.floatingRateDataValidator.validateForUpdate(request, floatingRateForUpdate);
+            final Map<String, Object> changes = floatingRateForUpdate.update(request);
 
             if (!changes.isEmpty()) {
                 this.floatingRateRepository.save(floatingRateForUpdate);
             }
 
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(command.entityId()) //
-                    .with(changes) //
-                    .build();
+            return FloatingRateUpdateResponse.builder().resourceId(request.getId()).changes(changes).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+            handleDataIntegrityIssues(request.getName(), dve.getMostSpecificCause(), dve);
+            return FloatingRateUpdateResponse.builder().build();
         } catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleDataIntegrityIssues(request.getName(), throwable, dve);
+            return FloatingRateUpdateResponse.builder().build();
         }
     }
 
-    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+    private void handleDataIntegrityIssues(final String name, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("unq_name")) {
-            final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.floatingrates.duplicate.name",
                     "Floating Rate with name `" + name + "` already exists", "name", name);
         }

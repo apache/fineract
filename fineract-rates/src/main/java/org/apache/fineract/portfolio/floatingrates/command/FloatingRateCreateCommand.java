@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.floatingrates.service;
+package org.apache.fineract.portfolio.floatingrates.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateRequest;
 
-public interface FloatingRateWritePlatformService {
-
-    CommandProcessingResult createFloatingRate(JsonCommand command);
-
-    CommandProcessingResult updateFloatingRate(JsonCommand command);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class FloatingRateCreateCommand extends Command<FloatingRateRequest> {}
