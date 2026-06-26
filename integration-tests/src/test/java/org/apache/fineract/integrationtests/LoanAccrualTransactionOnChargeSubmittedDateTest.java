@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -38,6 +37,8 @@ import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -69,7 +70,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
     private ClientHelper clientHelper;
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
     private AccountHelper accountHelper;
-    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private InlineLoanCOBHelper inlineLoanCOBHelper;
 
     @BeforeEach
@@ -82,7 +82,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
         this.inlineLoanCOBHelper = new InlineLoanCOBHelper(this.requestSpec, this.responseSpec);
     }
 
@@ -677,17 +676,16 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
             assertNotNull(feeLoanChargeId);
 
             // adjust loan schedule
-            final String requestJSON = new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("18 June 2023")
-                    .updateAdjustedDueDate("18 July 2023").updateSubmittedOnDate("19 May 2023").updateGraceOnPrincipal(null)
-                    .updateGraceOnInterest(null).updateExtraTerms(null).build(loanId.toString());
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("approvedOnDate", "19 May 2023");
-            final String aproveRequestJSON = new Gson().toJson(map);
-
-            Integer loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId, aproveRequestJSON);
+            final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateRescheduleFromDate("18 June 2023").updateAdjustedDueDate("18 July 2023").updateSubmittedOnDate("19 May 2023")
+                    .updateGraceOnPrincipal(null).updateGraceOnInterest(null).updateExtraTerms(null).buildRequest(loanId.longValue());
+            final PostCreateRescheduleLoansResponse loanRescheduleRequestResponse = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            final Long loanRescheduleRequestId = loanRescheduleRequestResponse.getResourceId();
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId,
+                    new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("18 June 2023").updateAdjustedDueDate("18 July 2023")
+                            .updateSubmittedOnDate("19 May 2023").updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                            .updateExtraTerms(null).getApproveRequest());
 
             // run cob
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, chargeSubmittedDate.plusDays(1));

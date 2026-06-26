@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,6 +39,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -50,7 +52,6 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
@@ -80,11 +81,10 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
     private ResponseSpecification generalResponseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
-    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private Integer clientId;
     private Integer loanProductId;
     private Integer loanId;
-    private Integer loanRescheduleRequestId;
+    private Long loanRescheduleRequestId;
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
@@ -97,7 +97,6 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
 
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -205,10 +204,11 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
     private void createLoanRescheduleRequest() {
         LOG.info("---------------------------------CREATING LOAN RESCHEDULE REQUEST------------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
     }
@@ -224,11 +224,12 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
         LOG.info("-----------------------------REJECTING LOAN RESCHEDULE REQUEST--------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().getRejectLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.rejectLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
+        final PostUpdateRescheduleLoansRequest rejectRequest = new LoanRescheduleRequestTestBuilder().getRejectRequest();
+        LoanRescheduleRequestHelper.rejectLoanRescheduleRequest(this.loanRescheduleRequestId, rejectRequest);
 
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("rejected"));
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getRejected());
 
         LOG.info("Successfully rejected loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
     }
@@ -239,11 +240,12 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
         LOG.info("-----------------------------APPROVING LOAN RESCHEDULE REQUEST--------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
 
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         final Integer numberOfRepayments = (Integer) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
                 "numberOfRepayments");
@@ -280,22 +282,22 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
                             .approvedOnDate("01 January 2023").locale("en"));
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanRescheduleRequestHelper
+                    () -> LoanRescheduleRequestHelper
                             .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
                                     .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
                                     .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
-            assertEquals(400, exception.getResponse().code());
+            assertEquals(400, exception.getStatus());
             assertTrue(exception.getMessage().contains("loan.is.not.active"));
 
             loanTransactionHelper.disburseLoan(loanResponse.get().getLoanId(),
                     new PostLoansLoanIdRequest().actualDisbursementDate("15 February 2023").dateFormat(DATETIME_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
 
-            rescheduleResponse.set(loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+            rescheduleResponse.set(LoanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
                     .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
                     .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
 
-            loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+            LoanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
                     .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("15 February 2023")
                     .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023"));
         });
@@ -303,22 +305,22 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
         // Do not allow create interest rate change if a previous interest rate change got already approved for that
         // date
         runAt("16 February 2023", () -> {
-            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = LoanRescheduleRequestHelper
                     .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
                             .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023").newInterestRate(BigDecimal.ONE)
                             .rescheduleReasonId(1L).rescheduleFromDate("17 February 2023"));
 
-            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
                     new PostUpdateRescheduleLoansRequest().approvedOnDate("17 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
 
-            PostCreateRescheduleLoansResponse secondRescheduleLoansResponse = loanRescheduleRequestHelper
+            PostCreateRescheduleLoansResponse secondRescheduleLoansResponse = LoanRescheduleRequestHelper
                     .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
                             .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("17 February 2023").newInterestRate(BigDecimal.TEN)
                             .rescheduleReasonId(1L).rescheduleFromDate("17 February 2023"));
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.get().getLoanId());
             assertEquals(loanDetails.getSummary().getInterestCharged().stripTrailingZeros(), BigDecimal.valueOf(1.53).stripTrailingZeros());
 
-            loanRescheduleRequestHelper.approveLoanRescheduleRequest(secondRescheduleLoansResponse.getResourceId(),
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(secondRescheduleLoansResponse.getResourceId(),
                     new PostUpdateRescheduleLoansRequest().approvedOnDate("17 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
             loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.get().getLoanId());
             assertEquals(loanDetails.getSummary().getInterestCharged().stripTrailingZeros(), BigDecimal.valueOf(4.22).stripTrailingZeros());
@@ -326,15 +328,15 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
         // Allow new interest rate change if the previous got rejected
         runAt("17 February 2023", () -> {
-            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = LoanRescheduleRequestHelper
                     .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanResponse.get().getLoanId())
                             .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("18 February 2023").newInterestRate(BigDecimal.ONE)
                             .rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
 
-            loanRescheduleRequestHelper.rejectLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+            LoanRescheduleRequestHelper.rejectLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
                     new PostUpdateRescheduleLoansRequest().rejectedOnDate("18 February 2024").locale("en").dateFormat(DATETIME_PATTERN));
 
-            loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
+            LoanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()
                     .loanId(loanResponse.get().getLoanId()).dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate("18 February 2023")
                     .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
 
@@ -347,12 +349,13 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
     private void createLoanRescheduleChangeEMIRequest() {
         LOG.info("---------------------------------CREATING LOAN RESCHEDULE REQUEST CHANGE EMI------------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateEMI("5000").updateEmiChangeEndDate("4 February 2015")
-                .updateRescheduleFromDate("04 January 2015").updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateEMI("5000").updateEmiChangeEndDate("4 February 2015")
+                .updateRescheduleFromDate("04 January 2015").updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
     }
@@ -404,13 +407,13 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "400", null);
 
-            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = LoanRescheduleRequestHelper
                     .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(DATETIME_PATTERN)
                             .locale("en").submittedOnDate("1 March 2024").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
                             .rescheduleFromDate("1 April 2024"));
 
             GetLoanRescheduleRequestResponse getLoanRescheduleRequestResponse = Assertions.assertDoesNotThrow(
-                    () -> loanRescheduleRequestHelper.readLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(), null));
+                    () -> LoanRescheduleRequestHelper.readLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(), null));
             Assertions.assertNotNull(getLoanRescheduleRequestResponse);
         });
     }
@@ -428,15 +431,16 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
             loanTransactionHelper.approveLoan("1 March 2024", loanId.intValue());
             loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "4000", null);
 
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                    .updateExtraTerms("2").updateEMI("500").updateEmiChangeEndDate("01 September 2024")
-                    .updateRescheduleFromDate("01 April 2024").updateSubmittedOnDate("01 March 2024").build(loanId.toString());
+            PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                    .updateGraceOnInterest(null).updateExtraTerms("2").updateEMI("500").updateEmiChangeEndDate("01 September 2024")
+                    .updateRescheduleFromDate("01 April 2024").updateSubmittedOnDate("01 March 2024").buildRequest(loanId);
 
-            Integer rescheduleRequestId = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            PostCreateRescheduleLoansResponse rescheduleResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+            Long rescheduleRequestId = rescheduleResponse.getResourceId();
             Assertions.assertNotNull(rescheduleRequestId);
 
-            GetLoanRescheduleRequestResponse createResponse = loanRescheduleRequestHelper
-                    .readLoanRescheduleRequest(rescheduleRequestId.longValue(), null);
+            GetLoanRescheduleRequestResponse createResponse = LoanRescheduleRequestHelper.readLoanRescheduleRequest(rescheduleRequestId,
+                    null);
             Assertions.assertNotNull(createResponse);
             Assertions.assertNotNull(createResponse.getLoanTermVariationsData());
 
@@ -510,13 +514,13 @@ public class LoanRescheduleRequestTest extends BaseLoanIntegrationTest {
 
     private PostCreateRescheduleLoansResponse rescheduleLoanWithNewInterestRate(Long loanId, String submittedOnDate,
             BigDecimal newInterestRate, String rescheduleFromDate) {
-        return loanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanId)
+        return LoanRescheduleRequestHelper.createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanId)
                 .dateFormat(DATETIME_PATTERN).locale("en").submittedOnDate(submittedOnDate).newInterestRate(newInterestRate)
                 .rescheduleReasonId(1L).rescheduleFromDate(rescheduleFromDate));
     }
 
     private void approveLoanReschedule(Long rescheduleId, String approvedOnDate) {
-        loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleId,
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleId,
                 new PostUpdateRescheduleLoansRequest().approvedOnDate(approvedOnDate).locale("en").dateFormat(DATETIME_PATTERN));
     }
 

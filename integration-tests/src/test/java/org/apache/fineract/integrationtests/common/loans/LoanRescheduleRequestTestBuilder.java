@@ -19,7 +19,10 @@
 package org.apache.fineract.integrationtests.common.loans;
 
 import com.google.gson.Gson;
+import java.math.BigDecimal;
 import java.util.HashMap;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 
 public class LoanRescheduleRequestTestBuilder {
 
@@ -171,5 +174,45 @@ public class LoanRescheduleRequestTestBuilder {
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("approvedOnDate", submittedOnDate);
         return new Gson().toJson(map);
+    }
+
+    public PostCreateRescheduleLoansRequest buildRequest(final Long loanId) {
+        PostCreateRescheduleLoansRequest request = new PostCreateRescheduleLoansRequest().dateFormat("dd MMMM yyyy").locale("en_GB")
+                .loanId(loanId).submittedOnDate(submittedOnDate).rescheduleFromDate(rescheduleFromDate)
+                .rescheduleReasonId(Long.valueOf(rescheduleReasonId));
+
+        if (graceOnPrincipal != null) {
+            request.graceOnPrincipal(Integer.valueOf(graceOnPrincipal));
+        }
+        if (graceOnInterest != null) {
+            request.graceOnInterest(Integer.valueOf(graceOnInterest));
+        }
+        if (extraTerms != null) {
+            request.extraTerms(Integer.valueOf(extraTerms));
+        }
+        if (newInterestRate != null) {
+            request.newInterestRate(new BigDecimal(newInterestRate));
+        }
+        if (adjustedDueDate != null) {
+            request.adjustedDueDate(adjustedDueDate);
+        }
+        if (rescheduleReasonComment != null) {
+            request.rescheduleReasonComment(rescheduleReasonComment);
+        }
+        if (emi != null) {
+            request.emi(new BigDecimal(emi));
+        }
+        if (emiEndDate != null) {
+            request.endDate(emiEndDate);
+        }
+        return request;
+    }
+
+    public PostUpdateRescheduleLoansRequest getRejectRequest() {
+        return new PostUpdateRescheduleLoansRequest().locale("en").dateFormat("dd MMMM yyyy").rejectedOnDate(submittedOnDate);
+    }
+
+    public PostUpdateRescheduleLoansRequest getApproveRequest() {
+        return new PostUpdateRescheduleLoansRequest().locale("en").dateFormat("dd MMMM yyyy").approvedOnDate(submittedOnDate);
     }
 }
