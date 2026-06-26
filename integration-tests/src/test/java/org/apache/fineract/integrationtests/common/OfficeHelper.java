@@ -32,11 +32,11 @@ public class OfficeHelper {
     public static final long HEAD_OFFICE_ID = 1L; // The ID is hardcoded in the initial Liquibase migration script
 
     public GetOfficesResponse retrieveOffice(Long officeId) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().retrieveOffice(officeId));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().retrieveOneOffice(officeId));
     }
 
     public static GetOfficesResponse getHeadOffice() {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().retrieveOffice(HEAD_OFFICE_ID));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().retrieveOneOffice(HEAD_OFFICE_ID));
     }
 
     public PostOfficesResponse createOffice(final LocalDate openingDate) {
@@ -70,7 +70,7 @@ public class OfficeHelper {
     }
 
     public GetOfficesResponse retrieveOfficeByExternalId(String externalId) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().retrieveOfficeByExternalId(externalId));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().retrieveOneOfficeByExternalId(externalId));
     }
 
     public PutOfficesOfficeIdResponse updateOfficeByExternalId(String externalId, String name, String openingDate) {
@@ -79,6 +79,6 @@ public class OfficeHelper {
                 .openingDate(openingDate)//
                 .dateFormat("dd MMMM yyyy")//
                 .locale("en");
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().updateOfficeWithExternalId(externalId, request));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().offices().updateOfficeByExternalId(externalId, request));
     }
 }

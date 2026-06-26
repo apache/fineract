@@ -60,7 +60,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
         // CRITICAL: SchedulerGlobalInitializerStep stops the scheduler globally
         // Solution: START the scheduler so the job runs every 1 second automatically
         log.debug("Starting scheduler to enable automatic job execution every 1 second...");
-        executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus("start", Map.of()));
+        executeVoid(() -> fineractClient.scheduler().handleCommandsScheduler("start", Map.of()));
         log.debug("Scheduler started successfully");
 
         // Manually execute once immediately to publish any queued events from initialization
@@ -110,7 +110,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
         // Stop the scheduler to prevent jobs from running between test suites
         log.debug("Stopping scheduler...");
         try {
-            executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus(Map.of("command", "stop")));
+            executeVoid(() -> fineractClient.scheduler().handleCommandsScheduler(Map.of("command", "stop")));
             log.debug("Scheduler stopped successfully");
         } catch (Exception e) {
             log.warn("Failed to stop scheduler: {}", e.getMessage());

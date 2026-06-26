@@ -30,15 +30,15 @@ public final class PasswordPreferencesHelper {
     private PasswordPreferencesHelper() {}
 
     public static void updatePasswordPreferences(String validationPolicyId) {
-        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().passwordPreferences()
-                .update7(new PutPasswordPreferencesTemplateRequest().validationPolicyId(Long.parseLong(validationPolicyId))));
+        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().passwordPreferences().updatePasswordPreferences(
+                new PutPasswordPreferencesTemplateRequest().validationPolicyId(Long.parseLong(validationPolicyId))));
     }
 
     public static GetPasswordPreferencesTemplateResponse getActivePasswordPreference() {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().passwordPreferences().retrieve2());
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().passwordPreferences().retrieveAllPasswordPreferences());
     }
 
     public static List<GetPasswordPreferencesTemplateResponse> getAllPreferences() {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().passwordPreferences().template4());
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().passwordPreferences().retrieveTemplatePasswordPreferences());
     }
 }

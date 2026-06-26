@@ -53,7 +53,7 @@ public class InlineJobApiResource {
     @Path("{jobName}/inline")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Starts an inline Job", description = "Starts an inline Job")
+    @Operation(summary = "Starts an inline Job", operationId = "executeInlineJob", description = "Starts an inline Job")
     @RequestBody(content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class)))
     @ApiResponse(responseCode = "400", description = "Request body item size validation error")

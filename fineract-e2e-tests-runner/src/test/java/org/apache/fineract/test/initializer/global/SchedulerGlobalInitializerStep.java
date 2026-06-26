@@ -38,6 +38,6 @@ public class SchedulerGlobalInitializerStep implements FineractGlobalInitializer
 
     @Override
     public void initialize() throws Exception {
-        executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus(Map.of("command", SCHEDULER_STATUS_STOP)));
+        executeVoid(() -> fineractClient.scheduler().handleCommandsScheduler(Map.of("command", SCHEDULER_STATUS_STOP)));
     }
 }

@@ -129,7 +129,7 @@ public final class RolesHelper {
     }
 
     public CommandProcessingResult updatePermissions(PutPermissionsRequest request) {
-        return Calls.ok(FineractClientHelper.getFineractClient().permissions.updatePermissionsDetails(request));
+        return Calls.ok(FineractClientHelper.getFineractClient().permissions.updatePermissions(request));
     }
 
     // TODO: Rewrite to use fineract-client instead!

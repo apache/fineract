@@ -75,7 +75,7 @@ public class AccountNumberFormatsApiResource {
     @GET
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Account number format Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Account number format Template", operationId = "retrieveTemplateAccountNumberFormat", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "\n" + "Example Request:\n" + "\n" + "accountnumberformats/template")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsResponseTemplate.class)))
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
@@ -91,8 +91,8 @@ public class AccountNumberFormatsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Account number formats", description = "Example Requests:\n" + "\n" + "accountnumberformats\n" + "\n" + "\n"
-            + "accountnumberformats?fields=accountType,prefixType")
+    @Operation(summary = "List Account number formats", operationId = "retrieveAllAccountNumberFormats", description = "Example Requests:\n"
+            + "\n" + "accountnumberformats\n" + "\n" + "\n" + "accountnumberformats?fields=accountType,prefixType")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class))))
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
@@ -108,8 +108,9 @@ public class AccountNumberFormatsApiResource {
     @GET
     @Path("{accountNumberFormatId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve an Account number format", description = "Example Requests:\n" + "\n" + "accountnumberformats/1\n" + "\n"
-            + "\n" + "accountnumberformats/1?template=true\n" + "\n" + "\n" + "accountnumberformats/1?fields=accountType,prefixType")
+    @Operation(summary = "Retrieve an Account number format", operationId = "retrieveOneAccountNumberFormat", description = "Example Requests:\n"
+            + "\n" + "accountnumberformats/1\n" + "\n" + "\n" + "accountnumberformats/1?template=true\n" + "\n" + "\n"
+            + "accountnumberformats/1?fields=accountType,prefixType")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class)))
     public String retrieveOne(@Context final UriInfo uriInfo,
             @PathParam("accountNumberFormatId") @Parameter(description = "accountNumberFormatId") final Long accountNumberFormatId) {
@@ -132,7 +133,7 @@ public class AccountNumberFormatsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create an Account number format", description = "Note: You may associate a single Account number format for a given account type\n"
+    @Operation(summary = "Create an Account number format", operationId = "createAccountNumberFormat", description = "Note: You may associate a single Account number format for a given account type\n"
             + "Mandatory Fields for Account number formats\n" + "accountType")
     @RequestBody(content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PostAccountNumberFormatsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PostAccountNumberFormatsResponse.class)))
@@ -152,7 +153,7 @@ public class AccountNumberFormatsApiResource {
     @Path("{accountNumberFormatId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update an Account number format")
+    @Operation(summary = "Update an Account number format", operationId = "updateAccountNumberFormat")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsResponse.class)))
     public String update(
@@ -172,7 +173,7 @@ public class AccountNumberFormatsApiResource {
     @DELETE
     @Path("{accountNumberFormatId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete an Account number format", description = "Note: Account numbers created while this format was active would remain unchanged.")
+    @Operation(summary = "Delete an Account number format", operationId = "deleteAccountNumberFormat", description = "Note: Account numbers created while this format was active would remain unchanged.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountNumberFormatsApiResourceSwagger.DeleteAccountNumberFormatsResponse.class)))
     public String delete(
             @PathParam("accountNumberFormatId") @Parameter(description = "accountNumberFormatId") final Long accountNumberFormatId) {

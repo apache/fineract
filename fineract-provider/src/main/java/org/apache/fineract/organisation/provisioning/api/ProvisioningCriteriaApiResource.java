@@ -74,7 +74,7 @@ public class ProvisioningCriteriaApiResource {
     @GET
     @Path("{criteriaId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieves a Provisioning Criteria", description = "Retrieves a Provisioning Criteria")
+    @Operation(summary = "Retrieves a Provisioning Criteria", operationId = "retrieveOneProvisioningCriteria", description = "Retrieves a Provisioning Criteria")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaCriteriaIdResponse.class)))
     public ProvisioningCriteriaData retrieveProvisioningCriteria(
             @PathParam("criteriaId") @Parameter(description = "criteriaId") final Long criteriaId, @Context final UriInfo uriInfo) {
@@ -89,7 +89,7 @@ public class ProvisioningCriteriaApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieves all created Provisioning Criterias", description = "Retrieves all created Provisioning Criterias")
+    @Operation(summary = "Retrieves all created Provisioning Criterias", operationId = "retrieveAllProvisioningCriteria", description = "Retrieves all created Provisioning Criterias")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaResponse.class))))
     public List<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
         platformSecurityContext.authenticatedUser();
@@ -99,8 +99,8 @@ public class ProvisioningCriteriaApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a new Provisioning Criteria", description = "Creates a new Provisioning Criteria\n" + "\n"
-            + "Mandatory Fields: \n" + "criteriaName\n" + "provisioningcriteria\n" + "\n" + "Optional Fields: \n" + "loanProducts")
+    @Operation(summary = "Create a new Provisioning Criteria", operationId = "createProvisioningCriteria", description = "Creates a new Provisioning Criteria\n"
+            + "\n" + "Mandatory Fields: \n" + "criteriaName\n" + "provisioningcriteria\n" + "\n" + "Optional Fields: \n" + "loanProducts")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaResponse.class)))
     public CommandProcessingResult createProvisioningCriteria(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -113,8 +113,8 @@ public class ProvisioningCriteriaApiResource {
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Updates a new Provisioning Criteria", description = "Updates a new Provisioning Criteria\n" + "\n"
-            + "Optional Fields\n" + "criteriaName, loanProducts, provisioningcriteria")
+    @Operation(summary = "Updates a new Provisioning Criteria", operationId = "updateProvisioningCriteria", description = "Updates a new Provisioning Criteria\n"
+            + "\n" + "Optional Fields\n" + "criteriaName, loanProducts, provisioningcriteria")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaResponse.class)))
     public CommandProcessingResult updateProvisioningCriteria(
@@ -129,7 +129,7 @@ public class ProvisioningCriteriaApiResource {
     @DELETE
     @Path("{criteriaId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Deletes Provisioning Criteria", description = "Deletes Provisioning Criteria")
+    @Operation(summary = "Deletes Provisioning Criteria", operationId = "deleteProvisioningCriteria", description = "Deletes Provisioning Criteria")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.DeleteProvisioningCriteriaResponse.class)))
     public CommandProcessingResult deleteProvisioningCriteria(
             @PathParam("criteriaId") @Parameter(description = "criteriaId") final Long criteriaId) {

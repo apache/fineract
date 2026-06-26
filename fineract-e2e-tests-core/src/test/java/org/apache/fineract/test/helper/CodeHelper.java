@@ -55,7 +55,7 @@ public class CodeHelper {
     }
 
     public GetCodesResponse retrieveCodeByName(String name) {
-        return ok(() -> fineractClient.codes().retrieveCodes(Map.of())).stream().filter(r -> name.equals(r.getName())).findAny()
+        return ok(() -> fineractClient.codes().retrieveAllCodes(Map.of())).stream().filter(r -> name.equals(r.getName())).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Code with name " + name + " has not been found"));
     }
 

@@ -64,7 +64,7 @@ public class FeignClientLifecycleTest extends FeignIntegrationTest {
     }
 
     private Long resolveOrCreateCodeValue(String codeName) {
-        GetCodesResponse code = ok(() -> fineractClient.codes().retrieveCodeByName(codeName));
+        GetCodesResponse code = ok(() -> fineractClient.codes().retrieveOneCodeByName(codeName));
         assertNotNull(code.getId());
 
         PostCodeValuesDataRequest createRequest = new PostCodeValuesDataRequest()//

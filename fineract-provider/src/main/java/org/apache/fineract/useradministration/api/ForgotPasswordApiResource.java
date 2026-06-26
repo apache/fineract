@@ -46,7 +46,7 @@ public class ForgotPasswordApiResource {
     @Path("/forgot")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Request password reset", description = """
+    @Operation(summary = "Request password reset", operationId = "forgotPassword", description = """
             Requests a password reset for the user with the given email.
             If the email exists and the user is active, a temporary password will be sent to the email address.
             The temporary password expires in 1 hour.""")

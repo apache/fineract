@@ -232,7 +232,8 @@ public class UsersApiResource {
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
-    @Operation(summary = "Download users template", description = "Returns an Excel template for bulk importing users.", tags = { "Users" })
+    @Operation(summary = "Download users template", operationId = "getBulkTemplateUser", description = "Returns an Excel template for bulk importing users.", tags = {
+            "Users" })
     public Response getUserTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,
             @QueryParam("dateFormat") final String dateFormat) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.USERS.toString(), officeId, staffId, dateFormat);
@@ -243,7 +244,7 @@ public class UsersApiResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequestBody(description = "Upload users template", content = {
             @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
-    @Operation(summary = "Upload users template", description = "Uploads a filled Excel template to create multiple users in bulk.", tags = {
+    @Operation(summary = "Upload users template", operationId = "postBulkTemplateUser", description = "Uploads a filled Excel template to create multiple users in bulk.", tags = {
             "Users" })
     public String postUsersTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
