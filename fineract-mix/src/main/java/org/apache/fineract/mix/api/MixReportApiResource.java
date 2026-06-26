@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.sql.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.mix.service.MixReportXBRLBuilder;
@@ -44,13 +45,13 @@ public class MixReportApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_XML })
     @Operation(summary = "Retrieve Mix XBRL report", operationId = "retrieveMixReport")
-    public jakarta.ws.rs.core.Response retrieveXBRLReport(@QueryParam("startDate") final Date startDate,
-            @QueryParam("endDate") final Date endDate, @QueryParam("currency") final String currency) {
+    public Response retrieveXBRLReport(@QueryParam("startDate") final Date startDate, @QueryParam("endDate") final Date endDate,
+            @QueryParam("currency") final String currency) {
 
         final var data = xbrlResultService.getXBRLResult(startDate, endDate, currency);
 
         String xmlPayload = this.xbrlBuilder.build(data);
 
-        return jakarta.ws.rs.core.Response.ok().entity(xmlPayload).type(MediaType.APPLICATION_XML_TYPE).build();
+        return Response.ok().entity(xmlPayload).type(MediaType.APPLICATION_XML_TYPE).build();
     }
 }
