@@ -25,9 +25,8 @@ dependencies {
     }
 
     implementation(project(path: ':fineract-core'))
-    implementation 'org.springframework.modulith:spring-modulith-api'
+    testImplementation 'org.springframework.modulith:spring-modulith-api'
     testImplementation 'org.springframework.modulith:spring-modulith-core'
-    testImplementation 'org.springframework.modulith:spring-modulith-docs'
     implementation(project(path: ':fineract-cob'))
     implementation(project(path: ':fineract-command'))
     implementation(project(path: ':fineract-command-audit'))

@@ -18,21 +18,23 @@
  */
 package org.apache.fineract.architecture;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.tngtech.archunit.core.domain.JavaClass;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.core.ApplicationModule;
 import org.springframework.modulith.core.ApplicationModuleDependency;
 import org.springframework.modulith.core.ApplicationModules;
+
+import com.tngtech.archunit.core.domain.JavaClass;
 
 class AllModulesCrossFeatureBoundaryTest {
 
@@ -63,24 +65,25 @@ class AllModulesCrossFeatureBoundaryTest {
     }
 
     private static String owningArtifact(JavaClass type) {
-        return type.getSource().map(source -> source.getUri().toString()).map(uri -> {
-            Matcher matcher = FINERACT_ARTIFACT.matcher(uri);
-            String artifact = null;
-            while (matcher.find()) {
-                artifact = matcher.group();
-            }
-            return artifact == null ? uri : artifact.replaceAll("-\\d.*$", "");
-        }).orElse("(unknown-source)");
+        return type.getSource() //
+                .map(source -> source.getUri().toString()) //
+                .map(uri -> {
+                    Matcher matcher = FINERACT_ARTIFACT.matcher(uri);
+                    String artifact = null;
+                    while (matcher.find()) {
+                        artifact = matcher.group();
+                    }
+                    return artifact == null ? uri : artifact.replaceAll("-\\d.*$", "");
+                }) //
+                .orElse("(unknown-source)");
     }
 
     private static boolean isFoundation(JavaClass type) {
-        return type.getSource() //
-                .map(source -> source.getUri().toString()) //
-                .map(uri -> FOUNDATION_ARTIFACTS.stream().anyMatch(uri::contains)) //
-                .orElse(false);
+        return FOUNDATION_ARTIFACTS.contains(owningArtifact(type));
     }
 
     @Test
+    @EnabledIfSystemProperty(named = "fineract.modulith.report", matches = "true")
     void printAllModulesCrossFeatureDependencyReport() {
         Map<String, ApplicationModule> sortedModules = new TreeMap<>();
         modules().forEach(module -> sortedModules.put(module.getBasePackage().getName(), module));
@@ -96,22 +99,23 @@ class AllModulesCrossFeatureBoundaryTest {
             Set<String> violationFeatures = new TreeSet<>();
             Set<String> allowedFromCore = new TreeSet<>();
 
-            module.getDirectDependencies(modules()).stream().forEach((ApplicationModuleDependency dependency) -> {
-                JavaClass targetType = dependency.getTargetType();
-                String sourceType = dependency.getSourceType().getName();
-                String featureKey = featureKey(targetType.getName());
-                String artifact = owningArtifact(targetType);
-                boolean foundation = isFoundation(targetType);
+            module.getDirectDependencies(modules()).stream()
+                    .forEach((ApplicationModuleDependency dependency) -> {
+                        JavaClass targetType = dependency.getTargetType();
+                        String sourceType = dependency.getSourceType().getName();
+                        String featureKey = featureKey(targetType.getName());
+                        String artifact = owningArtifact(targetType);
+                        boolean foundation = isFoundation(targetType);
 
-                String label = featureKey + "  [" + artifact + (foundation ? " : foundation]" : " : VIOLATION]");
-                sourceTypeToTargets.computeIfAbsent(sourceType, key -> new TreeSet<>()).add(label);
+                        String label = featureKey + "  [" + artifact + (foundation ? " : foundation]" : " : VIOLATION]");
+                        sourceTypeToTargets.computeIfAbsent(sourceType, key -> new TreeSet<>()).add(label);
 
-                if (foundation) {
-                    allowedFromCore.add(featureKey + " (" + artifact + ")");
-                } else {
-                    violationFeatures.add(featureKey + " (" + artifact + ")");
-                }
-            });
+                        if (foundation) {
+                            allowedFromCore.add(featureKey + " (" + artifact + ")");
+                        } else {
+                            violationFeatures.add(featureKey + " (" + artifact + ")");
+                        }
+                    });
 
             LOG.info("==== " + moduleName + " cross-feature dependency report (base = " + BASE + ") ====");
             LOG.info("-- source type -> referenced feature packages [owning artifact : status] --");
@@ -139,6 +143,7 @@ class AllModulesCrossFeatureBoundaryTest {
     }
 
     @Test
+    @EnabledIfSystemProperty(named = "fineract.modulith.report", matches = "true")
     void printModuleToModuleDependencyViolations() {
         Map<String, ApplicationModule> sortedModules = new TreeMap<>();
         modules().forEach(module -> sortedModules.put(module.getBasePackage().getName(), module));
@@ -153,25 +158,32 @@ class AllModulesCrossFeatureBoundaryTest {
         for (Map.Entry<String, ApplicationModule> moduleEntry : sortedModules.entrySet()) {
             String moduleName = moduleEntry.getKey();
             ApplicationModule module = moduleEntry.getValue();
+
             Map<String, Integer> targetModuleEdgeCount = new TreeMap<>();
+            
             Map<String, Set<String>> targetModuleFeatures = new TreeMap<>();
-            module.getDirectDependencies(modules()).stream().forEach((ApplicationModuleDependency dependency) -> {
-                JavaClass targetType = dependency.getTargetType();
-                if (!isFoundation(targetType)) {
-                    String targetModule = owningArtifact(targetType);
-                    targetModuleEdgeCount.merge(targetModule, 1, Integer::sum);
-                    targetModuleFeatures.computeIfAbsent(targetModule, key -> new TreeSet<>()).add(featureKey(targetType.getName()));
-                }
-            });
+
+            module.getDirectDependencies(modules()).stream()
+                    .forEach((ApplicationModuleDependency dependency) -> {
+                        JavaClass targetType = dependency.getTargetType();
+                        if (!isFoundation(targetType)) {
+                            String targetModule = owningArtifact(targetType);
+                            targetModuleEdgeCount.merge(targetModule, 1, Integer::sum);
+                            targetModuleFeatures.computeIfAbsent(targetModule, key -> new TreeSet<>())
+                                    .add(featureKey(targetType.getName()));
+                        }
+                    });
 
             if (targetModuleEdgeCount.isEmpty()) {
                 LOG.info("MODULE " + moduleName + "  ->  (no cross-module violations)");
             } else {
-                LOG.info("MODULE " + moduleName + "  ->  depends on " + targetModuleEdgeCount.size() + " other module(s):");
+                LOG.info("MODULE " + moduleName + "  ->  depends on " + targetModuleEdgeCount.size()
+                        + " other module(s):");
                 for (Map.Entry<String, Integer> target : targetModuleEdgeCount.entrySet()) {
                     String targetModule = target.getKey();
                     int edges = target.getValue();
-                    LOG.info("    -> " + targetModule + "  (" + edges + " edge(s))  " + targetModuleFeatures.get(targetModule));
+                    LOG.info("    -> " + targetModule + "  (" + edges + " edge(s))  "
+                            + targetModuleFeatures.get(targetModule));
                     totalCrossModuleEdges += edges;
                 }
                 modulesWithCrossModuleDeps++;
@@ -190,12 +202,14 @@ class AllModulesCrossFeatureBoundaryTest {
 
         modules().forEach(module -> {
             Set<String> featureDependencies = new TreeSet<>();
-            module.getDirectDependencies(modules()).stream().forEach((ApplicationModuleDependency dependency) -> {
-                JavaClass targetType = dependency.getTargetType();
-                if (!isFoundation(targetType)) {
-                    featureDependencies.add(featureKey(targetType.getName()) + " (" + owningArtifact(targetType) + ")");
-                }
-            });
+            module.getDirectDependencies(modules()).stream()
+                    .forEach((ApplicationModuleDependency dependency) -> {
+                        JavaClass targetType = dependency.getTargetType();
+                        if (!isFoundation(targetType)) {
+                            featureDependencies
+                                    .add(featureKey(targetType.getName()) + " (" + owningArtifact(targetType) + ")");
+                        }
+                    });
             if (!featureDependencies.isEmpty()) {
                 offending.put(module.getBasePackage().getName(), featureDependencies);
             }
