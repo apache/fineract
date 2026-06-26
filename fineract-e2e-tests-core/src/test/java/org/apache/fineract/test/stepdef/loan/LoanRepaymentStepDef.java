@@ -128,8 +128,8 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         String idempotencyKey = UUID.randomUUID().toString();
         testContext().set(TestContextKey.TRANSACTION_IDEMPOTENCY_KEY, idempotencyKey);
 
-        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
-                repaymentRequest, Map.<String, Object>of("command", "repayment")));
+        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> fineractClient.loanTransactions()
+                .handleCommandsLoanTransaction(loanId, repaymentRequest, Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         EventAssertion.EventAssertionBuilder<LoanTransactionDataV1> transactionEvent = eventCheckHelper
                 .transactionEventCheck(repaymentResponse, TransactionType.REPAYMENT, transferExternalOwnerId);
@@ -161,7 +161,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                 .credentials(user.getUsername(), PWD_USER_WITH_ROLE).tenantId(apiProperties.getTenantId()).disableSslVerification(true)
                 .readTimeout((int) apiProperties.getReadTimeout(), java.util.concurrent.TimeUnit.SECONDS).build();
 
-        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> userClient.loanTransactions().executeLoanTransaction(loanId,
+        PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> userClient.loanTransactions().handleCommandsLoanTransaction(loanId,
                 repaymentRequest, Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
@@ -184,7 +184,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.TRANSACTION_IDEMPOTENCY_KEY, idempotencyKey);
 
         PostLoansLoanIdTransactionsResponse repaymentResponse = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
                         Map.<String, Object>of("command", "repayment")));
 
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
@@ -218,7 +218,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                 .readTimeout((int) apiProperties.getReadTimeout(), java.util.concurrent.TimeUnit.SECONDS).build();
 
         PostLoansLoanIdTransactionsResponse repaymentResponse = ok(
-                () -> userClient.loanTransactions().executeLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
+                () -> userClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,
                         Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, repaymentResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
@@ -236,7 +236,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                 .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
 
         try {
-            ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, repaymentRequest,
+            ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, repaymentRequest,
                     Map.<String, Object>of("command", "repayment")));
             throw new IllegalStateException("Expected FeignException but call succeeded");
         } catch (feign.FeignException e) {
@@ -282,8 +282,8 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansLoanIdTransactionsRequest repaymentRequest = loanRequestFactory.defaultRepaymentRequest().transactionDate(transactionDate)
                 .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
 
-        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, repaymentRequest,
-                Map.<String, Object>of("command", "repayment")));
+        CallFailedRuntimeException exception = fail(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId,
+                repaymentRequest, Map.<String, Object>of("command", "repayment")));
         testContext().set(TestContextKey.LOAN_REPAYMENT_RESPONSE, null);
         testContext().set(TestContextKey.ERROR_RESPONSE, exception);
     }
@@ -298,8 +298,8 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
                 .locale(DEFAULT_LOCALE).accountNumber(DEFAULT_ACCOUNT_NB).checkNumber(DEFAULT_CHECK_NB).receiptNumber(DEFAULT_RECEIPT_NB)
                 .bankNumber(DEFAULT_BANK_NB);
 
-        PostLoansLoanIdTransactionsResponse refundResponse = ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
-                refundRequest, Map.<String, Object>of("command", "payoutRefund")));
+        PostLoansLoanIdTransactionsResponse refundResponse = ok(() -> fineractClient.loanTransactions()
+                .handleCommandsLoanTransaction(loanId, refundRequest, Map.<String, Object>of("command", "payoutRefund")));
         testContext().set(TestContextKey.LOAN_REFUND_RESPONSE, refundResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
@@ -377,7 +377,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         int nthItem = Integer.parseInt(nthItemStr) - 1;
@@ -400,7 +400,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         int nthItem = Integer.parseInt(nthItemStr) - 1;
@@ -424,7 +424,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         int nthItem = Integer.parseInt(nthItemStr) - 1;
@@ -448,7 +448,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         GetLoansLoanIdTransactions targetTransaction = eventCheckHelper.getNthTransactionType(nthItemStr, transactionType, transactionDate,
@@ -550,7 +550,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         // check that here are 2 transactions - target and linked
@@ -578,7 +578,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         GetLoansLoanIdTransactionsTransactionIdResponse transactionResponse = ok(() -> fineractClient.loanTransactions()
-                .retrieveTransaction(loanId, repaymentResponse.getResourceId(), Map.<String, Object>of()));
+                .retrieveOneLoanTransaction(loanId, repaymentResponse.getResourceId(), Map.<String, Object>of()));
         assertThat(transactionResponse.getAmount()).isEqualTo(repaymentAmount);
         assertThat(transactionResponse.getPaymentDetailData().getPaymentType().getName()).isEqualTo(paymentType);
     }
@@ -596,7 +596,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId1 = loanResponse.getLoanId();
 
-        GetLoansLoanIdResponse getLoansLoanIdResponseCall = ok(() -> fineractClient.loans().retrieveLoan(loanId1,
+        GetLoansLoanIdResponse getLoansLoanIdResponseCall = ok(() -> fineractClient.loans().retrieveOneLoan(loanId1,
                 Map.<String, Object>of("staffInSelectedOfficeOnly", false, "associations", "all", "exclude", "guarantors,futureSchedule")));
 
         List<GetLoansLoanIdRepaymentPeriod> periods = getLoansLoanIdResponseCall.getRepaymentSchedule().getPeriods();
@@ -632,8 +632,8 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     public Double getLoanTransactionAmountToPayOff(PostLoansResponse loanResponse, String transactionDate) {
         long loanId1 = loanResponse.getLoanId();
         GetLoansLoanIdTransactionsTemplateResponse response = ok(
-                () -> fineractClient.loanTransactions().retrieveTransactionTemplate(loanId1, Map.<String, Object>of("command", "prepayLoan",
-                        "dateFormat", DATE_FORMAT, "transactionDate", transactionDate, "locale", DEFAULT_LOCALE)));
+                () -> fineractClient.loanTransactions().retrieveTemplateLoanTransaction(loanId1, Map.<String, Object>of("command",
+                        "prepayLoan", "dateFormat", DATE_FORMAT, "transactionDate", transactionDate, "locale", DEFAULT_LOCALE)));
         return response.getAmount();
     }
 
@@ -671,7 +671,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
         List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         int nthItem = Integer.parseInt(nthItemStr) - 1;
@@ -725,7 +725,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         assert loanResponse != null;
         final long loanId = loanResponse.getLoanId();
         final List<GetLoansLoanIdTransactions> transactions = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")))
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")))
                 .getTransactions();
 
         final int nthItem = Integer.parseInt(nthItemStr) - 1;

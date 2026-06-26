@@ -188,7 +188,7 @@ public class RecurringDepositAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Adjust Transaction | Undo transaction", description = "Adjust Transaction:\n\n"
+    @Operation(summary = "Adjust Transaction | Undo transaction", operationId = "handleCommandsRecurringDepositAccountTransaction", description = "Adjust Transaction:\n\n"
             + "This command modifies the given transaction.\n\n" + "Undo transaction:\n\n"
             + "This command reverses the given transaction.\n\n" + "Showing request/response for 'Adjust Transaction'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountTransactionsApiResourceSwagger.PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest.class)))

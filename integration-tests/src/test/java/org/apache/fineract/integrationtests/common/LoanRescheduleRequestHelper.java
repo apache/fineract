@@ -32,25 +32,25 @@ public final class LoanRescheduleRequestHelper {
     private LoanRescheduleRequestHelper() {}
 
     public static PostCreateRescheduleLoansResponse createLoanRescheduleRequest(PostCreateRescheduleLoansRequest request) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().createLoanRescheduleRequest(request));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().createRescheduleLoan(request));
     }
 
     public static PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest(Long scheduleId,
             PostUpdateRescheduleLoansRequest request) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().updateLoanRescheduleRequest(scheduleId,
-                request, "approve"));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().updateRescheduleLoan(scheduleId, request,
+                "approve"));
     }
 
     public static PostUpdateRescheduleLoansResponse rejectLoanRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().updateLoanRescheduleRequest(scheduleId,
-                request, "reject"));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().updateRescheduleLoan(scheduleId, request,
+                "reject"));
     }
 
     public static GetLoanRescheduleRequestResponse readLoanRescheduleRequest(final Long requestId, final String command) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().readLoanRescheduleRequest(requestId, command));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().retrieveOneRescheduleLoan(requestId, command));
     }
 
     public static List<GetLoanRescheduleRequestResponse> retrieveLoanRescheduleRequestsByLoan(final String command, final Long loanId) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().retrieveAllRescheduleRequest(command, loanId));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rescheduleLoans().retrieveAllRescheduleLoans(command, loanId));
     }
 }

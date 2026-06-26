@@ -73,7 +73,7 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
 
         // Add withdrawal fee charge to FROM savings account
         final PostSavingsAccountsSavingsAccountIdChargesResponse chargeResponse = ok(fineractClient().savingsAccountCharges
-                .addSavingsAccountCharge(fromSavingsId, new PostSavingsAccountsSavingsAccountIdChargesRequest()
+                .createSavingsAccountCharge(fromSavingsId, new PostSavingsAccountsSavingsAccountIdChargesRequest()
                         .chargeId(withdrawalCharge.getResourceId()).amount(100.0f).locale("en")));
         Assertions.assertNotNull(chargeResponse.getResourceId());
 
@@ -142,7 +142,7 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
 
         // Add payment-type withdrawal fee charge to FROM savings account
         final PostSavingsAccountsSavingsAccountIdChargesResponse chargeResponse = ok(fineractClient().savingsAccountCharges
-                .addSavingsAccountCharge(fromSavingsId, new PostSavingsAccountsSavingsAccountIdChargesRequest()
+                .createSavingsAccountCharge(fromSavingsId, new PostSavingsAccountsSavingsAccountIdChargesRequest()
                         .chargeId(withdrawalCharge.getResourceId()).amount(100.0f).locale("en")));
         Assertions.assertNotNull(chargeResponse.getResourceId());
 

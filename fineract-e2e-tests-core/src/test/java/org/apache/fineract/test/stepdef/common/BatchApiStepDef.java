@@ -822,7 +822,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
         loanQueryParams.put("associations", "transactions");
-        GetLoansLoanIdResponse loanDetails = loansApi().retrieveLoan(loanId, loanQueryParams);
+        GetLoansLoanIdResponse loanDetails = loansApi().retrieveOneLoan(loanId, loanQueryParams);
 
         List<GetLoansLoanIdTransactions> transactions = loanDetails.getTransactions();
         List<String> transactionsMatched = new ArrayList<>();
@@ -872,7 +872,7 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
-        GetLoansLoanIdResponse response = loansApi().retrieveLoanByExternalId(loanExternalId, loanQueryParams);
+        GetLoansLoanIdResponse response = loansApi().retrieveOneLoanByExternalId(loanExternalId, loanQueryParams);
         assertThat(response.getId()).as(ErrorMessageHelper.idNull()).isNotNull();
     }
 
@@ -889,7 +889,7 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
-        GetLoansLoanIdResponse response = loansApi().retrieveLoanByExternalId(loanExternalId, loanQueryParams);
+        GetLoansLoanIdResponse response = loansApi().retrieveOneLoanByExternalId(loanExternalId, loanQueryParams);
         GetLoansLoanIdStatus status = response.getStatus();
         Long statusIdActual = status.getId();
         Long statusIdExpected = LoanStatus.APPROVED.value.longValue();
@@ -955,7 +955,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         // Feign throws exceptions on errors instead of returning error in response body
         ErrorResponse errorResponse = null;
         try {
-            loansApi().retrieveLoanByExternalId(loanExternalId, loanQueryParams);
+            loansApi().retrieveOneLoanByExternalId(loanExternalId, loanQueryParams);
             throw new IllegalStateException("Expected Feign exception but call succeeded");
         } catch (org.apache.fineract.client.feign.FeignException e) {
             errorResponse = fromJson(e.responseBodyAsString(), ErrorResponse.class);
@@ -1146,7 +1146,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
         loanQueryParams.put("associations", "all");
-        GetLoansLoanIdResponse loanDetails = loansApi().retrieveLoan(loanId, loanQueryParams);
+        GetLoansLoanIdResponse loanDetails = loansApi().retrieveOneLoan(loanId, loanQueryParams);
         // Check loan has a CHARGE_OFF transaction on the specified date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         boolean hasChargeOffTransaction = loanDetails.getTransactions().stream().anyMatch(
@@ -1351,7 +1351,7 @@ public class BatchApiStepDef extends AbstractStepDef {
         Map<String, Object> loanQueryParams = new HashMap<>();
         loanQueryParams.put("staffInSelectedOfficeOnly", false);
         loanQueryParams.put("associations", "all");
-        GetLoansLoanIdResponse loanResponse = loansApi().retrieveLoan(loanId, loanQueryParams);
+        GetLoansLoanIdResponse loanResponse = loansApi().retrieveOneLoan(loanId, loanQueryParams);
         assertThat(loanResponse != null).isTrue();
         assertThat(loanResponse).isNotNull();
 

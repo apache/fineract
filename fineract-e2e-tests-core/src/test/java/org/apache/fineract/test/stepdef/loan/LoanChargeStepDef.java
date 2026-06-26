@@ -94,7 +94,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .dueDate(transactionDate).amount(transactionAmount);
 
         PostLoansLoanIdChargesResponse loanChargeResponse = ok(
-                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+                () -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
         testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_RESPONSE, loanChargeResponse);
         testContext().set(TestContextKey.ADD_NSF_FEE_RESPONSE, loanChargeResponse);
 
@@ -119,7 +119,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .amount(transactionPercentageAmount);
 
         PostLoansLoanIdChargesResponse loanChargeResponse = ok(
-                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+                () -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
         testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_RESPONSE, loanChargeResponse);
     }
 
@@ -143,7 +143,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .chargeId(chargeTypeId).amount(amount);
 
         final PostLoansLoanIdChargesResponse loanChargeResponse = ok(
-                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+                () -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
         testContext().set(TestContextKey.ADD_INSTALLMENT_FEE_CHARGE_RESPONSE, loanChargeResponse);
     }
 
@@ -160,7 +160,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .chargeId(chargeTypeId).amount(amount);
 
         try {
-            fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of());
+            fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of());
             throw new AssertionError("Expected FeignException but request succeeded");
         } catch (FeignException e) {
             final ErrorResponse errorDetails = ErrorResponse.fromFeignException(e);
@@ -185,7 +185,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .dueDate(transactionDate).amount(transactionAmount);
 
         try {
-            fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of());
+            fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of());
             throw new AssertionError("Expected FeignException but request succeeded");
         } catch (FeignException e) {
             ErrorResponse errorDetails = ErrorResponse.fromFeignException(e);
@@ -205,7 +205,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .dueDate(date).dateFormat(DEFAULT_DATE_FORMAT).locale(locale);
 
         PostLoansLoanIdChargesResponse loanChargeResponse = ok(
-                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+                () -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
         testContext().set(TestContextKey.ADD_PROCESSING_FEE_RESPONSE, loanChargeResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
@@ -220,7 +220,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .dueDate(date).dateFormat(DEFAULT_DATE_FORMAT).locale(locale);
 
         PostLoansLoanIdChargesResponse loanChargeResponse = ok(
-                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+                () -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
         testContext().set(TestContextKey.ADD_PROCESSING_FEE_RESPONSE, loanChargeResponse);
     }
 
@@ -234,7 +234,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .dateFormat(DEFAULT_DATE_FORMAT);
 
         PostLoansLoanIdChargesResponse loanChargeResponse = ok(
-                () -> fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
+                () -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of()));
         testContext().set(TestContextKey.ADD_NSF_FEE_RESPONSE, loanChargeResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
@@ -275,7 +275,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
         long loanId = loanResponse.getLoanId();
 
         GetLoansLoanIdResponse loanDetails = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.<String, Object>of("associations", "transactions")));
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.<String, Object>of("associations", "transactions")));
         List<GetLoansLoanIdTransactions> transactions = loanDetails.getTransactions();
 
         final Long transactionId = transactions.stream().filter(t -> "loanTransactionType.waiveCharges".equals(t.getType().getCode()))
@@ -283,7 +283,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
 
         PutChargeTransactionChangesRequest undoWaiveRequest = new PutChargeTransactionChangesRequest();
         PutChargeTransactionChangesResponse undoWaiveResponse = ok(
-                () -> fineractClient.loanTransactions().undoWaiveCharge(loanId, transactionId, undoWaiveRequest));
+                () -> fineractClient.loanTransactions().undoWaiveChargeLoanTransaction(loanId, transactionId, undoWaiveRequest));
         testContext().set(TestContextKey.UNDO_WAIVE_RESPONSE, undoWaiveResponse);
     }
 
@@ -299,14 +299,14 @@ public class LoanChargeStepDef extends AbstractStepDef {
     public void checkLoanChargeAmount(float chargeAmount) throws IOException {
         PostLoansLoanIdChargesResponse response = testContext().get(TestContextKey.ADD_PROCESSING_FEE_RESPONSE);
         GetLoansLoanIdChargesChargeIdResponse loanChargeAmount = ok(
-                () -> fineractClient.loanCharges().retrieveLoanCharge(response.getLoanId(), Long.valueOf(response.getResourceId())));
+                () -> fineractClient.loanCharges().retrieveOneLoanCharge(response.getLoanId(), Long.valueOf(response.getResourceId())));
         assertThat(loanChargeAmount.getAmount()).as("Charge amount is wrong").isEqualByComparingTo(Double.valueOf(chargeAmount));
     }
 
     private void addChargeEventCheck(PostLoansLoanIdChargesResponse loanChargeResponse) throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_EVENTS);
-        GetLoansLoanIdChargesChargeIdResponse chargeDetails = ok(
-                () -> fineractClient.loanCharges().retrieveLoanCharge(loanChargeResponse.getLoanId(), loanChargeResponse.getResourceId()));
+        GetLoansLoanIdChargesChargeIdResponse chargeDetails = ok(() -> fineractClient.loanCharges()
+                .retrieveOneLoanCharge(loanChargeResponse.getLoanId(), loanChargeResponse.getResourceId()));
         GetLoansLoanIdChargesChargeIdResponse body = chargeDetails;
 
         eventAssertion.assertEvent(LoanAddChargeEvent.class, loanChargeResponse.getResourceId()).extractingData(LoanChargeDataV1::getName)
@@ -341,7 +341,7 @@ public class LoanChargeStepDef extends AbstractStepDef {
                 .dueDate(transactionDate).amount(transactionAmount);
 
         try {
-            fineractClient.loanCharges().executeLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of());
+            fineractClient.loanCharges().createOrPayLoanCharge(loanId, loanIdChargesRequest, Map.<String, Object>of());
             throw new AssertionError("Expected FeignException but request succeeded");
         } catch (FeignException e) {
             ErrorResponse errorResponse = ErrorResponse.fromFeignException(e);

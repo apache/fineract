@@ -151,7 +151,7 @@ public class EventCheckHelper {
 
     public void undoApproveLoanEventCheck(PostLoansLoanIdResponse loanUndoApproveResponse) {
         waitForTransactionCommit();
-        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveLoan(loanUndoApproveResponse.getLoanId(),
+        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(loanUndoApproveResponse.getLoanId(),
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "", "exclude", "", "fields", "")));
 
         eventAssertion.assertEventRaised(LoanUndoApprovalEvent.class, body.getId());
@@ -159,7 +159,7 @@ public class EventCheckHelper {
 
     public void loanRejectedEventCheck(PostLoansLoanIdResponse loanRejectedResponse) {
         waitForTransactionCommit();
-        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveLoan(loanRejectedResponse.getLoanId(),
+        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(loanRejectedResponse.getLoanId(),
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "", "exclude", "", "fields", "")));
 
         eventAssertion.assertEventRaised(LoanRejectedEvent.class, body.getId());
@@ -181,7 +181,7 @@ public class EventCheckHelper {
     }
 
     private void loanAccountDataV1Check(Class<? extends AbstractLoanEvent> eventClazz, Long loanId) {
-        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "all", "exclude", "", "fields", "")));
 
         eventAssertion.assertEvent(eventClazz, loanId)//
@@ -253,7 +253,7 @@ public class EventCheckHelper {
     }
 
     public GetLoansLoanIdTransactions findNthTransaction(String nthItemStr, String transactionType, String transactionDate, long loanId) {
-        GetLoansLoanIdResponse loanResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+        GetLoansLoanIdResponse loanResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
         List<GetLoansLoanIdTransactions> transactions = loanResponse.getTransactions();
         GetLoansLoanIdTransactions targetTransaction = getNthTransactionType(nthItemStr, transactionType, transactionDate, transactions);
@@ -289,7 +289,7 @@ public class EventCheckHelper {
         waitForTransactionCommit();
         Long disbursementTransactionId = loanDisburseResponse.getSubResourceId();
 
-        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveLoan(loanDisburseResponse.getLoanId(),
+        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(loanDisburseResponse.getLoanId(),
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
         List<GetLoansLoanIdTransactions> transactions = body.getTransactions();
         GetLoansLoanIdTransactions disbursementTransaction = transactions//
@@ -424,7 +424,7 @@ public class EventCheckHelper {
             PostLoansLoanIdTransactionsResponse transactionResponse, TransactionType transactionType, String externalOwnerId) {
         Long loanId = transactionResponse.getLoanId();
         Long transactionId = transactionResponse.getResourceId();
-        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+        GetLoansLoanIdResponse loanDetailsResponse = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "transactions", "exclude", "", "fields", "")));
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
         GetLoansLoanIdTransactions transactionFound = transactions//
@@ -584,7 +584,7 @@ public class EventCheckHelper {
         GlobalConfigurationPropertyData outstandingInterestStrategy = configurationHelper
                 .getGlobalConfiguration("outstanding-interest-calculation-strategy-for-external-asset-transfer");
         if ("PAYABLE_OUTSTANDING_INTEREST".equals(outstandingInterestStrategy.getStringValue())) {
-            GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+            GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                     Map.of("staffInSelectedOfficeOnly", false, "associations", "all", "exclude", "", "fields", "")));
             totalOutstandingBalanceAmountExpected = zeroConversion(loanDetails.getSummary().getTotalOutstanding());
             outstandingInterestPortionExpected = zeroConversion(loanDetails.getSummary().getInterestOutstanding());
@@ -618,7 +618,7 @@ public class EventCheckHelper {
 
     public void loanAccountDelinquencyPauseChangedBusinessEventCheck(Long loanId) {
         waitForTransactionCommit();
-        GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveLoan(loanId,
+        GetLoansLoanIdResponse loanDetails = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "all", "exclude", "", "fields", "")));
         List<GetLoansLoanIdDelinquencyPausePeriod> delinquencyPausePeriodsActual = loanDetails.getDelinquent().getDelinquencyPausePeriods();
 
@@ -705,7 +705,7 @@ public class EventCheckHelper {
 
     public void createLoanEventCheck(PostLoansResponse createLoanResponse) {
         waitForTransactionCommit();
-        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveLoan(createLoanResponse.getLoanId(),
+        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(createLoanResponse.getLoanId(),
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "all", "exclude", "", "fields", "")));
 
         eventAssertion.assertEvent(LoanCreatedEvent.class, createLoanResponse.getLoanId())//
@@ -720,7 +720,7 @@ public class EventCheckHelper {
 
     public void approveLoanEventCheck(PostLoansLoanIdResponse loanApproveResponse) {
         waitForTransactionCommit();
-        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveLoan(loanApproveResponse.getLoanId(),
+        GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(loanApproveResponse.getLoanId(),
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "", "exclude", "", "fields", "")));
 
         eventAssertion.assertEvent(LoanApprovedEvent.class, loanApproveResponse.getLoanId())//

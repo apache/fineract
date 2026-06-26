@@ -123,18 +123,18 @@ public class UserLoanPermissionTest extends BaseLoanIntegrationTest {
         runAt("1 January 2025", () -> {
             // disbursement should be rejected upon validation error
             Response<PostLoansLoanIdResponse> response = Calls.executeU(
-                    fineractClient().loans.stateTransitions(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2025")
+                    fineractClient().loans.handleCommandsLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2025")
                             .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(2000.0)).locale("en"), "disburse"));
 
             Assertions.assertEquals(403, response.code());
 
             // update approved amount
             performPermissionTestForRequest("UPDATE_APPROVED_AMOUNT_LOAN",
-                    fineractClient -> fineractClient.loans.modifyLoanApprovedAmount(loanId,
+                    fineractClient -> fineractClient.loans.updateApprovedAmountLoan(loanId,
                             new PutLoansApprovedAmountRequest().amount(BigDecimal.valueOf(4000.0d)).locale("en")));
 
             // disbursement should be performed without error
-            Calls.ok(fineractClient().loans.stateTransitions(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2025")
+            Calls.ok(fineractClient().loans.handleCommandsLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("1 January 2025")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(2000.0)).locale("en"), "disburse"));
         });
     }
@@ -143,11 +143,11 @@ public class UserLoanPermissionTest extends BaseLoanIntegrationTest {
     public void testContractTerminationAndUndoContractTerminationPermission() {
 
         runAt("2 January 2025", () -> {
-            performPermissionTestForRequest("CONTRACT_TERMINATION_LOAN", fineractClient -> fineractClient.loans.stateTransitions(loanId,
+            performPermissionTestForRequest("CONTRACT_TERMINATION_LOAN", fineractClient -> fineractClient.loans.handleCommandsLoan(loanId,
                     new PostLoansLoanIdRequest().note(""), "contractTermination"));
 
             performPermissionTestForRequest("CONTRACT_TERMINATION_UNDO_LOAN",
-                    fineractClient -> fineractClient.loans.stateTransitions(loanId,
+                    fineractClient -> fineractClient.loans.handleCommandsLoan(loanId,
                             new PostLoansLoanIdRequest().note("Contract Termination Undo Test Note"), "undoContractTermination"));
         });
     }

@@ -54,7 +54,7 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
         final Long loanId = loanResponse.getLoanId();
 
         final GetLoansLoanIdResponse loanDetails = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
 
         assertNotNull(loanDetails);
 
@@ -100,8 +100,7 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
             }
         });
 
-        final PostLoansResponse response = ok(
-                () -> fineractClient.loans().calculateLoanScheduleOrSubmitLoanApplication(loansRequest, Map.of()));
+        final PostLoansResponse response = ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(loansRequest, Map.of()));
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
 
     }
