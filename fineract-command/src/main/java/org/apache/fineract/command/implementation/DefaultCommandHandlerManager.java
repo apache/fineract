@@ -18,13 +18,17 @@
  */
 package org.apache.fineract.command.implementation;
 
+import jakarta.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
 import org.apache.fineract.command.core.CommandHandler;
 import org.apache.fineract.command.core.CommandHandlerManager;
 import org.apache.fineract.command.core.exception.CommandHandlerNotFoundException;
+import org.apache.fineract.command.core.exception.DuplicateCommandHandlerException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +41,23 @@ public class DefaultCommandHandlerManager implements CommandHandlerManager {
 
     private final List<CommandHandler> handlers;
 
+    @PostConstruct
+    public void validateNoDuplicateHandlers() {
+        Map<String, List<CommandHandler>> grouped = handlers.stream()
+                .collect(Collectors.groupingBy(h -> h.getClass().getGenericInterfaces()[0].getTypeName()));
+
+        grouped.forEach((commandType, matched) -> {
+            if (matched.size() > 1) {
+                log.error("Duplicate CommandHandlers detected for {}: {}", commandType,
+                        matched.stream().map(h -> h.getClass().getSimpleName()).toList());
+                throw new IllegalStateException("Duplicate CommandHandlers detected for command type: " + commandType
+                        + " -> " + matched.stream().map(h -> h.getClass().getSimpleName()).toList());
+            }
+        });
+
+        log.debug("CommandHandler validation passed: {} handler(s) registered, no duplicates found.", handlers.size());
+    }
+
     @Override
     public <REQ, RES> RES handle(Command<REQ> command) {
         CommandHandler<REQ, RES> handler = lookup(command);
@@ -45,12 +66,17 @@ public class DefaultCommandHandlerManager implements CommandHandlerManager {
     }
 
     private <REQ, RES> CommandHandler<REQ, RES> lookup(Command<REQ> command) {
-        // TODO: make sure there are no duplicate handlers
         if (command == null) {
             throw new CommandHandlerNotFoundException(command);
         }
 
-        return handlers.stream().filter(handler -> handler.matches(command)).findFirst()
+        List<CommandHandler> matched = handlers.stream().filter(handler -> handler.matches(command)).toList();
+
+        if (matched.size() > 1) {
+            throw new DuplicateCommandHandlerException(command, matched);
+        }
+
+        return (CommandHandler<REQ, RES>) matched.stream().findFirst()
                 .orElseThrow(() -> new CommandHandlerNotFoundException(command));
     }
 }
