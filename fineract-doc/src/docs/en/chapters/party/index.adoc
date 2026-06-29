@@ -1,0 +1,52 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+= Party (Clientes, Grupos y Centros)
+
+El módulo `fineract-party` agrupa el dominio de las *partes* a las que la institución
+presta servicio: *Clientes* (`Client`), *Grupos* (`Group`) y *Centros* (`Center`),
+junto con sus funcionalidades asociadas: *comisiones/cargos a clientes* (client charges)
+y la *contabilidad* que estos generan (journal entries), *documentos*,
+*identificaciones* (client identifiers), *direcciones* (client address),
+*miembros de familia* (family members) y *transacciones de cliente* (client transactions).
+
+El código fuente reside principalmente en `fineract-party`
+(paquetes `org.apache.fineract.portfolio.client`, `...group` y `...address`).
+Los orquestadores que dependen de préstamos/ahorros (creación de cuentas al activar
+clientes, plantillas y hojas de cobro, asientos contables) permanecen en
+`fineract-provider`; los DTO compartidos (`ClientData`, `GroupGeneralData`,
+`CenterData`, `AddressData`) y las constantes de API residen en `fineract-core`.
+
+[NOTE]
+====
+Un *Centro* no es una entidad propia: es un `Group` cuyo `GroupLevel` tiene
+`isCenter() == true`. Comparte la tabla `m_group` y la jerarquía padre-hijo
+(`parent_id`) para agrupar grupos.
+====
+
+include::overview.adoc[leveloffset=+1]
+
+include::data-model.adoc[leveloffset=+1]
+
+include::use-cases.adoc[leveloffset=+1]
+
+include::flows.adoc[leveloffset=+1]
+
+include::business-rules.adoc[leveloffset=+1]
+
+include::api.adoc[leveloffset=+1]

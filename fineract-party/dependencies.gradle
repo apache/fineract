@@ -24,15 +24,14 @@ dependencies {
 
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
+    // fineract-party holds the Client/Group/Center/Address domain plus most of their API,
+    // handlers and services. fineract-core still owns the shared *Data DTOs and *ApiConstants
+    // referenced cross-module. charge/accounting are needed by client charges (ClientCharge,
+    // glaccount) and are safe (they never depend back on fineract-party).
     implementation(project(path: ':fineract-core'))
-    implementation(project(path: ':fineract-party'))
-    implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-charge'))
-    implementation(project(path: ':fineract-loan'))
-    implementation('org.apache.avro:avro')
-    implementation(
-            project(path: ':fineract-avro-schemas')
-            )
+    implementation(project(path: ':fineract-accounting'))
+    implementation(project(path: ':fineract-validation'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
@@ -55,6 +54,7 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
+            'org.apache.httpcomponents:httpcore',
             )
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     compileOnly 'org.projectlombok:lombok'

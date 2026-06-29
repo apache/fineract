@@ -1,0 +1,127 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+= Casos de uso
+
+Todas las operaciones de escritura pasan por el patrón Command de Fineract:
+un `CommandHandler` anotado con `@CommandType(entity, action)` delega en el
+*write platform service*. La tabla siguiente lista las combinaciones reales
+declaradas en los handlers del módulo.
+
+[cols="1,1,2"]
+|===
+|*Entidad (`@CommandType`)* |*Acciones* |*Handlers (paquete)*
+
+|`CLIENT`
+|CREATE, UPDATE, DELETE, ACTIVATE, CLOSE, REJECT, WITHDRAW, REACTIVATE, UNDOREJECT, UNDOWITHDRAWAL, ASSIGNSTAFF, UNASSIGNSTAFF, UPDATESAVINGSACCOUNT
+|`client/handler`
+
+|`CLIENTIDENTIFIER`
+|CREATE, UPDATE, DELETE
+|`client/handler`
+
+|`FAMILYMEMBERS`
+|CREATE, UPDATE, DELETE
+|`client/handler`
+
+|`ADDRESS`
+|CREATE, UPDATE
+|`client/handler`
+
+|`CLIENTCHARGE` (cargo)
+|CREATE, PAY, WAIVE, DELETE
+|`client/handler`
+
+|`CLIENT` / transacción
+|UNDO (deshacer transacción de cliente)
+|`client/handler`
+
+|`GROUP`
+|CREATE, UPDATE, DELETE, ACTIVATE, CLOSE, ASSIGNSTAFF, UNASSIGNSTAFF, ASSOCIATECLIENTS, DISASSOCIATECLIENTS, ASSIGNROLE, UNASSIGNROLE, UPDATEROLE, SAVECOLLECTIONSHEET
+|`group/handler`
+
+|`CENTER`
+|CREATE, UPDATE, DELETE, ACTIVATE, CLOSE, ASSOCIATEGROUPS, DISASSOCIATEGROUPS, SAVECOLLECTIONSHEET
+|`group/handler`
+|===
+
+== UC-1: Crear cliente
+
+[cols="1,3"]
+|===
+|*Actor principal* | Oficial de crédito / cajero
+|*Trigger* | `POST /v1/clients`
+|*Comando* | `CLIENT / CREATE` — `CreateClientCommandHandler`
+|*Precondiciones* | Oficina válida; si `legalFormId = ENTITY`, datos de `ClientNonPerson`.
+|*Postcondiciones (éxito)* | Cliente en estado `PENDING` (o `ACTIVE` si `active=true`); `account_no` asignado.
+|===
+
+== UC-2: Activar cliente
+
+[cols="1,3"]
+|===
+|*Actor principal* | Oficial de crédito
+|*Trigger* | `POST /v1/clients/{clientId}?command=activate`
+|*Comando* | `CLIENT / ACTIVATE` — `ActivateClientCommandHandler`
+|*Precondiciones* | Cliente en `PENDING`; fecha de activación ≥ fecha de ingreso a la oficina.
+|*Postcondiciones (éxito)* | Estado `ACTIVE`; se dispara `ClientActivateBusinessEvent`; puede crearse la cuenta de ahorro por defecto.
+|===
+
+== UC-3: Aplicar y pagar una comisión al cliente
+
+[cols="1,3"]
+|===
+|*Actor principal* | Cajero
+|*Trigger* | `POST /v1/clients/{clientId}/charges` y luego `?command=paychange`/`paycharge`
+|*Comando* | `CLIENTCHARGE / CREATE` y `CLIENTCHARGE / PAY` — `CreateClientChargeCommandHandler`, `PayClientChargeCommandHandler`
+|*Precondiciones* | Cliente `ACTIVE`; cargo activo con saldo pendiente; detalle de pago válido.
+|*Postcondiciones (éxito)* | Se crea `ClientTransaction` (`PAY_CHARGE`); se actualizan los `*_derived`; se generan asientos contables (ver <<_flujos>>).
+|===
+
+== UC-4: Condonar (waive) una comisión
+
+[cols="1,3"]
+|===
+|*Actor principal* | Supervisor
+|*Trigger* | `POST /v1/clients/{clientId}/charges/{chargeId}?command=waive`
+|*Comando* | `CLIENTCHARGE / WAIVE` — `WaiveClientChargeCommandHandler`
+|*Precondiciones* | Cargo activo con saldo pendiente.
+|*Postcondiciones (éxito)* | `ClientTransaction` (`WAIVE_CHARGE`); aumenta `amount_waived_derived`. *No* genera asientos contables.
+|===
+
+== UC-5: Registrar identificación / dirección / miembro de familia
+
+[cols="1,3"]
+|===
+|*Actor principal* | Oficial de crédito
+|*Trigger* | `POST /v1/clients/{clientId}/identifiers`, `.../addresses`, `.../familymembers`
+|*Comando* | `CLIENTIDENTIFIER/CREATE`, `ADDRESS/CREATE`, `FAMILYMEMBERS/CREATE`
+|*Precondiciones* | Tipo de documento/dirección configurado como `CodeValue`; clave de documento única por tipo.
+|*Postcondiciones (éxito)* | Registro asociado al cliente. Identificación duplicada lanza `DuplicateClientIdentifierException`.
+|===
+
+== UC-6: Crear centro y asociar grupos; crear grupo y asociar clientes
+
+[cols="1,3"]
+|===
+|*Actor principal* | Coordinador de campo
+|*Trigger* | `POST /v1/centers`, `.../{id}?command=associateGroups`; `POST /v1/groups`, `.../{id}?command=associateClients`
+|*Comando* | `CENTER/CREATE`, `CENTER/ASSOCIATEGROUPS`, `GROUP/CREATE`, `GROUP/ASSOCIATECLIENTS`
+|*Precondiciones* | Nivel de grupo (`GroupLevel`) adecuado; el centro debe usar un nivel con `isCenter()`.
+|*Postcondiciones (éxito)* | Jerarquía Centro→Grupos→Clientes establecida vía `parent_id` y `m_group_client`.
+|===

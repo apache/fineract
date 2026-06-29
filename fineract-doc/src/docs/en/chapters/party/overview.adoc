@@ -1,0 +1,113 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+= Visión funcional
+
+== Conceptos
+
+[cols="1,2,2"]
+|===
+|*Concepto* |*Descripción* |*Implementación*
+
+|Cliente
+|Persona física (`PERSON`) o jurídica (`ENTITY`) titular de productos (préstamos, ahorros). Puede pertenecer a un grupo y a una oficina.
+|`Client` — tabla `m_client`
+
+|Grupo
+|Agrupación de clientes (metodología de grupos solidarios). Puede tener roles, personal asignado y reuniones.
+|`Group` — tabla `m_group`
+
+|Centro
+|Agrupación de grupos. Es un `Group` con un `GroupLevel` que reporta `isCenter()`.
+|`Group` + `GroupLevel` — tablas `m_group`, `m_group_level`
+
+|Comisión / Cargo de cliente
+|Cargo monetario asociado al cliente (cuota de afiliación, comisiones puntuales). Se paga o se condona generando una transacción y asientos contables.
+|`ClientCharge` — tabla `m_client_charge`
+
+|Transacción de cliente
+|Movimiento de pago o condonación de un cargo. Es el puente hacia la contabilidad.
+|`ClientTransaction` — tabla `m_client_transaction`
+
+|Identificación
+|Documento de identidad del cliente (cédula, pasaporte) tipado por un `CodeValue`.
+|`ClientIdentifier` — tabla `m_client_identifier`
+
+|Dirección
+|Dirección postal del cliente, con configuración de campos por entidad.
+|`Address` / `ClientAddress` — tablas `m_address`, `m_client_address`
+
+|Miembro de familia
+|Familiar asociado al cliente.
+|`ClientFamilyMembers` — tabla `m_family_members`
+
+|Persona no natural
+|Datos extendidos para clientes de tipo `ENTITY` (forma jurídica, constitución).
+|`ClientNonPerson` — tabla `m_client_non_person`
+|===
+
+== Ciclo de vida del cliente
+
+El estado se modela en `ClientStatus`
+(`fineract-party/src/main/java/org/apache/fineract/portfolio/client/domain/ClientStatus.java:28`):
+
+[cols="1,1,3"]
+|===
+|*Estado* |*Valor* |*Significado*
+
+|`PENDING` |100 |Creado, pendiente de activación. Permite edición y borrado.
+|`ACTIVE` |300 |Activo; puede operar productos y recibir cargos.
+|`TRANSFER_IN_PROGRESS` |303 |Transferencia entre oficinas en curso.
+|`TRANSFER_ON_HOLD` |304 |Transferencia retenida.
+|`CLOSED` |600 |Cerrado.
+|`REJECTED` |700 |Rechazado (desde `PENDING`).
+|`WITHDRAWN` |800 |Retirado por el cliente (desde `PENDING`).
+|===
+
+.Transiciones principales de estado del cliente
+[plantuml,format=svg]
+....
+@startuml
+hide empty description
+[*] --> PENDING : CREATE
+PENDING --> ACTIVE : ACTIVATE
+PENDING --> REJECTED : REJECT
+PENDING --> WITHDRAWN : WITHDRAW
+REJECTED --> PENDING : UNDOREJECT
+WITHDRAWN --> PENDING : UNDOWITHDRAWAL
+ACTIVE --> CLOSED : CLOSE
+CLOSED --> ACTIVE : REACTIVATE
+ACTIVE --> TRANSFER_IN_PROGRESS : transferencia
+TRANSFER_IN_PROGRESS --> ACTIVE
+REJECTED --> [*]
+WITHDRAWN --> [*]
+@enduml
+....
+
+NOTE: Las transiciones inválidas lanzan `InvalidClientStateTransitionException`
+(`...client/exception/InvalidClientStateTransitionException.java`).
+
+== Forma jurídica
+
+`LegalForm` (`...client/domain/LegalForm.java:29`) distingue `PERSON` (1) y `ENTITY` (2).
+Para `ENTITY` se exige `ClientNonPerson` con los datos de la persona jurídica.
+
+== Tipos de transacción de cliente
+
+`ClientTransactionType` (`...client/domain/ClientTransactionType.java:27`):
+`PAY_CHARGE` (1) y `WAIVE_CHARGE` (2). Solo `PAY_CHARGE` genera asientos contables.

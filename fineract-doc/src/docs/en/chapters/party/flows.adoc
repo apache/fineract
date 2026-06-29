@@ -1,0 +1,100 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+= Flujos
+
+== Pago de comisión de cliente y generación de contabilidad
+
+Cuando se paga un `ClientCharge`, `ClientChargeWritePlatformServiceImpl`
+(`fineract-provider/.../client/service/ClientChargeWritePlatformServiceImpl.java`)
+crea una `ClientTransaction` de tipo `PAY_CHARGE`
+(`ClientTransaction.payCharge(...)`, línea ~156) y, si la contabilidad está
+habilitada para el cargo, invoca
+`generateAccountingEntries(...)` (línea ~183), que llama a
+`journalEntryWritePlatformService.createJournalEntriesForClientTransactions(accountingBridgeData)`.
+
+El servicio de contabilidad
+(`accounting/journalentry/service/JournalEntryWritePlatformServiceJpaRepositoryImpl.java:819`)
+delega en `AccountingProcessorForClientTransactions`, que mediante
+`AccountingProcessorHelper` (línea ~1340, `createJournalEntriesForClientCharges` /
+`createDebitJournalEntryOrReversalForClientChargePayments`) genera los asientos
+usando las cuentas mapeadas del cargo (`incomeAccountId`).
+
+.Secuencia: pago de comisión con asiento contable
+[plantuml,format=svg]
+....
+@startuml
+actor Cajero
+participant "ClientChargesApiResource" as API
+participant "CommandProcessing" as CMD
+participant "ClientChargeWritePlatformServiceImpl" as SVC
+participant "ClientTransaction" as TXN
+participant "JournalEntryWritePlatformService" as JE
+database "m_client_charge / m_client_transaction" as DB
+database "acc_gl_journal_entry" as GL
+
+Cajero -> API : POST /v1/clients/{id}/charges/{chargeId}?command=paycharge
+API -> CMD : CommandWrapper (CLIENTCHARGE / PAY)
+CMD -> SVC : payCharge(command)
+SVC -> SVC : validar cargo activo y saldo
+SVC -> TXN : ClientTransaction.payCharge(client, office, paymentDetail, amount)
+SVC -> DB : actualizar amount_paid_derived / amount_outstanding_derived
+alt contabilidad habilitada en el cargo
+  SVC -> JE : createJournalEntriesForClientTransactions(bridgeData)
+  JE -> GL : DÉBITO efectivo/activo, CRÉDITO income (incomeAccountId)
+end
+SVC --> API : CommandProcessingResult (clientId, resourceId, transactionId)
+API --> Cajero : 200 OK
+@enduml
+....
+
+NOTE: La condonación (`WAIVE_CHARGE`) crea la transacción y aumenta
+`amount_waived_derived`, pero *no* genera asientos contables.
+
+== Deshacer una transacción de cliente
+
+`UndoClientTransactionCommandHandler` (`CLIENT` / `UNDO`) revierte una
+`ClientTransaction`. Si la transacción tenía contabilidad asociada, el proceso
+contable genera el asiento de reverso correspondiente
+(`createDebitJournalEntryOrReversalForClientChargePayments`).
+
+.Flujo de negocio: aplicación de un cargo de cliente
+[plantuml,format=svg]
+....
+@startuml
+start
+:Crear ClientCharge (CLIENTCHARGE/CREATE);
+if (¿cliente ACTIVE y cargo válido?) then (sí)
+  :registrar cargo con saldo pendiente;
+else (no)
+  :error de validación;
+  stop
+endif
+if (acción) then (PAY)
+  :ClientTransaction PAY_CHARGE;
+  :actualizar derivados;
+  if (¿contabilidad habilitada?) then (sí)
+    :generar asientos (income);
+  endif
+else (WAIVE)
+  :ClientTransaction WAIVE_CHARGE;
+  :aumentar amount_waived_derived;
+endif
+stop
+@enduml
+....
