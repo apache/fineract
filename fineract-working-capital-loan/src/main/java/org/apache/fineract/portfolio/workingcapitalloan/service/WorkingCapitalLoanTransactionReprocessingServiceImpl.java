@@ -126,7 +126,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
 
         // Re-allocate every non-reversed repayment-like transaction in chronological order.
         final List<WorkingCapitalLoanTransaction> replayable = allTransactions.stream()
-                .filter(txn -> !txn.isReversed() && txn.isRepaymentLike()).sorted(TRANSACTION_ORDER).toList();
+                .filter(txn -> !txn.isReversed() && txn.getTransactionType().isRepaymentType()).sorted(TRANSACTION_ORDER).toList();
 
         // Pre-load the existing allocations in one query rather than per transaction. Looking them up via the
         // repository (instead of txn.getAllocation()) also avoids the lazy inverse side being stale for the
@@ -171,7 +171,8 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
 
     private boolean isOverpaidByReplayableTransactions(final List<WorkingCapitalLoanTransaction> allTransactions,
             final WorkingCapitalLoanBalance balance) {
-        final BigDecimal replayableTotal = allTransactions.stream().filter(txn -> !txn.isReversed() && txn.isRepaymentLike())
+        final BigDecimal replayableTotal = allTransactions.stream()
+                .filter(txn -> !txn.isReversed() && txn.getTransactionType().isRepaymentType())
                 .map(WorkingCapitalLoanTransaction::getTransactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         return replayableTotal.compareTo(balance.getPrincipal()) > 0;
     }

@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
@@ -49,6 +50,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUsersResponse;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
@@ -61,9 +63,9 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanAdjustTrans
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
+@RequiredArgsConstructor
 public class LoanRepaymentStepDef extends AbstractStepDef {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
@@ -75,26 +77,13 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
     public static final String DEFAULT_REPAYMENT_TYPE = "AUTOPAY";
     private static final String PWD_USER_WITH_ROLE = "1234567890Aa!";
 
-    @Autowired
-    private FineractFeignClient fineractClient;
-
-    @Autowired
-    private EventAssertion eventAssertion;
-
-    @Autowired
-    private PaymentTypeResolver paymentTypeResolver;
-
-    @Autowired
-    private EventCheckHelper eventCheckHelper;
-
-    @Autowired
-    private EventStore eventStore;
-
-    @Autowired
-    private org.apache.fineract.test.api.ApiProperties apiProperties;
-
-    @Autowired
-    private LoanRequestFactory loanRequestFactory;
+    private final FineractFeignClient fineractClient;
+    private final EventAssertion eventAssertion;
+    private final PaymentTypeResolver paymentTypeResolver;
+    private final EventCheckHelper eventCheckHelper;
+    private final EventStore eventStore;
+    private final FineractClientConfiguration fineractClientConfiguration;
+    private final LoanRequestFactory loanRequestFactory;
 
     @And("Customer makes {string} repayment on {string} with {double} EUR transaction amount")
     public void makeLoanRepayment(String repaymentType, String transactionDate, double transactionAmount) throws IOException {
@@ -156,10 +145,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         Long createdUserId = createUserResponse.getResourceId();
         GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOneUser(createdUserId));
 
-        String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
-        FineractFeignClient userClient = FineractFeignClient.builder().baseUrl(apiBaseUrl)
-                .credentials(user.getUsername(), PWD_USER_WITH_ROLE).tenantId(apiProperties.getTenantId()).disableSslVerification(true)
-                .readTimeout((int) apiProperties.getReadTimeout(), java.util.concurrent.TimeUnit.SECONDS).build();
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(user.getUsername(), PWD_USER_WITH_ROLE);
 
         PostLoansLoanIdTransactionsResponse repaymentResponse = ok(() -> userClient.loanTransactions().handleCommandsLoanTransaction(loanId,
                 repaymentRequest, Map.<String, Object>of("command", "repayment")));
@@ -212,10 +198,7 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         Long createdUserId = createUserResponse.getResourceId();
         GetUsersUserIdResponse user = ok(() -> fineractClient.users().retrieveOneUser(createdUserId));
 
-        String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
-        FineractFeignClient userClient = FineractFeignClient.builder().baseUrl(apiBaseUrl)
-                .credentials(user.getUsername(), PWD_USER_WITH_ROLE).tenantId(apiProperties.getTenantId()).disableSslVerification(true)
-                .readTimeout((int) apiProperties.getReadTimeout(), java.util.concurrent.TimeUnit.SECONDS).build();
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(user.getUsername(), PWD_USER_WITH_ROLE);
 
         PostLoansLoanIdTransactionsResponse repaymentResponse = ok(
                 () -> userClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(resourceExternalId, repaymentRequest,

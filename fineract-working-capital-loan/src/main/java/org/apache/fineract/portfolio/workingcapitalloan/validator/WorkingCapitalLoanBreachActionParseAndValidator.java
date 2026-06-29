@@ -50,6 +50,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachScheduleEvaluationUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanActiveBreachResetResolver;
@@ -71,6 +72,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanActiveBreachResetResolver activeBreachResetResolver;
+    private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
     public WorkingCapitalLoanBreachAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanBreachAction> existing) {
@@ -87,6 +89,9 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         validateLoanIsActive(dataValidator, workingCapitalLoan);
         validateBreachConfigurationExists(dataValidator, workingCapitalLoan);
+        if (!UNDO_RESET_ACTION.equalsIgnoreCase(actionString)) {
+            validateBreachNotDisabled(dataValidator, workingCapitalLoan.getId());
+        }
 
         if (RESCHEDULE_ACTION.equalsIgnoreCase(actionString)) {
             return parseAndValidateReschedule(json, workingCapitalLoan, dataValidator);
@@ -278,6 +283,12 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
         if (details == null || details.getBreach() == null) {
             dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.configuration");
+        }
+    }
+
+    private void validateBreachNotDisabled(final DataValidatorBuilder dataValidator, final Long loanId) {
+        if (breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate())) {
+            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.is.disabled");
         }
     }
 

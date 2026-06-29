@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<WorkingCapitalLoanBreachAction, Long> {
 
@@ -30,5 +33,25 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
 
     Optional<WorkingCapitalLoanBreachAction> findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             WorkingCapitalLoanBreachActionType action);
+
+    @Query("""
+            select case when count(action) > 0 then true else false end from WorkingCapitalLoanBreachAction action
+            where action.action = org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE
+            and action.id = (select max(latest.id) from WorkingCapitalLoanBreachAction latest
+                where latest.workingCapitalLoan.id = :loanId
+                and latest.action in (org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE,
+                    org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.ENABLE)
+                and latest.startDate <= :date)
+            """)
+    boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
+
+    @Query("""
+            select action from WorkingCapitalLoanBreachAction action
+            where action.workingCapitalLoan.id = :loanId
+            and action.action in (org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE,
+                org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.ENABLE)
+            order by action.id
+            """)
+    List<WorkingCapitalLoanBreachAction> findDisableEnableHistory(@Param("loanId") Long loanId);
 
 }

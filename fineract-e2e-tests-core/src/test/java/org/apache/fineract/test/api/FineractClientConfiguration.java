@@ -46,4 +46,11 @@ public class FineractClientConfiguration {
                 .disableSslVerification(true).debug(debugEnabled).connectTimeout(60, TimeUnit.SECONDS)
                 .readTimeout((int) readTimeout, TimeUnit.SECONDS).build();
     }
+
+    public FineractFeignClient fineractFeignClientForUser(final String username, final String password) {
+        final String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
+        return FineractFeignClient.builder().baseUrl(apiBaseUrl).credentials(username, password).tenantId(apiProperties.getTenantId())
+                .disableSslVerification(true).connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout((int) apiProperties.getReadTimeout(), TimeUnit.SECONDS).build();
+    }
 }

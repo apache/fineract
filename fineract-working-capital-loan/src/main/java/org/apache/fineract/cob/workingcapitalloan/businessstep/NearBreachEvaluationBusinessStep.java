@@ -19,7 +19,6 @@
 package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -46,18 +45,21 @@ public class NearBreachEvaluationBusinessStep extends WorkingCapitalLoanCOBBusin
             return loan;
         }
 
-        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
-        final Optional<WorkingCapitalLoanNearBreachAction> latestAction = nearBreachActionRepository
-                .findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(loan.getId(), NearBreachActionType.RESCHEDULE);
-        final boolean hasConfig = details != null && (details.getNearBreach() != null || latestAction.isPresent());
-        if (!hasConfig) {
+        final WorkingCapitalLoanNearBreachAction latestAction = nearBreachActionRepository
+                .findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(loan.getId(), NearBreachActionType.RESCHEDULE).orElse(null);
+        if (!hasNearBreachConfiguration(loan, latestAction)) {
             log.debug("Skipping near breach evaluation for WC loan {} - no near breach configuration", loan.getId());
             return loan;
         }
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        nearBreachEvaluationService.evaluateNearBreach(loan, latestAction.orElse(null), businessDate);
+        nearBreachEvaluationService.evaluateNearBreach(loan, latestAction, businessDate);
         return loan;
+    }
+
+    private boolean hasNearBreachConfiguration(final WorkingCapitalLoan loan, final WorkingCapitalLoanNearBreachAction latestAction) {
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
+        return details != null && (details.getNearBreach() != null || latestAction != null);
     }
 
     @Override

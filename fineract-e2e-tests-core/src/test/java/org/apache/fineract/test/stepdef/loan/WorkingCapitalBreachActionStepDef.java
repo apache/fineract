@@ -179,6 +179,22 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         log.info("Verified breach action initiation failed with expected error for loan {}", loanId);
     }
 
+    @Then("Initiating a Working Capital loan breach reschedule with minimumPayment {string} {string} results an error with the following data:")
+    public void initiateBreachRescheduleResultsAnError(final String minimumPayment, final String minimumPaymentType,
+            final DataTable table) {
+        final Long loanId = extractLoanId();
+
+        final PostWorkingCapitalLoansBreachActionRequest request = buildRescheduleRequest(
+                Map.of("minimumPayment", minimumPayment, "minimumPaymentType", minimumPaymentType));
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request));
+
+        verifyBreachActionErrorWithTable(exception, table);
+
+        log.info("Verified breach reschedule initiation failed with expected error for loan {}", loanId);
+    }
+
     @Then("Initiating a Working Capital loan breach action without {string} results an error with the following data:")
     public void initiateBreachActionWithoutFieldResultsAnError(final String omittedField, final DataTable table) {
         final Long loanId = extractLoanId();

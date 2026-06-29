@@ -47,4 +47,6 @@ public interface WorkingCapitalLoanBreachScheduleService {
     void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction rescheduleAction);
 
     void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
+
+    void reEvaluateAfterEnable(WorkingCapitalLoan loan, LocalDate enableDate);
 }

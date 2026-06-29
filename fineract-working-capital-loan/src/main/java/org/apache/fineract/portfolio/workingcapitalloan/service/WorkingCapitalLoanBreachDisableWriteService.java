@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.domain;
+package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-public enum WorkingCapitalLoanBreachActionType {
-    PAUSE, //
-    RESUME, //
-    RESCHEDULE, //
-    RESET, //
-    UNDO_RESET, //
-    DISABLE, //
-    ENABLE //
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+
+public interface WorkingCapitalLoanBreachDisableWriteService {
+
+    CommandProcessingResult createBreachDisableAction(Long workingCapitalLoanId, JsonCommand command);
 }

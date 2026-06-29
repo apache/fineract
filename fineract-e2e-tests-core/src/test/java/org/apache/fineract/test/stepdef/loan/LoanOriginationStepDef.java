@@ -31,7 +31,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
@@ -58,7 +57,7 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanOriginatorsRequest;
 import org.apache.fineract.client.models.PutLoanOriginatorsResponse;
-import org.apache.fineract.test.api.ApiProperties;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.factory.LoanRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.messaging.EventAssertion;
@@ -85,7 +84,7 @@ public class LoanOriginationStepDef extends AbstractStepDef {
     private final LoanRequestFactory loanRequestFactory;
     private final EventAssertion eventAssertion;
     private final EventStore eventStore;
-    private final ApiProperties apiProperties;
+    private final FineractClientConfiguration fineractClientConfiguration;
 
     // --- Originator CRUD steps ---
 
@@ -910,11 +909,7 @@ public class LoanOriginationStepDef extends AbstractStepDef {
     private FineractFeignClient createClientForUser() {
         String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
         String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
-        String apiBaseUrl = apiProperties.getBaseUrl() + "/fineract-provider/api/";
-
-        return FineractFeignClient.builder().baseUrl(apiBaseUrl).credentials(username, password).tenantId(apiProperties.getTenantId())
-                .disableSslVerification(true).connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout((int) apiProperties.getReadTimeout(), TimeUnit.SECONDS).build();
+        return fineractClientConfiguration.fineractFeignClientForUser(username, password);
     }
 
     private void assertOriginatorsMatch(List<GetLoansLoanIdOriginatorData> expectedOriginators, List<OriginatorDetailsV1> actualOriginators,

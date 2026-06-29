@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -76,5 +77,17 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     Optional<WorkingCapitalLoanTransaction> findByWcLoan_IdAndExternalId(Long wcLoanId, ExternalId externalId);
 
     boolean existsByExternalId(ExternalId externalId);
+
+    @Query("""
+            select coalesce(sum(allocation.principalPortion), 0)
+            from WorkingCapitalLoanTransaction t
+            join t.allocation allocation
+            where t.wcLoan.id = :wcLoanId and t.reversed = false
+              and t.transactionType in :transactionTypes
+              and t.transactionDate >= :fromDate and t.transactionDate <= :toDate
+            """)
+    BigDecimal sumBreachRelevantPrincipalPaid(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") Collection<LoanTransactionType> transactionTypes, @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate);
 
 }
