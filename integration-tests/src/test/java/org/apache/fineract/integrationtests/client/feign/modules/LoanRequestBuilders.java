@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
@@ -34,6 +36,12 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 
 public final class LoanRequestBuilders {
+
+    private static final Gson GSON = new Gson();
+
+    private static final String KEY_LOCALE = "locale";
+    private static final String KEY_DATE_FORMAT = "dateFormat";
+    private static final String KEY_ACTUAL_DISBURSEMENT_DATE = "actualDisbursementDate";
 
     private LoanRequestBuilders() {}
 
@@ -114,6 +122,64 @@ public final class LoanRequestBuilders {
                 .transactionAmount(BigDecimal.valueOf(disbursedAmount))//
                 .locale(LoanTestData.LOCALE)//
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
+    }
+
+    public static String disburseLoanWithRepaymentRescheduleJson(String disbursedOnDate, String adjustRepaymentDate) {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put(KEY_LOCALE, LoanTestData.LOCALE);
+        map.put(KEY_DATE_FORMAT, LoanTestData.DATETIME_PATTERN);
+        map.put(KEY_ACTUAL_DISBURSEMENT_DATE, disbursedOnDate);
+        map.put("adjustRepaymentDate", adjustRepaymentDate);
+        map.put("note", "DISBURSE NOTE");
+        return GSON.toJson(map);
+    }
+
+    public static String disburseLoanWithNetDisbursalAmountJson(String disbursedOnDate, String netDisbursalAmount) {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put(KEY_LOCALE, LoanTestData.LOCALE);
+        map.put(KEY_DATE_FORMAT, LoanTestData.DATETIME_PATTERN);
+        map.put(KEY_ACTUAL_DISBURSEMENT_DATE, disbursedOnDate);
+        map.put("netDisbursalAmount", netDisbursalAmount);
+        return GSON.toJson(map);
+    }
+
+    public static PostLoansDisbursementData applyTrancheDetail(String expectedDisbursementDate, double principal) {
+        return new PostLoansDisbursementData()//
+                .expectedDisbursementDate(expectedDisbursementDate)//
+                .principal(BigDecimal.valueOf(principal));
+    }
+
+    public static PostLoansLoanIdDisbursementData approveTrancheDetail(String expectedDisbursementDate, double principal) {
+        return new PostLoansLoanIdDisbursementData()//
+                .expectedDisbursementDate(parseDate(expectedDisbursementDate))//
+                .principal(BigDecimal.valueOf(principal));
+    }
+
+    public static PostLoansLoanIdRequest approveLoanWithTranches(Double approvedAmount, String approvedOnDate,
+            String expectedDisbursementDate, List<PostLoansLoanIdDisbursementData> tranches) {
+        return approveLoan(approvedAmount, approvedOnDate, expectedDisbursementDate)//
+                .disbursementData(tranches);
+    }
+
+    public static String approveLoanWithTranchesJson(Double approvedAmount, String approvedOnDate, String expectedDisbursementDate,
+            List<PostLoansDisbursementData> tranches) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("approvedLoanAmount", approvedAmount.toString());
+        map.put("approvedOnDate", approvedOnDate);
+        map.put("expectedDisbursementDate", expectedDisbursementDate);
+        map.put(KEY_LOCALE, LoanTestData.LOCALE);
+        map.put(KEY_DATE_FORMAT, LoanTestData.DATETIME_PATTERN);
+        map.put("disbursementData", tranches.stream().map(tranche -> {
+            Map<String, String> trancheMap = new LinkedHashMap<>();
+            trancheMap.put("expectedDisbursementDate", tranche.getExpectedDisbursementDate());
+            trancheMap.put("principal", tranche.getPrincipal().toPlainString());
+            return trancheMap;
+        }).toList());
+        return GSON.toJson(map);
+    }
+
+    private static LocalDate parseDate(String date) {
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN, Locale.ENGLISH));
     }
 
     public static PostLoansLoanIdTransactionsRequest repayLoan(Double amount, String transactionDate) {
@@ -232,14 +298,63 @@ public final class LoanRequestBuilders {
         AdvancedPaymentData data = new AdvancedPaymentData();
         data.setTransactionType(transactionType);
         data.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
+        data.setPaymentAllocationOrder(defaultPaymentAllocationOrder());
+        return data;
+    }
+
+    public static AdvancedPaymentData paymentAllocation(String transactionType, String futureInstallmentAllocationRule,
+            String... paymentAllocationRules) {
+        AdvancedPaymentData data = new AdvancedPaymentData();
+        data.setTransactionType(transactionType);
+        data.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
         AtomicInteger order = new AtomicInteger(1);
-        List<PaymentAllocationOrder> orders = Stream
+        List<PaymentAllocationOrder> orders = Stream.of(paymentAllocationRules)
+                .map(rule -> new PaymentAllocationOrder().paymentAllocationRule(rule).order(order.getAndIncrement())).toList();
+        data.setPaymentAllocationOrder(orders);
+        return data;
+    }
+
+    public static List<PaymentAllocationOrder> defaultPaymentAllocationOrder() {
+        AtomicInteger order = new AtomicInteger(1);
+        return Stream
                 .of("PAST_DUE_PENALTY", "PAST_DUE_FEE", "PAST_DUE_PRINCIPAL", "PAST_DUE_INTEREST", "DUE_PENALTY", "DUE_FEE",
                         "DUE_PRINCIPAL", "DUE_INTEREST", "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL",
                         "IN_ADVANCE_INTEREST")
                 .map(rule -> new PaymentAllocationOrder().paymentAllocationRule(rule).order(order.getAndIncrement())).toList();
-        data.setPaymentAllocationOrder(orders);
+    }
+
+    public static CreditAllocationData creditAllocation(String transactionType, String... creditAllocationRules) {
+        CreditAllocationData data = new CreditAllocationData();
+        data.setTransactionType(transactionType);
+        AtomicInteger order = new AtomicInteger(1);
+        List<CreditAllocationOrder> orders = Stream.of(creditAllocationRules)
+                .map(rule -> new CreditAllocationOrder().creditAllocationRule(rule).order(order.getAndIncrement())).toList();
+        data.setCreditAllocationOrder(orders);
         return data;
+    }
+
+    public static PostLoansLoanIdTransactionsRequest reAmortize(String reAmortizationInterestHandling) {
+        PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
+        request.setReAmortizationInterestHandling(reAmortizationInterestHandling);
+        request.setLocale(LoanTestData.LOCALE);
+        request.setDateFormat(LoanTestData.DATETIME_PATTERN);
+        return request;
+    }
+
+    public static PostLoansLoanIdTransactionsRequest writeOff(String transactionDate) {
+        return new PostLoansLoanIdTransactionsRequest()//
+                .transactionDate(transactionDate)//
+                .locale(LoanTestData.LOCALE)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
+    }
+
+    public static PostLoansRequest applyCumulativeLoanRequest(Long clientId, Long productId, String submittedOnDate, Double principal,
+            Double interestRate, int numberOfRepayments, Consumer<PostLoansRequest> customizer) {
+        PostLoansRequest request = applyCumulativeLoan(clientId, productId, submittedOnDate, principal, numberOfRepayments, interestRate);
+        if (customizer != null) {
+            customizer.accept(request);
+        }
+        return request;
     }
 
     public static PostLoansLoanIdRequest rejectLoan(String rejectedOnDate) {
@@ -384,5 +499,47 @@ public final class LoanRequestBuilders {
             customizer.accept(request);
         }
         return request;
+    }
+
+    public static ApplyLoanWithLegacyDates applyLoanWithLegacyDates(PostLoansRequest base, String interestChargedFromDate,
+            String repaymentsStartingFromDate) {
+        ApplyLoanWithLegacyDates request = GSON.fromJson(GSON.toJson(base), ApplyLoanWithLegacyDates.class);
+        request.setInterestChargedFromDate(interestChargedFromDate);
+        request.setRepaymentsStartingFromDateForApply(repaymentsStartingFromDate);
+        return request;
+    }
+
+    /**
+     * Carries legacy string date fields omitted from the OpenAPI loan apply model.
+     */
+    public static final class ApplyLoanWithLegacyDates extends PostLoansRequest {
+
+        @JsonProperty("interestChargedFromDate")
+        private String interestChargedFromDate;
+
+        private String repaymentsStartingFromDateForApply;
+
+        public String getInterestChargedFromDate() {
+            return interestChargedFromDate;
+        }
+
+        public void setInterestChargedFromDate(String interestChargedFromDate) {
+            this.interestChargedFromDate = interestChargedFromDate;
+        }
+
+        public void setRepaymentsStartingFromDateForApply(String repaymentsStartingFromDateForApply) {
+            this.repaymentsStartingFromDateForApply = repaymentsStartingFromDateForApply;
+        }
+
+        @Override
+        @JsonIgnore
+        public LocalDate getRepaymentsStartingFromDate() {
+            return null;
+        }
+
+        @JsonProperty("repaymentsStartingFromDate")
+        public String getRepaymentsStartingFromDateForApply() {
+            return repaymentsStartingFromDateForApply;
+        }
     }
 }

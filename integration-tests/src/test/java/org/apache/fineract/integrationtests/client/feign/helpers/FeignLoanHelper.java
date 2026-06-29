@@ -379,6 +379,20 @@ public class FeignLoanHelper {
         return response.getResourceId();
     }
 
+    public Long rejectRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
+        PostUpdateRescheduleLoansResponse response = ok(
+                () -> fineractClient.rescheduleLoans().updateLoanRescheduleRequest(scheduleId, request, "reject"));
+        return response.getResourceId();
+    }
+
+    public PostCreateRescheduleLoansResponse createRescheduleRequestResponse(PostCreateRescheduleLoansRequest request) {
+        return ok(() -> fineractClient.rescheduleLoans().createLoanRescheduleRequest(request));
+    }
+
+    public org.apache.fineract.client.models.GetLoanRescheduleRequestResponse readRescheduleRequest(Long scheduleId, String fields) {
+        return ok(() -> fineractClient.rescheduleLoans().readLoanRescheduleRequest(scheduleId, fields));
+    }
+
     public void createAndApproveRescheduleRequest(PostCreateRescheduleLoansRequest createRequest,
             PostUpdateRescheduleLoansRequest approveRequest) {
         Long scheduleId = createRescheduleRequest(createRequest);
