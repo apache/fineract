@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
@@ -41,12 +43,24 @@ public class WorkingCapitalLoanBreachActionReadServiceImpl implements WorkingCap
         if (!loanRepository.existsById(workingCapitalLoanId)) {
             throw new WorkingCapitalLoanNotFoundException(workingCapitalLoanId);
         }
-        return actionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId).stream().map(this::toData).toList();
+        final List<WorkingCapitalLoanBreachAction> actions = actionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
+        final List<WorkingCapitalLoanBreachAction> resumes = actions.stream()
+                .filter(a -> WorkingCapitalLoanBreachActionType.RESUME.equals(a.getAction())).toList();
+        return actions.stream().map(action -> toData(action, resumes)).toList();
     }
 
-    private WorkingCapitalLoanBreachActionData toData(final WorkingCapitalLoanBreachAction action) {
+    private WorkingCapitalLoanBreachActionData toData(final WorkingCapitalLoanBreachAction action,
+            final List<WorkingCapitalLoanBreachAction> resumes) {
+        LocalDate effectiveEndDate = null;
+        if (WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction())) {
+            effectiveEndDate = resumes.stream()
+                    .filter(resume -> !action.getStartDate().isAfter(resume.getStartDate())
+                            && !resume.getStartDate().isAfter(action.getEndDate()))
+                    .map(WorkingCapitalLoanBreachAction::getStartDate).min(LocalDate::compareTo).orElse(null);
+        }
         return new WorkingCapitalLoanBreachActionData(action.getId(), action.getAction(), action.getStartDate(), action.getEndDate(),
-                action.getMinimumPayment(), action.getMinimumPaymentType(), action.getFrequency(), action.getFrequencyType());
+                effectiveEndDate, action.getMinimumPayment(), action.getMinimumPaymentType(), action.getFrequency(),
+                action.getFrequencyType());
     }
 
 }
