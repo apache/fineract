@@ -18,8 +18,16 @@
  */
 package org.apache.fineract.integrationtests.client.feign.modules;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -28,8 +36,10 @@ import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -248,6 +258,74 @@ public final class LoanRequestBuilders {
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 
+    public static PostCreateRescheduleLoansRequest rescheduleWithExtraTerms(Long loanId, String submittedOnDate,
+            String rescheduleFromDate, Integer extraTerms) {
+        return new PostCreateRescheduleLoansRequest()//
+                .loanId(loanId)//
+                .submittedOnDate(submittedOnDate)//
+                .rescheduleFromDate(rescheduleFromDate)//
+                .extraTerms(extraTerms)//
+                .rescheduleReasonId(1L)//
+                .locale(LoanTestData.LOCALE)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
+    }
+
+    /**
+     * Reschedule request with {@code recalculateInterest=true}. The generated OpenAPI model omits this field; the
+     * subclass ensures Gson serializes it for Feign calls.
+     */
+    public static PostCreateRescheduleLoansRequest rescheduleWithRecalculateInterest(Long loanId, String submittedOnDate,
+            String rescheduleFromDate, String adjustedDueDate) {
+        return withRecalculateInterest(rescheduleRequest(loanId, submittedOnDate, rescheduleFromDate, adjustedDueDate), true);
+    }
+
+    public static PostCreateRescheduleLoansRequest rescheduleWithFixedEmiAndRecalculateInterest(Long loanId, String submittedOnDate,
+            String rescheduleFromDate, String adjustedDueDate, BigDecimal emi, String emiEndDate) {
+        RescheduleRequestWithRecalculateInterest request = withRecalculateInterest(
+                rescheduleRequest(loanId, submittedOnDate, rescheduleFromDate, adjustedDueDate), true);
+        request.setEmi(emi);
+        request.setEndDate(emiEndDate);
+        return request;
+    }
+
+    private static RescheduleRequestWithRecalculateInterest withRecalculateInterest(PostCreateRescheduleLoansRequest base,
+            boolean recalculateInterest) {
+        RescheduleRequestWithRecalculateInterest request = new RescheduleRequestWithRecalculateInterest();
+        request.setAdjustedDueDate(base.getAdjustedDueDate());
+        request.setDateFormat(base.getDateFormat());
+        request.setEmi(base.getEmi());
+        request.setEndDate(base.getEndDate());
+        request.setExtraTerms(base.getExtraTerms());
+        request.setGraceOnInterest(base.getGraceOnInterest());
+        request.setGraceOnPrincipal(base.getGraceOnPrincipal());
+        request.setLoanId(base.getLoanId());
+        request.setLocale(base.getLocale());
+        request.setNewInterestRate(base.getNewInterestRate());
+        request.setRescheduleFromDate(base.getRescheduleFromDate());
+        request.setRescheduleReasonComment(base.getRescheduleReasonComment());
+        request.setRescheduleReasonId(base.getRescheduleReasonId());
+        request.setSubmittedOnDate(base.getSubmittedOnDate());
+        request.setRecalculateInterest(recalculateInterest);
+        return request;
+    }
+
+    /**
+     * Extends {@link PostCreateRescheduleLoansRequest} so {@code recalculateInterest} is included in JSON payloads.
+     */
+    public static final class RescheduleRequestWithRecalculateInterest extends PostCreateRescheduleLoansRequest {
+
+        @JsonProperty("recalculateInterest")
+        private Boolean recalculateInterest;
+
+        public Boolean getRecalculateInterest() {
+            return recalculateInterest;
+        }
+
+        public void setRecalculateInterest(Boolean recalculateInterest) {
+            this.recalculateInterest = recalculateInterest;
+        }
+    }
+
     /**
      * Creates a reAge request for non-interest-bearing loans (no interest handling needed).
      */
@@ -265,6 +343,11 @@ public final class LoanRequestBuilders {
      */
     public static PostLoansLoanIdTransactionsRequest reAge(String startDate, String frequencyType, Integer frequencyNumber,
             Integer numberOfInstallments, String reAgeInterestHandling) {
+        return reAge(startDate, frequencyType, frequencyNumber, numberOfInstallments, reAgeInterestHandling, null);
+    }
+
+    public static PostLoansLoanIdTransactionsRequest reAge(String startDate, String frequencyType, Integer frequencyNumber,
+            Integer numberOfInstallments, String reAgeInterestHandling, Double transactionAmount) {
         PostLoansLoanIdTransactionsRequest request = new PostLoansLoanIdTransactionsRequest();
         request.setStartDate(startDate);
         request.setFrequencyType(frequencyType);
@@ -272,6 +355,9 @@ public final class LoanRequestBuilders {
         request.setNumberOfInstallments(numberOfInstallments);
         if (reAgeInterestHandling != null) {
             request.setReAgeInterestHandling(reAgeInterestHandling);
+        }
+        if (transactionAmount != null) {
+            request.transactionAmount(transactionAmount);
         }
         request.setLocale(LoanTestData.LOCALE);
         request.setDateFormat(LoanTestData.DATETIME_PATTERN);

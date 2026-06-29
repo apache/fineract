@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
+import org.apache.fineract.client.models.LoanScheduleData;
+import org.apache.fineract.client.models.LoanTransactionData;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -33,9 +35,11 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 public class FeignTransactionHelper {
 
     private final FineractFeignClient fineractClient;
+    private final InternalLoanReAgeApi internalLoanReAgeApi;
 
     public FeignTransactionHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.internalLoanReAgeApi = fineractClient.create(InternalLoanReAgeApi.class);
     }
 
     public void executeInlineCOB(Long loanId) {
@@ -93,6 +97,20 @@ public class FeignTransactionHelper {
         PostLoansLoanIdTransactionsResponse response = ok(
                 () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "undoReAge")));
         return response.getResourceId();
+    }
+
+    public LoanTransactionData getReAgeTemplate(Long loanId) {
+        return ok(() -> internalLoanReAgeApi.retrieveReAgeTemplate(loanId));
+    }
+
+    public LoanScheduleData previewReAgeSchedule(Long loanId, Map<String, Object> queryParams) {
+        return ok(() -> fineractClient.loanTransactions().previewReAgeSchedule(loanId, queryParams));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(Long loanId, String transactionExternalId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByTransactionExternalId(loanId, transactionExternalId,
+                request, "chargeback"));
     }
 
     public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
@@ -203,5 +221,9 @@ public class FeignTransactionHelper {
 
     public PostLoansLoanIdTransactionsResponse writeOff(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(loanExternalId, request, "writeoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse closeRescheduledLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "close-rescheduled")));
     }
 }
