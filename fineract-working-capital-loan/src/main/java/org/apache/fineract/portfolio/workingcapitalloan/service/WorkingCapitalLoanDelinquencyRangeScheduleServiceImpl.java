@@ -179,14 +179,21 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         delinquencyClassificationService.instantClassifyDelinquency(loan, transactionDate);
     }
 
-    private BigDecimal unpayPeriod(WorkingCapitalLoanDelinquencyRangeSchedule period, BigDecimal transactionAmount) {
+    private BigDecimal unpayPeriod(WorkingCapitalLoanDelinquencyRangeSchedule period, BigDecimal transactionAmount,
+            boolean isCurrentPeriod) {
         BigDecimal unpayAmount = period.getPaidAmount().min(transactionAmount);
         period.setPaidAmount(period.getPaidAmount().subtract(unpayAmount));
         period.setOutstandingAmount(period.getExpectedAmount().subtract(period.getPaidAmount()).max(BigDecimal.ZERO));
-        if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) >= 0) {
-            period.setMinPaymentCriteriaMet(null);
-            period.setDelinquentAmount(null);
-            period.setDelinquentDays(null);
+        if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) > 0) {
+            if (!isCurrentPeriod) {
+                period.setMinPaymentCriteriaMet(false);
+                period.setDelinquentAmount(period.getOutstandingAmount());
+                period.setDelinquentDays(DateUtils.getDifferenceInDays(period.getToDate(), DateUtils.getBusinessLocalDate()));
+            } else {
+                period.setMinPaymentCriteriaMet(null);
+                period.setDelinquentAmount(null);
+                period.setDelinquentDays(null);
+            }
         }
         return unpayAmount;
     }
@@ -199,7 +206,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         BigDecimal transactionAmount = amount;
         if (currentPeriod.isPresent()) {
             WorkingCapitalLoanDelinquencyRangeSchedule period = currentPeriod.get();
-            BigDecimal unpayAmount = unpayPeriod(period, transactionAmount);
+            BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, true);
             transactionAmount = transactionAmount.subtract(unpayAmount);
         }
 
@@ -207,7 +214,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
             List<WorkingCapitalLoanDelinquencyRangeSchedule> pastPeriods = loanDelinquencyRangeScheduleRepository
                     .findByLoanIdAndToDateIsBefore(loanId, businessDate);
             for (WorkingCapitalLoanDelinquencyRangeSchedule period : pastPeriods.reversed()) {
-                BigDecimal unpayAmount = unpayPeriod(period, transactionAmount);
+                BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, false);
                 transactionAmount = transactionAmount.subtract(unpayAmount);
                 if (transactionAmount.compareTo(BigDecimal.ZERO) <= 0) {
                     break;

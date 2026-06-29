@@ -7,19 +7,19 @@ Feature: Working Capital Loan Undo Transaction
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
-      | LoanProduct                | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACCOUNTING_CASH_BASED | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And Working capital loan account has the correct data:
-      | product.name               | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
-      | WCLP_ACCOUNTING_CASH_BASED | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+      | product.name        | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | WCLP_ACC_DEF_REV_AM | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
     And Working capital loan account has the correct data:
-      | product.name               | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACCOUNTING_CASH_BASED | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
+      | product.name        | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     And Admin retrieves the projected amortization schedule
     And The retrieved amortization schedule has payments with the following details in first "11" lines:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
@@ -179,8 +179,8 @@ Feature: Working Capital Loan Undo Transaction
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
-      | LoanProduct                | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACCOUNTING_CASH_BASED | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -268,8 +268,8 @@ Feature: Working Capital Loan Undo Transaction
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
-      | LoanProduct                | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACCOUNTING_CASH_BASED | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -292,16 +292,16 @@ Feature: Working Capital Loan Undo Transaction
       | totalPaidPrincipal   | 0.00    |
     # Second undo on the same (already reversed) transaction must fail with 403
     When Customer tries to undo "1"th "REPAYMENT" transaction made on "10 January 2026" on Working Capital loan and gets error:
-      | httpCode | errorMessage                                                  |
-      | 400      | Failed data validation due to: transaction.already.undone                              |
+      | httpCode | errorMessage                                              |
+      | 400      | Failed data validation due to: transaction.already.undone |
 
   @TestRailId:C85335
   Scenario: Verify working capital loan undo transaction - UC5: undo disbursement via undo-transaction endpoint returns error (Negative)
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
-      | LoanProduct                | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ACCOUNTING_CASH_BASED | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -313,5 +313,5 @@ Feature: Working Capital Loan Undo Transaction
       | totalPaidPrincipal   | 0.00    |
     # Attempting to undo a DISBURSEMENT via the generic undo-transaction endpoint must be rejected
     When Customer tries to undo "1"th "DISBURSEMENT" transaction made on "01 January 2026" on Working Capital loan and gets error:
-      | httpCode | errorMessage                                                  |
-      | 400      | Undo is not supported for transaction type DISBURSEMENT       |
+      | httpCode | errorMessage                                            |
+      | 400      | Undo is not supported for transaction type DISBURSEMENT |

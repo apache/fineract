@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachScheduleData;
@@ -173,7 +172,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         period.setPaidAmount(newPaidAmount);
         period.setOutstandingAmount(period.getMinPaymentAmount().subtract(period.getPaidAmount()).max(BigDecimal.ZERO));
         if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) > 0) {
-            if (period.getToDate().isBefore(ThreadLocalContextUtil.getBusinessDate())) {
+            if (period.getToDate().isBefore(DateUtils.getBusinessLocalDate())) {
                 period.setBreach(true);
             } else {
                 period.setBreach(null);
