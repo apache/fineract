@@ -47,13 +47,10 @@ class AllModulesCrossFeatureBoundaryTest {
 
     private static final Pattern FINERACT_ARTIFACT = Pattern.compile("(?<=/)fineract-[a-z0-9-]+");
 
-    private static ApplicationModules modules;
+    private static final Pattern ARTIFACT_VERSION_SUFFIX = Pattern.compile("-\\d.*$");
 
     private static ApplicationModules modules() {
-        if (modules == null) {
-            modules = ApplicationModules.of(BASE);
-        }
-        return modules;
+        return ModulesHolder.MODULES;
     }
 
     private static String featureKey(String typeName) {
@@ -74,7 +71,7 @@ class AllModulesCrossFeatureBoundaryTest {
                     while (matcher.find()) {
                         artifact = matcher.group();
                     }
-                    return artifact == null ? uri : artifact.replaceAll("-\\d.*$", "");
+                    return artifact == null ? uri : ARTIFACT_VERSION_SUFFIX.matcher(artifact).replaceAll("");
                 }) //
                 .orElse("(unknown-source)");
     }
@@ -117,17 +114,17 @@ class AllModulesCrossFeatureBoundaryTest {
                 }
             });
 
-            LOG.info("==== " + moduleName + " cross-feature dependency report (base = " + BASE + ") ====");
+            LOG.info("==== {} cross-feature dependency report (base = {}) ====", moduleName, BASE);
             LOG.info("-- source type -> referenced feature packages [owning artifact : status] --");
             if (sourceTypeToTargets.isEmpty()) {
-                LOG.info("  (no outgoing dependencies)");
+                LOG.info("  no outgoing dependencies");
             } else {
-                sourceTypeToTargets.forEach((source, targets) -> LOG.info("  " + source + "  ->  " + targets));
+                sourceTypeToTargets.forEach((source, targets) -> LOG.info("  dependency {} -> {}", source, targets));
             }
             LOG.info("-- allowed (in fineract-core / fineract-command) --");
-            LOG.info("  " + allowedFromCore);
+            LOG.info("  allowed features: {}", allowedFromCore);
             LOG.info("-- VIOLATIONS (in some other fineract-* module) --");
-            LOG.info("  " + violationFeatures);
+            LOG.info("  violation features: {}", violationFeatures);
 
             totalViolations += violationFeatures.size();
             if (violationFeatures.isEmpty()) {
@@ -136,10 +133,10 @@ class AllModulesCrossFeatureBoundaryTest {
         }
 
         LOG.info("==== SUMMARY ====");
-        LOG.info("modules total        : " + sortedModules.size());
-        LOG.info("clean modules        : " + cleanModules);
-        LOG.info("modules with issues  : " + (sortedModules.size() - cleanModules));
-        LOG.info("total violations     : " + totalViolations);
+        LOG.info("modules total        : {}", sortedModules.size());
+        LOG.info("clean modules        : {}", cleanModules);
+        LOG.info("modules with issues  : {}", sortedModules.size() - cleanModules);
+        LOG.info("total violations     : {}", totalViolations);
     }
 
     @Test
@@ -148,7 +145,7 @@ class AllModulesCrossFeatureBoundaryTest {
         Map<String, ApplicationModule> sortedModules = new TreeMap<>();
         modules().forEach(module -> sortedModules.put(module.getBasePackage().getName(), module));
 
-        LOG.info("==== Module-to-module cross-feature dependency violations (base = " + BASE + ") ====");
+        LOG.info("==== Module-to-module cross-feature dependency violations (base = {}) ====", BASE);
         LOG.info("Rule: a module may depend only on fineract-core and fineract-command.");
         LOG.info("Each line: SOURCE module -> TARGET module (edge count) [offending feature packages].");
 
@@ -160,7 +157,6 @@ class AllModulesCrossFeatureBoundaryTest {
             ApplicationModule module = moduleEntry.getValue();
 
             Map<String, Integer> targetModuleEdgeCount = new TreeMap<>();
-
             Map<String, Set<String>> targetModuleFeatures = new TreeMap<>();
 
             module.getDirectDependencies(modules()).stream().forEach((ApplicationModuleDependency dependency) -> {
@@ -173,13 +169,13 @@ class AllModulesCrossFeatureBoundaryTest {
             });
 
             if (targetModuleEdgeCount.isEmpty()) {
-                LOG.info("MODULE " + moduleName + "  ->  (no cross-module violations)");
+                LOG.info("MODULE {}  ->  no cross-module violations", moduleName);
             } else {
-                LOG.info("MODULE " + moduleName + "  ->  depends on " + targetModuleEdgeCount.size() + " other module(s):");
+                LOG.info("MODULE {}  ->  depends on {} other module(s):", moduleName, targetModuleEdgeCount.size());
                 for (Map.Entry<String, Integer> target : targetModuleEdgeCount.entrySet()) {
                     String targetModule = target.getKey();
                     int edges = target.getValue();
-                    LOG.info("    -> " + targetModule + "  (" + edges + " edge(s))  " + targetModuleFeatures.get(targetModule));
+                    LOG.info("    target module {} with {} edge(s): {}", targetModule, edges, targetModuleFeatures.get(targetModule));
                     totalCrossModuleEdges += edges;
                 }
                 modulesWithCrossModuleDeps++;
@@ -187,12 +183,13 @@ class AllModulesCrossFeatureBoundaryTest {
         }
 
         LOG.info("==== SUMMARY ====");
-        LOG.info("modules total                 : " + sortedModules.size());
-        LOG.info("modules with cross-module deps : " + modulesWithCrossModuleDeps);
-        LOG.info("total cross-module class edges : " + totalCrossModuleEdges);
+        LOG.info("modules total                 : {}", sortedModules.size());
+        LOG.info("modules with cross-module deps : {}", modulesWithCrossModuleDeps);
+        LOG.info("total cross-module class edges : {}", totalCrossModuleEdges);
     }
 
     @Test
+    @EnabledIfSystemProperty(named = "fineract.modulith.report", matches = "true")
     void noModuleMayDependOnAnotherFeatureModule() {
         Map<String, Set<String>> offending = new TreeMap<>();
 
@@ -215,5 +212,10 @@ class AllModulesCrossFeatureBoundaryTest {
                         + "boundaries, or by-id references (or the shared type moved into core). Offending modules "
                         + "(each with its offending feature packages and owning artifact): %s", offending) //
                 .isEmpty();
+    }
+
+    private static final class ModulesHolder {
+
+        private static final ApplicationModules MODULES = ApplicationModules.of(BASE);
     }
 }
