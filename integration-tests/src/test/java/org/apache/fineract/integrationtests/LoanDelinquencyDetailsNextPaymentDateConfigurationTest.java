@@ -26,19 +26,18 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends BaseLoanIntegrationTest {
+public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends FeignLoanTestBase {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);
 
@@ -46,16 +45,12 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
     public void testNextPaymentDateForUnpaidInstallmentsWithNPlusOneTest() {
         runAt("01 November 2023", () -> {
             try {
-                // update Global configuration for next payment date
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("next-unpaid-due-date"));
-                // Create Client
                 Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-                // Create Loan Product
                 Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(false, true, false, 0);
 
-                // Apply and Approve Loan
                 Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 November 2023", 1000.0, 3, req -> {
                     req.submittedOnDate("01 November 2023");
                     req.setLoanTermFrequency(45);
@@ -63,10 +58,8 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                     req.setGraceOnArrearsAgeing(0);
                 });
 
-                // Loan amount Disbursement
                 disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 November 2023");
 
-                // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
                         installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, false, "01 November 2023"), //
@@ -75,32 +68,22 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                         installment(250.0, false, "16 December 2023") //
                 );
 
-                // delinquency next payment date for 01 Nov Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "01 November 2023", false);
 
-                // Update business date
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("13 November 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("13 November 2023");
 
-                // delinquency next payment date for 13 Nov Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "16 November 2023", false);
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("16 November 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("16 November 2023");
 
-                // delinquency next payment date for 16 Nov Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "01 December 2023", false);
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("01 December 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("01 December 2023");
 
-                // delinquency next payment date for 01 Dec Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "16 December 2023", false);
 
-                // add charge with due date after loan maturity date (N + 1)
-                Long loanChargeId = addCharge(loanId, false, 50, "23 December 2023");
+                addCharge(loanId, false, 50, "23 December 2023");
 
-                // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
                         installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, false, "01 November 2023"), //
@@ -110,17 +93,13 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                         installment(0.0, 0.0, 50.0, 50.0, false, "23 December 2023") //
                 );
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("17 December 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("17 December 2023");
 
-                // delinquency next payment date for 17 Dec Business date N + 1
                 verifyLoanDelinquencyNextPaymentDate(loanId, "23 December 2023", false);
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("25 December 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("25 December 2023");
 
             } finally {
-                // reset global config
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("earliest-unpaid-date"));
             }
@@ -132,16 +111,12 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
     public void testNextPaymentDateFor2Paid1PartiallyPaidInstallmentsWithNPlusOneTest() {
         runAt("01 November 2023", () -> {
             try {
-                // update Global configuration for next payment date
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("next-unpaid-due-date"));
-                // Create Client
                 Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-                // Create Loan Product with auto downpayment enabled
                 Long loanProductId = createLoanProductWith25PctDownPaymentAndDelinquencyBucket(true, true, false, 0);
 
-                // Apply and Approve Loan
                 Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 November 2023", 1000.0, 3, req -> {
                     req.submittedOnDate("01 November 2023");
                     req.setLoanTermFrequency(45);
@@ -149,10 +124,8 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                     req.setGraceOnArrearsAgeing(0);
                 });
 
-                // Loan amount Disbursement
                 disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 November 2023");
 
-                // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
                         installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
@@ -161,20 +134,14 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                         installment(250.0, false, "16 December 2023") //
                 );
 
-                // delinquency next payment date for 01 Nov Business date with auto paid downpayment installment
                 verifyLoanDelinquencyNextPaymentDate(loanId, "16 November 2023", false);
 
-                // Update business date
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("13 November 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("13 November 2023");
 
-                // delinquency next payment date for 13 Nov Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "16 November 2023", false);
 
-                // pay 16 Nov Installment
                 addRepaymentForLoan(loanId, 250.0, "13 November 2023");
 
-                // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
                         installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
@@ -183,19 +150,14 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                         installment(250.0, false, "16 December 2023")//
                 );
 
-                // delinquency next payment date for 13 Nov Business date after paying 16 November Installment
                 verifyLoanDelinquencyNextPaymentDate(loanId, "01 December 2023", false);
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("16 November 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("16 November 2023");
 
-                // delinquency next payment date for 16 Nov Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "01 December 2023", false);
 
-                // partially pay 01 December installment
                 addRepaymentForLoan(loanId, 100.0, "16 November 2023");
 
-                // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
                         installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
@@ -204,19 +166,14 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                         installment(250.0, false, "16 December 2023")//
                 );
 
-                // delinquency next payment date for 16 Nov Business date after partial payment of 01 Dec installment
                 verifyLoanDelinquencyNextPaymentDate(loanId, "01 December 2023", false);
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("01 December 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("01 December 2023");
 
-                // delinquency next payment date for 01 December Business date
                 verifyLoanDelinquencyNextPaymentDate(loanId, "16 December 2023", false);
 
-                // add charge with due date after loan maturity date (N + 1)
-                Long loanChargeId = addCharge(loanId, false, 50, "23 December 2023");
+                addCharge(loanId, false, 50, "23 December 2023");
 
-                // verify repayment schedule
                 verifyRepaymentSchedule(loanId, //
                         installment(1000.0, null, "01 November 2023"), //
                         installment(250.0, true, "01 November 2023"), //
@@ -226,16 +183,12 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
                         installment(0.0, 0.0, 50.0, 50.0, false, "23 December 2023") //
                 );
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("17 December 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("17 December 2023");
 
-                // delinquency next payment date for 17 Dec Business date N + 1
                 verifyLoanDelinquencyNextPaymentDate(loanId, "23 December 2023", false);
 
-                businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                        .date("25 December 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                updateBusinessDate("25 December 2023");
             } finally {
-                // reset global config
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.NEXT_PAYMENT_DUE_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("earliest-unpaid-date"));
             }
@@ -244,7 +197,7 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
     }
 
     private void verifyLoanDelinquencyNextPaymentDate(Long loanId, String nextPaymentDate, boolean verifyNull) {
-        GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+        GetLoansLoanIdResponse loan = getLoanDetails(loanId);
         Assertions.assertNotNull(loan.getDelinquent());
         if (!verifyNull) {
             Assertions.assertNotNull(loan.getDelinquent().getNextPaymentDueDate());
@@ -257,7 +210,6 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
 
     private Long createLoanProductWith25PctDownPaymentAndDelinquencyBucket(boolean autoDownPaymentEnabled, boolean multiDisburseEnabled,
             boolean installmentLevelDelinquencyEnabled, Integer graceOnArrearsAging) {
-        // Create DelinquencyBuckets
         Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                 Pair.of(1, 3), //
                 Pair.of(4, 10), //
@@ -274,11 +226,8 @@ public class LoanDelinquencyDetailsNextPaymentDateConfigurationTest extends Base
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
         product.setEnableInstallmentLevelDelinquency(installmentLevelDelinquencyEnabled);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductResponse.getResourceId());
-
-        Long loanProductId = loanProductResponse.getResourceId();
+        Long loanProductId = createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
 
         assertEquals(TRUE, getLoanProductsProductIdResponse.getEnableDownPayment());
         assertNotNull(getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment());

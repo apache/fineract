@@ -32,6 +32,7 @@ public final class ChargeRequestBuilders {
     private static final int CHARGE_TIME_TYPE_OVERDUE_INSTALLMENT_FEE = 9;
 
     private static final int CHARGE_CALCULATION_TYPE_FLAT = 1;
+    private static final int CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = 2;
 
     private static final int CHARGE_PAYMENT_MODE_REGULAR = 0;
 
@@ -41,8 +42,22 @@ public final class ChargeRequestBuilders {
     private ChargeRequestBuilders() {}
 
     public static ChargeRequest loanDisbursementFee(double amount) {
-        return baseLoanCharge(amount, DEFAULT_CURRENCY)//
+        return loanDisbursementFee(amount, DEFAULT_CURRENCY);
+    }
+
+    public static ChargeRequest loanDisbursementFee(double amount, String currencyCode) {
+        return baseLoanCharge(amount, currencyCode)//
                 .chargeTimeType(CHARGE_TIME_TYPE_DISBURSEMENT);
+    }
+
+    public static ChargeRequest loanDisbursementPercentageFee(double percentage) {
+        return loanDisbursementPercentageFee(percentage, DEFAULT_CURRENCY);
+    }
+
+    public static ChargeRequest loanDisbursementPercentageFee(double percentage, String currencyCode) {
+        return baseLoanCharge(percentage, currencyCode)//
+                .chargeTimeType(CHARGE_TIME_TYPE_DISBURSEMENT)//
+                .chargeCalculationType(CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT);
     }
 
     public static ChargeRequest loanSpecifiedDueDateFee(double amount) {

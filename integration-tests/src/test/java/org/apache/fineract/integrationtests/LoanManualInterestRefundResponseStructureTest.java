@@ -22,11 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,12 +29,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.SupportedInterestRefundTypesItem;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -48,22 +46,9 @@ import org.junit.jupiter.api.Test;
  * subEntityId should be null/not set - subEntityExternalId should be null/not set
  */
 @Slf4j
-public class LoanManualInterestRefundResponseStructureTest extends BaseLoanIntegrationTest {
+public class LoanManualInterestRefundResponseStructureTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private PostClientsResponse client;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        this.client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-    }
+    private final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
 
     @Test
     public void testManualInterestRefundResponseStructureWithoutExternalIds() {
@@ -71,14 +56,12 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
         AtomicReference<Long> targetTransactionIdRef = new AtomicReference<>();
 
         runAt("01 January 2024", () -> {
-            // Create loan product that supports manual interest refund
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.ACTUAL)
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.ACTUAL)
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND)
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "01 January 2024", 1000.0, 9.9,
-                    12, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductId, "01 January 2024", 1000.0, 9.9, 12, null);
             assertNotNull(loanId);
             loanIdRef.set(loanId);
 
@@ -88,54 +71,45 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
         runAt("15 January 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            // Make a merchant issued refund to have a target transaction that supports manual interest refund
             PostLoansLoanIdTransactionsResponse refundResponse = makeLoanMerchantIssuedRefund(loanId, "15 January 2024", 100.0);
             assertNotNull(refundResponse);
             assertNotNull(refundResponse.getResourceId());
             targetTransactionIdRef.set(refundResponse.getResourceId());
 
-            // Create manual interest refund via API
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId,
-                    refundResponse.getResourceId(), "15 January 2024", 5.0, null);
+            PostLoansLoanIdTransactionsResponse interestRefundResponse = createManualInterestRefund(loanId, refundResponse.getResourceId(),
+                    "15 January 2024", 5.0, null);
 
             assertNotNull(interestRefundResponse, "Interest refund response should not be null");
             assertNotNull(interestRefundResponse.getResourceId(), "Interest refund resource ID should not be null");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             GetLoansLoanIdTransactions interestRefundTransaction = findTransactionByType(loanDetails, "Interest Refund");
             assertNotNull(interestRefundTransaction, "Interest Refund transaction should exist");
 
             assertEquals(interestRefundTransaction.getId(), interestRefundResponse.getResourceId(),
                     "Response entityId should be the Interest Refund transaction ID");
 
-            // entityExternalId should be null (since no external ID was provided)
             assertNull(interestRefundResponse.getResourceExternalId(), "entityExternalId should be null when no external ID provided");
 
-            // subEntityId should be null (not the target transaction ID)
             assertNull(interestRefundResponse.getSubResourceId(), "subEntityId should be null");
 
-            // subEntityExternalId should be null
             assertNull(interestRefundResponse.getSubResourceExternalId(), "subEntityExternalId should be null");
         });
     }
 
     @Test
     public void testManualInterestRefundResponseStructureWithExternalIds() {
-        AtomicReference<String> loanExternalIdRef = new AtomicReference<>();
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
-        AtomicReference<String> targetTransactionExternalIdRef = new AtomicReference<>();
 
         String loanExternalId = UUID.randomUUID().toString();
-        loanExternalIdRef.set(loanExternalId);
 
         runAt("01 February 2024", () -> {
-            // Create loan product that supports manual interest refund
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.ACTUAL)
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.ACTUAL)
                             .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND)
                             .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY));
 
-            Long loanId = applyAndApproveProgressiveLoanWithExternalId(client.getClientId(), loanProduct.getResourceId(), loanExternalId,
+            Long loanId = applyAndApproveProgressiveLoanWithExternalId(client.getClientId(), loanProductId, loanExternalId,
                     "01 February 2024", 1000.0, 9.9, 12, null);
             assertNotNull(loanId);
             loanIdRef.set(loanId);
@@ -146,24 +120,20 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
         runAt("15 February 2024", () -> {
             Long loanId = loanIdRef.get();
             String repaymentExternalId = UUID.randomUUID().toString();
-            targetTransactionExternalIdRef.set(repaymentExternalId);
 
-            // Make a merchant issued refund with external ID (without automatic interest refund)
             PostLoansLoanIdTransactionsResponse refundResponse = makeLoanMerchantIssuedRefundWithExternalId(loanId, repaymentExternalId,
                     "15 February 2024", 100.0);
             assertNotNull(refundResponse);
             assertNotNull(refundResponse.getResourceId());
 
-            // Create manual interest refund with external ID
             String interestRefundExternalId = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse interestRefundResponse = loanTransactionHelper.createManualInterestRefund(loanId,
-                    refundResponse.getResourceId(), "15 February 2024", 5.0, interestRefundExternalId);
+            PostLoansLoanIdTransactionsResponse interestRefundResponse = createManualInterestRefund(loanId, refundResponse.getResourceId(),
+                    "15 February 2024", 5.0, interestRefundExternalId);
 
             assertNotNull(interestRefundResponse, "Interest refund response should not be null");
             assertNotNull(interestRefundResponse.getResourceId(), "Interest refund resource ID should not be null");
 
-            // Get the actual interest refund transaction to verify
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             GetLoansLoanIdTransactions interestRefundTransaction = findTransactionByType(loanDetails, "Interest Refund");
             assertNotNull(interestRefundTransaction, "Interest Refund transaction should exist");
 
@@ -179,51 +149,34 @@ public class LoanManualInterestRefundResponseStructureTest extends BaseLoanInteg
         });
     }
 
-    /**
-     * Helper method to make loan merchant issued refund (without automatic interest refund)
-     */
     private PostLoansLoanIdTransactionsResponse makeLoanMerchantIssuedRefund(Long loanId, String transactionDate, Double amount) {
-        // Create merchant issued refund transaction without automatic interest refund
         org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest request = new org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest()
                 .transactionDate(transactionDate).transactionAmount(amount).interestRefundCalculation(false).dateFormat("dd MMMM yyyy")
                 .locale("en");
-        return loanTransactionHelper.makeMerchantIssuedRefund(loanId, request);
+        return makeMerchantIssuedRefund(loanId, request);
     }
 
-    /**
-     * Helper method to make loan merchant issued refund with external ID (without automatic interest refund)
-     */
     private PostLoansLoanIdTransactionsResponse makeLoanMerchantIssuedRefundWithExternalId(Long loanId, String externalId,
             String transactionDate, Double amount) {
-        // Create merchant issued refund transaction with external ID but without automatic interest refund
         org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest request = new org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest()
                 .transactionDate(transactionDate).transactionAmount(amount).externalId(externalId).interestRefundCalculation(false)
                 .dateFormat("dd MMMM yyyy").locale("en");
-        return loanTransactionHelper.makeMerchantIssuedRefund(loanId, request);
+        return makeMerchantIssuedRefund(loanId, request);
     }
 
-    /**
-     * Helper method to find transaction by type
-     */
     private GetLoansLoanIdTransactions findTransactionByType(GetLoansLoanIdResponse loanDetails, String transactionType) {
         return loanDetails.getTransactions().stream().filter(t -> transactionType.equals(t.getType().getValue())).findFirst().orElse(null);
     }
 
-    /**
-     * Helper method to apply and approve progressive loan with external ID
-     */
     private Long applyAndApproveProgressiveLoanWithExternalId(Long clientId, Long productId, String loanExternalId, String submittedDate,
-            Double amount, Double interestRate, Integer termFrequency,
-            java.util.function.Consumer<org.apache.fineract.client.models.PostLoansRequest> customizer) {
+            Double amount, Double interestRate, Integer termFrequency, java.util.function.Consumer<PostLoansRequest> customizer) {
 
-        org.apache.fineract.client.models.PostLoansRequest request = applyLP2ProgressiveLoanRequest(clientId, productId, submittedDate,
-                amount, interestRate, termFrequency, customizer);
+        PostLoansRequest request = applyLP2ProgressiveLoanRequest(clientId, productId, submittedDate, amount, interestRate, termFrequency,
+                customizer);
         request.externalId(loanExternalId);
 
-        org.apache.fineract.client.models.PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(request);
-        Long loanId = loanResponse.getLoanId();
-
-        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(amount, submittedDate));
+        Long loanId = applyForLoan(request);
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, submittedDate));
         return loanId;
     }
 }

@@ -25,25 +25,22 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelinquency;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegrationTest {
-
-    private SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
+public class LoanDelinquencyForNonActiveAccountsTest extends FeignLoanTestBase {
 
     @Test
     public void testDelinquencyCalculationsForRejectedLoanAccount() {
         runAt("06 May 2024", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            // Create DelinquencyBuckets
             Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
@@ -51,32 +48,24 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
                     Pair.of(61, null)//
             ));
 
-            // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
-            // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "06 May 2024", 1000.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "06 May 2024", 1000.0, 4);
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Update Business Date
             updateBusinessDate("17 June 2024");
 
-            // Undo Approval
             undoLoanApproval(loanId);
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Reject Loan
             rejectLoan(loanId, "17 June 2024");
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
         });
     }
@@ -84,10 +73,8 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
     @Test
     public void testDelinquencyCalculationsForRejectedLoanAccountCOBTest() {
         runAt("06 May 2024", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            // Create DelinquencyBuckets
             Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
@@ -95,41 +82,30 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
                     Pair.of(61, null)//
             ));
 
-            // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
-            // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "06 May 2024", 1000.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "06 May 2024", 1000.0, 4);
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Update Business Date
             updateBusinessDate("17 June 2024");
 
-            // Undo Approval
             undoLoanApproval(loanId);
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Reject Loan
             rejectLoan(loanId, "17 June 2024");
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Update Business Date
             updateBusinessDate("18 June 2024");
 
-            // execute COB
-            schedulerJobHelper.executeAndAwaitJob("Loan COB");
+            schedulerHelper.executeAndAwaitJob("Loan COB");
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
         });
@@ -138,10 +114,8 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
     @Test
     public void testDelinquencyCalculationsForClosedLoanAccount() {
         runAt("06 May 2024", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            // Create DelinquencyBuckets
             Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
@@ -149,32 +123,25 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
                     Pair.of(61, null)//
             ));
 
-            // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
-            // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "06 May 2024", 1000.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "06 May 2024", 1000.0, 4);
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Update Business Date
             updateBusinessDate("17 June 2024");
 
-            // disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000), "06 May 2024");
 
             verifyDelinquency(loanId, 12, "250.0", null, null, //
                     delinquency(11, 30, "250.0"));
 
-            // re-pay Loan
             addRepaymentForLoan(loanId, 1000.0, "17 June 2024");
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", "17 June 2024", "1000.0");
         });
     }
@@ -182,10 +149,8 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
     @Test
     public void testDelinquencyCalculationsForOverPaidLoanAccount() {
         runAt("06 May 2024", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
-            // Create DelinquencyBuckets
             Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
@@ -193,32 +158,25 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
                     Pair.of(61, null)//
             ));
 
-            // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
-            // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "06 May 2024", 1000.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "06 May 2024", 1000.0, 4);
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", null, null);
 
-            // Update Business Date
             updateBusinessDate("17 June 2024");
 
-            // disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000), "06 May 2024");
 
             verifyDelinquency(loanId, 12, "250.0", null, null, //
                     delinquency(11, 30, "250.0"));
 
-            // over-pay Loan
             addRepaymentForLoan(loanId, 1200.0, "17 June 2024");
 
-            // Delinquency Calculations
             verifyDelinquency(loanId, 0, "0.0", "17 June 2024", "1200.0");
         });
     }
@@ -226,7 +184,7 @@ public class LoanDelinquencyForNonActiveAccountsTest extends BaseLoanIntegration
     private void verifyDelinquency(Long loanId, Integer loanLevelDelinquentDays, String loanLevelDelinquentAmount,
             String expectedLastRepaymentDate, String expectedLastRepaymentAmount,
             InstallmentLevelDelinquencyAPIIntegrationTests.DelinquencyData... expectedInstallmentLevelDelinquencyData) {
-        GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+        GetLoansLoanIdResponse loan = getLoanDetails(loanId);
         assertThat(loan.getDelinquent()).isNotNull();
         List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency = loan.getDelinquent()
                 .getInstallmentLevelDelinquency();

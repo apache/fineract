@@ -19,22 +19,20 @@
 package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.junit.jupiter.api.Test;
 
-public class ProgressiveLoanMoratoriumIntegrationTest extends BaseLoanIntegrationTest {
+public class ProgressiveLoanMoratoriumIntegrationTest extends FeignLoanTestBase {
 
     @Test
     public void testProgressivePrincipalMoratoriumSchedule() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Long clientId = createClient();
 
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().principal(100.0)
-                    .minPrincipal(100.0).maxPrincipal(100.0).numberOfRepayments(6).interestRatePerPeriod(7.0));
+            Long loanProductId = createLoanProduct(create4IProgressive().principal(100.0).minPrincipal(100.0).maxPrincipal(100.0)
+                    .numberOfRepayments(6).interestRatePerPeriod(7.0));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 100.0, 7.0, 6,
                     request -> request.graceOnPrincipalPayment(2));
 
             disburseLoan(loanId, BigDecimal.valueOf(100.0), "1 January 2024");
@@ -50,13 +48,13 @@ public class ProgressiveLoanMoratoriumIntegrationTest extends BaseLoanIntegratio
 
     @Test
     public void testProgressiveInterestMoratoriumSchedule() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        Long clientId = createClient();
 
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().principal(100.0)
-                    .minPrincipal(100.0).maxPrincipal(100.0).numberOfRepayments(6).interestRatePerPeriod(7.0));
+            Long loanProductId = createLoanProduct(create4IProgressive().principal(100.0).minPrincipal(100.0).maxPrincipal(100.0)
+                    .numberOfRepayments(6).interestRatePerPeriod(7.0));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 100.0, 7.0, 6,
                     request -> request.graceOnInterestPayment(2));
 
             disburseLoan(loanId, BigDecimal.valueOf(100.0), "1 January 2024");

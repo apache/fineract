@@ -29,15 +29,14 @@ import java.util.List;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
 
-public class LoanProductOverAppliedAmountTest extends BaseLoanIntegrationTest {
+public class LoanProductOverAppliedAmountTest extends FeignLoanTestBase {
 
     @Test
     public void testCreateMultiDisburseLoanProductWithOverAppliedAmountAndExpectedTranches() {
@@ -48,15 +47,12 @@ public class LoanProductOverAppliedAmountTest extends BaseLoanIntegrationTest {
                     .allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("percentage").overAppliedNumber(50);
 
             // This should not throw an exception
-            final PostLoanProductsResponse loanProductResponse = assertDoesNotThrow(
-                    () -> loanProductHelper.createLoanProduct(loanProductRequest));
+            final Long loanProductId = assertDoesNotThrow(() -> createLoanProduct(loanProductRequest));
 
-            assertNotNull(loanProductResponse);
-            assertNotNull(loanProductResponse.getResourceId());
+            assertNotNull(loanProductId);
 
             // Retrieve the created loan product to verify settings
-            final GetLoanProductsProductIdResponse retrievedProduct = loanProductHelper
-                    .retrieveLoanProductById(loanProductResponse.getResourceId());
+            final GetLoanProductsProductIdResponse retrievedProduct = retrieveLoanProduct(loanProductId);
 
             // Verify the loan product was created with correct settings
             assertEquals(true, retrievedProduct.getMultiDisburseLoan());
@@ -74,20 +70,19 @@ public class LoanProductOverAppliedAmountTest extends BaseLoanIntegrationTest {
                     .outstandingLoanBalance(10000.0).disallowExpectedDisbursements(false).allowApprovedDisbursedAmountsOverApplied(false)
                     .overAppliedCalculationType(null).overAppliedNumber(null);
 
-            final PostLoanProductsResponse initialLoanProductResponse = loanProductHelper.createLoanProduct(initialLoanProductRequest);
-            final Long loanProductId = initialLoanProductResponse.getResourceId();
+            final Long loanProductId = createLoanProduct(initialLoanProductRequest);
 
             // Modify loan product to enable over-applied amount
             final PutLoanProductsProductIdRequest modifyRequest = new PutLoanProductsProductIdRequest()
                     .allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("flat").overAppliedNumber(200).locale("en");
 
             final PutLoanProductsProductIdResponse modifyResponse = assertDoesNotThrow(
-                    () -> loanProductHelper.updateLoanProductById(loanProductId, modifyRequest));
+                    () -> updateLoanProduct(loanProductId, modifyRequest));
 
             assertNotNull(modifyResponse);
 
             // Retrieve the updated loan product to verify settings
-            final GetLoanProductsProductIdResponse retrievedProduct = loanProductHelper.retrieveLoanProductById(loanProductId);
+            final GetLoanProductsProductIdResponse retrievedProduct = retrieveLoanProduct(loanProductId);
             assertEquals(true, retrievedProduct.getMultiDisburseLoan());
             assertEquals(false, retrievedProduct.getDisallowExpectedDisbursements());
             assertEquals(true, retrievedProduct.getAllowApprovedDisbursedAmountsOverApplied());
@@ -103,11 +98,10 @@ public class LoanProductOverAppliedAmountTest extends BaseLoanIntegrationTest {
                     .outstandingLoanBalance(10000.0).disallowExpectedDisbursements(false) // Expected tranches enabled
                     .allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("percentage").overAppliedNumber(50);
 
-            final PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductRequest);
-            final Long loanProductId = loanProductResponse.getResourceId();
+            final Long loanProductId = createLoanProduct(loanProductRequest);
 
             // Create client
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = createClient();
             assertNotNull(clientId);
 
             // Create and approve loan with amount 1000
@@ -121,7 +115,7 @@ public class LoanProductOverAppliedAmountTest extends BaseLoanIntegrationTest {
             // Verify loan is active
             verifyLoanStatus(loanId, LoanStatus.ACTIVE);
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails);
 
             // Verify that the loan was created and disbursed successfully

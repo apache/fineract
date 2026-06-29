@@ -20,13 +20,13 @@ package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.junit.jupiter.api.Test;
 
-public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationTest {
+public class ProgressiveLoanCreditBalanceRefundTest extends FeignLoanTestBase {
 
-    Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-    Long loanProductId = loanProductHelper.createLoanProduct(create4IProgressive()).getResourceId();
+    Long clientId = createClient();
+    Long loanProductId = createLoanProduct(create4IProgressive());
 
     @Test
     public void testAccrualCreationAfterCBRThenReverseRepayment() {
@@ -53,11 +53,10 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
                     installment(29.49, 0.92, 30.41, false, "13 February 2022") //
             );
 
-            loanTransactionHelper.makeLoanRepayment(loanIdRef.get(), "Repayment", "13 February 2021", 60.0);
-            Long repaymentId = loanTransactionHelper.makeLoanRepayment(loanIdRef.get(), "Repayment", "13 February 2021", 40.0)
-                    .getResourceId();
+            makeLoanRepayment(loanIdRef.get(), "Repayment", "13 February 2021", 60.0);
+            Long repaymentId = makeLoanRepayment(loanIdRef.get(), "Repayment", "13 February 2021", 40.0).getResourceId();
             reverseRepaymentIdRef.set(repaymentId);
-            loanTransactionHelper.makeLoanRepayment(loanIdRef.get(), "MerchantIssuedRefund", "13 February 2021", 300.0);
+            makeLoanRepayment(loanIdRef.get(), "MerchantIssuedRefund", "13 February 2021", 300.0);
 
             verifyRepaymentSchedule(loanIdRef.get(), //
                     installment(300.0, null, "13 February 2021"), //
@@ -84,8 +83,8 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
 
         runAt("19 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            loanTransactionHelper.makeLoanRepayment(loanId, "CreditBalanceRefund", "19 February 2021", 100.0);
+            executeInlineCOB(loanId);
+            makeLoanRepayment(loanId, "CreditBalanceRefund", "19 February 2021", 100.0);
             // 0 overpaid
             verifyRepaymentSchedule(loanId, //
                     installment(300.0, null, "13 February 2021"), //
@@ -113,8 +112,8 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         runAt("23 February 2021", () -> {
             final Long loanId = loanIdRef.get();
             final Long reverseRepaymentId = reverseRepaymentIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            loanTransactionHelper.reverseLoanTransaction(loanId, reverseRepaymentId, "23 February 2021");
+            executeInlineCOB(loanId);
+            reverseLoanTransaction(loanId, reverseRepaymentId, "23 February 2021");
             // 40 outstanding
             verifyRepaymentSchedule(loanId, //
                     installment(300.0, null, "13 February 2021"), //
@@ -142,7 +141,7 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         });
         runAt("24 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
+            executeInlineCOB(loanId);
             verifyTransactions(loanId, //
                     transaction(300.0, "Disbursement", "13 February 2021", 300.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
                     transaction(60.0, "Repayment", "13 February 2021", 240.0, 60.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
@@ -154,7 +153,7 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         });
         runAt("28 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
+            executeInlineCOB(loanId);
             verifyTransactions(loanId, //
                     transaction(300.0, "Disbursement", "13 February 2021", 300.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
                     transaction(60.0, "Repayment", "13 February 2021", 240.0, 60.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
@@ -195,10 +194,10 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
                     installment(28.55, 1.82, 30.37, false, "13 January 2022"), //
                     installment(29.49, 0.92, 30.41, false, "13 February 2022") //
             );
-            Long resourceId = loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "13 February 2021", 100.0).getResourceId();
+            Long resourceId = makeLoanRepayment(loanId, "Repayment", "13 February 2021", 100.0).getResourceId();
             reverseRepaymentIdRef.set(resourceId);
 
-            loanTransactionHelper.makeLoanRepayment(loanId, "MerchantIssuedRefund", "13 February 2021", 300.0);
+            makeLoanRepayment(loanId, "MerchantIssuedRefund", "13 February 2021", 300.0);
 
             verifyRepaymentSchedule(loanId, //
                     installment(300.0, null, "13 February 2021"), //
@@ -224,8 +223,8 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         });
         runAt("19 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            loanTransactionHelper.makeLoanRepayment(loanId, "CreditBalanceRefund", "19 February 2021", 100.0);
+            executeInlineCOB(loanId);
+            makeLoanRepayment(loanId, "CreditBalanceRefund", "19 February 2021", 100.0);
             verifyRepaymentSchedule(loanId, //
                     installment(300.0, null, "13 February 2021"), //
                     installment(30.37, 0.0, 0.0, true, "13 March 2021"), //
@@ -250,10 +249,10 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         });
         runAt("23 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
+            executeInlineCOB(loanId);
 
             final Long reverseRepaymentId = reverseRepaymentIdRef.get();
-            loanTransactionHelper.reverseLoanTransaction(loanId, reverseRepaymentId, "23 February 2021");
+            reverseLoanTransaction(loanId, reverseRepaymentId, "23 February 2021");
             verifyRepaymentSchedule(loanId, //
                     installment(300.0, null, "13 February 2021"), //
                     installment(130.37, 2.46, 102.46, false, "13 March 2021"), //
@@ -278,7 +277,7 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         });
         runAt("24 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
+            executeInlineCOB(loanId);
             verifyTransactions(loanId, //
                     transaction(300.0, "Disbursement", "13 February 2021", 300.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false), //
                     transaction(100.0, "Repayment", "13 February 2021", 200.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, true), //
@@ -289,8 +288,8 @@ public class ProgressiveLoanCreditBalanceRefundTest extends BaseLoanIntegrationT
         });
         runAt("28 February 2021", () -> {
             final Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "28 February 2021", 101.01);
+            executeInlineCOB(loanId);
+            makeLoanRepayment(loanId, "Repayment", "28 February 2021", 101.01);
             verifyRepaymentSchedule(loanId, //
                     installment(300.0, null, "13 February 2021"), //
                     installment(130.37, 1.01, 0.0, true, "13 March 2021"), //

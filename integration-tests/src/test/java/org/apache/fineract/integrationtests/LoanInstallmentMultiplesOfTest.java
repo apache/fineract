@@ -18,23 +18,25 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD;
+import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestRateFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
+public class LoanInstallmentMultiplesOfTest extends FeignLoanTestBase {
 
     private static Stream<Arguments> interestTypes() {
         return Stream.of(Arguments.of(Named.of("DECLINING_BALANCE", InterestType.DECLINING_BALANCE)), //
@@ -48,14 +50,13 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
             int amortizationType = AmortizationType.EQUAL_INSTALLMENTS;
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest product = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
                     interestType, amortizationType);
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 1250.0;
@@ -68,12 +69,9 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .interestType(interestType)//
                     .amortizationType(amortizationType);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            Long loanId = approvedLoanResult.getLoanId();
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, "01 January 2023"));
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -105,7 +103,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
             int interestType = InterestType.FLAT;
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest product = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
@@ -115,8 +113,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .interestRatePerPeriod(12.0)//
                     .interestRateFrequencyType(InterestRateFrequencyType.YEARS).interestCalculationPeriodType(SAME_AS_REPAYMENT_PERIOD);
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 1250.0;
@@ -132,12 +129,9 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .interestCalculationPeriodType(SAME_AS_REPAYMENT_PERIOD)//
                     .interestRatePerPeriod(BigDecimal.valueOf(12));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            Long loanId = approvedLoanResult.getLoanId();
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, "01 January 2023"));
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -167,7 +161,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
             int interestType = InterestType.FLAT;
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest product = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
@@ -178,8 +172,7 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .installmentAmountInMultiplesOf(20).interestRateFrequencyType(InterestRateFrequencyType.YEARS)
                     .interestCalculationPeriodType(SAME_AS_REPAYMENT_PERIOD);
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 1250.0;
@@ -195,12 +188,9 @@ public class LoanInstallmentMultiplesOfTest extends BaseLoanIntegrationTest {
                     .interestCalculationPeriodType(SAME_AS_REPAYMENT_PERIOD)//
                     .interestRatePerPeriod(BigDecimal.valueOf(12));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            Long loanId = approvedLoanResult.getLoanId();
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, "01 January 2023"));
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //

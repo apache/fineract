@@ -27,18 +27,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class AccrualsOnLoanClosureTest extends BaseLoanIntegrationTest {
+public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
 
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
@@ -55,28 +53,27 @@ public class AccrualsOnLoanClosureTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testAccrualCreatedOnLoanClosureWithSubmittedDate() {
-        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        PostLoanProductsResponse loanProduct = loanProductHelper
-                .createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
+        Long clientId = createClient();
+        Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
 
-        loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), disbursementDate, disbursementAmount);
+        loanId = applyAndApproveLoan(clientId, loanProductId, disbursementDate, disbursementAmount);
         Assertions.assertNotNull(loanId);
         disburseLoan(loanId, BigDecimal.valueOf(disbursementAmount), disbursementDate);
 
-        penaltyResponse = chargesHelper.createCharges(
+        penaltyResponse = chargesHelper.createCharge(
                 new ChargeRequest().active(true).chargeTimeType(2).chargeAppliesTo(1).chargeCalculationType(1).penalty(true).amount(20.0)
                         .currencyCode("USD").locale("en").chargePaymentMode(0).name(Utils.randomStringGenerator("PENALTY_", 6)));
         runAt(startDate, () -> {
             globalConfigurationHelper.updateGlobalConfiguration(CHARGE_ACCRUAL_DATE,
                     new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
 
-            loanTransactionHelper.addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().dateFormat("dd MMMM yyyy").locale("en")
+            addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().dateFormat("dd MMMM yyyy").locale("en")
                     .chargeId(penaltyResponse.getResourceId()).amount(chargeAmount).dueDate(penaltyCharge1AddedDate));
 
-            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
-                    .transactionDate(repaymentDate).locale("en").transactionAmount(repaymentAmount));
+            addRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(repaymentDate)
+                    .locale("en").transactionAmount(repaymentAmount));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             verifyRepaymentSchedule(loanId, //
                     installment(800.0, null, "22 April 2024"), //

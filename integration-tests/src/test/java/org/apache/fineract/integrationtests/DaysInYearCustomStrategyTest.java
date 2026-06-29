@@ -18,58 +18,48 @@
  */
 package org.apache.fineract.integrationtests;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import retrofit2.Call;
-import retrofit2.Response;
 
-public class DaysInYearCustomStrategyTest extends BaseLoanIntegrationTest {
+public class DaysInYearCustomStrategyTest extends FeignLoanTestBase {
 
-    private final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getResourceId();
+    private static final Integer DAYS_IN_YEAR_ACTUAL = 1;
+    private static final Integer DAYS_IN_YEAR_360 = 360;
+    private static final String FEB_29_PERIOD_ONLY = "FEB_29_PERIOD_ONLY";
+    private static final String FULL_LEAP_YEAR = "FULL_LEAP_YEAR";
 
     @Test
     public void test_HttpError_for_ValidationError_DaysInYearsCustomStrategy() {
-        Call<PostLoanProductsResponse> loanProductCall = FineractClientHelper.getFineractClient().loanProducts
-                .createLoanProduct(create4IProgressive()
-                        // invalid settings combination
-                        .daysInYearType(DaysInYearType.DAYS_360).daysInYearCustomStrategy(DaysInYearCustomStrategy.FEB_29_PERIOD_ONLY));
-        try {
-            Response<PostLoanProductsResponse> response = loanProductCall.execute();
-            Assertions.assertEquals(403, response.code());
-        } catch (IOException e) {
-            Assertions.fail("Unexpected exception", e);
-        }
+        CallFailedRuntimeException exception = Assertions.assertThrows(CallFailedRuntimeException.class, () -> createLoanProduct(
+                create4IProgressive().daysInYearType(DAYS_IN_YEAR_360).daysInYearCustomStrategy(FEB_29_PERIOD_ONLY)));
+        Assertions.assertEquals(403, exception.getStatus());
     }
 
     @Test
     public void test_Update_DaysInYearsCustomStrategy_Value() {
-        PostLoanProductsResponse postLoanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD")
-                .daysInYearType(DaysInYearType.ACTUAL).daysInYearCustomStrategy(DaysInYearCustomStrategy.FEB_29_PERIOD_ONLY));
-        Assertions.assertNotNull(postLoanProduct.getResourceId());
-        final Long loanProductId = postLoanProduct.getResourceId();
+        Long loanProductId = createLoanProduct(
+                create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
 
-        GetLoanProductsProductIdResponse loanProduct = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
-        Assertions.assertEquals("FEB_29_PERIOD_ONLY", loanProduct.getDaysInYearCustomStrategy().getId());
+        GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
+        Assertions.assertEquals(FEB_29_PERIOD_ONLY, loanProduct.getDaysInYearCustomStrategy().getId());
 
-        loanProductHelper.updateLoanProductById(loanProductId,
-                new PutLoanProductsProductIdRequest().daysInYearCustomStrategy(DaysInYearCustomStrategy.FULL_LEAP_YEAR));
-        loanProduct = loanTransactionHelper.getLoanProduct(loanProductId.intValue());
-        Assertions.assertEquals("FULL_LEAP_YEAR", loanProduct.getDaysInYearCustomStrategy().getId());
+        updateLoanProduct(loanProductId, new PutLoanProductsProductIdRequest().daysInYearCustomStrategy(FULL_LEAP_YEAR));
+        loanProduct = retrieveLoanProduct(loanProductId);
+        Assertions.assertEquals(FULL_LEAP_YEAR, loanProduct.getDaysInYearCustomStrategy().getId());
     }
 
     @Test
     public void testFEB_29_PERIOD_ONLY() {
+        Long clientId = createClient();
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD")
-                    .daysInYearType(DaysInYearType.ACTUAL).daysInYearCustomStrategy(DaysInYearCustomStrategy.FEB_29_PERIOD_ONLY));
-            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProduct.getResourceId(), "1 January 2024", 10000.0, 99.99, 12, null);
+            Long loanProductId = createLoanProduct(create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL)
+                    .daysInYearCustomStrategy(FEB_29_PERIOD_ONLY));
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null);
             Assertions.assertNotNull(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(10000), "1 January 2024");
             verifyRepaymentSchedule(loanId, //
@@ -92,10 +82,11 @@ public class DaysInYearCustomStrategyTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testFULL_LEAP_YEAR() {
+        Long clientId = createClient();
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive().currencyCode("USD")
-                    .daysInYearType(DaysInYearType.ACTUAL).daysInYearCustomStrategy(DaysInYearCustomStrategy.FULL_LEAP_YEAR));
-            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProduct.getResourceId(), "1 January 2024", 10000.0, 99.99, 12, null);
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().currencyCode("USD").daysInYearType(DAYS_IN_YEAR_ACTUAL).daysInYearCustomStrategy(FULL_LEAP_YEAR));
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 10000.0, 99.99, 12, null);
             Assertions.assertNotNull(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(10000), "1 January 2024");
             verifyRepaymentSchedule(loanId, //

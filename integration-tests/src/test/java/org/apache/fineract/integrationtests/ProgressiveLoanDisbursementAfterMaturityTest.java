@@ -25,43 +25,44 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class ProgressiveLoanDisbursementAfterMaturityTest extends BaseLoanIntegrationTest {
+public class ProgressiveLoanDisbursementAfterMaturityTest extends FeignLoanTestBase {
 
     @Test
     public void testSecondDisbursementAfterOriginalMaturityDate() {
-        final PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
         // Create loan product with specific configurations for this test
-        final PostLoanProductsResponse loanProductResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().multiDisburseLoan(true).maxTrancheCount(10).disallowExpectedDisbursements(true)
-                        .allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("percentage").overAppliedNumber(100)
-                        .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25.0))
-                        .enableAutoRepaymentForDownPayment(true)
-                        .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND)
-                        .addSupportedInterestRefundTypesItem(SupportedInterestRefundTypesItem.PAYOUT_REFUND)
-                        .paymentAllocation(List.of(createPaymentAllocation("DEFAULT", FuturePaymentAllocationRule.NEXT_INSTALLMENT),
-                                createPaymentAllocation("DOWN_PAYMENT", FuturePaymentAllocationRule.NEXT_INSTALLMENT),
-                                createPaymentAllocation("MERCHANT_ISSUED_REFUND", FuturePaymentAllocationRule.LAST_INSTALLMENT),
-                                createPaymentAllocation("PAYOUT_REFUND", FuturePaymentAllocationRule.LAST_INSTALLMENT))));
+        final Long loanProductId = createLoanProduct(create4IProgressive().multiDisburseLoan(true).maxTrancheCount(10)
+                .disallowExpectedDisbursements(true).allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("percentage")
+                .overAppliedNumber(100).enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25.0))
+                .enableAutoRepaymentForDownPayment(true)
+                .addSupportedInterestRefundTypesItem(LoanTestData.SupportedInterestRefundTypesItem.MERCHANT_ISSUED_REFUND)
+                .addSupportedInterestRefundTypesItem(LoanTestData.SupportedInterestRefundTypesItem.PAYOUT_REFUND)
+                .paymentAllocation(List.of(
+                        LoanRequestBuilders.paymentAllocation("DEFAULT", LoanTestData.FuturePaymentAllocationRule.NEXT_INSTALLMENT),
+                        LoanRequestBuilders.paymentAllocation("DOWN_PAYMENT", LoanTestData.FuturePaymentAllocationRule.NEXT_INSTALLMENT),
+                        LoanRequestBuilders.paymentAllocation("MERCHANT_ISSUED_REFUND",
+                                LoanTestData.FuturePaymentAllocationRule.LAST_INSTALLMENT),
+                        LoanRequestBuilders.paymentAllocation("PAYOUT_REFUND",
+                                LoanTestData.FuturePaymentAllocationRule.LAST_INSTALLMENT))));
 
         runAt("14 March 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductResponse.getResourceId(), "14 March 2024", 1000.0,
-                    0.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "14 March 2024", 1000.0, 0.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(487.58), "14 March 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyLoanStatus(loanDetails, LoanStatus.ACTIVE);
 
             verifyTransactions(loanId, transaction(487.58, "Disbursement", "14 March 2024"),
@@ -74,12 +75,11 @@ public class ProgressiveLoanDisbursementAfterMaturityTest extends BaseLoanIntegr
         runAt("24 March 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            PostLoansLoanIdTransactionsResponse mirResponse = loanTransactionHelper.makeLoanRepayment(loanId, "MerchantIssuedRefund",
-                    "24 March 2024", 201.39);
+            PostLoansLoanIdTransactionsResponse mirResponse = makeLoanRepayment(loanId, "MerchantIssuedRefund", "24 March 2024", 201.39);
             Assertions.assertNotNull(mirResponse);
             Assertions.assertNotNull(mirResponse.getResourceId());
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyLoanStatus(loanDetails, LoanStatus.ACTIVE);
 
             // Verify remaining balance
@@ -92,13 +92,12 @@ public class ProgressiveLoanDisbursementAfterMaturityTest extends BaseLoanIntegr
         runAt("24 March 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            PostLoansLoanIdTransactionsResponse mirResponse = loanTransactionHelper.makeLoanRepayment(loanId, "MerchantIssuedRefund",
-                    "24 March 2024", 286.19);
+            PostLoansLoanIdTransactionsResponse mirResponse = makeLoanRepayment(loanId, "MerchantIssuedRefund", "24 March 2024", 286.19);
             Assertions.assertNotNull(mirResponse);
             Assertions.assertNotNull(mirResponse.getResourceId());
 
             // After second MIR, the loan should be overpaid
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyLoanStatus(loanDetails, LoanStatus.OVERPAID);
 
             // Verify overpaid amount
@@ -109,9 +108,9 @@ public class ProgressiveLoanDisbursementAfterMaturityTest extends BaseLoanIntegr
         runAt("25 March 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment(loanId, "CreditBalanceRefund", "25 March 2024", 121.90);
+            makeLoanRepayment(loanId, "CreditBalanceRefund", "25 March 2024", 121.90);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyLoanStatus(loanDetails, LoanStatus.CLOSED_OBLIGATIONS_MET);
 
             assertEquals(0, BigDecimal.ZERO.compareTo(loanDetails.getSummary().getPrincipalOutstanding()));
@@ -125,7 +124,7 @@ public class ProgressiveLoanDisbursementAfterMaturityTest extends BaseLoanIntegr
                 disburseLoan(loanId, BigDecimal.valueOf(312.69), "1 April 2025");
 
                 // If disbursement succeeds, verify the loan is active again
-                GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+                GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
                 verifyLoanStatus(loanDetails, LoanStatus.ACTIVE);
 
                 // Verify second disbursement and automatic downpayment

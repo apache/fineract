@@ -22,34 +22,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.Test;
 
-public class LoanTransactionReverseReplayChargeOffTest extends BaseLoanIntegrationTest {
+public class LoanTransactionReverseReplayChargeOffTest extends FeignLoanTestBase {
 
     @Test
     public void loanTransactionReverseReplayWithChargeOff() {
         runAt("4 October 2022", () -> {
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount();
-            final Account chargeOffExpenseAccount = accountHelper.createExpenseAccount();
+            final Account assetAccount = accountHelper.createAssetAccount("asset");
+            final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount("fraudExpense");
+            final Account chargeOffExpenseAccount = accountHelper.createExpenseAccount("chargeOffExpense");
 
-            // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
-
-            // Client and Loan account creation
 
             final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
@@ -57,51 +54,43 @@ public class LoanTransactionReverseReplayChargeOffTest extends BaseLoanIntegrati
                     .chargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())
                     .chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccount.getAccountID().longValue())
                     .loanPortfolioAccountId(assetAccount.getAccountID().longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "2 September 2022", 1000.0, 1,
-                    postLoansRequest -> {
-                        postLoansRequest.externalId(loanExternalIdStr);
-                    });
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "2 September 2022", 1000.0, 1,
+                    postLoansRequest -> postLoansRequest.externalId(loanExternalIdStr));
 
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "2 September 2022");
 
-            // make repayment
             String loanTransactionExternalIdStr = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("03 October 2022").locale("en")
-                            .transactionAmount(10.0).externalId(loanTransactionExternalIdStr));
+            PostLoansLoanIdTransactionsResponse repaymentTransaction = makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("03 October 2022")
+                            .locale(LoanTestData.LOCALE).transactionAmount(10.0).externalId(loanTransactionExternalIdStr));
 
-            // mark loan as fraud
-            final String command = "markAsFraud";
-            String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-            loanTransactionHelper.modifyLoanCommand(loanId.intValue(), command, payload, responseSpec);
+            changeLoanFraudState(loanId, true);
 
-            // charge-off loan
-            String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
-                    + Utils.randomStringGenerator("is", 5);
-            Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+            Long chargeOffReasonId = codeHelper.createChargeOffCodeValue(
+                    Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5), 1);
             String transactionExternalId = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                    new PostLoansLoanIdTransactionsRequest().transactionDate("4 October 2022").locale("en").dateFormat("dd MMMM yyyy")
-                            .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+            PostLoansLoanIdTransactionsResponse chargeOffTransaction = chargeOffLoan(loanId,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("4 October 2022").locale(LoanTestData.LOCALE)
+                            .dateFormat(LoanTestData.DATETIME_PATTERN).externalId(transactionExternalId)
+                            .chargeOffReasonId(chargeOffReasonId));
 
             updateBusinessDate("6 October 2022");
 
-            loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("6 October 2022").locale("en")
-                            .dateFormat(DATETIME_PATTERN).transactionAmount(0.0));
+            reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("6 October 2022").locale(LoanTestData.LOCALE)
+                            .dateFormat(LoanTestData.DATETIME_PATTERN).transactionAmount(0.0));
 
-            ArrayList<HashMap> journalEntriesForChargeOffTransaction = journalEntryHelper
-                    .getJournalEntriesByTransactionId("L" + chargeOffTransaction.getResourceId());
+            GetJournalEntriesTransactionIdResponse journalEntriesForChargeOffTransaction = getJournalEntries(
+                    "L" + chargeOffTransaction.getResourceId());
             assertNotNull(journalEntriesForChargeOffTransaction);
 
-            List<HashMap> assetAccountJournalEntries = journalEntriesForChargeOffTransaction.stream() //
-                    .filter(journalEntry -> assetAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
-                    .toList();
+            List<JournalEntryTransactionItem> assetAccountJournalEntries = journalEntriesForChargeOffTransaction.getPageItems().stream()
+                    .filter(journalEntry -> assetAccount.getAccountID().longValue() == journalEntry.getGlAccountId()).toList();
 
-            List<HashMap> expenseAccountJournalEntries = journalEntriesForChargeOffTransaction.stream() //
-                    .filter(journalEntry -> chargeOffFraudExpenseAccount.getAccountID().equals(journalEntry.get("glAccountId"))) //
+            List<JournalEntryTransactionItem> expenseAccountJournalEntries = journalEntriesForChargeOffTransaction.getPageItems().stream()
+                    .filter(journalEntry -> chargeOffFraudExpenseAccount.getAccountID().longValue() == journalEntry.getGlAccountId())
                     .toList();
 
             assertEquals(2, assetAccountJournalEntries.size());
