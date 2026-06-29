@@ -480,7 +480,7 @@ Feature: Working Capital Loan Goodwill Credit
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     Then Initiating a "GOODWILL_CREDIT" transaction on "01 January 2026" with 270.0 transaction amount on Working Capital loan results an error with the following data:
-      | httpCode | errorMessage                                                                      |
+      | httpCode | errorMessage                                                                     |
       | 400      | Goodwill Credit is allowed only for active/closed obligations met/overpaid loans |
 
   @TestRailId:C80936
@@ -496,5 +496,5 @@ Feature: Working Capital Loan Goodwill Credit
       | product.name | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
       | WCLP         | 2026-01-01      | 2026-01-01               | Approved | 9000.0    | 9000.0            | 100000.0     | 18.0              | null      |
     Then Initiating a "GOODWILL_CREDIT" transaction on "01 January 2026" with 270.0 transaction amount on Working Capital loan results an error with the following data:
-      | httpCode | errorMessage                                                                      |
+      | httpCode | errorMessage                                                                     |
       | 400      | Goodwill Credit is allowed only for active/closed obligations met/overpaid loans |
