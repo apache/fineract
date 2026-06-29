@@ -55,16 +55,19 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.data.request.AccountRequest;
+import org.apache.fineract.portfolio.shareaccounts.config.SharesModuleIsEnabledCondition;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/accounts/{type}")
 @Component
 @Tag(name = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
 @RequiredArgsConstructor
+@Conditional(SharesModuleIsEnabledCondition.class)
 public class AccountsApiResource {
 
     private final ApiRequestParameterHelper apiRequestParameterHelper;

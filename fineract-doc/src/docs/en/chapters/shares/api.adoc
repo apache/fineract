@@ -1,0 +1,124 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= REST API
+
+All endpoints are served under `/fineract-provider/api/v1` and require the
+`Fineract-Platform-TenantId` header. Share accounts and products reuse the generic _accounts_ and
+_products_ resources with the path segment `type = share`.
+
+== Share accounts — `AccountsApiResource`
+
+Source: `fineract-provider/.../portfolio/accounts/api/AccountsApiResource.java`, `@Path("/v1/accounts/{type}")`.
+
+[cols="2,3,2"]
+|===
+|*Method & path* |*Purpose* |*Command*
+
+|`GET /accounts/share/template` |Fields to build a new share account. |—
+|`GET /accounts/share/{accountId}` |Retrieve one account. |—
+|`GET /accounts/share` |List share accounts. |—
+|`POST /accounts/share` |Create a share account. |`CREATE SHAREACCOUNT`
+|`PUT /accounts/share/{accountId}` |Update a pending account. |`UPDATE SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=approve` |Approve. |`APPROVE SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=reject` |Reject. |`REJECT SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=activate` |Activate. |`ACTIVATE SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=close` |Close. |`CLOSE SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=applyadditionalshares` |Apply for more shares. |`APPLYADDITIONALSHARES SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=approveadditionalshares` |Approve additional shares. |`APPROVEADDITIONALSHARES SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=rejectadditionalshares` |Reject additional shares. |`REJECTADDITIONALSHARES SHAREACCOUNT`
+|`POST /accounts/share/{accountId}?command=redeemshares` |Redeem shares. |`REDEEMSHARES SHAREACCOUNT`
+|===
+
+.Create a share account — request (representative fields)
+[source,json]
+----
+{
+  "clientId": 1,
+  "productId": 1,
+  "submittedDate": "01 January 2026",
+  "requestedShares": 50,
+  "savingsAccountId": 7,
+  "applicationDate": "01 January 2026",
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "charges": [ { "chargeId": 20, "amount": 5 } ]
+}
+----
+
+NOTE: Parameter names are defined in `ShareAccountApiConstants`
+(`fineract-provider/.../portfolio/accounts/constants/ShareAccountApiConstants.java`).
+
+== Share products — `ProductsApiResource`
+
+Source: `fineract-provider/.../portfolio/products/api/ProductsApiResource.java`, `@Path("/v1/products/{type}")`.
+
+[cols="2,3,2"]
+|===
+|*Method & path* |*Purpose* |*Command*
+
+|`GET /products/share/template` |Fields to build a new product. |—
+|`GET /products/share/{productId}` |Retrieve one product. |—
+|`GET /products/share` |List products. |—
+|`POST /products/share` |Create a product. |`CREATE SHAREPRODUCT`
+|`PUT /products/share/{productId}` |Update a product. |`UPDATE SHAREPRODUCT`
+|===
+
+NOTE: Product parameter names are defined in `ShareProductApiConstants`
+(`fineract-core/.../portfolio/shareproducts/constants/ShareProductApiConstants.java`).
+
+== Dividends — `ShareDividendApiResource`
+
+Source: `fineract-provider/.../portfolio/shareproducts/api/ShareDividendApiResource.java`,
+`@Path("/v1/shareproduct/{productId}/dividend")`.
+
+[cols="2,3,2"]
+|===
+|*Method & path* |*Purpose* |*Command*
+
+|`GET /shareproduct/{productId}/dividend` |List dividends for the product. |—
+|`GET /shareproduct/{productId}/dividend/{dividendId}` |Dividend detail with per-account breakdown. |—
+|`POST /shareproduct/{productId}/dividend` |Declare a dividend. |`CREATE_DIVIDEND SHAREPRODUCT`
+|`PUT /shareproduct/{productId}/dividend/{dividendId}?command=approve` |Approve a dividend. |`APPROVE_DIVIDEND SHAREPRODUCT`
+|`DELETE /shareproduct/{productId}/dividend/{dividendId}` |Delete a non-approved dividend. |`DELETE_DIVIDEND SHAREPRODUCT`
+|===
+
+.Declare a dividend — request
+[source,json]
+----
+{
+  "dividendPeriodStartDate": "01 January 2026",
+  "dividendPeriodEndDate": "31 March 2026",
+  "dividendAmount": 10000,
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en"
+}
+----
+
+== Error responses
+
+[cols="1,2,2"]
+|===
+|*HTTP* |*Reason* |*Fineract code (examples)*
+
+|400 |Invalid or missing parameters. |`validation.msg.shareaccount.*`, `validation.msg.shareproduct.*`
+|403 |Caller lacks the required permission for the command. |`error.msg.no.permission`
+|404 |Account, product or dividend not found. |`error.msg.shareaccount.id.invalid`, `DividendNotFoundException`
+|409 |Issued shares would exceed the product's authorized total. |`IssueableSharesExceededException`
+|===

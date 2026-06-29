@@ -1,0 +1,36 @@
+@startuml
+start
+:Admin creates dividend for product\n(POST /shareproduct/{id}/dividend);
+note right
+  ShareProductDividendPayOutDetails
+  status = INITIATED (100)
+  amount split across eligible
+  active share accounts ->
+  ShareAccountDividendDetails
+  status = INITIATED (100)
+end note
+
+if (Account active during\nminimum active period?) then (yes)
+  :Account is eligible for dividend;
+else (no, inactive client)
+  if (allowDividendCalculationForInactiveClients?) then (yes)
+    :Still eligible;
+  else (no)
+    :Excluded from distribution;
+  endif
+endif
+
+:Admin approves dividend\n(PUT .../dividend/{id}?command=approve);
+note right
+  ShareProductDividendPayOutDetails
+  status = APPROVED (300)
+end note
+
+:Scheduled job\n"Post Dividends For Shares" runs;
+partition "PostDividentsForSharesTasklet" {
+  :Read APPROVED payout details;
+  :For each ShareAccountDividendDetails\ndeposit amount into linked savings account;
+  :savingsTransactionId set\nstatus = POSTED (300);
+}
+stop
+@enduml

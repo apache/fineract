@@ -1,0 +1,25 @@
+@startuml
+' Lifecycle of a Share Account (ShareAccountStatusType)
+[*] --> SUBMITTED_AND_PENDING_APPROVAL : createShareAccount\n(POST /accounts/share)
+
+SUBMITTED_AND_PENDING_APPROVAL --> APPROVED : approve
+SUBMITTED_AND_PENDING_APPROVAL --> REJECTED : reject
+SUBMITTED_AND_PENDING_APPROVAL : status_enum = 100
+SUBMITTED_AND_PENDING_APPROVAL : shares are PENDING
+
+APPROVED --> SUBMITTED_AND_PENDING_APPROVAL : undoApproval
+APPROVED --> ACTIVE : activate
+APPROVED : status_enum = 200
+APPROVED : shares APPROVED
+
+ACTIVE --> ACTIVE : applyAdditionalShares /\napproveAdditionalShares /\nredeemShares
+ACTIVE --> CLOSED : close
+ACTIVE : status_enum = 300
+ACTIVE : transactions allowed
+
+REJECTED : status_enum = 500
+CLOSED : status_enum = 600
+
+REJECTED --> [*]
+CLOSED --> [*]
+@enduml
