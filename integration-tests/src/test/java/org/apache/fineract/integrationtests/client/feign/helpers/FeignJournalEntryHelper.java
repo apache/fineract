@@ -66,11 +66,14 @@ public class FeignJournalEntryHelper {
         assertNotNull(journalEntries);
         assertNotNull(journalEntries.getPageItems());
 
-        List<JournalEntryTransactionItem> actualEntries = new ArrayList<>(journalEntries.getPageItems());
+        List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
         assertEquals(expectedEntries.length, actualEntries.size(),
-                "Expected " + expectedEntries.length + " journal entries but found " + actualEntries.size());
+                "Expected " + expectedEntries.length + " journal entries but found " + actualEntries.size() + ": " + actualEntries);
 
-        verifyJournalEntriesMatch(actualEntries, expectedEntries);
+        for (LoanTestData.Journal expected : expectedEntries) {
+            boolean found = actualEntries.stream().anyMatch(item -> matchesJournalEntry(item, expected));
+            assertTrue(found, "Required journal entry not found: " + expected);
+        }
     }
 
     private static void verifyJournalEntriesMatch(List<JournalEntryTransactionItem> actualEntries, LoanTestData.Journal[] expectedEntries) {

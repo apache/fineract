@@ -23,14 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
-import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
 import org.junit.jupiter.api.Test;
 
-public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanIntegrationTest {
+public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends FeignLoanTestBase {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);
 
@@ -38,7 +37,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, false);
@@ -64,10 +63,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -78,7 +77,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -86,15 +85,15 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId,
                     // original entries
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
                     // original entries reverted
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT")); //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name())); //
 
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
@@ -108,7 +107,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, false);
@@ -134,10 +133,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // make a repayment
@@ -151,7 +150,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -159,24 +158,24 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId, //
                     // original entries down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // repayment entries
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // original entries compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // repayment entries compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             verifyRepaymentSchedule(loanId, //
@@ -191,7 +190,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, false);
@@ -220,14 +219,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -235,16 +234,16 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId, //
                     // original entries
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // original entries are compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
 
             // verify repayment entries are reverted
@@ -260,7 +259,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithSingleDisbursalAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, false);
@@ -293,12 +292,12 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -309,7 +308,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -317,24 +316,24 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId, //
                     // original entries
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // original entries compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // manual partial repayment of the first installment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // manual partial repayment of the first installment compensation after undoDisburse
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -350,7 +349,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithSingleDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, false);
@@ -376,10 +375,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -398,7 +397,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithMultiDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -424,10 +423,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -445,7 +444,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -471,10 +470,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -485,7 +484,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -493,15 +492,15 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId, //
                     // original entries
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
                     // original entries reverted
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -517,7 +516,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -543,10 +542,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // make a repayment
@@ -560,7 +559,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -568,24 +567,24 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId,
                     // original entries down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // repayment entries
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // original entries compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // repayment entries compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -601,7 +600,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, true);
@@ -630,14 +629,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -645,16 +644,16 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId,
                     // original entries
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // original entries are compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -670,7 +669,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, true);
@@ -702,12 +701,12 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -718,7 +717,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify that all transactions are reverted
             verifyNoTransactions(loanId);
@@ -726,24 +725,24 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries are compensated after undo disbursal
             verifyJournalEntries(loanId,
                     // original entries
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // original entries compensated
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // manual partial repayment of the first installment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // manual partial repayment of the first installment compensation after undoDisburse
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -757,7 +756,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -782,10 +781,11 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // verify journal entries
-            verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+            verifyJournalEntries(loanId,
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -794,8 +794,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -810,14 +809,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -830,7 +829,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoLastDisbursal
-            loanTransactionHelper.undoLastDisbursal(loanId.intValue());
+            undoLastDisbursement(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -841,22 +840,22 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // first disbursement + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // second disbursement + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // compensation of second disbursement + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
 
             verifyRepaymentSchedule(loanId, //
@@ -871,7 +870,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndNoManualTransactionsWithExtraRepayment() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -896,10 +895,11 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // verify journal entries
-            verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+            verifyJournalEntries(loanId,
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -908,8 +908,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("10 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("10 January 2023");
 
             addRepaymentForLoan(loanId, 300.0, "10 January 2023");
 
@@ -919,8 +918,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     transaction(300.0, "Repayment", "10 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -936,16 +934,16 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(300.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(300.0, fundSource, "DEBIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(300.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(300.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -958,7 +956,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoLastDisbursal
-            loanTransactionHelper.undoLastDisbursal(loanId.intValue());
+            undoLastDisbursement(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -970,26 +968,26 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // first disbursement + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // repayment
-                    journalEntry(300.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(300.0, fundSource, "DEBIT"), //
+                    journalEntry(300.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(300.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // second disbursement + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // compensation of second disbursement + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
 
             verifyRepaymentSchedule(loanId, //
@@ -1004,7 +1002,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, true);
@@ -1033,10 +1031,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1046,8 +1044,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1065,14 +1062,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1085,7 +1082,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoLastDisbursal
-            loanTransactionHelper.undoLastDisbursal(loanId.intValue());
+            undoLastDisbursement(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -1096,22 +1093,22 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // first disbursement + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // second disbursement + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // compensation of second disbursement + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
 
             verifyRepaymentSchedule(loanId, //
@@ -1126,7 +1123,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -1152,10 +1149,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1165,8 +1162,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1181,14 +1177,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1200,8 +1196,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(1050.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("20 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("20 January 2023");
 
             // make an additional repayment after the 2nd disbursal
             addRepaymentForLoan(loanId, 50.0, "20 January 2023");
@@ -1215,7 +1210,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoLastDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, true);
@@ -1244,10 +1239,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1257,8 +1252,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1276,14 +1270,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1295,8 +1289,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(1050.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("20 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("20 January 2023");
 
             // make an additional repayment after the 2nd disbursal
             addRepaymentForLoan(loanId, 50.0, "20 January 2023");
@@ -1310,7 +1303,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -1336,10 +1329,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1349,8 +1342,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1365,14 +1357,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1385,7 +1377,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -1399,28 +1391,28 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // compensation of the 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of the 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
         });
     }
@@ -1429,7 +1421,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndNoManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, true);
@@ -1458,10 +1450,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1471,8 +1463,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1490,14 +1481,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1510,7 +1501,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -1524,28 +1515,28 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // compensation of the 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of the 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT") //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()) //
             );
         });
     }
@@ -1554,7 +1545,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentEnabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -1580,10 +1571,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1593,8 +1584,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1609,14 +1599,14 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1628,14 +1618,13 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(1050.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("20 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("20 January 2023");
 
             // make an additional repayment after the 2nd disbursal
             addRepaymentForLoan(loanId, 50.0, "20 January 2023");
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -1649,36 +1638,36 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // manual repayment
-                    journalEntry(50.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(50.0, fundSource, "DEBIT"), //
+                    journalEntry(50.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(50.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of the 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of the 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of repayment
-                    journalEntry(50.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50.0, fundSource, "CREDIT") //
+                    journalEntry(50.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(50.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
         });
     }
@@ -1687,7 +1676,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
     public void testUndoDisbursalForLoanWithMultiDisbursalWith2DisburseAutoDownPaymentDisabledAndHasManualTransactions() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(false, true);
@@ -1716,10 +1705,10 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1729,8 +1718,7 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(750.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("15 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("15 January 2023");
 
             // 2nd Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "15 January 2023");
@@ -1747,14 +1735,15 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             );
 
             // verify journal entries
-            verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT") //
+            verifyJournalEntries(loanId,
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
 
             // Verify Repayment Schedule
@@ -1766,14 +1755,13 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
                     installment(1050.0, false, "31 January 2023") //
             );
 
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("20 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+            updateBusinessDate("20 January 2023");
 
             // make an additional repayment after the 2nd disbursal
             addRepaymentForLoan(loanId, 50.0, "20 January 2023");
 
             // undoDisbursal
-            loanTransactionHelper.undoDisbursal(loanId.intValue());
+            undoDisbursement(loanId);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -1787,36 +1775,36 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
             // verify journal entries
             verifyJournalEntries(loanId,
                     // 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, fundSource, "DEBIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(400.0, fundSource, "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
 
                     // manual repayment
-                    journalEntry(50.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(50.0, fundSource, "DEBIT"), //
+                    journalEntry(50.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(50.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of the 1st disbursal + down-payment
-                    journalEntry(250.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(250.0, fundSource, "CREDIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, fundSource, "DEBIT"), //
+                    journalEntry(250.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(250.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of the 2nd disbursal + down-payment
-                    journalEntry(100.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, fundSource, "CREDIT"), //
-                    journalEntry(400.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(400.0, fundSource, "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(100.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(400.0, getAccounts().getFundSource(), JournalEntry.TransactionType.DEBIT.name()), //
 
                     // compensation of repayment
-                    journalEntry(50.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50.0, fundSource, "CREDIT") //
+                    journalEntry(50.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name()), //
+                    journalEntry(50.0, getAccounts().getFundSource(), JournalEntry.TransactionType.CREDIT.name()) //
             );
         });
     }
@@ -1836,11 +1824,8 @@ public class UndoLoanDisbursalWithDownPaymentIntegrationTest extends BaseLoanInt
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductResponse.getResourceId());
-
-        Long loanProductId = loanProductResponse.getResourceId();
+        Long loanProductId = createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
 
         assertEquals(TRUE, getLoanProductsProductIdResponse.getEnableDownPayment());
         assertNotNull(getLoanProductsProductIdResponse.getDisbursedAmountPercentageForDownPayment());

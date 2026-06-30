@@ -160,6 +160,10 @@ public class FeignTransactionHelper {
         return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "downPayment"));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeLoanDownPayment(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "downPayment"));
+    }
+
     public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(Long loanId, Long transactionId) {
         final Long resolvedTransactionId = transactionId;
         return ok(() -> fineractClient.loanTransactions().retrieveTransaction(loanId, resolvedTransactionId, ""));
@@ -221,6 +225,12 @@ public class FeignTransactionHelper {
             PostLoansLoanIdTransactionsTransactionIdRequest request) {
         return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanExternalId(loanExternalId, transactionId, request,
                 Map.of("command", "undo")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(String loanExternalId, String transactionExternalId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanAndTransactionExternalId(loanExternalId,
+                transactionExternalId, request, Map.of("command", "undo")));
     }
 
     public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(String loanExternalId, String transactionExternalId,
