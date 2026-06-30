@@ -43,6 +43,7 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
     private final WorkingCapitalLoanBreachActionRepository actionRepository;
     private final WorkingCapitalLoanBreachActionParseAndValidator validator;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
+    private final WorkingCapitalLoanBreachResetService breachResetService;
 
     @Transactional
     @Override
@@ -63,6 +64,10 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
             breachScheduleService.recalculatePeriodsForPauses(workingCapitalLoan);
         } else if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(action.getAction())) {
             breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan, action);
+        } else if (WorkingCapitalLoanBreachActionType.RESET.equals(action.getAction())) {
+            breachResetService.resetBreach(workingCapitalLoan, saved);
+        } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(action.getAction())) {
+            breachResetService.undoResetBreach(workingCapitalLoan, saved);
         }
 
         return new CommandProcessingResultBuilder() //

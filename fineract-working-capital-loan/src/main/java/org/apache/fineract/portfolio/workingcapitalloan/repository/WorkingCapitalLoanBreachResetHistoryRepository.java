@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.domain;
+package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
-public enum WorkingCapitalLoanBreachActionType {
-    PAUSE, //
-    RESUME, //
-    RESCHEDULE, //
-    RESET, //
-    UNDO_RESET //
+import java.util.List;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachResetHistory;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface WorkingCapitalLoanBreachResetHistoryRepository extends JpaRepository<WorkingCapitalLoanBreachResetHistory, Long> {
+
+    List<WorkingCapitalLoanBreachResetHistory> findByBreachActionIdOrderByBreachSchedulePeriodNumberAsc(Long breachActionId);
+
 }

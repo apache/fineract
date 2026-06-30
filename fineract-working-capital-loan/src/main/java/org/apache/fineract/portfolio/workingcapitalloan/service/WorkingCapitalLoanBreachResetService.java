@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.domain;
+package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-public enum WorkingCapitalLoanBreachActionType {
-    PAUSE, //
-    RESUME, //
-    RESCHEDULE, //
-    RESET, //
-    UNDO_RESET //
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
+
+public interface WorkingCapitalLoanBreachResetService {
+
+    void resetBreach(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction resetAction);
+
+    void undoResetBreach(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoResetAction);
+
 }
