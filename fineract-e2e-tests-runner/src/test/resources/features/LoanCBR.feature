@@ -806,7 +806,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -877,7 +877,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -943,7 +943,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -1020,7 +1020,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -1093,7 +1093,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -1172,7 +1172,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -1242,7 +1242,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 September 2023 | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 September 2023" with "1000" amount and expected disbursement date on "01 September 2023"
     When Admin successfully disburse the loan on "01 September 2023" with "1000" EUR transaction amount
@@ -1260,7 +1260,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
@@ -1307,7 +1307,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
@@ -1353,7 +1353,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
@@ -1429,7 +1429,7 @@ Feature: Credit Balance Refund
     When Admin creates a client with random data
     When Admin set "LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 January 2024   | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2024" with "1000" amount and expected disbursement date on "01 January 2024"
     When Admin successfully disburse the loan on "01 January 2024" with "1000" EUR transaction amount
@@ -1497,7 +1497,7 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "25 January 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                  | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                 | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_ADVANCED_PAYMENT_ALLOCATION | 25 January 2024   | 212.87         | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "25 January 2024" with "212.87" amount and expected disbursement date on "25 January 2024"
     When Admin successfully disburse the loan on "25 January 2024" with "212.87" EUR transaction amount
@@ -1542,7 +1542,7 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "24 May 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 24 May 2024       | 200            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "24 May 2024" with "200" amount and expected disbursement date on "24 May 2024"
     When Admin successfully disburse the loan on "24 May 2024" with "200" EUR transaction amount
@@ -1654,8 +1654,8 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "01 July 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 July 2024       | 1000            | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LoanProduct                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_PAYMENT_ALLOCATION | 01 July 2024      | 1000           | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 July 2024" with "1000" amount and expected disbursement date on "01 July 2024"
     When Admin successfully disburse the loan on "01 July 2024" with "1000" EUR transaction amount
     When Admin sets the business date to "10 July 2024"
@@ -1678,8 +1678,8 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "14 March 2024"
     When Admin creates a client with random data
     When Admin creates a fully customized loan with the following data:
-      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
-      | LP2_DOWNPAYMENT_AUTO_ADVANCED_CUSTOM_PAYMENT_ALLOCATION  | 14 March 2024     | 487.58         | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+      | LoanProduct                                             | submitted on date | with Principal | ANNUAL interest rate % | interest type | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_DOWNPAYMENT_AUTO_ADVANCED_CUSTOM_PAYMENT_ALLOCATION | 14 March 2024     | 487.58         | 0                      | FLAT          | SAME_AS_REPAYMENT_PERIOD    | EQUAL_INSTALLMENTS | 45                | DAYS                  | 15             | DAYS                   | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "14 March 2024" with "487.58" amount and expected disbursement date on "14 March 2024"
   # First disbursement with automatic downpayment
     When Admin successfully disburse the loan on "14 March 2024" with "487.58" EUR transaction amount
@@ -1870,7 +1870,7 @@ Feature: Credit Balance Refund
 
     @TestRailId:C78812
     Examples: LAST_INSTALLMENT future-installment rule (the configuration that originally reproduced PS-3087)
-      | rule             | loanProduct                                                                                       |
+      | rule             | loanProduct                                                                                        |
       | LAST_INSTALLMENT | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT |
 
     @TestRailId:C78853
@@ -1883,7 +1883,7 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "15 December 2025"
     And Admin creates a client with random data
     And Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT | 01 January 2025   | 300            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2025" with "300" amount and expected disbursement date on "01 January 2025"
     And Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
@@ -1913,7 +1913,7 @@ Feature: Credit Balance Refund
     When Admin sets the business date to "15 December 2025"
     And Admin creates a client with random data
     And Admin creates a fully customized loan with the following data:
-      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LoanProduct                                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
       | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT | 01 January 2025   | 300            | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
     And Admin successfully approves the loan on "01 January 2025" with "300" amount and expected disbursement date on "01 January 2025"
     And Admin successfully disburse the loan on "01 January 2025" with "300" EUR transaction amount
@@ -1938,3 +1938,117 @@ Feature: Credit Balance Refund
       | 2  | 28   | 01 March 2025    | 01 April 2025 | 100.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 100.0 | 0.0        | 100.0 | 0.0         |
       | 3  | 31   | 01 April 2025    |               | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0 | 50.0  | 0.0        | 0.0   | 50.0        |
       | 4  | 14   | 15 April 2025    |               | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0  | 0.0   | 0.0        | 0.0   | 50.0        |
+
+  @TestRailId:TODO_ADD_1
+  Scenario: Verify tha issue exactly
+    When Admin sets the business date to "29 August 2025"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                       | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_NO_INTEREST_RECALC_INT_REFUND_FULL_ACC_MATUR_CHARGE_OFF | 29 August 2025    | 65.98          | 0                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 30                | DAYS                  | 30             | DAYS                   | 1                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "29 August 2025" with "65.98" amount and expected disbursement date on "29 August 2025"
+    And Admin successfully disburse the loan on "29 August 2025" with "65.98" EUR transaction amount
+    When Admin creates and approves Loan reschedule with the following data:
+      | rescheduleFromDate | submittedOnDate | adjustedDueDate  | graceOnPrincipal | graceOnInterest | extraTerms | newInterestRate |
+      | 28 September 2025  | 29 August 2025  | 21 November 2025 |                  |                 |            |                 |
+    When Admin adds "LOAN_NSF_FEE" due date charge with "21 November 2025" due date and 1.9 EUR transaction amount
+    And Customer makes "AUTOPAY" repayment on "29 August 2025" with 46.89 EUR transaction amount
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 August 2025" with 20.99 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+
+    When Admin sets the business date to "03 September 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "03 September 2025" with 44.99 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation false
+
+    When Admin sets the business date to "05 September 2025"
+    And Admin runs inline COB job for Loan
+# full charge adjustment
+    And Admin makes a charge adjustment for the last "LOAN_NSF_FEE" type charge which is due on "21 November 2025" with 1.9 EUR transaction amount and externalId ""
+    When Admin makes Credit Balance Refund transaction on "05 September 2025" with 46.89 EUR transaction amount
+    And Loan Repayment schedule has 1 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date      | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                | 65.98           |               |          | 0.0  |           | 0.0   | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 | 29 August 2025 | 0.0             | 65.98         | 0.0      | 0.0  | 1.9       | 67.88 | 67.88 | 67.88      | 0.0  | 0.0         |
+
+    When Admin sets the business date to "10 September 2025"
+    And Admin runs inline COB job for Loan
+    When Customer undo "1"th repayment on "29 August 2025"
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+
+    When Admin sets the business date to "14 October 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "14 October 2025" with 46.89 EUR transaction amount
+
+    When Admin sets the business date to "25 October 2025"
+    And Admin runs inline COB job for Loan
+    When Customer undo "2"th repayment on "14 October 2025"
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+
+    When Admin sets the business date to "13 November 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "13 November 2025" with 46.89 EUR transaction amount
+
+    When Admin sets the business date to "19 November 2025"
+    And Admin runs inline COB job for Loan
+    When Customer undo "3"th repayment on "13 November 2025"
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+
+    When Admin sets the business date to "21 November 2025"
+    And Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "21 November 2025" with 46.89 EUR transaction amount
+
+    When Admin sets the business date to "25 November 2025"
+    And Admin runs inline COB job for Loan
+    When Customer undo "4"th repayment on "21 November 2025"
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+
+    When Admin sets the business date to "17 May 2026"
+    And Admin runs inline COB job for Loan
+    And Customer makes "AUTOPAY" repayment on "17 May 2026" with 46.89 EUR transaction amount
+
+    When Admin sets the business date to "20 May 2026"
+    And Admin runs inline COB job for Loan
+    When Customer undo "5"th repayment on "17 May 2026"
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+
+    When Admin sets the business date to "21 May 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |
+    And Admin does charge-off the loan on "21 May 2026"
+
+    And Customer makes "AUTOPAY" repayment on "21 May 2026" with 46.89 EUR transaction amount
+
+    When Admin sets the business date to "27 May 2026"
+    And Admin runs inline COB job for Loan
+    When Customer undo "6"th repayment on "21 May 2026"
+    When Admin sets the business date to "05 June 2026"
+    And Admin runs inline COB job for Loan
+
+    And Loan Repayment schedule has 2 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date         | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 29 August 2025   |                   | 65.98           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 84   | 21 November 2025 |                   | 0.0             | 112.87        | 0.0      | 0.0  | 0.0       | 112.87 | 65.98 | 65.98      | 0.0  | 46.89       |
+      | 2  | 54   | 21 November 2025 | 05 September 2025 | 0.0             | 0.0           | 0.0      | 0.0  | 1.9       | 1.9    | 1.9   | 1.9        | 0.0  | 0.0         |

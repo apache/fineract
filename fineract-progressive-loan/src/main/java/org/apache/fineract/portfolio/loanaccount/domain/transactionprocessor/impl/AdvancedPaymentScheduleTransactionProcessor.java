@@ -899,8 +899,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         List<LoanRepaymentScheduleInstallment> installments = ctx.getInstallments();
         MoneyHolder overpaymentHolder = ctx.getOverpaymentHolder();
 
-        if (ctx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
-                && loanTransaction.getLoan().isInterestRecalculationEnabled()) {
+        if (ctx instanceof ProgressiveTransactionCtx progressiveTransactionCtx) {
             var model = progressiveTransactionCtx.getModel();
 
             // Copy and paste Logic from super.handleCreditBalanceRefund
