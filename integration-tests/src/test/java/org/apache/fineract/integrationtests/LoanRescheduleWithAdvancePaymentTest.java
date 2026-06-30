@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -31,6 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -54,11 +59,10 @@ public class LoanRescheduleWithAdvancePaymentTest extends BaseLoanIntegrationTes
     private ResponseSpecification generalResponseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
-    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private Integer clientId;
     private Integer loanProductId;
     private Integer loanId;
-    private Integer loanRescheduleRequestId;
+    private Long loanRescheduleRequestId;
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
@@ -70,7 +74,6 @@ public class LoanRescheduleWithAdvancePaymentTest extends BaseLoanIntegrationTes
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
 
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -234,21 +237,24 @@ public class LoanRescheduleWithAdvancePaymentTest extends BaseLoanIntegrationTes
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("16 August 2021").updateAdjustedDueDate("31 August 2021")
-                .updateRecalculateInterest(false).updateSubmittedOnDate("16 August 2022").build(this.loanId.toString());
-        LOG.info("Reschedule request : {}", requestJSON);
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("16 August 2021")
+                .updateAdjustedDueDate("31 August 2021").updateRecalculateInterest(false).updateSubmittedOnDate("16 August 2022")
+                .buildRequest(this.loanId.longValue());
+        LOG.info("Reschedule request : {}", createRequest);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
 
-        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("16 August 2022")
-                .getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder()
+                .updateSubmittedOnDate("16 August 2022").getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
 
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 

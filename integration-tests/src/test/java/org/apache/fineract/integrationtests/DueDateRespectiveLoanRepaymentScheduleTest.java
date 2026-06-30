@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -34,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -64,7 +65,6 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
     private RequestSpecification requestSpec;
     private BusinessDateHelper businessDateHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private InlineLoanCOBHelper inlineLoanCOBHelper;
 
     @BeforeEach
@@ -75,7 +75,6 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
         this.businessDateHelper = new BusinessDateHelper();
         inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
     }
@@ -868,17 +867,17 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
             loanStatusHashMap = loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2023", loanID, "1000");
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-            final String requestJSON = new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("31 January 2023")
-                    .updateAdjustedDueDate("01 March 2023").updateSubmittedOnDate("25 January 2023").updateGraceOnPrincipal(null)
-                    .updateGraceOnInterest(null).updateExtraTerms(null).build(loanID.toString());
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("approvedOnDate", "25 January 2023");
-            final String aproveRequestJSON = new Gson().toJson(map);
-
-            Integer loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId, aproveRequestJSON);
+            final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateRescheduleFromDate("31 January 2023").updateAdjustedDueDate("01 March 2023")
+                    .updateSubmittedOnDate("25 January 2023").updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                    .updateExtraTerms(null).buildRequest(loanID.longValue());
+            final PostCreateRescheduleLoansResponse loanRescheduleRequestResponse = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            final Long loanRescheduleRequestId = loanRescheduleRequestResponse.getResourceId();
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId,
+                    new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("31 January 2023")
+                            .updateAdjustedDueDate("01 March 2023").updateSubmittedOnDate("25 January 2023").updateGraceOnPrincipal(null)
+                            .updateGraceOnInterest(null).updateExtraTerms(null).getApproveRequest());
 
             Integer firstChargeId = loanTransactionHelper.addChargesForLoan(loanID,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "01 March 2023", "20"));
@@ -1092,17 +1091,17 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
             loanStatusHashMap = loanTransactionHelper.disburseLoanWithTransactionAmount("01 January 2023", loanID, "1000");
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-            final String requestJSON = new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("31 January 2023")
-                    .updateAdjustedDueDate("01 March 2023").updateSubmittedOnDate("25 January 2023").updateGraceOnPrincipal(null)
-                    .updateGraceOnInterest(null).updateExtraTerms(null).build(loanID.toString());
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("approvedOnDate", "25 January 2023");
-            final String aproveRequestJSON = new Gson().toJson(map);
-
-            Integer loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId, aproveRequestJSON);
+            final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateRescheduleFromDate("31 January 2023").updateAdjustedDueDate("01 March 2023")
+                    .updateSubmittedOnDate("25 January 2023").updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                    .updateExtraTerms(null).buildRequest(loanID.longValue());
+            final PostCreateRescheduleLoansResponse loanRescheduleRequestResponse = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            final Long loanRescheduleRequestId = loanRescheduleRequestResponse.getResourceId();
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId,
+                    new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("31 January 2023")
+                            .updateAdjustedDueDate("01 March 2023").updateSubmittedOnDate("25 January 2023").updateGraceOnPrincipal(null)
+                            .updateGraceOnInterest(null).updateExtraTerms(null).getApproveRequest());
 
             Integer firstChargeId = loanTransactionHelper.addChargesForLoan(loanID,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "01 March 2023", "20"));
@@ -1401,18 +1400,16 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
             businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2023.06.11").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final String requestJSON = new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("13 June 2023")
-                    .updateAdjustedDueDate("13 July 2023").updateSubmittedOnDate("11 June 2023").updateGraceOnPrincipal(null)
-                    .updateGraceOnInterest(null).updateExtraTerms(null).build(loanID.toString());
-
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("approvedOnDate", "11 June 2023");
-            final String aproveRequestJSON = new Gson().toJson(map);
-
-            Integer loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId, aproveRequestJSON);
+            final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateRescheduleFromDate("13 June 2023").updateAdjustedDueDate("13 July 2023").updateSubmittedOnDate("11 June 2023")
+                    .updateGraceOnPrincipal(null).updateGraceOnInterest(null).updateExtraTerms(null).buildRequest(loanID.longValue());
+            final PostCreateRescheduleLoansResponse loanRescheduleRequestResponse = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            final Long loanRescheduleRequestId = loanRescheduleRequestResponse.getResourceId();
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId,
+                    new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("13 June 2023").updateAdjustedDueDate("13 July 2023")
+                            .updateSubmittedOnDate("11 June 2023").updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                            .updateExtraTerms(null).getApproveRequest());
             Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanID,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "13 July 2023", "3.65"));
             businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
@@ -1586,18 +1583,16 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends BaseLoanIntegrat
             businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                     .date("2023.06.11").dateFormat("yyyy.MM.dd").locale("en"));
 
-            final String requestJSON = new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("13 June 2023")
-                    .updateAdjustedDueDate("13 July 2023").updateSubmittedOnDate("11 June 2023").updateGraceOnPrincipal(null)
-                    .updateGraceOnInterest(null).updateExtraTerms(null).build(loanID.toString());
-
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("approvedOnDate", "11 June 2023");
-            final String aproveRequestJSON = new Gson().toJson(map);
-
-            Integer loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId, aproveRequestJSON);
+            final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateRescheduleFromDate("13 June 2023").updateAdjustedDueDate("13 July 2023").updateSubmittedOnDate("11 June 2023")
+                    .updateGraceOnPrincipal(null).updateGraceOnInterest(null).updateExtraTerms(null).buildRequest(loanID.longValue());
+            final PostCreateRescheduleLoansResponse loanRescheduleRequestResponse = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            final Long loanRescheduleRequestId = loanRescheduleRequestResponse.getResourceId();
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequestId,
+                    new LoanRescheduleRequestTestBuilder().updateRescheduleFromDate("13 June 2023").updateAdjustedDueDate("13 July 2023")
+                            .updateSubmittedOnDate("11 June 2023").updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                            .updateExtraTerms(null).getApproveRequest());
             Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanID,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "13 July 2023", "3.65"));
             businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)

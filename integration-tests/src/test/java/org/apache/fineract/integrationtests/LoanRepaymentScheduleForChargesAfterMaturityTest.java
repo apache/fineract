@@ -64,7 +64,6 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
             );
 
             createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
-
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -110,7 +109,6 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
             );
 
             createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
-
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -158,7 +156,6 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
             );
 
             createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
-
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -205,7 +202,6 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanT
             );
 
             createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
-
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
