@@ -53,6 +53,7 @@ public class CustomAuditingHandler extends AuditingHandler {
      * @since 1.8
      * @deprecated use AuditingHandler with PersistentEntities instead.
      */
+    @Deprecated
     public CustomAuditingHandler(MappingContext<? extends PersistentEntity<?, ?>, ? extends PersistentProperty<?>> mappingContext,
             AuditorAware<?> auditorAware) {
         this(PersistentEntities.of(mappingContext));
