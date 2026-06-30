@@ -64,6 +64,14 @@ public interface LoanAmortizationAllocationMappingRepository
     BigDecimal calculateAlreadyAmortizedAmount(@Param("baseLoanTransactionId") Long baseLoanTransactionId, @Param("loanId") Long loanId);
 
     @Query("""
+                    SELECT COALESCE(SUM(laam.amount), 0)
+                    FROM LoanAmortizationAllocationMapping laam
+                    WHERE laam.baseLoanTransactionId = :baseLoanTransactionId AND laam.loanId = :loanId
+                    AND laam.amortizationType = org.apache.fineract.portfolio.loanaccount.domain.AmortizationType.AM
+            """)
+    BigDecimal calculateGrossAmortizedAmount(@Param("baseLoanTransactionId") Long baseLoanTransactionId, @Param("loanId") Long loanId);
+
+    @Query("""
                     SELECT laam FROM LoanAmortizationAllocationMapping laam
                         JOIN LoanTransaction at ON at.id = laam.baseLoanTransactionId
                     WHERE laam.amortizationLoanTransactionId = :amortizationLoanTransactionId

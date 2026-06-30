@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
+import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -52,9 +53,11 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.externalevents.BusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
@@ -1027,6 +1030,88 @@ public class LoanBuyDownFeeTest extends BaseLoanIntegrationTest {
             verifyTRJournalEntries(optTx.get().getId(), debit(deferredIncomeLiabilityAccount, 1.23),
                     credit(classificationIncomeAccountRef.get(), 1.09), // First BuyDown Fee With classification
                     credit(feeIncomeAccount, 0.14)); // Second BuyDown Fee Without classification
+        });
+    }
+
+    @Test
+    public void testBuyDownFeePartialAdjustmentAfterFullAmortizationViaInvestorSale() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> buyDownFeeTransactionIdRef = new AtomicReference<>();
+
+        final Account transferAccount = accountHelper.createAssetAccount("transferInSuspense");
+        final FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
+        final ExternalAssetOwnerHelper externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
+        externalAssetOwnerHelper.setProperFinancialActivity(financialActivityAccountHelper, transferAccount);
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(createProgressiveLoanProductWithBuyDownFee(null));
+
+        // Step 1: Create and disburse loan on July 1, 2026, add buydown fee, sell to investor
+        runAt("01 July 2026", () -> {
+            final Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "01 July 2026", 1000.0,
+                    10.0, 6, null);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 July 2026");
+
+            final PostLoansLoanIdTransactionsResponse buyDownFeeResponse = loanTransactionHelper.makeLoanBuyDownFee(loanId, "01 July 2026",
+                    50.0);
+            buyDownFeeTransactionIdRef.set(buyDownFeeResponse.getResourceId());
+
+            externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
+                    new ExternalAssetOwnerRequest().settlementDate("2026-07-01").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(UUID.randomUUID().toString()).ownerExternalId(UUID.randomUUID().toString())
+                            .purchasePriceRatio("1.0"));
+        });
+
+        // Step 2: COB on July 2 — investor sale is processed → buydown fee should be fully amortized
+        runAt("02 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getTransactions());
+
+            final BigDecimal totalAmortized = loanDetails.getTransactions().stream()
+                    .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getBuyDownFeeAmortization()))
+                    .map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            assertEquals(0, BigDecimal.valueOf(50.0).compareTo(totalAmortized),
+                    "Buydown fee should be fully amortized after investor sale");
+
+            loanTransactionHelper.buyDownFeeAdjustment(loanId, buyDownFeeTransactionIdRef.get(), "02 July 2026", 20.0);
+        });
+
+        // Step 4: COB on July 3 — expect amortization adjustment equal to the $20 partial adjustment
+        runAt("03 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getTransactions());
+
+            final BigDecimal amortizationAdjustmentAmount = loanDetails.getTransactions().stream()
+                    .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getBuyDownFeeAmortizationAdjustment()))
+                    .map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            assertEquals(0, BigDecimal.valueOf(20.0).compareTo(amortizationAdjustmentAmount),
+                    "Buy Down Fee Amortization Adjustment should match the $20 partial adjustment");
+        });
+
+        // Step 5: COB on July 4 — expect amortization adjustment equal to the $20 partial adjustment (not change from
+        // 3rd)
+        runAt("04 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getTransactions());
+
+            final BigDecimal amortizationAdjustmentAmount = loanDetails.getTransactions().stream()
+                    .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getBuyDownFeeAmortizationAdjustment()))
+                    .map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            assertEquals(0, BigDecimal.valueOf(20.0).compareTo(amortizationAdjustmentAmount),
+                    "Buy Down Fee Amortization Adjustment should match the $20 partial adjustment");
         });
     }
 }

@@ -38,6 +38,8 @@ public interface LoanAmortizationAllocationService {
 
     BigDecimal calculateAlreadyAmortizedAmount(Long loanTransactionId, Long loanId);
 
+    BigDecimal calculateGrossAmortizedAmount(Long loanTransactionId, Long loanId);
+
     LoanAmortizationAllocationMapping createAmortizationAllocationMappingWithBaseLoanTransaction(LoanTransaction loanTransaction,
             BigDecimal amount, AmortizationType amortizationType);
 

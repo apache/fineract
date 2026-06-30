@@ -74,6 +74,11 @@ public class LoanAmortizationAllocationServiceImpl implements LoanAmortizationAl
         return loanAmortizationAllocationMappingRepository.calculateAlreadyAmortizedAmount(loanTransactionId, loanId);
     }
 
+    @Override
+    public BigDecimal calculateGrossAmortizedAmount(final Long loanTransactionId, final Long loanId) {
+        return loanAmortizationAllocationMappingRepository.calculateGrossAmortizedAmount(loanTransactionId, loanId);
+    }
+
     private LoanAmortizationAllocationData retrieveLoanAmortizationAllocationData(final LoanTransaction loanTransaction,
             final Long loanId) {
         try {

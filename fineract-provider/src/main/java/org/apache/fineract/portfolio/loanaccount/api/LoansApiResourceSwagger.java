@@ -736,6 +736,8 @@ final class LoansApiResourceSwagger {
                 @Schema(example = "false")
                 public boolean capitalizedIncomeAmortization;
                 @Schema(example = "false")
+                public boolean capitalizedIncomeAmortizationAdjustment;
+                @Schema(example = "false")
                 public boolean capitalizedIncomeAdjustment;
                 @Schema(example = "false")
                 public boolean contractTermination;

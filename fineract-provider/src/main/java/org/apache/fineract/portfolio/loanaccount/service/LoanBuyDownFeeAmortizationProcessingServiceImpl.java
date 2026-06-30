@@ -80,14 +80,19 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
             AmortizationType amortizationType;
             if (!balance.isDeleted()) {
                 final List<LoanTransaction> adjustments = loanTransactionRepository.findAdjustments(balance.getLoanTransaction());
-                final Money amortizationTillDate = BuyDownFeeAmortizationUtil.calculateTotalAmortizationTillDate(balance, adjustments,
-                        maturityDate, loan.getLoanProductRelatedDetail().getBuyDownFeeStrategy(), tillDatePlusOne, loan.getCurrency());
                 final BigDecimal alreadyAmortizedAmount = loanAmortizationAllocationService
                         .calculateAlreadyAmortizedAmount(balance.getLoanTransaction().getId(), loan.getId());
                 if (MathUtil.isZero(balance.getUnrecognizedAmount()) && adjustments.isEmpty()) {
                     totalAmortization = totalAmortization.add(Money.of(loan.getCurrency(), alreadyAmortizedAmount));
                     continue;
                 }
+                final BigDecimal grossAmortizedAmount = loanAmortizationAllocationService
+                        .calculateGrossAmortizedAmount(balance.getLoanTransaction().getId(), loan.getId());
+                final boolean fullyAmortizedOnSaleOrClosure = MathUtil.isZero(balance.getUnrecognizedAmount())
+                        && grossAmortizedAmount.compareTo(balance.getAmount()) >= 0;
+                final LocalDate effectiveTillDate = fullyAmortizedOnSaleOrClosure ? maturityDate : tillDatePlusOne;
+                final Money amortizationTillDate = BuyDownFeeAmortizationUtil.calculateTotalAmortizationTillDate(balance, adjustments,
+                        maturityDate, loan.getLoanProductRelatedDetail().getBuyDownFeeStrategy(), effectiveTillDate, loan.getCurrency());
                 totalAmortization = totalAmortization.add(amortizationTillDate);
                 if (alreadyAmortizedAmount.compareTo(amortizationTillDate.getAmount()) > 0) {
                     amortizationAmount = alreadyAmortizedAmount.subtract(amortizationTillDate.getAmount());
