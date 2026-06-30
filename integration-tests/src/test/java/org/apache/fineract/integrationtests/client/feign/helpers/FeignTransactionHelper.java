@@ -20,6 +20,11 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -27,10 +32,11 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.LoanScheduleData;
 import org.apache.fineract.client.models.LoanTransactionData;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 
 public class FeignTransactionHelper {
 
@@ -43,8 +49,27 @@ public class FeignTransactionHelper {
     }
 
     public void executeInlineCOB(Long loanId) {
-        InlineJobRequest request = new InlineJobRequest().loanIds(List.of(loanId));
-        ok(() -> fineractClient.inlineJob().executeInlineJob("LOAN_COB", request));
+        executeInlineCOB(List.of(loanId));
+    }
+
+    public void executeInlineCOB(List<Long> loanIds) {
+        RequestSpecification requestSpec = restAssuredRequestSpec();
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        new InlineLoanCOBHelper(requestSpec, responseSpec).executeInlineCOB(loanIds);
+    }
+
+    private static RequestSpecification restAssuredRequestSpec() {
+        Utils.initializeRESTAssured();
+        return new RequestSpecBuilder().setContentType(ContentType.JSON)
+                .addHeader("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey())
+                .addHeader("Fineract-Platform-TenantId", Utils.DEFAULT_TENANT).build();
+    }
+
+    public void addCapitalizedIncome(Long loanId, String transactionDate, double amount) {
+        ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
+                new PostLoansLoanIdTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate)
+                        .dateFormat("dd MMMM yyyy").locale("en"),
+                Map.of("command", "capitalizedIncome")));
     }
 
     public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(Long loanId, String transactionDate, String dateFormat) {
@@ -263,5 +288,13 @@ public class FeignTransactionHelper {
 
     public PostLoansLoanIdTransactionsResponse closeRescheduledLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "close-rescheduled")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRefundByCash(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "refundByCash"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRefundByCash(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "refundByCash"));
     }
 }

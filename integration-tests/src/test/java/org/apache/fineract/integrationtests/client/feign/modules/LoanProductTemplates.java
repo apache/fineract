@@ -506,6 +506,15 @@ public interface LoanProductTemplates {
                 .loanScheduleProcessingType("HORIZONTAL");
     }
 
+    default PostLoanProductsRequest create4IProgressiveWithCapitalizedIncome() {
+        return create4IProgressive().enableIncomeCapitalization(true)//
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)//
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)//
+                .deferredIncomeLiabilityAccountId(getLiabilityAccountId("deferredIncomeLiability"))//
+                .incomeFromCapitalizationAccountId(getIncomeAccountId("feeIncome"))//
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE);
+    }
+
     default PostLoanProductsRequest dueDateRespectiveNoAccountingNoInterestProduct(double principal, int repaymentEveryDays,
             int numberOfRepayments, double interestRatePerPeriod, String repaymentStrategy) {
         return new PostLoanProductsRequest().name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//

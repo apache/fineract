@@ -1375,7 +1375,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         LoanProductTestBuilder builder = advancedAllocation
                 ? new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                         .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
-                        .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation())
+                        .addAdvancedPaymentAllocation(LoanRequestBuilders.defaultPaymentAllocation(), createRepaymentPaymentAllocation())
                 : new LoanProductTestBuilder().withRepaymentStrategy(strategyCode);
 
         if (withJournalEntries) {
@@ -1431,10 +1431,6 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         java.util.concurrent.atomic.AtomicInteger order = new java.util.concurrent.atomic.AtomicInteger(1);
         return java.util.Arrays.stream(paymentAllocationTypes).map(pat -> new PaymentAllocationOrder().paymentAllocationRule(pat.name())
                 .order(order.getAndIncrement())).toList();
-    }
-
-    private static AdvancedPaymentData createDefaultPaymentAllocation() {
-        return LoanRequestBuilders.defaultPaymentAllocation();
     }
 
     private static Stream<Arguments> loanProductFactory() {

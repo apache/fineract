@@ -21,6 +21,8 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import org.apache.fineract.client.models.AdvancedPaymentData;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,6 +38,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -124,6 +128,20 @@ public class FeignLoanHelper {
         Integer resourceId = Utils.performServerPost(jsonRequestSpec(), responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJson,
                 "resourceId");
         return resourceId.longValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getLoanProductError(String loanProductJson, String jsonAttributeToGetBack) {
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        return Utils.performServerPost(jsonRequestSpec(), responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJson, jsonAttributeToGetBack);
+    }
+
+    public CallFailedRuntimeException addLoanChargeExpectingError(Long loanId, PostLoansLoanIdChargesRequest request) {
+        return fail(() -> fineractClient.loanCharges().executeLoanCharge(loanId, request, (String) null));
+    }
+
+    public List<AdvancedPaymentData> getAdvancedPaymentAllocationRules(Long loanId) {
+        return ok(() -> fineractClient.defaultApi().getAdvancedPaymentAllocationRulesOfLoan(loanId));
     }
 
     public Long applyForLoanFromJson(String loanApplicationJson) {

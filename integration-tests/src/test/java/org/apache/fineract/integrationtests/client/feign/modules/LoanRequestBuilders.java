@@ -401,11 +401,34 @@ public final class LoanRequestBuilders {
     }
 
     public static List<PaymentAllocationOrder> defaultPaymentAllocationOrder() {
+        return paymentAllocationOrder("PAST_DUE_PENALTY", "PAST_DUE_FEE", "PAST_DUE_PRINCIPAL", "PAST_DUE_INTEREST", "DUE_PENALTY",
+                "DUE_FEE", "DUE_PRINCIPAL", "DUE_INTEREST", "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL",
+                "IN_ADVANCE_INTEREST");
+    }
+
+    public static AdvancedPaymentData repaymentPaymentAllocation() {
+        AdvancedPaymentData data = new AdvancedPaymentData();
+        data.setTransactionType("REPAYMENT");
+        data.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
+        data.setPaymentAllocationOrder(paymentAllocationOrder("PAST_DUE_PENALTY", "PAST_DUE_FEE", "PAST_DUE_INTEREST",
+                "PAST_DUE_PRINCIPAL", "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY",
+                "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_INTEREST"));
+        return data;
+    }
+
+    public static AdvancedPaymentData interestPaymentWaiverAllocation() {
+        AdvancedPaymentData data = new AdvancedPaymentData();
+        data.setTransactionType("INTEREST_PAYMENT_WAIVER");
+        data.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
+        data.setPaymentAllocationOrder(paymentAllocationOrder("PAST_DUE_FEE", "PAST_DUE_PENALTY", "PAST_DUE_INTEREST",
+                "PAST_DUE_PRINCIPAL", "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY",
+                "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_INTEREST"));
+        return data;
+    }
+
+    public static List<PaymentAllocationOrder> paymentAllocationOrder(String... paymentAllocationRules) {
         AtomicInteger order = new AtomicInteger(1);
-        return Stream
-                .of("PAST_DUE_PENALTY", "PAST_DUE_FEE", "PAST_DUE_PRINCIPAL", "PAST_DUE_INTEREST", "DUE_PENALTY", "DUE_FEE",
-                        "DUE_PRINCIPAL", "DUE_INTEREST", "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL",
-                        "IN_ADVANCE_INTEREST")
+        return Stream.of(paymentAllocationRules)
                 .map(rule -> new PaymentAllocationOrder().paymentAllocationRule(rule).order(order.getAndIncrement())).toList();
     }
 
