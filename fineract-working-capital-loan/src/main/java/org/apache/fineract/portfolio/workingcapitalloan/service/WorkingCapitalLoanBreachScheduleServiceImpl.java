@@ -161,6 +161,26 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     }
 
     @Override
+    public void applyRepaymentUndo(Long loanId, LocalDate transactionDate, BigDecimal amount) {
+        Optional<WorkingCapitalLoanBreachSchedule> currentPeriod = repository
+                .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loanId, transactionDate, transactionDate);
+        currentPeriod.ifPresent(period -> applyRepaymentUndoForPeriod(period, amount));
+    }
+
+    private void applyRepaymentUndoForPeriod(final WorkingCapitalLoanBreachSchedule period, BigDecimal payAmount) {
+        BigDecimal newPaidAmount = period.getPaidAmount().subtract(payAmount);
+        period.setPaidAmount(newPaidAmount);
+        period.setOutstandingAmount(period.getMinPaymentAmount().subtract(period.getPaidAmount()).max(BigDecimal.ZERO));
+        if (period.getOutstandingAmount().compareTo(BigDecimal.ZERO) > 0) {
+            if (period.getToDate().isBefore(DateUtils.getBusinessLocalDate())) {
+                period.setBreach(true);
+            } else {
+                period.setBreach(null);
+            }
+        }
+    }
+
+    @Override
     public void evaluateBreach(final WorkingCapitalLoan loan, final LocalDate businessDate) {
         final Optional<WorkingCapitalLoanBreachSchedule> relevantPeriod = repository
                 .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), businessDate, businessDate);

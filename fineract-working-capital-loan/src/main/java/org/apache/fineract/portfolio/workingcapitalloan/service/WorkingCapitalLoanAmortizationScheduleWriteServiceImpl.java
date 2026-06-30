@@ -244,6 +244,23 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
 
+    @Override
+    public void applyRepaymentUndo(final WorkingCapitalLoan loan, final LocalDate transactionDate, final BigDecimal repaymentAmount) {
+        Validate.notNull(loan, "loan must not be null");
+        Validate.notNull(transactionDate, "transactionDate must not be null");
+        Validate.notNull(repaymentAmount, "repaymentAmount must not be null");
+
+        final MathContext mc = MoneyHelper.getMathContext();
+        final ProjectedAmortizationScheduleModel model = scheduleRepositoryWrapper
+                .readModel(loan.getId(), mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan))
+                .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
+
+        model.undoPayment(transactionDate, repaymentAmount);
+        model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
+
+        scheduleRepositoryWrapper.writeModel(loan, model);
+    }
+
     private LocalDate resolveLoanDisbursementDate(final WorkingCapitalLoan loan) {
         if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()) {
             final LocalDate actualDate = loan.getDisbursementDetails().getFirst().getActualDisbursementDate();

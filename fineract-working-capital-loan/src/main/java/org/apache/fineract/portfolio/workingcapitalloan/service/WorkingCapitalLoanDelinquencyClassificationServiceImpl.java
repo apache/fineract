@@ -19,6 +19,8 @@
 
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import static org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants.ENABLE_INSTANT_DELINQUENCY_CALCULATION;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
@@ -38,10 +42,28 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements WorkingCapitalLoanDelinquencyClassificationService {
 
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository delinquencyRangeScheduleTagHistoryRepository;
+    private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
+
+    /**
+     * If ENABLE_INSTANT_DELINQUENCY_CALCULATION is set to true in global config, classifies the delinquency of a loan
+     * based on the delinquency bucket and the business date.
+     *
+     * @param loan
+     *            the loan for which the delinquency range tag should be applied
+     * @param businessDate
+     *            the date on which the tagging operation is performed
+     */
+    @Override
+    public void instantClassifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate) {
+        if (instantDelinquencyClassificationIsEnabled()) {
+            classifyDelinquency(loan, businessDate);
+        }
+    }
 
     /**
      * Classifies the delinquency of a loan based on the delinquency bucket and the business date.
@@ -50,11 +72,14 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
      *            the loan for which the delinquency range tag should be applied
      * @param businessDate
      *            the date on which the tagging operation is performed
-     * @param delinquencyBucket
-     *            the delinquency bucket to search within
      */
     @Override
-    public void classifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate, DelinquencyBucket delinquencyBucket) {
+    public void classifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate) {
+        if (loan.getLoanProductRelatedDetails() == null || loan.getLoanProductRelatedDetails().getDelinquencyBucket() == null) {
+            log.debug("Skipping... Delinquency bucket is not configured for Working Capital Loan {}.", loan.getId());
+            return;
+        }
+        log.debug("Evaluate {} Working Capital Delinquency bucket", loan.getLoanProductRelatedDetails().getDelinquencyBucket());
 
         List<WorkingCapitalLoanDelinquencyRangeSchedule> delinquencyRangeScheduleList = delinquencyRangeScheduleRepository
                 .findByLoanIdOrderByPeriodNumberAsc(loan.getId());
@@ -69,8 +94,8 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
                 if (isDelinquent) {
                     range.setDelinquentAmount(range.getOutstandingAmount());
                     range.setDelinquentDays(rangeDelinquentDays);
-                    Optional<DelinquencyRange> delinquencyRangeByDays = findDelinquencyRangeByDays(delinquencyBucket,
-                            (int) rangeDelinquentDays);
+                    Optional<DelinquencyRange> delinquencyRangeByDays = findDelinquencyRangeByDays(
+                            loan.getLoanProductRelatedDetails().getDelinquencyBucket(), (int) rangeDelinquentDays);
                     applyDelinquencyTagForRange(loan, range, delinquencyRangeByDays.orElse(null), businessDate);
                 } else {
                     range.setDelinquentAmount(BigDecimal.ZERO);
@@ -79,6 +104,10 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
                 }
             }
         }
+    }
+
+    public boolean instantDelinquencyClassificationIsEnabled() {
+        return globalConfigurationRepository.findOneByNameWithNotFoundDetection(ENABLE_INSTANT_DELINQUENCY_CALCULATION).isEnabled();
     }
 
     /**

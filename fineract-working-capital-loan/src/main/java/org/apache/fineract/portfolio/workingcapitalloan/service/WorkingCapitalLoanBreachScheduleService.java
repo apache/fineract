@@ -40,6 +40,8 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     void applyRepayment(Long loanId, LocalDate transactionDate, BigDecimal amount);
 
+    void applyRepaymentUndo(Long loanId, LocalDate transactionDate, BigDecimal amount);
+
     void evaluateBreach(WorkingCapitalLoan loan, LocalDate businessDate);
 
     void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction rescheduleAction);

@@ -353,7 +353,7 @@ Feature: Working Capital Breach Pause
       | 2            | 2026-03-01 | 2026-05-11 | 72           | 110.70           | 110.70            | null       | null   |
     When Admin sets the business date to "14 April 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    And Admin makes Internal Payment "150.0" on "2026-02-15"
+    And Customer makes repayment on "15 February 2026" with 150.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 0.00              | null       | false  |
@@ -405,7 +405,7 @@ Feature: Working Capital Breach Pause
     When Admin sets the business date to "20 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     # the 50.00 paid on 05 Mar falls in period 2 (01 Mar - 30 Apr) at the time it is made
-    And Admin makes Internal Payment "50.0" on "2026-03-05"
+    And Customer makes repayment on "05 March 2026" with 50.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 110.70            | null       | true   |

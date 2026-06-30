@@ -51,7 +51,6 @@ public final class WorkingCapitalLoanConstants {
     public static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     public static final String DISCOUNT_FEE_LOAN_COMMAND = "discountFee";
     public static final String DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND = "discountFeeAdjustment";
-    public static final String UNDO_LOAN_COMMAND = "undo";
 
     // Approval / Rejection / Undo-approval parameters
     public static final String RESOURCE_NAME = WCL_RESOURCE_NAME;
@@ -90,6 +89,12 @@ public final class WorkingCapitalLoanConstants {
 
     public static final String WRITE_OFF_REASONS = "WriteOffReasons";
     public static final String CHARGE_OFF_REASONS = "ChargeOffReasons";
+
+    // transaction undo parameters
+    public static final String reversalExternalIdParamName = "reversalExternalId";
+
+    // Transaction Commands
+    public static final String UNDO_COMMAND = "undo";
 
     // Period payment rate change parameters
     public static final String periodPaymentRateParamName = "periodPaymentRate";

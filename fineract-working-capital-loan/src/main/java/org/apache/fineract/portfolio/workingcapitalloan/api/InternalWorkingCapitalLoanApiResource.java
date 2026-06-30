@@ -39,13 +39,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.workingcapitalloan.data.InternalWorkingCapitalLoanPaymentRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.service.InternalWorkingCapitalLoanPaymentService;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAmortizationScheduleWriteService;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyRangeScheduleService;
 import org.springframework.beans.factory.InitializingBean;
@@ -64,7 +62,6 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
     private final WorkingCapitalLoanAmortizationScheduleWriteService writeService;
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
-    private final InternalWorkingCapitalLoanPaymentService paymentService;
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -152,22 +149,6 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
 
         log.info("Generated next delinquency period for WC loan {} with business date {} (TEST ONLY)", loanId, businessDate);
         return Response.ok().build();
-    }
-
-    @POST
-    @Path("{loanId}/internalMakePayment")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Makes Payment (testing)", description = """
-            Makes payment for testing purposes.
-
-            DO NOT USE THIS IN PRODUCTION! In the real flow, the schedule will be \
-            generated during loan approval/disbursement from the loan and product data.""")
-    @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Working Capital Loan not found") })
-    public void payment(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
-            final InternalWorkingCapitalLoanPaymentRequest request) {
-        paymentService.makePayment(loanId, request.getAmount(), request.getTransactionDate());
     }
 
 }

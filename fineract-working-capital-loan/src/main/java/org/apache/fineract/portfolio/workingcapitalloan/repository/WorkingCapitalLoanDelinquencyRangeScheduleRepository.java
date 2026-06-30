@@ -40,6 +40,8 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateIsBeforeAndMinPaymentCriteriaMet(Long loanId,
             LocalDate toDateBefore, Boolean minPaymentCriteriaMet);
 
+    List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateIsBefore(Long loanId, LocalDate toDateBefore);
+
     Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(Long loanId,
             LocalDate date, LocalDate date2);
 
