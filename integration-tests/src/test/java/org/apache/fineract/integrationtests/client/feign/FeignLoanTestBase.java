@@ -1390,6 +1390,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected LoanTestData.Installment unpaidInstallment(double principalAmount, double interestAmount, String dueDate) {
-        return installment(principalAmount, interestAmount, principalAmount + interestAmount, false, dueDate);
+        double totalOutstanding = Math.round((principalAmount + interestAmount) * 100.0) / 100.0;
+        return installment(principalAmount, interestAmount, totalOutstanding, false, dueDate);
     }
 }
