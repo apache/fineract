@@ -25,16 +25,21 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.LoanScheduleData;
 import org.apache.fineract.client.models.LoanTransactionData;
-import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
+import org.apache.fineract.client.models.TransactionType;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 
@@ -65,11 +70,12 @@ public class FeignTransactionHelper {
                 .addHeader("Fineract-Platform-TenantId", Utils.DEFAULT_TENANT).build();
     }
 
-    public void addCapitalizedIncome(Long loanId, String transactionDate, double amount) {
-        ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate)
-                        .dateFormat("dd MMMM yyyy").locale("en"),
-                Map.of("command", "capitalizedIncome")));
+    public PostLoansLoanIdTransactionsResponse addCapitalizedIncome(Long loanId, String transactionDate, double amount) {
+        return ok(
+                () -> fineractClient.loanTransactions()
+                        .executeLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest().transactionAmount(amount)
+                                .transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"),
+                                Map.of("command", "capitalizedIncome")));
     }
 
     public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(Long loanId, String transactionDate, String dateFormat) {
@@ -211,6 +217,10 @@ public class FeignTransactionHelper {
         return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "charge-off")));
     }
 
+    public PostLoansLoanIdTransactionsResponse chargeOffLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "charge-off"));
+    }
+
     public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(loanExternalId, request,
                 "merchantIssuedRefund"));
@@ -254,10 +264,11 @@ public class FeignTransactionHelper {
     }
 
     public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
-        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, transactionId,
-                new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate(transactionDate)
-                        .transactionAmount(0.0).locale("en"),
-                "adjust"));
+        return ok(
+                () -> fineractClient.loanTransactions()
+                        .adjustLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                                .dateFormat("dd MMMM yyyy").transactionDate(transactionDate).transactionAmount(0.0).locale("en"),
+                                "adjust"));
     }
 
     public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
@@ -306,5 +317,167 @@ public class FeignTransactionHelper {
 
     public PostLoansLoanIdTransactionsResponse makeRefundByCash(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "refundByCash"));
+    }
+
+    public GetLoansLoanIdTransactionsResponse getLoanTransactions(Long loanId) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionsByLoanIdUniversal(loanId, Collections.emptyMap()));
+    }
+
+    public GetLoansLoanIdTransactionsResponse getLoanTransactions(Long loanId, List<TransactionType> excludedTransactionTypes) {
+        java.util.Map<String, Object> queryParams = new java.util.HashMap<>();
+        if (excludedTransactionTypes != null && !excludedTransactionTypes.isEmpty()) {
+            queryParams.put("excludedTypes", excludedTransactionTypes);
+        }
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionsByLoanIdUniversal(loanId, queryParams));
+    }
+
+    public GetLoansLoanIdTransactionsResponse getLoanTransactionsByExternalId(String loanExternalId) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionsByExternalLoanIdUniversal(loanExternalId,
+                Collections.emptyMap()));
+    }
+
+    public GetLoansLoanIdTransactionsResponse getLoanTransactionsByExternalId(String loanExternalId,
+            List<TransactionType> excludedTransactionTypes) {
+        java.util.Map<String, Object> queryParams = new java.util.HashMap<>();
+        if (excludedTransactionTypes != null && !excludedTransactionTypes.isEmpty()) {
+            queryParams.put("excludedTypes", excludedTransactionTypes);
+        }
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionsByExternalLoanIdUniversal(loanExternalId, queryParams));
+    }
+
+    public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(Long loanId, String command, String dateFormat,
+            String transactionDate, String locale) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionTemplate(loanId, command, dateFormat, transactionDate, locale,
+                null));
+    }
+
+    public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(Long loanId, String command, String dateFormat,
+            String transactionDate, String locale, Long transactionId) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionTemplate(loanId, command, dateFormat, transactionDate, locale,
+                transactionId));
+    }
+
+    public PostLoansLoanIdTransactionsResponse executeLoanTransaction(Long loanId, PostLoansLoanIdTransactionsRequest request,
+            String command) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, command));
+    }
+
+    public void makeRepayment(String date, float amount, int loanId) {
+        makeLoanRepayment((long) loanId, "Repayment", date, (double) amount);
+    }
+
+    public void makeRefundByCash(String date, float amount, int loanId) {
+        ok(() -> fineractClient.loanTransactions().executeLoanTransaction((long) loanId, new PostLoansLoanIdTransactionsRequest()
+                .transactionAmount((double) amount).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), "refundByCash"));
+    }
+
+    public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(String loanExternalId, String command, String dateFormat,
+            String transactionDate, String locale) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionTemplateByLoanExternalId(loanExternalId, command, dateFormat,
+                transactionDate, locale, null));
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(String loanExternalId, Long transactionId) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionByLoanExternalIdAndTransactionId(loanExternalId, transactionId,
+                (String) null));
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(String loanExternalId, String transactionExternalId) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTransactionByLoanExternalIdAndTransactionExternalId(loanExternalId,
+                transactionExternalId, (String) null));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makePayoutRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "payoutRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeGoodwillCredit(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(
+                () -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "goodwillCredit"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, String transactionExternalId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByTransactionExternalId(loanId, transactionExternalId,
+                request, "undo"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse closeLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "close"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse closeRescheduledLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request,
+                "close-rescheduled"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse forecloseLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "foreclosure"));
+    }
+
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(Long loanId, Long transactionId,
+            PutChargeTransactionChangesRequest request) {
+        return ok(() -> fineractClient.loanTransactions().undoWaiveCharge(loanId, transactionId, request));
+    }
+
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(Long loanId, String transactionExternalId,
+            PutChargeTransactionChangesRequest request) {
+        return ok(() -> fineractClient.loanTransactions().undoWaiveChargeByTransactionExternalId(loanId, transactionExternalId, request));
+    }
+
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(String loanExternalId, Long transactionId,
+            PutChargeTransactionChangesRequest request) {
+        return ok(() -> fineractClient.loanTransactions().undoWaiveChargeByLoanExternalId(loanExternalId, transactionId, request));
+    }
+
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(String loanExternalId, String transactionExternalId,
+            PutChargeTransactionChangesRequest request) {
+        return ok(() -> fineractClient.loanTransactions().undoWaiveChargeByLoanAndTransactionExternalId(loanExternalId,
+                transactionExternalId, request));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeChargeRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "chargeRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeChargeRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "chargeRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeWaiveInterest(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "waiveinterest"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeWaiveInterest(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "waiveinterest"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeUndoWriteoff(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "undowriteoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeUndoWriteoff(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "undowriteoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRecoveryPayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "recoverypayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRecoveryPayment(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(
+                () -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "recoverypayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(String loanExternalId, String transactionExternalId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanAndTransactionExternalId(loanExternalId,
+                transactionExternalId, request, "adjust"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(String loanExternalId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanExternalId(loanExternalId, transactionId, request,
+                "adjust"));
     }
 }

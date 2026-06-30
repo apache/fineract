@@ -29,6 +29,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 public class FeignBusinessDateHelper {
 
     private static final String ENABLE_BUSINESS_DATE = "enable-business-date";
+    private static final ThreadLocal<Integer> RUN_AT_NESTING_DEPTH = ThreadLocal.withInitial(() -> 0);
 
     private final FineractFeignClient fineractClient;
     private final FeignGlobalConfigurationHelper configHelper;
@@ -61,12 +62,19 @@ public class FeignBusinessDateHelper {
     }
 
     public void runAt(String date, String dateFormat, Runnable action) {
+        boolean outerScope = RUN_AT_NESTING_DEPTH.get() == 0;
+        RUN_AT_NESTING_DEPTH.set(RUN_AT_NESTING_DEPTH.get() + 1);
         try {
-            configHelper.updateConfigurationByName(ENABLE_BUSINESS_DATE, true);
+            if (outerScope) {
+                configHelper.updateConfigurationByName(ENABLE_BUSINESS_DATE, true);
+            }
             updateBusinessDate("BUSINESS_DATE", date, dateFormat);
             action.run();
         } finally {
-            configHelper.updateConfigurationByName(ENABLE_BUSINESS_DATE, false);
+            RUN_AT_NESTING_DEPTH.set(RUN_AT_NESTING_DEPTH.get() - 1);
+            if (outerScope) {
+                configHelper.updateConfigurationByName(ENABLE_BUSINESS_DATE, false);
+            }
         }
     }
 }
