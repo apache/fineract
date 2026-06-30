@@ -113,6 +113,37 @@ public class FeignTransactionHelper {
                 request, "chargeback"));
     }
 
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(Long loanId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, transactionId, request,
+                Map.of("command", "chargeback")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(String loanExternalId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransactionByLoanExternalId(loanExternalId, transactionId, request,
+                "chargeback"));
+    }
+
+    public Long applyChargebackTransaction(Long loanId, Long transactionId, Double amount, Long paymentTypeId) {
+        PostLoansLoanIdTransactionsTransactionIdRequest request = new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .transactionAmount(amount).paymentTypeId(paymentTypeId).locale("en");
+        return chargebackLoanTransaction(loanId, transactionId, request).getResourceId();
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanDownPayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, "downPayment"));
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(Long loanId, Long transactionId) {
+        final Long resolvedTransactionId = transactionId;
+        return ok(() -> fineractClient.loanTransactions().retrieveTransaction(loanId, resolvedTransactionId, ""));
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId, Long transactionId) {
+        return getLoanTransaction(loanId, transactionId);
+    }
+
     public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request,
                 Map.of("command", "merchantIssuedRefund")));
@@ -185,6 +216,13 @@ public class FeignTransactionHelper {
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
         return reverseLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
                 .dateFormat("dd MMMM yyyy").transactionDate(transactionDate).transactionAmount(0.0).locale("en"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, transactionId,
+                new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate(transactionDate)
+                        .transactionAmount(0.0).locale("en"),
+                "adjust"));
     }
 
     public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {

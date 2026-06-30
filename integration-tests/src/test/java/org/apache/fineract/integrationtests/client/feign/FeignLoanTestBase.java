@@ -210,6 +210,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         loanHelper.undoDisbursement(loanId);
     }
 
+    protected void undoLastDisbursement(Long loanId) {
+        loanHelper.undoLastDisbursement(loanId, new PostLoansLoanIdRequest());
+    }
+
     protected PostLoansLoanIdResponse disburseToSavings(Long loanId, PostLoansLoanIdRequest request) {
         return loanHelper.disburseToSavings(loanId, request);
     }
@@ -368,6 +372,28 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return transactionHelper.chargebackLoanTransaction(loanId, transactionExternalId, request);
     }
 
+    protected PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(Long loanId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return transactionHelper.chargebackLoanTransaction(loanId, transactionId, request);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(String loanExternalId, Long transactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return transactionHelper.chargebackLoanTransaction(loanExternalId, transactionId, request);
+    }
+
+    protected Long applyChargebackTransaction(Long loanId, Long transactionId, Double amount, Long paymentTypeId) {
+        return transactionHelper.applyChargebackTransaction(loanId, transactionId, amount, paymentTypeId);
+    }
+
+    protected PostLoansLoanIdTransactionsResponse makeLoanDownPayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return transactionHelper.makeLoanDownPayment(loanId, request);
+    }
+
+    protected GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(Long loanId, Long transactionId) {
+        return transactionHelper.getLoanTransaction(loanId, transactionId);
+    }
+
     protected GetLoansLoanIdResponse getLoanDetails(String loanExternalId) {
         return loanHelper.getLoanDetailsByExternalId(loanExternalId);
     }
@@ -426,6 +452,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         GetLoansLoanIdResponse loan = getLoanDetails(loanId);
         return loan.getTransactions().stream().filter(tr -> Objects.equals(tr.getType().getValue(), type)
                 && Objects.equals(tr.getDate(), LocalDate.parse(date, dateTimeFormatter))).findAny().orElseThrow().getId();
+    }
+
+    protected GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId, Long transactionId) {
+        return transactionHelper.getLoanTransactionDetails(loanId, transactionId);
     }
 
     protected GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId, String transactionExternalId) {
@@ -1200,6 +1230,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         loanHelper.disburseLoanFromJson(loanId, LoanRequestBuilders.disburseLoanWithRepaymentRescheduleJson(date, adjustRepaymentDate));
     }
 
+    protected void disburseLoanWithNetDisbursalAmount(Long loanId, String date, String netDisbursalAmount) {
+        loanHelper.disburseLoanFromJson(loanId, LoanRequestBuilders.disburseLoanWithNetDisbursalAmountJson(date, netDisbursalAmount));
+    }
+
     protected void approveLoanFromJson(Long loanId, String approveLoanJson) {
         loanHelper.approveLoanFromJson(loanId, approveLoanJson);
     }
@@ -1307,5 +1341,55 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         Long loanId = applyForLoan(request);
         approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, date));
         return loanId;
+    }
+
+    protected PostLoansLoanIdTransactionsResponse adjustLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
+        return transactionHelper.adjustLoanTransaction(loanId, transactionId, transactionDate);
+    }
+
+    protected Long applyChargebackTransaction(Long loanId, Long transactionId, String amount, int paymentTypeIdx) {
+        return applyChargebackTransaction(loanId, transactionId, Double.valueOf(amount), getPaymentTypeId(paymentTypeIdx));
+    }
+
+    protected Long getPaymentTypeId(int index) {
+        return org.apache.fineract.integrationtests.common.PaymentTypeHelper.getAllPaymentTypes(false).get(index).getId();
+    }
+
+    protected void reviewLoanTransactionRelations(Long loanId, Long transactionId, Integer expectedSize) {
+        reviewLoanTransactionRelations(loanId, transactionId, expectedSize, null);
+    }
+
+    protected void reviewLoanTransactionRelations(Long loanId, Long transactionId, Integer expectedSize, Double outstandingBalance) {
+        GetLoansLoanIdTransactionsTransactionIdResponse response = getLoanTransaction(loanId, transactionId);
+        assertNotNull(response);
+        assertNotNull(response.getTransactionRelations());
+        assertEquals(expectedSize, response.getTransactionRelations().size());
+        if (outstandingBalance != null) {
+            assertEquals(outstandingBalance, response.getOutstandingLoanBalance());
+        }
+    }
+
+    protected Long addChargebackForLoan(Long loanId, Long transactionId, Double amount) {
+        return applyChargebackTransaction(loanId, transactionId, amount, getPaymentTypeId(0));
+    }
+
+    protected void validateLoanPrincipalOustandingBalance(GetLoansLoanIdResponse loanDetails, Double amountExpected) {
+        assertEquals(amountExpected, Utils.getDoubleValue(loanDetails.getSummary().getPrincipalOutstanding()));
+    }
+
+    protected void validateLoanStatus(GetLoansLoanIdResponse loanDetails, String statusCodeExpected) {
+        assertEquals(statusCodeExpected, loanDetails.getStatus().getCode());
+    }
+
+    protected void evaluateLoanSummaryAdjustments(GetLoansLoanIdResponse loanDetails, Double amountExpected) {
+        assertEquals(amountExpected, Utils.getDoubleValue(loanDetails.getSummary().getPrincipalAdjustments()));
+    }
+
+    protected LoanTestData.Installment fullyRepaidInstallment(double principalAmount, double interestAmount, String dueDate) {
+        return installment(principalAmount, interestAmount, 0.0, true, dueDate);
+    }
+
+    protected LoanTestData.Installment unpaidInstallment(double principalAmount, double interestAmount, String dueDate) {
+        return installment(principalAmount, interestAmount, principalAmount + interestAmount, false, dueDate);
     }
 }

@@ -47,6 +47,10 @@ public final class FeignRawHttpHelper {
         return execute("POST", path, jsonBody);
     }
 
+    public static String get(String path) {
+        return execute("GET", path, null);
+    }
+
     private static String apiV1BaseUrl() {
         String baseUrl = System.getProperty("fineract.it.url", defaultBaseUrl());
         if (baseUrl.endsWith("/")) {
@@ -76,10 +80,11 @@ public final class FeignRawHttpHelper {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Authorization", AUTH_HEADER);
             conn.setRequestProperty("Fineract-Platform-TenantId", ConfigProperties.Backend.TENANT);
-            conn.setDoOutput(true);
-
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+            if (jsonBody != null) {
+                conn.setDoOutput(true);
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+                }
             }
 
             int status = conn.getResponseCode();

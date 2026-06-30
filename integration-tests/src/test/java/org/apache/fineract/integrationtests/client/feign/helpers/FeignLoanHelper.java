@@ -240,6 +240,10 @@ public class FeignLoanHelper {
         ok(() -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", "undoDisbursal")));
     }
 
+    public PostLoansLoanIdResponse undoLastDisbursement(Long loanId, PostLoansLoanIdRequest request) {
+        return ok(() -> fineractClient.loans().stateTransitions(loanId, request, Map.of("command", "undolastdisbursal")));
+    }
+
     public Long applyAndApproveLoan(Long clientId, Long productId, String submittedOnDate, Double principal, Integer numberOfRepayments) {
         PostLoansRequest applyRequest = new PostLoansRequest()//
                 .clientId(clientId)//
