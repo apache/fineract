@@ -37,7 +37,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.apache.fineract.client.feign.FeignException;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.ChargeRequest;
@@ -1416,6 +1418,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected PostLoansLoanIdTransactionsResponse adjustLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
         return transactionHelper.adjustLoanTransaction(loanId, transactionId, transactionDate);
+    }
+
+    protected CallFailedRuntimeException adjustLoanTransactionExpectingError(Long loanId, Long transactionId, String transactionDate,
+            double transactionAmount) {
+        return transactionHelper.adjustLoanTransactionExpectingError(loanId, transactionId, transactionDate, transactionAmount);
     }
 
     protected Long applyChargebackTransaction(Long loanId, Long transactionId, String amount, int paymentTypeIdx) {

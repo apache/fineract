@@ -80,9 +80,13 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignLoanHelper {
 
+    private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
+    private static final String APPLY_LOAN_URL = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
     private static final String LOAN_STATE_TRANSITION_URL = "/fineract-provider/api/v1/loans/%d?" + Utils.TENANT_IDENTIFIER
             + "&command=approve";
     private static final String LOAN_DISBURSE_URL = "/fineract-provider/api/v1/loans/%d?" + Utils.TENANT_IDENTIFIER + "&command=disburse";
+    private static final String LOAN_DISBURSE_TO_SAVINGS_URL = "/fineract-provider/api/v1/loans/%d?" + Utils.TENANT_IDENTIFIER
+            + "&command=disburseToSavings";
 
     private final FineractFeignClient fineractClient;
 
@@ -122,13 +126,16 @@ public class FeignLoanHelper {
     }
 
     public Long createLoanProductFromJson(String loanProductJson) {
-        return createLoanProduct(readJson(loanProductJson, PostLoanProductsRequest.class));
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        Integer resourceId = Utils.performServerPost(jsonRequestSpec(), responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJson,
+                "resourceId");
+        return resourceId.longValue();
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getLoanProductError(String loanProductJson, String jsonAttributeToGetBack) {
-        CallFailedRuntimeException exception = fail(() -> createLoanProduct(readJson(loanProductJson, PostLoanProductsRequest.class)));
-        return (T) extractErrorAttribute(exception, jsonAttributeToGetBack);
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        return Utils.performServerPost(jsonRequestSpec(), responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJson, jsonAttributeToGetBack);
     }
 
     public CallFailedRuntimeException addLoanChargeExpectingError(Long loanId, PostLoansLoanIdChargesRequest request) {
@@ -140,7 +147,9 @@ public class FeignLoanHelper {
     }
 
     public Long applyForLoanFromJson(String loanApplicationJson) {
-        return applyForLoan(readJson(loanApplicationJson, PostLoansRequest.class));
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        Integer loanId = Utils.performServerPost(jsonRequestSpec(), responseSpec, APPLY_LOAN_URL, loanApplicationJson, "loanId");
+        return loanId.longValue();
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProduct(Long productId) {
@@ -175,7 +184,7 @@ public class FeignLoanHelper {
     }
 
     public PostLoansLoanIdResponse disburseToSavings(Long loanId, PostLoansLoanIdRequest request) {
-        return ok(() -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", "disburseToSavings")));
+        return disburseToSavingsFromJson(loanId, toDisburseToSavingsJson(request));
     }
 
     public PostLoansLoanIdResponse rejectLoanByExternalId(String loanExternalId, PostLoansLoanIdRequest request) {
@@ -485,6 +494,33 @@ public class FeignLoanHelper {
             return ObjectMapperFactory.getShared().readValue(json, type);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Invalid JSON for " + type.getSimpleName(), e);
+        }
+    }
+
+    private PostLoansLoanIdResponse disburseToSavingsFromJson(Long loanId, String disburseJson) {
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        String response = Utils.performServerPost(jsonRequestSpec(), responseSpec, LOAN_DISBURSE_TO_SAVINGS_URL.formatted(loanId),
+                disburseJson, null);
+        try {
+            return ObjectMapperFactory.getShared().readValue(response, PostLoansLoanIdResponse.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to parse disburseToSavings response", e);
+        }
+    }
+
+    private static String toDisburseToSavingsJson(PostLoansLoanIdRequest request) {
+        ObjectMapper mapper = ObjectMapperFactory.getShared();
+        ObjectNode body = mapper.valueToTree(request);
+        if (request.getTransactionAmount() != null && !body.has("netDisbursalAmount")) {
+            body.put("netDisbursalAmount", request.getTransactionAmount().toPlainString());
+        }
+        if (!body.has("note")) {
+            body.put("note", "DISBURSE NOTE");
+        }
+        try {
+            return mapper.writeValueAsString(body);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize disburseToSavings request", e);
         }
     }
 

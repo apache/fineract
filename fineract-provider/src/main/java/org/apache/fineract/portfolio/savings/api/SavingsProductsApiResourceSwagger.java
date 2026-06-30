@@ -59,6 +59,8 @@ final class SavingsProductsApiResourceSwagger {
         public String locale;
         @Schema(example = "5.0")
         public Double nominalAnnualInterestRate;
+        @Schema(example = "10000.0")
+        public BigDecimal minRequiredOpeningBalance;
         @Schema(example = "1")
         public Integer interestCompoundingPeriodType;
         @Schema(example = "4")

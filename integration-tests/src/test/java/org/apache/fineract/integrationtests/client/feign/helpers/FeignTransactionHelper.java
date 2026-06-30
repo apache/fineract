@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
@@ -264,11 +266,23 @@ public class FeignTransactionHelper {
     }
 
     public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(Long loanId, Long transactionId, String transactionDate) {
-        return ok(
-                () -> fineractClient.loanTransactions()
-                        .adjustLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
-                                .dateFormat("dd MMMM yyyy").transactionDate(transactionDate).transactionAmount(0.0).locale("en"),
-                                "adjust"));
+        return adjustLoanTransaction(loanId, transactionId, transactionDate, 0.0);
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(Long loanId, Long transactionId, String transactionDate,
+            double transactionAmount) {
+        return ok(() -> fineractClient.loanTransactions()
+                .adjustLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate(transactionDate).transactionAmount(transactionAmount).locale("en"),
+                        "adjust"));
+    }
+
+    public CallFailedRuntimeException adjustLoanTransactionExpectingError(Long loanId, Long transactionId, String transactionDate,
+            double transactionAmount) {
+        return fail(() -> fineractClient.loanTransactions()
+                .adjustLoanTransaction(loanId, transactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                        .dateFormat("dd MMMM yyyy").transactionDate(transactionDate).transactionAmount(transactionAmount).locale("en"),
+                        "adjust"));
     }
 
     public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
