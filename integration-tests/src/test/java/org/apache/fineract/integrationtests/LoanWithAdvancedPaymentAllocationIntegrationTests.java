@@ -20,122 +20,85 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
-import org.apache.fineract.client.models.PostClientsRequest;
-import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@Slf4j
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanWithAdvancedPaymentAllocationIntegrationTests {
-
-    private static ClientHelper CLIENT_HELPER;
-    private static Account ASSET_ACCOUNT;
-    private static Account FEE_PENALTY_ACCOUNT;
-    private static Account EXPENSE_ACCOUNT;
-    private static Account INCOME_ACCOUNT;
-    private static Account OVERPAYMENT_ACCOUNT;
-    private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
-
-    @BeforeAll
-    public static void setupTests() {
-        Utils.initializeRESTAssured();
-        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
-        LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(requestSpec, responseSpec);
-        CLIENT_HELPER = new ClientHelper(requestSpec, responseSpec);
-
-        ASSET_ACCOUNT = accountHelper.createAssetAccount();
-        FEE_PENALTY_ACCOUNT = accountHelper.createAssetAccount();
-        EXPENSE_ACCOUNT = accountHelper.createExpenseAccount();
-        INCOME_ACCOUNT = accountHelper.createIncomeAccount();
-        OVERPAYMENT_ACCOUNT = accountHelper.createLiabilityAccount();
-    }
+public class LoanWithAdvancedPaymentAllocationIntegrationTests extends FeignLoanTestBase {
 
     @Test
     public void testCreateAndReadLoanProductWithAdvancedPayment() {
-        // given
-        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
-        AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
+        runAt("02 January 2022", () -> {
+            Account assetAccount = accountHelper.createAssetAccount("apaAsset");
+            Account expenseAccount = accountHelper.createExpenseAccount("apaExpense");
+            Account incomeAccount = accountHelper.createIncomeAccount("apaIncome");
+            Account overpaymentAccount = accountHelper.createLiabilityAccount("apaOverpayment");
+            Account feePenaltyAccount = accountHelper.createAssetAccount("apaFeePenalty");
 
-        // when
-        Integer loanProductId = LOAN_TRANSACTION_HELPER.getLoanProductId(createLoanJSON(defaultAllocation, repaymentPaymentAllocation));
-        Assertions.assertNotNull(loanProductId);
-        GetLoanProductsProductIdResponse loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
-        final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(new PostClientsRequest().activationDate("01 January 2022")
-                .active(true).dateFormat("dd MMMM yyyy").fullname("fullName").locale("en").legalFormId(1L).officeId(1L));
-        Integer loanId = createLoanAccount(LOAN_TRANSACTION_HELPER, clientResponse.getClientId().toString(), loanProductId.toString(),
-                "02 January 2022");
-        // then
-        List<AdvancedPaymentData> allocationRules = LOAN_TRANSACTION_HELPER.getAdvancedPaymentAllocationRules(loanId);
-        Assertions.assertNotNull(allocationRules);
+            AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
+            AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
 
-        Optional<AdvancedPaymentData> first = allocationRules.stream()
-                .filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType())).findFirst();
-        Assertions.assertTrue(first.isPresent());
-        Assertions.assertEquals(defaultAllocation, first.get());
+            Long loanProductId = createLoanProductFromJson(createLoanJSON(assetAccount, expenseAccount, incomeAccount, overpaymentAccount,
+                    feePenaltyAccount, defaultAllocation, repaymentPaymentAllocation));
+            Assertions.assertNotNull(loanProductId);
+            GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
 
-        Optional<AdvancedPaymentData> second = allocationRules.stream()
-                .filter(advancedPaymentData -> "REPAYMENT".equals(advancedPaymentData.getTransactionType())).findFirst();
-        Assertions.assertTrue(second.isPresent());
-        Assertions.assertEquals(repaymentPaymentAllocation, second.get());
+            Long clientId = createClient("01 January 2022");
+            Long loanId = createLoanAccount(clientId, loanProductId, "02 January 2022");
 
-        // when
-        LOAN_TRANSACTION_HELPER.updateLoanProduct(loanProductId.longValue(), updateLoanProductRequest(defaultAllocation));
-        // then
-        allocationRules = LOAN_TRANSACTION_HELPER.getAdvancedPaymentAllocationRules(loanId);
-        Assertions.assertNotNull(allocationRules);
+            List<AdvancedPaymentData> allocationRules = getAdvancedPaymentAllocationRules(loanId);
+            Assertions.assertNotNull(allocationRules);
 
-        first = allocationRules.stream().filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType()))
-                .findFirst();
-        Assertions.assertTrue(first.isPresent());
-        Assertions.assertEquals(defaultAllocation, first.get());
+            Optional<AdvancedPaymentData> first = allocationRules.stream()
+                    .filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType())).findFirst();
+            Assertions.assertTrue(first.isPresent());
+            Assertions.assertEquals(defaultAllocation, first.get());
 
-        second = allocationRules.stream().filter(advancedPaymentData -> "REPAYMENT".equals(advancedPaymentData.getTransactionType()))
-                .findFirst();
-        Assertions.assertTrue(second.isPresent());
-        Assertions.assertEquals(repaymentPaymentAllocation, second.get());
+            Optional<AdvancedPaymentData> second = allocationRules.stream()
+                    .filter(advancedPaymentData -> "REPAYMENT".equals(advancedPaymentData.getTransactionType())).findFirst();
+            Assertions.assertTrue(second.isPresent());
+            Assertions.assertEquals(repaymentPaymentAllocation, second.get());
+
+            updateLoanProduct(loanProductId, updateLoanProductRequest(defaultAllocation));
+
+            allocationRules = getAdvancedPaymentAllocationRules(loanId);
+            Assertions.assertNotNull(allocationRules);
+
+            first = allocationRules.stream().filter(advancedPaymentData -> "DEFAULT".equals(advancedPaymentData.getTransactionType()))
+                    .findFirst();
+            Assertions.assertTrue(first.isPresent());
+            Assertions.assertEquals(defaultAllocation, first.get());
+
+            second = allocationRules.stream().filter(advancedPaymentData -> "REPAYMENT".equals(advancedPaymentData.getTransactionType()))
+                    .findFirst();
+            Assertions.assertTrue(second.isPresent());
+            Assertions.assertEquals(repaymentPaymentAllocation, second.get());
+        });
     }
 
-    private String createLoanJSON(AdvancedPaymentData... advancedPaymentData) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+    private String createLoanJSON(Account assetAccount, Account expenseAccount, Account incomeAccount, Account overpaymentAccount,
+            Account feePenaltyAccount, AdvancedPaymentData... advancedPaymentData) {
+        return new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
+                .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1").withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, expenseAccount, incomeAccount, overpaymentAccount })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).addAdvancedPaymentAllocation(advancedPaymentData)
+                .withFeeAndPenaltyAssetAccount(feePenaltyAccount).addAdvancedPaymentAllocation(advancedPaymentData)
                 .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
                 .build();
-        return loanProductJSON;
     }
 
     private PutLoanProductsProductIdRequest updateLoanProductRequest(AdvancedPaymentData... advancedPaymentData) {
@@ -144,19 +107,15 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
         return putLoanProductsProductIdRequest;
     }
 
-    private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
+    private Long createLoanAccount(Long clientId, Long loanProductId, String operationDate) {
+        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("0") //
-                .withExpectedDisbursementDate(operationDate) //
-                .withInterestTypeAsDecliningBalance() //
-                .withSubmittedOnDate(operationDate) //
-                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY) //
-                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
-                .build(clientId, loanProductId, null);
-        return loanTransactionHelper.getLoanId(loanApplicationJSON);
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withExpectedDisbursementDate(operationDate)
+                .withInterestTypeAsDecliningBalance().withSubmittedOnDate(operationDate)
+                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())
+                .build(clientId.toString(), loanProductId.toString(), null);
+        return applyForLoanFromJson(loanApplicationJSON);
     }
 
     private AdvancedPaymentData createRepaymentPaymentAllocation() {
@@ -168,21 +127,6 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
                 PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
                 PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
                 PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private AdvancedPaymentData createDefaultPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
                 PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
 
         advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
