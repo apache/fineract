@@ -83,8 +83,8 @@ public class OfficeTest extends IntegrationTest {
     @ParameterizedTest(name = "orderBy=''{0}'' is whitelisted — must succeed")
     @ValueSource(strings = { "id", "name", "nameDecorated", "externalId", "hierarchy", "openingDate" })
     @Order(3)
-    void retrieveOffices_withWhitelistedOrderByColumn_succeeds(String column) throws Exception {
-        var response = fineractClient().offices.retrieveOffices(false, column, null).execute();
+    void retrieveAllOffices_withWhitelistedOrderByColumn_succeeds(String column) throws Exception {
+        var response = fineractClient().offices.retrieveAllOffices(false, column, null).execute();
         assertThat(response.isSuccessful())
                 .as("GET /offices?orderBy=%s should return 2xx (whitelist over-blocks), got HTTP %d", column, response.code()).isTrue();
         assertThat(response.body()).isNotNull();
@@ -97,8 +97,8 @@ public class OfficeTest extends IntegrationTest {
     @ParameterizedTest(name = "orderBy=''{0}'' is blank — treated as absent, must succeed")
     @ValueSource(strings = { "   ", "\t" })
     @Order(4)
-    void retrieveOffices_withBlankOrderBy_isAcceptedAsAbsent(String blank) throws Exception {
-        var response = fineractClient().offices.retrieveOffices(false, blank, null).execute();
+    void retrieveAllOffices_withBlankOrderBy_isAcceptedAsAbsent(String blank) throws Exception {
+        var response = fineractClient().offices.retrieveAllOffices(false, blank, null).execute();
         assertThat(response.isSuccessful()).as("Blank orderBy [%s] should be treated as absent, not rejected", blank).isTrue();
     }
 
@@ -121,8 +121,8 @@ public class OfficeTest extends IntegrationTest {
     @ValueSource(strings = { "(SELECT SLEEP(3))", "(SELECT SLEEP(10))", "(SELECT IF(SUBSTRING(user(),1,4)='root',SLEEP(2),0))",
             "(SELECT SLEEP(300))", "(SELECT 1)", "(SELECT 1 FROM dual)", })
     @Order(5)
-    void retrieveOffices_zdres035SubqueryPayloads_areRejected(String payload) throws Exception {
-        var response = fineractClient().offices.retrieveOffices(false, payload, null).execute();
+    void retrieveAllOffices_zdres035SubqueryPayloads_areRejected(String payload) throws Exception {
+        var response = fineractClient().offices.retrieveAllOffices(false, payload, null).execute();
         assertThat(response.isSuccessful()).as("ZDRES-035 subquery [%s] must be rejected — whitelist fix not effective", payload).isFalse();
         assertThat(response.code()).as("Expected HTTP 403 for payload [%s], got %d", payload, response.code()).isEqualTo(403);
     }
@@ -141,9 +141,9 @@ public class OfficeTest extends IntegrationTest {
      */
     @Test
     @Order(6)
-    void retrieveOffices_sleepSubquery_isRejectedBeforeDatabaseExecution() throws Exception {
+    void retrieveAllOffices_sleepSubquery_isRejectedBeforeDatabaseExecution() throws Exception {
         long start = System.currentTimeMillis();
-        var response = fineractClient().offices.retrieveOffices(false, "(SELECT SLEEP(3))", null).execute();
+        var response = fineractClient().offices.retrieveAllOffices(false, "(SELECT SLEEP(3))", null).execute();
         long elapsed = System.currentTimeMillis() - start;
 
         assertThat(response.code()).as("Expected HTTP 403 for SLEEP(3) subquery, got %d", response.code()).isEqualTo(403);
@@ -170,8 +170,8 @@ public class OfficeTest extends IntegrationTest {
             // Comment truncation
             "id--", "id/*comment*/", })
     @Order(7)
-    void retrieveOffices_classicInjectionPayloads_areRejected(String payload) throws Exception {
-        var response = fineractClient().offices.retrieveOffices(false, payload, null).execute();
+    void retrieveAllOffices_classicInjectionPayloads_areRejected(String payload) throws Exception {
+        var response = fineractClient().offices.retrieveAllOffices(false, payload, null).execute();
         assertThat(response.isSuccessful()).as("Injection payload [%s] must be rejected", payload).isFalse();
         assertThat(response.code()).isEqualTo(403);
     }
@@ -183,8 +183,8 @@ public class OfficeTest extends IntegrationTest {
      *
      * <p>
      * Note: blank / whitespace-only values are tested separately in
-     * {@link #retrieveOffices_withBlankOrderBy_isAcceptedAsAbsent} because the framework treats them as absent rather
-     * than as invalid input.
+     * {@link #retrieveAllOffices_withBlankOrderBy_isAcceptedAsAbsent} because the framework treats them as absent
+     * rather than as invalid input.
      */
     @ParameterizedTest(name = "non-whitelisted column ''{0}'' must be rejected with 403")
     @ValueSource(strings = {
@@ -199,8 +199,8 @@ public class OfficeTest extends IntegrationTest {
             // → no whitelist match → 403
             "%28SELECT%20SLEEP%283%29%29", })
     @Order(8)
-    void retrieveOffices_nonWhitelistedColumns_areRejected(String payload) throws Exception {
-        var response = fineractClient().offices.retrieveOffices(false, payload, null).execute();
+    void retrieveAllOffices_nonWhitelistedColumns_areRejected(String payload) throws Exception {
+        var response = fineractClient().offices.retrieveAllOffices(false, payload, null).execute();
         assertThat(response.isSuccessful()).as("Non-whitelisted column [%s] must be rejected by the whitelist", payload).isFalse();
         assertThat(response.code()).isEqualTo(403);
     }

@@ -36,7 +36,7 @@ public class FeignCodeHelper {
     }
 
     public Long createChargeOffCodeValue(String value, Integer position) {
-        GetCodesResponse code = ok(() -> fineractClient.codes().retrieveCodeByName(CHARGE_OFF_REASONS_CODE_NAME));
+        GetCodesResponse code = ok(() -> fineractClient.codes().retrieveOneCodeByName(CHARGE_OFF_REASONS_CODE_NAME));
         PostCodeValueDataResponse response = ok(() -> fineractClient.codeValues().createCodeValue(code.getId(),
                 new PostCodeValuesDataRequest().name(value).position(position).description(value).isActive(true)));
         return response.getSubResourceId();
