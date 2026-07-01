@@ -50,7 +50,7 @@ public class OfficeTest extends IntegrationTest {
     @Test
     @Order(2)
     void retrieveOneExistingInclDateFormat() { // see FINERACT-1220 re. what this tests re. Date Format
-        List<GetOfficesResponse> response = ok(fineractClient().offices.retrieveOffices(true, null, null));
+        List<GetOfficesResponse> response = ok(fineractClient().offices.retrieveAllOffices(true, null, null));
         assertThat(response.size()).isGreaterThanOrEqualTo(1);
         assertThat(response.get(0).getOpeningDate()).isNotNull();
     }

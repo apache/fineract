@@ -125,7 +125,7 @@ public class StaffApiResource {
     @GET
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
-    @Operation(summary = "Download bulk import template")
+    @Operation(summary = "Download bulk import template", operationId = "getBulkTemplateStaff")
     public Response getTemplate(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.STAFF.toString(), officeId, null, dateFormat);
@@ -160,7 +160,7 @@ public class StaffApiResource {
     @PUT
     @Path("{staffId}")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Staff Member", description = "Updates the details of a staff member.")
+    @Operation(summary = "Update a Staff Member", operationId = "updateStaff", description = "Updates the details of a staff member.")
     public StaffUpdateResponse updateStaff(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @RequestBody(required = true) @Valid StaffUpdateRequest request) {
         request.setId(staffId);

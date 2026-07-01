@@ -80,7 +80,7 @@ public class HolidaysApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create a Holiday", description = "Mandatory Fields: "
+    @Operation(summary = "Create a Holiday", operationId = "createHoliday", description = "Mandatory Fields: "
             + "name, description, fromDate, toDate, repaymentsRescheduledTo, offices")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysResponse.class)))
@@ -97,7 +97,7 @@ public class HolidaysApiResource {
     @Path("{holidayId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Activate a Holiday", description = "Always Holidays are created in pending state. This API allows to activate a holiday.\n"
+    @Operation(summary = "Activate a Holiday", operationId = "handleCommandsHoliday", description = "Always Holidays are created in pending state. This API allows to activate a holiday.\n"
             + "\n" + "Only the active holidays are considered for rescheduling the loan repayment.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysHolidayIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysHolidayIdResponse.class)))
@@ -128,7 +128,8 @@ public class HolidaysApiResource {
     @GET
     @Path("{holidayId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Holiday", description = "Example Requests:\n" + "\n" + "holidays/1")
+    @Operation(summary = "Retrieve a Holiday", operationId = "retrieveOneHoliday", description = "Example Requests:\n" + "\n"
+            + "holidays/1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.GetHolidaysResponse.class)))
     public String retrieveOne(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId,
             @Context final UriInfo uriInfo) {
@@ -146,7 +147,7 @@ public class HolidaysApiResource {
     @Path("{holidayId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update a Holiday", description = "If a holiday is in pending state (created and not activated) then all fields are allowed to modify. Once holidays become active only name and descriptions are allowed to modify.")
+    @Operation(summary = "Update a Holiday", operationId = "updateHoliday", description = "If a holiday is in pending state (created and not activated) then all fields are allowed to modify. Once holidays become active only name and descriptions are allowed to modify.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PutHolidaysHolidayIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PutHolidaysHolidayIdResponse.class)))
     public String update(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId,
@@ -162,7 +163,7 @@ public class HolidaysApiResource {
     @DELETE
     @Path("{holidayId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Holiday", description = "This API allows to delete a holiday. This is a soft delete the deleted holiday status is marked as deleted.")
+    @Operation(summary = "Delete a Holiday", operationId = "deleteHoliday", description = "This API allows to delete a holiday. This is a soft delete the deleted holiday status is marked as deleted.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.DeleteHolidaysHolidayIdResponse.class)))
     public String delete(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteHoliday(holidayId).build();
@@ -176,7 +177,8 @@ public class HolidaysApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Holidays", description = "Example Requests:\n" + "\n" + "holidays?officeId=1")
+    @Operation(summary = "List Holidays", operationId = "retrieveAllHolidays", description = "Example Requests:\n" + "\n"
+            + "holidays?officeId=1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = HolidaysApiResourceSwagger.GetHolidaysResponse.class))))
     public String retrieveAllHolidays(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,

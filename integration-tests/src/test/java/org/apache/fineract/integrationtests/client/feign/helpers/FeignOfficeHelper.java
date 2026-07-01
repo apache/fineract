@@ -62,15 +62,15 @@ public class FeignOfficeHelper {
     }
 
     public GetOfficesResponse retrieveOffice(Long officeId) {
-        return ok(() -> fineractClient.offices().retrieveOffice(officeId));
+        return ok(() -> fineractClient.offices().retrieveOneOffice(officeId));
     }
 
     public GetOfficesResponse retrieveOfficeByExternalId(String externalId) {
-        return ok(() -> fineractClient.offices().retrieveOfficeByExternalId(externalId));
+        return ok(() -> fineractClient.offices().retrieveOneOfficeByExternalId(externalId));
     }
 
     public GetOfficesResponse getHeadOffice() {
-        return ok(() -> fineractClient.offices().retrieveOffice(HEAD_OFFICE_ID));
+        return ok(() -> fineractClient.offices().retrieveOneOffice(HEAD_OFFICE_ID));
     }
 
     public PutOfficesOfficeIdResponse updateOffice(Long officeId, String name, String openingDate) {
@@ -88,10 +88,10 @@ public class FeignOfficeHelper {
                 .openingDate(openingDate)//
                 .dateFormat("dd MMMM yyyy")//
                 .locale("en");
-        return ok(() -> fineractClient.offices().updateOfficeWithExternalId(externalId, request));
+        return ok(() -> fineractClient.offices().updateOfficeByExternalId(externalId, request));
     }
 
     public List<GetOfficesResponse> retrieveAllOffices() {
-        return ok(() -> fineractClient.offices().retrieveOffices(false, null, null));
+        return ok(() -> fineractClient.offices().retrieveAllOffices(false, null, null));
     }
 }

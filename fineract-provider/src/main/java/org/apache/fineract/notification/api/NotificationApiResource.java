@@ -87,7 +87,7 @@ public class NotificationApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update Notification Read Status", description = "Updates the read status of all notifications for the authenticated user.", tags = {
+    @Operation(summary = "Update Notification Read Status", operationId = "updateNotificationReadStatus", description = "Updates the read status of all notifications for the authenticated user.", tags = {
             "Notification" })
     public void update() {
         this.context.authenticatedUser();

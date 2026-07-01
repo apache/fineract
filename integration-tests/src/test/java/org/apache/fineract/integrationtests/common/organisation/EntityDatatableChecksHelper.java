@@ -39,11 +39,12 @@ public final class EntityDatatableChecksHelper {
     }
 
     public static DeleteEntityDatatableChecksTemplateResponse deleteEntityDatatableCheck(final Long entityDatatableCheckId) {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().entityDataTable().deleteDatatable1(entityDatatableCheckId));
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().entityDataTable()
+                .deleteEntityDatatableCheck(entityDatatableCheckId));
     }
 
     public static List<GetEntityDatatableChecksResponse> retrieveEntityDatatableCheck() {
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().entityDataTable().retrieveAll4(null, null, null, null, null))
-                .getPageItems();
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().entityDataTable().retrieveAllEntityDatatableChecks(null, null,
+                null, null, null)).getPageItems();
     }
 }
