@@ -27,6 +27,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
@@ -57,21 +58,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanTransactionSummaryTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    protected ResponseSpecification responseSpec;
+    protected RequestSpecification requestSpec;
 
     @BeforeEach
-    public void setup() {
+    public void setupREST() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
     }
+
+    private ClientHelper clientHelper;
+    private LoanTransactionHelper loanTransactionHelper;
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     @Test
     public void loanTransactionSummaryTest() {
@@ -159,7 +161,7 @@ public class LoanTransactionSummaryTest {
         Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
 
-        LocalDate targetDate = LocalDate.of(2022, 9, 10);
+        LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 10);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
@@ -235,10 +237,10 @@ public class LoanTransactionSummaryTest {
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
 
         assertEquals(20.0, Utils.getDoubleValue(loanDetails.getDelinquent().getLastPaymentAmount()));
-        assertEquals(LocalDate.of(2022, 9, 8), loanDetails.getDelinquent().getLastPaymentDate());
+        assertEquals(LocalDate.of(2022, Month.SEPTEMBER, 8), loanDetails.getDelinquent().getLastPaymentDate());
 
         assertEquals(100.0, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
-        assertEquals(LocalDate.of(2022, 9, 7), loanDetails.getDelinquent().getLastRepaymentDate());
+        assertEquals(LocalDate.of(2022, Month.SEPTEMBER, 7), loanDetails.getDelinquent().getLastRepaymentDate());
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,

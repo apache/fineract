@@ -24,7 +24,6 @@ import static org.apache.fineract.portfolio.loanaccount.domain.transactionproces
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
@@ -45,16 +44,14 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
-import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccounts;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestAccounts;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
@@ -98,10 +95,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
         assertNotNull(getLoansLoanIdResponse);
 
-        
-
         Float amount = Float.valueOf(amountVal);
-        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                amount.doubleValue());
         assertNotNull(loanIdTransactionsResponse);
         final Long transactionId = loanIdTransactionsResponse.getResourceId();
         assertNotNull(transactionId);
@@ -146,7 +142,8 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         final Long loanId = createAccounts(15, 1, false, strategyCode, advancedAllocation);
 
         Float amount = Float.valueOf(amountVal);
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                amount.doubleValue());
         assertNotNull(loanTransactionResponse);
         final Long transactionId = loanTransactionResponse.getResourceId();
 
@@ -167,10 +164,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
         assertNotNull(getLoansLoanIdResponse);
 
-        
-
         Float amount = Float.valueOf(amountVal);
-        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                amount.doubleValue());
         assertNotNull(loanIdTransactionsResponse);
         final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
@@ -198,14 +194,13 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
 
-            
-
             final String baseAmount = "333.33";
             Float amount = Float.valueOf(baseAmount);
             final LocalDate transactionDate = this.todaysDate.minusMonths(numberOfRepayments - 1).plusDays(3);
             String operationDate = Utils.dateFormatter.format(transactionDate);
 
-            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                    amount.doubleValue());
             assertNotNull(loanIdTransactionsResponse);
             final Long transactionId = loanIdTransactionsResponse.getResourceId();
             reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("666.67"));
@@ -222,7 +217,6 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf(amountVal));
 
-            
             GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
             for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
                 if (period.getPeriod() != null && period.getPeriod() == 3) {
@@ -279,8 +273,6 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
 
-            
-
             DelinquencyRangeData delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
             assertNotNull(delinquencyRange);
             log.info("Loan Delinquency Range is {}", delinquencyRange.getClassification());
@@ -290,7 +282,8 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             assertEquals(2, getLoanRepaymentSchedule.getPeriods().size());
 
             Float amount = Float.valueOf(amountVal);
-            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                    amount.doubleValue());
             assertNotNull(loanIdTransactionsResponse);
             final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
@@ -318,7 +311,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                     getLoansLoanIdResponse.getTimeline().getActualMaturityDate());
 
             // N+1 Scenario
-            
+
             getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
             log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
             assertEquals(3, getLoanRepaymentSchedule.getPeriods().size());
@@ -347,7 +340,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("800.00"));
 
             // N+1 Scenario -- Remains the same periods number
-            
+
             getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
             log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
             assertEquals(3, getLoanRepaymentSchedule.getPeriods().size());
@@ -383,10 +376,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
         assertNotNull(getLoansLoanIdResponse);
 
-        
-
         Float amount = Float.valueOf("1100.00");
-        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                amount.doubleValue());
         assertNotNull(loanIdTransactionsResponse);
         final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
@@ -431,10 +423,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
         assertNotNull(getLoansLoanIdResponse);
 
-        
-
         Float amount = Float.valueOf("1100.00");
-        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                amount.doubleValue());
         assertNotNull(loanIdTransactionsResponse);
         final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
@@ -465,10 +456,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
         assertNotNull(getLoansLoanIdResponse);
 
-        
-
         Float amount = Float.valueOf("1100.00");
-        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                amount.doubleValue());
         assertNotNull(loanIdTransactionsResponse);
         final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
@@ -517,10 +507,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
 
-            
-
             Float amount = Float.valueOf(amountVal);
-            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, amount.doubleValue());
+            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                    amount.doubleValue());
             assertNotNull(loanIdTransactionsResponse);
             final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
@@ -538,7 +527,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, expectedAmount);
 
             evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, expectedAmount);
-            
+
             DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
 
             // Second round, array size equal to 1
@@ -563,7 +552,6 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, expectedAmount);
 
             evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, expectedAmount);
-            
 
             DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, Double.valueOf("0.00"));
         } finally {
@@ -597,8 +585,8 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         @Nested
         public class WithoutChargebackAllocation {
 
-            final Long loanProductWithoutChargebackAllocation = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true).daysInYearType(DaysInYearType.DAYS_360)
-                            .daysInMonthType(DaysInMonthType.DAYS_30));
+            final Long loanProductWithoutChargebackAllocation = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true)
+                    .daysInYearType(DaysInYearType.DAYS_360).daysInMonthType(DaysInMonthType.DAYS_30));
 
             @Test
             public void testS1FullChargebackBeforeMaturityDate() {
@@ -639,8 +627,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 final Long loanId = applyApproveDisburseLoan(loanProductWithoutChargebackAllocation);
                 AtomicReference<Long> repaymentFebruaryRef = new AtomicReference<>();
                 runAt("1 February 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 February 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                     repaymentFebruaryRef.set(repayment.getResourceId());
                 });
                 runAt("1 March 2024", () -> {
@@ -687,8 +674,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
                 runAt("1 March 2024", () -> {
-                    repaymentMarchId
-                            .set(makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId());
+                    repaymentMarchId.set(makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId());
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
                             fullyRepaidInstallment(16.43, 0.58, "01 February 2024"), //
@@ -732,14 +718,12 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 });
                 AtomicReference<Long> repaymentJuneRef = new AtomicReference<>();
                 runAt("1 June 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 June 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 June 2024", 17.01);
                     repaymentJuneRef.set(repayment.getResourceId());
                 });
                 AtomicReference<Long> repaymentJulyRef = new AtomicReference<>();
                 runAt("1 July 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 July 2024", 17.00);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 July 2024", 17.00);
                     repaymentJulyRef.set(repayment.getResourceId());
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
@@ -783,14 +767,12 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 });
                 AtomicReference<Long> repaymentJuneRef = new AtomicReference<>();
                 runAt("1 June 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 June 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 June 2024", 17.01);
                     repaymentJuneRef.set(repayment.getResourceId());
                 });
                 AtomicReference<Long> repaymentJulyRef = new AtomicReference<>();
                 runAt("1 July 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 July 2024", 17.00);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 July 2024", 17.00);
                     repaymentJulyRef.set(repayment.getResourceId());
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
@@ -837,14 +819,13 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         @Nested
         public class WithChargebackAllocationPrincipalInterestFeesPenalties {
 
-            final Long loanProductWithChargebackAllocationPrincipalInterestFeesPenalties = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true).daysInYearType(DaysInYearType.DAYS_360)
-                            .daysInMonthType(DaysInMonthType.DAYS_30)
-                            .creditAllocation(chargebackCreditAllocationOrders(List.of("PRINCIPAL", "PENALTY", "FEE", "INTEREST"))));
+            final Long loanProductWithChargebackAllocationPrincipalInterestFeesPenalties = createLoanProduct(create4IProgressive()
+                    .isInterestRecalculationEnabled(true).daysInYearType(DaysInYearType.DAYS_360).daysInMonthType(DaysInMonthType.DAYS_30)
+                    .creditAllocation(chargebackCreditAllocationOrders(List.of("PRINCIPAL", "PENALTY", "FEE", "INTEREST"))));
 
             @Test
             public void testS1FullChargebackBeforeMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
@@ -887,18 +868,15 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS2AndS3PartialChargebackThenFullChargebackBeforeMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
                 AtomicReference<Long> repaymentFebruaryRef = new AtomicReference<>();
                 runAt("1 February 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 February 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                     repaymentFebruaryRef.set(repayment.getResourceId());
                 });
                 runAt("1 March 2024", () -> {
                     runAt("1 March 2024", () -> {
-                        Long repaymentMarchId = makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01)
-                                .getResourceId();
+                        Long repaymentMarchId = makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId();
                         verifyRepaymentSchedule(loanId, //
                                 installment(100.0, null, "01 January 2024"), //
                                 fullyRepaidInstallment(16.43, 0.58, "01 February 2024"), //
@@ -952,15 +930,13 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS4FullChargebackMiddleOfRepaymentPeriodBeforeMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
                 AtomicReference<Long> repaymentMarchId = new AtomicReference<>();
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
                 runAt("1 March 2024", () -> {
-                    repaymentMarchId
-                            .set(makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId());
+                    repaymentMarchId.set(makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId());
                 });
                 runAt("15 March 2024", () -> {
                     verifyRepaymentSchedule(loanId, //
@@ -998,8 +974,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS5AndS6ChargebacksAfterMaturityDateVerifyNPlus1ThPeriod() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationPrincipalInterestFeesPenalties);
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
@@ -1014,14 +989,12 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 });
                 AtomicReference<Long> repaymentJuneRef = new AtomicReference<>();
                 runAt("1 June 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 June 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 June 2024", 17.01);
                     repaymentJuneRef.set(repayment.getResourceId());
                 });
                 AtomicReference<Long> repaymentJulyRef = new AtomicReference<>();
                 runAt("1 July 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 July 2024", 17.00);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 July 2024", 17.00);
                     repaymentJulyRef.set(repayment.getResourceId());
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
@@ -1068,14 +1041,13 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         @Nested
         public class WithChargebackAllocationInterestFeesPenaltiesPrincipal {
 
-            final Long loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true).daysInYearType(DaysInYearType.DAYS_360)
-                            .daysInMonthType(DaysInMonthType.DAYS_30)
-                            .creditAllocation(chargebackCreditAllocationOrders(List.of("PENALTY", "FEE", "INTEREST", "PRINCIPAL"))));
+            final Long loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal = createLoanProduct(create4IProgressive()
+                    .isInterestRecalculationEnabled(true).daysInYearType(DaysInYearType.DAYS_360).daysInMonthType(DaysInMonthType.DAYS_30)
+                    .creditAllocation(chargebackCreditAllocationOrders(List.of("PENALTY", "FEE", "INTEREST", "PRINCIPAL"))));
 
             @Test
             public void testS1FullChargebackBeforeMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
@@ -1118,17 +1090,14 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS2AndS3PartialChargebackThenFullChargebackBeforeMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
                 AtomicReference<Long> repaymentFebruaryRef = new AtomicReference<>();
                 runAt("1 February 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 February 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                     repaymentFebruaryRef.set(repayment.getResourceId());
                 });
                 runAt("1 March 2024", () -> {
-                    Long repaymentMarchId = makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01)
-                            .getResourceId();
+                    Long repaymentMarchId = makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId();
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
                             fullyRepaidInstallment(16.43, 0.58, "01 February 2024"), //
@@ -1181,15 +1150,13 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS4FullChargebackMiddleOfRepaymentPeriodBeforeMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
                 AtomicReference<Long> repaymentMarchId = new AtomicReference<>();
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
                 runAt("1 March 2024", () -> {
-                    repaymentMarchId
-                            .set(makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId());
+                    repaymentMarchId.set(makeLoanRepayment(loanId, "Repayment", "01 March 2024", 17.01).getResourceId());
                 });
                 runAt("15 March 2024", () -> {
                     verifyRepaymentSchedule(loanId, //
@@ -1227,8 +1194,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS5AndS6ChargebacksAfterMaturityDateVerifyNPlus1ThPeriod() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
@@ -1243,14 +1209,12 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 });
                 AtomicReference<Long> repaymentJuneRef = new AtomicReference<>();
                 runAt("1 June 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 June 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 June 2024", 17.01);
                     repaymentJuneRef.set(repayment.getResourceId());
                 });
                 AtomicReference<Long> repaymentJulyRef = new AtomicReference<>();
                 runAt("1 July 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 July 2024", 17.00);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 July 2024", 17.00);
                     repaymentJulyRef.set(repayment.getResourceId());
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
@@ -1297,8 +1261,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
             @Test
             public void testS7ChargebacksOnMaturityDate() {
-                final Long loanId = applyApproveDisburseLoan(
-                        loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
+                final Long loanId = applyApproveDisburseLoan(loanProductWithChargebackAllocationInterestFeesPenaltiesPrincipal);
                 runAt("1 February 2024", () -> {
                     makeLoanRepayment(loanId, "Repayment", "01 February 2024", 17.01);
                 });
@@ -1313,14 +1276,12 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 });
                 AtomicReference<Long> repaymentJuneRef = new AtomicReference<>();
                 runAt("1 June 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 June 2024", 17.01);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 June 2024", 17.01);
                     repaymentJuneRef.set(repayment.getResourceId());
                 });
                 AtomicReference<Long> repaymentJulyRef = new AtomicReference<>();
                 runAt("1 July 2024", () -> {
-                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment",
-                            "01 July 2024", 17.00);
+                    PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, "Repayment", "01 July 2024", 17.00);
                     repaymentJulyRef.set(repayment.getResourceId());
                     verifyRepaymentSchedule(loanId, //
                             installment(100.0, null, "01 January 2024"), //
@@ -1351,7 +1312,6 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
             }
         }
     }
-
 
     private Long applyChargebackTransactionWithExpectedStatus(Long loanId, Long transactionId, String amount, int paymentTypeIdx,
             int expectedStatus) {
@@ -1394,8 +1354,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                                     .overpaymentLiabilityAccountId(accounts.getOverpaymentAccount().getAccountID().longValue())
                                     .receivableInterestAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue())
                                     .receivableFeeAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue())
-                                    .receivablePenaltyAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue())
-                                    .build())
+                                    .receivablePenaltyAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue()).build())
                     .build(null, delinquencyBucketId)));
         }
         return createLoanProductFromJson(Utils.convertToJson(builder.build(null, delinquencyBucketId)));
@@ -1403,11 +1362,13 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String operationDate, final String principalAmount,
             final Integer numberOfRepayments, final String repaymentStrategy) {
-        PostLoansRequest request = applyLoanRequest(clientId, loanProductId, operationDate, Double.valueOf(principalAmount), numberOfRepayments,
-                req -> req.repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS).loanTermFrequency(numberOfRepayments)
-                        .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS).interestRatePerPeriod(BigDecimal.ZERO)
-                        .interestType(LoanTestData.InterestType.DECLINING_BALANCE).expectedDisbursementDate(operationDate)
-                        .submittedOnDate(operationDate).transactionProcessingStrategyCode(repaymentStrategy));
+        PostLoansRequest request = applyLoanRequest(clientId, loanProductId, operationDate, Double.valueOf(principalAmount),
+                numberOfRepayments,
+                req -> req.repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                        .loanTermFrequency(numberOfRepayments).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                        .interestRatePerPeriod(BigDecimal.ZERO).interestType(LoanTestData.InterestType.DECLINING_BALANCE)
+                        .expectedDisbursementDate(operationDate).submittedOnDate(operationDate)
+                        .transactionProcessingStrategyCode(repaymentStrategy));
         Long loanId = applyForLoan(request);
         approveLoan(loanId, approveLoanRequest(Double.valueOf(principalAmount), operationDate));
         disburseLoan(loanId, operationDate, Double.valueOf(principalAmount));
@@ -1429,8 +1390,8 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
     private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
         java.util.concurrent.atomic.AtomicInteger order = new java.util.concurrent.atomic.AtomicInteger(1);
-        return java.util.Arrays.stream(paymentAllocationTypes).map(pat -> new PaymentAllocationOrder().paymentAllocationRule(pat.name())
-                .order(order.getAndIncrement())).toList();
+        return java.util.Arrays.stream(paymentAllocationTypes)
+                .map(pat -> new PaymentAllocationOrder().paymentAllocationRule(pat.name()).order(order.getAndIncrement())).toList();
     }
 
     private static Stream<Arguments> loanProductFactory() {
@@ -1438,4 +1399,3 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                 Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY", ADVANCED_PAYMENT_ALLOCATION_STRATEGY), true));
     }
 }
-

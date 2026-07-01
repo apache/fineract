@@ -73,9 +73,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignL
         assertEquals(500.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
         PostLoansLoanIdTransactionsResponse chargebackTransactionResponse = chargebackLoanTransaction(loanExternalIdStr,
-                repaymentTransaction_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE).transactionAmount(500.0)
-                        .paymentTypeId(1L));
+                repaymentTransaction_1.getResourceId(), new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE)
+                        .transactionAmount(500.0).paymentTypeId(1L));
 
         assertNotNull(chargebackTransactionResponse);
         reviewLoanTransactionRelations(loanId, repaymentTransaction_1.getResourceId(), 1, Double.valueOf("500.00"));
@@ -182,8 +181,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignL
     }
 
     private Long createLoanProduct(String strategyCode, boolean advancedAllocation, Long delinquencyBucketId) {
-        PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().principal(1000.0).numberOfRepayments(1)
-                .repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS_L)
+        PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().principal(1000.0)
+                .numberOfRepayments(1).repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS_L)
                 .interestRateFrequencyType(LoanTestData.InterestRateFrequencyType.MONTHS)
                 .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL).interestType(LoanTestData.InterestType.FLAT)
                 .daysInMonthType(LoanTestData.DaysInMonthType.DAYS_30).daysInYearType(LoanTestData.DaysInYearType.DAYS_365)

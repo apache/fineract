@@ -196,8 +196,8 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        approveLoanFromJson(loanId, LoanRequestBuilders.approveLoanWithTranchesJson(10000.0, approveDate, expectedDisbursementDate,
-                approveTranches));
+        approveLoanFromJson(loanId,
+                LoanRequestBuilders.approveLoanWithTranchesJson(10000.0, approveDate, expectedDisbursementDate, approveTranches));
         GetLoansLoanIdResponse approvedLoan = getLoanDetails(loanId);
         verifyLoanStatus(approvedLoan, LoanStatus.APPROVED);
         verifyLoanStatus(approvedLoan, status -> Boolean.TRUE.equals(status.getWaitingForDisbursal()));
@@ -255,8 +255,8 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
             repeatsOnDay = 7;
         }
 
-        Long calendarId = CalendarHelper
-                .createMeetingForGroup(centerId, startDate, frequency, interval, repeatsOnDay.toString()).getResourceId();
+        Long calendarId = CalendarHelper.createMeetingForGroup(centerId, startDate, frequency, interval, repeatsOnDay.toString())
+                .getResourceId();
         LOG.info("calendarId {}", calendarId);
         return calendarId;
     }

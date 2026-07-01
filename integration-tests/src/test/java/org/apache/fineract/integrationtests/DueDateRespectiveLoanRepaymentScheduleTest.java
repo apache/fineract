@@ -67,10 +67,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             updateBusinessDate("01 February 2023");
 
             Long penalty = createSpecifiedDueDateCharge(50, true);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -162,10 +165,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             Long penalty = createSpecifiedDueDateCharge(50, true);
 
             Long fee = createSpecifiedDueDateCharge(50, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -251,10 +257,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             updateBusinessDate("01 February 2023");
 
             Long fee = createSpecifiedDueDateCharge(50, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -323,10 +332,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             updateBusinessDate("01 February 2023");
 
             Long fee = createSpecifiedDueDateCharge(50, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 3, 0, LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 3, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "90", "30", "3", "0", LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "90", "30", "3", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -394,10 +406,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             updateBusinessDate("01 February 2023");
 
             Long fee = createSpecifiedDueDateCharge(50, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 3, 0, LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 3, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "90", "30", "3", "0", LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "90", "30", "3", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -525,10 +540,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
                     new PutGlobalConfigurationsRequest().enabled(false));
 
             Long fee = createSpecifiedDueDateCharge(20, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -586,10 +604,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
                     new PutGlobalConfigurationsRequest().enabled(false));
 
             Long penalty = createSpecifiedDueDateCharge(15, true);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -620,8 +641,9 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.0, Utils.getDoubleValue(response.getTransactions().get(1).getOutstandingLoanBalance()));
             assertEquals(0, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
-            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
-                            .transactionDate("28 January 2023").transactionAmount(0.0).locale("en"));
+            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("28 January 2023")
+                            .transactionAmount(0.0).locale("en"));
 
             updateBusinessDate("31 January 2023");
 
@@ -705,10 +727,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
 
             Long fee = createSpecifiedDueDateCharge(20, false);
             Long penalty = createSpecifiedDueDateCharge(15, true);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -743,8 +768,9 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(firstChargeId, response.getTransactions().get(1).getLoanChargePaidByList().get(0).getChargeId());
             assertEquals(1, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
-            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
-                            .transactionDate("15 February 2023").transactionAmount(0.0).locale("en"));
+            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("15 February 2023")
+                            .transactionAmount(0.0).locale("en"));
 
             Long secondChargeId = addLoanCharge(loanId, penalty, "15 February 2023", 15.0).getResourceId();
 
@@ -898,10 +924,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
 
             Long fee = createSpecifiedDueDateCharge(20, false);
             Long penalty = createSpecifiedDueDateCharge(15, true);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY, "01 January 2023", "01 January 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY,
+                    "01 January 2023", "01 January 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2023"));
             disburseLoanWithAmount(loanId, "01 January 2023", 1000.0);
@@ -936,8 +965,9 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(firstChargeId, response.getTransactions().get(1).getLoanChargePaidByList().get(0).getChargeId());
             assertEquals(1, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
-            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
-                            .transactionDate("15 February 2023").transactionAmount(0.0).locale("en"));
+            PostLoansLoanIdTransactionsResponse reverseRepayment = reverseLoanTransaction(loanId, firstRepaymentId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("15 February 2023")
+                            .transactionAmount(0.0).locale("en"));
 
             Long secondChargeId = addLoanCharge(loanId, penalty, "15 February 2023", 15.0).getResourceId();
 
@@ -1010,8 +1040,9 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
 
             updateBusinessDate("07 March 2023");
 
-            PostLoansLoanIdTransactionsResponse secondReverseRepayment = reverseLoanTransaction(loanId, secondRepayment, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
-                            .transactionDate("07 March 2023").transactionAmount(0.0).locale("en"));
+            PostLoansLoanIdTransactionsResponse secondReverseRepayment = reverseLoanTransaction(loanId, secondRepayment,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy").transactionDate("07 March 2023")
+                            .transactionAmount(0.0).locale("en"));
 
             Long thirdChargeId = addLoanCharge(loanId, penalty, "07 March 2023", 15.0).getResourceId();
 
@@ -1169,10 +1200,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
                     new PutGlobalConfigurationsRequest().enabled(false));
 
             Long fee = createSpecifiedDueDateCharge(3.65, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY, "14 May 2023", "14 May 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY,
+                    "14 May 2023", "14 May 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "14 May 2023"));
             disburseLoanWithAmount(loanId, "14 May 2023", 127.95);
@@ -1239,7 +1273,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getFeeChargesPortion()));
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getOutstandingLoanBalance()));
 
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment(loanId, penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
+            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment(loanId, penalty1LoanChargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1326,10 +1361,13 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
                     new PutGlobalConfigurationsRequest().enabled(false));
 
             Long fee = createSpecifiedDueDateCharge(3.65, false);
-            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0, LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
+            final Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY));
             final Long clientId = createClient("01 January 2023");
 
-            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0", LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY, "14 May 2023", "14 May 2023");
+            final Long loanId = applyForDueDateRespectiveLoan(clientId, loanProductId, "1000", "30", "30", "1", "0",
+                    LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY,
+                    "14 May 2023", "14 May 2023");
 
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "14 May 2023"));
             disburseLoanWithAmount(loanId, "14 May 2023", 127.95);
@@ -1397,7 +1435,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertEquals(0.0, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getFeeChargesPortion()));
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getTransactions().get(1).getOutstandingLoanBalance()));
 
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment(loanId, penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
+            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = chargeAdjustment(loanId, penalty1LoanChargeId,
+                    new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
 
             loanDetails = getLoanDetails(loanId);
             assertEquals(2.95, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
@@ -1475,13 +1514,11 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
     private Long applyForDueDateRespectiveLoan(Long clientId, Long productId, String principal, String loanTermFrequency,
             String repaymentAfterEvery, String numberOfRepayments, String interestRate, String repaymentStrategy,
             String expectedDisbursementDate, String submittedOnDate) {
-        PostLoansRequest request = new PostLoansRequest().clientId(clientId).productId(productId)
-                .principal(new BigDecimal(principal)).loanTermFrequency(Integer.parseInt(loanTermFrequency))
-                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)
+        PostLoansRequest request = new PostLoansRequest().clientId(clientId).productId(productId).principal(new BigDecimal(principal))
+                .loanTermFrequency(Integer.parseInt(loanTermFrequency)).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)
                 .numberOfRepayments(Integer.parseInt(numberOfRepayments)).repaymentEvery(Integer.parseInt(repaymentAfterEvery))
-                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)
-                .interestRatePerPeriod(new BigDecimal(interestRate)).interestType(LoanTestData.InterestType.FLAT)
-                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS).interestRatePerPeriod(new BigDecimal(interestRate))
+                .interestType(LoanTestData.InterestType.FLAT).amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)
                 .transactionProcessingStrategyCode(repaymentStrategy)
                 .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)
                 .expectedDisbursementDate(expectedDisbursementDate).submittedOnDate(submittedOnDate)

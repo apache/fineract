@@ -51,12 +51,10 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
 
         Long loanProductId = createLoanProductFromJson(buildLoanProductJson());
 
-        List<PostLoansDisbursementData> createTranches = List.of(
-                LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
+        List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
                 LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
 
-        List<PostLoansDisbursementData> approveTranches = List.of(
-                LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
+        List<PostLoansDisbursementData> approveTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
                 LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
 
         Long loanId = applyForLoanFromJson(buildLoanApplicationJson(clientId, loanProductId, disbursementDate, createTranches));
@@ -105,8 +103,8 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
 
         return new LoanApplicationTestBuilder().withPrincipal("10000.00").withLoanTermFrequency("24").withLoanTermFrequencyAsWeeks()
                 .withNumberOfRepayments("12").withRepaymentEveryAfter("2").withRepaymentFrequencyTypeAsWeeks()
-                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withTranches(trancheMaps)
-                .withFixedEmiAmount("").withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
+                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withTranches(trancheMaps).withFixedEmiAmount("")
+                .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
                 .withExpectedDisbursementDate(disbursementDate).withSubmittedOnDate(disbursementDate)
                 .withRepaymentStrategy(LoanApplicationTestBuilder.RBI_INDIA_STRATEGY).withCharges(new ArrayList<>())
                 .build(clientId.toString(), loanProductId.toString(), null);

@@ -19,7 +19,12 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +32,7 @@ import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -100,6 +106,26 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         return detail;
     }
 
+    /**
+     * Sums the per-disbursement {@code principalDisbursed} across the schedule's disbursement rows (those without a
+     * {@code period} number). The generated Feign {@code GetLoansLoanIdRepaymentPeriod} model does not expose
+     * {@code principalDisbursed}, so read it from the raw loan JSON.
+     */
+    private BigDecimal sumDisbursedPrincipal(final Long loanId) {
+        String loanJson = FeignRawHttpHelper.get("/loans/" + loanId + "?associations=all&exclude=guarantors,futureSchedule");
+        JsonArray periods = JsonParser.parseString(loanJson).getAsJsonObject().getAsJsonObject("repaymentSchedule")
+                .getAsJsonArray("periods");
+        BigDecimal total = BigDecimal.ZERO;
+        for (JsonElement element : periods) {
+            JsonObject period = element.getAsJsonObject();
+            boolean isDisbursement = !period.has("period") || period.get("period").isJsonNull();
+            if (isDisbursement && period.has("principalDisbursed")) {
+                total = total.add(period.get("principalDisbursed").getAsBigDecimal());
+            }
+        }
+        return total;
+    }
+
     /***
      * Test case to verify repayment schedule shows all disbursals for tranche loans
      */
@@ -163,27 +189,22 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         assertEquals(expectedLoanScheduleLineCount, loanScheduleLineCount, "Checking nine lines in schedule");
 
         int disbursalCount = 0;
-        BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
         // First 8 lines should be disbursals
         for (int i = 0; i < loanScheduleLineCount - 1; i++) {
-            final Integer period = loanSchedule.get(i).getPeriod();
-            final BigDecimal principalDisbursed = loanSchedule.get(i).getPrincipalLoanBalanceOutstanding();
-
-            if (period == null && principalDisbursed != null) {
+            if (loanSchedule.get(i).getPeriod() == null) {
                 disbursalCount += 1;
-                totalPrincipalDisbursed = totalPrincipalDisbursed.add(principalDisbursed);
             }
         }
         assertEquals(expectedDisbursals, disbursalCount, "Checking for eight disbursals");
-        assertEquals(expectedTotalPrincipalDisbursed, totalPrincipalDisbursed, "Checking Principal Disburse is 255");
+        final BigDecimal totalPrincipalDisbursed = sumDisbursedPrincipal(loanID);
+        assertTrue(expectedTotalPrincipalDisbursed.compareTo(totalPrincipalDisbursed) == 0, "Checking Principal Disburse is 255");
 
         GetLoansLoanIdRepaymentPeriod lastPeriod = loanSchedule.get(8);
         final BigDecimal principalDue = lastPeriod.getPrincipalDue();
-        assertEquals(expectedPrincipalDue, principalDue, "Checking Principal Due is 255");
+        assertTrue(expectedPrincipalDue.compareTo(principalDue) == 0, "Checking Principal Due is 255");
 
         final BigDecimal principalLoanBalanceOutstanding = lastPeriod.getPrincipalLoanBalanceOutstanding();
-        assertEquals(expectedPrincipalLoanBalanceOutstanding, principalLoanBalanceOutstanding,
-                "Checking Principal Loan Balance Outstanding is zero");
+        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0, "Checking Principal Loan Balance Outstanding is zero");
     }
 
     @Test
@@ -214,7 +235,8 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         approveLoan(loanID, approveLoanRequest(12000.0, "01 January 2021"));
         verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        LOG.info("-------------------------------DISBURSE 1, repay fully, disburse again LOANS -------------------------------------------");
+        LOG.info(
+                "-------------------------------DISBURSE 1, repay fully, disburse again LOANS -------------------------------------------");
         disburseLoanWithAmount(loanID, "12 January 2021", 1);
         verifyLoanStatus(loanID, LoanStatus.ACTIVE);
         makeLoanRepayment(loanID, "Repayment", "13 January 2021", 1.0);
@@ -236,30 +258,25 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         assertEquals(expectedLoanScheduleLineCount, loanScheduleLineCount, "Checking 3 lines in schedule");
 
         int disbursalCount = 0;
-        BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
         for (int i = 0; i < loanScheduleLineCount - 1; i++) {
-            final Integer period = loanSchedule.get(i).getPeriod();
-            final BigDecimal principalDisbursed = loanSchedule.get(i).getPrincipalLoanBalanceOutstanding();
-
-            if (period == null && principalDisbursed != null) {
+            if (loanSchedule.get(i).getPeriod() == null) {
                 disbursalCount += 1;
-                totalPrincipalDisbursed = totalPrincipalDisbursed.add(principalDisbursed);
             }
         }
         assertEquals(expectedDisbursals, disbursalCount, "Checking for 2 disbursals");
-        assertEquals(expectedTotalPrincipalDisbursed, totalPrincipalDisbursed, "Checking Principal Disburse is 3");
+        final BigDecimal totalPrincipalDisbursed = sumDisbursedPrincipal(loanID);
+        assertTrue(expectedTotalPrincipalDisbursed.compareTo(totalPrincipalDisbursed) == 0, "Checking Principal Disburse is 3");
 
         GetLoansLoanIdRepaymentPeriod lastPeriod = loanSchedule.get(2);
         final BigDecimal principalDue = lastPeriod.getPrincipalDue();
-        assertEquals(expectedPrincipalDue, principalDue, "Checking Principal Due is 3");
+        assertTrue(expectedPrincipalDue.compareTo(principalDue) == 0, "Checking Principal Due is 3");
         final BigDecimal principalPaid = lastPeriod.getPrincipalPaid();
-        assertEquals(expectedPrincipalPaid, principalPaid, "Checking Principal Paid is 1");
+        assertTrue(expectedPrincipalPaid.compareTo(principalPaid) == 0, "Checking Principal Paid is 1");
         final BigDecimal principalOutstanding = lastPeriod.getPrincipalOutstanding();
-        assertEquals(expectedPrincipalOutstanding, principalOutstanding, "Checking Principal Due is 2");
+        assertTrue(expectedPrincipalOutstanding.compareTo(principalOutstanding) == 0, "Checking Principal Due is 2");
 
         final BigDecimal principalLoanBalanceOutstanding = lastPeriod.getPrincipalLoanBalanceOutstanding();
-        assertEquals(expectedPrincipalLoanBalanceOutstanding, principalLoanBalanceOutstanding,
-                "Checking Principal Loan Balance Outstanding is zero");
+        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0, "Checking Principal Loan Balance Outstanding is zero");
     }
 
     @Test
@@ -290,7 +307,8 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         approveLoan(loanID, approveLoanRequest(12000.0, "01 January 2021"));
         verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
-        LOG.info("-------------------------------DISBURSE 1, repay fully, disburse again LOANS -------------------------------------------");
+        LOG.info(
+                "-------------------------------DISBURSE 1, repay fully, disburse again LOANS -------------------------------------------");
         disburseLoanWithAmount(loanID, "12 January 2021", 1);
         verifyLoanStatus(loanID, LoanStatus.ACTIVE);
         makeLoanRepayment(loanID, "Repayment", "13 January 2021", 2.0);
@@ -312,29 +330,24 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         assertEquals(expectedLoanScheduleLineCount, loanScheduleLineCount, "Checking nine lines in schedule");
 
         int disbursalCount = 0;
-        BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
         for (int i = 0; i < loanScheduleLineCount - 1; i++) {
-            final Integer period = loanSchedule.get(i).getPeriod();
-            final BigDecimal principalDisbursed = loanSchedule.get(i).getPrincipalLoanBalanceOutstanding();
-
-            if (period == null && principalDisbursed != null) {
+            if (loanSchedule.get(i).getPeriod() == null) {
                 disbursalCount += 1;
-                totalPrincipalDisbursed = totalPrincipalDisbursed.add(principalDisbursed);
             }
         }
         assertEquals(expectedDisbursals, disbursalCount, "Checking for 2 disbursals");
-        assertEquals(expectedTotalPrincipalDisbursed, totalPrincipalDisbursed, "Checking Principal Disburse is 3");
+        final BigDecimal totalPrincipalDisbursed = sumDisbursedPrincipal(loanID);
+        assertTrue(expectedTotalPrincipalDisbursed.compareTo(totalPrincipalDisbursed) == 0, "Checking Principal Disburse is 3");
 
         GetLoansLoanIdRepaymentPeriod lastPeriod = loanSchedule.get(2);
         final BigDecimal principalDue = lastPeriod.getPrincipalDue();
-        assertEquals(expectedPrincipalDue, principalDue, "Checking Principal Due is 3");
+        assertTrue(expectedPrincipalDue.compareTo(principalDue) == 0, "Checking Principal Due is 3");
         final BigDecimal principalPaid = lastPeriod.getPrincipalPaid();
-        assertEquals(expectedPrincipalPaid, principalPaid, "Checking Principal Paid is 1");
+        assertTrue(expectedPrincipalPaid.compareTo(principalPaid) == 0, "Checking Principal Paid is 1");
         final BigDecimal principalOutstanding = lastPeriod.getPrincipalOutstanding();
-        assertEquals(expectedPrincipalOutstanding, principalOutstanding, "Checking Principal Due is 2");
+        assertTrue(expectedPrincipalOutstanding.compareTo(principalOutstanding) == 0, "Checking Principal Due is 2");
 
         final BigDecimal principalLoanBalanceOutstanding = lastPeriod.getPrincipalLoanBalanceOutstanding();
-        assertEquals(expectedPrincipalLoanBalanceOutstanding, principalLoanBalanceOutstanding,
-                "Checking Principal Loan Balance Outstanding is zero");
+        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0, "Checking Principal Loan Balance Outstanding is zero");
     }
 }

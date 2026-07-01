@@ -50,9 +50,20 @@ import org.slf4j.LoggerFactory;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
+    protected ResponseSpecification responseSpec;
+    protected RequestSpecification requestSpec;
+    protected LoanTransactionHelper loanTransactionHelper;
+
+    @BeforeEach
+    public void setupREST() {
+        Utils.initializeRESTAssured();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(LoanWithWaiveInterestAndWriteOffIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
 
     private static final String LP_PRINCIPAL = "12,000.00";
     private static final String LP_REPAYMENTS = "2";
@@ -68,16 +79,6 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     private static final String RATE_OF_INTEREST_PER_PERIOD = "2";
     private static final String DATE_OF_JOINING = "04 March 2009";
     private static final String INTEREST_VALUE_AMOUNT = "40.00";
-    private LoanTransactionHelper loanTransactionHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-    }
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow() {

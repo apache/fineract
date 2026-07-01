@@ -51,9 +51,8 @@ public class LoanAccountCreditRefundPayoutWithChargebackTest extends FeignLoanTe
                         .locale(LoanTestData.LOCALE).transactionAmount(1000.0));
 
         PostLoansLoanIdTransactionsResponse chargebackResponse = chargebackLoanTransaction(loanExternalIdStr,
-                repaymentTransaction_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE).transactionAmount(1000.0)
-                        .paymentTypeId(1L));
+                repaymentTransaction_1.getResourceId(), new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE)
+                        .transactionAmount(1000.0).paymentTypeId(1L));
 
         GetLoansLoanIdTransactionsTransactionIdResponse chargebackTransactionResponse = getLoanTransactionDetails(
                 chargebackResponse.getLoanId(), chargebackResponse.getResourceId());

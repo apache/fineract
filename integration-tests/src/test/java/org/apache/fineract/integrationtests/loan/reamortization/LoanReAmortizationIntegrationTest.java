@@ -33,9 +33,9 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
-import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.reamortization.LoanReAmortizationInterestHandlingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -63,7 +63,6 @@ public class LoanReAmortizationIntegrationTest extends FeignLoanTestBase {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
             Long loanProductId = createLoanProduct(product);
-            
 
             // Apply and Approve Loan
             double amount = 1250.0;
@@ -130,7 +129,6 @@ public class LoanReAmortizationIntegrationTest extends FeignLoanTestBase {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
             Long loanProductId = createLoanProduct(product);
-            
 
             // Apply and Approve Loan
             double amount = 1250.0;

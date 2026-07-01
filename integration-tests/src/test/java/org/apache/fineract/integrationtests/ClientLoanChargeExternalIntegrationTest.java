@@ -81,9 +81,11 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
                 .amount(1.0).dueDate("22 September 2011").externalId(externalId).dateFormat("dd MMMM yyyy").locale("en"));
         assertNotNull(chargeResponse);
 
-        assertThrows(CallFailedRuntimeException.class,
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeDefId).amount(2.0)
                         .dueDate("23 September 2011").externalId(externalId).dateFormat("dd MMMM yyyy").locale("en")));
+        assertEquals(403, exception.getStatus());
+        assertErrorGlobalisationCode(exception, "error.msg.loan.charge.duplicate.externalId");
     }
 
     private Long createLoanProduct(final boolean multiDisburseLoan, final String accountingRule) {

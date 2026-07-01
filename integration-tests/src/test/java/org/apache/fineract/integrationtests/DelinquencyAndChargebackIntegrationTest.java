@@ -49,7 +49,6 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -271,7 +270,8 @@ public class DelinquencyAndChargebackIntegrationTest extends FeignLoanTestBase {
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String operationDate, final String periods,
             String repaymentStrategy) {
         PostLoansRequest request = applyLoanRequest(clientId, loanProductId, operationDate, Double.valueOf(principalAmount),
-                Integer.valueOf(periods), req -> req.repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                Integer.valueOf(periods),
+                req -> req.repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
                         .loanTermFrequency(Integer.valueOf(periods)).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
                         .interestRatePerPeriod(BigDecimal.ZERO).interestType(LoanTestData.InterestType.DECLINING_BALANCE)
                         .expectedDisbursementDate(operationDate).submittedOnDate(operationDate)

@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -43,13 +44,11 @@ import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
-import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -155,9 +154,10 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
      **/
     private void disburseLoan() {
         if (this.loanId != null) {
-            disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(dateString)
-                    .transactionAmount(getLoanDetails(loanId).getNetDisbursalAmount()).dateFormat(LoanTestData.DATETIME_PATTERN)
-                    .locale(LoanTestData.LOCALE));
+            disburseLoan(loanId,
+                    new PostLoansLoanIdRequest().actualDisbursementDate(dateString)
+                            .transactionAmount(getLoanDetails(loanId).getNetDisbursalAmount()).dateFormat(LoanTestData.DATETIME_PATTERN)
+                            .locale(LoanTestData.LOCALE));
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
     }
@@ -201,9 +201,8 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
 
         LOG.info("-----------------------------REJECTING LOAN RESCHEDULE REQUEST--------------------------");
 
-        loanHelper.rejectRescheduleRequest(this.loanRescheduleRequestId,
-                new PostUpdateRescheduleLoansRequest().rejectedOnDate(dateString).locale(LoanTestData.LOCALE)
-                        .dateFormat(LoanTestData.DATETIME_PATTERN));
+        loanHelper.rejectRescheduleRequest(this.loanRescheduleRequestId, new PostUpdateRescheduleLoansRequest().rejectedOnDate(dateString)
+                .locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN));
 
         assertTrue(loanHelper.readRescheduleRequest(loanRescheduleRequestId, "statusEnum").getStatusEnum().getRejected());
 
@@ -262,14 +261,13 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
             disburseLoan(loanIdRef.get(), new PostLoansLoanIdRequest().actualDisbursementDate("15 February 2023")
                     .dateFormat(LoanTestData.DATETIME_PATTERN).transactionAmount(BigDecimal.valueOf(500.00)).locale(LoanTestData.LOCALE));
 
-            rescheduleResponse.set(loanHelper.createRescheduleRequestResponse(new PostCreateRescheduleLoansRequest()
-                    .loanId(loanIdRef.get()).dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE)
-                    .submittedOnDate("15 February 2023").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
-                    .rescheduleFromDate("16 February 2023")));
-
-            createRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get())
+            rescheduleResponse.set(loanHelper.createRescheduleRequestResponse(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get())
                     .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE).submittedOnDate("15 February 2023")
-                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023"));
+                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("16 February 2023")));
+
+            createRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(LoanTestData.DATETIME_PATTERN)
+                    .locale(LoanTestData.LOCALE).submittedOnDate("15 February 2023").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
+                    .rescheduleFromDate("16 February 2023"));
         });
         // Do not allow approve an interest rate change if the reschedule from date is not in the future
         // Do not allow create interest rate change if a previous interest rate change got already approved for that
@@ -306,9 +304,9 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
             loanHelper.rejectRescheduleRequest(rescheduleLoansResponse.getResourceId(), new PostUpdateRescheduleLoansRequest()
                     .rejectedOnDate("18 February 2024").locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN));
 
-            createRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get())
-                    .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE).submittedOnDate("18 February 2023")
-                    .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("18 February 2023"));
+            createRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(LoanTestData.DATETIME_PATTERN)
+                    .locale(LoanTestData.LOCALE).submittedOnDate("18 February 2023").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
+                    .rescheduleFromDate("18 February 2023"));
 
         });
     }
@@ -355,8 +353,8 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
 
             GetLoansLoanIdResponse savedLoanResponse = getLoanDetails(loanIdRef.get());
 
-            PostCreateRescheduleLoansResponse rescheduleLoansResponse = rescheduleLoanWithNewInterestRate(loanIdRef.get(), "2 February 2024",
-                    BigDecimal.ONE, "3 February 2024");
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = rescheduleLoanWithNewInterestRate(loanIdRef.get(),
+                    "2 February 2024", BigDecimal.ONE, "3 February 2024");
 
             approveRescheduleRequest(rescheduleLoansResponse.getResourceId(), LoanRequestBuilders.approveReschedule("2 February 2024"));
 
@@ -385,8 +383,8 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
                             .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE).submittedOnDate("1 March 2024")
                             .newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L).rescheduleFromDate("1 April 2024"));
 
-            GetLoanRescheduleRequestResponse getLoanRescheduleRequestResponse = Assertions.assertDoesNotThrow(
-                    () -> loanHelper.readRescheduleRequest(rescheduleLoansResponse.getResourceId(), null));
+            GetLoanRescheduleRequestResponse getLoanRescheduleRequestResponse = Assertions
+                    .assertDoesNotThrow(() -> loanHelper.readRescheduleRequest(rescheduleLoansResponse.getResourceId(), null));
             Assertions.assertNotNull(getLoanRescheduleRequestResponse);
         });
     }
@@ -473,12 +471,13 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
 
     private Long applyForProgressiveLoanWithRecalculation(Long clientId, Long loanProductId, String expectedDisbursementDate,
             String submittedOnDate) {
-        return applyForLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId).expectedDisbursementDate(expectedDisbursementDate)
-                .dateFormat(LoanTestData.DATETIME_PATTERN)
+        return applyForLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId)
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(LoanTestData.DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .locale(LoanTestData.LOCALE).submittedOnDate(submittedOnDate).amortizationType(1).interestRatePerPeriod(BigDecimal.valueOf(7))
-                .interestCalculationPeriodType(0).interestType(0).repaymentFrequencyType(2).repaymentEvery(1).numberOfRepayments(6)
-                .loanTermFrequency(6).loanTermFrequencyType(2).principal(BigDecimal.valueOf(100)).loanType("individual"));
+                .locale(LoanTestData.LOCALE).submittedOnDate(submittedOnDate).amortizationType(1)
+                .interestRatePerPeriod(BigDecimal.valueOf(7)).interestCalculationPeriodType(0).interestType(0).repaymentFrequencyType(2)
+                .repaymentEvery(1).numberOfRepayments(6).loanTermFrequency(6).loanTermFrequencyType(2).principal(BigDecimal.valueOf(100))
+                .loanType("individual"));
     }
 
     private void approveAndDisburseLoan(Long loanId, String date, BigDecimal amount) {
@@ -513,13 +512,14 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
             final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
             String loanScheduleProcessingType) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        return applyForLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId).expectedDisbursementDate(expectedDisbursementDate)
-                .dateFormat(LoanTestData.DATETIME_PATTERN).transactionProcessingStrategyCode(transactionProcessorCode)
-                .locale(LoanTestData.LOCALE).submittedOnDate(submittedOnDate).amortizationType(1).interestRatePerPeriod(interestRate)
-                .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery)
-                .numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency).loanTermFrequencyType(0)
-                .principal(BigDecimal.valueOf(principal)).loanType("individual").loanScheduleProcessingType(loanScheduleProcessingType)
-                .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
+        return applyForLoan(
+                new PostLoansRequest().clientId(clientId).productId(loanProductId).expectedDisbursementDate(expectedDisbursementDate)
+                        .dateFormat(LoanTestData.DATETIME_PATTERN).transactionProcessingStrategyCode(transactionProcessorCode)
+                        .locale(LoanTestData.LOCALE).submittedOnDate(submittedOnDate).amortizationType(1)
+                        .interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0)
+                        .repaymentEvery(repaymentAfterEvery).numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency)
+                        .loanTermFrequencyType(0).principal(BigDecimal.valueOf(principal)).loanType("individual")
+                        .loanScheduleProcessingType(loanScheduleProcessingType).maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
     }
 
     private Long applyForProgressiveLoan(final Long clientId, final Long loanProductId, final double principal, final int loanTermFrequency,
@@ -537,9 +537,9 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
                 AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY, loanScheduleProcessingType.name());
     }
 
-    private Long createProgressiveDownPaymentLoanProduct(final String principal, final int repaymentAfterEvery, final int numberOfRepayments,
-            boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
-            LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
+    private Long createProgressiveDownPaymentLoanProduct(final String principal, final int repaymentAfterEvery,
+            final int numberOfRepayments, boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment,
+            LoanScheduleType loanScheduleType, LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct()//
                 .minPrincipal(Double.parseDouble(principal))//
@@ -609,9 +609,9 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
         final PostLoansRequest loanRequest = new PostLoansRequest()//
                 .loanTermFrequency(4).locale(LoanTestData.LOCALE).loanTermFrequencyType(2).numberOfRepayments(4).repaymentFrequencyType(2)
                 .interestRatePerPeriod(BigDecimal.valueOf(2)).repaymentEvery(1).principal(principal).amortizationType(1).interestType(0)
-                .interestCalculationPeriodType(0).dateFormat(LoanTestData.DATETIME_PATTERN).transactionProcessingStrategyCode(DEFAULT_STRATEGY)
-                .loanType("individual").submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisburmentDate).clientId(clientId)
-                .productId(loanProductId);
+                .interestCalculationPeriodType(0).dateFormat(LoanTestData.DATETIME_PATTERN)
+                .transactionProcessingStrategyCode(DEFAULT_STRATEGY).loanType("individual").submittedOnDate(submittedOnDate)
+                .expectedDisbursementDate(expectedDisburmentDate).clientId(clientId).productId(loanProductId);
         return applyForLoan(loanRequest);
     }
 

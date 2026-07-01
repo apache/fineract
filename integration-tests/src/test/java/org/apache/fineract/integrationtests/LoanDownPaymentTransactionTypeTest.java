@@ -73,8 +73,8 @@ public class LoanDownPaymentTransactionTypeTest extends FeignLoanTestBase {
         LocalDate adjustmentDate = LocalDate.of(2022, Month.SEPTEMBER, 7);
         String formattedDate = dateFormatter.format(adjustmentDate);
         PostLoansLoanIdTransactionsResponse adjustmentResult = reverseLoanTransaction(loanExternalIdStr, loanDownPaymentTransaction.getId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en")
-                        .dateFormat("dd MMMM yyyy").transactionAmount(0.0));
+                new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
+                        .transactionAmount(0.0));
 
         assertNotNull(adjustmentResult);
         assertEquals(loanDownPaymentTransaction.getId(), adjustmentResult.getResourceId());
@@ -98,8 +98,8 @@ public class LoanDownPaymentTransactionTypeTest extends FeignLoanTestBase {
         adjustmentDate = LocalDate.of(2022, Month.SEPTEMBER, 12);
         formattedDate = dateFormatter.format(adjustmentDate);
         PostLoansLoanIdTransactionsResponse adjustmentResult_1 = reverseLoanTransaction(loanExternalIdStr, downPaymentExternalIdStr,
-                new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en")
-                        .dateFormat("dd MMMM yyyy").transactionAmount(0.0));
+                new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
+                        .transactionAmount(0.0));
 
         assertNotNull(adjustmentResult_1);
         assertEquals(loanDownPaymentTransaction_1.getId(), adjustmentResult_1.getResourceId());

@@ -88,9 +88,8 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest extends Feig
         assertEquals(100.0, loanTransaction.getPrincipalPortion());
 
         PostLoansLoanIdTransactionsResponse chargebackTransactionResponse = chargebackLoanTransaction(loanExternalIdStr,
-                repaymentTransaction_3.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE).transactionAmount(300.0)
-                        .paymentTypeId(1L));
+                repaymentTransaction_3.getResourceId(), new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE)
+                        .transactionAmount(300.0).paymentTypeId(1L));
 
         assertNotNull(chargebackTransactionResponse);
         GetLoansLoanIdResponse loanDetailsAfterChargeback = getLoanDetails(loanId);
@@ -125,8 +124,7 @@ public class LoanTransactionFullAmountChargebackForOverpaidLoanTest extends Feig
         return createLoanProduct(product);
     }
 
-    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId,
-            final String repaymentStrategy) {
+    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId, final String repaymentStrategy) {
         PostLoansRequest request = applyLoanRequest(clientId, loanProductId, "01 September 2022", 1000.0, 1,
                 req -> req.externalId(externalId).expectedDisbursementDate("03 September 2022").repaymentEvery(1)
                         .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS).loanTermFrequency(1)

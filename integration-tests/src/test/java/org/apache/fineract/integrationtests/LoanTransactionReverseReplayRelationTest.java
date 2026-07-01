@@ -49,9 +49,8 @@ public class LoanTransactionReverseReplayRelationTest extends FeignLoanTestBase 
         final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
 
         // Client and Loan account creation
-        final Long productId = createLoanProductFromJson(
-                new com.google.gson.Gson().toJson(
-                        new org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder().build(null, delinquencyBucketId)));
+        final Long productId = createLoanProductFromJson(new com.google.gson.Gson()
+                .toJson(new org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder().build(null, delinquencyBucketId)));
         assertNotNull(productId);
 
         String loanApplicationJSON = new org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder()

@@ -62,9 +62,8 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
         assertNotNull(product);
         assertEquals(false, product.getEnableDownPayment());
 
-        PutLoanProductsProductIdResponse modifyResponse = updateLoanProduct(product.getId(),
-                new PutLoanProductsProductIdRequest().enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25.0))
-                        .locale("en"));
+        PutLoanProductsProductIdResponse modifyResponse = updateLoanProduct(product.getId(), new PutLoanProductsProductIdRequest()
+                .enableDownPayment(true).disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25.0)).locale("en"));
         assertNotNull(modifyResponse);
 
         product = retrieveLoanProduct(modifyResponse.getResourceId());
@@ -78,24 +77,22 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
         Boolean enableDownPayment = true;
 
         ArrayList<HashMap<String, Object>> loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "0", false).build(null,
-                        delinquencyBucketId)),
+                Utils.convertToJson(
+                        new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "0", false).build(null, delinquencyBucketId)),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.is.less.than.min",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "101", false).build(null,
-                        delinquencyBucketId)),
+        loanProductErrorData = getLoanProductError(Utils.convertToJson(
+                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "101", false).build(null, delinquencyBucketId)),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.is.greater.than.max",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "12.55555555", false)
-                        .build(null, delinquencyBucketId)),
+        loanProductErrorData = getLoanProductError(Utils.convertToJson(new LoanProductTestBuilder()
+                .withEnableDownPayment(enableDownPayment, "12.55555555", false).build(null, delinquencyBucketId)),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.scale.is.greater.than.6",
@@ -109,9 +106,8 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.supported.only.for.enable.down.payment.true",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, null, false).build(null,
-                        delinquencyBucketId)),
+        loanProductErrorData = getLoanProductError(Utils.convertToJson(
+                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, null, false).build(null, delinquencyBucketId)),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.required.for.enable.down.payment.true",

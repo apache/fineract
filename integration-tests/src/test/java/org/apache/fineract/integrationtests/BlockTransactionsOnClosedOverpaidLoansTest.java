@@ -36,13 +36,16 @@ import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
+@ExtendWith(LoanTestLifecycleExtension.class)
 public class BlockTransactionsOnClosedOverpaidLoansTest {
 
     private ResponseSpecification responseSpec;
@@ -79,7 +82,7 @@ public class BlockTransactionsOnClosedOverpaidLoansTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         final Integer loanProductID = createLoanProduct();
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "1000", "01 January 2024");
+        final Integer loanID = createLoanApplication(clientID, loanProductID, "1000", "01 January 2024");
 
         this.loanTransactionHelper.approveLoan("01 January 2024", loanID);
         this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("01 January 2024", loanID, "1000");
@@ -116,7 +119,7 @@ public class BlockTransactionsOnClosedOverpaidLoansTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         final Integer loanProductID = createLoanProduct();
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "1000", "01 January 2024");
+        final Integer loanID = createLoanApplication(clientID, loanProductID, "1000", "01 January 2024");
 
         this.loanTransactionHelper.approveLoan("01 January 2024", loanID);
         this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("01 January 2024", loanID, "1000");
@@ -165,7 +168,7 @@ public class BlockTransactionsOnClosedOverpaidLoansTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate) {
+    private Integer createLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //

@@ -26,12 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
-import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -133,8 +132,8 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest extends FeignLoanTest
 
             AtomicReference<PostLoansLoanIdTransactionsResponse> writeOffTransaction = new AtomicReference<>();
             runAt("10 September 2022", () -> {
-                writeOffTransaction.set(writeOffLoan(loanExternalIdStr,
-                        LoanRequestBuilders.writeOff("10 September 2022").note("test WriteOff")));
+                writeOffTransaction
+                        .set(writeOffLoan(loanExternalIdStr, LoanRequestBuilders.writeOff("10 September 2022").note("test WriteOff")));
                 assertTrue(getLoanDetails(loanId).getStatus().getClosedWrittenOff());
             });
 

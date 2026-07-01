@@ -153,11 +153,13 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
-        approveLoan(this.loanId, new org.apache.fineract.client.models.PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(15000))
-                .approvedOnDate(submittedDate).dateFormat(LoanTestData.ISO_DATE_PATTERN).locale(LoanTestData.LOCALE));
-        disburseLoan(this.loanId, new org.apache.fineract.client.models.PostLoansLoanIdRequest()
-                .actualDisbursementDate(submittedDate).transactionAmount(getLoanDetails(this.loanId).getNetDisbursalAmount())
-                .dateFormat(LoanTestData.ISO_DATE_PATTERN).locale(LoanTestData.LOCALE));
+        approveLoan(this.loanId,
+                new org.apache.fineract.client.models.PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(15000))
+                        .approvedOnDate(submittedDate).dateFormat(LoanTestData.ISO_DATE_PATTERN).locale(LoanTestData.LOCALE));
+        disburseLoan(this.loanId,
+                new org.apache.fineract.client.models.PostLoansLoanIdRequest().actualDisbursementDate(submittedDate)
+                        .transactionAmount(getLoanDetails(this.loanId).getNetDisbursalAmount()).dateFormat(LoanTestData.ISO_DATE_PATTERN)
+                        .locale(LoanTestData.LOCALE));
         LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
     }
 
@@ -249,11 +251,13 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
-        approveLoan(this.loanId, new org.apache.fineract.client.models.PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(15000))
-                .approvedOnDate(submittedDate).dateFormat(LoanTestData.ISO_DATE_PATTERN).locale(LoanTestData.LOCALE));
-        disburseLoan(this.loanId, new org.apache.fineract.client.models.PostLoansLoanIdRequest()
-                .actualDisbursementDate(submittedDate).transactionAmount(getLoanDetails(this.loanId).getNetDisbursalAmount())
-                .dateFormat(LoanTestData.ISO_DATE_PATTERN).locale(LoanTestData.LOCALE));
+        approveLoan(this.loanId,
+                new org.apache.fineract.client.models.PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(15000))
+                        .approvedOnDate(submittedDate).dateFormat(LoanTestData.ISO_DATE_PATTERN).locale(LoanTestData.LOCALE));
+        disburseLoan(this.loanId,
+                new org.apache.fineract.client.models.PostLoansLoanIdRequest().actualDisbursementDate(submittedDate)
+                        .transactionAmount(getLoanDetails(this.loanId).getNetDisbursalAmount()).dateFormat(LoanTestData.ISO_DATE_PATTERN)
+                        .locale(LoanTestData.LOCALE));
         LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
     }
 

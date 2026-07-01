@@ -191,9 +191,9 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
 
     private void approveAndDisburseLoan(Long loanId, double amount, String date) {
         approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, date));
-        disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(date)
-                .transactionAmount(getLoanDetails(loanId).getNetDisbursalAmount()).dateFormat(LoanTestData.DATETIME_PATTERN)
-                .locale(LoanTestData.LOCALE));
+        disburseLoan(loanId,
+                new PostLoansLoanIdRequest().actualDisbursementDate(date).transactionAmount(getLoanDetails(loanId).getNetDisbursalAmount())
+                        .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE));
         LOG.info("Successfully disbursed loan (ID: {} )", loanId);
     }
 
@@ -220,8 +220,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
     }
 
     private void createLoanRescheduleRequestWhichFailsAsLoanIdChargedOff() {
-        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId,
-                dateString, "04 January 2015", "04 October 2015");
+        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId, dateString,
+                "04 January 2015", "04 October 2015");
 
         chargeOffLoan(this.loanId, "04 January 2015");
 
@@ -238,8 +238,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
-        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId,
-                dateString, "04 January 2015", "04 October 2015");
+        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId, dateString,
+                "04 January 2015", "04 October 2015");
 
         this.loanRescheduleRequestId = createRescheduleRequest(rescheduleRequest);
 
@@ -269,8 +269,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
 
-        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId,
-                dateString, "04 January 2015", "04 October 2015");
+        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId, dateString,
+                "04 January 2015", "04 October 2015");
 
         this.loanRescheduleRequestId = createRescheduleRequest(rescheduleRequest);
 
@@ -300,8 +300,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
-        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithFixedEmiAndRecalculateInterest(
-                this.loanId, dateString, "04 January 2015", "04 July 2015", BigDecimal.valueOf(5000), "4 September 2015");
+        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithFixedEmiAndRecalculateInterest(this.loanId,
+                dateString, "04 January 2015", "04 July 2015", BigDecimal.valueOf(5000), "4 September 2015");
 
         this.loanRescheduleRequestId = createRescheduleRequest(rescheduleRequest);
 
@@ -334,8 +334,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
-        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId,
-                dateString, "04 December 2015", "04 June 2016");
+        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId, dateString,
+                "04 December 2015", "04 June 2016");
 
         this.loanRescheduleRequestId = createRescheduleRequest(rescheduleRequest);
 
@@ -389,8 +389,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
                 .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
                 .withInterestRatePerPeriod("25").withInterestTypeAsDecliningBalance().withSubmittedOnDate(this.dateString)
                 .withExpectedDisbursementDate(this.dateString).withFirstRepaymentDate("01 January 2015")
-                .withinterestChargedFromDate(this.dateString)
-                .build(this.clientId.toString(), this.loanProductId.toString(), null);
+                .withinterestChargedFromDate(this.dateString).build(this.clientId.toString(), this.loanProductId.toString(), null);
 
         this.loanId = applyForLoanFromJson(loanApplicationJSON);
 
@@ -403,8 +402,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
 
-        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId,
-                dateString, "01 March 2015", "01 July 2015");
+        PostCreateRescheduleLoansRequest rescheduleRequest = LoanRequestBuilders.rescheduleWithRecalculateInterest(this.loanId, dateString,
+                "01 March 2015", "01 July 2015");
 
         this.loanRescheduleRequestId = createRescheduleRequest(rescheduleRequest);
 

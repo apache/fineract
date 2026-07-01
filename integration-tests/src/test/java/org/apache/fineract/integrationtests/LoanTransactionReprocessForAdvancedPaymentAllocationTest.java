@@ -113,8 +113,7 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends Fe
     private void verifyRepaymentTransaction(Long loanId, String date, double amount, double principalPortion, double interestPortion,
             double feePortion, double penaltyPortion) {
         GetLoansLoanIdTransactions repayment = getLoanDetails(loanId).getTransactions().stream()
-                .filter(tx -> Boolean.TRUE.equals(tx.getType().getRepayment())
-                        && date.equals(tx.getDate().format(dateTimeFormatter)))
+                .filter(tx -> Boolean.TRUE.equals(tx.getType().getRepayment()) && date.equals(tx.getDate().format(dateTimeFormatter)))
                 .findFirst().orElseThrow();
         assertEquals(amount, Utils.getDoubleValue(repayment.getAmount()));
         assertEquals(principalPortion, Utils.getDoubleValue(repayment.getPrincipalPortion()));

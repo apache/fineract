@@ -258,8 +258,8 @@ public final class LoanRequestBuilders {
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 
-    public static PostCreateRescheduleLoansRequest rescheduleWithExtraTerms(Long loanId, String submittedOnDate,
-            String rescheduleFromDate, Integer extraTerms) {
+    public static PostCreateRescheduleLoansRequest rescheduleWithExtraTerms(Long loanId, String submittedOnDate, String rescheduleFromDate,
+            Integer extraTerms) {
         return new PostCreateRescheduleLoansRequest()//
                 .loanId(loanId)//
                 .submittedOnDate(submittedOnDate)//
@@ -410,9 +410,9 @@ public final class LoanRequestBuilders {
         AdvancedPaymentData data = new AdvancedPaymentData();
         data.setTransactionType("REPAYMENT");
         data.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-        data.setPaymentAllocationOrder(paymentAllocationOrder("PAST_DUE_PENALTY", "PAST_DUE_FEE", "PAST_DUE_INTEREST",
-                "PAST_DUE_PRINCIPAL", "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY",
-                "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_INTEREST"));
+        data.setPaymentAllocationOrder(paymentAllocationOrder("PAST_DUE_PENALTY", "PAST_DUE_FEE", "PAST_DUE_INTEREST", "PAST_DUE_PRINCIPAL",
+                "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL",
+                "IN_ADVANCE_INTEREST"));
         return data;
     }
 
@@ -420,9 +420,9 @@ public final class LoanRequestBuilders {
         AdvancedPaymentData data = new AdvancedPaymentData();
         data.setTransactionType("INTEREST_PAYMENT_WAIVER");
         data.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-        data.setPaymentAllocationOrder(paymentAllocationOrder("PAST_DUE_FEE", "PAST_DUE_PENALTY", "PAST_DUE_INTEREST",
-                "PAST_DUE_PRINCIPAL", "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY",
-                "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_INTEREST"));
+        data.setPaymentAllocationOrder(paymentAllocationOrder("PAST_DUE_FEE", "PAST_DUE_PENALTY", "PAST_DUE_INTEREST", "PAST_DUE_PRINCIPAL",
+                "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL",
+                "IN_ADVANCE_INTEREST"));
         return data;
     }
 

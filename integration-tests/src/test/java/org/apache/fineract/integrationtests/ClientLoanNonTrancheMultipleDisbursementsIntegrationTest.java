@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -147,12 +148,12 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
         long repaymentPeriodCount = schedule.stream().filter(p -> p.getPeriod() != null).count();
         Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
-        Assertions.assertEquals(approved, loanDetails.getSummary().getPrincipalDisbursed());
-        Assertions.assertEquals(approved, loanDetails.getSummary().getPrincipalOutstanding());
+        Assertions.assertTrue(BigDecimal.valueOf(approved).compareTo(loanDetails.getSummary().getPrincipalDisbursed()) == 0);
+        Assertions.assertTrue(BigDecimal.valueOf(approved).compareTo(loanDetails.getSummary().getPrincipalOutstanding()) == 0);
 
         LOG.info("------------------------------- 2nd DISBURSE non-tranch multi-disbursal loan       ----------");
         final Double anotherDisbursalAmount = 900.00;
-        disburseLoanWithNetDisbursalAmount(loanID, submitDate, anotherDisbursalAmount.toString());
+        disburseLoan(loanID, submitDate, anotherDisbursalAmount);
         verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         loanDetails = getLoanDetails(loanID);
@@ -161,13 +162,13 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
         Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
         Double disbursedSum = approved + anotherDisbursalAmount;
-        Assertions.assertEquals(disbursedSum, loanDetails.getSummary().getPrincipalDisbursed());
-        Assertions.assertEquals(disbursedSum, loanDetails.getSummary().getPrincipalOutstanding());
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalDisbursed()) == 0);
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalOutstanding()) == 0);
 
         LOG.info("------------------------------- 3rd DISBURSE non-tranch multi-disbursal loan       ----------");
         final Double thirdDisbursalAmount = 500.00;
         String thirdDisbursalDate = "03 February 2021";
-        disburseLoanWithNetDisbursalAmount(loanID, thirdDisbursalDate, thirdDisbursalAmount.toString());
+        disburseLoan(loanID, thirdDisbursalDate, thirdDisbursalAmount);
         verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
         loanDetails = getLoanDetails(loanID);
@@ -176,8 +177,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
         Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
         disbursedSum = disbursedSum + thirdDisbursalAmount;
-        Assertions.assertEquals(disbursedSum, loanDetails.getSummary().getPrincipalDisbursed());
-        Assertions.assertEquals(disbursedSum, loanDetails.getSummary().getPrincipalOutstanding());
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalDisbursed()) == 0);
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalOutstanding()) == 0);
     }
 
     @Test
