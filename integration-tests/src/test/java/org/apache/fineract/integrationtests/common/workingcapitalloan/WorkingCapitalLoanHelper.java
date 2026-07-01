@@ -138,9 +138,14 @@ public class WorkingCapitalLoanHelper {
                 .getResourceId();
     }
 
-    public Long makeRepaymentByLoanExternalId(final String loanExternalId, final PostWorkingCapitalLoanTransactionsRequest request) {
-        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, request,
-                Map.of("command", "repayment"))).getResourceId();
+    public void undoTransactionByLoanId(final Long loanId, final Long transactionId) {
+        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, transactionId,
+                "undo", new ExecuteWorkingCapitalLoanTransactionCommandRequest()));
+    }
+
+    public void makeRepaymentByLoanExternalId(final String loanExternalId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, request,
+                Map.of("command", "repayment")));
     }
 
     public void undoTransactionById(final Long loanId, final Long transactionId) {

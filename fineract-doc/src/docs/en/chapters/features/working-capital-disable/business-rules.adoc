@@ -1,0 +1,49 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Business Rules
+
+The rules below apply symmetrically to Delinquency and Breach unless a column notes
+otherwise. Origins point at the two `parseAndValidateDisableOrEnable` / `validateDisableState`
+validator methods and the write services.
+
+[cols="1,1,3,1,2"]
+|===
+|*ID* |*Category* |*Rule* |*Type* |*Origin in code*
+
+|RN-001 |Authorization |Any action requires the base create permission; `disable`/`enable` additionally require the dedicated disable permission. |Precondition |`*ApiResource` (permission checks)
+|RN-002 |State |The loan must be `ACTIVE`; disable/enable on a non-active loan is rejected. |Precondition |`*ParseAndValidator` (loan-state check)
+|RN-003 |Temporal |`startDate` must equal the current business date; backdating or future-dating is rejected. |Precondition |`parseAndValidateDisableOrEnable` — `must.be.current.business.date`
+|RN-004 |Input |`endDate` must not be present for a `disable`/`enable`. |Precondition |`parseAndValidateDisableOrEnable` — `must.not.be.provided.for.disable.or.enable`
+|RN-005 |Invariant |At most one open disable per loan: a second `disable` while one is active is rejected. |Precondition |`validateDisableState` — `*.already.disabled`
+|RN-006 |Invariant |`enable` requires an active disable; enabling when nothing is disabled is rejected. |Precondition |`validateDisableState` — `no.active.*.disable.to.enable`
+|RN-007 |Behaviour |While disabled, `pause`, `resume`, `reschedule` (and `reset` for breach) are blocked. |Guard |`validateBreachNotDisabled` / `validateDelinquencyNotDisabled` — `*.is.disabled`
+|RN-008 |Behaviour |For breach, `undo_reset` is the only action allowed while disabled (corrective bypass). |Exception |Breach validator (undo-reset bypass)
+|RN-009 |Effect (disable) |Delinquency disable lifts the active classification tag as of the disable date; while disabled, classification is skipped. |Postcondition |`WorkingCapitalLoanDelinquencyClassificationServiceImpl` (skip + lift)
+|RN-010 |Effect (disable) |Breach disable suppresses breach evaluation and schedule updates from repayments while disabled. |Postcondition |`WorkingCapitalLoanBreachScheduleServiceImpl` (skip guards)
+|RN-011 |Effect (enable) |Delinquency enable adds a dedicated `ENABLE` row, closes the disable (`end_date` = today − 1), extends open periods by the disabled days (pause-like) and re-classifies as of today. |Postcondition |`WorkingCapitalLoanDelinquencyActionWriteServiceImpl`
+|RN-012 |Effect (enable) |Breach enable closes the disable (`end_date` = today − 1) and reprocesses the breach schedule, applying repayments accrued while disabled. |Postcondition |`WorkingCapitalLoanBreachActionWriteServiceImpl` → `reprocessBreachSchedule`
+|===
+
+[IMPORTANT]
+====
+RN-003 and RN-004 together mean disable/enable are strictly "now" operations with an
+open-ended window: the operator cannot choose the disable window boundaries directly. The
+window opens at the disable business date and closes at the enable business date.
+====

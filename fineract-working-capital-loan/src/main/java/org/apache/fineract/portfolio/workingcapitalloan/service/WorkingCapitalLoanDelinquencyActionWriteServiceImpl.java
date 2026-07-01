@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
     private final WorkingCapitalLoanDelinquencyActionParseAndValidator validator;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
     private final PlatformSecurityContext context;
+    private final WorkingCapitalLoanDelinquencyClassificationService classificationService;
 
     @Transactional
     @Override
@@ -61,10 +63,24 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
 
         final WorkingCapitalLoanDelinquencyAction action = validator.validateAndParse(command, workingCapitalLoan, existing);
 
+        // A disable/enable is routed through the same create command (like the breach actions) and, as with breach,
+        // each is persisted as its own row: an enable adds an ENABLE row and separately closes the open disable window.
         final WorkingCapitalLoanDelinquencyAction saved = actionRepository.saveAndFlush(action);
         log.debug("Created WC loan delinquency action {} for loan {}", action.getAction(), workingCapitalLoanId);
 
-        if (DelinquencyAction.PAUSE.equals(action.getAction())) {
+        if (DelinquencyAction.ENABLE.equals(action.getAction())) {
+            // Mirror breach action management: close the open disable at the day before the enable date so the loan
+            // stops being considered disabled from the enable date on.
+            final LocalDate enableDate = action.getStartDate();
+            final WorkingCapitalLoanDelinquencyAction activeDisable = validator.findActiveDisable(existing);
+            activeDisable.setEndDate(enableDate.minusDays(1));
+            // Effect specific to delinquency (breach reprocesses its own breach schedule instead): the disabled window
+            // is treated as a pause so it does not count towards delinquency, then classification is recomputed as of
+            // the enable date.
+            rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, activeDisable.getStartDate(), enableDate);
+            rangeScheduleService.evaluateExpiredPeriods(workingCapitalLoan, enableDate);
+            classificationService.classifyDelinquency(workingCapitalLoan, enableDate);
+        } else if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, action.getStartDate(), action.getEndDate());
         } else if (DelinquencyAction.RESCHEDULE.equals(action.getAction())) {
             rangeScheduleService.rescheduleMinimumPayment(workingCapitalLoan);
@@ -82,6 +98,8 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
                     .findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
             rangeScheduleService.undoResetPeriods(workingCapitalLoan, action, byWorkingCapitalLoanIdOrderById);
             rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+        } else if (DelinquencyAction.DISABLE.equals(action.getAction())) {
+            classificationService.liftDelinquencyClassification(workingCapitalLoan, action.getStartDate());
         }
 
         return new CommandProcessingResultBuilder() //

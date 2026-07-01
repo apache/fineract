@@ -23,5 +23,7 @@ public enum DelinquencyAction {
     RESUME, //
     RESCHEDULE, //
     RESET, //
-    UNDO_RESET //
+    UNDO_RESET, //
+    DISABLE, //
+    ENABLE //
 }

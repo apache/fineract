@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -31,5 +34,12 @@ public interface WorkingCapitalLoanDelinquencyActionRepository extends JpaReposi
 
     List<WorkingCapitalLoanDelinquencyAction> findByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             DelinquencyAction action);
+
+    @Query("""
+            select case when count(action) > 0 then true else false end from WorkingCapitalLoanDelinquencyAction action
+            where action.action = org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.DISABLE
+            and action.workingCapitalLoan.id = :loanId and action.startDate <= :date and (action.endDate is null or action.endDate >= :date)
+            """)
+    boolean isDelinquencyDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
 
 }

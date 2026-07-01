@@ -36,4 +36,6 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository
             WorkingCapitalLoanDelinquencyRangeSchedule rangeSchedule, LocalDate liftedOnDate);
 
     List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> findByLoanIdOrderByAddedOnDateDesc(Long loanId);
+
+    List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> findByLoanIdAndLiftedOnDateIsNull(Long loanId);
 }
