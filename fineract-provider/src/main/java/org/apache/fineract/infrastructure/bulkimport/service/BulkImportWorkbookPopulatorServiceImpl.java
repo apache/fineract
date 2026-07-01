@@ -28,6 +28,7 @@ import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.data.LookupMode;
 import org.apache.fineract.infrastructure.bulkimport.populator.CenterSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ChargeSheetPopulator;
 import org.apache.fineract.infrastructure.bulkimport.populator.ClientSheetPopulator;
@@ -175,7 +176,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     @Override
-    public Response getTemplate(String entityType, Long officeId, Long staffId, final String dateFormat) {
+    public Response getTemplate(String entityType, Long officeId, Long staffId, final String dateFormat, final LookupMode lookupMode) {
         WorkbookPopulator populator = null;
         final Workbook workbook = new HSSFWorkbook();
         if (entityType != null) {
@@ -189,7 +190,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.LOANS.toString())) {
                 populator = populateLoanWorkbook(officeId, staffId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.LOAN_TRANSACTIONS.toString())) {
-                populator = populateLoanRepaymentWorkbook(officeId);
+                populator = populateLoanRepaymentWorkbook(officeId, lookupMode);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.GL_JOURNAL_ENTRIES.toString())) {
                 populator = populateJournalEntriesWorkbook(officeId);
             } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.GUARANTORS.toString())) {
@@ -420,20 +421,25 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         return groups;
     }
 
-    private WorkbookPopulator populateLoanRepaymentWorkbook(Long officeId) {
+    private WorkbookPopulator populateLoanRepaymentWorkbook(Long officeId, LookupMode lookupMode) {
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.OFFICE_ENTITY_TYPE);
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.CLIENT_ENTITY_TYPE);
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.FUNDS_ENTITY_TYPE);
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.PAYMENT_TYPE_ENTITY_TYPE);
         this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.CURRENCY_ENTITY_TYPE);
+        // FINERACT-2668: the Extras (payment types) sheet is small and read back at import, so it is always built. The
+        // clients/offices lookup sheets and the per-loan lookup table are tenant-wide and are NOT read at import (the
+        // handler resolves the loan from the typed account number), so they are omittable — all or nothing:
+        // EXCLUDE = lean (fetch none); otherwise the full template fetches every client/loan (unchanged behaviour).
+        ExtrasSheetPopulator extras = new ExtrasSheetPopulator(fetchFunds(), fetchPaymentTypes(), fetchCurrencies());
+        if (lookupMode == LookupMode.EXCLUDE) {
+            return LoanRepaymentWorkbookPopulator.lean(extras);
+        }
         List<OfficeData> offices = fetchOffices(officeId);
         List<ClientData> clients = fetchClients(officeId);
-        List<FundData> funds = fetchFunds();
-        List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
-        List<CurrencyData> currencies = fetchCurrencies();
         List<LoanAccountData> loans = fetchLoanAccounts(officeId);
-        return new LoanRepaymentWorkbookPopulator(loans, new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
-                new ExtrasSheetPopulator(funds, paymentTypes, currencies));
+        return LoanRepaymentWorkbookPopulator.full(loans, new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
+                extras);
     }
 
     private List<LoanAccountData> fetchLoanAccounts(final Long officeId) {

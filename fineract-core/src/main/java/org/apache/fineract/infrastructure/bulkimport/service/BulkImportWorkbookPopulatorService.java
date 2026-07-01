@@ -19,8 +19,19 @@
 package org.apache.fineract.infrastructure.bulkimport.service;
 
 import jakarta.ws.rs.core.Response;
+import org.apache.fineract.infrastructure.bulkimport.data.LookupMode;
 
 public interface BulkImportWorkbookPopulatorService {
 
-    Response getTemplate(String entityType, Long officeId, Long staffId, String dateFormat);
+    /**
+     * @param lookupMode
+     *            controls whether tenant-wide lookup sheets (clients, offices) and their in-sheet dropdown/VLOOKUP
+     *            machinery are embedded in the template (see {@link LookupMode}). Honoured by templates that opt in
+     *            (loan repayment); ignored by the rest.
+     */
+    Response getTemplate(String entityType, Long officeId, Long staffId, String dateFormat, LookupMode lookupMode);
+
+    default Response getTemplate(String entityType, Long officeId, Long staffId, String dateFormat) {
+        return getTemplate(entityType, officeId, staffId, dateFormat, LookupMode.INCLUDE);
+    }
 }
