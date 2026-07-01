@@ -78,6 +78,14 @@ public class FeignChargesHelper {
         return createCharge(ChargeRequestBuilders.loanDisbursementFee(amount)).getResourceId();
     }
 
+    public Long createLoanSpecifiedDueDatePenalty(double amount) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePenalty(amount)).getResourceId();
+    }
+
+    public Long createLoanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageAmountAndInterestFee(amount)).getResourceId();
+    }
+
     public Long createClientSpecifiedDueDateCharge(double amount) {
         return createCharge(ChargeRequestBuilders.clientSpecifiedDueDateFee(amount)).getResourceId();
     }
