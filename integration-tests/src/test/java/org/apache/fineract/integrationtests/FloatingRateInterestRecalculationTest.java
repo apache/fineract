@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostFloatingRatesResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -154,7 +156,8 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
         loanProductMap.put("defaultDifferentialLendingRate", "0");
         loanProductMap.put("maxDifferentialLendingRate", "50");
 
-        return getLoanProductId(Utils.convertToJson(loanProductMap));
+        String responseJson = FeignRawHttpHelper.post("/loanproducts", Utils.convertToJson(loanProductMap));
+        return JsonParser.parseString(responseJson).getAsJsonObject().get("resourceId").getAsInt();
     }
 
     private Long createAndDisburseLoan(Long clientId, Integer loanProductId, String disburseDateStr) {
@@ -165,7 +168,7 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
                 .withExpectedDisbursementDate(disburseDateStr).withSubmittedOnDate(disburseDateStr).withLoanType("individual")
                 .build(clientId.toString(), loanProductId.toString(), null);
 
-        com.google.gson.JsonObject jsonObject = com.google.gson.JsonParser.parseString(loanApplicationJSON).getAsJsonObject();
+        JsonObject jsonObject = JsonParser.parseString(loanApplicationJSON).getAsJsonObject();
         jsonObject.remove("interestRatePerPeriod");
         jsonObject.addProperty("interestRateDifferential", "0");
         jsonObject.addProperty("isFloatingInterestRate", true);

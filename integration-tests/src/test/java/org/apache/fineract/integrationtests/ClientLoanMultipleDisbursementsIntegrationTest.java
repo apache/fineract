@@ -78,7 +78,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         return createLoanProductFromJson(loanProductJSON);
     }
 
-    private Long applyForLoanApplicationWithTranches(final Long clientID, final Long loanProductID, String principal,
+    private Long applyForLoanApplicationWithTranches(final Long clientId, final Long loanProductID, String principal,
             List<HashMap> tranches, String submitDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -95,7 +95,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
                 .withExpectedDisbursementDate(submitDate) //
                 .withTranches(tranches) //
                 .withSubmittedOnDate(submitDate) //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .build(clientId.toString(), loanProductID.toString(), null);
         return applyForLoanFromJson(loanApplicationJSON);
     }
 
@@ -204,7 +204,8 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         assertTrue(expectedPrincipalDue.compareTo(principalDue) == 0, "Checking Principal Due is 255");
 
         final BigDecimal principalLoanBalanceOutstanding = lastPeriod.getPrincipalLoanBalanceOutstanding();
-        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0, "Checking Principal Loan Balance Outstanding is zero");
+        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0,
+                "Checking Principal Loan Balance Outstanding is zero");
     }
 
     @Test
@@ -276,7 +277,8 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         assertTrue(expectedPrincipalOutstanding.compareTo(principalOutstanding) == 0, "Checking Principal Due is 2");
 
         final BigDecimal principalLoanBalanceOutstanding = lastPeriod.getPrincipalLoanBalanceOutstanding();
-        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0, "Checking Principal Loan Balance Outstanding is zero");
+        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0,
+                "Checking Principal Loan Balance Outstanding is zero");
     }
 
     @Test
@@ -348,6 +350,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         assertTrue(expectedPrincipalOutstanding.compareTo(principalOutstanding) == 0, "Checking Principal Due is 2");
 
         final BigDecimal principalLoanBalanceOutstanding = lastPeriod.getPrincipalLoanBalanceOutstanding();
-        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0, "Checking Principal Loan Balance Outstanding is zero");
+        assertTrue(expectedPrincipalLoanBalanceOutstanding.compareTo(principalLoanBalanceOutstanding) == 0,
+                "Checking Principal Loan Balance Outstanding is zero");
     }
 }

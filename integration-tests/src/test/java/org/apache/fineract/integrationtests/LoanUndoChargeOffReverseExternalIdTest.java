@@ -61,16 +61,16 @@ public class LoanUndoChargeOffReverseExternalIdTest extends FeignLoanTestBase {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.assetAccount = this.accountHelper.createAssetAccount();
-        this.incomeAccount = this.accountHelper.createIncomeAccount();
-        this.expenseAccount = this.accountHelper.createExpenseAccount();
-        this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        this.restAccountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.assetAccount = this.restAccountHelper.createAssetAccount();
+        this.incomeAccount = this.restAccountHelper.createIncomeAccount();
+        this.expenseAccount = this.restAccountHelper.createExpenseAccount();
+        this.overpaymentAccount = this.restAccountHelper.createLiabilityAccount();
     }
 
     private LoanTransactionHelper loanTransactionHelper;
 
-    private AccountHelper accountHelper;
+    private AccountHelper restAccountHelper;
     private Account assetAccount;
     private Account incomeAccount;
     private Account expenseAccount;

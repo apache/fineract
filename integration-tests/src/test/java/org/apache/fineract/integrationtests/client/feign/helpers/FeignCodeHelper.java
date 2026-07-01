@@ -43,7 +43,7 @@ public class FeignCodeHelper {
     }
 
     public GetCodesResponse retrieveCodeByName(String codeName) {
-        return ok(() -> fineractClient.codes().retrieveCodeByName(codeName));
+        return ok(() -> fineractClient.codes().retrieveOneCodeByName(codeName));
     }
 
     public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {

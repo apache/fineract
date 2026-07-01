@@ -66,7 +66,7 @@ public class LoanTransactionReverseReplayRelationTest extends FeignLoanTestBase 
         disburseLoanWithNetDisbursalAmount(loanId, "03 September 2022", "1000");
 
         // Add Charge
-        Long penaltyChargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(10.0);
+        Long penaltyChargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(10.0).getResourceId();
 
         addLoanCharge(loanId, penaltyChargeId, "07 September 2022", 10.0);
 

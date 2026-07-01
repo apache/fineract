@@ -72,10 +72,7 @@ public class FeignJournalEntryHelper {
         assertEquals(expectedEntries.length, actualEntries.size(),
                 "Expected " + expectedEntries.length + " journal entries but found " + actualEntries.size() + ": " + actualEntries);
 
-        for (LoanTestData.Journal expected : expectedEntries) {
-            boolean found = actualEntries.stream().anyMatch(item -> matchesJournalEntry(item, expected));
-            assertTrue(found, "Required journal entry not found: " + expected);
-        }
+        verifyJournalEntriesMatch(new ArrayList<>(actualEntries), expectedEntries);
     }
 
     private static void verifyJournalEntriesMatch(List<JournalEntryTransactionItem> actualEntries, LoanTestData.Journal[] expectedEntries) {
@@ -158,10 +155,19 @@ public class FeignJournalEntryHelper {
         List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
         assertNotNull(actualEntries);
 
+        List<JournalEntryTransactionItem> remaining = new ArrayList<>(actualEntries);
         for (LoanTestData.Journal expected : accountEntries) {
-            boolean matchFound = actualEntries.stream().anyMatch(item -> matchesJournalEntry(item, expected));
             if (expected.amount > 0) {
-                assertTrue(matchFound, "Journal entry not found for account " + account.getAccountID() + " on " + date + ": " + expected);
+                int matchIndex = -1;
+                for (int i = 0; i < remaining.size(); i++) {
+                    if (matchesJournalEntry(remaining.get(i), expected)) {
+                        matchIndex = i;
+                        break;
+                    }
+                }
+                assertTrue(matchIndex >= 0,
+                        "Journal entry not found for account " + account.getAccountID() + " on " + date + ": " + expected);
+                remaining.remove(matchIndex);
             }
         }
     }

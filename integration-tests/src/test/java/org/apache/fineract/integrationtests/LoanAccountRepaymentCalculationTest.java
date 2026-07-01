@@ -28,6 +28,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
@@ -35,30 +36,35 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest {
+public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private ClientHelper clientHelper;
+    protected RequestSpecification requestSpec;
+    protected ResponseSpecification responseSpec;
+    protected LoanTransactionHelper loanTransactionHelper;
+    protected JournalEntryHelper journalEntryHelper;
 
     @BeforeEach
-    public void setup() {
+    @SuppressWarnings("removal")
+    public void setupREST() {
         Utils.initializeRESTAssured();
+
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
     }
 
     @Test
@@ -66,7 +72,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -111,20 +117,20 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 3, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.MARCH, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -134,20 +140,20 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 3, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.MARCH, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -161,7 +167,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -206,20 +212,20 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 3, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.MARCH, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -229,20 +235,20 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 3, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.MARCH, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -256,7 +262,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -294,16 +300,16 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -313,16 +319,16 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -336,7 +342,7 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -374,16 +380,16 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -393,16 +399,16 @@ public class LoanAccountRepaymentCalculationTest extends BaseLoanIntegrationTest
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, 3, 3),
-                    LocalDate.of(2023, 4, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, Month.MARCH, 3),
+                    LocalDate.of(2023, Month.APRIL, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, 4, 3),
-                    LocalDate.of(2023, 5, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, Month.APRIL, 3),
+                    LocalDate.of(2023, Month.MAY, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, 5, 3),
-                    LocalDate.of(2023, 6, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, Month.MAY, 3),
+                    LocalDate.of(2023, Month.JUNE, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,

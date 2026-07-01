@@ -89,7 +89,7 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
         return createLoanProductFromJson(loanProductJSON);
     }
 
-    private Long applyForLoanApplication(final Long clientID, final Long loanProductID, String principal, String submitDate,
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductID, String principal, String submitDate,
             String repaymentsNo) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -106,7 +106,7 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
                 .withExpectedDisbursementDate(submitDate) //
                 .withTranches(null) //
                 .withSubmittedOnDate(submitDate) //
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .build(clientId.toString(), loanProductID.toString(), null);
         return applyForLoanFromJson(loanApplicationJSON);
     }
 

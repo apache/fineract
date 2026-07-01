@@ -46,6 +46,7 @@ import org.mockserver.model.MediaType;
  */
 @ExtendWith(MockServerExtension.class)
 @MockServerSettings(ports = { 9191 })
+@SuppressWarnings("removal")
 public class SmsCampaignIntegrationTest {
 
     private RequestSpecification requestSpec;
@@ -62,6 +63,7 @@ public class SmsCampaignIntegrationTest {
     }
 
     @BeforeEach
+    @SuppressWarnings("removal")
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();

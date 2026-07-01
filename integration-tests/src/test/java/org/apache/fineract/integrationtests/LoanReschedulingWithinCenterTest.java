@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
+    private static final Long LEGAL_FORM_PERSON = 1L;
 
     private static FeignOfficeHelper officeHelper;
 
@@ -223,7 +224,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
     private Long createClient(int officeId, String activationDate) {
         PostClientsRequest request = new PostClientsRequest()//
                 .officeId((long) officeId)//
-                .legalFormId(1L)//
+                .legalFormId(LEGAL_FORM_PERSON)//
                 .firstname(Utils.randomFirstNameGenerator())//
                 .lastname(Utils.randomLastNameGenerator())//
                 .externalId(Utils.randomStringGenerator("EXT_", 7))//

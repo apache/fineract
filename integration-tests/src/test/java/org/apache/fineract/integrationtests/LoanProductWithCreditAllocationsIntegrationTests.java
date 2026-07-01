@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -139,8 +138,12 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         String loanProductJSON = baseLoanProduct().withRepaymentStrategy("mifos-standard-strategy")
                 .withLoanScheduleType(LoanScheduleType.CUMULATIVE).addCreditAllocations(createChargebackAllocation()).build();
 
-        // when / then
-        assertThrows(CallFailedRuntimeException.class, () -> createLoanProductFromJson(loanProductJSON));
+        // when
+        List<Map<String, String>> loanProductError = getLoanProductError(loanProductJSON, "errors");
+
+        // then
+        Assertions.assertEquals("In case 'mifos-standard-strategy' payment strategy, creditAllocation must not be provided",
+                loanProductError.get(0).get("defaultUserMessage"));
     }
 
     @Test
