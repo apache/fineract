@@ -39,7 +39,11 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
-    private static final Pattern NAME_REGEX = Pattern.compile("[ @#&()<>,;.:$£€§°\\\\/=!\\?\\-\\+\\*\"\\[\\]]");
+    // Allowlist (not a denylist): Excel named ranges only permit letters, digits, period and underscore, so replace
+    // anything else with '_'. A denylist of "bad" characters silently misses any it forgot — e.g. the apostrophe in
+    // a client name like "IRE'S LIMITED" produced an invalid name 'Account_IRE'S_LIMITED_181_' and threw. Unicode
+    // letters/digits (\p{L}/\p{N}) are kept, matching the previous behaviour for accented names. See FINERACT-1256.
+    private static final Pattern NAME_REGEX = Pattern.compile("[^\\p{L}\\p{N}._]");
 
     protected void writeInt(int colIndex, Row row, int value) {
         row.createCell(colIndex).setCellValue(value);
