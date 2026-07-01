@@ -244,6 +244,16 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
     }
 
+    @Then("Admin fails to create WC breach {string} action with error containing {string}")
+    public void failToCreateBreachActionByType(final String action, final String expectedMessage) {
+        final Long loanId = extractLoanId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest(action);
+        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
+    }
+
     private void executeBreachAction(final PostWorkingCapitalLoansBreachActionRequest request) {
         final Long loanId = extractLoanId();
         log.debug("Creating breach action {} for WC loan {}", request.getAction(), loanId);
