@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -35,15 +36,17 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
+import org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeResponse;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
+import org.apache.fineract.investor.data.request.PostExternalAssetOwnerLoanProductAttributeRequest;
+import org.apache.fineract.investor.data.request.PutExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.investor.service.ExternalAssetOwnerLoanProductAttributesReadService;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
@@ -56,7 +59,7 @@ import org.springframework.stereotype.Component;
 public class ExternalAssetOwnerLoanProductAttributesApiResource {
 
     private final PlatformUserRightsContext platformUserRightsContext;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher commandDispatcher;
     private final ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
 
     @POST
@@ -64,15 +67,17 @@ public class ExternalAssetOwnerLoanProductAttributesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create External Asset Owner Loan Product Attribute", operationId = "createExternalAssetOwnerLoanProductAttribute")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnerLoanProductAttributesApiResourceSwagger.PostExternalAssetOwnerLoanProductAttributeRequest.class)))
-    public CommandProcessingResult postExternalAssetOwnerLoanProductAttribute(
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PostExternalAssetOwnerLoanProductAttributeRequest.class)))
+    public ExternalAssetOwnerLoanProductAttributeResponse postExternalAssetOwnerLoanProductAttribute(
             @PathParam("loanProductId") @Parameter(description = "loanProductId") final Long loanProductId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+            @Valid final PostExternalAssetOwnerLoanProductAttributeRequest request) {
         platformUserRightsContext.isAuthenticated();
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        CommandWrapper request = builder.createExternalAssetOwnerLoanProductAttribute(loanProductId).build();
+        request.setLoanProductId(loanProductId);
+        final var command = new Command<PostExternalAssetOwnerLoanProductAttributeRequest>();
+        command.setPayload(request);
 
-        return commandsSourceWritePlatformService.logCommandSource(request);
+        final Supplier<ExternalAssetOwnerLoanProductAttributeResponse> response = commandDispatcher.dispatch(command);
+        return response.get();
     }
 
     @GET
@@ -95,20 +100,23 @@ public class ExternalAssetOwnerLoanProductAttributesApiResource {
     @Path("/{loanProductId}/attributes/{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalAssetOwnerLoanProductAttributesApiResourceSwagger.PutExternalAssetOwnerLoanProductAttributeRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PutExternalAssetOwnerLoanProductAttributeRequest.class)))
     @Operation(tags = {
             "External Asset Owner Loan Product Attributes" }, summary = "Update a Loan Product Attribute", operationId = "updateExternalAssetOwnerLoanProductAttribute", description = "Updates a loan product attribute with a given loan product id and attribute id", parameters = {
                     @Parameter(name = "loanProductId", description = "loanProductId"),
                     @Parameter(name = "attributeId", description = "attributeId") })
-    public CommandProcessingResult updateLoanProductAttribute(
+    public ExternalAssetOwnerLoanProductAttributeResponse updateLoanProductAttribute(
             @PathParam("loanProductId") @Parameter(description = "loanProductId") final Long loanProductId,
             @PathParam("id") @Parameter(description = "attributeId") final Long attributeId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+            @Valid final PutExternalAssetOwnerLoanProductAttributeRequest request) {
         platformUserRightsContext.isAuthenticated();
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        CommandWrapper request = builder.updateExternalAssetOwnerLoanProductAttribute(loanProductId, attributeId).build();
+        request.setLoanProductId(loanProductId);
+        request.setAttributeId(attributeId);
+        final var command = new Command<PutExternalAssetOwnerLoanProductAttributeRequest>();
+        command.setPayload(request);
 
-        return commandsSourceWritePlatformService.logCommandSource(request);
+        final Supplier<ExternalAssetOwnerLoanProductAttributeResponse> response = commandDispatcher.dispatch(command);
+        return response.get();
     }
 
 }

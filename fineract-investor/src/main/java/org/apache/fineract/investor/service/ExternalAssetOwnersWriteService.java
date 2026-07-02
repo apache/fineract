@@ -18,18 +18,23 @@
  */
 package org.apache.fineract.investor.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.investor.data.ExternalAssetOwnerCreateResponse;
+import org.apache.fineract.investor.data.ExternalAssetOwnerTransferResponse;
+import org.apache.fineract.investor.data.request.ExternalAssetOwnerBuybackRequest;
+import org.apache.fineract.investor.data.request.ExternalAssetOwnerCancelRequest;
+import org.apache.fineract.investor.data.request.ExternalAssetOwnerCreateRequest;
+import org.apache.fineract.investor.data.request.ExternalAssetOwnerIntermediarySaleRequest;
+import org.apache.fineract.investor.data.request.ExternalAssetOwnerSaleRequest;
 
 public interface ExternalAssetOwnersWriteService {
 
-    CommandProcessingResult intermediarySaleLoanByLoanId(JsonCommand jsonCommand);
+    ExternalAssetOwnerTransferResponse saleLoan(ExternalAssetOwnerSaleRequest request);
 
-    CommandProcessingResult saleLoanByLoanId(JsonCommand command);
+    ExternalAssetOwnerTransferResponse intermediarySaleLoan(ExternalAssetOwnerIntermediarySaleRequest request);
 
-    CommandProcessingResult buybackLoanByLoanId(JsonCommand command);
+    ExternalAssetOwnerTransferResponse buybackLoan(ExternalAssetOwnerBuybackRequest request);
 
-    CommandProcessingResult cancelTransactionById(JsonCommand command);
+    ExternalAssetOwnerTransferResponse cancelTransfer(ExternalAssetOwnerCancelRequest request);
 
-    CommandProcessingResult createExternalAssetOwner(JsonCommand command);
+    ExternalAssetOwnerCreateResponse createOwner(ExternalAssetOwnerCreateRequest request);
 }

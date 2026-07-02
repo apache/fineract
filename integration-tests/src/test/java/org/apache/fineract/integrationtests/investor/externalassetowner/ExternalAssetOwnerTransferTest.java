@@ -42,12 +42,12 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
-import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
-import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
-import org.apache.fineract.client.models.ExternalTransferData;
-import org.apache.fineract.client.models.PageExternalTransferData;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.models.ExternalAssetOwnerSaleRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerTransferResponse;
+import org.apache.fineract.client.models.ExternalOwnerJournalEntryResponse;
+import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryResponse;
+import org.apache.fineract.client.models.ExternalTransferResponse;
+import org.apache.fineract.client.models.PageExternalTransferResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
@@ -121,31 +121,31 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         SCHEDULER_JOB_HELPER.executeAndAwaitJob("Loan COB");
     }
 
-    protected PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
+    protected ExternalAssetOwnerTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
         String transferExternalGroupId = UUID.randomUUID().toString();
         ownerExternalId = UUID.randomUUID().toString();
         return createSaleTransfer(loanID, settlementDate, transferExternalId, transferExternalGroupId, ownerExternalId, "1.0");
     }
 
-    protected PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
+    protected ExternalAssetOwnerTransferResponse createSaleTransfer(Integer loanID, String settlementDate, String transferExternalId,
             String transferExternalGroupId, String ownerExternalId, String purchasePriceRatio) {
-        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
-                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
+        ExternalAssetOwnerTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "sale",
+                new ExternalAssetOwnerSaleRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId).transferExternalGroupId(transferExternalGroupId)
                         .ownerExternalId(ownerExternalId).purchasePriceRatio(purchasePriceRatio));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
     }
 
-    protected PostInitiateTransferResponse createBuybackTransfer(Integer loanID, String settlementDate) {
+    protected ExternalAssetOwnerTransferResponse createBuybackTransfer(Integer loanID, String settlementDate) {
         String transferExternalId = UUID.randomUUID().toString();
         return createBuybackTransfer(loanID, settlementDate, transferExternalId);
     }
 
-    protected PostInitiateTransferResponse createBuybackTransfer(Integer loanID, String settlementDate, String transferExternalId) {
-        PostInitiateTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(), "buyback",
-                new ExternalAssetOwnerRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
+    protected ExternalAssetOwnerTransferResponse createBuybackTransfer(Integer loanID, String settlementDate, String transferExternalId) {
+        ExternalAssetOwnerTransferResponse saleResponse = EXTERNAL_ASSET_OWNER_HELPER.initiateTransferByLoanId(loanID.longValue(),
+                "buyback", new ExternalAssetOwnerSaleRequest().settlementDate(settlementDate).dateFormat("yyyy-MM-dd").locale("en")
                         .transferExternalId(transferExternalId));
         assertEquals(transferExternalId, saleResponse.getResourceExternalId());
         return saleResponse;
@@ -250,20 +250,21 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
     }
 
     protected void getAndValidateExternalAssetOwnerTransferByLoan(Integer loanID, ExpectedExternalTransferData... expectedItems) {
-        PageExternalTransferData retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+        PageExternalTransferResponse retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
         assertEquals(expectedItems.length, retrieveResponse.getNumberOfElements());
         validateExternalAssetOwnerTransfer(retrieveResponse, expectedItems);
     }
 
-    protected void validateExternalAssetOwnerTransfer(PageExternalTransferData response, ExpectedExternalTransferData... expectedItems) {
+    protected void validateExternalAssetOwnerTransfer(PageExternalTransferResponse response,
+            ExpectedExternalTransferData... expectedItems) {
         for (ExpectedExternalTransferData expected : expectedItems) {
             assertNotNull(response.getContent());
-            Optional<ExternalTransferData> first = response.getContent().stream()
+            Optional<ExternalTransferResponse> first = response.getContent().stream()
                     .filter(e -> Objects.equals(e.getTransferExternalId(), expected.transferExternalId)
                             && Objects.equals(e.getStatus(), expected.status))
                     .findFirst();
             assertTrue(first.isPresent());
-            ExternalTransferData etd = first.get();
+            ExternalTransferResponse etd = first.get();
             assertEquals(expected.transferExternalId, etd.getTransferExternalId());
             assertEquals(expected.status, etd.getStatus());
             assertEquals(LocalDate.parse(expected.settlementDate), etd.getSettlementDate());
@@ -287,24 +288,25 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
     }
 
     protected void getAndValidateThereIsActiveMapping(Integer loanID) {
-        ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId((long) loanID);
+        ExternalTransferResponse activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId((long) loanID);
         assertNotNull(activeTransfer);
-        ExternalTransferData retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue()).getContent()
-                .stream().filter(transfer -> ExternalTransferData.StatusEnum.ACTIVE.equals(transfer.getStatus())).findFirst().get();
+        ExternalTransferResponse retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue()).getContent()
+                .stream().filter(transfer -> ExternalTransferResponse.StatusEnum.ACTIVE.equals(transfer.getStatus())).findFirst().get();
         assertEquals(retrieveResponse.getTransferId(), activeTransfer.getTransferId());
     }
 
     protected void getAndValidateThereIsNoActiveMapping(Long loanId) {
-        ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanId);
+        ExternalTransferResponse activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanId);
         assertNull(activeTransfer);
     }
 
     protected void getAndValidateThereIsNoActiveMapping(String transferExternalId) {
-        ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByTransferExternalId(transferExternalId);
+        ExternalTransferResponse activeTransfer = EXTERNAL_ASSET_OWNER_HELPER
+                .retrieveActiveTransferByTransferExternalId(transferExternalId);
         assertNull(activeTransfer);
     }
 
-    protected void validateResponse(PostInitiateTransferResponse transferResponse, Integer loanID) {
+    protected void validateResponse(ExternalAssetOwnerTransferResponse transferResponse, Integer loanID) {
         assertNotNull(transferResponse);
         assertNotNull(transferResponse.getResourceId());
         assertNotNull(transferResponse.getResourceExternalId());
@@ -315,7 +317,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
     }
 
     protected void getAndValidateOwnerJournalEntries(String ownerExternalId, ExpectedJournalEntryData... expectedItems) {
-        ExternalOwnerJournalEntryData result = EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfOwner(ownerExternalId);
+        ExternalOwnerJournalEntryResponse result = EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfOwner(ownerExternalId);
         assertNotNull(result);
         assertEquals(expectedItems.length, result.getJournalEntryData().getTotalElements());
         int i = 0;
@@ -331,7 +333,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
     }
 
     protected void getAndValidateThereIsJournalEntriesForTransfer(Long transferId, ExpectedJournalEntryData... expectedItems) {
-        ExternalOwnerTransferJournalEntryData result = EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfTransfer(transferId);
+        ExternalOwnerTransferJournalEntryResponse result = EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfTransfer(transferId);
         assertNotNull(result);
         long totalElements = result.getJournalEntryData().getTotalElements();
         assertEquals(expectedItems.length, totalElements);
@@ -348,14 +350,14 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
     }
 
     protected void getAndValidateThereIsNoJournalEntriesForTransfer(Long transferId) {
-        ExternalOwnerTransferJournalEntryData result = EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfTransfer(transferId);
+        ExternalOwnerTransferJournalEntryResponse result = EXTERNAL_ASSET_OWNER_HELPER.retrieveJournalEntriesOfTransfer(transferId);
         assertNull(result.getJournalEntryData());
     }
 
     @RequiredArgsConstructor
     public static class ExpectedExternalTransferData {
 
-        private final ExternalTransferData.StatusEnum status;
+        private final ExternalTransferResponse.StatusEnum status;
 
         private final String transferExternalId;
 
@@ -363,7 +365,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
         private final String effectiveFrom;
         private final String effectiveTo;
-        private final ExternalTransferData.SubStatusEnum subStatus;
+        private final ExternalTransferResponse.SubStatusEnum subStatus;
         private final boolean detailsExpected;
         private final BigDecimal totalOutstanding;
         private final BigDecimal totalPrincipalOutstanding;
@@ -372,7 +374,7 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
         private final BigDecimal totalFeeOutstanding;
         private final BigDecimal totalOverpaid;
 
-        static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
+        static ExpectedExternalTransferData expected(ExternalTransferResponse.StatusEnum status, String transferExternalId,
                 String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
                 BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
                 BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
@@ -381,14 +383,14 @@ public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
                     totalFeeOutstanding, totalOverpaid);
         }
 
-        static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
+        static ExpectedExternalTransferData expected(ExternalTransferResponse.StatusEnum status, String transferExternalId,
                 String settlementDate, String effectiveFrom, String effectiveTo) {
             return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null, false,
                     null, null, null, null, null, null);
         }
 
-        static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
-                String settlementDate, String effectiveFrom, String effectiveTo, ExternalTransferData.SubStatusEnum subStatus) {
+        static ExpectedExternalTransferData expected(ExternalTransferResponse.StatusEnum status, String transferExternalId,
+                String settlementDate, String effectiveFrom, String effectiveTo, ExternalTransferResponse.SubStatusEnum subStatus) {
             return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, subStatus,
                     false, null, null, null, null, null, null);
         }

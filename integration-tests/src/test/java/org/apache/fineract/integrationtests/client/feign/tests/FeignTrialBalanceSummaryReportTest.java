@@ -31,11 +31,11 @@ import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.BusinessStep;
 import org.apache.fineract.client.models.BusinessStepRequest;
-import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerSaleRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerTransferResponse;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoanOriginatorsRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -166,8 +166,9 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
             Long loanId = createAndDisburseLoan(clientId, "01 March 2020", "02 March 2020", null, null);
 
             String ownerExternalId = UUID.randomUUID().toString();
-            PostInitiateTransferResponse saleResponse = ok(() -> fineractClient().externalAssetOwners().transferRequestWithLoanId(loanId,
-                    new ExternalAssetOwnerRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale(LoanTestData.LOCALE)
+            ExternalAssetOwnerTransferResponse saleResponse = ok(() -> fineractClient().externalAssetOwners().transferRequestWithLoanId(
+                    loanId,
+                    new ExternalAssetOwnerSaleRequest().settlementDate("2020-03-02").dateFormat("yyyy-MM-dd").locale(LoanTestData.LOCALE)
                             .transferExternalId(UUID.randomUUID().toString()).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"),
                     "sale"));
             assertNotNull(saleResponse);

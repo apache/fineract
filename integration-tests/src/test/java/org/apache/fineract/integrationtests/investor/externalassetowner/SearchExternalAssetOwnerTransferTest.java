@@ -18,19 +18,24 @@
  */
 package org.apache.fineract.integrationtests.investor.externalassetowner;
 
-import static org.apache.fineract.client.models.ExternalTransferData.StatusEnum.CANCELLED;
-import static org.apache.fineract.client.models.ExternalTransferData.StatusEnum.PENDING;
+import static org.apache.fineract.client.models.ExternalTransferResponse.StatusEnum.CANCELLED;
+import static org.apache.fineract.client.models.ExternalTransferResponse.StatusEnum.PENDING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ExternalAssetOwnerTransferResponse;
+import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.ExternalTransferResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchRequest;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Test;
@@ -50,7 +55,7 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
             Integer loanID = createLoanForClient(clientID, "29 February 2020");
             addPenaltyForLoan(loanID, "10");
 
-            PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, baseDate);
+            ExternalAssetOwnerTransferResponse saleTransferResponse = createSaleTransfer(loanID, baseDate);
             validateResponse(saleTransferResponse, loanID);
 
             // LookUp by ExternalId
@@ -201,6 +206,83 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
             assertTrue(response.getNumberOfElements() > 0, "Total number of elements difference");
         }
         assertEquals(true, response.getFirst());
+    }
+
+    private void validateExternalAssetOwnerTransfer(PageExternalTransferData response, ExpectedExternalTransferData... expectedItems) {
+        for (ExpectedExternalTransferData expected : expectedItems) {
+            assertNotNull(response.getContent());
+            Optional<ExternalTransferData> first = response.getContent().stream()
+                    .filter(e -> Objects.equals(e.getTransferExternalId(), expected.transferExternalId)
+                            && Objects.equals(e.getStatus().name(), expected.status.name()))
+                    .findFirst();
+            assertTrue(first.isPresent(), "Expected transfer not found. transferExternalId=" + expected.transferExternalId + ", status="
+                    + expected.status + ", actualContent=" + response.getContent());
+            ExternalTransferData etd = first.get();
+            assertEquals(expected.transferExternalId, etd.getTransferExternalId());
+            assertEquals(expected.status.name(), etd.getStatus().name());
+            assertEquals(LocalDate.parse(expected.settlementDate), etd.getSettlementDate());
+            assertEquals(LocalDate.parse(expected.effectiveFrom), etd.getEffectiveFrom());
+            assertEquals(LocalDate.parse(expected.effectiveTo), etd.getEffectiveTo());
+            if (!expected.detailsExpected) {
+                assertNull(etd.getDetails());
+            } else {
+                assertNotNull(etd.getDetails());
+                assertEquals(expected.totalOutstanding, etd.getDetails().getTotalOutstanding());
+                assertEquals(expected.totalPrincipalOutstanding, etd.getDetails().getTotalPrincipalOutstanding());
+                assertEquals(expected.totalInterestOutstanding, etd.getDetails().getTotalInterestOutstanding());
+                assertEquals(expected.totalPenaltyOutstanding, etd.getDetails().getTotalPenaltyChargesOutstanding());
+                assertEquals(expected.totalFeeOutstanding, etd.getDetails().getTotalFeeChargesOutstanding());
+                assertEquals(expected.totalOverpaid, etd.getDetails().getTotalOverpaid());
+            }
+            if (expected.subStatus != null) {
+                assertEquals(expected.subStatus.name(), etd.getSubStatus().name());
+            }
+        }
+    }
+
+    public static final class ExpectedExternalTransferData {
+
+        private final ExternalTransferResponse.StatusEnum status;
+        private final String transferExternalId;
+        private final String settlementDate;
+        private final String effectiveFrom;
+        private final String effectiveTo;
+        private final ExternalTransferResponse.SubStatusEnum subStatus;
+        private final boolean detailsExpected;
+        private final BigDecimal totalOutstanding;
+        private final BigDecimal totalPrincipalOutstanding;
+        private final BigDecimal totalInterestOutstanding;
+        private final BigDecimal totalPenaltyOutstanding;
+        private final BigDecimal totalFeeOutstanding;
+        private final BigDecimal totalOverpaid;
+
+        private ExpectedExternalTransferData(ExternalTransferResponse.StatusEnum status, String transferExternalId, String settlementDate,
+                String effectiveFrom, String effectiveTo, ExternalTransferResponse.SubStatusEnum subStatus, boolean detailsExpected,
+                BigDecimal totalOutstanding, BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding,
+                BigDecimal totalPenaltyOutstanding, BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
+            this.status = status;
+            this.transferExternalId = transferExternalId;
+            this.settlementDate = settlementDate;
+            this.effectiveFrom = effectiveFrom;
+            this.effectiveTo = effectiveTo;
+            this.subStatus = subStatus;
+            this.detailsExpected = detailsExpected;
+            this.totalOutstanding = totalOutstanding;
+            this.totalPrincipalOutstanding = totalPrincipalOutstanding;
+            this.totalInterestOutstanding = totalInterestOutstanding;
+            this.totalPenaltyOutstanding = totalPenaltyOutstanding;
+            this.totalFeeOutstanding = totalFeeOutstanding;
+            this.totalOverpaid = totalOverpaid;
+        }
+
+        static ExpectedExternalTransferData expected(ExternalTransferResponse.StatusEnum status, String transferExternalId,
+                String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
+                BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
+                BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
+            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null,
+                    detailsExpected, totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding, totalPenaltyOutstanding,
+                    totalFeeOutstanding, totalOverpaid);
+        }
     }
 
 }

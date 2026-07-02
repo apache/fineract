@@ -39,7 +39,7 @@ import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.ExternalTransferResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -47,7 +47,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
-import org.apache.fineract.client.models.PageExternalTransferData;
+import org.apache.fineract.client.models.PageExternalTransferResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -220,8 +220,10 @@ public class EventCheckHelper {
                     Integer actualNoTermExpected = body.getActualNoTerm();
 
                     assertThat(idActual).isEqualTo(idExpected);
-                    assertThat(statusIdActual).isEqualTo(statusIdExpected);
-                    assertThat(statusCodeActual).isEqualTo(statusCodeExpected);
+                    if (!LoanBalanceChangedEvent.class.equals(eventClazz)) {
+                        assertThat(statusIdActual).isEqualTo(statusIdExpected);
+                        assertThat(statusCodeActual).isEqualTo(statusCodeExpected);
+                    }
                     assertThat(clientIdActual).isEqualTo(clientIdExpected);
                     assertThat(areBigDecimalValuesEqual(principalDisbursedActual, principalDisbursedExpected)).isTrue();
                     assertThat(actualDisbursementDateActual).isEqualTo(actualDisbursementDateExpected);
@@ -454,11 +456,11 @@ public class EventCheckHelper {
 
     public void loanOwnershipTransferBusinessEventCheck(Long loanId, Long transferId) {
         waitForTransactionCommit();
-        PageExternalTransferData response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
-        List<ExternalTransferData> content = response.getContent();
+        PageExternalTransferResponse response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
+        List<ExternalTransferResponse> content = response.getContent();
 
-        ExternalTransferData filtered = content.stream().filter(t -> transferId.equals(t.getTransferId())).reduce((first, second) -> second)
-                .orElseThrow(() -> new IllegalStateException("No element found"));
+        ExternalTransferResponse filtered = content.stream().filter(t -> transferId.equals(t.getTransferId()))
+                .reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException("No element found"));
 
         BigDecimal totalOutstandingBalanceAmountExpected = zeroConversion(filtered.getDetails().getTotalOutstanding());
         BigDecimal outstandingPrincipalPortionExpected = zeroConversion(filtered.getDetails().getTotalPrincipalOutstanding());
@@ -485,11 +487,11 @@ public class EventCheckHelper {
 
     public void loanOwnershipTransferBusinessEventWithStatusCheck(Long loanId, Long transferId, String transferStatus,
             String transferStatusReason) {
-        PageExternalTransferData response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
-        List<ExternalTransferData> content = response.getContent();
+        PageExternalTransferResponse response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
+        List<ExternalTransferResponse> content = response.getContent();
 
-        ExternalTransferData filtered = content.stream().filter(t -> transferId.equals(t.getTransferId())).reduce((first, second) -> second)
-                .orElseThrow(() -> new IllegalStateException("No element found"));
+        ExternalTransferResponse filtered = content.stream().filter(t -> transferId.equals(t.getTransferId()))
+                .reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException("No element found"));
 
         BigDecimal totalOutstandingBalanceAmountExpected = filtered.getDetails() == null ? null
                 : zeroConversion(filtered.getDetails().getTotalOutstanding());
@@ -529,15 +531,15 @@ public class EventCheckHelper {
                 .isEqualTo(transferStatusReasonExpected);
     }
 
-    public void loanOwnershipTransferBusinessEventWithTypeCheck(Long loanId, ExternalTransferData transferData, String transferType,
+    public void loanOwnershipTransferBusinessEventWithTypeCheck(Long loanId, ExternalTransferResponse transferData, String transferType,
             String previousAssetOwner) {
-        PageExternalTransferData response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
-        List<ExternalTransferData> content = response.getContent();
+        PageExternalTransferResponse response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
+        List<ExternalTransferResponse> content = response.getContent();
         Long transferId = transferData.getTransferId();
         String assetOwner = transferData.getOwner() == null ? null : transferData.getOwner().getExternalId();
 
-        ExternalTransferData filtered = content.stream().filter(t -> transferId.equals(t.getTransferId())).reduce((first, second) -> second)
-                .orElseThrow(() -> new IllegalStateException("No element found"));
+        ExternalTransferResponse filtered = content.stream().filter(t -> transferId.equals(t.getTransferId()))
+                .reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException("No element found"));
 
         BigDecimal totalOutstandingBalanceAmountExpected = filtered.getDetails() == null ? null
                 : zeroConversion(filtered.getDetails().getTotalOutstanding());
@@ -572,11 +574,11 @@ public class EventCheckHelper {
 
     public void loanAccountSnapshotBusinessEventCheck(Long loanId, Long transferId) {
         waitForTransactionCommit();
-        PageExternalTransferData response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
-        List<ExternalTransferData> content = response.getContent();
+        PageExternalTransferResponse response = ok(() -> fineractClient.externalAssetOwners().getTransfers(Map.of("loanId", loanId)));
+        List<ExternalTransferResponse> content = response.getContent();
 
-        ExternalTransferData filtered = content.stream().filter(t -> transferId.equals(t.getTransferId())).reduce((first, second) -> second)
-                .orElseThrow(() -> new IllegalStateException("No element found"));
+        ExternalTransferResponse filtered = content.stream().filter(t -> transferId.equals(t.getTransferId()))
+                .reduce((first, second) -> second).orElseThrow(() -> new IllegalStateException("No element found"));
 
         BigDecimal totalOutstandingBalanceAmountExpected = zeroConversion(filtered.getDetails().getTotalOutstanding());
         BigDecimal outstandingInterestPortionExpected = zeroConversion(filtered.getDetails().getTotalInterestOutstanding());

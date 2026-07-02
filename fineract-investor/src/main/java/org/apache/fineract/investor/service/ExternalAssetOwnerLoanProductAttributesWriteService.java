@@ -18,13 +18,16 @@
  */
 package org.apache.fineract.investor.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.investor.data.ExternalAssetOwnerLoanProductAttributeResponse;
+import org.apache.fineract.investor.data.request.PostExternalAssetOwnerLoanProductAttributeRequest;
+import org.apache.fineract.investor.data.request.PutExternalAssetOwnerLoanProductAttributeRequest;
 
 public interface ExternalAssetOwnerLoanProductAttributesWriteService {
 
-    CommandProcessingResult createExternalAssetOwnerLoanProductAttribute(JsonCommand command);
+    ExternalAssetOwnerLoanProductAttributeResponse createExternalAssetOwnerLoanProductAttribute(
+            PostExternalAssetOwnerLoanProductAttributeRequest request);
 
-    CommandProcessingResult updateExternalAssetOwnerLoanProductAttribute(JsonCommand command, String attributeKey, String attributeValue);
+    ExternalAssetOwnerLoanProductAttributeResponse updateExternalAssetOwnerLoanProductAttribute(
+            PutExternalAssetOwnerLoanProductAttributeRequest request);
 
 }

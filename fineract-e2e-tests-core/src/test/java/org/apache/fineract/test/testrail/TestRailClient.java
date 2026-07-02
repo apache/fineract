@@ -21,7 +21,7 @@ package org.apache.fineract.test.testrail;
 import feign.FeignException;
 import io.cucumber.java.Scenario;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -109,7 +109,8 @@ public class TestRailClient implements InitializingBean {
                 Field fieldStepResults = objectScenario.getClass().getDeclaredField("stepResults");
                 fieldStepResults.setAccessible(true);
 
-                ArrayList<Result> results = (ArrayList<Result>) fieldStepResults.get(objectScenario);
+                @SuppressWarnings("unchecked")
+                List<Result> results = (List<Result>) fieldStepResults.get(objectScenario);
                 for (Result result : results) {
                     if (result.getFailures() != null) {
                         return FAILED_COMMENT + "%n" + result.getFailures();

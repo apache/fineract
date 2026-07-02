@@ -16,26 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.messaging.event.loan.transaction;
+package org.apache.fineract.investor.data;
 
-import java.util.function.Function;
-import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
-import org.apache.fineract.test.messaging.event.Event;
+import java.time.LocalDate;
+import lombok.Data;
 
-public class LoanAdjustTransactionBusinessEvent implements Event<LoanTransactionAdjustmentDataV1> {
+@Data
+public class ExternalTransferResponse {
 
-    @Override
-    public Class<LoanTransactionAdjustmentDataV1> getDataClass() {
-        return LoanTransactionAdjustmentDataV1.class;
-    }
-
-    @Override
-    public Function<LoanTransactionAdjustmentDataV1, Long> getIdExtractor() {
-        return loanTransactionAdjustmentDataV1 -> loanTransactionAdjustmentDataV1.getTransactionToAdjust().getId();
-    }
-
-    @Override
-    public String getEventName() {
-        return "LoanAdjustTransactionBusinessEvent";
-    }
+    private Long transferId;
+    private ExternalTransferOwnerData owner;
+    private ExternalTransferOwnerData previousOwner;
+    private ExternalTransferLoanData loan;
+    private ExternalTransferDataDetails details;
+    private String transferExternalId;
+    private String transferExternalGroupId;
+    private String purchasePriceRatio;
+    private LocalDate settlementDate;
+    private ExternalTransferStatus status;
+    private ExternalTransferSubStatus subStatus;
+    private LocalDate effectiveFrom;
+    private LocalDate effectiveTo;
 }

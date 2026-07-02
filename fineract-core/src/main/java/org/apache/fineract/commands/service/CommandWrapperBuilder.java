@@ -39,11 +39,9 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_BLOCKDEBIT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_BOUNCE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_BULKREASSIGN;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_BUYBACK;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_BUYDOWNFEE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_BUYDOWNFEEADJUSTMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_CALCULATEINTEREST;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_CANCEL;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_CAPITALIZEDINCOME;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_CAPITALIZEDINCOMEADJUSTMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_CHANGEPWD;
@@ -87,7 +85,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_HOLDAMOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INACTIVATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INTERESTPAYMENTWAIVER;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INTERMEDIARYSALE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_INVALIDATE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MANUAL_INTEREST_REFUND_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_MERCHANTISSUEDREFUND;
@@ -115,7 +112,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REPAYMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REVERSE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_REVERSETRANSACTION;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_SALE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_SAVE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_SAVECOLLECTIONSHEET;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_SETFRAUD;
@@ -156,7 +152,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ACCOUNTTRANSFER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ADDRESS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ADHOC;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ASSET_OWNER_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_BATCH_BUSINESS_STEP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CALENDAR;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CENTER;
@@ -183,8 +178,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ENTITYMAPPING;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ENTITY_DATATABLE_CHECK;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNALSERVICES;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FAMILYMEMBERS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FINANCIALACTIVITYACCOUNT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_FIXEDDEPOSITACCOUNT;
@@ -3805,62 +3798,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_LOAN;
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/transactions?command=undo-charge-off";
-        return this;
-    }
-
-    public CommandWrapperBuilder createExternalAssetOwnerLoanProductAttribute(final Long loanProductId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE;
-        this.productId = loanProductId;
-        this.href = "/external-asset-owners/loan-product/" + loanProductId + "/attributes";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateExternalAssetOwnerLoanProductAttribute(final Long loanProductId, final Long attributeId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_EXTERNAL_ASSET_OWNER_LOAN_PRODUCT_ATTRIBUTE;
-        this.productId = loanProductId;
-        this.entityId = attributeId;
-        this.href = "/external-asset-owners/loan-product/" + loanProductId + "/attributes/" + attributeId;
-        return this;
-    }
-
-    public CommandWrapperBuilder intermediarySaleLoanToExternalAssetOwner(final Long loanId) {
-        this.actionName = ACTION_INTERMEDIARYSALE;
-        this.entityName = ENTITY_LOAN;
-        this.loanId = loanId;
-        this.href = "/external-asset-owners/transfers/loans/" + loanId;
-        return this;
-    }
-
-    public CommandWrapperBuilder saleLoanToExternalAssetOwner(final Long loanId) {
-        this.actionName = ACTION_SALE;
-        this.entityName = ENTITY_LOAN;
-        this.loanId = loanId;
-        this.href = "/external-asset-owners/transfers/loans/" + loanId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createExternalAssetOwner() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_EXTERNAL_ASSET_OWNER;
-        this.href = "/external-asset-owners";
-        return this;
-    }
-
-    public CommandWrapperBuilder buybackLoanToExternalAssetOwner(final Long loanId) {
-        this.actionName = ACTION_BUYBACK;
-        this.entityName = ENTITY_LOAN;
-        this.loanId = loanId;
-        this.href = "/external-asset-owners/transfers/loans/" + loanId;
-        return this;
-    }
-
-    public CommandWrapperBuilder cancelTransactionByIdToExternalAssetOwner(final Long id) {
-        this.actionName = ACTION_CANCEL;
-        this.entityName = ENTITY_ASSET_OWNER_TRANSACTION;
-        this.entityId = id;
-        this.href = "/external-asset-owners/transfers/" + id;
         return this;
     }
 

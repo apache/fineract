@@ -18,25 +18,26 @@
  */
 package org.apache.fineract.investor.data.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import java.io.Serial;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
-public class ExternalAssetOwnerRequest implements Serializable {
+@AllArgsConstructor
+public class ExternalAssetOwnerCreateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long loanId;
-    private Long transferId;
-    private String settlementDate;
+    @jakarta.validation.constraints.NotBlank(message = "{validation.msg.externalAssetOwner.ownerExternalId.cannot.be.blank}")
+    @Size(max = 100, message = "{org.apache.fineract.investor.transfer.owner-external-id.size}")
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED, maxLength = Integer.MAX_VALUE)
     private String ownerExternalId;
-    private String transferExternalId;
-    private String transferExternalGroupId;
-    private String purchasePriceRatio;
-    private String dateFormat;
-    private String locale;
 }

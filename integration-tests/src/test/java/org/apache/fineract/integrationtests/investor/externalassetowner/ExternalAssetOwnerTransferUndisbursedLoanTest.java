@@ -24,10 +24,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerSaleRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerTransferResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
@@ -103,8 +103,8 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
                 String transferExternalId = UUID.randomUUID().toString();
                 String ownerExternalId = UUID.randomUUID().toString();
 
-                PostInitiateTransferResponse transferResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
-                        new ExternalAssetOwnerRequest().settlementDate("01 January 2024").dateFormat("dd MMMM yyyy").locale("en")
+                ExternalAssetOwnerTransferResponse transferResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
+                        new ExternalAssetOwnerSaleRequest().settlementDate("01 January 2024").dateFormat("dd MMMM yyyy").locale("en")
                                 .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
 
                 assertNotNull(transferResponse);
@@ -159,8 +159,8 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
                 String transferExternalId = UUID.randomUUID().toString();
                 String ownerExternalId = UUID.randomUUID().toString();
 
-                PostInitiateTransferResponse transferResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
-                        new ExternalAssetOwnerRequest().settlementDate("01 March 2024").dateFormat("dd MMMM yyyy").locale("en")
+                ExternalAssetOwnerTransferResponse transferResponse = externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
+                        new ExternalAssetOwnerSaleRequest().settlementDate("01 March 2024").dateFormat("dd MMMM yyyy").locale("en")
                                 .transferExternalId(transferExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
 
                 assertNotNull(transferResponse);
@@ -228,12 +228,12 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
                 String transfer2ExternalId = UUID.randomUUID().toString();
                 String ownerExternalId = UUID.randomUUID().toString();
 
-                PostInitiateTransferResponse transfer1Response = externalAssetOwnerHelper.initiateTransferByLoanId(loan1Id, "sale",
-                        new ExternalAssetOwnerRequest().settlementDate("31 January 2024").dateFormat("dd MMMM yyyy").locale("en")
+                ExternalAssetOwnerTransferResponse transfer1Response = externalAssetOwnerHelper.initiateTransferByLoanId(loan1Id, "sale",
+                        new ExternalAssetOwnerSaleRequest().settlementDate("31 January 2024").dateFormat("dd MMMM yyyy").locale("en")
                                 .transferExternalId(transfer1ExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
 
-                PostInitiateTransferResponse transfer2Response = externalAssetOwnerHelper.initiateTransferByLoanId(loan2Id, "sale",
-                        new ExternalAssetOwnerRequest().settlementDate("31 January 2024").dateFormat("dd MMMM yyyy").locale("en")
+                ExternalAssetOwnerTransferResponse transfer2Response = externalAssetOwnerHelper.initiateTransferByLoanId(loan2Id, "sale",
+                        new ExternalAssetOwnerSaleRequest().settlementDate("31 January 2024").dateFormat("dd MMMM yyyy").locale("en")
                                 .transferExternalId(transfer2ExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
 
                 GetLoansLoanIdResponse disbursedLoan = loanTransactionHelper.getLoanDetails(loan1Id);

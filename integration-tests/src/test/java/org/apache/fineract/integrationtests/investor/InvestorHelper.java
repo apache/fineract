@@ -19,9 +19,9 @@
 package org.apache.fineract.integrationtests.investor;
 
 import java.util.List;
+import org.apache.fineract.client.models.ExternalAssetOwnerCreateRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerCreateResponse;
 import org.apache.fineract.client.models.ExternalTransferOwnerData;
-import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
-import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 
@@ -35,7 +35,7 @@ public final class InvestorHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.retrieveExternalAssetOwners());
     }
 
-    public static PostExternalAssetOwnerResponse createExternalAssetOwner(final PostExternalAssetOwnerRequest request) {
+    public static ExternalAssetOwnerCreateResponse createExternalAssetOwner(final ExternalAssetOwnerCreateRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.createExternalAssetOwner(request));
     }
 }

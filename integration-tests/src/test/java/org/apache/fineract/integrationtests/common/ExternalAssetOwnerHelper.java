@@ -25,16 +25,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.accounting.common.AccountingConstants;
-import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
+import org.apache.fineract.client.models.ExternalAssetOwnerSaleRequest;
 import org.apache.fineract.client.models.ExternalAssetOwnerSearchRequest;
-import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
-import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
-import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.ExternalAssetOwnerTransferResponse;
+import org.apache.fineract.client.models.ExternalOwnerJournalEntryResponse;
+import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryResponse;
+import org.apache.fineract.client.models.ExternalTransferResponse;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
+import org.apache.fineract.client.models.PageExternalTransferResponse;
 import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchRequest;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
-import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -44,7 +45,7 @@ public class ExternalAssetOwnerHelper {
 
     public ExternalAssetOwnerHelper() {}
 
-    public PostInitiateTransferResponse initiateTransferByLoanId(Long loanId, String command, ExternalAssetOwnerRequest request) {
+    public ExternalAssetOwnerTransferResponse initiateTransferByLoanId(Long loanId, String command, ExternalAssetOwnerSaleRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.transferRequestWithLoanId(loanId, request, command));
     }
 
@@ -60,39 +61,39 @@ public class ExternalAssetOwnerHelper {
         assertEquals(403, exception.getResponse().code());
     }
 
-    public PageExternalTransferData retrieveTransferByTransferExternalId(String transferExternalId) {
+    public PageExternalTransferResponse retrieveTransferByTransferExternalId(String transferExternalId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getTransfers(transferExternalId, null, null, 0, 100));
     }
 
-    public PageExternalTransferData retrieveTransferByLoanExternalId(String loanExternalId) {
+    public PageExternalTransferResponse retrieveTransferByLoanExternalId(String loanExternalId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getTransfers(null, null, loanExternalId, 0, 100));
     }
 
-    public PageExternalTransferData retrieveTransfersByLoanId(Long loanId) {
+    public PageExternalTransferResponse retrieveTransfersByLoanId(Long loanId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getTransfers(null, loanId, null, 0, 100));
     }
 
-    public PageExternalTransferData retrieveTransfersByLoanId(Long loanId, int offset, int limit) {
+    public PageExternalTransferResponse retrieveTransfersByLoanId(Long loanId, int offset, int limit) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getTransfers(null, loanId, null, offset, limit));
     }
 
-    public ExternalTransferData retrieveActiveTransferByLoanExternalId(String loanExternalId) {
+    public ExternalTransferResponse retrieveActiveTransferByLoanExternalId(String loanExternalId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getActiveTransfer(null, null, loanExternalId));
     }
 
-    public ExternalTransferData retrieveActiveTransferByTransferExternalId(String transferExternalId) {
+    public ExternalTransferResponse retrieveActiveTransferByTransferExternalId(String transferExternalId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getActiveTransfer(transferExternalId, null, null));
     }
 
-    public ExternalTransferData retrieveActiveTransferByLoanId(Long loanId) {
+    public ExternalTransferResponse retrieveActiveTransferByLoanId(Long loanId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getActiveTransfer(null, loanId, null));
     }
 
-    public ExternalOwnerTransferJournalEntryData retrieveJournalEntriesOfTransfer(Long transferId) {
+    public ExternalOwnerTransferJournalEntryResponse retrieveJournalEntriesOfTransfer(Long transferId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getJournalEntriesOfTransfer(transferId, 0, 100));
     }
 
-    public ExternalOwnerJournalEntryData retrieveJournalEntriesOfOwner(String ownerExternalId) {
+    public ExternalOwnerJournalEntryResponse retrieveJournalEntriesOfOwner(String ownerExternalId) {
         return Calls.ok(FineractClientHelper.getFineractClient().externalAssetOwners.getJournalEntriesOfOwner(ownerExternalId, 0, 100));
     }
 
