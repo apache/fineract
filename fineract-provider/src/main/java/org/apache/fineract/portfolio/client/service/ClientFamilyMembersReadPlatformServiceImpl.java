@@ -28,7 +28,9 @@ import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformSer
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
+import org.apache.fineract.portfolio.client.exception.FamilyMemberNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -101,14 +103,18 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
     }
 
     @Override
-    public ClientFamilyMembersData getClientFamilyMember(long id) {
+    public ClientFamilyMembersData getClientFamilyMember(long clientId, long familyMemberId) {
 
         this.context.authenticatedUser();
 
         final ClientFamilyMembersMapper rm = new ClientFamilyMembersMapper();
-        final String sql = "select " + rm.schema() + " where fmb.id=? ";
+        final String sql = "select " + rm.schema() + " where fmb.client_id=? and fmb.id=? ";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, id); // NOSONAR
+        try {
+            return this.jdbcTemplate.queryForObject(sql, rm, clientId, familyMemberId); // NOSONAR
+        } catch (final EmptyResultDataAccessException e) {
+            throw new FamilyMemberNotFoundException(familyMemberId, clientId, e);
+        }
     }
 
     @Override
