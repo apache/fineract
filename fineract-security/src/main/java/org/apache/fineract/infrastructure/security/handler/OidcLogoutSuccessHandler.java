@@ -68,16 +68,16 @@ public class OidcLogoutSuccessHandler implements LogoutSuccessHandler {
 
         return switch (provider) {
             case "keycloak" ->
-                UriComponentsBuilder.fromHttpUrl(issuer).path("/protocol/openid-connect/logout").queryParam("id_token_hint", idToken)
+                UriComponentsBuilder.fromUriString(issuer).path("/protocol/openid-connect/logout").queryParam("id_token_hint", idToken)
                         .queryParam("post_logout_redirect_uri", postLogoutUri).encode(StandardCharsets.UTF_8).toUriString();
 
-            case "azure_ad" -> UriComponentsBuilder.fromHttpUrl(issuer).path("/oauth2/v2.0/logout")
+            case "azure_ad" -> UriComponentsBuilder.fromUriString(issuer).path("/oauth2/v2.0/logout")
                     .queryParam("post_logout_redirect_uri", postLogoutUri).encode(StandardCharsets.UTF_8).toUriString();
 
-            case "okta" -> UriComponentsBuilder.fromHttpUrl(issuer).path("/v1/logout").queryParam("id_token_hint", idToken)
+            case "okta" -> UriComponentsBuilder.fromUriString(issuer).path("/v1/logout").queryParam("id_token_hint", idToken)
                     .queryParam("post_logout_redirect_uri", postLogoutUri).encode(StandardCharsets.UTF_8).toUriString();
 
-            case "auth0" -> UriComponentsBuilder.fromHttpUrl(issuer).path("/v2/logout").queryParam("returnTo", postLogoutUri)
+            case "auth0" -> UriComponentsBuilder.fromUriString(issuer).path("/v2/logout").queryParam("returnTo", postLogoutUri)
                     .encode(StandardCharsets.UTF_8).toUriString();
 
             // "generic" and any unknown value: let Spring discover end_session_endpoint
