@@ -1003,3 +1003,349 @@ Feature: Asset Externalization - Part2
 
     When Loan Pay-off is made on "26 January 2026" with transfer external owner
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C85406
+  Scenario: Verify buy down fee partial adjustment after full amortization via investor sale - UC1: results in correct amortization adjustment amount
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 July 2026      | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "1000" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "1000" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 July 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-01     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    When Admin sets the business date to "02 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-01     | 1                  | PENDING | 2026-07-01    | 2026-07-01  | SALE             |
+      | 2026-07-01     | 1                  | ACTIVE  | 2026-07-02    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 July 2026"
+    And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "02 July 2026" with "20" EUR transaction amount
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Buy Down Fee Adjustment   | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 30.0             | 0.0                      | 20.0            | 0.0                |
+    And LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent is created on "02 July 2026"
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                         | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Buy Down Fee                         | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization            | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Buy Down Fee Adjustment              | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Buy Down Fee Amortization Adjustment | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 30.0             | 0.0                      | 20.0            | 0.0                |
+    And LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent is created on "02 July 2026"
+#    --- Close loan ---
+    When Loan Pay-off is made on "02 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C85407
+  Scenario: Verify buy down fee partial adjustment after full amortization via investor sale - UC2: with two buydown fees results in correct amortization adjustment amount
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 July 2026      | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "1000" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "1000" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 July 2026" with "50" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 July 2026" with "30" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-01     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+      | 01 July 2026 | 30.0       | 0.0              | 30.0                     | 0.0             | 0.0                |
+    When Admin sets the business date to "02 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-01     | 1                  | PENDING | 2026-07-01    | 2026-07-01  | SALE             |
+      | 2026-07-01     | 1                  | ACTIVE  | 2026-07-02    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee              | 30.0   | 0.0       | 30.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 79.13  | 0.0       | 79.13    | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+      | 01 July 2026 | 30.0       | 30.0             | 0.0                      | 0.0             | 0.0                |
+    And LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent is created on "01 July 2026"
+    And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "02 July 2026" with "20" EUR transaction amount
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee              | 30.0   | 0.0       | 30.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization | 79.13  | 0.0       | 79.13    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Buy Down Fee Adjustment   | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 30.0             | 0.0                      | 20.0            | 0.0                |
+      | 01 July 2026 | 30.0       | 30.0             | 0.0                      | 0.0             | 0.0                |
+    And LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent is created on "02 July 2026"
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                         | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Buy Down Fee                         | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee                         | 30.0   | 0.0       | 30.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization            | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Buy Down Fee Amortization            | 79.13  | 0.0       | 79.13    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Buy Down Fee Adjustment              | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Buy Down Fee Amortization Adjustment | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 01 July 2026 | 50.0       | 30.0             | 0.0                      | 20.0            | 0.0                |
+      | 01 July 2026 | 30.0       | 30.0             | 0.0                      | 0.0             | 0.0                |
+    And LoanBuyDownFeeAmortizationAdjustmentTransactionCreatedBusinessEvent is created on "02 July 2026"
+    #    --- Close loan ---
+    When Loan Pay-off is made on "02 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C85408
+  Scenario: Verify buy down fee partial adjustment after full amortization via investor sale - UC3: second daily COB after buy down fee adjustment post investor sale does not duplicate amortization adjustment
+    When Admin sets the business date to "01 August 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 August 2026    | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2026" with "1000" amount and expected disbursement date on "01 August 2026"
+    And Admin successfully disburse the loan on "01 August 2026" with "1000" EUR transaction amount
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "01 August 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-08-01     | 1                  |
+    When Admin sets the business date to "02 August 2026"
+    And Admin runs inline COB job for Loan
+    And Admin adds buy down fee adjustment with "AUTOPAY" payment type to the loan on "02 August 2026" with "20" EUR transaction amount
+    When Admin sets the business date to "03 August 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 August 2026   | Disbursement                         | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 August 2026   | Buy Down Fee                         | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 August 2026   | Buy Down Fee Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 August 2026   | Buy Down Fee Amortization            | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 August 2026   | Buy Down Fee Adjustment              | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 August 2026   | Buy Down Fee Amortization Adjustment | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    When Admin sets the business date to "04 August 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                     | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 August 2026   | Disbursement                         | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 August 2026   | Buy Down Fee                         | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 August 2026   | Buy Down Fee Amortization            | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 August 2026   | Buy Down Fee Amortization            | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 August 2026   | Buy Down Fee Adjustment              | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 02 August 2026   | Buy Down Fee Amortization Adjustment | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "04 August 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C85409
+  Scenario: Verify capitalized income partial adjustment after full amortization via investor sale - UC1: results in correct amortization adjustment amount
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 July 2026      | 1100           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "1100" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "1000" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 July 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-01     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.0              | 50.0                | 0.0             | 0.0                |
+    When Admin sets the business date to "02 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-01     | 1                  | PENDING | 2026-07-01    | 2026-07-01  | SALE             |
+      | 2026-07-01     | 1                  | ACTIVE  | 2026-07-02    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "01 July 2026"
+    And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "02 July 2026" with "20" EUR transaction amount
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Capitalized Income Adjustment   | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 1030.0       | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 30.0             | 0.0                 | 20.0            | 0.0                |
+    And LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent is raised on "02 July 2026"
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                            | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                                | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Capitalized Income                          | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 July 2026     | Capitalized Income Amortization             | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Capitalized Income Amortization             | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Capitalized Income Adjustment               | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 1030.0       | false    |
+      | 02 July 2026     | Capitalized Income Amortization Adjustment  | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 30.0             | 0.0                 | 20.0            | 0.0                |
+    And LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on "02 July 2026"
+#    --- Close loan ---
+    When Loan Pay-off is made on "02 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C85410
+  Scenario: Verify capitalized income partial adjustment after full amortization via investor sale - UC2: with two capitalized income transactions results in correct amortization adjustment amount
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 July 2026      | 1100           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "1100" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "1000" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 July 2026" with "50" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 July 2026" with "30" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-01     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.0              | 50.0                | 0.0             | 0.0                |
+      | 30.0   | 0.0              | 30.0                | 0.0             | 0.0                |
+    When Admin sets the business date to "02 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-01     | 1                  | PENDING | 2026-07-01    | 2026-07-01  | SALE             |
+      | 2026-07-01     | 1                  | ACTIVE  | 2026-07-02    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 July 2026     | Capitalized Income              | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 1080.0       | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 79.13  | 0.0       | 79.13    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+      | 30.0   | 30.0             | 0.0                 | 0.0             | 0.0                |
+    And LoanCapitalizedIncomeAmortizationTransactionCreatedBusinessEvent is raised on "01 July 2026"
+    And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "02 July 2026" with "20" EUR transaction amount
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 July 2026     | Capitalized Income              | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 1080.0       | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Capitalized Income Amortization | 79.13  | 0.0       | 79.13    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Capitalized Income Adjustment   | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 1060.0       | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 30.0             | 0.0                 | 20.0            | 0.0                |
+      | 30.0   | 30.0             | 0.0                 | 0.0             | 0.0                |
+    And LoanCapitalizedIncomeAdjustmentTransactionCreatedBusinessEvent is raised on "02 July 2026"
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                            | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                                | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 July 2026     | Capitalized Income                          | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 July 2026     | Capitalized Income                          | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 1080.0       | false    |
+      | 01 July 2026     | Capitalized Income Amortization             | 0.87   | 0.0       | 0.87     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 July 2026     | Capitalized Income Amortization             | 79.13  | 0.0       | 79.13    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 July 2026     | Capitalized Income Adjustment               | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 1060.0       | false    |
+      | 02 July 2026     | Capitalized Income Amortization Adjustment  | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 30.0             | 0.0                 | 20.0            | 0.0                |
+      | 30.0   | 30.0             | 0.0                 | 0.0             | 0.0                |
+    And LoanCapitalizedIncomeAmortizationAdjustmentTransactionCreatedBusinessEvent is raised on "02 July 2026"
+#    --- Close loan ---
+    When Loan Pay-off is made on "02 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C85411
+  Scenario: Verify capitalized income partial adjustment after full amortization via investor sale - UC3: second daily COB after capitalized income adjustment post investor sale does not duplicate amortization adjustment
+    When Admin sets the business date to "01 August 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                    | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 August 2026    | 1100           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 August 2026" with "1100" amount and expected disbursement date on "01 August 2026"
+    And Admin successfully disburse the loan on "01 August 2026" with "1000" EUR transaction amount
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "01 August 2026" with "50" EUR transaction amount
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-08-01     | 1                  |
+    When Admin sets the business date to "02 August 2026"
+    And Admin runs inline COB job for Loan
+    And Admin adds capitalized income adjustment with "AUTOPAY" payment type to the loan on "02 August 2026" with "20" EUR transaction amount
+    When Admin sets the business date to "03 August 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                            | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 August 2026   | Disbursement                                | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 August 2026   | Capitalized Income                          | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 August 2026   | Capitalized Income Amortization             | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 August 2026   | Capitalized Income Amortization             | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 August 2026   | Capitalized Income Adjustment               | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 1030.0       | false    |
+      | 02 August 2026   | Capitalized Income Amortization Adjustment  | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    When Admin sets the business date to "04 August 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                            | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 August 2026   | Disbursement                                | 1000.0 | 0.0       | 0.0      | 0.0  | 0.0       | 1000.0       | false    |
+      | 01 August 2026   | Capitalized Income                          | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 1050.0       | false    |
+      | 01 August 2026   | Capitalized Income Amortization             | 0.54   | 0.0       | 0.54     | 0.0  | 0.0       | 0.0          | false    |
+      | 01 August 2026   | Capitalized Income Amortization             | 49.46  | 0.0       | 49.46    | 0.0  | 0.0       | 0.0          | false    |
+      | 02 August 2026   | Capitalized Income Adjustment               | 20.0   | 20.0      | 0.0      | 0.0  | 0.0       | 1030.0       | false    |
+      | 02 August 2026   | Capitalized Income Amortization Adjustment  | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "04 August 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

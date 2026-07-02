@@ -28,8 +28,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
+import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -49,9 +51,11 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionBusinessEvent;
@@ -1183,6 +1187,88 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             verifyBusinessEvents(new LoanAdjustTransactionBusinessEvent("LoanAdjustTransactionBusinessEvent", "04 January 2024",
                     "loanTransactionType.capitalizedIncome", "2024-01-01") //
             );
+        });
+    }
+
+    @Test
+    public void testCapitalizedIncomePartialAdjustmentAfterFullAmortizationViaInvestorSale() {
+        final AtomicReference<Long> loanIdRef = new AtomicReference<>();
+        final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
+        final Account transferAccount = accountHelper.createAssetAccount("transferInSuspense");
+        final FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
+        final ExternalAssetOwnerHelper externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
+        externalAssetOwnerHelper.setProperFinancialActivity(financialActivityAccountHelper, transferAccount);
+
+        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
+                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
+                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+
+        runAt("01 July 2026", () -> {
+            final Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "01 July 2026",
+                    1000.0, 10.0, 6, null);
+            loanIdRef.set(loanId);
+            disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 July 2026");
+
+            final PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
+                    "01 July 2026", 50.0);
+            capitalizedIncomeTransactionIdRef.set(capitalizedIncomeResponse.getResourceId());
+
+            externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
+                    new ExternalAssetOwnerRequest().settlementDate("2026-07-01").dateFormat("yyyy-MM-dd").locale("en")
+                            .transferExternalId(UUID.randomUUID().toString()).ownerExternalId(UUID.randomUUID().toString())
+                            .purchasePriceRatio("1.0"));
+        });
+
+        runAt("02 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getTransactions());
+
+            final BigDecimal totalAmortized = loanDetails.getTransactions().stream()
+                    .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getCapitalizedIncomeAmortization()))
+                    .map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            assertEquals(0, BigDecimal.valueOf(50.0).compareTo(totalAmortized),
+                    "Capitalized income should be fully amortized after investor sale COB");
+
+            loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "02 July 2026", 20.0);
+        });
+
+        runAt("03 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getTransactions());
+
+            final BigDecimal amortizationAdjustmentAmount = loanDetails.getTransactions().stream()
+                    .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getCapitalizedIncomeAmortizationAdjustment()))
+                    .map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            assertEquals(0, BigDecimal.valueOf(20.0).compareTo(amortizationAdjustmentAmount),
+                    "Capitalized Income Amortization Adjustment should match the $20 partial adjustment");
+        });
+
+        runAt("04 July 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            executeInlineCOB(loanId);
+
+            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            assertNotNull(loanDetails.getTransactions());
+
+            final BigDecimal amortizationAdjustmentAmount = loanDetails.getTransactions().stream()
+                    .filter(t -> t.getType() != null && Boolean.TRUE.equals(t.getType().getCapitalizedIncomeAmortizationAdjustment()))
+                    .map(GetLoansLoanIdTransactions::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            assertEquals(0, BigDecimal.valueOf(20.0).compareTo(amortizationAdjustmentAmount),
+                    "Capitalized Income Amortization Adjustment should still match the $20 partial adjustment");
         });
     }
 
