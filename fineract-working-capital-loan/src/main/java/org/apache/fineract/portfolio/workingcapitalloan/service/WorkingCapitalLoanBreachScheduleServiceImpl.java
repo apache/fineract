@@ -174,25 +174,45 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     @Override
     public void applyRepaymentUndo(final Long loanId, final LocalDate transactionDate, final BigDecimal amount) {
+        if (loanId == null || transactionDate == null || amount == null) {
+            return;
+        }
         if (isBreachEvaluationDisabled(loanId, DateUtils.getBusinessLocalDate())) {
             log.debug("Skipping breach schedule repayment undo for WC loan {} - breach evaluation is disabled", loanId);
             return;
         }
 
+        // Un-apply the amount from the period containing the transaction date, then cascade any remainder that period
+        // could not absorb (its accumulated paid amount was smaller) back through the earlier periods, most-recent
+        // first. Each period floors its paid amount at zero, so the undo can never drive a paid amount negative or
+        // inflate an outstanding amount above the period's minimum payment.
+        BigDecimal remaining = amount;
         final Optional<WorkingCapitalLoanBreachSchedule> currentPeriod = repository
                 .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loanId, transactionDate, transactionDate);
-        if (currentPeriod.isEmpty()) {
-            return;
+        if (currentPeriod.isPresent()) {
+            remaining = remaining.subtract(applyRepaymentUndoForPeriod(currentPeriod.get(), remaining, loanId));
         }
-        applyRepaymentUndo(currentPeriod.get(), amount, loanId);
+        if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+            final List<WorkingCapitalLoanBreachSchedule> pastPeriods = repository
+                    .findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(loanId, transactionDate);
+            for (final WorkingCapitalLoanBreachSchedule period : pastPeriods.reversed()) {
+                remaining = remaining.subtract(applyRepaymentUndoForPeriod(period, remaining, loanId));
+                if (remaining.compareTo(BigDecimal.ZERO) <= 0) {
+                    break;
+                }
+            }
+        }
         recalculatePastDueAmount(loanId);
     }
 
-    private void applyRepaymentUndo(final WorkingCapitalLoanBreachSchedule period, final BigDecimal payAmount, final Long loanId) {
-        period.setPaidAmount(period.getPaidAmount().subtract(payAmount).max(BigDecimal.ZERO));
+    private BigDecimal applyRepaymentUndoForPeriod(final WorkingCapitalLoanBreachSchedule period, final BigDecimal payAmount,
+            final Long loanId) {
+        final BigDecimal unpayAmount = period.getPaidAmount().min(payAmount);
+        period.setPaidAmount(period.getPaidAmount().subtract(unpayAmount));
         period.setOutstandingAmount(MathUtil.subtract(period.getMinPaymentAmount(), period.getPaidAmount()).max(BigDecimal.ZERO));
         recomputeBreach(period, DateUtils.getBusinessLocalDate());
-        log.debug("Undid repayment of {} from Breach Schedule period {} for WC loan {}", payAmount, period.getPeriodNumber(), loanId);
+        log.debug("Undid repayment of {} from Breach Schedule period {} for WC loan {}", unpayAmount, period.getPeriodNumber(), loanId);
+        return unpayAmount;
     }
 
     @Override

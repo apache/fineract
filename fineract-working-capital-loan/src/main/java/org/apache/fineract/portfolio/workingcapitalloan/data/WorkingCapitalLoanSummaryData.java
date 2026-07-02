@@ -39,6 +39,7 @@ public class WorkingCapitalLoanSummaryData implements Serializable {
     // Principal
     private BigDecimal principal;
     private BigDecimal principalPaid;
+    private BigDecimal principalAdjustment;
     private BigDecimal principalOutstanding;
 
     // Fee

@@ -81,6 +81,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public BigDecimal feeChargesPortion;
         @Schema(example = "0.00", description = "Penalty charges portion from allocation")
         public BigDecimal penaltyChargesPortion;
+        public BigDecimal overpaymentPortion;
     }
 
     @Schema(description = "Loan transaction type enum data (same as basic loan)")

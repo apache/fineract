@@ -792,8 +792,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 transactionAmount, paymentDetail, transactionDate, classification, txnExternalId);
         this.transactionRepository.saveAndFlush(creditBalanceRefundTransaction);
 
+        // A booked refund can never exceed the overpayment (validated above), so it is fully funded by the overpayment
+        // balance and moves no principal: the whole amount is its overpayment portion. Principal appears on a CBR only
+        // when a later reprocess leaves part of the refund without overpayment behind it (the over-refund excess).
         final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation
-                .forPrincipalAllocation(creditBalanceRefundTransaction, transactionAmount);
+                .forCreditBalanceRefund(creditBalanceRefundTransaction, BigDecimal.ZERO, transactionAmount);
         this.allocationRepository.saveAndFlush(allocation);
 
         updateBalanceOnCreditBalanceRefund(loan, transactionAmount);
@@ -900,25 +903,43 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         changes.put("reversedOnDate", reversedOnDate);
 
         final List<WorkingCapitalLoanCharge> charges = this.chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
-        if (charges.isEmpty()) {
-            // The simple total adjustment below is only correct when there is no overpayment to redistribute. If the
-            // loan was overpaid, a full re-allocation is needed so a former overpayment portion folds back into
-            // principal instead of leaving the allocations and schedule disagreeing with the balance.
-            final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
-            final boolean wasOverpaid = balance != null && MathUtil.isGreaterThanZero(balance.getOverpaymentAmount());
-            if (wasOverpaid) {
-                transactionReprocessingService.reprocessTransactionsForChargeFreeUndo(loan);
-            } else {
-                amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
-                        transaction.getAllocation().getPrincipalPortion());
-                updateBalanceOnUndoRepayment(loan, transaction.getAllocation().getPrincipalPortion());
-            }
-        } else {
-            transactionReprocessingService.reprocessTransactions(loan);
-        }
 
-        breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
-        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        // CBR-aware branch: a Credit Balance Refund is an inverse money movement whose outcome depends on the
+        // recomputed overpayment, so an active CBR forces a full reprocess and the breach/delinquency schedules are
+        // reconciled from the NET change in outstanding principal (which can increase via an over-refund "Credit
+        // Principal"), rather than from the single reversed transaction's principal portion.
+        final BigDecimal netPrincipalPositionBeforeUndo = signedPrincipalPosition(loan);
+
+        final List<WorkingCapitalLoanTransaction> allTransactions = transactionRepository
+                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId());
+        final boolean hasActiveCreditBalanceRefund = allTransactions.stream()
+                .anyMatch(tr -> !tr.isReversed() && tr.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND);
+        if (hasActiveCreditBalanceRefund) {
+            transactionReprocessingService.reprocessTransactionsAndCorrectAccounting(loan, allTransactions);
+            final BigDecimal netPrincipalPositionAfterUndo = signedPrincipalPosition(loan);
+            applyOutstandingPrincipalDeltaToSchedules(loan, reversedOnDate, netPrincipalPositionBeforeUndo, netPrincipalPositionAfterUndo);
+        } else {
+            // Non-CBR undo path: the standard repayment-undo behaviour.
+            if (charges.isEmpty()) {
+                // The simple total adjustment below is only correct when there is no overpayment to redistribute. If
+                // the
+                // loan was overpaid, a full re-allocation is needed so a former overpayment portion folds back into
+                // principal instead of leaving the allocations and schedule disagreeing with the balance.
+                final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
+                final boolean wasOverpaid = balance != null && MathUtil.isGreaterThanZero(balance.getOverpaymentAmount());
+                if (wasOverpaid) {
+                    transactionReprocessingService.reprocessTransactionsForChargeFreeUndo(loan, allTransactions);
+                } else {
+                    amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
+                            transaction.getAllocation().getPrincipalPortion());
+                    updateBalanceOnUndoRepayment(loan, transaction.getAllocation().getPrincipalPortion());
+                }
+            } else {
+                transactionReprocessingService.reprocessTransactions(loan, allTransactions);
+            }
+            breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
+            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        }
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             accountingProcessor.postReversalJournalEntries(loan, transaction);
@@ -971,9 +992,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             balance.setTotalDiscountFeeAdjustment(balance.getTotalDiscountFeeAdjustment().add(discountAmount));
             balance.setPrincipal(balance.getPrincipal().subtract(discountAmount));
 
-            final BigDecimal diff = balance.getPrincipal().subtract(balance.getPrincipalPaid());
+            // Clamp against the total principal due (principal + any over-refund principal adjustment), not the bare
+            // principal: an adjustment still owed must not be treated as overpaid just because the discount reduced the
+            // principal below what was paid. Identical to the previous principal-only clamp when there is no
+            // adjustment.
+            final BigDecimal totalPrincipalDue = balance.getTotalPrincipalDue();
+            final BigDecimal diff = totalPrincipalDue.subtract(balance.getPrincipalPaid());
             if (MathUtil.isLessThanOrEqualZero(diff)) {
-                balance.setPrincipalPaid(balance.getPrincipal());
+                balance.setPrincipalPaid(totalPrincipalDue);
                 if (MathUtil.isLessThanZero(diff)) {
                     balance.setOverpaymentAmount(balance.getOverpaymentAmount().add(diff.negate()));
                 } else {
@@ -1001,6 +1027,41 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         balance.setPrincipalPaid(currentTotalPaidPrincipal.subtract(amountSubtractFromPrincipal));
 
         this.balanceRepository.saveAndFlush(balance);
+    }
+
+    /**
+     * The signed principal position: outstanding principal minus any overpayment. Unlike
+     * {@link WorkingCapitalLoanBalance#getPrincipalOutstanding()} — which is floored at zero — this stays negative
+     * while the loan is overpaid, so the breach/delinquency reconciliation sees the full swing when an undo moves the
+     * loan out of overpayment. Using the floored value would hide the overpayment and leave a period carrying
+     * phantom-paid amount.
+     */
+    private BigDecimal signedPrincipalPosition(final WorkingCapitalLoan loan) {
+        if (loan.getBalance() == null) {
+            return BigDecimal.ZERO;
+        }
+        return MathUtil.subtract(MathUtil.nullToZero(loan.getBalance().getPrincipalOutstanding()),
+                MathUtil.nullToZero(loan.getBalance().getOverpaymentAmount()));
+    }
+
+    /**
+     * Reconciles the breach and delinquency range schedules with the net change in the signed principal position
+     * produced by a CBR-aware reprocess. When the position increases (over-refund "Credit Principal", or an undo that
+     * consumes a former overpayment) the schedules are re-opened for that amount; when it decreases they are settled by
+     * the reduction. This replaces the incremental single-transaction delta, which cannot represent principal newly
+     * created by the refund.
+     */
+    private void applyOutstandingPrincipalDeltaToSchedules(final WorkingCapitalLoan loan, final LocalDate effectiveDate,
+            final BigDecimal netPositionBefore, final BigDecimal netPositionAfter) {
+        final BigDecimal delta = MathUtil.subtract(netPositionAfter, netPositionBefore);
+        if (MathUtil.isGreaterThanZero(delta)) {
+            breachScheduleService.applyRepaymentUndo(loan.getId(), effectiveDate, delta);
+        } else if (MathUtil.isLessThanZero(delta)) {
+            breachScheduleService.applyRepayment(loan.getId(), effectiveDate, delta.negate());
+        }
+        // The delinquency range schedule is rebuilt from the loan's recomputed state rather than nudged by the delta,
+        // matching the standard undo path's reprocess.
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
     }
 
     private void updateBalanceOnCreditBalanceRefund(final WorkingCapitalLoan loan, final BigDecimal refundAmount) {

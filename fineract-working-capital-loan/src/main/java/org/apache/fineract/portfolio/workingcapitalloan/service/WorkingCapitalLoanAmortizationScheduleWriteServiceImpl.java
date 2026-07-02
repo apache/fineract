@@ -235,6 +235,10 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         final List<ProjectedAmortizationScheduleModel.ActualPayment> preservedPayments = currentModel.snapshotActualPayments();
+        // Preserve principal re-injected by an over-refund CBR: restating from a fresh model would otherwise drop the
+        // CBR-date overlay, leaving the schedule out of step with the loan balance that still owns the adjustment.
+        final List<ProjectedAmortizationScheduleModel.PrincipalAdjustment> preservedAdjustments = currentModel
+                .snapshotPrincipalAdjustments();
 
         final BigDecimal disbursedAmount = resolveActualDisbursedAmount(loan);
         final LocalDate disbursementDate = resolveActualDisbursementDate(loan);
@@ -243,14 +247,18 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 disbursementDate);
         preservedPayments.stream().sorted(Comparator.comparing(ProjectedAmortizationScheduleModel.ActualPayment::date))
                 .forEach(payment -> restatedModel.applyPayment(payment.date(), payment.amount().getAmount()));
+        preservedAdjustments
+                .forEach(adjustment -> restatedModel.applyPrincipalAdjustment(adjustment.date(), adjustment.amount().getAmount()));
 
         scheduleRepositoryWrapper.writeModel(loan, restatedModel);
     }
 
     @Override
-    public void rebuildScheduleFromPrincipalPayments(final WorkingCapitalLoan loan, final List<PrincipalPayment> principalPayments) {
+    public void rebuildScheduleFromPrincipalPayments(final WorkingCapitalLoan loan, final List<PrincipalPayment> principalPayments,
+            final List<PrincipalAdjustment> principalAdjustments) {
         Validate.notNull(loan, "loan must not be null");
         Validate.notNull(principalPayments, "principalPayments must not be null");
+        Validate.notNull(principalAdjustments, "principalAdjustments must not be null");
 
         final BigDecimal disbursedAmount = resolveActualDisbursedAmount(loan);
         final LocalDate disbursementDate = resolveActualDisbursementDate(loan);
@@ -260,6 +268,9 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         principalPayments.stream().filter(payment -> payment.amount() != null && payment.amount().signum() > 0)
                 .sorted(Comparator.comparing(PrincipalPayment::date))
                 .forEach(payment -> model.applyPayment(payment.date(), payment.amount()));
+        principalAdjustments.stream().filter(adjustment -> adjustment.amount() != null && adjustment.amount().signum() > 0)
+                .sorted(Comparator.comparing(PrincipalAdjustment::date))
+                .forEach(adjustment -> model.applyPrincipalAdjustment(adjustment.date(), adjustment.amount()));
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }

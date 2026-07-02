@@ -291,6 +291,8 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     void testCreditBalanceRefundPostsOverpaymentDebitAndFundSourceCredit() {
         when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
         when(txn.getTransactionAmount()).thenReturn(new BigDecimal("50"));
+        // a booked refund is fully funded by the overpayment, which its allocation records
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("50"));
 
         processor.postJournalEntries(loan, txn, allocation, false);
 
@@ -441,5 +443,134 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
 
         assertThrows(IllegalStateException.class, () -> processor.postJournalEntries(loan, txn, allocation, false));
+    }
+
+    // --- restatement of a surviving transaction after a reprocess re-splits it (append-only) ---
+
+    private JournalEntry postedEntry(final GLAccount account, final JournalEntryType type, final String amount) {
+        return JournalEntry.createNew(office, null, account, CURRENCY_CODE, "WC" + TXN_ID, false, LocalDate.of(2026, 5, 1), type,
+                new BigDecimal(amount), null, WORKING_CAPITAL_LOAN_ENTITY_TYPE, LOAN_ID, null, TXN_ID, null, null, null);
+    }
+
+    private void stubGLAccountIds() {
+        lenient().when(fundSourceGLAccount.getId()).thenReturn(1L);
+        lenient().when(loanPortfolioGLAccount.getId()).thenReturn(2L);
+        lenient().when(overpaymentGLAccount.getId()).thenReturn(3L);
+        lenient().when(feesReceivableGLAccount.getId()).thenReturn(4L);
+        lenient().when(penaltiesReceivableGLAccount.getId()).thenReturn(5L);
+    }
+
+    private void stubLiveEntries(final JournalEntry... entries) {
+        when(journalEntryRepository.findJournalEntries("WC" + TXN_ID, WORKING_CAPITAL_LOAN_ENTITY_TYPE)).thenReturn(List.of(entries));
+    }
+
+    /** A refund that partly outlived its overpayment: the remainder became newly-lent principal. */
+    @Test
+    void testRestateSplitsCreditBalanceRefundBetweenOverpaymentAndExcessPrincipal() {
+        stubGLAccountIds();
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("300"));
+        final JournalEntry overpaymentDebit = postedEntry(overpaymentGLAccount, JournalEntryType.DEBIT, "300");
+        final JournalEntry fundSourceCredit = postedEntry(fundSourceGLAccount, JournalEntryType.CREDIT, "300");
+        stubLiveEntries(overpaymentDebit, fundSourceCredit);
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("200"));
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("100"));
+
+        processor.restateJournalEntries(loan, txn, allocation, false);
+
+        // the stale lines are cancelled, never deleted
+        verify(journalEntryRepository, org.mockito.Mockito.never()).deleteAll(any());
+        assertTrue(overpaymentDebit.isReversed());
+        assertTrue(fundSourceCredit.isReversed());
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(overpaymentGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("100")), isNull());
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(loanPortfolioGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("200")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(fundSourceGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("300")), isNull());
+    }
+
+    /** A refund left with no overpayment behind it at all books entirely as newly-lent principal. */
+    @Test
+    void testRestateBooksFullyUnbackedCreditBalanceRefundAsPrincipal() {
+        stubGLAccountIds();
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("1000"));
+        stubLiveEntries(postedEntry(overpaymentGLAccount, JournalEntryType.DEBIT, "1000"),
+                postedEntry(fundSourceGLAccount, JournalEntryType.CREDIT, "1000"));
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("1000"));
+        when(allocation.getOverpaymentPortion()).thenReturn(BigDecimal.ZERO);
+
+        processor.restateJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(loanPortfolioGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("1000")), isNull());
+        // nothing is left to take off the overpayment liability
+        verify(helper, org.mockito.Mockito.never()).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), eq(overpaymentGLAccount),
+                anyLong(), anyLong(), any(), any(), any());
+    }
+
+    /** A refund still fully funded by overpayment must keep booking to the overpayment liability. */
+    @Test
+    void testRestateKeepsFullyFundedCreditBalanceRefundOnOverpayment() {
+        stubGLAccountIds();
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("300"));
+        // ledger currently shows it as partly principal, so a restatement back to fully-funded is required
+        stubLiveEntries(postedEntry(overpaymentGLAccount, JournalEntryType.DEBIT, "100"),
+                postedEntry(loanPortfolioGLAccount, JournalEntryType.DEBIT, "200"),
+                postedEntry(fundSourceGLAccount, JournalEntryType.CREDIT, "300"));
+        when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("300"));
+
+        processor.restateJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(overpaymentGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("300")), isNull());
+        verify(helper, org.mockito.Mockito.never()).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), eq(loanPortfolioGLAccount),
+                anyLong(), anyLong(), any(), any(), any());
+    }
+
+    /** An unchanged split must not be re-posted, or every undo would pile cancelling noise onto untouched entries. */
+    @Test
+    void testRestateSkipsTransactionWhoseSplitDidNotChange() {
+        stubGLAccountIds();
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("300"));
+        final JournalEntry overpaymentDebit = postedEntry(overpaymentGLAccount, JournalEntryType.DEBIT, "100");
+        final JournalEntry loanPortfolioDebit = postedEntry(loanPortfolioGLAccount, JournalEntryType.DEBIT, "200");
+        stubLiveEntries(overpaymentDebit, loanPortfolioDebit, postedEntry(fundSourceGLAccount, JournalEntryType.CREDIT, "300"));
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("200"));
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("100"));
+
+        processor.restateJournalEntries(loan, txn, allocation, false);
+
+        assertTrue(!overpaymentDebit.isReversed());
+        assertTrue(!loanPortfolioDebit.isReversed());
+        verify(helper, org.mockito.Mockito.never()).persistJournalEntry(any());
+        verify(helper, org.mockito.Mockito.never()).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), any(), anyLong(), anyLong(),
+                any(), any(), any());
+    }
+
+    /** A repayment whose principal/overpayment split moved is restated from the recomputed allocation. */
+    @Test
+    void testRestateRepaymentUsesRecomputedAllocationSplit() {
+        stubGLAccountIds();
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("9100"));
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("9000"));
+        when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        final JournalEntry loanPortfolioCredit = postedEntry(loanPortfolioGLAccount, JournalEntryType.CREDIT, "8800");
+        stubLiveEntries(postedEntry(fundSourceGLAccount, JournalEntryType.DEBIT, "9100"), loanPortfolioCredit,
+                postedEntry(overpaymentGLAccount, JournalEntryType.CREDIT, "300"));
+
+        processor.restateJournalEntries(loan, txn, allocation, false);
+
+        assertTrue(loanPortfolioCredit.isReversed());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(loanPortfolioGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("9000")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(overpaymentGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("100")), isNull());
     }
 }
