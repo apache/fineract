@@ -32,7 +32,11 @@ public enum DefaultWorkingCapitalLoanProduct implements WorkingCapitalLoanProduc
     WCLP_BREACH_NEAR_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE, //
     WCLP_ADVANCED_ACCOUNTING, //
     WCLP_ACC_DEF_REV_AM, //
-    WCLP_PERIOD_PAYMENT_RATE; //
+    WCLP_PERIOD_PAYMENT_RATE, //
+    WCLP_DUE_FEE_PENALTY_PRINCIPAL, //
+    WCLP_IN_ADVANCE_PENALTY_FEE_PRINCIPAL, //
+    WCLP_DUE_FEE_PRINCIPAL_PENALTY, //
+    WCLP_DUE_PRINCIPAL_FEE_PENALTY; //
 
     @Override
     public String getName() {
