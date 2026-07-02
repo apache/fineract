@@ -69,8 +69,7 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         final Long loanId = extractLoanId();
         final PostWorkingCapitalLoansBreachActionRequest request = buildRescheduleRequest(new BigDecimal(minimumPayment),
                 minimumPaymentType, frequency, frequencyType);
-        final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request));
+        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
         assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
     }
@@ -80,8 +79,7 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         final Long loanId = extractLoanId();
         final PostWorkingCapitalLoansBreachActionRequest request = buildRescheduleRequest(Map.of());
 
-        final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request));
+        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
         assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
     }
@@ -216,15 +214,70 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         verifyBreachActionsWithTable(actualActions, dataTable);
     }
 
+    @When("Admin creates WC breach reset action")
+    public void createBreachResetAction() {
+        executeBreachAction(workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansBreachActionRequest("reset"));
+    }
+
+    @When("Admin creates WC breach undo reset action")
+    public void createBreachUndoResetAction() {
+        executeBreachAction(workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansBreachActionRequest("undo_reset"));
+    }
+
+    @Then("Admin fails to create WC breach reset action with error containing {string}")
+    public void failToCreateBreachResetAction(final String expectedMessage) {
+        final Long loanId = extractLoanId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("reset");
+        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
+    }
+
+    @Then("Admin fails to create WC breach undo reset action with error containing {string}")
+    public void failToCreateBreachUndoResetAction(final String expectedMessage) {
+        final Long loanId = extractLoanId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("undo_reset");
+        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
+    }
+
+    @Then("Admin fails to create WC breach {string} action with error containing {string}")
+    public void failToCreateBreachActionByType(final String action, final String expectedMessage) {
+        final Long loanId = extractLoanId();
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest(action);
+        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
+    }
+
+    private void executeBreachAction(final PostWorkingCapitalLoansBreachActionRequest request) {
+        final Long loanId = extractLoanId();
+        log.debug("Creating breach action {} for WC loan {}", request.getAction(), loanId);
+
+        final PostWorkingCapitalLoansBreachActionResponse result = ok(() -> createBreachAction(loanId, request));
+        assertThat(result).isNotNull();
+        assertThat(result.getResourceId()).isNotNull();
+        log.info("Breach {} action created with id={}", request.getAction(), result.getResourceId());
+    }
+
     private void executeRescheduleAction(final PostWorkingCapitalLoansBreachActionRequest request) {
         final Long loanId = extractLoanId();
         log.debug("Creating breach RESCHEDULE action for WC loan {}: {}", loanId, request);
 
-        final PostWorkingCapitalLoansBreachActionResponse result = ok(
-                () -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request));
+        final PostWorkingCapitalLoansBreachActionResponse result = ok(() -> createBreachAction(loanId, request));
         assertThat(result).isNotNull();
         assertThat(result.getResourceId()).isNotNull();
         log.info("Breach RESCHEDULE action created with id={}", result.getResourceId());
+    }
+
+    private PostWorkingCapitalLoansBreachActionResponse createBreachAction(final Long loanId,
+            final PostWorkingCapitalLoansBreachActionRequest request) {
+        assert request.getAction() != null;
+        return fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request);
     }
 
     private void verifyBreachActionsWithTable(final List<WorkingCapitalLoanBreachActionData> actualActions, final DataTable dataTable) {

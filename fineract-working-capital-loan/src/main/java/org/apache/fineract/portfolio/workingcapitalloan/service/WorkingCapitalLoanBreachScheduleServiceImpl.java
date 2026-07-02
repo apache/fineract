@@ -56,6 +56,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     private final WorkingCapitalLoanBreachScheduleMapper mapper;
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
+    private final WorkingCapitalLoanActiveBreachResetResolver activeBreachResetResolver;
 
     @Override
     public void generateInitialPeriod(final WorkingCapitalLoan loan) {
@@ -143,8 +144,17 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
     }
 
     @Override
-    public void applyRepayment(Long loanId, LocalDate transactionDate, BigDecimal amount) {
-        Optional<WorkingCapitalLoanBreachSchedule> currentPeriod = repository
+    public void applyRepayment(final Long loanId, final LocalDate transactionDate, final BigDecimal amount) {
+        if (loanId == null || transactionDate == null || amount == null) {
+            return;
+        }
+        final Optional<LocalDate> lastResetDate = activeBreachResetResolver.findLatestActiveResetDate(loanId);
+        if (lastResetDate.isPresent() && transactionDate.isBefore(lastResetDate.get())) {
+            log.debug("Ignoring backdated repayment on {} for WC loan {} breach schedule (last reset on {})", transactionDate, loanId,
+                    lastResetDate.get());
+            return;
+        }
+        final Optional<WorkingCapitalLoanBreachSchedule> currentPeriod = repository
                 .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loanId, transactionDate, transactionDate);
         currentPeriod.ifPresent(period -> applyRepayment(period, amount, loanId));
     }

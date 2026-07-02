@@ -30,7 +30,7 @@ public final class WorkingCapitalLoanBreachActionApiResourceSwagger {
 
         private PostWorkingCapitalLoansBreachActionRequest() {}
 
-        @Schema(example = "pause", description = "Breach action type: pause, reschedule or resume")
+        @Schema(example = "pause", description = "Breach action type: pause, reschedule, resume, reset, undo reset")
         public String action;
         @Schema(example = "2026-03-05", description = "For pause: start date of the pause period. For resume: the resume date, which must be the current business date")
         public String startDate;

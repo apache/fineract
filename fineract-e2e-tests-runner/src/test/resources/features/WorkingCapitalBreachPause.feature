@@ -260,7 +260,7 @@ Feature: Working Capital Breach Pause
       | 400      | The parameter `startDate` must be greater than or equal to the provided date: 2026-01-01 |
     And Initiating a Working Capital loan breach action "invalid" with startDate "15 January 2026" and endDate "25 January 2026" results an error with the following data:
       | httpCode | message                                                             |
-      | 400      | The parameter `action` must be one of [ pause, reschedule, resume ] |
+      | 400      | The parameter `action` must be one of [ pause, reschedule, resume, reset, undo_reset ] |
     And Initiating a Working Capital loan breach action without "action" results an error with the following data:
       | httpCode | message                             |
       | 400      | The parameter `action` is mandatory |
