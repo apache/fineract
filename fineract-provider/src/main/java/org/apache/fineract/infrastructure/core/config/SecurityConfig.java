@@ -149,6 +149,9 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CACHE")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/caches"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CACHE")
+                    // familymember: clients
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/familymembers"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_PAYMENTTYPE")
                     // currency
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/currencies"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CURRENCY")
@@ -271,8 +274,10 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/images"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTIMAGE")
                     // collateral: clients
-                    // NOTE: the "_CLIENT_COLLATERAL_PRODUCT" suffix is the legacy permission naming kept for
-                    // backwards compatibility (entity_name = CLIENT_COLLATERAL_PRODUCT in the permission table)
+                    // NOTE: the "_CLIENT_COLLATERAL_PRODUCT" suffix is the legacy permission naming
+                    // kept for
+                    // backwards compatibility (entity_name = CLIENT_COLLATERAL_PRODUCT in the
+                    // permission table)
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/collaterals"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_CLIENT_COLLATERAL_PRODUCT")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/clients/*/collaterals/*"))
@@ -332,7 +337,8 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/mixmapping/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_MIX_MAPPING")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/mixmapping/*"))
-                    // TODO: "UPDATE_XBRLMAPPING" is the legacy permission name; we should rename for consistency
+                    // TODO: "UPDATE_XBRLMAPPING" is the legacy permission name; we should rename
+                    // for consistency
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_MIX_MAPPING", "UPDATE_XBRLMAPPING")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/mixmapping/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_MIX_MAPPING")

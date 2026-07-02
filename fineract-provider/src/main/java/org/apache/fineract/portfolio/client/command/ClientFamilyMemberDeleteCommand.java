@@ -17,22 +17,13 @@
  * under the License.
  */
 
-package org.apache.fineract.portfolio.client.service;
+package org.apache.fineract.portfolio.client.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMemberDeleteRequest;
-import org.apache.fineract.portfolio.client.data.ClientFamilyMemberDeleteResponse;
-import org.apache.fineract.portfolio.client.domain.Client;
 
-public interface ClientFamilyMembersWritePlatformService {
-
-    CommandProcessingResult addFamilyMember(long clientId, JsonCommand command);
-
-    CommandProcessingResult addClientFamilyMember(Client client, JsonCommand command);
-
-    CommandProcessingResult updateFamilyMember(Long familyMemberId, JsonCommand command);
-
-    ClientFamilyMemberDeleteResponse deleteFamilyMember(ClientFamilyMemberDeleteRequest request);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ClientFamilyMemberDeleteCommand extends Command<ClientFamilyMemberDeleteRequest> {}

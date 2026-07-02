@@ -22,6 +22,7 @@ package org.apache.fineract.portfolio.client.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -32,10 +33,13 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.data.ClientFamilyMemberDeleteRequest;
+import org.apache.fineract.portfolio.client.data.ClientFamilyMemberDeleteResponse;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientFamilyMembers;
 import org.apache.fineract.portfolio.client.domain.ClientFamilyMembersRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.client.exception.ClientFamilyMemberNotFoundException;
 import org.apache.fineract.portfolio.client.serialization.ClientFamilyMemberCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,18 +365,27 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
     }
 
     @Override
-    public CommandProcessingResult deleteFamilyMember(Long clientFamilyMemberId, JsonCommand command) {
-        this.context.authenticatedUser();
+    public ClientFamilyMemberDeleteResponse deleteFamilyMember(@Valid ClientFamilyMemberDeleteRequest request) {
+        // this.context.authenticatedUser();
 
-        apiJsonDeserializer.validateForDelete(clientFamilyMemberId);
+        // apiJsonDeserializer.validateForDelete(clientFamilyMemberId);
 
-        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
-        clientFamilyRepository.delete(clientFamilyMember);
+        // ClientFamilyMembers clientFamilyMember =
+        // clientFamilyRepository.getReferenceById(clientFamilyMemberId);
+        // clientFamilyRepository.delete(clientFamilyMember);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(clientFamilyMember.getId()) //
-                .build();
+        // return new CommandProcessingResultBuilder() //
+        // .withCommandId(command.commandId()) //
+        // .withEntityId(clientFamilyMember.getId()) //
+        // .build();
+
+        final var clientFamilyMember = clientFamilyRepository.findById(request.getId())
+                .orElseThrow(() -> new ClientFamilyMemberNotFoundException(request.getId()));
+
+        this.clientFamilyRepository.delete(clientFamilyMember);
+        this.clientFamilyRepository.flush();
+
+        return ClientFamilyMemberDeleteResponse.builder().resourceId(clientFamilyMember.getId()).build();
 
     }
 

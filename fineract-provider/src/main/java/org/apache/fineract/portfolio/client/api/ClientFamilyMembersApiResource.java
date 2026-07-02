@@ -32,13 +32,18 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.command.ClientFamilyMemberDeleteCommand;
+import org.apache.fineract.portfolio.client.data.ClientFamilyMemberDeleteRequest;
+import org.apache.fineract.portfolio.client.data.ClientFamilyMemberDeleteResponse;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMemberRequest;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.apache.fineract.portfolio.client.service.ClientFamilyMembersReadPlatformService;
@@ -55,6 +60,7 @@ public class ClientFamilyMembersApiResource {
     private final ClientFamilyMembersReadPlatformService readPlatformService;
     private final ToApiJsonSerializer<ClientFamilyMembersData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Path("/{familyMemberId}")
@@ -111,15 +117,38 @@ public class ClientFamilyMembersApiResource {
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
+    // @DELETE
+    // @Path("/{familyMemberId}")
+    // @Produces({ MediaType.APPLICATION_JSON })
+    // @Operation(summary = "Delete a client family member", operationId =
+    // "deleteClientFamilyMember")
+    // public CommandProcessingResult
+    // deleteClientFamilyMembers(@PathParam("familyMemberId") final long
+    // familyMemberId,
+    // @PathParam("clientId") @Parameter(description = "clientId") final Long
+    // clientId) {
+    // final CommandWrapper commandRequest = new
+    // CommandWrapperBuilder().deleteFamilyMembers(familyMemberId).build();
+
+    // return
+    // this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    // }
+
     @DELETE
     @Path("/{familyMemberId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a client family member", operationId = "deleteClientFamilyMember")
-    public CommandProcessingResult deleteClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId,
+    public ClientFamilyMemberDeleteResponse deleteClientFamilyMembers(@PathParam("familyMemberId") final Long familyMemberId,
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteFamilyMembers(familyMemberId).build();
 
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        var command = new ClientFamilyMemberDeleteCommand();
+
+        command.setPayload(ClientFamilyMemberDeleteRequest.builder().id(familyMemberId).build());
+
+        Supplier<ClientFamilyMemberDeleteResponse> response = dispatcher.dispatch(command);
+
+        return response.get();
+
     }
 
 }
