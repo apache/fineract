@@ -704,6 +704,12 @@ public class WorkingCapitalLoanDataValidator {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                         "Repayment is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
             }
+        } else if (LoanTransactionType.PAYOUT_REFUND.equals(transactionType)) {
+            if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
+                    && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
+                throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
+                        "Payout Refund is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
+            }
         } else if (LoanTransactionType.GOODWILL_CREDIT.equals(transactionType)) {
             if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
                     && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {

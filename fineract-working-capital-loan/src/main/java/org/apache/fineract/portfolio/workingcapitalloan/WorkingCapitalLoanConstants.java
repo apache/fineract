@@ -49,6 +49,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String REPAYMENT_LOAN_COMMAND = "repayment";
     public static final String GOODWILL_CREDIT_LOAN_COMMAND = "goodwillCredit";
     public static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
+    public static final String PAYOUT_REFUND_COMMAND = "payoutRefund";
     public static final String DISCOUNT_FEE_LOAN_COMMAND = "discountFee";
     public static final String DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND = "discountFeeAdjustment";
 
