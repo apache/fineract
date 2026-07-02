@@ -48,33 +48,70 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 
-public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
+public final class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 
     private final OfficeSheetPopulator officeSheetPopulator;
     private final ClientSheetPopulator clientSheetPopulator;
     private final ExtrasSheetPopulator extrasSheetPopulator;
     private final List<LoanAccountData> allloans;
+    // FINERACT-2668: when true, the tenant-wide client/office lookup sheets, the per-loan lookup table and the
+    // cascading dropdown/VLOOKUP machinery are omitted. The data-entry columns keep their positions (so the import
+    // handler, which parses by fixed column index, is unaffected); the user types the loan account number directly.
+    private final boolean lean;
     private Map<Long, String> clientIdToClientExternalId;
 
-    public LoanRepaymentWorkbookPopulator(List<LoanAccountData> loans, OfficeSheetPopulator officeSheetPopulator,
+    private LoanRepaymentWorkbookPopulator(boolean lean, List<LoanAccountData> loans, OfficeSheetPopulator officeSheetPopulator,
             ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
+        this.lean = lean;
         this.allloans = loans;
         this.officeSheetPopulator = officeSheetPopulator;
         this.clientSheetPopulator = clientSheetPopulator;
         this.extrasSheetPopulator = extrasSheetPopulator;
     }
 
+    /** Full template: tenant-wide client/office lookup sheets + cascading dropdowns + per-loan lookup table. */
+    public static LoanRepaymentWorkbookPopulator full(List<LoanAccountData> loans, OfficeSheetPopulator officeSheetPopulator,
+            ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
+        return new LoanRepaymentWorkbookPopulator(false, loans, officeSheetPopulator, clientSheetPopulator, extrasSheetPopulator);
+    }
+
+    /** FINERACT-2668 lean template: typed keys only, no client/office lookups; just the payment-type dropdown. */
+    public static LoanRepaymentWorkbookPopulator lean(ExtrasSheetPopulator extrasSheetPopulator) {
+        return new LoanRepaymentWorkbookPopulator(true, List.of(), null, null, extrasSheetPopulator);
+    }
+
     @Override
     public void populate(Workbook workbook, String dateFormat) {
         Sheet loanRepaymentSheet = workbook.createSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
         setLayout(loanRepaymentSheet);
+        // Extras (payment types) is always small and is read back at import, so it is built in both modes.
+        extrasSheetPopulator.populate(workbook, dateFormat);
+        // The payment-type dropdown is cheap (sourced from Extras, read back at import) and is added in both modes.
+        if (lean) {
+            // No client/office sheets, no per-loan lookup table, no 3000-row VLOOKUP block.
+            addPaymentTypeValidation(loanRepaymentSheet);
+            return;
+        }
         officeSheetPopulator.populate(workbook, dateFormat);
         clientSheetPopulator.populate(workbook, dateFormat);
-        extrasSheetPopulator.populate(workbook, dateFormat);
         setClientIdToClientExternalId();
         populateLoansTable(loanRepaymentSheet, dateFormat);
         setRules(loanRepaymentSheet, dateFormat);
+        addPaymentTypeValidation(loanRepaymentSheet);
         setDefaults(loanRepaymentSheet, dateFormat);
+    }
+
+    // Payment-type list dropdown on the Type column, backed by the Extras sheet. Shared by the full and lean paths.
+    private void addPaymentTypeValidation(Sheet worksheet) {
+        Name paymentTypeGroup = worksheet.getWorkbook().createName();
+        paymentTypeGroup.setNameName("PaymentTypes");
+        paymentTypeGroup.setRefersToFormula(
+                TemplatePopulateImportConstants.EXTRAS_SHEET_NAME + "!$D$2:$D$" + (extrasSheetPopulator.getPaymentTypesSize() + 1));
+        CellRangeAddressList repaymentTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                LoanRepaymentConstants.REPAYMENT_TYPE_COL, LoanRepaymentConstants.REPAYMENT_TYPE_COL);
+        DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) worksheet);
+        DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
+        worksheet.addValidationData(validationHelper.createValidation(paymentTypeConstraint, repaymentTypeRange));
     }
 
     private void setClientIdToClientExternalId() {
@@ -124,8 +161,6 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 LoanRepaymentConstants.CLIENT_NAME_COL, LoanRepaymentConstants.CLIENT_NAME_COL);
         CellRangeAddressList accountNumberRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL);
-        CellRangeAddressList repaymentTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
-                LoanRepaymentConstants.REPAYMENT_TYPE_COL, LoanRepaymentConstants.REPAYMENT_TYPE_COL);
         CellRangeAddressList repaymentDateRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 LoanRepaymentConstants.REPAID_ON_DATE_COL, LoanRepaymentConstants.REPAID_ON_DATE_COL);
 
@@ -138,7 +173,6 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Client_\",$A1))");
         DataValidationConstraint accountNumberConstraint = validationHelper.createFormulaListConstraint(
                 "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
-        DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint repaymentDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($D1,$T$2:$X$" + (allloans.size() + 1) + ",4,FALSE)", "=TODAY()",
                 dateFormat);
@@ -146,15 +180,12 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
         DataValidation accountNumberValidation = validationHelper.createValidation(accountNumberConstraint, accountNumberRange);
-        DataValidation repaymentTypeValidation = validationHelper.createValidation(paymentTypeConstraint, repaymentTypeRange);
         DataValidation repaymentDateValidation = validationHelper.createValidation(repaymentDateConstraint, repaymentDateRange);
 
         worksheet.addValidationData(officeValidation);
         worksheet.addValidationData(clientValidation);
         worksheet.addValidationData(accountNumberValidation);
-        worksheet.addValidationData(repaymentTypeValidation);
         worksheet.addValidationData(repaymentDateValidation);
-
     }
 
     private void setNames(Sheet worksheet) {
@@ -211,12 +242,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                     + clientNameToBeginEndIndexes.get(clientsWithActiveLoans.get(j))[0] + ":$T$"
                     + clientNameToBeginEndIndexes.get(clientsWithActiveLoans.get(j))[1]);
         }
-
-        // Payment Type Name
-        Name paymentTypeGroup = loanRepaymentWorkbook.createName();
-        paymentTypeGroup.setNameName("PaymentTypes");
-        paymentTypeGroup.setRefersToFormula(
-                TemplatePopulateImportConstants.EXTRAS_SHEET_NAME + "!$D$2:$D$" + (extrasSheetPopulator.getPaymentTypesSize() + 1));
+        // Payment-type named range + dropdown are added by addPaymentTypeValidation() (shared with the lean path).
     }
 
     private void populateLoansTable(Sheet loanRepaymentSheet, String dateFormat) {

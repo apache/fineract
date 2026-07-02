@@ -64,6 +64,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.infrastructure.bulkimport.data.LookupMode;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -694,9 +695,10 @@ public class LoansApiResource {
     @GET
     @Path("repayments/downloadtemplate")
     @Produces("application/vnd.ms-excel")
-    public Response getLoanRepaymentTemplate(@QueryParam("officeId") final Long officeId,
-            @QueryParam("dateFormat") final String dateFormat) {
-        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOAN_TRANSACTIONS.toString(), officeId, null, dateFormat);
+    public Response getLoanRepaymentTemplate(@QueryParam("officeId") final Long officeId, @QueryParam("dateFormat") final String dateFormat,
+            @QueryParam("includeLookups") final Boolean includeLookups) {
+        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOAN_TRANSACTIONS.toString(), officeId, null, dateFormat,
+                LookupMode.fromIncludeLookups(includeLookups));
     }
 
     @POST
