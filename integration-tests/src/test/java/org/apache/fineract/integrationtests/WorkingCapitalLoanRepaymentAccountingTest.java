@@ -55,8 +55,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Integration tests verifying that cash-based accounting journal entries are correctly created during Working Capital
- * Loan repayment transactions.
+ * Integration tests verifying that accrual with deferred revenue amortization accounting journal entries are correctly
+ * created during Working Capital Loan repayment transactions.
  */
 public class WorkingCapitalLoanRepaymentAccountingTest {
 
@@ -69,7 +69,7 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
     private final List<Long> createdProductIds = new ArrayList<>();
     private static Long createdClientId;
 
-    // GL accounts for cash-based accounting
+    // GL accounts for accrual with deferred revenue amortization accounting
     private static Account fundSourceAccount;
     private static Account loanPortfolioAccount;
     private static Account transfersSuspenseAccount;
@@ -139,7 +139,7 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
 
     @Test
     public void testRepaymentCreatesJournalEntriesPrincipalOnly() {
-        final Long productId = createCashBasedProduct();
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
         AtomicLong loanId = new AtomicLong(0L);
         BusinessDateHelper.runAt(currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")), () -> {
@@ -169,7 +169,7 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
 
     @Test
     public void testRepaymentWithOverpaymentCreatesJournalEntries() {
-        final Long productId = createCashBasedProduct();
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
         AtomicLong loanId = new AtomicLong(0L);
         BusinessDateHelper.runAt(currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")), () -> {
@@ -200,7 +200,7 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
 
     @Test
     public void testFullRepaymentCreatesJournalEntries() {
-        final Long productId = createCashBasedProduct();
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
         AtomicLong loanId = new AtomicLong(0L);
         BusinessDateHelper.runAt(currentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")), () -> {
@@ -260,11 +260,11 @@ public class WorkingCapitalLoanRepaymentAccountingTest {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private Long createCashBasedProduct() {
+    private Long createAccrualWithDeferredRevenueAmortizationProduct() {
         final String uniqueName = "WCL Acct " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
-                .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.CASH_BASED)
+                .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
                 .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())

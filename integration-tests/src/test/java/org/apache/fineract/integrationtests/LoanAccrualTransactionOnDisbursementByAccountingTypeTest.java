@@ -28,15 +28,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends BaseLoanIntegrationTest {
+public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends FeignLoanTestBase {
 
     private static final String DISBURSEMENT_DATE = "01 January 2024";
     private static final Double LOAN_AMOUNT = 1000.0;
@@ -81,13 +81,12 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Ba
                         .chargeOffExpenseAccountId(null) //
                         .chargeOffFraudExpenseAccountId(null);
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(productRequest);
-                Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), DISBURSEMENT_DATE, LOAN_AMOUNT, 1,
-                        WITH_INTEREST);
+                Long loanProductId = createLoanProduct(productRequest);
+                Long loanId = applyAndApproveLoan(client.getClientId(), loanProductId, DISBURSEMENT_DATE, LOAN_AMOUNT, 1, WITH_INTEREST);
                 disburseLoan(loanId, BigDecimal.valueOf(LOAN_AMOUNT), DISBURSEMENT_DATE);
 
-                List<GetLoansLoanIdTransactions> accrualTransactions = loanTransactionHelper.getLoanDetails(loanId).getTransactions()
-                        .stream().filter(t -> "Accrual".equals(t.getType().getValue())).toList();
+                List<GetLoansLoanIdTransactions> accrualTransactions = getLoanDetails(loanId).getTransactions().stream()
+                        .filter(t -> "Accrual".equals(t.getType().getValue())).toList();
 
                 assertTrue(accrualTransactions.isEmpty(),
                         "No accrual transactions should be created for None accounting type, but found: " + accrualTransactions.size());
@@ -112,13 +111,12 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Ba
                         .receivableFeeAccountId(null) //
                         .receivablePenaltyAccountId(null);
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(productRequest);
-                Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), DISBURSEMENT_DATE, LOAN_AMOUNT, 1,
-                        WITH_INTEREST);
+                Long loanProductId = createLoanProduct(productRequest);
+                Long loanId = applyAndApproveLoan(client.getClientId(), loanProductId, DISBURSEMENT_DATE, LOAN_AMOUNT, 1, WITH_INTEREST);
                 disburseLoan(loanId, BigDecimal.valueOf(LOAN_AMOUNT), DISBURSEMENT_DATE);
 
-                List<GetLoansLoanIdTransactions> accrualTransactions = loanTransactionHelper.getLoanDetails(loanId).getTransactions()
-                        .stream().filter(t -> "Accrual".equals(t.getType().getValue())).toList();
+                List<GetLoansLoanIdTransactions> accrualTransactions = getLoanDetails(loanId).getTransactions().stream()
+                        .filter(t -> "Accrual".equals(t.getType().getValue())).toList();
 
                 assertTrue(accrualTransactions.isEmpty(),
                         "No accrual transactions should be created for Cash accounting type, but found: " + accrualTransactions.size());
@@ -140,13 +138,12 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Ba
                 PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD)
                         .accountingRule(4); // ACCRUAL_UPFRONT
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(productRequest);
-                Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), DISBURSEMENT_DATE, LOAN_AMOUNT, 1,
-                        WITH_INTEREST);
+                Long loanProductId = createLoanProduct(productRequest);
+                Long loanId = applyAndApproveLoan(client.getClientId(), loanProductId, DISBURSEMENT_DATE, LOAN_AMOUNT, 1, WITH_INTEREST);
                 disburseLoan(loanId, BigDecimal.valueOf(LOAN_AMOUNT), DISBURSEMENT_DATE);
 
-                List<GetLoansLoanIdTransactions> accrualTransactions = loanTransactionHelper.getLoanDetails(loanId).getTransactions()
-                        .stream().filter(t -> "Accrual".equals(t.getType().getValue())).toList();
+                List<GetLoansLoanIdTransactions> accrualTransactions = getLoanDetails(loanId).getTransactions().stream()
+                        .filter(t -> "Accrual".equals(t.getType().getValue())).toList();
 
                 assertEquals(1, accrualTransactions.size(),
                         "Exactly one accrual transaction should be created for Accrual Upfront accounting type");
@@ -171,13 +168,12 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Ba
                 PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(INTEREST_RATE_PER_PERIOD);
                 // accountingRule is already 3 (ACCRUAL_PERIODIC) by default in this method
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(productRequest);
-                Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), DISBURSEMENT_DATE, LOAN_AMOUNT, 1,
-                        WITH_INTEREST);
+                Long loanProductId = createLoanProduct(productRequest);
+                Long loanId = applyAndApproveLoan(client.getClientId(), loanProductId, DISBURSEMENT_DATE, LOAN_AMOUNT, 1, WITH_INTEREST);
                 disburseLoan(loanId, BigDecimal.valueOf(LOAN_AMOUNT), DISBURSEMENT_DATE);
 
-                List<GetLoansLoanIdTransactions> accrualTransactions = loanTransactionHelper.getLoanDetails(loanId).getTransactions()
-                        .stream().filter(t -> "Accrual".equals(t.getType().getValue())).toList();
+                List<GetLoansLoanIdTransactions> accrualTransactions = getLoanDetails(loanId).getTransactions().stream()
+                        .filter(t -> "Accrual".equals(t.getType().getValue())).toList();
 
                 assertTrue(accrualTransactions.isEmpty(),
                         "No accrual transactions should be created at disbursement for Periodic Accrual accounting type");
@@ -222,12 +218,11 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Ba
                     .chargeOffExpenseAccountId(null) //
                     .chargeOffFraudExpenseAccountId(null);
 
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(productRequest);
-            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), DISBURSEMENT_DATE, LOAN_AMOUNT, 1,
-                    WITH_INTEREST);
+            Long loanProductId = createLoanProduct(productRequest);
+            Long loanId = applyAndApproveLoan(client.getClientId(), loanProductId, DISBURSEMENT_DATE, LOAN_AMOUNT, 1, WITH_INTEREST);
             disburseLoan(loanId, BigDecimal.valueOf(LOAN_AMOUNT), DISBURSEMENT_DATE);
 
-            List<GetLoansLoanIdTransactions> accrualTransactions = loanTransactionHelper.getLoanDetails(loanId).getTransactions().stream()
+            List<GetLoansLoanIdTransactions> accrualTransactions = getLoanDetails(loanId).getTransactions().stream()
                     .filter(t -> "Accrual".equals(t.getType().getValue())).toList();
 
             assertEquals(1, accrualTransactions.size(),
@@ -252,12 +247,11 @@ public class LoanAccrualTransactionOnDisbursementByAccountingTypeTest extends Ba
                     .receivableFeeAccountId(null) //
                     .receivablePenaltyAccountId(null);
 
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(productRequest);
-            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), DISBURSEMENT_DATE, LOAN_AMOUNT, 1,
-                    WITH_INTEREST);
+            Long loanProductId = createLoanProduct(productRequest);
+            Long loanId = applyAndApproveLoan(client.getClientId(), loanProductId, DISBURSEMENT_DATE, LOAN_AMOUNT, 1, WITH_INTEREST);
             disburseLoan(loanId, BigDecimal.valueOf(LOAN_AMOUNT), DISBURSEMENT_DATE);
 
-            List<GetLoansLoanIdTransactions> accrualTransactions = loanTransactionHelper.getLoanDetails(loanId).getTransactions().stream()
+            List<GetLoansLoanIdTransactions> accrualTransactions = getLoanDetails(loanId).getTransactions().stream()
                     .filter(t -> "Accrual".equals(t.getType().getValue())).toList();
 
             assertEquals(1, accrualTransactions.size(),

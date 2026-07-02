@@ -74,7 +74,6 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static PostClientsResponse client;
     private static LoanTransactionHelper loanTransactionHelper;
-    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private static Long loanProductId;
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -90,7 +89,6 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
         BusinessStepHelper businessStepHelper = new BusinessStepHelper();
         client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
         loanProductId = createLoanProductPeriodicWithInterest();
@@ -833,14 +831,14 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.disburseLoan("1 March 2024", loanId.intValue(), "400", null);
 
-            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper
+            PostCreateRescheduleLoansResponse rescheduleLoansResponse = LoanRescheduleRequestHelper
                     .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).dateFormat(DATETIME_PATTERN)
                             .locale("en").submittedOnDate("1 March 2024").newInterestRate(BigDecimal.ONE).rescheduleReasonId(1L)
                             .rescheduleFromDate("1 April 2024"));
 
             deleteAllExternalEvents();
 
-            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
+            LoanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(),
                     new PostUpdateRescheduleLoansRequest().approvedOnDate("1 March 2024").locale("en").dateFormat(DATETIME_PATTERN));
 
             verifyBusinessEvents(new LoanBusinessEvent("LoanRescheduledDueAdjustScheduleBusinessEvent", "01 March 2024", 300, 400.0, 400.0,

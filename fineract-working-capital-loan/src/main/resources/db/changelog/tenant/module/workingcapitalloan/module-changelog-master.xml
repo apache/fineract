@@ -69,4 +69,5 @@
   <include relativeToChangelogFile="true" file="parts/0045_wc_loan_breach_action.xml"/>
   <include relativeToChangelogFile="true" file="parts/0046_wc_loan_breach_action_reschedule.xml"/>
   <include relativeToChangelogFile="true" file="parts/0047_wc_loan_near_breach_action.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0048_rename_wc_accounting_type_cash_based_to_acc_def_rev_am.xml"/>
 </databaseChangeLog>

@@ -24,8 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
@@ -36,9 +40,6 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_20 = new BigDecimal(20);
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_25 = new BigDecimal(25);
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_33 = new BigDecimal(33);
-
-    private final LoanRescheduleRequestHelper loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec,
-            this.responseSpec);
 
     @Test
     public void testRescheduleWithDownPayment() {
@@ -84,16 +85,16 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     installment(375.0, false, "02 March 2023") //
             );
 
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms(null).updateNewInterestRate(null).updateRescheduleFromDate("31 January 2023")
-                    .updateAdjustedDueDate("15 February 2023").updateSubmittedOnDate("01 January 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 January 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
+            PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null)
+                    .updateGraceOnPrincipal(null).updateExtraTerms(null).updateNewInterestRate(null)
+                    .updateRescheduleFromDate("31 January 2023").updateAdjustedDueDate("15 February 2023")
+                    .updateSubmittedOnDate("01 January 2023").updateRescheduleReasonId("1").buildRequest(loanId);
+            PostCreateRescheduleLoansResponse loanRescheduleRequest = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateSubmittedOnDate("01 January 2023").getApproveRequest();
+            PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest = LoanRescheduleRequestHelper
+                    .approveLoanRescheduleRequest(loanRescheduleRequest.getResourceId(), approveRequest);
 
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 January 2023"), //
@@ -143,16 +144,16 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     installment(223.34, false, "31 December 2023") //
             );
 
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 November 2023")
-                    .updateAdjustedDueDate(null).updateSubmittedOnDate("01 November 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 November 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
+            PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null)
+                    .updateGraceOnPrincipal(null).updateExtraTerms("2").updateNewInterestRate(null)
+                    .updateRescheduleFromDate("01 November 2023").updateAdjustedDueDate(null).updateSubmittedOnDate("01 November 2023")
+                    .updateRescheduleReasonId("1").buildRequest(loanId);
+            PostCreateRescheduleLoansResponse loanRescheduleRequest = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateSubmittedOnDate("01 November 2023").getApproveRequest();
+            PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest = LoanRescheduleRequestHelper
+                    .approveLoanRescheduleRequest(loanRescheduleRequest.getResourceId(), approveRequest);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -228,16 +229,16 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     installment(268.0, false, "31 December 2023") //
             );
 
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("31 December 2023")
-                    .updateAdjustedDueDate(null).updateSubmittedOnDate("31 December 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("31 December 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
+            PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null)
+                    .updateGraceOnPrincipal(null).updateExtraTerms("2").updateNewInterestRate(null)
+                    .updateRescheduleFromDate("31 December 2023").updateAdjustedDueDate(null).updateSubmittedOnDate("31 December 2023")
+                    .updateRescheduleReasonId("1").buildRequest(loanId);
+            PostCreateRescheduleLoansResponse loanRescheduleRequest = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder()
+                    .updateSubmittedOnDate("31 December 2023").getApproveRequest();
+            PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest = LoanRescheduleRequestHelper
+                    .approveLoanRescheduleRequest(loanRescheduleRequest.getResourceId(), approveRequest);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -307,15 +308,15 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
             );
 
             updateBusinessDate("01 June 2023");
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 June 2023").updateAdjustedDueDate(null)
-                    .updateSubmittedOnDate("01 June 2023").updateRescheduleReasonId("1").build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 June 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
+            PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null)
+                    .updateGraceOnPrincipal(null).updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 June 2023")
+                    .updateAdjustedDueDate(null).updateSubmittedOnDate("01 June 2023").updateRescheduleReasonId("1").buildRequest(loanId);
+            PostCreateRescheduleLoansResponse loanRescheduleRequest = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 June 2023")
+                    .getApproveRequest();
+            PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest = LoanRescheduleRequestHelper
+                    .approveLoanRescheduleRequest(loanRescheduleRequest.getResourceId(), approveRequest);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //
@@ -412,15 +413,15 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
             );
 
             updateBusinessDate("01 June 2023");
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 June 2023").updateAdjustedDueDate(null)
-                    .updateSubmittedOnDate("01 June 2023").updateRescheduleReasonId("1").build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 June 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
+            PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null)
+                    .updateGraceOnPrincipal(null).updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 June 2023")
+                    .updateAdjustedDueDate(null).updateSubmittedOnDate("01 June 2023").updateRescheduleReasonId("1").buildRequest(loanId);
+            PostCreateRescheduleLoansResponse loanRescheduleRequest = LoanRescheduleRequestHelper
+                    .createLoanRescheduleRequest(createRequest);
+            PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 June 2023")
+                    .getApproveRequest();
+            PostUpdateRescheduleLoansResponse approveLoanRescheduleRequest = LoanRescheduleRequestHelper
+                    .approveLoanRescheduleRequest(loanRescheduleRequest.getResourceId(), approveRequest);
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanId, //

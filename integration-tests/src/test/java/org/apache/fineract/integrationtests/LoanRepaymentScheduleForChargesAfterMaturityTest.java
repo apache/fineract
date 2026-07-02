@@ -23,37 +23,27 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Test;
 
-public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIntegrationTest {
-
-    private final LoanRescheduleRequestHelper loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec,
-            this.responseSpec);
+public class LoanRepaymentScheduleForChargesAfterMaturityTest extends FeignLoanTestBase {
 
     @Test
     public void loanNPlusOneInstallmentIsRetainedAfterLoanRescheduleTest() {
         runAt("03 March 2023", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepayments();
 
-            // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
                 req.setRepaymentEvery(15);
                 req.setLoanTermFrequency(60);
             });
 
-            // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -62,10 +52,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(250.0, false, "30 April 2023")//
             );
 
-            // add charge with due date after loan maturity date
-            Long loanChargeId = addCharge(loanId, false, 50, "23 May 2023");
+            addCharge(loanId, false, 50, "23 May 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -75,19 +63,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(0.0, 0.0, 50.0, 50.0, false, "23 May 2023")//
             );
 
-            // reschedule installment date
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms(null).updateNewInterestRate(null).updateRescheduleFromDate("15 April 2023")
-                    .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
-
-            // verify repayment schedule
+            createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -103,21 +79,16 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     @Test
     public void loanNPlusOneInstallmentIsAdjustedAfterRescheduleIfDateFallBeforeMaturityDateTest() {
         runAt("03 March 2023", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepayments();
 
-            // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
                 req.setRepaymentEvery(15);
                 req.setLoanTermFrequency(60);
             });
 
-            // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -126,11 +97,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(250.0, false, "30 April 2023")//
             );
 
-            // add charge with due date after loan maturity date but date which is with in installment date after
-            // reschedule
-            Long loanChargeId = addCharge(loanId, false, 50, "13 May 2023");
+            addCharge(loanId, false, 50, "13 May 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -140,19 +108,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(0.0, 0.0, 50.0, 50.0, false, "13 May 2023")//
             );
 
-            // reschedule installment date
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms(null).updateNewInterestRate(null).updateRescheduleFromDate("15 April 2023")
-                    .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
-
-            // verify repayment schedule
+            createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -167,12 +123,9 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     @Test
     public void loanNPlusOneInstallmentIsRetainedAfterLoanRescheduleForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithAdvancedPaymentAllocationStrategy();
 
-            // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
                 req.setRepaymentEvery(15);
                 req.setLoanTermFrequency(60);
@@ -181,10 +134,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                 req.setLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString());
             });
 
-            // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -193,10 +144,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(250.0, false, "30 April 2023")//
             );
 
-            // add charge with due date after loan maturity date
-            Long loanChargeId = addCharge(loanId, false, 50, "23 May 2023");
+            addCharge(loanId, false, 50, "23 May 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -206,19 +155,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(0.0, 0.0, 50.0, 50.0, false, "23 May 2023")//
             );
 
-            // reschedule installment date
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms(null).updateNewInterestRate(null).updateRescheduleFromDate("15 April 2023")
-                    .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
-
-            // verify repayment schedule
+            createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -234,22 +171,17 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     @Test
     public void loanNPlusOneInstallmentIsAdjustedAfterRescheduleIfDateFallBeforeMaturityDateForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithAdvancedPaymentAllocationStrategy();
 
-            // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 March 2023", 1500.0, 4, req -> {
                 req.setRepaymentEvery(15);
                 req.setLoanTermFrequency(60);
                 req.setTransactionProcessingStrategyCode("advanced-payment-allocation-strategy");
             });
 
-            // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -258,11 +190,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(250.0, false, "30 April 2023")//
             );
 
-            // add charge with due date after loan maturity date but date which is with in installment date after
-            // reschedule
-            Long loanChargeId = addCharge(loanId, false, 50, "13 May 2023");
+            addCharge(loanId, false, 50, "13 May 2023");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -272,19 +201,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     installment(0.0, 0.0, 50.0, 50.0, false, "13 May 2023")//
             );
 
-            // reschedule installment date
-            String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest(null).updateGraceOnPrincipal(null)
-                    .updateExtraTerms(null).updateNewInterestRate(null).updateRescheduleFromDate("15 April 2023")
-                    .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
-                    .build(loanId.toString());
-
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-            requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
-                    .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
-                    requestJSON);
-
-            // verify repayment schedule
+            createAndApproveReschedule(loanId, "03 March 2023", "15 April 2023", "30 April 2023");
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, false, "16 March 2023"), //
@@ -299,28 +216,21 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     @Test
     public void incorrectValueAfterCharge() {
         runAt("20 December 2024", () -> {
-            // Create Client
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            // Create Loan Product
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .minPrincipal(100.0);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
-            // Apply and Approve Loan
             Long loanId = applyAndApproveLoan(clientId, loanProductId, "20 December 2024", 800.0, 4, req -> {
                 req.setRepaymentEvery(30);
                 req.setLoanTermFrequency(120);
                 req.setTransactionProcessingStrategyCode("advanced-payment-allocation-strategy");
             });
 
-            // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(800.00), "20 December 2024");
 
-            // add charge with a huge amount
             addCharge(loanId, false, 123456789012.12, "23 December 2024");
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(800.0, null, "20 December 2024"), //
                     installment(200.0, 0.0, 123456789212.12, false, "19 January 2025"), //
@@ -345,11 +255,10 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
             product.overAppliedNumber(null);
         }
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductResponse.getResourceId());
+        Long loanProductId = createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductIdResponse);
-        return loanProductResponse.getResourceId();
+        return loanProductId;
 
     }
 
@@ -367,10 +276,9 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
             product.overAppliedNumber(null);
         }
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductResponse.getResourceId());
+        Long loanProductId = createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = retrieveLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductIdResponse);
-        return loanProductResponse.getResourceId();
+        return loanProductId;
     }
 }

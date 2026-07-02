@@ -18,7 +18,7 @@ It ensures:
 ** A lender decides to credit an amount to the borrower without expecting repayment.
 * It results in:
 ** Reduction in outstanding loan balance
-** Triggering of accounting entries for cash-based accounting products
+** Triggering of accounting entries for accrual with deferred revenue amortization accounting products
 
 == Goodwill Credit Handling
 
@@ -28,7 +28,7 @@ It ensures:
 ** Posting a Discount Fee Amortization transaction when the loan is closed or overpaid and discount fee income still needs to be recognized
 ** Adjustment of the Amortization schedule
 ** Allocation of the applied amount to principal outstanding, with any excess tracked as overpayment
-** Triggering of accounting entries for cash-based accounting products
+** Triggering of accounting entries for accrual with deferred revenue amortization accounting products
 
 == Validation Rules
 
@@ -71,7 +71,7 @@ POST /v1/working-capital-loans/external-id/{loanExternalId}/transactions?command
 ----
 
 == Accounting Treatment
-Goodwill Credit triggers Journal Entries (JE) when the Working Capital Loan product uses cash-based accounting.
+Goodwill Credit triggers Journal Entries (JE) when the Working Capital Loan product uses accrual with deferred revenue amortization accounting.
 
 === Goodwill Credit
 

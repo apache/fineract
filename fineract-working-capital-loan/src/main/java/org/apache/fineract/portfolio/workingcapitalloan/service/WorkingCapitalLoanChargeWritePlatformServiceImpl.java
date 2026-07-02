@@ -156,7 +156,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         applyChargeAmountPaid(wcCharge, amount);
         applyBalanceAdjustment(loan, wcCharge, amount);
 
-        if (loan.getLoanProduct().getAccountingRule().isCashBased()) {
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             accountingProcessor.postJournalEntries(loan, adjustmentTx, allocation, false);
         }
 

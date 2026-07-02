@@ -113,7 +113,7 @@ An allocation row is stored in `m_wc_loan_transaction_allocation`. The adjustmen
 
 == Accounting
 
-The Discount Fee transaction updates the Working Capital Loan balance immediately. Income recognition is handled through Discount Fee Amortization transactions. For cash-based accounting products, Discount Fee Amortization debits Deferred Income Liability and credits Income from Discount Fee.
+The Discount Fee transaction updates the Working Capital Loan balance immediately. Income recognition is handled through Discount Fee Amortization transactions. For accrual with deferred revenue amortization accounting products, Discount Fee Amortization debits Deferred Income Liability and credits Income from Discount Fee.
 
 == Reversal Behavior
 

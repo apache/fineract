@@ -128,7 +128,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testDiscountFeeAmortizationCreatedAfterRepaymentAndCOB() {
         businessDateHelper.runAt("2026-01-01", () -> {
             final Long testClientId = clientHelper.createClient("01 January 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -173,7 +173,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testNoAmortizationWithoutRepayment() {
         businessDateHelper.runAt("2026-02-01", () -> {
             final Long testClientId = clientHelper.createClient("01 February 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -201,7 +201,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testNoAmortizationWithoutDiscountFee() {
         businessDateHelper.runAt("2026-03-01", () -> {
             final Long testClientId = clientHelper.createClient("01 March 2026");
-            final Long productId = createCashBasedProductWithoutDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithoutDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
 
             final Long loanId = submitLoan(testClientId, productId, principal, "01 March 2026");
@@ -230,7 +230,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testCOBIdempotencyNoNewPayment() {
         businessDateHelper.runAt("2026-04-01", () -> {
             final Long testClientId = clientHelper.createClient("01 April 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -268,7 +268,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testIncrementalAmortizationAcrossMultipleRepayments() {
         businessDateHelper.runAt("2026-05-01", () -> {
             final Long testClientId = clientHelper.createClient("01 May 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -314,7 +314,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testAmortizationUsesCOBDateAsTransactionDate() {
         businessDateHelper.runAt("2026-06-14", () -> {
             final Long testClientId = clientHelper.createClient("14 June 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -344,12 +344,12 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     // Helpers
     // -----------------------------------------------------------------------
 
-    private Long createCashBasedProductWithDiscount() {
+    private Long createAccrualWithDeferredRevenueAmortizationProductWithDiscount() {
         final String uniqueName = "WCL DiscAmort " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE))
-                .withAccountingRule(AccountingRuleEnum.CASH_BASED).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
+                .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
                 .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
                 .withIncomeFromDiscountFeeAccountId(incomeFromDiscountFeeAccount.getAccountID().longValue())
@@ -365,11 +365,11 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
         return productId;
     }
 
-    private Long createCashBasedProductWithoutDiscount() {
+    private Long createAccrualWithDeferredRevenueAmortizationProductWithoutDiscount() {
         final String uniqueName = "WCL NoDisc " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
-                .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.CASH_BASED)
+                .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
                 .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
                 .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
                 .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
@@ -424,7 +424,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testAmortizationCreatedInlineOnLoanClose() {
         businessDateHelper.runAt("2026-07-01", () -> {
             final Long testClientId = clientHelper.createClient("01 July 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -463,7 +463,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testAmortizationCreatedInlineOnLoanOverpay() {
         businessDateHelper.runAt("2026-08-01", () -> {
             final Long testClientId = clientHelper.createClient("01 August 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 
@@ -495,7 +495,7 @@ public class FeignWorkingCapitalLoanDiscountFeeAmortizationTest extends FeignInt
     void testBackdatedRepaymentKeepsAmortizationConsistent() {
         businessDateHelper.runAt("2026-09-01", () -> {
             final Long testClientId = clientHelper.createClient("01 September 2026");
-            final Long productId = createCashBasedProductWithDiscount();
+            final Long productId = createAccrualWithDeferredRevenueAmortizationProductWithDiscount();
             final BigDecimal principal = BigDecimal.valueOf(9000);
             final BigDecimal discount = BigDecimal.valueOf(1000);
 

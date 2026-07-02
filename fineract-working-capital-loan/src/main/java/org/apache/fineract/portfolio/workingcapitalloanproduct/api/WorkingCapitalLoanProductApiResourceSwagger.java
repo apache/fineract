@@ -134,7 +134,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public PostAllowAttributeOverrides allowAttributeOverrides;
 
         // Accounting
-        @Schema(example = "CASH_BASED", description = "NONE or CASH_BASED", allowableValues = { "NONE", "CASH_BASED" })
+        @Schema(example = "ACC_DEF_REV_AM", description = "NONE or ACC_DEF_REV_AM", allowableValues = { "NONE", "ACC_DEF_REV_AM" })
         public String accountingRule;
         @Schema(example = "1")
         public Long fundSourceAccountId;
@@ -604,7 +604,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public PostWorkingCapitalLoanProductsRequest.PostAllowAttributeOverrides allowAttributeOverrides;
 
         // Accounting
-        @Schema(example = "CASH_BASED", description = "NONE or CASH_BASED", allowableValues = { "NONE", "CASH_BASED" })
+        @Schema(example = "ACC_DEF_REV_AM", description = "NONE or ACC_DEF_REV_AM", allowableValues = { "NONE", "ACC_DEF_REV_AM" })
         public String accountingRule;
         @Schema(example = "1")
         public Long fundSourceAccountId;

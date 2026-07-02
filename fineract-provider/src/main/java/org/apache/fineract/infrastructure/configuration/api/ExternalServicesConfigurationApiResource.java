@@ -65,7 +65,7 @@ public class ExternalServicesConfigurationApiResource {
     @GET
     @Path("{servicename}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve External Services Configuration", description = "Returns a external Service configurations based on the Service Name.\n"
+    @Operation(summary = "Retrieve External Services Configuration", operationId = "retrieveExternalServicesConfiguration", description = "Returns a external Service configurations based on the Service Name.\n"
             + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalServicesPropertiesData.class)))
     public String retrieveOne(@PathParam("servicename") @Parameter(description = "servicename") final String serviceName,
@@ -82,8 +82,8 @@ public class ExternalServicesConfigurationApiResource {
     @Path("{servicename}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update External Service", description = "Updates the external Service Configuration for a Service Name.\n" + "\n"
-            + "Example: \n" + "\n" + "externalservice/S3")
+    @Operation(summary = "Update External Service", operationId = "updateExternalServicesConfiguration", description = "Updates the external Service Configuration for a Service Name.\n"
+            + "\n" + "Example: \n" + "\n" + "externalservice/S3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK")
     public String updateExternalServiceProperties(

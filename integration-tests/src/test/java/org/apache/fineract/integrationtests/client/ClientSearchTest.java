@@ -224,7 +224,8 @@ public class ClientSearchTest extends IntegrationTest {
         clientHelper.createClient(request1);
 
         PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
-        request2.setMobileNo(Utils.randomNumberGenerator(8).toString());
+        // request2.setMobileNo(Utils.randomNumberGenerator(8).toString());
+        request2.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         clientHelper.createClient(request2);
 
         PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
@@ -258,7 +259,8 @@ public class ClientSearchTest extends IntegrationTest {
     public void testClientSearchWorks_ByClientIdentifier() {
         // given
         PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
-        request1.setMobileNo(Utils.randomNumberGenerator(8).toString());
+        // request1.setMobileNo(Utils.randomNumberGenerator(8).toString());
+        request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
         PostClientsClientIdIdentifiersRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
@@ -393,7 +395,8 @@ public class ClientSearchTest extends IntegrationTest {
 
     @Test
     public void testClientSearchOrderByRejectsSnakeCaseColumnName() {
-        // given - undocumented internal SQL column form should no longer be accepted directly
+        // given - undocumented internal SQL column form should no longer be accepted
+        // directly
         // when
         Response<GetClientsResponse> response1 = callRetrieveAllClients("c.display_name", null);
         // then

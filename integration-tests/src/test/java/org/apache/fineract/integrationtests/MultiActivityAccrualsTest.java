@@ -21,27 +21,17 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class MultiActivityAccrualsTest extends BaseLoanIntegrationTest {
+public class MultiActivityAccrualsTest extends FeignLoanTestBase {
 
     private static final String disbursementDate = "9 August 2024";
     private static final String repaymentDate = "9 December 2024";
@@ -49,26 +39,14 @@ public class MultiActivityAccrualsTest extends BaseLoanIntegrationTest {
     private static final Integer expectedNumberOfAccruals = 1;
     private static final Integer expectedNumberOfActivityAccruals = 4;
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
     private static Long loanId;
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        Long loanProductId = createLoanProduct(create4IProgressive().currencyCode("USD").enableAccrualActivityPosting(true));
 
-        PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        PostLoanProductsResponse loanProduct = loanProductHelper
-                .createLoanProduct(create4IProgressive().currencyCode("USD").enableAccrualActivityPosting(true));
-
-        loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), disbursementDate, 600.0, 9.99, 4, null);
+        loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, disbursementDate, 600.0, 9.99, 4, null);
         Assertions.assertNotNull(loanId);
         disburseLoan(loanId, BigDecimal.valueOf(600), disbursementDate);
     }
@@ -77,11 +55,9 @@ public class MultiActivityAccrualsTest extends BaseLoanIntegrationTest {
     public void testMultiAccrualActivityCreated() {
         runAt(repaymentDate, () -> {
 
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(repaymentDate).locale("en")
-                            .transactionAmount(fullRepaymentAmount));
+            makeLoanRepayment(loanId, "Repayment", repaymentDate, fullRepaymentAmount);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             List<GetLoansLoanIdTransactions> accrualTransactional = loanDetails.getTransactions().stream()
                     .filter(transaction -> transaction.getType().getCode().equals("loanTransactionType.accrual")).toList();

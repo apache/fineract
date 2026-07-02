@@ -1,19 +1,19 @@
-= Working Capital Loan — Cash-Based Accounting
+= Working Capital Loan — Accrual with Deferred Revenue Amortization Accounting
 
 == Overview
 
-Working Capital Loan products support cash-based accounting, where journal entries are posted only when cash actually moves. The accounting rule is selected at the product level via `accountingRule = CASH_BASED`. Each monetary transaction on a Working Capital Loan (repayment, goodwill credit, reversals) drives a balanced set of journal entries against GL accounts mapped on the loan product.
+Working Capital Loan products support accrual with deferred revenue amortization accounting, where journal entries are posted only when cash actually moves. The accounting rule is selected at the product level via `accountingRule = ACC_DEF_REV_AM`. Each monetary transaction on a Working Capital Loan (repayment, goodwill credit, reversals) drives a balanced set of journal entries against GL accounts mapped on the loan product.
 
 === Purpose
 
-Cash-based accounting allows lenders to record the financial impact of Working Capital Loan transactions in the general ledger at the moment cash is received or disbursed, without recognizing accrued income or receivables in advance. This is the simpler of the two accounting bases and is appropriate when income recognition should track cash flow rather than economic activity.
+Accrual with deferred revenue amortization accounting allows lenders to record the financial impact of Working Capital Loan transactions in the general ledger at the moment cash is received or disbursed, without recognizing accrued income or receivables in advance. This is the simpler of the two accounting bases and is appropriate when income recognition should track cash flow rather than economic activity.
 
 === Scope
 
 The scope of this document includes:
 
 * Working Capital Loan product accounting rule configuration
-* GL account mappings required for cash-based accounting
+* GL account mappings required for accrual with deferred revenue amortization accounting
 * Journal entries posted on repayment (regular and charged-off)
 * Journal entries posted on goodwill credit
 * Reversal journal entries
@@ -24,12 +24,12 @@ EIR-specific discount fee amortization journal entries are documented separately
 
 === Applicability
 
-* Working Capital Loan products with `accountingRule = CASH_BASED`
+* Working Capital Loan products with `accountingRule = ACC_DEF_REV_AM`
 * Working Capital Loans linked to such products
 
 === Definitions and Key Concepts
 
-*Accounting Rule:* Product-level configuration that selects the accounting basis. For Working Capital Loans the supported values are `NONE` (no journal entries posted) and `CASH_BASED`.
+*Accounting Rule:* Product-level configuration that selects the accounting basis. For Working Capital Loans the supported values are `NONE` (no journal entries posted) and `ACC_DEF_REV_AM`.
 
 *GL Account Mapping:* Persisted link between a Working Capital Loan product, an accounting placeholder (e.g., `LOAN_PORTFOLIO`), and a concrete `GLAccount` row.
 
@@ -41,11 +41,11 @@ EIR-specific discount fee amortization journal entries are documented separately
 
 === Dedicated Working Capital Accounting Processor
 
-Working Capital Loans use a dedicated `WorkingCapitalLoanAccountingProcessor` interface with a single `CashBasedAccountingProcessorForWorkingCapitalLoan` implementation. This keeps Working Capital posting logic independent from the standard Loan accounting processors, which avoids coupling the Working Capital allocation model (`WorkingCapitalLoanTransactionAllocation`) to the standard loan data structures.
+Working Capital Loans use a dedicated `WorkingCapitalLoanAccountingProcessor` interface with a single `AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapitalLoan` implementation. This keeps Working Capital posting logic independent from the standard Loan accounting processors, which avoids coupling the Working Capital allocation model (`WorkingCapitalLoanTransactionAllocation`) to the standard loan data structures.
 
 === Accrual Basis Not Supported
 
-The `WorkingCapitalAccountingRuleType` enum only exposes `NONE` and `CASH_BASED`. Accrual-based accounting is not implemented for Working Capital Loan products.
+The `WorkingCapitalAccountingRuleType` enum only exposes `NONE` and `ACC_DEF_REV_AM`. Accrual-based accounting is not implemented for Working Capital Loan products.
 
 == Database Design
 
@@ -53,7 +53,7 @@ The `WorkingCapitalAccountingRuleType` enum only exposes `NONE` and `CASH_BASED`
 
 *m_product_loan_gl_account_mapping*: Stores the mapping between a Working Capital Loan product, a cash account placeholder (`CashAccountsForLoan` value), an optional payment type / charge / code value, and the target `GLAccount`. Working Capital mappings are identified by `product_type = PortfolioProductType.WORKING_CAPITAL_LOAN.value` (4).
 
-*acc_gl_journal_entry*: Standard journal entry table. Cash-based Working Capital postings are written here with a transaction id prefixed by `WC` (see `AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER`) and `entity_type = WORKING_CAPITAL_LOAN`.
+*acc_gl_journal_entry*: Standard journal entry table. Accrual with deferred revenue amortization Working Capital postings are written here with a transaction id prefixed by `WC` (see `AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER`) and `entity_type = WORKING_CAPITAL_LOAN`.
 
 === Changes to Existing Tables
 
@@ -64,7 +64,7 @@ The product-level accounting rule is persisted in:
 [cols="1,2,1,3",options="header"]
 |===
 | Column Name | Type | Constraints | Description
-| accounting_type | VARCHAR(20) | not null, default `NONE` | Selected `WorkingCapitalAccountingRuleType` (`NONE` or `CASH_BASED`)
+| accounting_type | VARCHAR(20) | not null, default `NONE` | Selected `WorkingCapitalAccountingRuleType` (`NONE` or `ACC_DEF_REV_AM`)
 |===
 
 == Configuration
@@ -76,7 +76,7 @@ The accounting rule and GL account mappings are supplied when creating or updati
 [source,json]
 ----
 {
-  "accountingRule": "CASH_BASED",
+  "accountingRule": "ACC_DEF_REV_AM",
   "fundSourceAccountId": 1,
   "loanPortfolioAccountId": 2,
   "transfersInSuspenseAccountId": 3,
@@ -114,7 +114,7 @@ The accounting rule and GL account mappings are supplied when creating or updati
 
 === GL Account Mappings
 
-When `accountingRule = CASH_BASED`, the platform persists one `ProductToGLAccountMapping` row per supplied mapping. The placeholder enum is `CashAccountsForLoan`:
+When `accountingRule = ACC_DEF_REV_AM`, the platform persists one `ProductToGLAccountMapping` row per supplied mapping. The placeholder enum is `CashAccountsForLoan`:
 
 * *Fund Source (Asset)*: `fundSourceAccountId` — cash account that is debited on repayment and may be overridden per payment type via `paymentChannelToFundSourceMappings`
 * *Loan Portfolio (Asset)*: `loanPortfolioAccountId` — credited for the principal portion of regular repayments
@@ -160,15 +160,15 @@ GET  /v1/working-capital-loan-products/template
 The `GET` responses expose:
 
 * `accountingRule` — current rule as a `StringEnumOptionData`
-* `accountingMappings` — map of placeholder name to `GLAccountData` (only populated when the rule is cash-based)
+* `accountingMappings` — map of placeholder name to `GLAccountData` (only populated when the rule is `ACC_DEF_REV_AM`)
 * `accountingMappingOptions` (template) — lookup data for the UI: fund source, payment channels, fee/penalty income, charge-off / write-off reason mappings
 
 == Validation Rules
 
 === General Rules
 
-* `accountingRule` must be a valid `WorkingCapitalAccountingRuleType` name (`NONE` or `CASH_BASED`).
-* When `accountingRule = NONE`, no GL account mappings are persisted; if previously cash-based, the prior mappings are deleted.
+* `accountingRule` must be a valid `WorkingCapitalAccountingRuleType` name (`NONE` or `ACC_DEF_REV_AM`).
+* When `accountingRule = NONE`, no GL account mappings are persisted; if previously `ACC_DEF_REV_AM`, the prior mappings are deleted.
 
 === Validation Rules for Mappings
 
@@ -298,7 +298,7 @@ Every journal entry written for a Working Capital Loan transaction can be revers
 
 **Setup:**
 
-* Working Capital Loan product with `accountingRule = CASH_BASED`
+* Working Capital Loan product with `accountingRule = ACC_DEF_REV_AM`
 * Mappings configured for Fund Source, Loan Portfolio, Fees Receivable, Overpayment
 * Active loan with outstanding principal 800 and fees 50
 
@@ -335,9 +335,9 @@ A repayment of 500 is posted with allocation principal = 300, fees = 100, penalt
 
 == Summary
 
-Working Capital Loan cash-based accounting provides cash-aligned journal entries for repayments and goodwill credits via a dedicated `CashBasedAccountingProcessorForWorkingCapitalLoan`. Key aspects include:
+Working Capital Loan accrual with deferred revenue amortization accounting provides cash-aligned journal entries for repayments and goodwill credits via a dedicated `AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapitalLoan`. Key aspects include:
 
-* Product-level `accountingRule` selecting `NONE` or `CASH_BASED`
+* Product-level `accountingRule` selecting `NONE` or `ACC_DEF_REV_AM`
 * `CashAccountsForLoan`-based GL account mappings, with advanced overrides per payment type, charge, and reason code
 * Distinct posting flows for regular vs. charged-off repayments
 * Dedicated goodwill credit posting with charge-off explicitly unsupported

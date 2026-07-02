@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.service;
+package org.apache.fineract.command.core.exception;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+public class CommandHandlerDuplicateException extends RuntimeException {
 
-public interface InternalWorkingCapitalLoanPaymentService {
-
-    void makePayment(Long loanId, BigDecimal amount, LocalDate transactionDate);
+    public CommandHandlerDuplicateException(Class<?> requestType, Class<?> userClass) {
+        super("Multiple handlers found for " + requestType.getSimpleName() + " command payload: Conflict found for "
+                + userClass.getSimpleName());
+    }
 }

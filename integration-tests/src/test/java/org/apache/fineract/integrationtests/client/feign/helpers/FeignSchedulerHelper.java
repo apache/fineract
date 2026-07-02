@@ -40,11 +40,11 @@ public class FeignSchedulerHelper {
     }
 
     public void stopScheduler() {
-        FeignCalls.executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus("stop"));
+        FeignCalls.executeVoid(() -> fineractClient.scheduler().handleCommandsScheduler("stop"));
     }
 
     public void startScheduler() {
-        FeignCalls.executeVoid(() -> fineractClient.scheduler().changeSchedulerStatus("start"));
+        FeignCalls.executeVoid(() -> fineractClient.scheduler().handleCommandsScheduler("start"));
     }
 
     public void executeAndAwaitJob(String jobDisplayName) {

@@ -34,11 +34,8 @@ import org.apache.fineract.integrationtests.ConfigProperties;
 
 public final class FeignRawHttpHelper {
 
-    private static final String BASE_URL = ConfigProperties.Backend.PROTOCOL + "://" + ConfigProperties.Backend.HOST + ":"
-            + ConfigProperties.Backend.PORT + "/fineract-provider/api/v1";
     private static final String AUTH_HEADER = "Basic " + Base64.getEncoder()
             .encodeToString((ConfigProperties.Backend.USERNAME + ":" + ConfigProperties.Backend.PASSWORD).getBytes(StandardCharsets.UTF_8));
-    private static final String TENANT_ID = "default";
 
     private FeignRawHttpHelper() {}
 
@@ -50,9 +47,25 @@ public final class FeignRawHttpHelper {
         return execute("POST", path, jsonBody);
     }
 
+    private static String apiV1BaseUrl() {
+        String baseUrl = System.getProperty("fineract.it.url", defaultBaseUrl());
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        if (!baseUrl.endsWith("/v1")) {
+            baseUrl = baseUrl + "/v1";
+        }
+        return baseUrl;
+    }
+
+    private static String defaultBaseUrl() {
+        return ConfigProperties.Backend.PROTOCOL + "://" + ConfigProperties.Backend.HOST + ":" + ConfigProperties.Backend.PORT
+                + "/fineract-provider/api";
+    }
+
     private static String execute(String method, String path, String jsonBody) {
         try {
-            URI uri = URI.create(BASE_URL + path);
+            URI uri = URI.create(apiV1BaseUrl() + path);
             HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
 
             if (conn instanceof HttpsURLConnection httpsConn) {
@@ -62,7 +75,7 @@ public final class FeignRawHttpHelper {
             conn.setRequestMethod(method);
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Authorization", AUTH_HEADER);
-            conn.setRequestProperty("Fineract-Platform-TenantId", TENANT_ID);
+            conn.setRequestProperty("Fineract-Platform-TenantId", ConfigProperties.Backend.TENANT);
             conn.setDoOutput(true);
 
             try (OutputStream os = conn.getOutputStream()) {
@@ -70,8 +83,8 @@ public final class FeignRawHttpHelper {
             }
 
             int status = conn.getResponseCode();
-            String response = new String((status >= 200 && status < 300 ? conn.getInputStream() : conn.getErrorStream()).readAllBytes(),
-                    StandardCharsets.UTF_8);
+            var stream = status >= 200 && status < 300 ? conn.getInputStream() : conn.getErrorStream();
+            String response = stream == null ? "" : new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 
             if (status < 200 || status >= 300) {
                 throw new RuntimeException("HTTP " + status + " " + method + " " + path + ": " + response);

@@ -46,7 +46,7 @@ public class FeignNotificationHelper {
     }
 
     public void markNotificationsAsRead() {
-        fineractClient.notification().update4();
+        fineractClient.notification().updateNotificationReadStatus();
     }
 
     public boolean areNotificationsAvailable() {

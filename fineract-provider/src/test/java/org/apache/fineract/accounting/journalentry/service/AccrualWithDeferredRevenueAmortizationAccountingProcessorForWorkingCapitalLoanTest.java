@@ -62,7 +62,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CashBasedAccountingProcessorForWorkingCapitalLoanTest {
+class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapitalLoanTest {
 
     private static final Long PRODUCT_ID = 10L;
     private static final Long LOAN_ID = 100L;
@@ -76,7 +76,7 @@ class CashBasedAccountingProcessorForWorkingCapitalLoanTest {
     private JournalEntryRepository journalEntryRepository;
 
     @InjectMocks
-    private CashBasedAccountingProcessorForWorkingCapitalLoan processor;
+    private AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapitalLoan processor;
 
     @Mock
     private WorkingCapitalLoan loan;

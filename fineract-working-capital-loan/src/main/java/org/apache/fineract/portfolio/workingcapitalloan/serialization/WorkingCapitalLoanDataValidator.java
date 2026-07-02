@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -81,6 +82,9 @@ public class WorkingCapitalLoanDataValidator {
             WorkingCapitalLoanConstants.discountAmountParamName, WorkingCapitalLoanConstants.noteParamName,
             WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName,
             WorkingCapitalLoanConstants.discountExternalIdParameterName, WorkingCapitalLoanConstants.classificationIdParamName));
+
+    private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList("locale", WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> PAYMENT_DETAILS_SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(WorkingCapitalLoanConstants.paymentTypeIdParamName, WorkingCapitalLoanConstants.accountNumberParamName,
@@ -693,7 +697,8 @@ public class WorkingCapitalLoanDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
         if (LoanTransactionType.REPAYMENT.equals(goodwillCredit)) {
-            if (loan.getLoanStatus() != LoanStatus.ACTIVE && loan.getLoanStatus() != LoanStatus.OVERPAID) {
+            if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
+                    && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                         "Repayment is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
             }
@@ -905,5 +910,25 @@ public class WorkingCapitalLoanDataValidator {
     private boolean isDiscountOverrideDisallowed(final WorkingCapitalLoan loan) {
         return loan.getLoanProduct() == null || loan.getLoanProduct().getConfigurableAttributes() == null
                 || !loan.getLoanProduct().getConfigurableAttributes().isDiscountDefaultOverridable();
+    }
+
+    public void validateUndoTransaction(JsonCommand command, WorkingCapitalLoan loan, WorkingCapitalLoanTransaction transaction) {
+        final String json = command.getJsonCommand();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UNDO_TRANSACTION_SUPPORTED_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (transaction.isReversed()) {
+            baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 }

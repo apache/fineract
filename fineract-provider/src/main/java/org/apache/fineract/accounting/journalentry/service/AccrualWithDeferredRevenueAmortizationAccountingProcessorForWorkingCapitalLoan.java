@@ -42,7 +42,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CashBasedAccountingProcessorForWorkingCapitalLoan implements WorkingCapitalLoanAccountingProcessor {
+public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapitalLoan
+        implements WorkingCapitalLoanAccountingProcessor {
 
     private static final int WORKING_CAPITAL_LOAN_ENTITY_TYPE = PortfolioProductType.WORKING_CAPITAL_LOAN.getValue();
 

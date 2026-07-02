@@ -89,7 +89,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .orElseThrow(() -> new WorkingCapitalLoanProductNotFoundException(productId));
         final WorkingCapitalLoanProductData productData = this.mapper.toData(product);
 
-        if (product.getAccountingRule().isCashBased()) {
+        if (product.getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             final Map<String, GLAccountData> accountingMappings = this.wcAccountingMappingService.fetchAccountMappingDetails(productId,
                     product.getAccountingRule());
             productData.setAccountingMappings(accountingMappings);

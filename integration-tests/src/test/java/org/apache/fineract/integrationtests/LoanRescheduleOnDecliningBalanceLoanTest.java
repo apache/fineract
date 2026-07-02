@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -32,7 +34,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
+import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -57,11 +64,10 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
     private ResponseSpecification generalResponseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
-    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private Integer clientId;
     private Integer loanProductId;
     private Integer loanId;
-    private Integer loanRescheduleRequestId;
+    private Long loanRescheduleRequestId;
     private final String loanPrincipalAmount = "100000.00";
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
@@ -74,7 +80,6 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
 
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -318,17 +323,16 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
      **/
     private void createLoanRescheduleRequestWhichFailsAsLoanIdChargedOff() {
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 October 2015")
-                .updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("04 January 2015")
+                .updateAdjustedDueDate("04 October 2015").updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
         this.loanTransactionHelper.chargeOffLoan((long) this.loanId,
                 new PostLoansLoanIdTransactionsRequest().transactionDate("04 January 2015").locale("en").dateFormat("dd MMMM yyyy"));
 
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        LoanRescheduleRequestHelper errorLoanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, responseSpec);
-        HashMap response = errorLoanRescheduleRequestHelper.createLoanRescheduleRequestWithFullResponse(requestJSON);
-        assertEquals("error.msg.loan.is.charged.off", ((Map) ((List) response.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest));
+        assertTrue(exception.getDeveloperMessage().contains("Loan Account is Charged-off"));
 
         this.loanTransactionHelper.undoChargeOffLoan((long) this.loanId, new PostLoansLoanIdTransactionsRequest());
         this.loanTransactionHelper.closeRescheduledLoan((long) this.loanId,
@@ -342,19 +346,21 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 October 2015")
-                .updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("04 January 2015")
+                .updateAdjustedDueDate("04 October 2015").updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
 
-        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
@@ -390,19 +396,21 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 October 2015")
-                .updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("04 January 2015")
+                .updateAdjustedDueDate("04 October 2015").updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
 
-        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
@@ -437,19 +445,22 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("04 January 2015").updateAdjustedDueDate("04 July 2015").updateEMI("5000")
-                .updateEmiChangeEndDate("4 September 2015").updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("04 January 2015")
+                .updateAdjustedDueDate("04 July 2015").updateEMI("5000").updateEmiChangeEndDate("4 September 2015")
+                .updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
 
-        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
@@ -492,19 +503,21 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("04 December 2015").updateAdjustedDueDate("04 June 2016")
-                .updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("04 December 2015")
+                .updateAdjustedDueDate("04 June 2016").updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
 
-        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
@@ -590,19 +603,21 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends BaseLoanIntegratio
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
 
-        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
-                .updateExtraTerms(null).updateRescheduleFromDate("01 March 2015").updateAdjustedDueDate("01 July 2015")
-                .updateRecalculateInterest(true).build(this.loanId.toString());
+        final PostCreateRescheduleLoansRequest createRequest = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null)
+                .updateGraceOnInterest(null).updateExtraTerms(null).updateRescheduleFromDate("01 March 2015")
+                .updateAdjustedDueDate("01 July 2015").updateRecalculateInterest(true).buildRequest(this.loanId.longValue());
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+        final PostCreateRescheduleLoansResponse createResponse = LoanRescheduleRequestHelper.createLoanRescheduleRequest(createRequest);
+        this.loanRescheduleRequestId = createResponse.getResourceId();
+        assertNotNull(this.loanRescheduleRequestId, "ERROR IN CREATING LOAN RESCHEDULE REQUEST");
 
         LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
 
-        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+        final PostUpdateRescheduleLoansRequest approveRequest = new LoanRescheduleRequestTestBuilder().getApproveRequest();
+        LoanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, approveRequest);
+        final GetLoanRescheduleRequestResponse response = LoanRescheduleRequestHelper.readLoanRescheduleRequest(loanRescheduleRequestId,
+                null);
+        assertTrue(response.getStatusEnum().getApproved());
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 

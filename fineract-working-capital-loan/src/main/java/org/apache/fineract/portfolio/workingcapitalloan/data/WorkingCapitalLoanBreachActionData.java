@@ -25,7 +25,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalBreachAmountCalculationType;
 
 public record WorkingCapitalLoanBreachActionData(Long id, WorkingCapitalLoanBreachActionType action, LocalDate startDate, LocalDate endDate,
-        BigDecimal minimumPayment, WorkingCapitalBreachAmountCalculationType minimumPaymentType, Integer frequency,
-        WorkingCapitalLoanPeriodFrequencyType frequencyType) {
+        LocalDate effectiveEndDate, BigDecimal minimumPayment, WorkingCapitalBreachAmountCalculationType minimumPaymentType,
+        Integer frequency, WorkingCapitalLoanPeriodFrequencyType frequencyType) {
 
 }

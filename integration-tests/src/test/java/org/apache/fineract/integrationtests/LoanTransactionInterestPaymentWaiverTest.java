@@ -65,7 +65,6 @@ import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -97,7 +96,6 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
     private static AccountHelper accountHelper;
     private static Integer commonLoanProductId;
     private static PostClientsResponse client;
-    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private static ChargesHelper chargesHelper;
     private static final Gson GSON = new Gson();
 
@@ -112,7 +110,6 @@ public class LoanTransactionInterestPaymentWaiverTest extends BaseLoanIntegratio
         businessDateHelper = new BusinessDateHelper();
         accountHelper = new AccountHelper(requestSpec, responseSpec);
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
         chargesHelper = new ChargesHelper();
 
         final Account assetAccount = accountHelper.createAssetAccount();

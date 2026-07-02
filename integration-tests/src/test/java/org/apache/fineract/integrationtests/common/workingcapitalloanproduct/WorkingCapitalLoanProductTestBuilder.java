@@ -81,7 +81,7 @@ public class WorkingCapitalLoanProductTestBuilder {
     private AccountingRuleEnum accountingRule = DEFAULT_ACCOUNTING_RULE;
     private Long nearBreachId;
 
-    // GL account IDs for cash-based accounting
+    // GL account IDs for accrual with deferred revenue amortization accounting
     private Long fundSourceAccountId;
     private Long loanPortfolioAccountId;
     private Long transfersInSuspenseAccountId;

@@ -50,7 +50,7 @@ public class WorkingCapitalLoanProductToGLAccountMappingHelper {
     private final FromJsonHelper fromApiJsonHelper;
     private final ProductToGLAccountMappingHelper productToGLAccountMappingHelper;
 
-    public void saveCashBasedAccountMapping(final JsonElement element, final Long productId) {
+    public void saveAccrualWithDeferredRevenueAmortizationAccountMapping(final JsonElement element, final Long productId) {
         // assets / liabilities (fund source can be either asset or liability)
         saveAccountMapping(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), productId,
                 CashAccountsForLoan.FUND_SOURCE.getValue(), ASSET_LIABILITY_TYPES);
@@ -106,7 +106,8 @@ public class WorkingCapitalLoanProductToGLAccountMappingHelper {
                 CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), GLAccountType.LIABILITY);
     }
 
-    public void handleChangesToCashBasedAccountMapping(final Long productId, final Map<String, Object> changes, final JsonElement element) {
+    public void handleChangesToAccrualWithDeferredRevenueAmortizationAccountMapping(final Long productId, final Map<String, Object> changes,
+            final JsonElement element) {
         // assets / liabilities (fund source can be either asset or liability)
         mergeAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), productId,
                 CashAccountsForLoan.FUND_SOURCE.getValue(), changes, ASSET_LIABILITY_TYPES);
@@ -158,7 +159,7 @@ public class WorkingCapitalLoanProductToGLAccountMappingHelper {
                 CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), changes, GLAccountType.LIABILITY);
     }
 
-    public Map<String, Object> populateChangesForNewCashBasedMappingCreation(final JsonElement element) {
+    public Map<String, Object> populateChangesForNewAccrualWithDeferredRevenueAmortizationMappingCreation(final JsonElement element) {
         final Map<String, Object> changes = new HashMap<>();
         // required accounts
         putChange(changes, element, LoanProductAccountingParams.FUND_SOURCE);

@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 public enum WorkingCapitalAccountingRuleType {
 
     NONE("wcAccountingRuleType.none", "No accounting"), //
-    CASH_BASED("wcAccountingRuleType.cash", "Cash based accounting");
+    ACC_DEF_REV_AM("wcAccountingRuleType.accrual.def.rev.am", "Accrual with deferred revenue amortization");
 
     private final String code;
     private final String description;
@@ -42,7 +42,7 @@ public enum WorkingCapitalAccountingRuleType {
         return new StringEnumOptionData(name(), getCode(), getDescription());
     }
 
-    public boolean isCashBased() {
-        return this == CASH_BASED;
+    public boolean isAccrualWithDeferredRevenueAmortization() {
+        return this == ACC_DEF_REV_AM;
     }
 }

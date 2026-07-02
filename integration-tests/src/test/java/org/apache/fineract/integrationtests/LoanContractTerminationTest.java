@@ -22,32 +22,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
+public class LoanContractTerminationTest extends FeignLoanTestBase {
 
     @Test
     public void testLoanContractTermination() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long loanProductId = createLoanProduct(create4IProgressive());
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 6, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 500.0, 7.0, 6, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
@@ -61,7 +57,7 @@ public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
         runAt("3 February 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.moveLoanState(loanId,
+            moveLoanState(loanId,
                     new PostLoansLoanIdRequest().note("Contract Termination Test").externalId(Utils.randomStringGenerator("", 20)),
                     "contractTermination");
 
@@ -78,17 +74,16 @@ public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
     public void testNegativeLoanContractTerminationInNoActiveLoan() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long loanProductId = createLoanProduct(create4IProgressive());
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.moveLoanState(loanId,
+                    () -> moveLoanState(loanId,
                             new PostLoansLoanIdRequest().note("Contract Termination Test").externalId(Utils.randomStringGenerator("", 20)),
                             "contractTermination"));
 
@@ -101,19 +96,19 @@ public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
     public void testNegativeLoanContractTerminationInNoProgressiveLoan() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(
+        final Long loanProductId = createLoanProduct(
                 createOnePeriod30DaysPeriodicAccrualProduct(12.4).transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY)
                         .loanScheduleType(LoanScheduleType.CUMULATIVE.toString()));
 
         runAt("1 January 2024", () -> {
-            final Long loanId = applyAndApproveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024", 100.0, 6);
+            final Long loanId = applyAndApproveLoan(clientId, loanProductId, "1 January 2024", 100.0, 6);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.moveLoanState(loanId,
+                    () -> moveLoanState(loanId,
                             new PostLoansLoanIdRequest().note("Contract Termination Test").externalId(Utils.randomStringGenerator("", 20)),
                             "contractTermination"));
 
@@ -124,19 +119,17 @@ public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testLoanContractTerminationSameDisbursementDate() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        final Long clientId = createClient();
 
         runAt("1 January 2024", () -> {
 
-            PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(create4IProgressive().interestRecognitionOnDisbursementDate(false));
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 6, (request) -> request.interestRecognitionOnDisbursementDate(false));
+            Long loanProductId = createLoanProduct(create4IProgressive().interestRecognitionOnDisbursementDate(false));
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 500.0, 7.0, 6,
+                    (request) -> request.interestRecognitionOnDisbursementDate(false));
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            loanTransactionHelper.moveLoanState(loanId,
+            moveLoanState(loanId,
                     new PostLoansLoanIdRequest().note("Contract Termination Test").externalId(Utils.randomStringGenerator("", 20)),
                     "contractTermination");
 
@@ -144,7 +137,7 @@ public class LoanContractTerminationTest extends BaseLoanIntegrationTest {
                     transaction(100.0, "Disbursement", "01 January 2024"), //
                     transaction(100.0, "Contract Termination", "01 January 2024"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertEquals(BigDecimal.ZERO.stripTrailingZeros(), loanDetails.getSummary().getInterestCharged().stripTrailingZeros());
         });
     }

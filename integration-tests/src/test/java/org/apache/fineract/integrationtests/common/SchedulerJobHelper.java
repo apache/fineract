@@ -107,7 +107,7 @@ public class SchedulerJobHelper {
 
     public void updateSchedulerStatus(final boolean on) {
         String command = on ? "start" : "stop";
-        Calls.ok(FineractClientHelper.getFineractClient().jobsScheduler.changeSchedulerStatus(command));
+        Calls.ok(FineractClientHelper.getFineractClient().jobsScheduler.handleCommandsScheduler(command));
     }
 
     // TODO: Rewrite to use fineract-client instead!

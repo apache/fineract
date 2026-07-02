@@ -33,14 +33,16 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.provisioning.constants.ProvisioningCriteriaConstants;
-import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCriteria;
+import org.apache.fineract.organisation.provisioning.domain.ProvisioningCriteriaDefinition;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCriteriaRepository;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCategoryNotFoundException;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaCannotBeDeletedException;
@@ -125,9 +127,11 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command.parsedJson().getAsJsonObject());
         JsonArray jsonProvisioningCriteria = this.fromApiJsonHelper
                 .extractJsonArrayNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, command.parsedJson());
+        // Index the existing definitions by their natural key (categoryId) once, then resolve each incoming definition
+        // with a direct lookup. The payload carries no per-definition surrogate id to match on.
+        final Map<Long, ProvisioningCriteriaDefinition> existingByCategoryId = provisioningCriteria.getDefinitionsByCategoryId();
         for (JsonElement element : jsonProvisioningCriteria) {
             JsonObject jsonObject = element.getAsJsonObject();
-            Long id = this.fromApiJsonHelper.extractLongNamed("id", jsonObject);
             Long categoryId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM, jsonObject);
             Long minimumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, jsonObject);
             Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
@@ -139,16 +143,15 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                     jsonObject);
             GLAccount liabilityAccount = glAccountRepository.findById(liabilityAccountId).orElse(null);
             GLAccount expenseAccount = glAccountRepository.findById(expenseAccountId).orElse(null);
-            String categoryName = null;
-            String liabilityAccountName = null;
-            String expenseAccountName = null;
-            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData().setId(id).setCategoryId(categoryId)
-                    .setCategoryName(categoryName).setMinAge(minimumAge).setMaxAge(maximumAge)
-                    .setProvisioningPercentage(provisioningpercentage).setLiabilityAccount(liabilityAccount.getId())
-                    .setLiabilityCode(liabilityAccount.getGlCode()).setLiabilityName(liabilityAccountName)
-                    .setExpenseAccount(expenseAccount.getId()).setExpenseCode(expenseAccount.getGlCode())
-                    .setExpenseName(expenseAccountName);
-            provisioningCriteria.update(data, liabilityAccount, expenseAccount);
+
+            final ProvisioningCriteriaDefinition definition = existingByCategoryId.get(categoryId);
+            if (definition == null) {
+                throw new PlatformApiDataValidationException(
+                        List.of(ApiParameterError.parameterError("error.msg.provisioningcriteria.definition.category.not.found",
+                                "Provisioning criteria has no definition for the given category",
+                                ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM, categoryId)));
+            }
+            definition.update(minimumAge, maximumAge, provisioningpercentage, liabilityAccount, expenseAccount);
         }
     }
 

@@ -226,9 +226,9 @@ Feature: WorkingCapitalLoanProduct
       | breachId       | "0"                     | "The parameter `breachId` must be greater than 0." |
 
   @TestRailId:C74445
-  Scenario: Verify Working capital Loan Product create with Cash based accounting
-    When Admin creates a new Working Capital Loan Product with accounting rule "CASH_BASED"
-    Then Admin verifies Working Capital Loan Product has accounting rule "CASH_BASED"
+  Scenario: Verify Working capital Loan Product create with Accrual with deferred revenue amortization accounting
+    When Admin creates a new Working Capital Loan Product with accounting rule "ACC_DEF_REV_AM"
+    Then Admin verifies Working Capital Loan Product has accounting rule "ACC_DEF_REV_AM"
     Then Admin deletes Working Capital Loan Product and verifies GL account mappings are cleaned up
 
   @TestRailId:C74446
@@ -238,28 +238,28 @@ Feature: WorkingCapitalLoanProduct
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74447
-  Scenario: Verify Working capital Loan Product create with Cash based accounting fails when required GL accounts are missing
-    Then Admin failed to create a new Working Capital Loan Product with Cash based accounting and missing required GL accounts
+  Scenario: Verify Working capital Loan Product create with Accrual with deferred revenue amortization accounting fails when required GL accounts are missing
+    Then Admin failed to create a new Working Capital Loan Product with Accrual with deferred revenue amortization accounting and missing required GL accounts
 
   @TestRailId:C74448
-  Scenario: Verify Working capital Loan Product update accounting rule from None to Cash based
+  Scenario: Verify Working capital Loan Product update accounting rule from None to Accrual with deferred revenue amortization
     When Admin creates a new Working Capital Loan Product with accounting rule "NONE"
-    When Admin updates Working Capital Loan Product accounting rule from None to Cash based
-    Then Admin verifies Working Capital Loan Product has accounting rule "CASH_BASED"
+    When Admin updates Working Capital Loan Product accounting rule from None to Accrual with deferred revenue amortization
+    Then Admin verifies Working Capital Loan Product has accounting rule "ACC_DEF_REV_AM"
     Then Admin deletes Working Capital Loan Product and verifies GL account mappings are cleaned up
 
   @TestRailId:C74449
-  Scenario: Verify Working capital Loan Product update accounting rule from Cash based to None
-    When Admin creates a new Working Capital Loan Product with accounting rule "CASH_BASED"
-    When Admin updates Working Capital Loan Product accounting rule from Cash based to None
+  Scenario: Verify Working capital Loan Product update accounting rule from Accrual with deferred revenue amortization to None
+    When Admin creates a new Working Capital Loan Product with accounting rule "ACC_DEF_REV_AM"
+    When Admin updates Working Capital Loan Product accounting rule from Accrual with deferred revenue amortization to None
     Then Admin verifies Working Capital Loan Product has accounting rule "NONE"
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74450
-  Scenario: Verify Working capital Loan Product update GL account mappings on existing Cash based product
-    When Admin creates a new Working Capital Loan Product with accounting rule "CASH_BASED"
-    When Admin updates GL account mappings on existing Cash based Working Capital Loan Product
-    Then Admin verifies Working Capital Loan Product has accounting rule "CASH_BASED"
+  Scenario: Verify Working capital Loan Product update GL account mappings on existing Accrual with deferred revenue amortization product
+    When Admin creates a new Working Capital Loan Product with accounting rule "ACC_DEF_REV_AM"
+    When Admin updates GL account mappings on existing Accrual with deferred revenue amortization Working Capital Loan Product
+    Then Admin verifies Working Capital Loan Product has accounting rule "ACC_DEF_REV_AM"
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74451
@@ -267,8 +267,8 @@ Feature: WorkingCapitalLoanProduct
     Then Admin verifies Working Capital Loan Product template has accounting options
 
   @TestRailId:C74452
-  Scenario: Verify Working capital Loan Product create with Cash based accounting and verify each GL account mapping value
-    When Admin creates a new Working Capital Loan Product with Cash based accounting for GL mapping verification
+  Scenario: Verify Working capital Loan Product create with Accrual with deferred revenue amortization accounting and verify each GL account mapping value
+    When Admin creates a new Working Capital Loan Product with Accrual with deferred revenue amortization accounting for GL mapping verification
     Then Admin verifies Working Capital Loan Product GL account mapping values match the request
     Then Admin deletes Working Capital Loan Product and verifies GL account mappings are cleaned up
 
@@ -280,33 +280,33 @@ Feature: WorkingCapitalLoanProduct
 
   @TestRailId:C74455
   Scenario: Verify Working capital Loan Product create with non-existent GL account ID fails
-    Then Admin failed to create a Working Capital Loan Product with Cash based accounting and non-existent GL account ID with status 404
+    Then Admin failed to create a Working Capital Loan Product with Accrual with deferred revenue amortization accounting and non-existent GL account ID with status 404
 
   @TestRailId:C74456
-  Scenario: Verify Working capital Loan Product update to Cash based without required GL accounts fails
+  Scenario: Verify Working capital Loan Product update to Accrual with deferred revenue amortization without required GL accounts fails
     When Admin creates a new Working Capital Loan Product with accounting rule "NONE"
-    Then Admin failed to update Working Capital Loan Product to Cash based without required GL accounts with status 400
+    Then Admin failed to update Working Capital Loan Product to Accrual with deferred revenue amortization without required GL accounts with status 400
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74457
-  Scenario: Verify Working capital Loan Product update single GL account on Cash based product and verify changed value
-    When Admin creates a new Working Capital Loan Product with accounting rule "CASH_BASED"
-    When Admin updates writeOff GL account on Cash based Working Capital Loan Product
+  Scenario: Verify Working capital Loan Product update single GL account on Accrual with deferred revenue amortization product and verify changed value
+    When Admin creates a new Working Capital Loan Product with accounting rule "ACC_DEF_REV_AM"
+    When Admin updates writeOff GL account on Accrual with deferred revenue amortization Working Capital Loan Product
     Then Admin verifies Working Capital Loan Product writeOff GL account was updated
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74458
-  Scenario: Verify Working capital Loan Product update from Cash based to None removes all GL account mappings
-    When Admin creates a new Working Capital Loan Product with Cash based accounting for GL mapping verification
+  Scenario: Verify Working capital Loan Product update from Accrual with deferred revenue amortization to None removes all GL account mappings
+    When Admin creates a new Working Capital Loan Product with Accrual with deferred revenue amortization accounting for GL mapping verification
     Then Admin verifies Working Capital Loan Product GL account mapping values match the request
-    When Admin updates Working Capital Loan Product accounting rule from Cash based to None
+    When Admin updates Working Capital Loan Product accounting rule from Accrual with deferred revenue amortization to None
     Then Admin verifies Working Capital Loan Product has no accounting mappings
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74459
   Scenario: Verify Working capital Loan Product list returns accounting rule field
-    When Admin creates a new Working Capital Loan Product with accounting rule "CASH_BASED"
-    Then Admin verifies Working Capital Loan Product list contains the product with accounting rule "CASH_BASED"
+    When Admin creates a new Working Capital Loan Product with accounting rule "ACC_DEF_REV_AM"
+    Then Admin verifies Working Capital Loan Product list contains the product with accounting rule "ACC_DEF_REV_AM"
     Then Admin deletes a Working Capital Loan Product
 
   @TestRailId:C74460
@@ -314,8 +314,8 @@ Feature: WorkingCapitalLoanProduct
     Then Admin failed to create a Working Capital Loan Product with wrong GL account type for loanPortfolio with status 403
 
   @TestRailId:C74461
-  Scenario: Verify Working capital Loan Product template accounting rule options contain NONE and CASH_BASED
-    Then Admin verifies Working Capital Loan Product template has NONE and CASH_BASED accounting rule options
+  Scenario: Verify Working capital Loan Product template accounting rule options contain NONE and ACC_DEF_REV_AM
+    Then Admin verifies Working Capital Loan Product template has NONE and ACC_DEF_REV_AM accounting rule options
 
   @TestRailId:C76707
   Scenario: Verify WC Loan Product create with breach and update with near breach (breach -> all) - UC1

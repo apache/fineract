@@ -18,17 +18,18 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DATETIME_PATTERN;
+
 import java.math.BigDecimal;
-import java.util.HashMap;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanPayOffTest extends BaseLoanIntegrationTest {
+public class LoanPayOffTest extends FeignLoanTestBase {
 
     private Long clientId;
     private Long loanId;
@@ -38,12 +39,10 @@ public class LoanPayOffTest extends BaseLoanIntegrationTest {
     @BeforeEach
     public void beforeEach() {
         runAt("01 June 2024", () -> {
-            clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(
-                    applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
-            loanId = postLoansResponse.getLoanId();
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 June 2024"));
+            clientId = createClient();
+            final Long loanProductId = createLoanProduct(create4IProgressive());
+            loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "01 June 2024", 1000.0, 10.0, 4, null));
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 June 2024"));
             disburseLoan(loanId, BigDecimal.valueOf(250.0), "01 June 2024");
         });
     }
@@ -51,13 +50,13 @@ public class LoanPayOffTest extends BaseLoanIntegrationTest {
     @Test
     public void testPayOffOnDisbursementDate() {
         runAt("01 June 2024", () -> {
-            final HashMap prepayAmount = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, loanId.intValue());
+            GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepaymentAmount(loanId, null, DATETIME_PATTERN);
 
-            Assertions.assertEquals(250.0f, prepayAmount.get("amount"));
+            Assertions.assertEquals(250.0, prepayAmount.getAmount());
 
-            loanTransactionHelper.makeLoanRepayment("01 June 2024", 250.0f, loanId.intValue());
+            addRepaymentForLoan(loanId, 250.0, "01 June 2024");
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertNotNull(loanDetails.getStatus());
             Assertions.assertEquals(Boolean.TRUE, loanDetails.getStatus().getClosedObligationsMet());
         });

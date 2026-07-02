@@ -89,8 +89,8 @@ public class WorkingCapitalProductAccountingMappingServiceImpl implements Workin
                 AccountingConstants.LoanProductAccountingParams.WRITE_OFF_REASON_TO_EXPENSE_ACCOUNT_MAPPINGS.getValue(),
                 AccountingConstants.LoanProductAccountingParams.WRITE_OFF_REASON_CODE_VALUE_ID.getValue());
 
-        if (accountingRuleType.isCashBased()) {
-            this.mappingHelper.saveCashBasedAccountMapping(element, wcLoanProductId);
+        if (accountingRuleType.isAccrualWithDeferredRevenueAmortization()) {
+            this.mappingHelper.saveAccrualWithDeferredRevenueAmortizationAccountMapping(element, wcLoanProductId);
             this.mappingHelper.saveAdvancedMappings(command, element, wcLoanProductId);
         }
     }
@@ -104,13 +104,13 @@ public class WorkingCapitalProductAccountingMappingServiceImpl implements Workin
 
         if (accountingRuleChanged) {
             this.mappingHelper.deleteProductToGLAccountMapping(wcLoanProductId);
-            if (accountingRuleType.isCashBased()) {
-                this.mappingHelper.saveCashBasedAccountMapping(element, wcLoanProductId);
-                changes = this.mappingHelper.populateChangesForNewCashBasedMappingCreation(element);
+            if (accountingRuleType.isAccrualWithDeferredRevenueAmortization()) {
+                this.mappingHelper.saveAccrualWithDeferredRevenueAmortizationAccountMapping(element, wcLoanProductId);
+                changes = this.mappingHelper.populateChangesForNewAccrualWithDeferredRevenueAmortizationMappingCreation(element);
             }
         } else {
-            if (accountingRuleType.isCashBased()) {
-                this.mappingHelper.handleChangesToCashBasedAccountMapping(wcLoanProductId, changes, element);
+            if (accountingRuleType.isAccrualWithDeferredRevenueAmortization()) {
+                this.mappingHelper.handleChangesToAccrualWithDeferredRevenueAmortizationAccountMapping(wcLoanProductId, changes, element);
                 this.mappingHelper.updateAdvancedMappings(command, element, wcLoanProductId, changes);
             }
         }
@@ -129,7 +129,7 @@ public class WorkingCapitalProductAccountingMappingServiceImpl implements Workin
             final WorkingCapitalAccountingRuleType accountingRuleType) {
         final Map<String, GLAccountData> accountMappingDetails = new LinkedHashMap<>(8);
 
-        if (!accountingRuleType.isCashBased()) {
+        if (!accountingRuleType.isAccrualWithDeferredRevenueAmortization()) {
             return accountMappingDetails;
         }
 

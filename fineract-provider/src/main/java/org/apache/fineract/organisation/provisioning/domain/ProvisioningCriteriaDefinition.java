@@ -79,6 +79,10 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
                 liabilityAccount, expenseAccount);
     }
 
+    public Long getCategoryId() {
+        return this.provisioningCategory == null ? null : this.provisioningCategory.getId();
+    }
+
     public void update(Long minAge, Long maxAge, BigDecimal percentage, GLAccount lia, GLAccount exp) {
         this.minimumAge = minAge;
         this.maximumAge = maxAge;

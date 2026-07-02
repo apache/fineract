@@ -16,12 +16,17 @@ Feature: Working Capital Breach Evaluation
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "15 January 2026"
-    And Admin makes Internal Payment "500.0" on "2026-01-15"
+    And Customer makes repayment on "15 January 2026" with 500.0 transaction amount on Working Capital loan
     When Admin sets the business date to "01 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 500.00           | 0.00              | null       | false  |
+      | 2            | 2026-02-01 | 2026-02-28 | 28           | 500.00           | 500.00            | null       | null   |
+    When Customer undo "1"th working capital transaction made on "15 January 2026"
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-31 | 31           | 500.00           | 500.00            | null       | true   |
       | 2            | 2026-02-01 | 2026-02-28 | 28           | 500.00           | 500.00            | null       | null   |
 
   @TestRailId:C76609
@@ -38,7 +43,7 @@ Feature: Working Capital Breach Evaluation
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "15 January 2026"
-    And Admin makes Internal Payment "200.0" on "2026-01-15"
+    And Customer makes repayment on "15 January 2026" with 200.0 transaction amount on Working Capital loan
     When Admin sets the business date to "01 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
@@ -84,7 +89,7 @@ Feature: Working Capital Breach Evaluation
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Now make excess payment of 1500 (3x minPayment) in period 2
     When Admin sets the business date to "10 February 2026"
-    And Admin makes Internal Payment "1500.0" on "2026-02-10"
+    And Customer makes repayment on "10 February 2026" with 1500.0 transaction amount on Working Capital loan
     When Admin sets the business date to "01 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Period 1 stays breach=true (NOT retroactively cleared per NOTE1)
@@ -109,10 +114,10 @@ Feature: Working Capital Breach Evaluation
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "10 January 2026"
-    And Admin makes Internal Payment "200.0" on "2026-01-10"
-    And Admin makes Internal Payment "150.0" on "2026-01-10"
+    And Customer makes repayment on "10 January 2026" with 200.0 transaction amount on Working Capital loan
+    And Customer makes repayment on "10 January 2026" with 150.0 transaction amount on Working Capital loan
     When Admin sets the business date to "20 January 2026"
-    And Admin makes Internal Payment "150.0" on "2026-01-20"
+    And Customer makes repayment on "20 January 2026" with 150.0 transaction amount on Working Capital loan
     # Total paid = 200+150+150 = 500 = minPayment -> NOT a breach
     When Admin sets the business date to "01 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -136,7 +141,7 @@ Feature: Working Capital Breach Evaluation
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Pay full amount on the LAST day of period 1
     When Admin sets the business date to "31 January 2026"
-    And Admin makes Internal Payment "500.0" on "2026-01-31"
+    And Customer makes repayment on "31 January 2026" with 500.0 transaction amount on Working Capital loan
     When Admin sets the business date to "01 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
@@ -164,7 +169,7 @@ Feature: Working Capital Breach Evaluation
       | 1            | 2019-01-04 | 2019-04-03 | 90           | 900.00           | 900.00            | null       | null   |
     # Payment of 250 on Jan 5 (within period 1)
     When Admin sets the business date to "05 January 2019"
-    And Admin makes Internal Payment "250.0" on "2019-01-05"
+    And Customer makes repayment on "05 January 2019" with 250.0 transaction amount on Working Capital loan
     # Outstanding should decrease mid-period
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
@@ -196,13 +201,13 @@ Feature: Working Capital Breach Evaluation
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 1000.00          | 1000.00           | null       | null   |
     # First partial payment
     When Admin sets the business date to "10 January 2026"
-    And Admin makes Internal Payment "400.0" on "2026-01-10"
+    And Customer makes repayment on "10 January 2026" with 400.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 1000.00          | 600.00            | null       | null   |
     # Second partial payment clears the rest — paidAmount >= minPayment, breach resolves to false immediately
     When Admin sets the business date to "20 January 2026"
-    And Admin makes Internal Payment "600.0" on "2026-01-20"
+    And Customer makes repayment on "20 January 2026" with 600.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 1000.00          | 0.00              | null       | false  |
@@ -229,7 +234,7 @@ Feature: Working Capital Breach Evaluation
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Pay 800 in period 1 (300 above minPayment=500)
     When Admin sets the business date to "15 January 2026"
-    And Admin makes Internal Payment "800.0" on "2026-01-15"
+    And Customer makes repayment on "15 January 2026" with 800.0 transaction amount on Working Capital loan
     # Period 2 still starts with full outstanding=500, unaffected by period 1 overpayment
     When Admin sets the business date to "01 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId

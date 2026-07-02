@@ -109,7 +109,7 @@ public class CodeGlobalInitializerStep implements FineractGlobalInitializerStep 
     }
 
     private void fetchExistingCodesAndCodeValues() {
-        List<GetCodesResponse> existingCodes = fineractClient.codes().retrieveCodes();
+        List<GetCodesResponse> existingCodes = fineractClient.codes().retrieveAllCodes();
         existingCodes.forEach(code -> {
             List<GetCodeValuesDataResponse> existingCodeValues = fineractClient.codeValues()
                     .retrieveAllCodeValuesByCodeName(code.getName());

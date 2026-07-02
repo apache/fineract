@@ -35,7 +35,6 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -62,7 +61,6 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
     private static AccountHelper accountHelper;
     private static Integer commonLoanProductId;
     private static PostClientsResponse client;
-    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
     private static ChargesHelper chargesHelper;
 
     @BeforeAll
@@ -76,7 +74,6 @@ public class LoanOriginationValidationTest extends BaseLoanIntegrationTest {
         businessDateHelper = new BusinessDateHelper();
         accountHelper = new AccountHelper(requestSpec, responseSpec);
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
         chargesHelper = new ChargesHelper();
 
         final Account assetAccount = accountHelper.createAssetAccount();

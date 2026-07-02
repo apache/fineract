@@ -21,19 +21,18 @@ package org.apache.fineract.integrationtests;
 import java.math.BigDecimal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
-@ExtendWith({ LoanTestLifecycleExtension.class })
-public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegrationTest {
+public class LoanTransactionBackdatedProgressiveTest extends FeignLoanTestBase {
+
+    private static final String DATETIME_PATTERN = LoanTestData.DATETIME_PATTERN;
 
     private Long clientId;
     private Long loanId;
@@ -41,12 +40,10 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
     @BeforeEach
     public void beforeEach() {
         runAt("01 July 2024", () -> {
-            clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(
-                    applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse.getResourceId(), "01 June 2024", 1000.0, 10.0, 4, null));
-            loanId = postLoansResponse.getLoanId();
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 June 2024"));
+            clientId = createClient();
+            final Long loanProductId = createLoanProduct(create4IProgressive());
+            loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "01 June 2024", 1000.0, 10.0, 4, null));
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 June 2024"));
             disburseLoan(loanId, BigDecimal.valueOf(250.0), "01 June 2024");
             addRepaymentForLoan(loanId, 100.0, "10 June 2024");
         });
@@ -57,7 +54,7 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
         runAt("01 July 2024", () -> {
             disburseLoan(loanId, BigDecimal.valueOf(250.0), "5 June 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(loanDetails.getDisbursementDetails().size(), 2);
         });
     }
@@ -67,7 +64,7 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
         runAt("01 July 2024", () -> {
             addRepaymentForLoan(loanId, 100.0, "5 June 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().size() >= 2);
         });
     }
@@ -75,10 +72,10 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
     @Test
     public void testProgressiveBackdatedMerchantIssuedRefund() {
         runAt("01 July 2024", () -> {
-            loanTransactionHelper.makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("5 June 2024").locale("en").transactionAmount(100.0));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().size() >= 2);
         });
     }
@@ -86,10 +83,10 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
     @Test
     public void testProgressiveBackdatedPayoutRefund() {
         runAt("01 July 2024", () -> {
-            loanTransactionHelper.makePayoutRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("5 June 2024").locale("en").transactionAmount(100.0));
+            makePayoutRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("5 June 2024")
+                    .locale("en").transactionAmount(100.0));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().size() >= 2);
         });
     }
@@ -97,10 +94,10 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
     @Test
     public void testProgressiveBackdatedGoodwillCredit() {
         runAt("01 July 2024", () -> {
-            loanTransactionHelper.makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("5 June 2024").locale("en").transactionAmount(100.0));
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("5 June 2024")
+                    .locale("en").transactionAmount(100.0));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().size() >= 2);
         });
     }
@@ -108,10 +105,10 @@ public class LoanTransactionBackdatedProgressiveTest extends BaseLoanIntegration
     @Test
     public void testProgressiveBackdatedInterestPaymentWaiver() {
         runAt("01 July 2024", () -> {
-            loanTransactionHelper.makeInterestPaymentWaiver(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeInterestPaymentWaiver(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("5 June 2024").locale("en").transactionAmount(100.0));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().size() >= 2);
         });
     }

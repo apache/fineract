@@ -87,9 +87,9 @@ public class WorkingCapitalRequestFactory {
     public static final String DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE = WorkingCapitalBreachFrequencyType.DAYS.getCode();
     public static final BigDecimal DEFAULT_WC_NEAR_BREACH_THRESHOLD = new BigDecimal("70.23");
 
-    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithCashAccounting() {
+    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithAccrualAccounting() {
         return defaultWorkingCapitalLoanProductRequest()//
-                .accountingRule(AccountingRuleEnum.CASH_BASED)//
+                .accountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)//
                 .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.SUSPENSE_CLEARING_ACCOUNT))//
                 .loanPortfolioAccountId(accountTypeResolver.resolve(DefaultAccountType.LOANS_RECEIVABLE))//
                 .transfersInSuspenseAccountId(accountTypeResolver.resolve(DefaultAccountType.TRANSFER_IN_SUSPENSE_ACCOUNT))//
@@ -112,11 +112,12 @@ public class WorkingCapitalRequestFactory {
     }
 
     /**
-     * Creates a Cash based accounting request where optional Income-type GL accounts are overridden with distinct (but
-     * still type-correct) accounts to verify each mapping is stored and returned independently.
+     * Creates a Accrual with deferred revenue amortization request where optional Income-type GL accounts are
+     * overridden with distinct (but still type-correct) accounts to verify each mapping is stored and returned
+     * independently.
      */
-    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithDistinctCashAccountingMappings() {
-        return defaultWorkingCapitalLoanProductRequestWithCashAccounting()//
+    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithDistinctAccrualAccountingMappings() {
+        return defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()//
                 .incomeFromPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.RECOVERIES))//
                 .incomeFromGoodwillCreditFeesAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME_CHARGE_OFF))//
                 .incomeFromGoodwillCreditPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_INCOME))//

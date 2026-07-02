@@ -120,7 +120,7 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                                 .getName()))),
                 () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ADVANCED_ACCOUNTING,
                         createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
-                                .defaultWorkingCapitalLoanProductRequestWithCashAccounting()
+                                .defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
                                 .name(DefaultWorkingCapitalLoanProduct.WCLP_ADVANCED_ACCOUNTING.getName())
                                 .allowAttributeOverrides(allowAttributeOverrides)
                                 .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
@@ -139,11 +139,10 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                                 .writeOffReasonCodeValueId(codeValueResolver.resolve(writeOffReasonCodeId,
                                                         DefaultCodeValue.valueOf("BAD_DEBT")))
                                                 .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)))))),
-                () -> TestContext.INSTANCE.set(
-                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ACCOUNTING_CASH_BASED,
+                () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ACC_DEF_REV_AM,
                         createWorkingCapitalLoanProductIdempotent(
-                                workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithCashAccounting()
-                                        .name(DefaultWorkingCapitalLoanProduct.WCLP_ACCOUNTING_CASH_BASED.getName())
+                                workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                                        .name(DefaultWorkingCapitalLoanProduct.WCLP_ACC_DEF_REV_AM.getName())
                                         .allowAttributeOverrides(allowAttributeOverrides).overpaymentLiabilityAccountId(
                                                 accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY)))),
                 () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_PERIOD_PAYMENT_RATE,

@@ -593,10 +593,10 @@ public class WorkingCapitalLoanProductDataValidator {
                     .extractStringNamed(WorkingCapitalLoanProductConstants.accountingRuleParamName, element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.accountingRuleParamName).value(accountingRuleValue)
                     .notBlank().isOneOfTheseStringValues(
-                            List.of(WorkingCapitalAccountingRuleType.NONE.name(), WorkingCapitalAccountingRuleType.CASH_BASED.name()));
+                            List.of(WorkingCapitalAccountingRuleType.NONE.name(), WorkingCapitalAccountingRuleType.ACC_DEF_REV_AM.name()));
 
-            if (WorkingCapitalAccountingRuleType.CASH_BASED.name().equals(accountingRuleValue)) {
-                // Required GL accounts for Cash based
+            if (WorkingCapitalAccountingRuleType.ACC_DEF_REV_AM.name().equals(accountingRuleValue)) {
+                // Required GL accounts for accrual with deferred revenue amortization
                 final Long fundSourceAccountId = this.fromApiJsonHelper
                         .extractLongNamed(WorkingCapitalLoanProductConstants.fundSourceAccountIdParamName, element);
                 baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.fundSourceAccountIdParamName)

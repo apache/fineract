@@ -22,23 +22,26 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansRequestChargeData;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestRecalculationCompoundingMethod;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RescheduleStrategyMethod;
 import org.junit.jupiter.api.Test;
 
-public class LoanRepaymentTest extends BaseLoanIntegrationTest {
+public class LoanRepaymentTest extends FeignLoanTestBase {
 
     @Test
     public void test_LoanRepaymentWorks_WhenDisbursementChargeIsAvailable_AndAccrualAccounting_AndDailyRecalculateInterest_AndDailyInterestCalculationPeriod() {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -71,8 +74,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .multiDisburseLoan(null)//
                     .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 1000.0;
@@ -89,12 +91,9 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                             new PostLoansRequestChargeData().chargeId(charge2Id).amount(BigDecimal.valueOf(charge2Amount))//
             ));//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            Long loanId = approvedLoanResult.getLoanId();
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, "01 January 2023"));
 
             // disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
@@ -107,10 +106,10 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(25.0, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(25.0, fundSource, "DEBIT") //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(25.0, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(25.0, getAccounts().getFundSource(), "DEBIT") //
             );
 
             // repay 500
@@ -125,12 +124,12 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
 
             // verify journal entries
             verifyJournalEntries(loanId, //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(25.0, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(25.0, fundSource, "DEBIT"), //
-                    journalEntry(500.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(500.0, fundSource, "DEBIT") //
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(1000.0, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(25.0, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(25.0, getAccounts().getFundSource(), "DEBIT"), //
+                    journalEntry(500.0, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(500.0, getAccounts().getFundSource(), "DEBIT") //
             );
         });
     }
@@ -140,7 +139,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
 
         runAt("31 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 1;
             int repaymentEvery = 1;
@@ -167,8 +166,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .interestRatePerPeriod(10.0)//
                     .multiDisburseLoan(null);//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 1000.0;
@@ -182,12 +180,9 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
                     .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD);//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            Long loanId = approvedLoanResult.getLoanId();
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, "01 January 2023"));
 
             // disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
@@ -209,10 +204,13 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
             // verify journal entries
             verifyJournalEntries(loanId,
 
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), journalEntry(1000.0, fundSource, "CREDIT"),
-                    journalEntry(1045.16, fundSource, "DEBIT"), journalEntry(45.16, interestReceivableAccount, "CREDIT"),
-                    journalEntry(45.16, interestReceivableAccount, "DEBIT"), journalEntry(45.16, interestIncomeAccount, "CREDIT"),
-                    journalEntry(1000.0, fundSource, "CREDIT")
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "DEBIT"),
+                    journalEntry(1000.0, getAccounts().getFundSource(), "CREDIT"),
+                    journalEntry(1045.16, getAccounts().getFundSource(), "DEBIT"),
+                    journalEntry(45.16, getAccounts().getInterestReceivableAccount(), "CREDIT"),
+                    journalEntry(45.16, getAccounts().getInterestReceivableAccount(), "DEBIT"),
+                    journalEntry(45.16, getAccounts().getInterestIncomeAccount(), "CREDIT"),
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "CREDIT")
 
             );
         });
@@ -223,7 +221,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
 
         runAt("31 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 1;
             int repaymentEvery = 1;
@@ -250,8 +248,7 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .interestRatePerPeriod(10.0)//
                     .multiDisburseLoan(null);//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 1000.0;
@@ -265,12 +262,9 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
                     .interestRatePerPeriod(BigDecimal.valueOf(10.0))//
                     .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD);//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long loanId = applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            Long loanId = approvedLoanResult.getLoanId();
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(amount, "01 January 2023"));
 
             // disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
@@ -292,10 +286,13 @@ public class LoanRepaymentTest extends BaseLoanIntegrationTest {
             // verify journal entries
             verifyJournalEntries(loanId,
 
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), journalEntry(1000.0, fundSource, "CREDIT"),
-                    journalEntry(1100.0, fundSource, "DEBIT"), journalEntry(100.0, interestReceivableAccount, "CREDIT"),
-                    journalEntry(100.0, interestReceivableAccount, "DEBIT"), journalEntry(100.0, interestIncomeAccount, "CREDIT"),
-                    journalEntry(1000.0, fundSource, "CREDIT")
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "DEBIT"),
+                    journalEntry(1000.0, getAccounts().getFundSource(), "CREDIT"),
+                    journalEntry(1100.0, getAccounts().getFundSource(), "DEBIT"),
+                    journalEntry(100.0, getAccounts().getInterestReceivableAccount(), "CREDIT"),
+                    journalEntry(100.0, getAccounts().getInterestReceivableAccount(), "DEBIT"),
+                    journalEntry(100.0, getAccounts().getInterestIncomeAccount(), "CREDIT"),
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), "CREDIT")
 
             );
         });

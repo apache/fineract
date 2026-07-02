@@ -21,11 +21,11 @@ The scope of this document includes:
 * Charge-off behavior for amortization entries
 * Reversal handling
 
-General Working Capital Loan repayment and goodwill credit accounting are documented in `working-capital-cash-accounting.adoc`.
+General Working Capital Loan repayment and goodwill credit accounting are documented in `working-capital-accrual-deferred-revenue-amortization-accounting.adoc`.
 
 === Applicability
 
-* Working Capital Loan products with `accountingRule = CASH_BASED`
+* Working Capital Loan products with `accountingRule = ACC_DEF_REV_AM`
 * Working Capital Loans with `amortizationType = EIR` and a non-zero discount fee, OR with previously recognized discount fee income that needs to be reconciled downward
 
 === Definitions and Key Concepts
@@ -211,7 +211,7 @@ EIR amortization transactions reverse through the same generic mechanism as othe
 
 === Reversal
 
-Every leg can be reversed; the reversal posts a balanced mirror entry per leg and flags the originals as reversed (see `working-capital-cash-accounting.adoc`).
+Every leg can be reversed; the reversal posts a balanced mirror entry per leg and flags the originals as reversed (see `working-capital-accrual-deferred-revenue-amortization-accounting.adoc`).
 
 == Example Scenarios
 

@@ -58,13 +58,7 @@ public class WorkingCapitalLoanDelinquencyClassificationBusinessStep extends Wor
                     "Starting Working Capital delinquency tag processing for Working Capital Loan with Id [{}], account number [{}], external Id [{}]",
                     loan.getId(), loan.getAccountNumber(), externalId);
 
-            if (loan.getLoanProductRelatedDetails() != null && loan.getLoanProductRelatedDetails().getDelinquencyBucket() != null) {
-                log.debug("Evaluate {} Working Capital Delinquency bucket", loan.getLoanProductRelatedDetails().getDelinquencyBucket());
-                delinquencyClassificationService.classifyDelinquency(loan, ThreadLocalContextUtil.getBusinessDate().plusDays(1),
-                        loan.getLoanProductRelatedDetails().getDelinquencyBucket());
-            } else {
-                log.debug("Skipping... Delinquency bucket is not configured for Working Capital Loan {}.", loan.getId());
-            }
+            delinquencyClassificationService.classifyDelinquency(loan, ThreadLocalContextUtil.getBusinessDate().plusDays(1));
         } catch (RuntimeException re) {
             log.error(
                     "Received exception while processing delinquency tag for Working Capital Loan with Id [{}], account number [{}], external Id [{}]",

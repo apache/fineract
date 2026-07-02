@@ -20,69 +20,34 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
-import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
+public class LoanRefundTransactionTest extends FeignLoanTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoanRefundTransactionTest.class);
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private static BusinessDateHelper businessDateHelper;
-    private static LoanTransactionHelper loanTransactionHelper;
-    private static AccountHelper accountHelper;
-    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
-
-    @BeforeAll
-    public static void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        businessDateHelper = new BusinessDateHelper();
-        accountHelper = new AccountHelper(requestSpec, responseSpec);
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
-    }
+    private static final String DATETIME_PATTERN = LoanTestData.DATETIME_PATTERN;
 
     @Test
     public void testMerchantIssuedRefundCreatesAndReversesInterestRefund() {
         runAt("01 July 2024", () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             final Long loanId = createAndDisburseLoanForMerchantIssuedRefundWithInterestRefund(clientId);
-            final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("01 July 2024").locale("en")
-                            .transactionAmount(100.0));
+            final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse = makeMerchantIssuedRefund(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("01 July 2024")
+                            .locale(LoanTestData.LOCALE).transactionAmount(100.0));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(
                     loanDetails.getTransactions().stream().anyMatch(transaction -> transaction.getType().getMerchantIssuedRefund()
                             && Boolean.FALSE.equals(transaction.getManuallyReversed())));
@@ -91,10 +56,9 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
                     .anyMatch(transaction -> transaction.getType().getCode().equals("loanTransactionType.interestRefund")
                             && Boolean.FALSE.equals(transaction.getManuallyReversed())));
 
-            loanTransactionHelper.reverseLoanTransaction(loanId.intValue(), merchantIssuedRefundResponse.getResourceId(), "01 July 2024",
-                    responseSpec);
+            reverseLoanTransaction(loanId, merchantIssuedRefundResponse.getResourceId(), "01 July 2024");
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(
                     loanDetails.getTransactions().stream().anyMatch(transaction -> transaction.getType().getMerchantIssuedRefund()
                             && Boolean.TRUE.equals(transaction.getManuallyReversed())));
@@ -110,11 +74,11 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
         runAt("01 July 2024", () -> {
             Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             final Long loanId = createAndDisburseLoanForPayoutRefundWithInterestRefund(clientId);
-            final PostLoansLoanIdTransactionsResponse payoutRefundResponse = loanTransactionHelper.makePayoutRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("01 July 2024").locale("en")
-                            .transactionAmount(100.0));
+            final PostLoansLoanIdTransactionsResponse payoutRefundResponse = makePayoutRefund(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("01 July 2024")
+                            .locale(LoanTestData.LOCALE).transactionAmount(100.0));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
                     transaction -> transaction.getType().getPayoutRefund() && Boolean.FALSE.equals(transaction.getManuallyReversed())));
 
@@ -122,10 +86,9 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
                     .anyMatch(transaction -> transaction.getType().getCode().equals("loanTransactionType.interestRefund")
                             && Boolean.FALSE.equals(transaction.getManuallyReversed())));
 
-            loanTransactionHelper.reverseLoanTransaction(loanId.intValue(), payoutRefundResponse.getResourceId(), "01 July 2024",
-                    responseSpec);
+            reverseLoanTransaction(loanId, payoutRefundResponse.getResourceId(), "01 July 2024");
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().stream().anyMatch(
                     transaction -> transaction.getType().getPayoutRefund() && Boolean.TRUE.equals(transaction.getManuallyReversed())));
 
@@ -144,15 +107,13 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
             disburseLoan(loanId, BigDecimal.valueOf(1.99), "05 April 2025");
             disburseLoan(loanId, BigDecimal.valueOf(20.00), "05 April 2025");
 
-            final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse1 = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 April 2025").locale("en")
-                            .transactionAmount(6.29));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("06 April 2025").locale(LoanTestData.LOCALE).transactionAmount(6.29));
 
-            final PostLoansLoanIdTransactionsResponse merchantIssuedRefundResponse2 = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("07 April 2025").locale("en")
-                            .transactionAmount(1.99));
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("07 April 2025").locale(LoanTestData.LOCALE).transactionAmount(1.99));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertTrue(loanDetails.getTransactions().stream()
                     .filter(transaction -> transaction.getType().getCode().equals("loanTransactionType.interestRefund"))
                     .allMatch(transaction -> transaction.getAmount().doubleValue() > 0.0));
@@ -178,11 +139,10 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
 
         runAt("06 October 2025", () -> {
             executeInlineCOB(loanIdRef.get());
-            loanTransactionHelper.makeMerchantIssuedRefund(loanIdRef.get(), new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATETIME_PATTERN).transactionDate("06 October 2025").locale(LOCALE).transactionAmount(8.13));
+            makeMerchantIssuedRefund(loanIdRef.get(), new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("06 October 2025").locale(LoanTestData.LOCALE).transactionAmount(8.13));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
-            // Validate Loan is Overpaid
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanIdRef.get());
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             validateLoanSummaryBalances(loanDetails, 0.00, 117.12, 0.00, 116.89, 8.14);
@@ -190,28 +150,21 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
 
         runAt("07 October 2025", () -> {
             executeInlineCOB(loanIdRef.get());
-            loanTransactionHelper.makeCreditBalanceRefund(loanIdRef.get(), new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATETIME_PATTERN).transactionDate("07 October 2025").locale(LOCALE).transactionAmount(8.14));
+            makeCreditBalanceRefund(loanIdRef.get(), new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("07 October 2025").locale(LoanTestData.LOCALE).transactionAmount(8.14));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
-            // Validate Loan is Closed
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanIdRef.get());
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
             validateLoanSummaryBalances(loanDetails, 0.00, 117.12, 0.00, 116.89, null);
 
-            PostCreateRescheduleLoansResponse rescheduleLoansResponse = loanRescheduleRequestHelper//
-                    .createLoanRescheduleRequest(new PostCreateRescheduleLoansRequest()//
-                            .loanId(loanIdRef.get())//
-                            .rescheduleReasonId(1L)//
-                            .rescheduleFromDate("25 September 2025").dateFormat(DATETIME_PATTERN).locale(LOCALE)//
-                            .submittedOnDate("07 October 2025")//
-                            .newInterestRate(BigDecimal.valueOf(25.99)));//
+            Long scheduleId = createRescheduleRequest(new PostCreateRescheduleLoansRequest().loanId(loanIdRef.get()).rescheduleReasonId(1L)
+                    .rescheduleFromDate("25 September 2025").dateFormat(DATETIME_PATTERN).locale(LoanTestData.LOCALE)
+                    .submittedOnDate("07 October 2025").newInterestRate(BigDecimal.valueOf(25.99)));
 
-            loanRescheduleRequestHelper.approveLoanRescheduleRequest(rescheduleLoansResponse.getResourceId(), //
-                    new PostUpdateRescheduleLoansRequest()//
-                            .approvedOnDate("07 October 2025").locale(LOCALE).dateFormat(DATETIME_PATTERN));//
+            approveRescheduleRequest(scheduleId, new PostUpdateRescheduleLoansRequest().approvedOnDate("07 October 2025")
+                    .locale(LoanTestData.LOCALE).dateFormat(DATETIME_PATTERN));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
-            // Validate Loan is Overpaid
+            loanDetails = getLoanDetails(loanIdRef.get());
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             validateLoanSummaryBalances(loanDetails, 0.00, 117.06, 0.00, 116.89, 0.06);
@@ -234,12 +187,11 @@ public class LoanRefundTransactionTest extends BaseLoanIntegrationTest {
 
     private Long createLoanForRefundWithInterestRefund(Long clientId, String refundType, String date, double amount, double interestRate,
             int numRepayments) {
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(
+        final Long loanProductId = createLoanProduct(
                 create4IProgressive().supportedInterestRefundTypes(new ArrayList<>()).addSupportedInterestRefundTypesItem(refundType));
-        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
-                loanProductsResponse.getResourceId(), date, amount, interestRate, numRepayments, null));
-        Long loanId = postLoansResponse.getLoanId();
-        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(amount, date));
+        Long loanId = applyForLoan(
+                applyLP2ProgressiveLoanRequest(clientId, loanProductId, date, amount, interestRate, numRepayments, null));
+        approveLoan(loanId, approveLoanRequest(amount, date));
         return loanId;
     }
 }
