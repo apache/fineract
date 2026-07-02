@@ -131,10 +131,14 @@ public class StandingInstructionsHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId,
+    public List<HashMap> getStandingInstructionHistory(Integer fromAccountId, Integer fromAccountType, Integer fromClientId,
             Integer transferType) {
+        // The history endpoint filters by fromAccountId (see StandingInstructionHistoryApiResource); sending the
+        // unrecognised fromSavingsId param silently dropped the per-account filter, so the query returned every history
+        // row for the client (masking a duplicate/cross-instruction row whenever a client has more than one
+        // instruction).
         final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUN_HISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
-                + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId + "&transferType="
+                + "&fromAccountId=" + fromAccountId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId + "&transferType="
                 + transferType;
         log.info("STANDING_INSTRUCTIONS_HISTORY_URL= {}", STANDING_INSTRUCTIONS_HISTORY_URL);
         return Utils.performServerGet(this.requestSpec, this.responseSpec, STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");

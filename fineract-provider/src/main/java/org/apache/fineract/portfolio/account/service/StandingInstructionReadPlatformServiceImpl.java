@@ -338,7 +338,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
                 .append(" where atsi.status=? and " + businessDate + " >= atsi.valid_from and (atsi.valid_till IS NULL or " + businessDate
                         + " < atsi.valid_till) ")
                 .append(" and  (atsi.last_run_date <> " + businessDate + " or atsi.last_run_date IS NULL)")
-                .append(" ORDER BY atsi.priority DESC");
+                // priority enum is URGENT(1) .. LOW(4); ASC runs URGENT first (DESC previously ran LOW first).
+                .append(" ORDER BY atsi.priority ASC");
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.standingInstructionMapper, status);
     }
 

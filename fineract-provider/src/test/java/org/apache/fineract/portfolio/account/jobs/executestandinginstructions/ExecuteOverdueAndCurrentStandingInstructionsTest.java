@@ -49,14 +49,14 @@ public class ExecuteOverdueAndCurrentStandingInstructionsTest {
 
     @Test
     public void testAcceptPreviousDateAsDue() {
-        ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(null, null, null, null);
+        ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(null, null);
         boolean isDueForTransfer = tasklet.isDueForTransfer(new StandingInstructionDuesData(previousDate, BigDecimal.ONE));
         assertThat(isDueForTransfer).isTrue().describedAs("Earlier instructions are accepted as due");
     }
 
     @Test
     public void testAcceptCurrentDateAsDue() {
-        ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(null, null, null, null);
+        ExecuteStandingInstructionsTasklet tasklet = new ExecuteStandingInstructionsTasklet(null, null);
         boolean isDueForTransfer = tasklet.isDueForTransfer(new StandingInstructionDuesData(currentDate, BigDecimal.ONE));
         assertThat(isDueForTransfer).isTrue().describedAs("Current day instructions are accepted as due");
     }
