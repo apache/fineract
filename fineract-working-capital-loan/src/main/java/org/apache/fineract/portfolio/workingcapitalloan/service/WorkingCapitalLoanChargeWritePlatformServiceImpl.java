@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPreBusinessEvent;
@@ -87,6 +86,8 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
     private final WorkingCapitalLoanNoteRepository noteRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
+    private final WorkingCapitalLoanChargePaymentHandler chargePaymentHandler;
+    private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
 
     @Override
     public CommandProcessingResult createLoanCharge(Long loanId, JsonCommand command) {
@@ -153,8 +154,12 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 amount, wcCharge.isPenaltyCharge());
         allocationRepository.saveAndFlush(allocation);
 
-        applyChargeAmountPaid(wcCharge, amount);
-        applyBalanceAdjustment(loan, wcCharge, amount);
+        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
+                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
+        chargePaymentHandler.applyChargePayment(wcCharge, amount);
+        balanceUpdater.applyChargePayment(balance, wcCharge, amount);
+        loanChargeRepository.save(wcCharge);
+        balanceRepository.save(balance);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             accountingProcessor.postJournalEntries(loan, adjustmentTx, allocation, false);
@@ -226,26 +231,6 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         if (loan.getClient() != null && loan.getClient().isNotActive()) {
             throw new ClientNotActiveException(loan.getClient().getId());
         }
-    }
-
-    private void applyChargeAmountPaid(final WorkingCapitalLoanCharge wcCharge, final BigDecimal amount) {
-        final BigDecimal newPaid = MathUtil.nullToZero(wcCharge.getAmountPaid()).add(amount);
-        wcCharge.setAmountPaid(newPaid);
-        if (newPaid.compareTo(MathUtil.nullToZero(wcCharge.getAmount())) >= 0) {
-            wcCharge.setPaid(true);
-        }
-        loanChargeRepository.save(wcCharge);
-    }
-
-    private void applyBalanceAdjustment(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge wcCharge, final BigDecimal amount) {
-        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
-                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
-        if (wcCharge.isPenaltyCharge()) {
-            balance.setPenaltyPaid(MathUtil.nullToZero(balance.getPenaltyPaid()).add(amount));
-        } else {
-            balance.setFeePaid(MathUtil.nullToZero(balance.getFeePaid()).add(amount));
-        }
-        balanceRepository.save(balance);
     }
 
     private PaymentDetail createAndPersistPaymentDetailFromCommand(final JsonCommand command, final Map<String, Object> changes) {

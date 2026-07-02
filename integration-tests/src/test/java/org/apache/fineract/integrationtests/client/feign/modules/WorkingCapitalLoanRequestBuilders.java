@@ -19,17 +19,26 @@
 package org.apache.fineract.integrationtests.client.feign.modules;
 
 import java.math.BigDecimal;
+import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest.NearBreachFrequencyTypeEnum;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public final class WorkingCapitalLoanRequestBuilders {
 
     private static final String LOCALE = "en";
     private static final String DATE_FORMAT = "dd MMMM yyyy";
+
+    private static final Integer CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN = 5;
+    private static final Integer CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE = 2;
+    private static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
+    private static final String CHARGE_CURRENCY_CODE = "USD";
 
     private WorkingCapitalLoanRequestBuilders() {}
 
@@ -85,6 +94,23 @@ public final class WorkingCapitalLoanRequestBuilders {
 
     public static PostWorkingCapitalLoanTransactionsRequest repayment(BigDecimal amount, String transactionDate) {
         return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static ChargeRequest specifiedDueDateCharge(boolean penalty, double amount) {
+        return new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN)
+                .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE).chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)
+                .name(Utils.uniqueRandomStringGenerator("WCL_CHARGE_", 8)).amount(amount).active(true).currencyCode(CHARGE_CURRENCY_CODE)
+                .locale(LOCALE).penalty(penalty);
+    }
+
+    public static PostLoansLoanIdChargesRequest addCharge(Long chargeId, double amount, String dueDate) {
+        return new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(amount).dueDate(dueDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansLoanIdChargesChargeIdRequest chargeAdjustment(BigDecimal amount, String transactionDate) {
+        return new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest().amount(amount).transactionDate(transactionDate).locale(LOCALE)
                 .dateFormat(DATE_FORMAT);
     }
 }

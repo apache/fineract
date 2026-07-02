@@ -62,6 +62,8 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -119,6 +121,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
+    private final WorkingCapitalLoanAllocationRequestFactory allocationRequestFactory;
+    private final WorkingCapitalLoanAllocationApplier allocationApplier;
+    private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
 
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
@@ -737,20 +742,20 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
         final List<WorkingCapitalLoanCharge> charges = this.chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
 
-        // Allocate the amount across penalty/fee/principal following the loan's configured payment allocation order
-        // (principal-only when no order is configured). This updates the charge paid amounts and the loan balance.
-        final WorkingCapitalLoanPaymentAllocationProcessor.AllocationResult allocationResult = allocationProcessor.allocate(loan, balance,
-                charges, transactionDate, transactionAmount);
+        // Decide the allocation across penalty/fee/principal following the loan's configured payment allocation order
+        // (principal-only when no order is configured), then materialize it onto the charges and refresh the balance.
+        final WorkingCapitalLoanAllocationRequest allocationRequest = allocationRequestFactory.build(loan, balance, charges,
+                transactionDate, transactionAmount);
+        final WorkingCapitalLoanAllocationPlan allocationPlan = allocationProcessor.plan(allocationRequest);
+        final WorkingCapitalLoanTransactionAllocation allocation = allocationApplier.apply(transaction, null, allocationPlan, charges);
+        balanceUpdater.apply(balance, allocationPlan);
         this.chargeRepository.saveAll(charges);
         this.balanceRepository.saveAndFlush(balance);
-
-        final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation.forPortions(transaction,
-                allocationResult.principalPortion(), allocationResult.feeChargesPortion(), allocationResult.penaltyChargesPortion());
         this.allocationRepository.saveAndFlush(allocation);
 
         // Only the principal portion affects the amortization and delinquency/breach schedules; fee and penalty
         // portions settle charges.
-        final BigDecimal principalPortion = allocationResult.principalPortion();
+        final BigDecimal principalPortion = allocationPlan.principalPortion();
 
         // A backdated transaction can change how the other transactions allocate across charges, so it triggers
         // reprocessing. When the loan has charges, reprocessing rebuilds the amortization schedule from scratch, so
