@@ -62,6 +62,7 @@ public class WorkingCapitalLoanBreachResetServiceImpl implements WorkingCapitalL
 
         breachScheduleRepository.saveAllAndFlush(periods);
         breachResetHistoryRepository.saveAllAndFlush(resetHistory);
+        breachScheduleService.recalculatePastDueAmount(loan);
     }
 
     @Override

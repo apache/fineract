@@ -55,4 +55,5 @@ public class WorkingCapitalLoanBalanceData implements Serializable {
     private BigDecimal totalDisbursement;
     private BigDecimal totalDiscountFee;
     private BigDecimal totalDiscountFeeAdjustment;
+    private BigDecimal breachPastDueAmount;
 }
