@@ -315,3 +315,179 @@ Feature: Working Capital Loan Undo Transaction
     When Customer tries to undo "1"th "DISBURSEMENT" transaction made on "01 January 2026" on Working Capital loan and gets error:
       | httpCode | errorMessage                                            |
       | 400      | Undo is not supported for transaction type DISBURSEMENT |
+
+
+  @TestRailId:C85454
+  Scenario: Verify undo repayment after a credit balance refund does not resurrect the refunded overpayment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    # An active charge is required so the undo triggers the reprocessing replay
+    When Admin sets the business date to "05 January 2026"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "06 January 2026"
+    And Customer makes repayment on "06 January 2026" with 100 transaction amount on Working Capital loan
+    When Admin sets the business date to "07 January 2026"
+    And Customer makes repayment on "07 January 2026" with 9300 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 300.0 |
+    # Refund 100 of the 300 overpayment
+    When Admin sets the business date to "08 January 2026"
+    And Customer makes credit balance refund on "08 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 200.0 |
+    # Undo the fee-settling day-6 repayment. Replaying the remaining day-7 repayment yields fee 100 + principal
+    # 9000 + overpayment 200; the 100 already refunded must stay subtracted: overpayment = 100, not 200.
+    When Admin sets the business date to "09 January 2026"
+    And Customer undo "1"th "REPAYMENT" transaction made on "06 January 2026" on Working Capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 06 January 2026 | Repayment             | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+      | 07 January 2026 | Repayment             | 9300.0            | 9000.0           | 100.0             | 0.0                   | false    |
+      | 08 January 2026 | Credit Balance Refund | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value  |
+      | principalOutstanding | 0.0    |
+      | totalPaidPrincipal   | 9000.0 |
+      | overpaymentAmount    | 100.0  |
+
+  @TestRailId:C85455
+  Scenario: Verify undo of an early repayment on an overpaid charge-free loan realigns the remaining allocation
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 3000 transaction amount on Working Capital loan
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 6500 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value  |
+      | principalOutstanding | 0.0    |
+      | totalPaidPrincipal   | 9000.0 |
+      | overpaymentAmount    | 500.0  |
+    # Undo the day-5 repayment: the remaining day-10 repayment alone covers 6500 principal (no overpayment)
+    When Admin sets the business date to "12 January 2026"
+    And Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value  |
+      | principalOutstanding | 2500.0 |
+      | totalPaidPrincipal   | 6500.0 |
+      | overpaymentAmount    | 0.0    |
+    # The allocation row of the remaining repayment must match the corrected balance (6500, not 6000)
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Repayment    | 6500.0            | 6500.0           | 0.0               | 0.0                   | false    |
+    # The amortization schedule must record the corrected 6500 principal payment on day 10
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule has payments with the following details in first "11" lines:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
+      | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 0.0                        | 9000.00       | 0.00                     |
+      | 1         | 2026-01-02 | 50.00                 | 8950.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 2         | 2026-01-03 | 50.00                 | 8900.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 3         | 2026-01-04 | 50.00                 | 8850.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 4         | 2026-01-05 | 50.00                 | 8800.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 5         | 2026-01-06 | 50.00                 | 8750.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 6         | 2026-01-07 | 50.00                 | 8700.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 7         | 2026-01-08 | 50.00                 | 8650.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 8         | 2026-01-09 | 50.00                 | 8600.00         | 0.0                        | 0.0                 | 0.0                      | 0.0                        | 9000.00       | 0.00                     |
+      | 9         | 2026-01-10 | 50.00                 | 8550.00         | 0.0                        | 6500.0              | 0.0                      | 0.0                        | 2500.00       | 0.00                     |
+      | 10        | 2026-01-11 | 50.00                 | 8500.00         | 0.0                        |                     |                          | 0.0                        |               |                          |
+
+  @TestRailId:C85457
+  Scenario: Verify a new repayment on a closed working capital loan is accepted and moves the loan to overpaid
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 9000 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    # A repayment on a closed loan is accepted; the full amount becomes overpayment
+    When Admin sets the business date to "06 January 2026"
+    And Customer makes repayment on "06 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value  |
+      | principalOutstanding | 0.0    |
+      | totalPaidPrincipal   | 9000.0 |
+      | overpaymentAmount    | 100.0  |
+
+  @TestRailId:C85458
+  Scenario: Verify undo repayment posts a discount fee amortization adjustment on the next COB
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 3000 transaction amount on Working Capital loan
+    # COB recognizes part of the discount as income via an amortization transaction
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | false    |
+      | 02 January 2026 | Repayment                 | 3000.0            | false    |
+      | 02 January 2026 | Discount Fee Amortization | 498.67            | false    |
+    # Undo the repayment; the next COB re-evaluates and posts an amortization adjustment returning income to zero
+    When Customer undo "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan has transactions:
+      | transactionDate | type                                 | transactionAmount | reversed |
+      | 01 January 2026 | Disbursement                         | 9000.0            | false    |
+      | 01 January 2026 | Discount Fee                         | 1000.0            | false    |
+      | 02 January 2026 | Repayment                            | 3000.0            | true     |
+      | 02 January 2026 | Discount Fee Amortization            | 498.67            | false    |
+      | 03 January 2026 | Discount Fee Amortization Adjustment | 498.67            | false    |
+    And Working Capital loan balance payload contains the following fields:
+      | field          | value |
+      | realizedIncome | 0.0   |
+
+  @TestRailId:C85459
+  Scenario: Verify undoing the closing repayment re-opens the loan from closed to active
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "05 January 2026"
+    And Customer makes repayment on "05 January 2026" with 9000 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "06 January 2026"
+    And Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value  |
+      | principalOutstanding | 9000.0 |
+      | totalPaidPrincipal   | 0.0    |
+      | overpaymentAmount    | 0.0    |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
