@@ -55,7 +55,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private static final Comparator<WorkingCapitalLoanTransaction> TRANSACTION_ORDER = Comparator
             .comparing(WorkingCapitalLoanTransaction::getTransactionDate)
             .thenComparing(WorkingCapitalLoanTransaction::getSubmittedOnDate, Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(WorkingCapitalLoanTransaction::getId);
+            .thenComparing(WorkingCapitalLoanTransaction::getId, Comparator.nullsLast(Comparator.naturalOrder()));
 
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanChargeRepository chargeRepository;
@@ -126,7 +126,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
 
         // Re-allocate every non-reversed repayment-like transaction in chronological order.
         final List<WorkingCapitalLoanTransaction> replayable = allTransactions.stream()
-                .filter(txn -> !txn.isReversed() && isRepaymentLike(txn.getTypeOf())).sorted(TRANSACTION_ORDER).toList();
+                .filter(txn -> !txn.isReversed() && txn.isRepaymentLike()).sorted(TRANSACTION_ORDER).toList();
 
         // Pre-load the existing allocations in one query rather than per transaction. Looking them up via the
         // repository (instead of txn.getAllocation()) also avoids the lazy inverse side being stale for the
@@ -169,13 +169,9 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         amortizationScheduleWriteService.rebuildScheduleFromPrincipalPayments(loan, principalPayments);
     }
 
-    private boolean isRepaymentLike(final LoanTransactionType type) {
-        return type == LoanTransactionType.REPAYMENT || type == LoanTransactionType.GOODWILL_CREDIT;
-    }
-
     private boolean isOverpaidByReplayableTransactions(final List<WorkingCapitalLoanTransaction> allTransactions,
             final WorkingCapitalLoanBalance balance) {
-        final BigDecimal replayableTotal = allTransactions.stream().filter(txn -> !txn.isReversed() && isRepaymentLike(txn.getTypeOf()))
+        final BigDecimal replayableTotal = allTransactions.stream().filter(txn -> !txn.isReversed() && txn.isRepaymentLike())
                 .map(WorkingCapitalLoanTransaction::getTransactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         return replayableTotal.compareTo(balance.getPrincipal()) > 0;
     }

@@ -37,10 +37,14 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
 
     Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findTopByLoanIdOrderByPeriodNumberDesc(Long loanId);
 
-    List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateIsBeforeAndMinPaymentCriteriaMet(Long loanId,
-            LocalDate toDateBefore, Boolean minPaymentCriteriaMet);
-
-    List<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndToDateIsBefore(Long loanId, LocalDate toDateBefore);
+    @Query("""
+            SELECT s FROM WorkingCapitalLoanDelinquencyRangeSchedule s
+            WHERE s.loan.id = :loanId
+              AND s.toDate < :transactionDate
+              AND (s.minPaymentCriteriaMet IS NULL OR s.minPaymentCriteriaMet = FALSE)
+            ORDER BY s.periodNumber ASC""")
+    List<WorkingCapitalLoanDelinquencyRangeSchedule> findPastOpenPeriodsForRepayment(@Param("loanId") Long loanId,
+            @Param("transactionDate") LocalDate transactionDate);
 
     Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(Long loanId,
             LocalDate date, LocalDate date2);
