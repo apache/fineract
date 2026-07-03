@@ -41,11 +41,15 @@ import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterExc
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
+import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
+import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 import org.apache.fineract.portfolio.address.domain.Address;
 import org.apache.fineract.portfolio.address.domain.AddressRepository;
+import org.apache.fineract.portfolio.address.exception.AddressNotFoundException;
 import org.apache.fineract.portfolio.address.mapper.AddressMapperImpl;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientAddress;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.junit.jupiter.api.AfterEach;
@@ -64,6 +68,8 @@ class AddressDomainServiceImplTest {
 
     private static final long CLIENT_ID = 1L;
     private static final long ADDRESS_TYPE_ID = 2L;
+    private static final long ADDRESS_ID = 3L;
+    private static final long CLIENT_ADDRESS_ID = 4L;
 
     @Mock
     private Validator validator;
@@ -90,6 +96,7 @@ class AddressDomainServiceImplTest {
         when(client.getId()).thenReturn(CLIENT_ID);
         when(clientRepositoryWrapper.findOneWithNotFoundDetection(CLIENT_ID)).thenReturn(client);
         when(validator.validate(any(AddressCreateRequest.class))).thenReturn(Set.of());
+        when(validator.validate(any(AddressUpdateRequest.class))).thenReturn(Set.of());
     }
 
     @AfterEach
@@ -184,6 +191,91 @@ class AddressDomainServiceImplTest {
         assertThrows(ConstraintViolationException.class, () -> underTest.create(request().build()));
 
         verifyNoInteractions(fieldConfigurationReadPlatformService, clientRepositoryWrapper, addressRepository, clientAddressRepository);
+    }
+
+    @Test
+    void updateChangesTheSentFieldsAndKeepsTheOthers() {
+        givenFieldConfiguration(field("street", true, false, ""), field("city", true, false, ""));
+        final Address address = new Address();
+        address.setStreet("Rakoczi Street");
+        address.setCity("Budapest");
+        final ClientAddress clientAddress = givenClientAddress(address);
+
+        final AddressUpdateResponse response = underTest.update(updateRequest().street("Andrassy Avenue").isActive(false).build());
+
+        assertThat(address.getStreet()).isEqualTo("Andrassy Avenue");
+        assertThat(address.getCity()).isEqualTo("Budapest");
+        assertThat(address.getUpdatedOn()).isNotNull();
+        verify(clientAddress).setIs_active(false);
+        assertThat(response.getResourceId()).isEqualTo(CLIENT_ADDRESS_ID);
+        assertThat(response.getClientId()).isEqualTo(CLIENT_ID);
+    }
+
+    @Test
+    void updateDoesNotEnforceMandatoryFields() {
+        givenFieldConfiguration(field("postalCode", true, true, ""));
+        final Address address = new Address();
+        givenClientAddress(address);
+
+        underTest.update(updateRequest().city("Pune").build());
+
+        assertThat(address.getCity()).isEqualTo("Pune");
+    }
+
+    @Test
+    void updateRejectsValueNotMatchingTheConfiguredRegex() {
+        givenFieldConfiguration(field("postalCode", true, false, "^\\d{6}$"));
+        final Address address = new Address();
+        givenClientAddress(address);
+
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> underTest.update(updateRequest().postalCode("ABC").build()));
+
+        assertThat(exception.getErrors()).extracting(ApiParameterError::getParameterName).containsExactly("postalCode");
+        assertThat(address.getPostalCode()).isNull();
+    }
+
+    @Test
+    void updateRejectsFieldThatIsDisabled() {
+        givenFieldConfiguration(field("latitude", false, false, ""));
+        final Address address = new Address();
+        givenClientAddress(address);
+
+        final UnsupportedParameterException exception = assertThrows(UnsupportedParameterException.class,
+                () -> underTest.update(updateRequest().latitude(BigDecimal.ONE).build()));
+
+        assertThat(exception.getUnsupportedParameters()).containsExactly("latitude");
+        assertThat(address.getLatitude()).isNull();
+    }
+
+    @Test
+    void updateRejectsAddressThatDoesNotBelongToTheClient() {
+        givenFieldConfiguration();
+
+        assertThrows(AddressNotFoundException.class, () -> underTest.update(updateRequest().city("Pune").build()));
+    }
+
+    @Test
+    void updateRejectsConstraintViolationsBeforeTouchingTheDatabase() {
+        @SuppressWarnings("unchecked")
+        final ConstraintViolation<AddressUpdateRequest> violation = mock(ConstraintViolation.class);
+        when(validator.validate(any(AddressUpdateRequest.class))).thenReturn(Set.of(violation));
+
+        assertThrows(ConstraintViolationException.class, () -> underTest.update(updateRequest().build()));
+
+        verifyNoInteractions(fieldConfigurationReadPlatformService, addressRepository, clientAddressRepository);
+    }
+
+    private ClientAddress givenClientAddress(final Address address) {
+        final ClientAddress clientAddress = mock(ClientAddress.class);
+        when(clientAddress.getId()).thenReturn(CLIENT_ADDRESS_ID);
+        when(clientAddress.getAddress()).thenReturn(address);
+        when(clientAddressRepository.findByClientIdAndAddressId(CLIENT_ID, ADDRESS_ID)).thenReturn(clientAddress);
+        return clientAddress;
+    }
+
+    private static AddressUpdateRequest.AddressUpdateRequestBuilder updateRequest() {
+        return AddressUpdateRequest.builder().clientId(CLIENT_ID).addressId(ADDRESS_ID);
     }
 
     private static AddressCreateRequest.AddressCreateRequestBuilder request() {

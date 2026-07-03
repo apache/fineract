@@ -39,9 +39,12 @@ import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterExc
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
+import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
+import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 import org.apache.fineract.portfolio.address.domain.Address;
 import org.apache.fineract.portfolio.address.domain.AddressRepository;
+import org.apache.fineract.portfolio.address.exception.AddressNotFoundException;
 import org.apache.fineract.portfolio.address.mapper.AddressMapper;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
@@ -103,6 +106,34 @@ public class AddressDomainServiceImpl implements AddressDomainService {
         return AddressCreateResponse.builder().resourceId(clientAddress.getId()).clientId(client.getId()).build();
     }
 
+    @Override
+    @Transactional
+    public AddressUpdateResponse update(final AddressUpdateRequest request) {
+        validate(request);
+
+        final ClientAddress clientAddress = clientAddressRepository.findByClientIdAndAddressId(request.getClientId(),
+                request.getAddressId());
+        if (clientAddress == null) {
+            throw new AddressNotFoundException(request.getClientId());
+        }
+
+        final Address address = clientAddress.getAddress();
+        addressMapper.updateAddressFromRequest(request, address);
+        if (request.getStateProvinceId() != null) {
+            address.setStateProvince(codeValueRepository.getReferenceById(request.getStateProvinceId()));
+        }
+        if (request.getCountryId() != null) {
+            address.setCountry(codeValueRepository.getReferenceById(request.getCountryId()));
+        }
+        address.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+
+        if (request.getIsActive() != null) {
+            clientAddress.setIs_active(request.getIsActive());
+        }
+
+        return AddressUpdateResponse.builder().resourceId(clientAddress.getId()).clientId(request.getClientId()).build();
+    }
+
     // Both create paths (the REST endpoint and client creation) call this service directly or through the dispatcher,
     // so the request is validated here rather than on the REST resource.
     private void validate(final AddressCreateRequest request) {
@@ -110,13 +141,21 @@ public class AddressDomainServiceImpl implements AddressDomainService {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        validateAgainstFieldConfiguration(request);
+        validateAgainstFieldConfiguration(parameterValues(request), true);
+    }
+
+    private void validate(final AddressUpdateRequest request) {
+        final Set<ConstraintViolation<AddressUpdateRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+        // Like the legacy update validator: mandatory fields are not enforced, a field not sent keeps its value.
+        validateAgainstFieldConfiguration(parameterValues(request), false);
     }
 
     // Applies the tenant's ADDRESS field configuration (m_field_configuration): a disabled field must not be sent, a
-    // mandatory field must not be blank and a configured regex must match.
-    private void validateAgainstFieldConfiguration(final AddressCreateRequest request) {
-        final Map<String, Object> values = parameterValues(request);
+    // mandatory field must not be blank (when enforceMandatory is set) and a configured regex must match.
+    private void validateAgainstFieldConfiguration(final Map<String, Object> values, final boolean enforceMandatory) {
         final List<String> unsupportedParameters = new ArrayList<>();
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("Address");
@@ -126,7 +165,8 @@ public class AddressDomainServiceImpl implements AddressDomainService {
             final String parameter = ADDRESS_TYPE_FIELD.equals(fieldConfiguration.field()) ? AddressCreateRequest.Fields.addressTypeId
                     : fieldConfiguration.field();
             if (!values.containsKey(parameter)) {
-                // createdOn and updatedOn are set by the server and are not part of the request
+                // createdOn and updatedOn are set by the server and are not part of the request, and the address type
+                // cannot be changed on update
                 continue;
             }
             final Object value = values.get(parameter);
@@ -136,7 +176,7 @@ public class AddressDomainServiceImpl implements AddressDomainService {
                 }
                 continue;
             }
-            if (fieldConfiguration.isMandatory()) {
+            if (enforceMandatory && fieldConfiguration.isMandatory()) {
                 baseDataValidator.reset().parameter(parameter).value(value).notBlank();
             }
             if (StringUtils.isNotEmpty(fieldConfiguration.validationRegex())) {
@@ -171,6 +211,24 @@ public class AddressDomainServiceImpl implements AddressDomainService {
         values.put(AddressCreateRequest.Fields.isActive, request.getIsActive());
         values.put(AddressCreateRequest.Fields.createdBy, request.getCreatedBy());
         values.put(AddressCreateRequest.Fields.updatedBy, request.getUpdatedBy());
+        return values;
+    }
+
+    private static Map<String, Object> parameterValues(final AddressUpdateRequest request) {
+        final Map<String, Object> values = new HashMap<>();
+        values.put(AddressUpdateRequest.Fields.street, request.getStreet());
+        values.put(AddressUpdateRequest.Fields.addressLine1, request.getAddressLine1());
+        values.put(AddressUpdateRequest.Fields.addressLine2, request.getAddressLine2());
+        values.put(AddressUpdateRequest.Fields.addressLine3, request.getAddressLine3());
+        values.put(AddressUpdateRequest.Fields.townVillage, request.getTownVillage());
+        values.put(AddressUpdateRequest.Fields.city, request.getCity());
+        values.put(AddressUpdateRequest.Fields.countyDistrict, request.getCountyDistrict());
+        values.put(AddressUpdateRequest.Fields.stateProvinceId, request.getStateProvinceId());
+        values.put(AddressUpdateRequest.Fields.countryId, request.getCountryId());
+        values.put(AddressUpdateRequest.Fields.postalCode, request.getPostalCode());
+        values.put(AddressUpdateRequest.Fields.latitude, request.getLatitude());
+        values.put(AddressUpdateRequest.Fields.longitude, request.getLongitude());
+        values.put(AddressUpdateRequest.Fields.isActive, request.getIsActive());
         return values;
     }
 }

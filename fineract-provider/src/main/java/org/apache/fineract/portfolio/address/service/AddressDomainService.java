@@ -20,8 +20,12 @@ package org.apache.fineract.portfolio.address.service;
 
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
+import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
+import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
 
 public interface AddressDomainService {
 
     AddressCreateResponse create(AddressCreateRequest request);
+
+    AddressUpdateResponse update(AddressUpdateRequest request);
 }
