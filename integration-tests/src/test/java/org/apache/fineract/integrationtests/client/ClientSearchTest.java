@@ -224,7 +224,6 @@ public class ClientSearchTest extends IntegrationTest {
         clientHelper.createClient(request1);
 
         PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
-        // request2.setMobileNo(Utils.randomNumberGenerator(8).toString());
         request2.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         clientHelper.createClient(request2);
 
@@ -259,7 +258,6 @@ public class ClientSearchTest extends IntegrationTest {
     public void testClientSearchWorks_ByClientIdentifier() {
         // given
         PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
-        // request1.setMobileNo(Utils.randomNumberGenerator(8).toString());
         request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
