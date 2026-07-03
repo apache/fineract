@@ -65,7 +65,7 @@ public class ClientFamilyMembersApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        return this.readPlatformService.getClientFamilyMember(familyMemberId);
+        return this.readPlatformService.getClientFamilyMember(clientId, familyMemberId);
     }
 
     @GET

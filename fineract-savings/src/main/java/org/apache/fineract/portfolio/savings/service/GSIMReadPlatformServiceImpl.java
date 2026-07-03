@@ -42,6 +42,8 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimel
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
+import org.apache.fineract.portfolio.savings.exception.GSIMAccountNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -192,7 +194,11 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
+        try {
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
+        } catch (final EmptyResultDataAccessException e) {
+            throw new GSIMAccountNotFoundException(gsimId, e);
+        }
     }
 
     @Override

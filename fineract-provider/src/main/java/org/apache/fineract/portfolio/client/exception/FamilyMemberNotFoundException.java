@@ -16,17 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.client.exception;
 
-package org.apache.fineract.portfolio.client.service;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
-import java.util.List;
-import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
+/**
+ * A {@link RuntimeException} thrown when a client family member is not found.
+ */
+public class FamilyMemberNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-public interface ClientFamilyMembersReadPlatformService {
-
-    List<ClientFamilyMembersData> getClientFamilyMembers(long clientId);
-
-    ClientFamilyMembersData getClientFamilyMember(long clientId, long familyMemberId);
-
-    ClientFamilyMembersData retrieveTemplate();
+    public FamilyMemberNotFoundException(final Long familyMemberId, final Long clientId, final EmptyResultDataAccessException e) {
+        super("error.msg.family.member.id.invalid",
+                "Family member with identifier " + familyMemberId + " does not exist for client with identifier " + clientId,
+                familyMemberId, clientId, e);
+    }
 }
