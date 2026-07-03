@@ -171,8 +171,11 @@ public final class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopula
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint clientNameConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Client_\",$A1))");
+        // The account named range is built from the sanitised client display name (see setNames -> setSanitized). The
+        // formula must apply the SAME substitutions, including the apostrophe, or the dropdown fails to resolve for
+        // clients like "IRE'S LIMITED" (the Java sanitiser strips '\'' but this formula must too). See FINERACT-1256.
         DataValidationConstraint accountNumberConstraint = validationHelper.createFormulaListConstraint(
-                "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
+                "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\"),\"'\",\"_\")))");
         DataValidationConstraint repaymentDateConstraint = validationHelper.createDateConstraint(
                 DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($D1,$T$2:$X$" + (allloans.size() + 1) + ",4,FALSE)", "=TODAY()",
                 dateFormat);
