@@ -154,7 +154,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_WRITEOFF;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ACCOUNTINGRULE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ACCOUNTTRANSFER;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ADDRESS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ADHOC;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_ASSET_OWNER_TRANSACTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_BATCH_BUSINESS_STEP;
@@ -362,14 +361,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_CREDITBUREAU_CONFIGURATION;
         this.entityId = configurationId;
         this.href = "/updateCreditBureauConfigurationData/";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateClientAddress(final long clientId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_ADDRESS;
-        this.href = "/clients/" + clientId + "/addresses";
-        this.clientId = clientId;
         return this;
     }
 

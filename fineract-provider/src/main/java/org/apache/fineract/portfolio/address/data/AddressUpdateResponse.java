@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.address.service;
+package org.apache.fineract.portfolio.address.data;
 
-import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
-import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
-import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
-import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface AddressDomainService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AddressUpdateResponse implements Serializable {
 
-    AddressCreateResponse create(AddressCreateRequest request);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    AddressUpdateResponse update(AddressUpdateRequest request);
+    private Long resourceId;
+    private Long clientId;
 }

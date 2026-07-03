@@ -26,12 +26,16 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
 import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
+import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
+import org.apache.fineract.portfolio.address.data.AddressUpdateResponse;
 import org.apache.fineract.portfolio.address.domain.Address;
 import org.apache.fineract.portfolio.address.domain.AddressRepository;
+import org.apache.fineract.portfolio.address.exception.AddressNotFoundException;
 import org.apache.fineract.portfolio.address.mapper.AddressMapper;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepository;
+import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
@@ -48,6 +52,7 @@ public class AddressDomainServiceImpl implements AddressDomainService {
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final CodeValueRepository codeValueRepository;
     private final AddressMapper addressMapper;
+    private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
 
     @Override
     @Transactional
@@ -77,5 +82,33 @@ public class AddressDomainServiceImpl implements AddressDomainService {
         clientAddressRepository.saveAndFlush(clientAddress);
 
         return AddressCreateResponse.builder().resourceId(clientAddress.getId()).clientId(client.getId()).build();
+    }
+
+    @Override
+    @Transactional
+    public AddressUpdateResponse update(final AddressUpdateRequest request) {
+
+        final ClientAddress clientAddress = clientAddressRepositoryWrapper.findOneByClientIdAndAddressId(request.getClientId(),
+                request.getAddressId());
+        if (clientAddress == null) {
+            throw new AddressNotFoundException(request.getClientId());
+        }
+
+        final Address address = addressRepository.getReferenceById(request.getAddressId());
+        addressMapper.updateAddressFromRequest(request, address);
+
+        if (request.getStateProvinceId() != null) {
+            address.setStateProvince(codeValueRepository.getReferenceById(request.getStateProvinceId()));
+        }
+        if (request.getCountryId() != null) {
+            address.setCountry(codeValueRepository.getReferenceById(request.getCountryId()));
+        }
+        address.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+
+        if (request.getIsActive() != null) {
+            clientAddress.setIs_active(request.getIsActive());
+        }
+
+        return AddressUpdateResponse.builder().resourceId(clientAddress.getId()).clientId(request.getClientId()).build();
     }
 }

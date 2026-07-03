@@ -19,9 +19,13 @@
 package org.apache.fineract.portfolio.address.mapper;
 
 import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
+import org.apache.fineract.portfolio.address.data.AddressUpdateRequest;
 import org.apache.fineract.portfolio.address.domain.Address;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface AddressMapper {
@@ -36,4 +40,16 @@ public interface AddressMapper {
     @Mapping(target = "updatedOn", ignore = true)
     @Mapping(target = "street", ignore = true)
     Address toAddress(AddressCreateRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "clientaddress", ignore = true)
+    @Mapping(target = "stateProvince", ignore = true)
+    @Mapping(target = "country", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "updatedOn", ignore = true)
+    @Mapping(target = "street", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateAddressFromRequest(AddressUpdateRequest request, @MappingTarget Address address);
 }
