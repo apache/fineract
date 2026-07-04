@@ -170,8 +170,7 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | ASSET     | 112601       | Loans Receivable          | 270.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 270.0  |
 
-  #  TODO Check and update when "[BE] WC - Transaction Type- Repayment- Backdated and Undo Repayment" is done
-  @Skip @UndoRepaymentGLEntries2
+  @UndoRepaymentGLEntries2
   Scenario: Verify Working Capital loan UNDO repayment GL entries - UC2: reversal with fees
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -186,12 +185,14 @@ Feature: Working Capital Loan Repayment Accounting Entries
     When Customer undo "1"th "Repayment" transaction made on "10 January 2026" on Working Capital loan
     Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          |       | 270.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 50.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 320.0 |        |
       | ASSET     | 112601       | Loans Receivable          | 270.0 |        |
-      | ASSET     | 112603       | Fee Receivable            | 50.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   | 50.0  |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 320.0  |
 
-  #  TODO Check and update when "[BE] WC - Transaction Type- Repayment- Backdated and Undo Repayment" is done
-  @Skip @UndoRepaymentGLEntries3
+  @UndoRepaymentGLEntries3
   Scenario: Verify Working Capital loan UNDO repayment GL entries - UC3: reversal with penalties
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -206,8 +207,11 @@ Feature: Working Capital Loan Repayment Accounting Entries
     When Customer undo "1"th "Repayment" transaction made on "10 January 2026" on Working Capital loan
     Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
-      | ASSET     | 112601       | Loans Receivable          | 270.0 |        |
-      | ASSET     | 112603       | Fee Receivable            | 30.0  |        |
+      | ASSET     | 112601       | Loans Receivable          |       | 250.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 50.0   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
+      | ASSET     | 112601       | Loans Receivable          | 250.0 |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   | 50.0  |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 300.0  |
 
   @TestRailId:C85339

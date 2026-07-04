@@ -24,8 +24,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 
 /**
  * Reprocesses transaction allocations for a Working Capital loan after a backdated transaction changes the
- * chronological order. (Transaction reversal is the other intended trigger but is not wired yet — it arrives with the
- * generic undo work in PS-3209.)
+ * chronological order.
  *
  * <p>
  * Transactions themselves are never reversed or replayed — only the allocation split (principal/fee/penalty portions)
@@ -39,8 +38,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
  * stale, but only when a period boundary falls between the affected dates (the totals are unchanged).
  *
  * <p>
- * Allocation order only matters when payments compete for charge buckets. A loan without charges allocates every
- * repayment-like transaction to principal only, which is order-independent — reprocessing is a no-op in that case.
+ * Allocation order only matters when payments compete for charge buckets, or when the loan overpays (the chronological
+ * split then differs from booking-time order). A charge-free, non-overpaid loan is skipped as a no-op.
  */
 public interface WorkingCapitalLoanTransactionReprocessingService {
 
@@ -51,4 +50,10 @@ public interface WorkingCapitalLoanTransactionReprocessingService {
      * already fetched them).
      */
     void reprocessTransactions(WorkingCapitalLoan loan, List<WorkingCapitalLoanTransaction> allTransactions);
+
+    /**
+     * Reprocesses even when the loan has no charges, for the repayment-undo path where undoing a payment on a
+     * previously overpaid loan must fold the former overpayment back into principal.
+     */
+    void reprocessTransactionsForChargeFreeUndo(WorkingCapitalLoan loan);
 }

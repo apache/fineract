@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -1010,14 +1009,20 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         final List<WorkingCapitalLoanCharge> charges = this.chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
         if (charges.isEmpty()) {
-            amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
-                    transaction.getAllocation().getPrincipalPortion());
-            updateBalanceOnUndoRepayment(loan, transaction.getTransactionAmount());
+            // The simple total adjustment below is only correct when there is no overpayment to redistribute. If the
+            // loan was overpaid, a full re-allocation is needed so a former overpayment portion folds back into
+            // principal instead of leaving the allocations and schedule disagreeing with the balance.
+            final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
+            final boolean wasOverpaid = balance != null && MathUtil.isGreaterThanZero(balance.getOverpaymentAmount());
+            if (wasOverpaid) {
+                transactionReprocessingService.reprocessTransactionsForChargeFreeUndo(loan);
+            } else {
+                amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
+                        transaction.getAllocation().getPrincipalPortion());
+                updateBalanceOnUndoRepayment(loan, transaction.getTransactionAmount());
+            }
         } else {
-            final List<WorkingCapitalLoanTransaction> transactionsToReprocess = transactionRepository
-                    .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId()).stream()
-                    .filter(tr -> Objects.equals(tr.getId(), transaction.getId())).toList();
-            transactionReprocessingService.reprocessTransactions(loan, transactionsToReprocess);
+            transactionReprocessingService.reprocessTransactions(loan);
         }
 
         breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(),

@@ -142,12 +142,12 @@ public class FeignWorkingCapitalLoanTransactionReprocessingTest extends FeignInt
             assertEqualBigDecimal(BigDecimal.valueOf(3000), afterBackdated.getBalance().getOverpaymentAmount(),
                     "Overpayment should be 3000 (5000 + 7000 - 9000 principal)");
 
-            // Without charges, allocations are not redistributed: the day-10 repayment keeps its original
-            // 7000 principal allocation, and the backdated day-5 repayment allocates against the 2000 that
-            // was outstanding when it was booked (its excess 3000 is overpayment, not part of the allocation).
+            // Overpaying the loan triggers a chronological redistribution: the backdated day-5 repayment is now the
+            // earliest, so it allocates first against the full 9000 outstanding (5000 to principal), leaving 4000 for
+            // the day-10 repayment; the remaining 3000 of the day-10 repayment becomes overpayment.
             List<GetWorkingCapitalLoanTransactionIdResponse> transactions = wcLoanHelper.getTransactions(loanId);
-            assertAllocation(findTransaction(transactions, LocalDate.of(2026, 1, 5), BigDecimal.valueOf(5000)), BigDecimal.valueOf(2000));
-            assertAllocation(findTransaction(transactions, LocalDate.of(2026, 1, 10), BigDecimal.valueOf(7000)), BigDecimal.valueOf(7000));
+            assertAllocation(findTransaction(transactions, LocalDate.of(2026, 1, 5), BigDecimal.valueOf(5000)), BigDecimal.valueOf(5000));
+            assertAllocation(findTransaction(transactions, LocalDate.of(2026, 1, 10), BigDecimal.valueOf(7000)), BigDecimal.valueOf(4000));
         });
     }
 
@@ -186,6 +186,53 @@ public class FeignWorkingCapitalLoanTransactionReprocessingTest extends FeignInt
                     "Outstanding should be 3000 after 6000 total repaid");
             assertEqualBigDecimal(BigDecimal.valueOf(6000), afterThird.getBalance().getPrincipalPaid(),
                     "Principal paid should be 6000 (1000 + 2000 + 3000)");
+        });
+    }
+
+    @Test
+    void testUndoRepayment_onOverpaidChargeFreeLoan_reallocatesRemainingRepayment() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            Long clientForTest = clientHelper.createClient("01 January 2026");
+            Long loanId = createAndDisburseLoanOnDate(clientForTest, BigDecimal.valueOf(9000), "01 January 2026");
+
+            // Repayment on day 5 (3000) leaves 6000 outstanding.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-05");
+            final Long day5TxnId = wcLoanHelper.makeRepayment(loanId,
+                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(3000), "05 January 2026"));
+
+            // Repayment on day 10 (6500) overpays: total repaid 9500 on a 9000 loan, so the day-10 repayment stores
+            // 6000 principal + 500 overpayment.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-10");
+            wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(6500), "10 January 2026"));
+
+            GetWorkingCapitalLoansLoanIdResponse afterOverpay = wcLoanHelper.getLoanDetails(loanId);
+            assertEqualBigDecimal(BigDecimal.valueOf(9000), afterOverpay.getBalance().getPrincipalPaid(),
+                    "Principal paid should be capped at 9000 after the overpaying day-10 repayment");
+            assertEqualBigDecimal(BigDecimal.valueOf(500), afterOverpay.getBalance().getOverpaymentAmount(),
+                    "Overpayment should be 500 (9500 - 9000)");
+
+            // Undo the day-5 repayment. Total remaining repaid is now 6500 on a 9000 loan → no overpayment, and the
+            // remaining day-10 repayment must re-allocate its full 6500 to principal (its former 500 overpayment folds
+            // back into principal).
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-15");
+            wcLoanHelper.undoTransaction(loanId, day5TxnId, WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            GetWorkingCapitalLoansLoanIdResponse afterUndo = wcLoanHelper.getLoanDetails(loanId);
+            assertNotNull(afterUndo.getBalance(), "Balance should exist after undo");
+            assertEqualBigDecimal(BigDecimal.valueOf(6500), afterUndo.getBalance().getPrincipalPaid(),
+                    "Principal paid should be 6500 after undoing the day-5 repayment");
+            assertEqualBigDecimal(BigDecimal.ZERO, afterUndo.getBalance().getOverpaymentAmount(),
+                    "Overpayment should be 0 — the remaining 6500 is under the 9000 principal");
+            assertEqualBigDecimal(BigDecimal.valueOf(2500), afterUndo.getBalance().getPrincipalOutstanding(),
+                    "Principal outstanding should be 2500 (9000 - 6500)");
+            assertEquals(Boolean.TRUE, afterUndo.getStatus().getActive(), "Loan must be active after the undo");
+
+            // The remaining day-10 repayment must re-allocate its full 6500 to principal (was 6000 + 500 overpayment).
+            List<GetWorkingCapitalLoanTransactionIdResponse> transactions = wcLoanHelper.getTransactions(loanId);
+            GetWorkingCapitalLoanTransactionIdResponse day10 = findTransaction(transactions, LocalDate.of(2026, 1, 10),
+                    BigDecimal.valueOf(6500));
+            assertEqualBigDecimal(BigDecimal.valueOf(6500), day10.getPrincipalPortion(),
+                    "The remaining day-10 repayment must re-allocate its full 6500 to principal after the undo");
         });
     }
 

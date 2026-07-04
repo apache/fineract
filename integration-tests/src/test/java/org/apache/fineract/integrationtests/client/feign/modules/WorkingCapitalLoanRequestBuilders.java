@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.client.feign.modules;
 
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
@@ -95,6 +96,10 @@ public final class WorkingCapitalLoanRequestBuilders {
     public static PostWorkingCapitalLoanTransactionsRequest repayment(BigDecimal amount, String transactionDate) {
         return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate).locale(LOCALE)
                 .dateFormat(DATE_FORMAT);
+    }
+
+    public static ExecuteWorkingCapitalLoanTransactionCommandRequest undoTransaction() {
+        return new ExecuteWorkingCapitalLoanTransactionCommandRequest();
     }
 
     public static ChargeRequest specifiedDueDateCharge(boolean penalty, double amount) {
