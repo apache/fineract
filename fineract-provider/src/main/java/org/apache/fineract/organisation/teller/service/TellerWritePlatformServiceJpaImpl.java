@@ -183,7 +183,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleTellerDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        if (realCause.getMessage().contains("m_tellers_name_unq")) {
+        if (realCause.getMessage().contains("m_tellers_office_name_unq")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.teller.duplicate.name", "Teller with name `" + name + "` already exists",
                     "name", name);
