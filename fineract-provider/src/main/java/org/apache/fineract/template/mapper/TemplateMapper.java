@@ -23,10 +23,13 @@ import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.template.data.TemplateData;
 import org.apache.fineract.template.domain.Template;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = MapstructMapperConfig.class, uses = { TemplateMapperMapper.class })
 public interface TemplateMapper {
 
+    @Mapping(target = "entity", expression = "java(source.getEntity() == null ? null : source.getEntity().getName())")
+    @Mapping(target = "type", expression = "java(source.getType() == null ? null : source.getType().getName())")
     TemplateData map(Template source);
 
     List<TemplateData> map(List<Template> source);

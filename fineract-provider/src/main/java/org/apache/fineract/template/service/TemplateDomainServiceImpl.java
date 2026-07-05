@@ -55,7 +55,7 @@ public class TemplateDomainServiceImpl implements TemplateDomainService {
 
     @Override
     public List<TemplateData> getAll() {
-        return templateRepository.findAll().stream().map(template -> TemplateData.builder().id(template.getId()).build()).toList();
+        return templateMapper.map(templateRepository.findAll());
     }
 
     @Override
@@ -127,7 +127,6 @@ public class TemplateDomainServiceImpl implements TemplateDomainService {
 
     @Override
     public List<TemplateData> getAllByEntityAndType(final TemplateEntity entity, final TemplateType type) {
-        return templateRepository.findByEntityAndType(entity, type).stream()
-                .map(template -> TemplateData.builder().id(template.getId()).build()).toList();
+        return templateMapper.map(templateRepository.findByEntityAndType(entity, type));
     }
 }
