@@ -22,9 +22,10 @@ import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import org.apache.fineract.client.feign.services.ClientFamilyMemberApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ClientFamilyMemberRequest;
+import org.apache.fineract.client.models.FamilyMemberCreateRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -57,7 +58,7 @@ public class ClientFamilyMemberTest extends FeignIntegrationTest {
                 new PostCodeValuesDataRequest().name(Utils.randomStringGenerator("Relative_", 4)).position(1).isActive(true)))
                 .getSubResourceId();
         Long familyMemberId = ok(() -> familyMemberApi.createClientFamilyMember(ownerClientId,
-                new ClientFamilyMemberRequest().firstName("Ada").lastName("Lovelace").relationshipId(relationshipId))).getResourceId();
+                new FamilyMemberCreateRequest().firstName("Ada").lastName("Lovelace").relationshipId(relationshipId))).getResourceId();
 
         // sanity: reachable through the owning client
         assertEquals(familyMemberId, ok(() -> familyMemberApi.retrieveOneClientFamilyMember(familyMemberId, ownerClientId)).getId());
@@ -65,6 +66,35 @@ public class ClientFamilyMemberTest extends FeignIntegrationTest {
         CallFailedRuntimeException e = fail(() -> familyMemberApi.retrieveOneClientFamilyMember(familyMemberId, otherClientId));
 
         assertEquals(404, e.getStatus());
+    }
+
+    @Test
+    public void createFamilyMemberAcceptsFormattedDateOfBirth() {
+        Long clientId = createClient();
+        Long relationshipId = ok(() -> fineractClient().codeValues().createCodeValueByCodeName("RELATIONSHIP",
+                new PostCodeValuesDataRequest().name(Utils.randomStringGenerator("Relative_", 4)).position(1).isActive(true)))
+                .getSubResourceId();
+
+        Long familyMemberId = ok(() -> familyMemberApi.createClientFamilyMember(clientId, new FamilyMemberCreateRequest().firstName("Grace")
+                .lastName("Hopper").relationshipId(relationshipId).dateOfBirth("01 January 2000").dateFormat("dd MMMM yyyy").locale("en")))
+                .getResourceId();
+
+        assertEquals(LocalDate.of(2000, 1, 1),
+                ok(() -> familyMemberApi.retrieveOneClientFamilyMember(familyMemberId, clientId)).getDateOfBirth());
+    }
+
+    @Test
+    public void createFamilyMemberRejectsBlankFirstName() {
+        Long clientId = createClient();
+        Long relationshipId = ok(() -> fineractClient().codeValues().createCodeValueByCodeName("RELATIONSHIP",
+                new PostCodeValuesDataRequest().name(Utils.randomStringGenerator("Relative_", 4)).position(1).isActive(true)))
+                .getSubResourceId();
+
+        CallFailedRuntimeException e = fail(() -> familyMemberApi.createClientFamilyMember(clientId,
+                new FamilyMemberCreateRequest().firstName(" ").lastName("Hopper").relationshipId(relationshipId)));
+
+        assertEquals(400, e.getStatus());
+        assertTrue(e.getMessage().contains("firstName"));
     }
 
     private Long createClient() {
