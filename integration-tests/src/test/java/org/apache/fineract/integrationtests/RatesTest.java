@@ -18,49 +18,41 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.math.BigDecimal;
+import java.util.List;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.RateData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.rates.RatesHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "rawtypes" })
 public class RatesTest {
-
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void testRatesForLoans() {
 
         // Retrieving all Rates
-        ArrayList<HashMap> allRatesData = RatesHelper.getRates(this.requestSpec, this.responseSpec);
+        List<RateData> allRatesData = RatesHelper.getRates();
         Assertions.assertNotNull(allRatesData);
 
         // Testing Creation and Update of Loan Rate
-        final Integer loanRateId = RatesHelper.createRates(this.requestSpec, this.responseSpec, RatesHelper.getLoanRateJSON());
+        final CommandProcessingResult createResponse = RatesHelper.createRates(RatesHelper.getLoanRateRequest());
+        final Long loanRateId = createResponse.getResourceId();
         Assertions.assertNotNull(loanRateId);
 
         // Update Rate percentage
-        HashMap changes = RatesHelper.updateRates(this.requestSpec, this.responseSpec, loanRateId, RatesHelper.getModifyRateJSON());
+        final CommandProcessingResult changes = RatesHelper.updateRates(loanRateId, RatesHelper.getModifyRateRequest());
 
-        HashMap rateDataAfterChanges = RatesHelper.getRateById(this.requestSpec, this.responseSpec, loanRateId);
-        Assertions.assertEquals(rateDataAfterChanges.get("percentage"), changes.get("percentage"), "Verifying Rate after modification");
+        final RateData rateDataAfterChanges = RatesHelper.getRateById(loanRateId);
+        final BigDecimal changedPercentage = new BigDecimal(changes.getChanges().get("percentage").toString());
+        Assertions.assertEquals(0, rateDataAfterChanges.getPercentage().compareTo(changedPercentage), "Verifying Rate after modification");
 
     }
 
