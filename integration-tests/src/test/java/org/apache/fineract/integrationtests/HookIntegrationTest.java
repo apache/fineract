@@ -21,12 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.apache.fineract.integrationtests.common.HookHelper;
@@ -41,19 +36,11 @@ import org.slf4j.LoggerFactory;
 public class HookIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-
-    private HookHelper hookHelper;
     private OfficeHelper officeHelper;
 
     @BeforeEach
     public void setUp() throws Exception {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.hookHelper = new HookHelper(this.requestSpec, this.responseSpec);
         this.officeHelper = new OfficeHelper();
     }
 
@@ -63,7 +50,7 @@ public class HookIntegrationTest {
         // See http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
         final String uniqueId = UUID.randomUUID().toString();
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "/";
-        final Integer hookId = this.hookHelper.createHook(payloadURL);
+        final Long hookId = HookHelper.createHook(payloadURL).getResourceId();
         Assertions.assertNotNull(hookId);
         final Integer createdOfficeID = this.officeHelper.createOffice(java.time.LocalDate.of(2012, 1, 1)).getResourceId().intValue();
         Assertions.assertNotNull(createdOfficeID);
@@ -87,7 +74,7 @@ public class HookIntegrationTest {
         } catch (final Exception e) {
             fail("Failed to connect to https://echo-webhook.herokuapp.com platform");
         } finally {
-            this.hookHelper.deleteHook(hookId.longValue());
+            HookHelper.deleteHook(hookId);
         }
     }
 
@@ -96,15 +83,15 @@ public class HookIntegrationTest {
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn/";
         final String updateURL = "http://localhost";
 
-        Long hookId = this.hookHelper.createHook(payloadURL).longValue();
+        Long hookId = HookHelper.createHook(payloadURL).getResourceId();
         Assertions.assertNotNull(hookId);
-        this.hookHelper.verifyHookCreatedOnServer(hookId);
+        HookHelper.verifyHookCreatedOnServer(hookId);
         LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}", hookId);
-        this.hookHelper.updateHook(updateURL, hookId);
-        this.hookHelper.verifyUpdateHook(updateURL, hookId);
+        HookHelper.updateHook(updateURL, hookId);
+        HookHelper.verifyUpdateHook(updateURL, hookId);
         LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}", hookId);
-        this.hookHelper.deleteHook(hookId);
-        this.hookHelper.verifyDeleteHook(hookId);
+        HookHelper.deleteHook(hookId);
+        HookHelper.verifyDeleteHook(hookId);
         LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}", hookId);
     }
 }
