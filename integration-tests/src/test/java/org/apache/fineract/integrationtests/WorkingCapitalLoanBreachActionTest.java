@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -105,7 +106,7 @@ public class WorkingCapitalLoanBreachActionTest {
     @Test
     public void testPauseCreatesBreachActionWithNoEffectiveEndDate() {
         BusinessDateHelper.runAt("01 July 2026", () -> {
-            final Long loanId = createActiveLoan(LocalDate.of(2026, 7, 1));
+            final Long loanId = createActiveLoan(LocalDate.of(2026, Month.JULY, 1));
 
             breachActionHelper.pause(loanId, "2026-07-01", "2026-07-10");
 
@@ -115,8 +116,8 @@ public class WorkingCapitalLoanBreachActionTest {
             final WorkingCapitalLoanBreachActionData pause = actions.getFirst();
             assertNotNull(pause.getAction());
             assertEquals(WorkingCapitalLoanBreachActionData.ActionEnum.PAUSE, pause.getAction());
-            assertEquals(LocalDate.of(2026, 7, 1), pause.getStartDate());
-            assertEquals(LocalDate.of(2026, 7, 10), pause.getEndDate());
+            assertEquals(LocalDate.of(2026, Month.JULY, 1), pause.getStartDate());
+            assertEquals(LocalDate.of(2026, Month.JULY, 10), pause.getEndDate());
             assertNull(pause.getEffectiveEndDate(), "effectiveEndDate must be null when the pause has not been resumed");
         });
     }
@@ -125,7 +126,7 @@ public class WorkingCapitalLoanBreachActionTest {
     public void testResumeCreatesResumeActionAndSetsEffectiveEndDateOnPause() {
         final Long[] loanIdHolder = new Long[1];
         BusinessDateHelper.runAt("01 July 2026", () -> {
-            loanIdHolder[0] = createActiveLoan(LocalDate.of(2026, 7, 1));
+            loanIdHolder[0] = createActiveLoan(LocalDate.of(2026, Month.JULY, 1));
 
             breachActionHelper.pause(loanIdHolder[0], "2026-07-01", "2026-07-10");
         });
@@ -141,20 +142,20 @@ public class WorkingCapitalLoanBreachActionTest {
             final WorkingCapitalLoanBreachActionData resume = actions.stream()
                     .filter(a -> WorkingCapitalLoanBreachActionData.ActionEnum.RESUME == a.getAction()).findFirst().orElseThrow();
 
-            assertEquals(LocalDate.of(2026, 7, 5), resume.getStartDate());
+            assertEquals(LocalDate.of(2026, Month.JULY, 5), resume.getStartDate());
             assertNull(resume.getEffectiveEndDate(), "RESUME rows should never have an effectiveEndDate");
 
             assertNotNull(pause.getEffectiveEndDate(), "effectiveEndDate must be set on the pause after a resume");
-            assertEquals(LocalDate.of(2026, 7, 5), pause.getEffectiveEndDate());
+            assertEquals(LocalDate.of(2026, Month.JULY, 5), pause.getEffectiveEndDate());
 
-            assertEquals(LocalDate.of(2026, 7, 10), pause.getEndDate());
+            assertEquals(LocalDate.of(2026, Month.JULY, 10), pause.getEndDate());
         });
     }
 
     @Test
     public void testPauseWithoutResumeHasNullEffectiveEndDate() {
         BusinessDateHelper.runAt("01 July 2026", () -> {
-            final Long loanId = createActiveLoan(LocalDate.of(2026, 7, 1));
+            final Long loanId = createActiveLoan(LocalDate.of(2026, Month.JULY, 1));
 
             breachActionHelper.pause(loanId, "2026-07-01", "2026-07-15");
 
@@ -168,7 +169,7 @@ public class WorkingCapitalLoanBreachActionTest {
     public void testResumeOutsidePauseWindowDoesNotSetEffectiveEndDate() {
         final Long[] loanIdHolder = new Long[1];
         BusinessDateHelper.runAt("01 July 2026", () -> {
-            loanIdHolder[0] = createActiveLoan(LocalDate.of(2026, 7, 1));
+            loanIdHolder[0] = createActiveLoan(LocalDate.of(2026, Month.JULY, 1));
 
             breachActionHelper.pause(loanIdHolder[0], "2026-07-01", "2026-07-10");
         });
@@ -192,7 +193,7 @@ public class WorkingCapitalLoanBreachActionTest {
     public void testMultiplePausesEachGetCorrectEffectiveEndDate() {
         final Long[] loanIdHolder = new Long[1];
         BusinessDateHelper.runAt("01 July 2026", () -> {
-            loanIdHolder[0] = createActiveLoan(LocalDate.of(2026, 7, 1));
+            loanIdHolder[0] = createActiveLoan(LocalDate.of(2026, Month.JULY, 1));
 
             breachActionHelper.pause(loanIdHolder[0], "2026-07-01", "2026-07-10");
             breachActionHelper.pause(loanIdHolder[0], "2026-07-15", "2026-07-25");
@@ -205,14 +206,14 @@ public class WorkingCapitalLoanBreachActionTest {
 
             final WorkingCapitalLoanBreachActionData firstPause = actions.stream()
                     .filter(a -> WorkingCapitalLoanBreachActionData.ActionEnum.PAUSE == a.getAction()
-                            && LocalDate.of(2026, 7, 1).equals(a.getStartDate()))
+                            && LocalDate.of(2026, Month.JULY, 1).equals(a.getStartDate()))
                     .findFirst().orElseThrow();
             final WorkingCapitalLoanBreachActionData secondPause = actions.stream()
                     .filter(a -> WorkingCapitalLoanBreachActionData.ActionEnum.PAUSE == a.getAction()
-                            && LocalDate.of(2026, 7, 15).equals(a.getStartDate()))
+                            && LocalDate.of(2026, Month.JULY, 15).equals(a.getStartDate()))
                     .findFirst().orElseThrow();
 
-            assertEquals(LocalDate.of(2026, 7, 5), firstPause.getEffectiveEndDate(),
+            assertEquals(LocalDate.of(2026, Month.JULY, 5), firstPause.getEffectiveEndDate(),
                     "first pause effectiveEndDate should match the resume date");
             assertNull(secondPause.getEffectiveEndDate(), "second pause was not resumed and must have no effectiveEndDate");
         });

@@ -36,6 +36,7 @@ public class WorkingCapitalLoanDelinquencyActionData {
     private DelinquencyAction action;
     private LocalDate startDate;
     private LocalDate endDate;
+    private LocalDate effectiveEndDate;
     private BigDecimal minimumPayment;
     private DelinquencyMinimumPaymentType minimumPaymentType;
     private Integer frequency;
