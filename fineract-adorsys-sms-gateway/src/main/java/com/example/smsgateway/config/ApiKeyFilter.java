@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 public class ApiKeyFilter extends OncePerRequestFilter {
 
-    private static final String API_KEY_HEADER = "X-KYC-Api-Key";
+    private static final String API_KEY_HEADER = "X-SMS-Gateway-Api-Key";
 
     @Value("${sms.gateway.api-key:}")
     private String expectedApiKey;
