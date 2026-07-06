@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import com.google.gson.Gson;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import java.security.SecureRandom;
-import java.util.HashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.WorkingDaysData;
+import org.apache.fineract.client.models.WorkingDaysUpdateRequest;
+import org.apache.fineract.client.models.WorkingDaysUpdateResponse;
 
 public final class WorkingDaysHelper {
 
@@ -33,108 +33,43 @@ public final class WorkingDaysHelper {
 
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
-    private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
     private static final SecureRandom random = new SecureRandom();
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
+    public static WorkingDaysUpdateResponse updateWorkingDays() {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingDays().updateWorkingDay(getUpdateWorkingDaysRequest()));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDayWithWrongRecur(),
-                jsonAttributeToGetback);
+    public static CallFailedRuntimeException updateWorkingDaysWithWrongRecurrence() {
+        return fail(() -> FineractFeignClientHelper.getFineractFeignClient().workingDays()
+                .updateWorkingDay(getUpdateWorkingDaysWithWrongRecurrenceRequest()));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Object updateWorkingDaysWeekDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingWeekDaysDaysAsJson(), "");
+    public static WorkingDaysUpdateResponse updateWorkingDaysWeekDays() {
+        return ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().workingDays().updateWorkingDay(getUpdateWorkingWeekDaysRequest()));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    public static String updateWorkingWeekDaysDaysAsJson() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR");
-        map.put("locale", "en");
-        map.put("repaymentRescheduleType", 2);
-        map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+    public static WorkingDaysUpdateRequest getUpdateWorkingWeekDaysRequest() {
+        return new WorkingDaysUpdateRequest().recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR").repaymentRescheduleType(2)
+                .extendTermForDailyRepayments(false);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    public static String updateWorkingDaysAsJson() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
-        map.put("locale", "en");
-        map.put("repaymentRescheduleType", random.nextInt(4) + 1);
-        map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+    public static WorkingDaysUpdateRequest getUpdateWorkingDaysRequest() {
+        return new WorkingDaysUpdateRequest().recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU")
+                .repaymentRescheduleType(random.nextInt(4) + 1).extendTermForDailyRepayments(false);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    public static String updateWorkingDayWithWrongRecur() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH");
-        map.put("locale", "en");
-        map.put("repaymentRescheduleType", random.nextInt(4) + 1);
-        map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+    public static WorkingDaysUpdateRequest getUpdateWorkingDaysWithWrongRecurrenceRequest() {
+        return new WorkingDaysUpdateRequest().recurrence("FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH")
+                .repaymentRescheduleType(random.nextInt(4) + 1).extendTermForDailyRepayments(false);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static int workingDaysId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        HashMap<String, Object> workingDays = getAllWorkingDays(requestSpec, responseSpec);
-        return (int) workingDays.get("id");
+    public static int workingDaysId() {
+        return Math.toIntExact(getAllWorkingDays().getId());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-
-        return Utils.performServerGet(requestSpec, responseSpec, WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER, "");
-
+    public static WorkingDaysData getAllWorkingDays() {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingDays().retrieveAllWorkingDays());
     }
 
 }

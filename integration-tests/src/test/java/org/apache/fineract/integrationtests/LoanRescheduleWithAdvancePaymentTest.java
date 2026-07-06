@@ -149,11 +149,11 @@ public class LoanRescheduleWithAdvancePaymentTest extends BaseLoanIntegrationTes
     public void testRescheduleAfterLatePayment() {
         this.enableConfig();
         this.enablePrincipalCompoundingConfig();
-        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDaysWeekDays();
         // create all required entities
         this.createRequiredEntitiesWithLatePayment();
         this.createApproveLoanRescheduleRequestAfterLatePayment();
-        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDays();
         this.disablePrincipalCompoundingConfig();
         this.disableConfig();
     }
@@ -275,11 +275,11 @@ public class LoanRescheduleWithAdvancePaymentTest extends BaseLoanIntegrationTes
     public void testMultipleAdvancePaymentWithReschedule() {
         this.enableConfig();
         this.enablePrincipalCompoundingConfig();
-        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDaysWeekDays();
         // create all required entities
         this.createRequiredEntitiesForTestMultipleAdvancePaymentWithReschedule();
         this.doMultipleAdvancePaymentsAndVerifySchedule();
-        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDays();
         this.disablePrincipalCompoundingConfig();
         this.disableConfig();
     }
