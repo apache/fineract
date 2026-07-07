@@ -107,6 +107,23 @@ public class WorkingCapitalBreachDisableStepDef extends AbstractStepDef {
         log.info("Verified breach disable denied for user without CREATE_WC_BREACH_DISABLE permission on loan {}", loanId);
     }
 
+    @Then("Created user with no READ_WC_BREACH_DISABLE permission gets an error when retrieving Working Capital loan breach disable actions")
+    public void retrieveBreachDisableActionsWithoutPermissionResultsAnError() {
+        final Long loanId = extractLoanId();
+
+        final String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        final String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        final FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
+
+        final CallFailedRuntimeException exception = fail(
+                () -> userClient.workingCapitalLoanBreachDisable().retrieveBreachDisableActions(loanId));
+
+        assertThat(exception.getStatus()).as("HTTP status code should be 403").isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).as("Should contain authorization error message")
+                .contains("User has no authority to READ wc_breach_disables");
+        log.info("Verified breach disable retrieval denied for user without READ_WC_BREACH_DISABLE permission on loan {}", loanId);
+    }
+
     @Then("Working Capital loan breach disable action has the following data:")
     public void verifyBreachDisableActions(final DataTable dataTable) {
         final Long loanId = extractLoanId();

@@ -240,24 +240,23 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         executeBreachAction(workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansBreachActionRequest("undo_reset"));
     }
 
-    @Then("Admin fails to create WC breach reset action with error containing {string}")
-    public void failToCreateBreachResetAction(final String expectedMessage) {
+    @Then("Admin fails to create WC breach reset action with the following data:")
+    public void failToCreateBreachResetActionWithTable(final DataTable table) {
         final Long loanId = extractLoanId();
         final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
                 .defaultWorkingCapitalLoansBreachActionRequest("reset");
         final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
-        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
-        assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
+        verifyBreachActionErrorWithTable(exception, table);
+    }
+
+    @Then("Admin fails to create WC breach reset action with error containing {string}")
+    public void failToCreateBreachResetAction(final String expectedMessage) {
+        failToCreateBreachActionByType("reset", expectedMessage);
     }
 
     @Then("Admin fails to create WC breach undo reset action with error containing {string}")
     public void failToCreateBreachUndoResetAction(final String expectedMessage) {
-        final Long loanId = extractLoanId();
-        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
-                .defaultWorkingCapitalLoansBreachActionRequest("undo_reset");
-        final CallFailedRuntimeException exception = fail(() -> createBreachAction(loanId, request));
-        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
-        assertThat(exception.getDeveloperMessage()).as("Developer message").contains(expectedMessage);
+        failToCreateBreachActionByType("undo_reset", expectedMessage);
     }
 
     @Then("Admin fails to create WC breach {string} action with error containing {string}")
@@ -281,13 +280,7 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
     }
 
     private void executeRescheduleAction(final PostWorkingCapitalLoansBreachActionRequest request) {
-        final Long loanId = extractLoanId();
-        log.debug("Creating breach RESCHEDULE action for WC loan {}: {}", loanId, request);
-
-        final PostWorkingCapitalLoansBreachActionResponse result = ok(() -> createBreachAction(loanId, request));
-        assertThat(result).isNotNull();
-        assertThat(result.getResourceId()).isNotNull();
-        log.info("Breach RESCHEDULE action created with id={}", result.getResourceId());
+        executeBreachAction(request);
     }
 
     private PostWorkingCapitalLoansBreachActionResponse createBreachAction(final Long loanId,
