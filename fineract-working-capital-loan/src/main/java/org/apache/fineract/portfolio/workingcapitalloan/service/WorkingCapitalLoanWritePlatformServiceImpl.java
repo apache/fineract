@@ -851,7 +851,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     loan.setMaturedOnDate(transactionDate);
                 }
             } else if (principalOutstanding.compareTo(BigDecimal.ZERO) == 0) {
-                this.stateMachine.transition(WorkingCapitalLoanEvent.LOAN_REPAID_IN_FULL, loan);
+                if (!loan.getLoanStatus().isClosedObligationsMet()) {
+                    this.stateMachine.transition(WorkingCapitalLoanEvent.LOAN_REPAID_IN_FULL, loan);
+                }
                 if (loan.getMaturedOnDate() == null) {
                     loan.setMaturedOnDate(transactionDate);
                 }
