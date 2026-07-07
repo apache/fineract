@@ -144,7 +144,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             // Build the request from the live (running) balance/charges so the decision is made against the
             // remaining outstanding after the previously replayed transactions; the balance is then refreshed onto it.
             final WorkingCapitalLoanAllocationRequest request = allocationRequestFactory.build(loan, balance, charges,
-                    txn.getTransactionDate(), txn.getTransactionAmount());
+                    txn.getTransactionDate(), txn.getTransactionAmount(), txn.getTypeOf());
             final WorkingCapitalLoanAllocationPlan plan = allocationProcessor.plan(request);
             updatedAllocations.add(allocationApplier.apply(txn, allocationsByTxnId.get(txn.getId()), plan, chargesById));
             balanceUpdater.apply(balance, plan);

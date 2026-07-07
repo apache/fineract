@@ -744,7 +744,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // Decide the allocation across penalty/fee/principal following the loan's configured payment allocation order
         // (principal-only when no order is configured), then materialize it onto the charges and refresh the balance.
         final WorkingCapitalLoanAllocationRequest allocationRequest = allocationRequestFactory.build(loan, balance, charges,
-                transactionDate, transactionAmount);
+                transactionDate, transactionAmount, transactionType);
         final WorkingCapitalLoanAllocationPlan allocationPlan = allocationProcessor.plan(allocationRequest);
         final WorkingCapitalLoanTransactionAllocation allocation = allocationApplier.apply(transaction, null, allocationPlan, charges);
         balanceUpdater.apply(balance, allocationPlan);

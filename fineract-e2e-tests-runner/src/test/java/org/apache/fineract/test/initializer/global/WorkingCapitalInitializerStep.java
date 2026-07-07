@@ -228,6 +228,27 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                 .paymentChannelToFundSourceMappings(
                                         List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
                                                 .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
+                                                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)))))),
+                () -> TestContext.INSTANCE.set(
+                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_GOODWILL_CREDIT_ALLOCATION,
+                        createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                .defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                                .name(DefaultWorkingCapitalLoanProduct.WCLP_GOODWILL_CREDIT_ALLOCATION.getName())
+                                .allowAttributeOverrides(allowAttributeOverrides)
+                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                                .paymentAllocation(List.of(
+                                        createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(),
+                                                List.of(DUE_FEE, DUE_PENALTY, DUE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY,
+                                                        IN_ADVANCE_PRINCIPAL)),
+                                        createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.REPAYMENT.getValue(),
+                                                List.of(DUE_FEE, DUE_PENALTY, DUE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY,
+                                                        IN_ADVANCE_PRINCIPAL)),
+                                        createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.GOODWILL_CREDIT.getValue(),
+                                                List.of(DUE_PRINCIPAL, DUE_FEE, DUE_PENALTY, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_FEE,
+                                                        IN_ADVANCE_PENALTY))))
+                                .paymentChannelToFundSourceMappings(
+                                        List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
+                                                .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
                                                 .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)))))));
         ParallelExecutionHelper.runInParallel(items);
     }
