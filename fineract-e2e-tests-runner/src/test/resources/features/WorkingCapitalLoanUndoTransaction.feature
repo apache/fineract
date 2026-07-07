@@ -491,3 +491,31 @@ Feature: Working Capital Loan Undo Transaction
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+
+  @TestRailId:C85487
+  Scenario: Verify undo of an earlier repayment recomputes the principal split of a later overpaying repayment
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin creates WC Delinquency Bucket with frequency 30 DAYS and minimumPayment 25 PERCENTAGE
+    When Admin creates a new Working Capital Loan Product with delinquency bucket
+    When Admin creates a working capital loan with the following data:
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 8000               | 1                 | 0.0      |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+    When Admin runs inline COB job for Working Capital Loan
+    When Admin sets the business date to "30 January 2026"
+    And Customer makes repayment on "30 January 2026" with 700 transaction amount on Working Capital loan
+    When Admin sets the business date to "28 February 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "28 February 2026" with 200 transaction amount on Working Capital loan
+    Then WC loan delinquency range schedule periods have specific data:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 200            | 700        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 200            | 100        | 100               |                       |
+    When Customer undo "1"th working capital transaction made on "30 January 2026"
+    Then WC loan delinquency range schedule periods have specific data:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 200            | 200        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 200            | 0          | 200               |                       |
+    Then Admin closes the Working Capital loan with a full repayment on "28 February 2026"

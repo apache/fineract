@@ -295,13 +295,18 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
             case "endDate" ->
                 verifyOptionalField(expected, v -> assertThat(actual.getEndDate()).as("endDate").isEqualTo(LocalDate.parse(v, DATE_FORMAT)),
                         () -> assertThat(actual.getEndDate()).as("endDate").isNull());
-            case "minimumPayment" ->
-                assertThat(actual.getMinimumPayment()).as("minimumPayment").isEqualByComparingTo(new BigDecimal(expected));
+            case "minimumPayment" -> verifyOptionalField(expected,
+                    v -> assertThat(actual.getMinimumPayment()).as("minimumPayment").isEqualByComparingTo(new BigDecimal(v)),
+                    () -> assertThat(actual.getMinimumPayment()).as("minimumPayment").isNull());
             case "minimumPaymentType" ->
                 verifyOptionalField(expected, v -> assertThat(actual.getMinimumPaymentType().name()).as("minimumPaymentType").isEqualTo(v),
                         () -> assertThat(actual.getMinimumPaymentType()).as("minimumPaymentType").isNull());
-            case "frequency" -> assertThat(actual.getFrequency()).as("frequency").isEqualTo(Integer.parseInt(expected));
-            case "frequencyType" -> assertThat(actual.getFrequencyType().name()).as("frequencyType").isEqualTo(expected);
+            case "frequency" ->
+                verifyOptionalField(expected, v -> assertThat(actual.getFrequency()).as("frequency").isEqualTo(Integer.parseInt(v)),
+                        () -> assertThat(actual.getFrequency()).as("frequency").isNull());
+            case "frequencyType" ->
+                verifyOptionalField(expected, v -> assertThat(actual.getFrequencyType().name()).as("frequencyType").isEqualTo(v),
+                        () -> assertThat(actual.getFrequencyType()).as("frequencyType").isNull());
             default -> throw new IllegalArgumentException("Unknown action field: " + field);
         }
     }
