@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.integrationtests.client.feign.tests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.assertEqualBigDecimal;
+import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.findCharge;
+import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.findTransaction;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,6 +43,7 @@ import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.Wor
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegrationTest {
@@ -69,6 +72,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
     }
 
     @Test
+    @DisplayName("A single repayment splits across penalty, fee and principal in the product's configured allocation order")
     void testRepaymentSplitsAcrossPenaltyFeeAndPrincipalInConfiguredOrder() {
         businessDateHelper.runAt("2026-01-01", () -> {
             Long client = clientHelper.createClient("01 January 2026");
@@ -109,6 +113,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
     }
 
     @Test
+    @DisplayName("A backdated repayment triggers reprocessing that redistributes the later repayment's charge allocation onto principal")
     void testBackdatedRepaymentReprocessingRedistributesChargeAllocation() {
         businessDateHelper.runAt("2026-01-01", () -> {
             Long client = clientHelper.createClient("01 January 2026");
@@ -157,6 +162,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
     }
 
     @Test
+    @DisplayName("A charge adjustment partially settles the charge and refreshes the fee balance bucket without touching principal")
     void testChargeAdjustmentPartiallySettlesChargeAndRefreshesBalanceBucket() {
         businessDateHelper.runAt("2026-01-01", () -> {
             Long client = clientHelper.createClient("01 January 2026");
@@ -215,22 +221,5 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
                 .getResourceId();
         createdProductIds.add(productId);
         return productId;
-    }
-
-    private static GetWorkingCapitalLoanTransactionIdResponse findTransaction(List<GetWorkingCapitalLoanTransactionIdResponse> transactions,
-            LocalDate transactionDate, BigDecimal amount) {
-        return transactions.stream().filter(txn -> transactionDate.equals(txn.getTransactionDate()))
-                .filter(txn -> txn.getTransactionAmount() != null && amount.compareTo(txn.getTransactionAmount()) == 0).findFirst()
-                .orElseThrow(() -> new AssertionError("Transaction not found on " + transactionDate + " with amount " + amount));
-    }
-
-    private static WorkingCapitalLoanChargeData findCharge(List<WorkingCapitalLoanChargeData> charges, Long loanChargeId) {
-        return charges.stream().filter(charge -> loanChargeId.equals(charge.getId())).findFirst()
-                .orElseThrow(() -> new AssertionError("Loan charge not found with id " + loanChargeId));
-    }
-
-    private static void assertEqualBigDecimal(BigDecimal expected, BigDecimal actual, String message) {
-        assertNotNull(actual, message + " — value was null");
-        assertEquals(0, expected.compareTo(actual), message + " — expected: " + expected + " but was: " + actual);
     }
 }

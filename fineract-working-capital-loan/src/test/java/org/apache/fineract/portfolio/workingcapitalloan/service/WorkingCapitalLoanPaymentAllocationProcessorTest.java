@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanA
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest.ChargeBalance;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class WorkingCapitalLoanPaymentAllocationProcessorTest {
@@ -38,6 +40,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     private final WorkingCapitalLoanPaymentAllocationProcessor processor = new WorkingCapitalLoanPaymentAllocationProcessor();
 
     @Test
+    @DisplayName("With no charges and principal-only allocation, the payment settles principal and the excess becomes overpayment")
     void principalOnlyFallbackAllocatesToPrincipalAndLeavesOverpayment() {
         final WorkingCapitalLoanAllocationRequest request = new WorkingCapitalLoanAllocationRequest(TXN_DATE, amount("120"),
                 List.of(WorkingCapitalPaymentAllocationType.DUE_PRINCIPAL), amount("100"), List.of());
@@ -52,6 +55,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     }
 
     @Test
+    @DisplayName("A fee-then-principal order first settles the due fee in full, then applies the remainder to principal")
     void feeThenPrincipalSplitsAmountAcrossChargeAndPrincipal() {
         final ChargeBalance fee = new ChargeBalance(10L, amount("30"), TXN_DATE, false);
         final WorkingCapitalLoanAllocationRequest request = new WorkingCapitalLoanAllocationRequest(TXN_DATE, amount("100"),
@@ -67,11 +71,12 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
         assertEquals(1, plan.chargeAllocations().size());
         final ChargeAllocation allocation = plan.chargeAllocations().get(0);
         assertEquals(10L, allocation.chargeId());
-        assertEquals(false, allocation.penalty());
+        assertFalse(allocation.penalty(), "ChargeAllocation for a fee charge must not be flagged as penalty");
         assertAmount("30", allocation.amount());
     }
 
     @Test
+    @DisplayName("A penalty-then-fee-then-principal order settles penalty, then fee, then principal in that sequence")
     void penaltyThenFeeThenPrincipalFollowsConfiguredOrder() {
         final ChargeBalance penalty = new ChargeBalance(1L, amount("15"), TXN_DATE, true);
         final ChargeBalance fee = new ChargeBalance(2L, amount("25"), TXN_DATE, false);
@@ -90,6 +95,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     }
 
     @Test
+    @DisplayName("The DUE_FEE bucket settles only charges already due and skips charges dated in the future")
     void dueBucketSkipsInAdvanceCharges() {
         final ChargeBalance dueFee = new ChargeBalance(1L, amount("20"), TXN_DATE.minusDays(1), false);
         final ChargeBalance inAdvanceFee = new ChargeBalance(2L, amount("20"), TXN_DATE.plusDays(5), false);
@@ -106,6 +112,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     }
 
     @Test
+    @DisplayName("The IN_ADVANCE_FEE bucket settles only charges dated in the future and skips already-due charges")
     void inAdvanceBucketMatchesOnlyFutureCharges() {
         final ChargeBalance dueFee = new ChargeBalance(1L, amount("20"), TXN_DATE.minusDays(1), false);
         final ChargeBalance inAdvanceFee = new ChargeBalance(2L, amount("20"), TXN_DATE.plusDays(5), false);
@@ -122,6 +129,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     }
 
     @Test
+    @DisplayName("A charge with a null due date is treated as due and settled by the DUE_FEE bucket")
     void chargeWithNullDueDateIsTreatedAsDue() {
         final ChargeBalance fee = new ChargeBalance(1L, amount("20"), null, false);
         final WorkingCapitalLoanAllocationRequest request = new WorkingCapitalLoanAllocationRequest(TXN_DATE, amount("20"),
@@ -134,6 +142,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     }
 
     @Test
+    @DisplayName("Within a bucket the oldest charge is settled first, then the remainder partially settles the next")
     void oldestChargeFirstWithinBucket() {
         final ChargeBalance older = new ChargeBalance(1L, amount("30"), TXN_DATE.minusDays(10), false);
         final ChargeBalance newer = new ChargeBalance(2L, amount("30"), TXN_DATE.minusDays(1), false);
@@ -152,6 +161,7 @@ class WorkingCapitalLoanPaymentAllocationProcessorTest {
     }
 
     @Test
+    @DisplayName("When fee and principal are both fully settled, the leftover payment becomes overpayment")
     void leftoverBecomesOverpaymentWhenEverythingIsSettled() {
         final ChargeBalance fee = new ChargeBalance(1L, amount("20"), TXN_DATE, false);
         final WorkingCapitalLoanAllocationRequest request = new WorkingCapitalLoanAllocationRequest(TXN_DATE, amount("100"),

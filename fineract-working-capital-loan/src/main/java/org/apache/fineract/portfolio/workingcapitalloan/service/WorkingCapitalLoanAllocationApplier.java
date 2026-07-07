@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan.ChargeAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Component;
  * persist, does not refresh the balance buckets ({@link WorkingCapitalLoanBalanceUpdater} does, driven by the
  * orchestrator), and does not touch the amortization schedule; those stay with the orchestrator.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WorkingCapitalLoanAllocationApplier {
@@ -51,10 +53,19 @@ public class WorkingCapitalLoanAllocationApplier {
             final List<WorkingCapitalLoanCharge> charges) {
         final Map<Long, WorkingCapitalLoanCharge> chargesById = charges.stream()
                 .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));
+        return apply(transaction, existingAllocation, plan, chargesById);
+    }
+
+    public WorkingCapitalLoanTransactionAllocation apply(final WorkingCapitalLoanTransaction transaction,
+            final WorkingCapitalLoanTransactionAllocation existingAllocation, final WorkingCapitalLoanAllocationPlan plan,
+            final Map<Long, WorkingCapitalLoanCharge> chargesById) {
         for (final ChargeAllocation chargeAllocation : plan.chargeAllocations()) {
             final WorkingCapitalLoanCharge charge = chargesById.get(chargeAllocation.chargeId());
             if (charge != null) {
                 chargePaymentHandler.applyChargePayment(charge, chargeAllocation.amount());
+            } else {
+                log.warn("WC loan allocation plan references chargeId {} not found in provided charges; skipping",
+                        chargeAllocation.chargeId());
             }
         }
 
