@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.journalentry.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
@@ -44,12 +46,15 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.junit.jupiter.api.AfterEach;
@@ -107,6 +112,10 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     private GLAccount penaltiesReceivableGLAccount;
     @Mock
     private GLAccount incomeFromRecoveryGLAccount;
+    @Mock
+    private GLAccount incomeFromFeesGLAccount;
+    @Mock
+    private GLAccount incomeFromPenaltiesGLAccount;
 
     @BeforeEach
     void setUp() {
@@ -141,6 +150,19 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 eq(CashAccountsForLoan.PENALTIES_RECEIVABLE.getValue()), any())).thenReturn(penaltiesReceivableGLAccount);
         lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
                 eq(CashAccountsForLoan.INCOME_FROM_RECOVERY.getValue()), any())).thenReturn(incomeFromRecoveryGLAccount);
+        lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
+                eq(CashAccountsForLoan.INCOME_FROM_FEES.getValue()), any())).thenReturn(incomeFromFeesGLAccount);
+        lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
+                eq(CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue()), any())).thenReturn(incomeFromPenaltiesGLAccount);
+    }
+
+    private void mockChargeAdjustmentRelation(final boolean penaltyCharge) {
+        final WorkingCapitalLoanCharge charge = org.mockito.Mockito.mock(WorkingCapitalLoanCharge.class);
+        lenient().when(charge.isPenaltyCharge()).thenReturn(penaltyCharge);
+        final WorkingCapitalLoanTransactionRelation relation = org.mockito.Mockito.mock(WorkingCapitalLoanTransactionRelation.class);
+        lenient().when(relation.getToCharge()).thenReturn(charge);
+        lenient().when(relation.getRelationType()).thenReturn(LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT);
+        lenient().when(txn.getLoanTransactionRelations()).thenReturn(Set.of(relation));
     }
 
     @AfterEach
@@ -334,5 +356,90 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
 
         verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(paymentChannelFundSource),
                 eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("1000")), eq(paymentDetail));
+    }
+
+    @Test
+    void testChargeAdjustmentOnFeeChargeDebitsFeeIncomeAndCreditsFeeReceivable() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("40"));
+        mockChargeAdjustmentRelation(false);
+        when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("40"));
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromFeesGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(feesReceivableGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+    }
+
+    @Test
+    void testChargeAdjustmentOnPenaltyChargeDebitsPenaltyIncomeAndCreditsPenaltyReceivable() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("25"));
+        mockChargeAdjustmentRelation(true);
+        when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getPenaltyChargesPortion()).thenReturn(new BigDecimal("25"));
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromPenaltiesGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("25")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(penaltiesReceivableGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("25")), isNull());
+    }
+
+    @Test
+    void testChargeAdjustmentSpillingOntoPrincipalDebitsFullAmountAgainstChargesOwnIncomeAccount() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("60"));
+        mockChargeAdjustmentRelation(false);
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("40"));
+        when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("20"));
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        // Debit is the FULL transaction amount against the adjusted charge's own income account, regardless of
+        // where the credit side ends up.
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromFeesGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("60")), isNull());
+        // Credit is split by where the allocation actually landed.
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(feesReceivableGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("20")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(loanPortfolioGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+    }
+
+    @Test
+    void testChargedOffChargeAdjustmentDebitsRecoveryInsteadOfFeeIncome() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("40"));
+        mockChargeAdjustmentRelation(false);
+        when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("40"));
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+
+        processor.postJournalEntries(loan, txn, allocation, true);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromRecoveryGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(feesReceivableGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+    }
+
+    @Test
+    void testChargeAdjustmentWithoutChargeLinkFailsFast() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("40"));
+        when(txn.getLoanTransactionRelations()).thenReturn(Set.of());
+        when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("40"));
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+
+        assertThrows(IllegalStateException.class, () -> processor.postJournalEntries(loan, txn, allocation, false));
     }
 }

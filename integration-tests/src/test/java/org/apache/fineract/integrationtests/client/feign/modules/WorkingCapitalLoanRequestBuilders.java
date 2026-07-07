@@ -98,6 +98,11 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .dateFormat(DATE_FORMAT);
     }
 
+    public static PostWorkingCapitalLoanTransactionsRequest goodwillCredit(BigDecimal amount, String transactionDate) {
+        return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
     public static ExecuteWorkingCapitalLoanTransactionCommandRequest undoTransaction() {
         return new ExecuteWorkingCapitalLoanTransactionCommandRequest();
     }
