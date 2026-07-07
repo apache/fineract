@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
@@ -68,7 +69,10 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
             template.setDelinquentPrincipal(delinquentAmount);
         }
 
-        template.setRangeLevelDelinquency(list);
+        delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loanId)
+                .map(WorkingCapitalLoanDelinquencyRangeSchedule::getDelinquentDays).ifPresent(template::setPastDueDays);
+
+        template.setInstallmentLevelDelinquency(list);
 
         return template;
     }

@@ -105,7 +105,8 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
                 .currency(getCharge().toData().getCurrency()).amount(amount).amountPaid(amountPaid)
                 .amountOutstanding(getAmountOutstanding()).chargeTimeType(chargeTimeTypeData).submittedOnDate(submittedOnDate)
                 .dueDate(dueDate).chargeCalculationType(chargeCalculationTypeData).penalty(penaltyCharge)
-                .chargePaymentMode(chargePaymentModeData).paid(paid).loanId(loan.getId()).externalId(externalId).build();
+                .chargePaymentMode(chargePaymentModeData).paid(paid).loanId(loan.getId()).externalId(externalId)
+                .externalLoanId(loan.getExternalId()).build();
     }
 
     public BigDecimal getAmountOutstanding() {

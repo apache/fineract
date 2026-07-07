@@ -54,26 +54,35 @@ public class WorkingCapitalLoanData implements Serializable {
     private String accountNo;
     private ExternalId externalId;
     private ClientData client;
-    private Long officeId;
-    private String officeName;
+    private Long clientId;
+    private String clientAccountNo;
+    private String clientName;
+    private ExternalId clientExternalId;
+    private Long clientOfficeId;
     private Long fundId;
     private String fundName;
     private WorkingCapitalLoanProductData product;
+    private Long loanProductId;
+    private String loanProductName;
+    private String loanProductDescription;
     private LoanStatusEnumData status;
-    private LocalDate submittedOnDate;
-    private LocalDate approvedOnDate;
-    private LocalDate rejectedOnDate;
     private BigDecimal proposedPrincipal;
     private BigDecimal approvedPrincipal;
+    private BigDecimal principal;
+    private BigDecimal netDisbursalAmount;
+    private StringEnumOptionData amortizationType;
+    private Integer npvDayCount;
+    private Integer loanProductCounter;
+    private List<WorkingCapitalLoanChargeData> charges;
 
     private CurrencyData currency;
-    private BigDecimal periodPaymentRate;
+    private BigDecimal paymentRate;
     private Integer repaymentEvery;
     private StringEnumOptionData repaymentFrequencyType;
-    private BigDecimal discount;
-    private BigDecimal discountProposed;
-    private BigDecimal discountApproved;
-    private Integer totalNoPayments;
+    private BigDecimal discountFee;
+    private BigDecimal proposedDiscountFee;
+    private BigDecimal approvedDiscountFee;
+    private Integer numberOfRepayments;
     private BigDecimal periodPaymentAmount;
     private BigDecimal dailyEir;
     private BigDecimal calculatedAnnualEir;
@@ -91,8 +100,10 @@ public class WorkingCapitalLoanData implements Serializable {
     private BigDecimal totalPaymentVolume;
     private LocalDate delinquencyStartDate;
     private LocalDate breachStartDate;
-
-    private WorkingCapitalLoanCollectionData collectionData;
+    private WorkingCapitalLoanCollectionData delinquent;
+    private Boolean enableInstallmentLevelDelinquency;
     private WorkingCapitalLoanSummaryData summary;
     private List<LoanOriginatorData> originators;
+    private Boolean fraud;
+    private Boolean chargedOff;
 }
