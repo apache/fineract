@@ -21,11 +21,16 @@ package org.apache.fineract.portfolio.savings.domain;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.deleteParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closeDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.dateFormatParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.localeParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.startDateParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,11 +49,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
@@ -69,6 +76,14 @@ public class FixedDepositProduct extends SavingsProduct {
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
     private DepositProductTermAndPreClosure productTermAndPreClosure;
 
+    @Getter
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Getter
+    @Column(name = "close_date")
+    private LocalDate closeDate;
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "m_deposit_product_interest_rate_chart", joinColumns = @JoinColumn(name = "deposit_product_id"), inverseJoinColumns = @JoinColumn(name = "interest_rate_chart_id", unique = true))
     protected Set<InterestRateChart> charts;
@@ -87,7 +102,7 @@ public class FixedDepositProduct extends SavingsProduct {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
             final SavingsPeriodFrequencyType lockinPeriodFrequencyType, final AccountingRuleType accountingRuleType,
             final Set<Charge> charges, final DepositProductTermAndPreClosure productTermAndPreClosure, final Set<InterestRateChart> charts,
-            BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroup taxGroup) {
+            BigDecimal minBalanceForInterestCalculation, boolean withHoldTax, TaxGroup taxGroup, LocalDate startDate, LocalDate closeDate) {
 
         final BigDecimal minRequiredOpeningBalance = null;
         final boolean withdrawalFeeApplicableForTransfer = false;
@@ -97,7 +112,8 @@ public class FixedDepositProduct extends SavingsProduct {
         return new FixedDepositProduct(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
-                productTermAndPreClosure, charts, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation, withHoldTax, taxGroup);
+                productTermAndPreClosure, charts, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation, withHoldTax, taxGroup,
+                startDate, closeDate);
     }
 
     protected FixedDepositProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
@@ -108,7 +124,7 @@ public class FixedDepositProduct extends SavingsProduct {
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
             final DepositProductTermAndPreClosure productTermAndPreClosure, final Set<InterestRateChart> charts,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final BigDecimal minBalanceForInterestCalculation,
-            boolean withHoldTax, TaxGroup taxGroup) {
+            boolean withHoldTax, TaxGroup taxGroup, LocalDate startDate, LocalDate closeDate) {
 
         super(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
@@ -119,6 +135,8 @@ public class FixedDepositProduct extends SavingsProduct {
             this.charts = charts;
         }
 
+        this.startDate = startDate;
+        this.closeDate = closeDate;
         this.productTermAndPreClosure = productTermAndPreClosure;
     }
 
@@ -168,6 +186,20 @@ public class FixedDepositProduct extends SavingsProduct {
         // update chart Slabs
         if (command.hasParameter(DepositsApiConstants.chartsParamName)) {
             updateCharts(command, actualChanges, baseDataValidator);
+        }
+
+        if (command.isChangeInLocalDateParameterNamed(startDateParamName, this.startDate)) {
+            actualChanges.put(startDateParamName, command.stringValueOfParameterNamed(startDateParamName));
+            actualChanges.put(dateFormatParamName, command.dateFormat());
+            actualChanges.put(localeParamName, command.locale());
+            this.startDate = command.localDateValueOfParameterNamed(startDateParamName);
+        }
+
+        if (command.isChangeInLocalDateParameterNamed(closeDateParamName, this.closeDate)) {
+            actualChanges.put(closeDateParamName, command.stringValueOfParameterNamed(closeDateParamName));
+            actualChanges.put(dateFormatParamName, command.dateFormat());
+            actualChanges.put(localeParamName, command.locale());
+            this.closeDate = command.localDateValueOfParameterNamed(closeDateParamName);
         }
 
         return actualChanges;
@@ -342,6 +374,11 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     private void validateDomainRules(final DataValidatorBuilder baseDataValidator) {
+
+        if (this.startDate != null && this.closeDate != null && DateUtils.isBefore(this.closeDate, this.startDate)) {
+            baseDataValidator.reset().parameter(closeDateParamName).value(this.closeDate).failWithCode("must.be.after.startDate",
+                    this.closeDate.toString(), this.startDate.toString());
+        }
 
         final DepositTermDetail termDetails = this.depositProductTermAndPreClosure().depositTermDetail();
         final boolean isMinTermGreaterThanMax = termDetails.isMinDepositTermGreaterThanMaxDepositTerm();

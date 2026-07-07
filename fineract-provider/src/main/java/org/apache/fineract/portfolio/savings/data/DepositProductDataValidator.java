@@ -145,7 +145,9 @@ public class DepositProductDataValidator {
 
         validateDepositTermDetailForUpdate(element, baseDataValidator);
 
-        validateChartsData(element, baseDataValidator);
+        if (fromApiJsonHelper.parameterExists(chartsParamName, element)) {
+            validateChartsData(element, baseDataValidator);
+        }
 
         validateDepositAmountForUpdate(element, baseDataValidator);
 
@@ -202,7 +204,9 @@ public class DepositProductDataValidator {
 
         validateRecurringDepositUpdate(element, baseDataValidator);
 
-        validateChartsData(element, baseDataValidator);
+        if (fromApiJsonHelper.parameterExists(chartsParamName, element)) {
+            validateChartsData(element, baseDataValidator);
+        }
 
         validateDepositAmountForUpdate(element, baseDataValidator);
 

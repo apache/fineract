@@ -205,6 +205,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         if (onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST
                 || onClosureType == DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY) {
             ExternalId externalId = this.externalIdFactory.create();
+            this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
             FixedDepositAccount reinvestedDeposit = account.reInvest(account.getAccountBalance(), externalId);
             this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
@@ -274,6 +275,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             }
             ExternalId externalId = this.externalIdFactory.create();
 
+            this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
             FixedDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount, externalId);
             this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
@@ -355,6 +357,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             } else {
                 reInvestAmount = account.getAccountBalance();
             }
+            this.depositAccountAssembler.validateProductApplicationDate(closedDate, account.savingsProduct());
             RecurringDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount);
             depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             this.savingsAccountRepository.save(reinvestedDeposit);
