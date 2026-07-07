@@ -103,6 +103,38 @@ public interface {{classname}} {
   })
   ApiResponse<{{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {{nickname}}WithHttpInfo({{#allParams}}{{^isBodyParam}}{{^isFormParam}}{{^legacyDates}}@Param("{{paramName}}") {{/legacyDates}}{{#legacyDates}}@Param(value="{{paramName}}", expander=ParamExpander.class) {{/legacyDates}}{{/isFormParam}}{{#isFormParam}}@Param("{{baseName}}") {{/isFormParam}}{{/isBodyParam}}{{{dataType}}} {{paramName}}, {{/allParams}}@HeaderMap Map<String, String> headers);
 
+{{#vendorExtensions.x-alternative-operation-id}}
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}</code>.
+   * @deprecated Use <code>{{operationId}}</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}({{#allParams}}{{{dataType}}} {{paramName}}, {{/allParams}}Map<String, String> headers) {
+    {{#returnType}}return {{/returnType}}{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}headers);
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}</code> with empty headers.
+   * @deprecated Use <code>{{operationId}}</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}({{#allParams}}{{{dataType}}} {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}) {
+    {{#returnType}}return {{/returnType}}{{nickname}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}WithHttpInfo</code>.
+   * @deprecated Use <code>{{operationId}}WithHttpInfo</code> instead.
+   */
+  @Deprecated
+  default ApiResponse<{{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {{vendorExtensions.x-alternative-operation-id}}WithHttpInfo({{#allParams}}{{{dataType}}} {{paramName}}, {{/allParams}}Map<String, String> headers) {
+    return {{nickname}}WithHttpInfo({{#allParams}}{{paramName}}, {{/allParams}}headers);
+  }
+
+{{/vendorExtensions.x-alternative-operation-id}}
 
   {{#hasQueryParams}}
   /**
@@ -257,6 +289,58 @@ public interface {{classname}} {
       })
    ApiResponse<{{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {{nickname}}WithHttpInfo({{#allParams}}{{^isQueryParam}}{{^isBodyParam}}{{^isFormParam}}{{^legacyDates}}@Param("{{paramName}}") {{/legacyDates}}{{#legacyDates}}@Param(value="{{paramName}}", expander=ParamExpander.class) {{/legacyDates}}{{/isFormParam}}{{#isFormParam}}@Param("{{baseName}}") {{/isFormParam}}{{/isBodyParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}@QueryMap(encoded=true) {{operationIdCamelCase}}QueryParams queryParams, @HeaderMap Map<String, String> headers);
 
+{{#vendorExtensions.x-alternative-operation-id}}
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}</code> using typed query parameters.
+   * @deprecated Use <code>{{operationId}}</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}{{operationIdCamelCase}}QueryParams queryParams, Map<String, String> headers) {
+    {{#returnType}}return {{/returnType}}{{nickname}}({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams, headers);
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}</code> using typed query parameters and empty headers.
+   * @deprecated Use <code>{{operationId}}</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}{{operationIdCamelCase}}QueryParams queryParams) {
+    {{#returnType}}return {{/returnType}}{{nickname}}({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams);
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}</code> using generic query parameters.
+   * @deprecated Use <code>{{operationId}}</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}Map<String, Object> queryParams, Map<String, String> headers) {
+    {{#returnType}}return {{/returnType}}{{nickname}}({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams, headers);
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}</code> using generic query parameters and empty headers.
+   * @deprecated Use <code>{{operationId}}</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}Map<String, Object> queryParams) {
+    {{#returnType}}return {{/returnType}}{{nickname}}({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams);
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}WithHttpInfo</code> using typed query parameters.
+   * @deprecated Use <code>{{operationId}}WithHttpInfo</code> instead.
+   */
+  @Deprecated
+  default ApiResponse<{{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {{vendorExtensions.x-alternative-operation-id}}WithHttpInfo({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}{{operationIdCamelCase}}QueryParams queryParams, Map<String, String> headers) {
+    return {{nickname}}WithHttpInfo({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams, headers);
+  }
+
+{{/vendorExtensions.x-alternative-operation-id}}
 
    /**
    * A convenience class for generating query parameters for the
@@ -320,6 +404,29 @@ public interface {{classname}} {
   default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{nickname}}Universal({{#allParams}}{{^isQueryParam}}{{^isBodyParam}}{{^isFormParam}}{{^legacyDates}}@Param("{{paramName}}") {{/legacyDates}}{{#legacyDates}}@Param(value="{{paramName}}", expander=ParamExpander.class) {{/legacyDates}}{{/isFormParam}}{{#isFormParam}}@Param("{{baseName}}") {{/isFormParam}}{{/isBodyParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}@QueryMap(encoded=true) Map<String, Object> queryParams) {
     {{#returnType}}return {{/returnType}}{{nickname}}Universal({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams, Map.of());
   }
+
+{{#vendorExtensions.x-alternative-operation-id}}
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}Universal</code>.
+   * @deprecated Use <code>{{operationId}}Universal</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}Universal({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}Map<String, Object> queryParams, Map<String, String> headers) {
+    {{#returnType}}return {{/returnType}}{{nickname}}Universal({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams, headers);
+  }
+
+  /**
+   * {{summary}}
+   * Alias for <code>{{operationId}}Universal</code> with empty headers.
+   * @deprecated Use <code>{{operationId}}Universal</code> instead.
+   */
+  @Deprecated
+  default {{#returnType}}{{{.}}}{{/returnType}}{{^returnType}}void{{/returnType}} {{vendorExtensions.x-alternative-operation-id}}Universal({{#allParams}}{{^isQueryParam}}{{{dataType}}} {{paramName}}, {{/isQueryParam}}{{/allParams}}Map<String, Object> queryParams) {
+    {{#returnType}}return {{/returnType}}{{nickname}}Universal({{#allParams}}{{^isQueryParam}}{{paramName}}, {{/isQueryParam}}{{/allParams}}queryParams);
+  }
+
+{{/vendorExtensions.x-alternative-operation-id}}
 
   {{/operation}}
 {{/operations}}

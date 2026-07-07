@@ -121,6 +121,12 @@ jobs:
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
+  run-generated-client-api-method-compatibility:
+    needs: build-core
+    uses: ./.github/workflows/verify-generated-client-api-method-compatibility.yml
+    secrets:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
   run-liquibase-backward-compatibility:
     needs: build-core
     uses: ./.github/workflows/verify-liquibase-backward-compatibility.yml
