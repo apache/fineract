@@ -49,15 +49,6 @@ public class WorkingCapitalLoanBreachActionReadServiceImpl implements WorkingCap
         return actions.stream().map(action -> toData(action, resumes)).toList();
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<WorkingCapitalLoanBreachActionData> retrieveBreachDisableActions(final Long workingCapitalLoanId) {
-        if (!loanRepository.existsById(workingCapitalLoanId)) {
-            throw new WorkingCapitalLoanNotFoundException(workingCapitalLoanId);
-        }
-        return actionRepository.findDisableEnableHistory(workingCapitalLoanId).stream().map(action -> toData(action, List.of())).toList();
-    }
-
     private WorkingCapitalLoanBreachActionData toData(final WorkingCapitalLoanBreachAction action,
             final List<WorkingCapitalLoanBreachAction> resumes) {
         LocalDate effectiveEndDate = null;

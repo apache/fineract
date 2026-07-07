@@ -45,13 +45,4 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
             """)
     boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
 
-    @Query("""
-            select action from WorkingCapitalLoanBreachAction action
-            where action.workingCapitalLoan.id = :loanId
-            and action.action in (org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE,
-                org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.ENABLE)
-            order by action.id
-            """)
-    List<WorkingCapitalLoanBreachAction> findDisableEnableHistory(@Param("loanId") Long loanId);
-
 }

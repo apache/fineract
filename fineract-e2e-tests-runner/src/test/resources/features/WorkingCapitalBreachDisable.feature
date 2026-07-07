@@ -537,7 +537,7 @@ Feature: Working Capital Breach Disable
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C85485
-  Scenario: Verify Working Capital breach enable/disable - UC23: Breach disable history retrieval requires READ_WC_BREACH_DISABLE permission (Negative)
+  Scenario: Verify Working Capital breach enable/disable - UC23: Breach action history retrieval requires READ_WC_BREACH_ACTION permission (Negative)
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
@@ -550,9 +550,9 @@ Feature: Working Capital Breach Disable
     And Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin initiate a Working Capital loan breach disable with startDate "15 January 2026"
-    And Admin creates new user with "NO_READ_WC_BREACH_DISABLE_USER" username, "NO_READ_WC_BREACH_DISABLE_ROLE" role name and given permissions:
+    And Admin creates new user with "NO_READ_WC_BREACH_ACTION_USER" username, "NO_READ_WC_BREACH_ACTION_ROLE" role name and given permissions:
       | REPAYMENT_LOAN |
-    Then Created user with no READ_WC_BREACH_DISABLE permission gets an error when retrieving Working Capital loan breach disable actions
+    Then Created user with no READ_WC_BREACH_ACTION permission gets an error when retrieving Working Capital loan breach actions
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 

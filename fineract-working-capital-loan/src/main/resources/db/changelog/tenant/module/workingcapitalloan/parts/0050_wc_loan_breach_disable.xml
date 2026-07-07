@@ -36,17 +36,4 @@
         </insert>
     </changeSet>
 
-    <changeSet author="fineract" id="wcl-0050-2">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'READ_WC_BREACH_DISABLE'</sqlCheck>
-        </preConditions>
-        <insert tableName="m_permission">
-            <column name="grouping" value="portfolio"/>
-            <column name="code" value="READ_WC_BREACH_DISABLE"/>
-            <column name="entity_name" value="WC_BREACH_DISABLE"/>
-            <column name="action_name" value="READ"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
-    </changeSet>
-
 </databaseChangeLog>

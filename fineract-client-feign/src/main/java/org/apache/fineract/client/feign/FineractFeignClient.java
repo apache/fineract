@@ -157,7 +157,6 @@ import org.apache.fineract.client.feign.services.UsersApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalBreachApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanAccountLockApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanBreachActionsApi;
-import org.apache.fineract.client.feign.services.WorkingCapitalLoanBreachDisableApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanBreachScheduleApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanChargesApi;
 import org.apache.fineract.client.feign.services.WorkingCapitalLoanCobCatchUpApi;
@@ -785,10 +784,6 @@ public final class FineractFeignClient {
 
     public WorkingCapitalLoanBreachActionsApi workingCapitalLoanBreachActions() {
         return create(WorkingCapitalLoanBreachActionsApi.class);
-    }
-
-    public WorkingCapitalLoanBreachDisableApi workingCapitalLoanBreachDisable() {
-        return create(WorkingCapitalLoanBreachDisableApi.class);
     }
 
     public InternalWorkingCapitalLoansApi internalWorkingCapitalLoans() {

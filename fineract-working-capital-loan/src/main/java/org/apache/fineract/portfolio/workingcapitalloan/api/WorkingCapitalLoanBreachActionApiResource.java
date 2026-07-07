@@ -57,12 +57,13 @@ import org.springframework.stereotype.Component;
 
 @Path("/v1/working-capital-loans")
 @Component
-@Tag(name = "Working Capital Loan Breach Actions", description = "Manages breach pause, resume, reschedule, reset and undo reset actions for Working Capital loans")
+@Tag(name = "Working Capital Loan Breach Actions", description = "Manages breach pause, resume, reschedule, reset, undo reset, disable and enable actions for Working Capital loans")
 @RequiredArgsConstructor
 public class WorkingCapitalLoanBreachActionApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "WC_BREACH_ACTION";
     private static final String RESET_RESOURCE_NAME_FOR_PERMISSIONS = "WC_BREACH_RESET";
+    private static final String DISABLE_RESOURCE_NAME_FOR_PERMISSIONS = "WC_BREACH_DISABLE";
 
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
@@ -74,7 +75,7 @@ public class WorkingCapitalLoanBreachActionApiResource {
     @Path("{loanId}/breach-actions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create Breach Action", description = "Creates a breach action (pause, reschedule, resume, reset, undo_reset) for a Working Capital loan. A resume shortens the currently active pause to the current business date.")
+    @Operation(summary = "Create Breach Action", description = "Creates a breach action (pause, reschedule, resume, reset, undo_reset, disable, enable) for a Working Capital loan. A resume shortens the currently active pause to the current business date. A disable stops breach evaluation as of the current business date; an enable re-triggers and recomputes breach evaluation as of that date.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanBreachActionApiResourceSwagger.PostWorkingCapitalLoansBreachActionRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanBreachActionApiResourceSwagger.PostWorkingCapitalLoansBreachActionResponse.class))),
@@ -89,7 +90,7 @@ public class WorkingCapitalLoanBreachActionApiResource {
     @Path("external-id/{loanExternalId}/breach-actions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "createBreachActionByExternalId", summary = "Create Breach Action by external id", description = "Creates a breach action (pause, reschedule, resume, reset, undo_reset) for a Working Capital loan identified by external id.")
+    @Operation(operationId = "createBreachActionByExternalId", summary = "Create Breach Action by external id", description = "Creates a breach action (pause, reschedule, resume, reset, undo_reset, disable, enable) for a Working Capital loan identified by external id.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = WorkingCapitalLoanBreachActionApiResourceSwagger.PostWorkingCapitalLoansBreachActionRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanBreachActionApiResourceSwagger.PostWorkingCapitalLoansBreachActionResponse.class))),
@@ -131,6 +132,9 @@ public class WorkingCapitalLoanBreachActionApiResource {
         if (isResetAction(action)) {
             this.context.authenticatedUser().validateHasCreatePermission(RESET_RESOURCE_NAME_FOR_PERMISSIONS);
         }
+        if (isDisableOrEnableAction(action)) {
+            this.context.authenticatedUser().validateHasCreatePermission(DISABLE_RESOURCE_NAME_FOR_PERMISSIONS);
+        }
         final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson)
                 .createWorkingCapitalLoanBreachAction(loanId).build();
         return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -146,6 +150,10 @@ public class WorkingCapitalLoanBreachActionApiResource {
 
     private boolean isResetAction(final String action) {
         return CommandParameterUtil.is(action, "reset") || CommandParameterUtil.is(action, "undo_reset");
+    }
+
+    private boolean isDisableOrEnableAction(final String action) {
+        return CommandParameterUtil.is(action, "disable") || CommandParameterUtil.is(action, "enable");
     }
 
     private Long resolveExternalId(final String loanExternalIdStr) {

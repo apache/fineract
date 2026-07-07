@@ -67,6 +67,8 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private static final String RESUME_ACTION = "resume";
     private static final String RESET_ACTION = "reset";
     private static final String UNDO_RESET_ACTION = "undo_reset";
+    private static final String DISABLE_ACTION = "disable";
+    private static final String ENABLE_ACTION = "enable";
 
     private final FromJsonHelper jsonHelper;
     private final WorkingCapitalLoanRepository loanRepository;
@@ -83,13 +85,13 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         dataValidator.reset().parameter(ACTION).value(actionString).notBlank();
         if (StringUtils.isNotBlank(actionString)) {
             dataValidator.reset().parameter(ACTION).value(actionString).isOneOfTheseStringValues(PAUSE_ACTION, RESCHEDULE_ACTION,
-                    RESUME_ACTION, RESET_ACTION, UNDO_RESET_ACTION);
+                    RESUME_ACTION, RESET_ACTION, UNDO_RESET_ACTION, DISABLE_ACTION, ENABLE_ACTION);
         }
         throwExceptionIfValidationWarningsExist(dataValidator);
 
         validateLoanIsActive(dataValidator, workingCapitalLoan);
         validateBreachConfigurationExists(dataValidator, workingCapitalLoan);
-        if (!UNDO_RESET_ACTION.equalsIgnoreCase(actionString)) {
+        if (!isDisableStateChange(actionString) && !UNDO_RESET_ACTION.equalsIgnoreCase(actionString)) {
             validateBreachNotDisabled(dataValidator, workingCapitalLoan.getId());
         }
 
@@ -105,7 +107,14 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         if (UNDO_RESET_ACTION.equalsIgnoreCase(actionString)) {
             return parseAndValidateUndoReset(workingCapitalLoan, dataValidator);
         }
+        if (isDisableStateChange(actionString)) {
+            return parseAndValidateDisableOrEnable(json, workingCapitalLoan, actionString, dataValidator);
+        }
         return parseAndValidatePause(json, workingCapitalLoan, existing, dataValidator);
+    }
+
+    private boolean isDisableStateChange(final String actionString) {
+        return DISABLE_ACTION.equalsIgnoreCase(actionString) || ENABLE_ACTION.equalsIgnoreCase(actionString);
     }
 
     private WorkingCapitalLoanBreachAction parseAndValidatePause(final JsonElement json, final WorkingCapitalLoan workingCapitalLoan,
@@ -209,6 +218,41 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         undoReset.setAction(WorkingCapitalLoanBreachActionType.UNDO_RESET);
         undoReset.setStartDate(DateUtils.getBusinessLocalDate());
         return undoReset;
+    }
+
+    private WorkingCapitalLoanBreachAction parseAndValidateDisableOrEnable(final JsonElement json,
+            final WorkingCapitalLoan workingCapitalLoan, final String actionString, final DataValidatorBuilder dataValidator) {
+        final LocalDate startDate = extractDate(json, START_DATE);
+        dataValidator.reset().parameter(START_DATE).value(startDate).notNull();
+
+        final LocalDate endDate = extractDate(json, END_DATE);
+        if (endDate != null) {
+            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.not.be.provided.for.disable.or.enable");
+        }
+
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        if (startDate != null && !startDate.isEqual(businessDate)) {
+            dataValidator.reset().parameter(START_DATE).value(startDate).failWithCode("must.be.current.business.date");
+        }
+
+        final boolean isEnable = ENABLE_ACTION.equalsIgnoreCase(actionString);
+        validateDisableState(dataValidator, workingCapitalLoan.getId(), isEnable);
+
+        throwExceptionIfValidationWarningsExist(dataValidator);
+
+        final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
+        action.setAction(isEnable ? WorkingCapitalLoanBreachActionType.ENABLE : WorkingCapitalLoanBreachActionType.DISABLE);
+        action.setStartDate(startDate);
+        return action;
+    }
+
+    private void validateDisableState(final DataValidatorBuilder dataValidator, final Long loanId, final boolean isEnable) {
+        final boolean alreadyDisabled = breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate());
+        if (isEnable && !alreadyDisabled) {
+            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.active.breach.disable.to.enable");
+        } else if (!isEnable && alreadyDisabled) {
+            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.already.disabled");
+        }
     }
 
     private Optional<WorkingCapitalLoanBreachAction> findActivePause(final LocalDate resumeDate,

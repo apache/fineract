@@ -68,6 +68,8 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
             breachResetService.resetBreach(workingCapitalLoan, saved);
         } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(action.getAction())) {
             breachResetService.undoResetBreach(workingCapitalLoan, saved);
+        } else if (WorkingCapitalLoanBreachActionType.ENABLE.equals(action.getAction())) {
+            breachScheduleService.reEvaluateAfterEnable(workingCapitalLoan, action.getStartDate());
         }
 
         return new CommandProcessingResultBuilder() //

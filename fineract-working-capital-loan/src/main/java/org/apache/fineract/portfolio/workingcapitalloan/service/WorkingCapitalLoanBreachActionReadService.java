@@ -25,6 +25,4 @@ public interface WorkingCapitalLoanBreachActionReadService {
 
     List<WorkingCapitalLoanBreachActionData> retrieveBreachActions(Long workingCapitalLoanId);
 
-    List<WorkingCapitalLoanBreachActionData> retrieveBreachDisableActions(Long workingCapitalLoanId);
-
 }
