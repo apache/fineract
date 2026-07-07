@@ -20,8 +20,16 @@ package org.apache.fineract.portfolio.client.service;
 
 import org.apache.fineract.portfolio.client.data.FamilyMemberCreateRequest;
 import org.apache.fineract.portfolio.client.data.FamilyMemberCreateResponse;
+import org.apache.fineract.portfolio.client.data.FamilyMemberDeleteRequest;
+import org.apache.fineract.portfolio.client.data.FamilyMemberDeleteResponse;
+import org.apache.fineract.portfolio.client.data.FamilyMemberUpdateRequest;
+import org.apache.fineract.portfolio.client.data.FamilyMemberUpdateResponse;
 
 public interface FamilyMemberWriteService {
 
     FamilyMemberCreateResponse createFamilyMember(FamilyMemberCreateRequest request);
+
+    FamilyMemberUpdateResponse updateFamilyMember(FamilyMemberUpdateRequest request);
+
+    FamilyMemberDeleteResponse deleteFamilyMember(FamilyMemberDeleteRequest request);
 }
