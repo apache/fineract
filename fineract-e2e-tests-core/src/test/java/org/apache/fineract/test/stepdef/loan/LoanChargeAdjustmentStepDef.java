@@ -75,7 +75,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
         long loanId = loanResponse.getLoanId();
 
         GetLoansLoanIdResponse loanDetailsResponse = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "charges")));
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", "charges")));
 
         Long transactionId = getTransactionIdForLastChargeMetConditions(chargeTypeEnum, date, loanDetailsResponse);
         makeChargeAdjustmentCall(loanId, transactionId, externalId, transactionAmount);
@@ -87,7 +87,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
         long loanId = loanResponse.getLoanId();
 
         GetLoansLoanIdResponse loanDetailsResponse = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "charges")));
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", "charges")));
 
         Long transactionId = getTransactionIdForLastChargeMetConditions(chargeTypeEnum, date, loanDetailsResponse);
         PostLoansLoanIdChargesChargeIdRequest chargeAdjustmentRequest = loanRequestFactory.defaultChargeAdjustmentRequest().amount(amount)
@@ -123,7 +123,7 @@ public class LoanChargeAdjustmentStepDef extends AbstractStepDef {
         long loanId = loanResponse.getLoanId();
 
         GetLoansLoanIdResponse loanDetailsResponse = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "transactions")));
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", "transactions")));
 
         Long transactionId = getTransactionIdForTransactionMetConditions(transactionDate, transactionAmount, loanDetailsResponse);
 

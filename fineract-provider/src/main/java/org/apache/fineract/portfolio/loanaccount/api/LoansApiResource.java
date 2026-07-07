@@ -327,6 +327,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.GetLoansApprovalTemplateResponse.class))) })
+    @Operation(summary = "Retrieve Loan Approval Template", operationId = "retrieveApprovalTemplate")
     public String retrieveApprovalTemplate(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
             @QueryParam("templateType") @Parameter(description = "templateType") final String templateType,
             @Context final UriInfo uriInfo) {
@@ -336,7 +337,7 @@ public class LoansApiResource {
     @GET
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve Loan Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+    @Operation(summary = "Retrieve Loan Details Template", operationId = "retrieveTemplateLoan", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Requests:\n" + "\n"
             + "loans/template?templateType=individual&clientId=1\n" + "\n" + "\n"
             + "loans/template?templateType=individual&clientId=1&productId=1")
@@ -462,7 +463,7 @@ public class LoansApiResource {
     @GET
     @Path("{loanId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Loan", description = "Note: template=true parameter doesn't apply to this resource."
+    @Operation(summary = "Retrieve a Loan", operationId = "retrieveOneLoan", description = "Note: template=true parameter doesn't apply to this resource."
             + "Example Requests:\n" + "\n" + "loans/1\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate\n" + "\n" + "\n"
             + "loans/1?associations=all\n" + "\n" + "loans/1?associations=all&exclude=guarantors\n" + "\n" + "\n"
             + "loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions")
@@ -551,7 +552,7 @@ public class LoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Calculate loan repayment schedule | Submit a new Loan Application", description = "It calculates the loan repayment Schedule\n"
+    @Operation(summary = "Calculate loan repayment schedule | Submit a new Loan Application", operationId = "calculateOrSubmitLoanApplication", description = "It calculates the loan repayment Schedule\n"
             + "Submits a new loan application\n"
             + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, expectedDisbursementDate, submittedOnDate, loanType\n"
             + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalculation, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n"
@@ -586,7 +587,7 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a loan application", description = "Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.")
+    @Operation(summary = "Modify a loan application", operationId = "updateLoanApplication", description = "Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansLoanIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansLoanIdResponse.class))) })
@@ -599,7 +600,7 @@ public class LoansApiResource {
     @DELETE
     @Path("{loanId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Delete a Loan Application", description = "Note: Only loans in \"Submitted and awaiting approval\" status can be deleted.")
+    @Operation(summary = "Delete a Loan Application", operationId = "deleteLoanApplication", description = "Note: Only loans in \"Submitted and awaiting approval\" status can be deleted.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.DeleteLoansLoanIdResponse.class))) })
     public String deleteLoanApplication(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId) {
@@ -610,7 +611,7 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", description = "Approve Loan Application:\n"
+    @Operation(summary = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", operationId = "handleCommandsLoan", description = "Approve Loan Application:\n"
             + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n"
             + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n"
             + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n"
@@ -653,7 +654,7 @@ public class LoansApiResource {
     @Path("glimAccount/{glimId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Approve GLIM Application | Undo GLIM Application Approval | Reject GLIM Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", description = "Approve GLIM Application:\n"
+    @Operation(summary = "Approve GLIM Application | Undo GLIM Application Approval | Reject GLIM Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", operationId = "handleCommandsGlimLoan", description = "Approve GLIM Application:\n"
             + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n"
             + "Approves the GLIM application\n\n" + "Undo GLIM Application Approval:\n" + "Undoes the GLIM Application Approval\n\n"
             + "Reject GLIM Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the GLIM application\n\n"
@@ -730,7 +731,7 @@ public class LoansApiResource {
     @GET
     @Path("{loanId}/delinquencytags")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan Id", description = "")
+    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan Id", operationId = "retrieveDelinquencyTagHistoryLoan", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DelinquencyApiResourceSwagger.GetDelinquencyTagHistoryResponse.class)))) })
     public String getDelinquencyTagHistory(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
@@ -755,7 +756,7 @@ public class LoansApiResource {
     @GET
     @Path("external-id/{loanExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve a Loan", operationId = "retrieveLoanByExternalId", description = "Note: template=true parameter doesn't apply to this resource."
+    @Operation(summary = "Retrieve a Loan", operationId = "retrieveOneLoanByExternalId", description = "Note: template=true parameter doesn't apply to this resource."
             + "Example Requests:\n" + "\n" + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854\n" + "\n" + "\n"
             + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?fields=id,principal,annualInterestRate\n" + "\n" + "\n"
             + "loans/external-id/7dd80a7c-ycba-a446-t378-91eb6f53e854?associations=all\n" + "\n"
@@ -778,7 +779,7 @@ public class LoansApiResource {
     @Path("external-id/{loanExternalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Modify a loan application", operationId = "modifyLoanApplicationByExternalId", description = "Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.")
+    @Operation(summary = "Modify a loan application", operationId = "updateLoanApplicationByExternalId", description = "Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansLoanIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansLoanIdResponse.class))) })
@@ -804,7 +805,7 @@ public class LoansApiResource {
     @Path("external-id/{loanExternalId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", operationId = "stateTransitionsByExternalId", description = "Approve Loan Application:\n"
+    @Operation(summary = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", operationId = "handleCommandsLoanByExternalId", description = "Approve Loan Application:\n"
             + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n"
             + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n"
             + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n"
@@ -829,7 +830,7 @@ public class LoansApiResource {
     @GET
     @Path("external-id/{loanExternalId}/delinquencytags")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan Id", operationId = "getDelinquencyTagHistoryByExternalId", description = "")
+    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan Id", operationId = "retrieveDelinquencyTagHistoryLoanByExternalId", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DelinquencyApiResourceSwagger.GetDelinquencyTagHistoryResponse.class)))) })
     public String getDelinquencyTagHistory(
@@ -841,7 +842,7 @@ public class LoansApiResource {
     @GET
     @Path("{loanId}/delinquency-actions")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve delinquency actions related to the loan", description = "")
+    @Operation(summary = "Retrieve delinquency actions related to the loan", operationId = "retrieveDelinquencyActionsLoan", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DelinquencyApiResourceSwagger.GetDelinquencyActionsResponse.class)))) })
     public String getLoanDelinquencyActions(@PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
@@ -852,7 +853,7 @@ public class LoansApiResource {
     @GET
     @Path("external-id/{loanExternalId}/delinquency-actions")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve delinquency actions related to the loan", operationId = "getLoanDelinquencyActionsByExternalId", description = "")
+    @Operation(summary = "Retrieve delinquency actions related to the loan", operationId = "retrieveDelinquencyActionsLoanByExternalId", description = "")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DelinquencyApiResourceSwagger.GetDelinquencyActionsResponse.class)))) })
     public String getLoanDelinquencyActions(
@@ -865,7 +866,7 @@ public class LoansApiResource {
     @Path("{loanId}/delinquency-actions")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Adds a new delinquency action for a loan", description = "")
+    @Operation(summary = "Adds a new delinquency action for a loan", operationId = "createDelinquencyActionLoan", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PostLoansDelinquencyActionRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PostLoansDelinquencyActionResponse.class))) })
@@ -878,7 +879,7 @@ public class LoansApiResource {
     @Path("external-id/{loanExternalId}/delinquency-actions")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Adds a new delinquency action for a loan", operationId = "createLoanDelinquencyActionByExternalId", description = "")
+    @Operation(summary = "Adds a new delinquency action for a loan", operationId = "createDelinquencyActionLoanByExternalId", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PostLoansDelinquencyActionRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PostLoansDelinquencyActionResponse.class))) })
@@ -892,7 +893,7 @@ public class LoansApiResource {
     @Path("{loanId}/approved-amount")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Modifies the approved amount of the loan", description = "")
+    @Operation(summary = "Modifies the approved amount of the loan", operationId = "updateApprovedAmountLoan", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansApprovedAmountRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansApprovedAmountResponse.class))) })
@@ -906,7 +907,7 @@ public class LoansApiResource {
     @Path("external-id/{loanExternalId}/approved-amount")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Modifies the approved amount of the loan", description = "")
+    @Operation(summary = "Modifies the approved amount of the loan", operationId = "updateApprovedAmountLoanByExternalId", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansApprovedAmountRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansApprovedAmountResponse.class))) })
@@ -919,7 +920,7 @@ public class LoansApiResource {
     @GET
     @Path("{loanId}/approved-amount")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Collects and returns the approved amount modification history for a given loan", description = "")
+    @Operation(summary = "Collects and returns the approved amount modification history for a given loan", operationId = "retrieveApprovedAmountHistoryLoan", description = "")
     public List<LoanApprovedAmountHistoryData> getLoanApprovedAmountHistory(
             @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId, @Context final UriInfo uriInfo) {
         return getLoanApprovedAmountHistory(loanId, ExternalId.empty());
@@ -928,7 +929,7 @@ public class LoansApiResource {
     @GET
     @Path("external-id/{loanExternalId}/approved-amount")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Collects and returns the approved amount modification history for a given loan", description = "")
+    @Operation(summary = "Collects and returns the approved amount modification history for a given loan", operationId = "retrieveApprovedAmountHistoryLoanByExternalId", description = "")
     public List<LoanApprovedAmountHistoryData> getLoanApprovedAmountHistory(
             @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
             @Context final UriInfo uriInfo) {
@@ -939,7 +940,7 @@ public class LoansApiResource {
     @Path("{loanId}/available-disbursement-amount")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Modifies the available disbursement amount of the loan", description = "Modifies the available disbursement amount of the loan, this indirectly modifies the approved amount that can be disbursed on the loan")
+    @Operation(summary = "Modifies the available disbursement amount of the loan", operationId = "updateAvailableDisbursementAmountLoan", description = "Modifies the available disbursement amount of the loan, this indirectly modifies the approved amount that can be disbursed on the loan")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountResponse.class))) })
@@ -953,7 +954,7 @@ public class LoansApiResource {
     @Path("external-id/{loanExternalId}/available-disbursement-amount")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Modifies the available disbursement amount of the loan", operationId = "modifyLoanAvailableDisbursementAmountByExternalId", description = "Modifies the available disbursement amount of the loan, this indirectly modifies the approved amount that can be disbursed on the loan")
+    @Operation(summary = "Modifies the available disbursement amount of the loan", operationId = "updateAvailableDisbursementAmountLoanByExternalId", description = "Modifies the available disbursement amount of the loan, this indirectly modifies the approved amount that can be disbursed on the loan")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansAvailableDisbursementAmountResponse.class))) })

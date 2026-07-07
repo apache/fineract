@@ -71,7 +71,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
 
             // When: a charge is added to the loan
             ok(() -> fineractClient.loanCharges()
-                    .executeLoanCharge(loanId,
+                    .createOrPayLoanCharge(loanId,
                             new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(50.0).locale("en").dateFormat("dd MMMM yyyy")
                                     .dueDate(org.apache.fineract.integrationtests.common.Utils.dateFormatter
                                             .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant())),
@@ -120,7 +120,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
 
             // When: a charge is added
             ok(() -> fineractClient.loanCharges()
-                    .executeLoanCharge(loanId,
+                    .createOrPayLoanCharge(loanId,
                             new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(75.0).locale("en").dateFormat("dd MMMM yyyy")
                                     .dueDate(org.apache.fineract.integrationtests.common.Utils.dateFormatter
                                             .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant())),
@@ -159,7 +159,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
 
             // When: a charge is added
             ok(() -> fineractClient.loanCharges()
-                    .executeLoanCharge(loanId,
+                    .createOrPayLoanCharge(loanId,
                             new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(50.0).locale("en").dateFormat("dd MMMM yyyy")
                                     .dueDate(org.apache.fineract.integrationtests.common.Utils.dateFormatter
                                             .format(org.apache.fineract.integrationtests.common.Utils.getLocalDateOfTenant())),

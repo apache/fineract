@@ -165,7 +165,7 @@ public class FixedDepositAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Adjust Transaction | Undo transaction", description = "Adjust Transaction:\n\nThis command modifies the given transaction.\n\n"
+    @Operation(summary = "Adjust Transaction | Undo transaction", operationId = "handleCommandsFixedDepositAccountTransaction", description = "Adjust Transaction:\n\nThis command modifies the given transaction.\n\n"
             + "Undo transaction:\n\nThis command reverses the given transaction.\n\n" + "Showing request/response for 'Adjust Transaction'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountTransactionsApiResourceSwagger.PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest.class)))
     @ApiResponses({

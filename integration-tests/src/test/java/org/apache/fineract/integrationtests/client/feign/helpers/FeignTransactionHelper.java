@@ -44,30 +44,31 @@ public class FeignTransactionHelper {
     }
 
     public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(Long loanId, String transactionDate, String dateFormat) {
-        return ok(() -> fineractClient.loanTransactions().retrieveTransactionTemplate(loanId, "prepayLoan", dateFormat, transactionDate,
+        return ok(() -> fineractClient.loanTransactions().retrieveTemplateLoanTransaction(loanId, "prepayLoan", dateFormat, transactionDate,
                 "en", null));
     }
 
     public Long addRepayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         PostLoansLoanIdTransactionsResponse response = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "repayment")));
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "repayment")));
         return response.getResourceId();
     }
 
     public Long addInterestWaiver(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         PostLoansLoanIdTransactionsResponse response = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "waiveInterest")));
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "waiveInterest")));
         return response.getResourceId();
     }
 
     public Long chargeOff(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         PostLoansLoanIdTransactionsResponse response = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "charge-off")));
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "charge-off")));
         return response.getResourceId();
     }
 
     public PostLoansLoanIdTransactionsResponse undoChargeOff(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "undo-charge-off")));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request,
+                Map.of("command", "undo-charge-off")));
     }
 
     public Long addChargeback(Long loanId, Long transactionId, PostLoansLoanIdTransactionsRequest request) {
@@ -84,58 +85,61 @@ public class FeignTransactionHelper {
 
     public Long reAge(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         PostLoansLoanIdTransactionsResponse response = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "reAge")));
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "reAge")));
         return response.getResourceId();
     }
 
     public Long undoReAge(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         PostLoansLoanIdTransactionsResponse response = ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "undoReAge")));
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "undoReAge")));
         return response.getResourceId();
     }
 
     public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "merchantIssuedRefund")));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request,
+                Map.of("command", "merchantIssuedRefund")));
     }
 
     public PostLoansLoanIdTransactionsResponse makePayoutRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "payoutRefund")));
+        return ok(
+                () -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "payoutRefund")));
     }
 
     public PostLoansLoanIdTransactionsResponse makeGoodwillCredit(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "goodwillCredit")));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request,
+                Map.of("command", "goodwillCredit")));
     }
 
     public PostLoansLoanIdTransactionsResponse makeInterestPaymentWaiver(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request,
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request,
                 Map.of("command", "interestPaymentWaiver")));
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, String command, String date, Double amount) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest()
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest()
                 .transactionAmount(amount).transactionDate(date).dateFormat("dd MMMM yyyy").locale("en"), Map.of("command", command)));
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "repayment")));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "repayment")));
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request, "repayment"));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(loanExternalId, request,
+                "repayment"));
     }
 
     public PostLoansLoanIdTransactionsResponse chargeOffLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "charge-off")));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "charge-off")));
     }
 
     public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request,
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(loanExternalId, request,
                 "merchantIssuedRefund"));
     }
 
     public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(() -> fineractClient.loanTransactions().executeLoanTransactionByLoanExternalId(loanExternalId, request,
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransactionByLoanExternalId(loanExternalId, request,
                 "creditBalanceRefund"));
     }
 
@@ -166,12 +170,12 @@ public class FeignTransactionHelper {
     }
 
     public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(Long loanId, PostLoansLoanIdTransactionsRequest request) {
-        return ok(
-                () -> fineractClient.loanTransactions().executeLoanTransaction(loanId, request, Map.of("command", "creditBalanceRefund")));
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request,
+                Map.of("command", "creditBalanceRefund")));
     }
 
     public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(Long loanId, String transactionExternalId) {
-        return ok(() -> fineractClient.loanTransactions().retrieveTransactionByTransactionExternalId(loanId, transactionExternalId, ""));
+        return ok(() -> fineractClient.loanTransactions().retrieveOneLoanTransactionByExternalId(loanId, transactionExternalId, ""));
     }
 
     public PostLoansLoanIdTransactionsResponse createManualInterestRefund(Long loanId, Long targetTransactionId, String transactionDate,

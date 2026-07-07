@@ -384,7 +384,7 @@ public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
         assertNotNull(loanId);
 
         if (chargeId != null) {
-            ok(() -> fineractClient().loanCharges().executeLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeId)
+            ok(() -> fineractClient().loanCharges().createOrPayLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeId)
                     .amount(500.0).dueDate(disburseDate).dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE),
                     (String) null));
         }

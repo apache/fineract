@@ -284,7 +284,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected GetLoansLoanIdTransactionsTemplateResponse getPrepayAmount(Long loanId, String date) {
-        return ok(fineractClient().loanTransactions.retrieveTransactionTemplate(loanId, "prepayLoan", DATETIME_PATTERN, date, "en", null));
+        return ok(fineractClient().loanTransactions.retrieveTemplateLoanTransaction(loanId, "prepayLoan", DATETIME_PATTERN, date, "en",
+                null));
     }
 
     protected Long verifyPrepayAmountByRepayment(Long loanId, String date) {
@@ -319,8 +320,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
      */
     public PostLoansLoanIdTransactionsResponse makeLoanTransactionWithPermissionVerification(final Long loanId,
             PostLoansLoanIdTransactionsRequest postLoansLoanIdTransactionsRequest, final String command, final String permission) {
-        return performPermissionTestForRequest(permission, fineractClient -> fineractClient.loanTransactions.executeLoanTransaction(loanId,
-                postLoansLoanIdTransactionsRequest, command));
+        return performPermissionTestForRequest(permission, fineractClient -> fineractClient.loanTransactions
+                .handleCommandsLoanTransaction(loanId, postLoansLoanIdTransactionsRequest, command));
     }
 
     /**
@@ -1072,17 +1073,17 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected PutLoansApprovedAmountResponse modifyLoanApprovedAmount(Long loanId, BigDecimal approvedAmount) {
         PutLoansApprovedAmountRequest request = new PutLoansApprovedAmountRequest().amount(approvedAmount).locale("en");
-        return Calls.ok(fineractClient().loans.modifyLoanApprovedAmount(loanId, request));
+        return Calls.ok(fineractClient().loans.updateApprovedAmountLoan(loanId, request));
     }
 
     protected List<LoanApprovedAmountHistoryData> getLoanApprovedAmountHistory(Long loanId) {
-        return Calls.ok(fineractClient().loans.getLoanApprovedAmountHistory(loanId));
+        return Calls.ok(fineractClient().loans.retrieveApprovedAmountHistoryLoan(loanId));
     }
 
     protected PutLoansAvailableDisbursementAmountResponse modifyLoanAvailableDisbursementAmount(Long loanId, BigDecimal approvedAmount) {
         PutLoansAvailableDisbursementAmountRequest request = new PutLoansAvailableDisbursementAmountRequest().amount(approvedAmount)
                 .locale("en");
-        return Calls.ok(fineractClient().loans.modifyLoanAvailableDisbursementAmount(loanId, request));
+        return Calls.ok(fineractClient().loans.updateAvailableDisbursementAmountLoan(loanId, request));
     }
 
     protected void verifyOutstanding(LoanPointInTimeData loan, OutstandingAmounts outstanding) {
@@ -1513,7 +1514,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
     }
 
     protected void deactivateOverdueLoanCharges(Long loanId, String fromDueDate) {
-        ok(fineractClient().loanCharges.executeLoanCharge(loanId,
+        ok(fineractClient().loanCharges.createOrPayLoanCharge(loanId,
                 new PostLoansLoanIdChargesRequest().dueDate(fromDueDate).dateFormat(DATETIME_PATTERN).locale("en"), "deactivateOverdue"));
     }
 

@@ -74,11 +74,11 @@ public class LoanTestLifecycleExtension implements AfterEachCallback, BeforeEach
 
     private void closeActiveLoan(Long loanId, LocalDate cleanupDate) {
         GetLoansLoanIdResponse loanResponse = Calls
-                .ok(FineractClientHelper.getFineractClient().loans.retrieveLoan(loanId, null, "all", null, null));
+                .ok(FineractClientHelper.getFineractClient().loans.retrieveOneLoan(loanId, null, "all", null, null));
         if (MathUtil.isLessThan(loanResponse.getApprovedPrincipal(), loanResponse.getProposedPrincipal())) {
             PutLoansApprovedAmountRequest request = new PutLoansApprovedAmountRequest().amount(loanResponse.getProposedPrincipal())
                     .locale("en");
-            Calls.ok(FineractClientHelper.getFineractClient().loans.modifyLoanApprovedAmount(loanId, request));
+            Calls.ok(FineractClientHelper.getFineractClient().loans.updateApprovedAmountLoan(loanId, request));
         }
         loanResponse.getDisbursementDetails().forEach(disbursementDetail -> {
             if (disbursementDetail.getActualDisbursementDate() == null) {

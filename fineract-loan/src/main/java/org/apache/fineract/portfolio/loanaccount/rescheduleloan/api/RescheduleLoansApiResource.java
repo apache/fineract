@@ -73,7 +73,7 @@ public class RescheduleLoansApiResource {
     @GET
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve all reschedule loan reasons", description = "Retrieve all reschedule loan reasons as a template")
+    @Operation(summary = "Retrieve all reschedule loan reasons", operationId = "retrieveAllRescheduleLoanReasons", description = "Retrieve all reschedule loan reasons as a template")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetRescheduleReasonsTemplateResponse.class)))
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
@@ -89,7 +89,7 @@ public class RescheduleLoansApiResource {
     @GET
     @Path("{scheduleId}")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve loan reschedule request by schedule id", description = "Retrieve loan reschedule request by schedule id")
+    @Operation(summary = "Retrieve loan reschedule request by schedule id", operationId = "retrieveOneRescheduleLoan", description = "Retrieve loan reschedule request by schedule id")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class)))
     public String readLoanRescheduleRequest(@Context final UriInfo uriInfo, @PathParam("scheduleId") final Long scheduleId,
             @QueryParam("command") final String command) {
@@ -112,7 +112,7 @@ public class RescheduleLoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Create loan reschedule request", description = "Create a loan reschedule request.")
+    @Operation(summary = "Create loan reschedule request", operationId = "createRescheduleLoan", description = "Create a loan reschedule request.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostCreateRescheduleLoansRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostCreateRescheduleLoansResponse.class)))
     public String createLoanRescheduleRequest(final String apiRequestBodyAsJson) {
@@ -128,7 +128,7 @@ public class RescheduleLoansApiResource {
     @Path("{scheduleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update loan reschedule request", description = "Update a loan reschedule request by either approving/rejecting it.")
+    @Operation(summary = "Update loan reschedule request", operationId = "updateRescheduleLoan", description = "Update a loan reschedule request by either approving/rejecting it.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostUpdateRescheduleLoansRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostUpdateRescheduleLoansResponse.class)))
     public String updateLoanRescheduleRequest(@PathParam("scheduleId") final Long scheduleId, @QueryParam("command") final String command,
@@ -169,7 +169,7 @@ public class RescheduleLoansApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Retrieve all reschedule requests", description = "Retrieve all reschedule requests.")
+    @Operation(summary = "Retrieve all reschedule requests", operationId = "retrieveAllRescheduleLoans", description = "Retrieve all reschedule requests.")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class))))
     public String retrieveAllRescheduleRequest(@Context final UriInfo uriInfo, @QueryParam("command") final String command,
             @QueryParam("loanId") Long loanId) {

@@ -649,9 +649,10 @@ public class FixedDepositAccountHelper {
 
     public Long undoFixedDepositTransaction(final Integer fixedDepositAccountId, final Integer transactionId) {
         LOG.info("--------------------------------- UNDO FIXED DEPOSIT TRANSACTION --------------------------------");
-        return Calls.ok(FineractClientHelper.getFineractClient().fixedDepositAccountTransactions.adjustTransaction(
-                fixedDepositAccountId.longValue(), transactionId.longValue(),
-                new PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest(), "undo")).getResourceId();
+        return Calls.ok(FineractClientHelper.getFineractClient().fixedDepositAccountTransactions
+                .handleCommandsFixedDepositAccountTransaction(fixedDepositAccountId.longValue(), transactionId.longValue(),
+                        new PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest(), "undo"))
+                .getResourceId();
     }
 
     public Long adjustFixedDepositTransaction(final Integer fixedDepositAccountId, final Integer transactionId,
@@ -660,8 +661,8 @@ public class FixedDepositAccountHelper {
         final PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest request = new PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest()
                 .dateFormat("dd MMMM yyyy").locale("en").transactionDate(transactionDate).transactionAmount(transactionAmount);
         return Calls
-                .ok(FineractClientHelper.getFineractClient().fixedDepositAccountTransactions
-                        .adjustTransaction(fixedDepositAccountId.longValue(), transactionId.longValue(), request, "modify"))
+                .ok(FineractClientHelper.getFineractClient().fixedDepositAccountTransactions.handleCommandsFixedDepositAccountTransaction(
+                        fixedDepositAccountId.longValue(), transactionId.longValue(), request, "modify"))
                 .getResourceId();
     }
 

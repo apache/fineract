@@ -182,7 +182,7 @@ public class FixedDepositAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Submit new fixed deposit application", description = """
+    @Operation(summary = "Submit new fixed deposit application", operationId = "createFixedDepositAccount", description = """
             Submits a new fixed deposit application
             Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId
 

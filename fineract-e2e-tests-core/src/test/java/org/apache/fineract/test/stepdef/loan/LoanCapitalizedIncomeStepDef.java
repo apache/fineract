@@ -58,7 +58,7 @@ public class LoanCapitalizedIncomeStepDef extends AbstractStepDef {
         long loanId = loanCreateResponse.getLoanId();
 
         GetLoansLoanIdResponse loanDetailsResponse = ok(
-                () -> fineractClient.loans().retrieveLoan(loanId, Map.of("associations", "transactions")));
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", "transactions")));
 
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
         GetLoansLoanIdTransactions capitalizedIncomeAmortizationTransaction = transactions.stream()

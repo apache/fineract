@@ -80,7 +80,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("staffInSelectedOfficeOnly", false);
         queryParams.put("associations", "transactions");
-        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveLoan(loanId, queryParams);
+        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
         TransactionType transactionType1 = TransactionType.valueOf(transactionType);
         String transactionTypeExpected = transactionType1.getValue();
 
@@ -190,7 +190,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("staffInSelectedOfficeOnly", false);
         queryParams.put("associations", "transactions");
-        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveLoan(loanId, queryParams);
+        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
         TransactionType transactionType1 = TransactionType.valueOf(transactionType);
         String transactionTypeExpected = transactionType1.getValue();
 
@@ -276,7 +276,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("staffInSelectedOfficeOnly", false);
         queryParams.put("associations", "transactions");
-        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveLoan(loanId, queryParams);
+        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
         TransactionType transactionType1 = TransactionType.valueOf(transactionType);
         String transactionTypeExpected = transactionType1.getValue();
 
@@ -347,7 +347,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("staffInSelectedOfficeOnly", false);
         queryParams.put("associations", "transactions");
-        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveLoan(loanId, queryParams);
+        GetLoansLoanIdResponse loanDetailsResponse = loansApi().retrieveOneLoan(loanId, queryParams);
         TransactionType transactionType1 = TransactionType.valueOf(transactionType);
         String transactionTypeExpected = transactionType1.getValue();
 
