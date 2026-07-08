@@ -51,6 +51,10 @@ public final class FeignRawHttpHelper {
         return execute("GET", path, null);
     }
 
+    public static String delete(String path) {
+        return execute("DELETE", path, null);
+    }
+
     private static String apiV1BaseUrl() {
         String baseUrl = System.getProperty("fineract.it.url", defaultBaseUrl());
         if (baseUrl.endsWith("/")) {
