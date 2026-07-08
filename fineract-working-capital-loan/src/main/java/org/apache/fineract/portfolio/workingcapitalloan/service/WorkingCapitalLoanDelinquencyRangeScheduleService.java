@@ -43,9 +43,13 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction rescheduleAction);
 
-    void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
-
     void resumeActivePause(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction activePause,
             WorkingCapitalLoanDelinquencyAction resumeAction);
+
+    /**
+     * Rebuilds paid amounts and evaluation for all periods by replaying the principal portions of the repayment type
+     * transactions in chronological order.
+     */
+    void reprocessDelinquencySchedule(WorkingCapitalLoan loan);
 
 }

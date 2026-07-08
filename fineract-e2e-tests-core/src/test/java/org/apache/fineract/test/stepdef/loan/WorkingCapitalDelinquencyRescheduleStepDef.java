@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
@@ -46,6 +47,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
+import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
@@ -77,6 +79,34 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
         log.info("Created WC product id={} with delinquency bucket id={}", response.getResourceId(), bucketId);
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with delinquency bucket and custom breach config:")
+    public void createProductWithDelinquencyBucketAndCustomBreachConfig(final DataTable table) {
+        final Long bucketId = TestContext.GLOBAL.get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        assertThat(bucketId).isNotNull();
+
+        final Map<String, String> data = table.asMaps().getFirst();
+        final String breachName = "WC Breach " + Utils.randomStringGenerator("", 10);
+        final WorkingCapitalBreachRequest breachRequest = new WorkingCapitalBreachRequest().name(breachName)
+                .breachFrequency(Integer.valueOf(data.get("breachFrequency"))).breachFrequencyType(data.get("breachFrequencyType"))
+                .breachAmountCalculationType(data.get("breachAmountCalculationType"))
+                .breachAmount(new BigDecimal(data.get("breachAmount")));
+        final CommandProcessingResult breachCreateResponse = ok(
+                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(breachRequest));
+        final Long breachId = breachCreateResponse.getResourceId();
+        testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachId);
+
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .name("WCLP-DLQ-BR-" + Utils.randomStringGenerator(8)) //
+                .delinquencyBucketId(bucketId) //
+                .breachId(breachId);
+        final PostWorkingCapitalLoanProductsResponse response = ok(
+                () -> fineractFeignClient.workingCapitalLoanProducts().createWorkingCapitalLoanProduct(request));
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        log.info("Created WC product id={} with delinquency bucket id={} and breach id={}", response.getResourceId(), bucketId, breachId);
     }
 
     @When("Admin creates WC Delinquency Bucket with frequency {int} {word} and minimumPayment {int} {word}")
@@ -194,6 +224,20 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         assertThat(retrieveDelinquencyActions(loanId)).hasSize(count);
     }
 
+    @Then("WC loan delinquency actions have the following data:")
+    public void verifyDelinquencyActionsHistory(final DataTable table) {
+        final Long loanId = getLoanId();
+        final List<WorkingCapitalLoanDelinquencyActionData> actions = retrieveDelinquencyActions(loanId);
+        final List<Map<String, String>> expectedRows = table.asMaps();
+        assertThat(actions).as("Delinquency actions count").hasSize(expectedRows.size());
+        for (int i = 0; i < expectedRows.size(); i++) {
+            final WorkingCapitalLoanDelinquencyActionData actual = actions.get(i);
+            final int rowNumber = i + 1;
+            expectedRows.get(i).forEach((field, value) -> verifyActionField(actual, field, value));
+        }
+        log.info("Successfully verified {} delinquency action(s) for loan {}", actions.size(), loanId);
+    }
+
     @Then("WC loan has both PAUSE and RESCHEDULE delinquency actions")
     public void verifyBothPauseAndRescheduleActions() {
         final Long loanId = getLoanId();
@@ -251,13 +295,18 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
             case "endDate" ->
                 verifyOptionalField(expected, v -> assertThat(actual.getEndDate()).as("endDate").isEqualTo(LocalDate.parse(v, DATE_FORMAT)),
                         () -> assertThat(actual.getEndDate()).as("endDate").isNull());
-            case "minimumPayment" ->
-                assertThat(actual.getMinimumPayment()).as("minimumPayment").isEqualByComparingTo(new BigDecimal(expected));
+            case "minimumPayment" -> verifyOptionalField(expected,
+                    v -> assertThat(actual.getMinimumPayment()).as("minimumPayment").isEqualByComparingTo(new BigDecimal(v)),
+                    () -> assertThat(actual.getMinimumPayment()).as("minimumPayment").isNull());
             case "minimumPaymentType" ->
                 verifyOptionalField(expected, v -> assertThat(actual.getMinimumPaymentType().name()).as("minimumPaymentType").isEqualTo(v),
                         () -> assertThat(actual.getMinimumPaymentType()).as("minimumPaymentType").isNull());
-            case "frequency" -> assertThat(actual.getFrequency()).as("frequency").isEqualTo(Integer.parseInt(expected));
-            case "frequencyType" -> assertThat(actual.getFrequencyType().name()).as("frequencyType").isEqualTo(expected);
+            case "frequency" ->
+                verifyOptionalField(expected, v -> assertThat(actual.getFrequency()).as("frequency").isEqualTo(Integer.parseInt(v)),
+                        () -> assertThat(actual.getFrequency()).as("frequency").isNull());
+            case "frequencyType" ->
+                verifyOptionalField(expected, v -> assertThat(actual.getFrequencyType().name()).as("frequencyType").isEqualTo(v),
+                        () -> assertThat(actual.getFrequencyType()).as("frequencyType").isNull());
             default -> throw new IllegalArgumentException("Unknown action field: " + field);
         }
     }

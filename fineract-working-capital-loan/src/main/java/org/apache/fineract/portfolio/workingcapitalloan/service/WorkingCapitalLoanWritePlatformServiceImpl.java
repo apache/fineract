@@ -770,10 +770,12 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         if (backdated) {
             transactionReprocessingService.reprocessTransactions(loan, allTransactions);
+            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        } else {
+            delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, principalPortion);
         }
-        // Delinquency and breach schedules are maintained incrementally here; reprocessing does not rebuild them.
+        // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
         breachScheduleService.applyRepayment(loanId, transactionDate, principalPortion);
-        delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, principalPortion);
 
         handleStateChanges(loan, transactionDate);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
@@ -1027,7 +1029,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(),
                 transaction.getAllocation().getPrincipalPortion());
-        delinquencyRangeScheduleService.applyRepaymentUndo(loan, reversedOnDate, transaction.getAllocation().getPrincipalPortion());
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             accountingProcessor.postReversalJournalEntries(loan, transaction);
