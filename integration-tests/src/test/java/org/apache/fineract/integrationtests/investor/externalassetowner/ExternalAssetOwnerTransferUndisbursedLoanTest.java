@@ -26,21 +26,16 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalAssetOwnerHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,25 +43,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith({ LoanTestLifecycleExtension.class })
-public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanIntegrationTest {
+public class ExternalAssetOwnerTransferUndisbursedLoanTest extends FeignLoanTestBase {
+
+    private final FeignExternalAssetOwnerHelper externalAssetOwnerHelper = new FeignExternalAssetOwnerHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     private Long loan1Id;
     private Long loan2Id;
 
     @BeforeAll
     public static void setup() {
-        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
-                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
+        new FeignBusinessStepHelper(FineractFeignClientHelper.getFineractFeignClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS",
+                "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
+                "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
                 "EXTERNAL_ASSET_OWNER_TRANSFER");
-        new GlobalConfigurationHelper().updateGlobalConfiguration(
-                GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER,
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER,
                 new PutGlobalConfigurationsRequest().stringValue("APPROVED,ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD"));
     }
 
     @AfterAll
     public static void tearDown() {
-        new GlobalConfigurationHelper().updateGlobalConfiguration(
-                GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER,
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOWED_LOAN_STATUSES_FOR_EXTERNAL_ASSET_TRANSFER,
                 new PutGlobalConfigurationsRequest().stringValue("ACTIVE,TRANSFER_IN_PROGRESS,TRANSFER_ON_HOLD"));
     }
 
@@ -74,29 +71,24 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
     public void testExternalAssetOwnerTransferForUndisbursedLoan() {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
 
-        Account transferAccount = accountHelper.createAssetAccount();
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        ExternalAssetOwnerHelper externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
-        externalAssetOwnerHelper.setProperFinancialActivity(financialActivityAccountHelper, transferAccount);
+        Account transferAccount = accountHelper.createAssetAccount(Utils.uniqueRandomStringGenerator("TRANSFER_", 5));
+        externalAssetOwnerHelper.setProperFinancialActivity(transferAccount);
 
         try {
             runAt("01 January 2024", () -> {
-                PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-                Long clientId = client.getClientId();
+                Long clientId = createClient();
 
                 PostLoanProductsRequest loanProductRequest = createOnePeriod30DaysPeriodicAccrualProduct(12.0)
                         .name(Utils.uniqueRandomStringGenerator("UNDISBURSED_TEST_", 4))
                         .shortName(Utils.uniqueRandomStringGenerator("UT", 2));
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(loanProductRequest);
+                Long loanProductId = createLoanProduct(loanProductRequest);
 
-                PostLoansResponse loanResponse = loanTransactionHelper
-                        .applyLoan(applyLoanRequest(clientId, loanProduct.getResourceId(), "01 January 2024", 10000.0, 4));
-                Long loanId = loanResponse.getLoanId();
+                Long loanId = applyForLoan(applyLoanRequest(clientId, loanProductId, "01 January 2024", 10000.0, 4));
 
-                loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.0, "01 January 2024"));
+                approveLoan(loanId, approveLoanRequest(10000.0, "01 January 2024"));
 
-                GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+                GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
                 assertNotNull(loanDetails);
                 assertEquals("loanStatusType.approved", loanDetails.getStatus().getCode());
 
@@ -110,7 +102,7 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
                 assertNotNull(transferResponse);
                 assertEquals(transferExternalId, transferResponse.getResourceExternalId());
 
-                GetLoansLoanIdResponse loanAfterTransfer = loanTransactionHelper.getLoanDetails(loanId);
+                GetLoansLoanIdResponse loanAfterTransfer = getLoanDetails(loanId);
                 assertNotNull(loanAfterTransfer, "Loan details should not be null");
 
                 if (loanAfterTransfer.getSummary() == null) {
@@ -134,27 +126,22 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
     public void testExternalAssetOwnerTransferForBackdatedUndisbursedLoan() {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
 
-        Account transferAccount = accountHelper.createAssetAccount();
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        ExternalAssetOwnerHelper externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
-        externalAssetOwnerHelper.setProperFinancialActivity(financialActivityAccountHelper, transferAccount);
+        Account transferAccount = accountHelper.createAssetAccount(Utils.uniqueRandomStringGenerator("TRANSFER_", 5));
+        externalAssetOwnerHelper.setProperFinancialActivity(transferAccount);
 
         try {
             runAt("01 March 2024", () -> {
-                PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-                Long clientId = client.getClientId();
+                Long clientId = createClient();
 
                 PostLoanProductsRequest loanProductRequest = createOnePeriod30DaysPeriodicAccrualProduct(12.0)
                         .name(Utils.uniqueRandomStringGenerator("BACKDATED_UNDISBURSED_", 4))
                         .shortName(Utils.uniqueRandomStringGenerator("BU", 2));
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(loanProductRequest);
+                Long loanProductId = createLoanProduct(loanProductRequest);
 
-                PostLoansResponse loanResponse = loanTransactionHelper
-                        .applyLoan(applyLoanRequest(clientId, loanProduct.getResourceId(), "01 December 2023", 15000.0, 4));
-                Long loanId = loanResponse.getLoanId();
+                Long loanId = applyForLoan(applyLoanRequest(clientId, loanProductId, "01 December 2023", 15000.0, 4));
 
-                loanTransactionHelper.approveLoan(loanId, approveLoanRequest(15000.0, "01 December 2023"));
+                approveLoan(loanId, approveLoanRequest(15000.0, "01 December 2023"));
 
                 String transferExternalId = UUID.randomUUID().toString();
                 String ownerExternalId = UUID.randomUUID().toString();
@@ -166,7 +153,7 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
                 assertNotNull(transferResponse);
                 assertEquals(transferExternalId, transferResponse.getResourceExternalId());
 
-                GetLoansLoanIdResponse loanAfterTransfer = loanTransactionHelper.getLoanDetails(loanId);
+                GetLoansLoanIdResponse loanAfterTransfer = getLoanDetails(loanId);
                 assertNotNull(loanAfterTransfer, "Loan details should not be null");
 
                 if (loanAfterTransfer.getSummary() == null) {
@@ -190,32 +177,25 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
     public void testExternalAssetOwnerTransferComparison_DisbursedVsUndisbursed() {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
 
-        Account transferAccount = accountHelper.createAssetAccount();
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        ExternalAssetOwnerHelper externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
-        externalAssetOwnerHelper.setProperFinancialActivity(financialActivityAccountHelper, transferAccount);
+        Account transferAccount = accountHelper.createAssetAccount(Utils.uniqueRandomStringGenerator("TRANSFER_", 5));
+        externalAssetOwnerHelper.setProperFinancialActivity(transferAccount);
 
         try {
             runAt("01 January 2024", () -> {
-                PostClientsResponse client1 = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-                PostClientsResponse client2 = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                Long client1Id = createClient();
+                Long client2Id = createClient();
 
                 PostLoanProductsRequest loanProductRequest = createOnePeriod30DaysPeriodicAccrualProduct(12.0)
                         .name(Utils.uniqueRandomStringGenerator("COMPARISON_TEST_", 4))
                         .shortName(Utils.uniqueRandomStringGenerator("CT", 2));
 
-                PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(loanProductRequest);
+                Long loanProductId = createLoanProduct(loanProductRequest);
 
-                PostLoansResponse loan1Response = loanTransactionHelper
-                        .applyLoan(applyLoanRequest(client1.getClientId(), loanProduct.getResourceId(), "01 January 2024", 20000.0, 4));
-                loan1Id = loan1Response.getLoanId();
+                loan1Id = applyForLoan(applyLoanRequest(client1Id, loanProductId, "01 January 2024", 20000.0, 4));
+                loan2Id = applyForLoan(applyLoanRequest(client2Id, loanProductId, "01 January 2024", 20000.0, 4));
 
-                PostLoansResponse loan2Response = loanTransactionHelper
-                        .applyLoan(applyLoanRequest(client2.getClientId(), loanProduct.getResourceId(), "01 January 2024", 20000.0, 4));
-                loan2Id = loan2Response.getLoanId();
-
-                loanTransactionHelper.approveLoan(loan1Id, approveLoanRequest(20000.0, "01 January 2024"));
-                loanTransactionHelper.approveLoan(loan2Id, approveLoanRequest(20000.0, "01 January 2024"));
+                approveLoan(loan1Id, approveLoanRequest(20000.0, "01 January 2024"));
+                approveLoan(loan2Id, approveLoanRequest(20000.0, "01 January 2024"));
 
                 disburseLoan(loan1Id, BigDecimal.valueOf(20000.0), "01 January 2024");
             });
@@ -236,8 +216,11 @@ public class ExternalAssetOwnerTransferUndisbursedLoanTest extends BaseLoanInteg
                         new ExternalAssetOwnerRequest().settlementDate("31 January 2024").dateFormat("dd MMMM yyyy").locale("en")
                                 .transferExternalId(transfer2ExternalId).ownerExternalId(ownerExternalId).purchasePriceRatio("1.0"));
 
-                GetLoansLoanIdResponse disbursedLoan = loanTransactionHelper.getLoanDetails(loan1Id);
-                GetLoansLoanIdResponse undisbursedLoan = loanTransactionHelper.getLoanDetails(loan2Id);
+                assertNotNull(transfer1Response);
+                assertNotNull(transfer2Response);
+
+                GetLoansLoanIdResponse disbursedLoan = getLoanDetails(loan1Id);
+                GetLoansLoanIdResponse undisbursedLoan = getLoanDetails(loan2Id);
 
                 assertNotNull(disbursedLoan, "Disbursed loan details should not be null");
                 assertNotNull(undisbursedLoan, "Undisbursed loan details should not be null");
