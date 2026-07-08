@@ -40,6 +40,18 @@ public final class ClientRequestBuilders {
                 .locale(LoanTestData.LOCALE);
     }
 
+    public static PostClientsRequest createActivePersonClient(String activationDate) {
+        return new PostClientsRequest()//
+                .officeId(1L)//
+                .legalFormId(1L)//
+                .firstname(Utils.randomFirstNameGenerator())//
+                .lastname(Utils.randomLastNameGenerator())//
+                .active(true)//
+                .activationDate(activationDate)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN)//
+                .locale(LoanTestData.LOCALE);
+    }
+
     public static PostClientsClientIdRequest activateClient(String activationDate) {
         return new PostClientsClientIdRequest()//
                 .locale(LoanTestData.LOCALE)//

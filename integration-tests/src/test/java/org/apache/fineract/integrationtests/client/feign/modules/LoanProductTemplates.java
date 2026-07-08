@@ -506,6 +506,25 @@ public interface LoanProductTemplates {
                 .loanScheduleProcessingType("HORIZONTAL");
     }
 
+    default PostLoanProductsRequest create4ICumulative() {
+        return create4IProgressive()//
+                .transactionProcessingStrategyCode(
+                        LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)//
+                .paymentAllocation(null)//
+                .rescheduleStrategyMethod(RescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS)//
+                .allowAttributeOverrides(new AllowAttributeOverrides()//
+                        .amortizationType(true)//
+                        .interestType(true)//
+                        .transactionProcessingStrategyCode(true)//
+                        .interestCalculationPeriodType(true)//
+                        .inArrearsTolerance(true)//
+                        .repaymentEvery(true)//
+                        .graceOnPrincipalAndInterestPayment(true)//
+                        .graceOnArrearsAgeing(true))//
+                .loanScheduleType(LoanScheduleType.CUMULATIVE.toString())//
+                .loanScheduleProcessingType(null);
+    }
+
     default PostLoanProductsRequest create4IProgressiveWithCapitalizedIncome() {
         return create4IProgressive().enableIncomeCapitalization(true)//
                 .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)//

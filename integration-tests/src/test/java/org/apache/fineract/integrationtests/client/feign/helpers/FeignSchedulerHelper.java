@@ -28,6 +28,7 @@ import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
+import org.apache.fineract.client.models.GetSchedulerResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
 import org.awaitility.Awaitility;
 
@@ -45,6 +46,19 @@ public class FeignSchedulerHelper {
 
     public void startScheduler() {
         FeignCalls.executeVoid(() -> fineractClient.scheduler().handleCommandsScheduler("start"));
+    }
+
+    public boolean getSchedulerStatus() {
+        GetSchedulerResponse response = ok(() -> fineractClient.scheduler().retrieveSchedulerStatus());
+        return Boolean.TRUE.equals(response.getActive());
+    }
+
+    public void updateSchedulerStatus(boolean enabled) {
+        if (enabled) {
+            startScheduler();
+        } else {
+            stopScheduler();
+        }
     }
 
     public void executeAndAwaitJob(String jobDisplayName) {
