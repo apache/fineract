@@ -28,7 +28,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collections;
@@ -128,7 +127,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -284,7 +283,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -459,7 +458,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -517,7 +516,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -595,7 +594,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -656,7 +655,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -724,7 +723,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, Month.SEPTEMBER, 5));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 5));
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -737,7 +736,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = dateFormatter.format(targetDate);
             Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "10"));
@@ -751,7 +750,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, Month.SEPTEMBER, 6));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 6));
             inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
@@ -771,7 +770,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             assertTrue(loanDetails.getChargedOff());
 
             // no accrual
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, Month.SEPTEMBER, 7));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 7));
             inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
@@ -780,9 +779,9 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             assertTrue(loanDetails.getTransactions().get(3).getType().getChargeoff());
             assertEquals(4, loanDetails.getTransactions().size());
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, Month.SEPTEMBER, 8));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 8));
             inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
-            PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(dateFormatter.format(LocalDate.of(2020, Month.SEPTEMBER, 8)));
+            PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(dateFormatter.format(LocalDate.of(2020, 9, 8)));
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
             assertTrue(loanDetails.getTransactions().get(1).getType().getAccrual());
@@ -792,7 +791,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
             loanTransactionHelper.undoChargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest());
             // generate accrual again
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, Month.SEPTEMBER, 9));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 9));
             inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
@@ -802,7 +801,7 @@ public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
             assertTrue(loanDetails.getTransactions().get(4).getType().getAccrual());
             assertEquals(5, loanDetails.getTransactions().size());
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, Month.SEPTEMBER, 10));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 10));
 
             this.loanTransactionHelper.chargeOffLoan((long) loanId,
                     new PostLoansLoanIdTransactionsRequest().transactionDate("10 September 2020").locale("en").dateFormat("dd MMMM yyyy")

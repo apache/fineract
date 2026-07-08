@@ -98,7 +98,7 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 January 2026", DATETIME_PATTERN);
             assertNotNull(prepayTemplate);
 
-            double prepayAmount = prepayTemplate.getAmount();
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
             log.info("Prepay template amount: {}", prepayAmount);
             log.info("Prepay template interest portion: {}", prepayTemplate.getInterestPortion());
             log.info("Prepay template principal portion: {}", prepayTemplate.getPrincipalPortion());
@@ -162,8 +162,8 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
                     unpaidAccruedInterest);
 
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 January 2026", DATETIME_PATTERN);
-            double prepayAmount = prepayTemplate.getAmount();
-            double templateInterest = prepayTemplate.getInterestPortion() != null ? prepayTemplate.getInterestPortion() : 0.0;
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
+            double templateInterest = prepayTemplate.getInterestPortion() != null ? prepayTemplate.getInterestPortion().doubleValue() : 0.0;
             log.info("Prepay template - amount: {}, interest: {}, principal: {}", prepayAmount, templateInterest,
                     prepayTemplate.getPrincipalPortion());
 
@@ -220,8 +220,8 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
 
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 February 2026", DATETIME_PATTERN);
             assertNotNull(prepayTemplate);
-            double prepayAmount = prepayTemplate.getAmount();
-            double templateInterest = prepayTemplate.getInterestPortion() != null ? prepayTemplate.getInterestPortion() : 0.0;
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
+            double templateInterest = prepayTemplate.getInterestPortion() != null ? prepayTemplate.getInterestPortion().doubleValue() : 0.0;
             log.info("Prepay template - amount: {}, interest: {}, principal: {}", prepayAmount, templateInterest,
                     prepayTemplate.getPrincipalPortion());
 
@@ -296,7 +296,7 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
             }
 
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 February 2026", DATETIME_PATTERN);
-            double prepayAmount = prepayTemplate.getAmount();
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
             log.info("Prepay amount: {}", prepayAmount);
             addRepayment(loanId, repayment(prepayAmount, "15 February 2026"));
 
@@ -350,7 +350,7 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
             log.info("Installment total due: {}", installmentTotalDue);
 
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 February 2026", DATETIME_PATTERN);
-            double prepayAmount = prepayTemplate.getAmount();
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
             log.info("Prepay amount on Feb 15: {}", prepayAmount);
 
             assertTrue(prepayAmount > installmentTotalDue,
@@ -382,9 +382,10 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
 
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 February 2026", DATETIME_PATTERN);
             assertNotNull(prepayTemplate);
-            double prepayAmount = prepayTemplate.getAmount();
-            double templateInterest = prepayTemplate.getInterestPortion() != null ? prepayTemplate.getInterestPortion() : 0.0;
-            double templatePrincipal = prepayTemplate.getPrincipalPortion() != null ? prepayTemplate.getPrincipalPortion() : 0.0;
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
+            double templateInterest = prepayTemplate.getInterestPortion() != null ? prepayTemplate.getInterestPortion().doubleValue() : 0.0;
+            double templatePrincipal = prepayTemplate.getPrincipalPortion() != null ? prepayTemplate.getPrincipalPortion().doubleValue()
+                    : 0.0;
             log.info("Prepay template - amount: {}, interest: {}, principal: {}", prepayAmount, templateInterest, templatePrincipal);
 
             // Prepay template must include full principal + all interest (including post-maturity)
@@ -433,7 +434,7 @@ public class FeignLoanAccrualOnClosedLoanTest extends FeignLoanTestBase {
         runAt("2026-02-15", () -> {
             executeInlineCOB(loanId);
             GetLoansLoanIdTransactionsTemplateResponse prepayTemplate = getPrepaymentAmount(loanId, "15 February 2026", DATETIME_PATTERN);
-            double prepayAmount = prepayTemplate.getAmount();
+            double prepayAmount = prepayTemplate.getAmount().doubleValue();
             log.info("Prepay amount: {}", prepayAmount);
             addRepayment(loanId, repayment(prepayAmount, "15 February 2026"));
 

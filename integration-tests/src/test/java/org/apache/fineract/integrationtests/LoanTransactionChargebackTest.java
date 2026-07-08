@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -183,7 +182,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
         try {
             updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            LocalDate businessDate = LocalDate.of(2023, Month.JANUARY, 20);
+            LocalDate businessDate = LocalDate.of(2023, 1, 20);
             todaysDate = businessDate;
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             // Client and Loan account creation

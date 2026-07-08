@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             // apply charges
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 9);
+            LocalDate targetDate = LocalDate.of(2022, 9, 9);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -107,7 +106,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             // apply charges
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 9);
+            LocalDate targetDate = LocalDate.of(2022, 9, 9);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -144,7 +143,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             updateBusinessDate("4 September 2022");
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 2);
+            LocalDate targetDate = LocalDate.of(2022, 9, 2);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -181,7 +180,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
             updateBusinessDate("4 September 2022");
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 2);
+            LocalDate targetDate = LocalDate.of(2022, 9, 2);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 

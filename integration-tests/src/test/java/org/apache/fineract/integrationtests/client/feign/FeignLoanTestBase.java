@@ -60,7 +60,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
 import org.apache.fineract.client.models.LoanScheduleData;
-import org.apache.fineract.client.models.LoanTransactionData;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -74,6 +73,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
@@ -116,6 +116,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
 import org.apache.fineract.integrationtests.common.externalevents.BusinessEvent;
+import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
@@ -123,7 +124,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
+@ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public abstract class FeignLoanTestBase extends FeignIntegrationTest implements LoanProductTemplates {
 
     protected static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN, Locale.ENGLISH);
@@ -596,7 +597,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected Long verifyPrepayAmountByRepayment(Long loanId, String date) {
         GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepayAmount(loanId, date);
-        Double amountToPrepayLoan = prepayAmount.getAmount();
+        Double amountToPrepayLoan = prepayAmount.getAmount() != null ? prepayAmount.getAmount().doubleValue() : null;
         Long repaymentId = null;
         if (amountToPrepayLoan != null && amountToPrepayLoan > 0) {
             PostLoansLoanIdTransactionsResponse repayment = transactionHelper.makeLoanRepayment(loanId, "repayment", date,
@@ -771,12 +772,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return createLoanProductFromJson(loanProductJson).intValue();
     }
 
-    protected HashMap<String, Object> applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId) {
+    protected PostLoansResponse applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId) {
         return applyForLoanApplication(clientId, loanProductId, externalId, null);
     }
 
-    protected HashMap<String, Object> applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId,
-            String linkAccountId) {
+    protected PostLoansResponse applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId, String linkAccountId) {
         final String loanApplicationJSON = new org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder()
                 .withPrincipal("1000").withLoanTermFrequency("1").withLoanTermFrequencyAsMonths().withNumberOfRepayments("1")
                 .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0")
@@ -784,41 +784,23 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 September 2022")
                 .withSubmittedOnDate("01 September 2022").withLoanType("individual").withInArrearsTolerance("1001")
                 .withExternalId(externalId).build(clientId.toString(), loanProductId.toString(), linkAccountId);
-        Long loanId = applyForLoanFromJson(loanApplicationJSON);
-        HashMap<String, Object> result = new HashMap<>();
-        result.put("resourceId", loanId.intValue());
-        result.put("resourceExternalId", getLoanDetails(loanId).getExternalId());
-        return result;
+        return getLoanIdFromApplication(loanApplicationJSON);
     }
 
-    protected HashMap<String, Object> getLoanIdFromApplication(String loanApplicationJson) {
+    protected PostLoansResponse getLoanIdFromApplication(String loanApplicationJson) {
         Long loanId = applyForLoanFromJson(loanApplicationJson);
-        HashMap<String, Object> result = new HashMap<>();
-        result.put("resourceId", loanId.intValue());
-        result.put("resourceExternalId", getLoanDetails(loanId).getExternalId());
+        PostLoansResponse result = new PostLoansResponse();
+        result.setResourceId(loanId);
+        result.setResourceExternalId(getLoanDetails(loanId).getExternalId());
         return result;
     }
 
-    protected HashMap<String, Object> disburseLoanAsMap(String date, Integer loanId, String transactionAmount, String externalId) {
-        PostLoansLoanIdResponse response = loanHelper.disburseLoanWithExternalId(date, loanId.longValue(), transactionAmount, externalId);
-        HashMap<String, Object> result = new HashMap<>();
-        result.put("subResourceExternalId", response.getSubResourceExternalId());
-        return result;
+    protected PostLoansLoanIdResponse disburseLoan(String date, Integer loanId, String transactionAmount, String externalId) {
+        return loanHelper.disburseLoanWithExternalId(date, loanId.longValue(), transactionAmount, externalId);
     }
 
-    protected HashMap<String, Object> disburseLoanAsMap(String date, Integer loanId, String transactionAmount) {
-        PostLoansLoanIdResponse response = loanHelper.disburseLoan(date, loanId.longValue(), transactionAmount);
-        HashMap<String, Object> result = new HashMap<>();
-        result.put("subResourceExternalId", response.getSubResourceExternalId());
-        return result;
-    }
-
-    protected HashMap<String, Object> disburseLoan(String date, Integer loanId, String transactionAmount, String externalId) {
-        return disburseLoanAsMap(date, loanId, transactionAmount, externalId);
-    }
-
-    protected HashMap<String, Object> disburseLoan(String date, Integer loanId, String transactionAmount) {
-        return disburseLoanAsMap(date, loanId, transactionAmount);
+    protected PostLoansLoanIdResponse disburseLoan(String date, Integer loanId, String transactionAmount) {
+        return loanHelper.disburseLoan(date, loanId.longValue(), transactionAmount);
     }
 
     protected Long addChargesForLoan(Integer loanId, String chargeJson) {
@@ -1116,7 +1098,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         transactionHelper.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest());
     }
 
-    protected LoanTransactionData getReAgeTemplate(Long loanId) {
+    protected GetLoansLoanIdTransactionsTemplateResponse getReAgeTemplate(Long loanId) {
         return transactionHelper.getReAgeTemplate(loanId);
     }
 

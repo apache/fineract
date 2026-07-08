@@ -1066,7 +1066,7 @@ public class LoanReAmortizationIntegrationTest extends FeignLoanTestBase {
             // Pay-off the loan on Mar 15, 2024
             GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepayAmount(loanId.get(), "15 March 2024");
             assertNotNull(prepayAmount);
-            Double amount = prepayAmount.getAmount();
+            Double amount = prepayAmount.getAmount().doubleValue();
 
             makeLoanRepayment(loanId.get(), "repayment", "15 March 2024", amount);
 

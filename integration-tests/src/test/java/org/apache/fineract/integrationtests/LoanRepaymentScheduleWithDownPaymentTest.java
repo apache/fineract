@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -105,9 +104,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
@@ -155,9 +154,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalPaidForPeriod())) //
@@ -206,9 +205,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
@@ -256,11 +255,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedFirstDownPaymentAmount = 175.00;
-            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedSecondDownPaymentAmount = 75.00;
-            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 4);
+            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, 9, 4);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedFirstDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
@@ -312,11 +311,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedFirstDownPaymentAmount = 175.00;
-            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedSecondDownPaymentAmount = 75.00;
-            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 4);
+            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, 9, 4);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
             Double expectedTotalRepaymentAmount = expectedFirstDownPaymentAmount + expectedSecondDownPaymentAmount;
 
             assertTrue(periods.stream() //
@@ -371,13 +370,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedOutstandingLoanBalanceOnDisbursement = 1000.00;
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 250.00;
-            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, 10, 3);
             Double outstandingBalanceOnFirstRepayment = 500.00;
-            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, Month.NOVEMBER, 3);
+            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, 11, 3);
             Double outstandingBalanceOnSecondRepayment = 250.00;
-            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, Month.DECEMBER, 3);
+            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, 12, 3);
             Double outstandingBalanceOnThirdRepayment = 0.00;
 
             assertEquals(expectedDownPaymentAmount, Utils.getDoubleValue(summary.getTotalRepaymentTransaction()));
@@ -450,16 +449,16 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedOutstandingLoanBalanceOnFirstDisbursement = 700.00;
             Double expectedFirstDownPaymentAmount = 175.00;
-            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedOutstandingLoanBalanceOnSecondDisbursement = 300.00;
             Double expectedSecondDownPaymentAmount = 75.00;
-            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 4);
+            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, 9, 4);
             Double expectedRepaymentAmount = 250.00;
-            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, 10, 3);
             Double outstandingBalanceOnFirstRepayment = 500.00;
-            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, Month.NOVEMBER, 3);
+            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, 11, 3);
             Double outstandingBalanceOnSecondRepayment = 250.00;
-            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, Month.DECEMBER, 3);
+            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, 12, 3);
             Double outstandingBalanceOnThirdRepayment = 0.00;
             Double expectedTotalRepaymentAmount = expectedFirstDownPaymentAmount + expectedSecondDownPaymentAmount;
 
@@ -547,10 +546,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
             Double expectedTotalDueForRepaymentInstallment = 760.0;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
@@ -611,17 +610,17 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedOutstandingLoanBalanceOnFirstDisbursement = 700.00;
             Double expectedFirstDownPaymentAmount = 175.00;
-            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedOutstandingLoanBalanceOnSecondDisbursement = 300.00;
             Double expectedSecondDownPaymentAmount = 75.00;
-            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 4);
+            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, 9, 4);
             Double expectedRepaymentAmount = 250.00;
             Double expectedRepaymentTotalDueWithCharge = 260.0;
-            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, 10, 3);
             Double outstandingBalanceOnFirstRepayment = 500.00;
-            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, Month.NOVEMBER, 3);
+            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, 11, 3);
             Double outstandingBalanceOnSecondRepayment = 250.00;
-            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, Month.DECEMBER, 3);
+            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, 12, 3);
             Double outstandingBalanceOnThirdRepayment = 0.00;
             Double expectedTotalRepaymentAmount = expectedFirstDownPaymentAmount + expectedSecondDownPaymentAmount;
 
@@ -710,10 +709,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
             Double expectedTotalDueForRepaymentInstallment = 767.50;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
@@ -777,10 +776,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             Double expectedOutstandingLoanBalanceOnFirstDisbursement = 700.00;
             Double expectedFirstDownPaymentAmount = 175.00;
             Double expectedDownPaymentInterest = 0.00;
-            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedFirstDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedOutstandingLoanBalanceOnSecondDisbursement = 300.00;
             Double expectedSecondDownPaymentAmount = 75.00;
-            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 4);
+            LocalDate expectedSecondDownPaymentDueDate = LocalDate.of(2022, 9, 4);
             Double expectedRepaymentAmount = 250.00;
             Double expectedRepaymentAmountWithInterest = 255.0;
             Double expectedRepaymentAmountWithInterest2 = 252.5;
@@ -788,11 +787,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             Double expectedRepaymentInterest2 = 5.0;
             Double expectedRepaymentInterest3 = 2.5;
             Double expectedRepaymentTotalDueWithChargeAndInterest = 267.42;
-            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedFirstRepaymentDueDate = LocalDate.of(2022, 10, 3);
             Double outstandingBalanceOnFirstRepayment = 500.00;
-            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, Month.NOVEMBER, 3);
+            LocalDate expectedSecondRepaymentDueDate = LocalDate.of(2022, 11, 3);
             Double outstandingBalanceOnSecondRepayment = 250.00;
-            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, Month.DECEMBER, 3);
+            LocalDate expectedThirdRepaymentDueDate = LocalDate.of(2022, 12, 3);
             Double outstandingBalanceOnThirdRepayment = 0.00;
             Double expectedTotalRepaymentAmount = expectedFirstDownPaymentAmount + expectedSecondDownPaymentAmount;
 
@@ -879,9 +878,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
 
             assertTrue(periods.stream() //
                     .anyMatch(period -> expectedDownPaymentAmount.equals(Utils.getDoubleValue(period.getTotalDueForPeriod())) //
@@ -1011,7 +1010,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
     @Test
     public void loanApplicationWithLoanProductWithEnableDownPaymentAndEnableAutoRepaymentForDownPaymentTest() {
         runAt("03 March 2023", () -> {
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             // Accounts of periodic accrual
             final Account assetAccount = getAccounts().getLoansReceivableAccount();
@@ -1070,48 +1069,48 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
                     journalEntry(250.0, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
 
             // verify installment details
-            assertEquals(LocalDate.of(2023, Month.MARCH, 3), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
             assertEquals(1000.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(0).getPrincipalLoanBalanceOutstanding()));
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, Month.MARCH, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(250.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getDownPaymentPeriod());
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, Month.APRIL, 2), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 2), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(750.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(2).getDownPaymentPeriod());
 
             // second disbursement
 
-            disbursementDate = LocalDate.of(2023, Month.MARCH, 5);
+            disbursementDate = LocalDate.of(2023, 3, 5);
             updateBusinessDate(DateUtils.format(disbursementDate, DATETIME_PATTERN));
             disburseLoanWithAmount(loanId.longValue(), "05 March 2023", Double.parseDouble("200"));
             checkDownPaymentTransaction(disbursementDate, 50.0f, 0.0f, 0.0f, 0.0f, loanId);
 
             loanDetails = getLoanDetails(loanId.longValue());
             // verify installment details
-            assertEquals(LocalDate.of(2023, Month.MARCH, 3), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
             assertEquals(1000.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(0).getPrincipalLoanBalanceOutstanding()));
             assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, Month.MARCH, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
             assertEquals(250.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(1).getDownPaymentPeriod());
-            assertEquals(LocalDate.of(2023, Month.MARCH, 5), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
             assertEquals(200.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getPrincipalLoanBalanceOutstanding()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(2).getDownPaymentPeriod());
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, Month.MARCH, 5), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 5), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
             assertEquals(50.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
             assertEquals(true, loanDetails.getRepaymentSchedule().getPeriods().get(3).getDownPaymentPeriod());
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
-            assertEquals(LocalDate.of(2023, Month.APRIL, 2), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 2), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
             assertEquals(900.0,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(4).getDownPaymentPeriod());
@@ -1223,7 +1222,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
     @Test
     public void downPaymentOnOverpaidProgressiveLoan() {
         runAt("03 March 2023", () -> {
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             Long clientId = createClient();
 
@@ -1290,7 +1289,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             assertEquals(50.0, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
 
             // second disbursement
-            disbursementDate = LocalDate.of(2023, Month.MARCH, 5);
+            disbursementDate = LocalDate.of(2023, 3, 5);
             updateBusinessDate(DateUtils.format(disbursementDate, DATETIME_PATTERN));
 
             disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
@@ -1424,7 +1423,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
     @Test
     public void downPaymentOnOverpaidCumulativeLoan() {
         runAt("03 March 2023", () -> {
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             Long clientId = createClient();
 
@@ -1496,7 +1495,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             assertEquals(50.0, Utils.getDoubleValue(loanDetails.getTotalOverpaid()));
 
             // second disbursement
-            disbursementDate = LocalDate.of(2023, Month.MARCH, 5);
+            disbursementDate = LocalDate.of(2023, 3, 5);
             updateBusinessDate(DateUtils.format(disbursementDate, DATETIME_PATTERN));
 
             disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
@@ -1650,9 +1649,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
             List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
             Double expectedDownPaymentAmount = 250.00;
-            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, Month.SEPTEMBER, 3);
+            LocalDate expectedDownPaymentDueDate = LocalDate.of(2022, 9, 3);
             Double expectedRepaymentAmount = 750.00;
-            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, Month.OCTOBER, 3);
+            LocalDate expectedRepaymentDueDate = LocalDate.of(2022, 10, 3);
             Double expectedTotalOutstandingAmount = 1000.00;
             Double expectedTotalRepaymentTransactionAmount = 0.00;
 

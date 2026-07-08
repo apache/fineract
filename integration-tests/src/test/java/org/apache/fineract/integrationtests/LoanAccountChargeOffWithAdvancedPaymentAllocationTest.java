@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
@@ -78,7 +77,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             // apply charges
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -108,7 +107,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             assertTrue(loanDetails.getChargedOff());
 
             // verify amounts for charge-off transaction
-            verifyTransaction(LocalDate.of(2022, Month.SEPTEMBER, 10), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
+            verifyTransaction(LocalDate.of(2022, 9, 10), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
             // verify journal entries
             GetJournalEntriesTransactionIdResponse journalEntriesForChargeOff = getJournalEntries(
                     "L" + chargeOffTransaction.getResourceId().toString());
@@ -117,13 +116,13 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
 
             List<JournalEntryTransactionItem> journalEntries = journalEntriesForChargeOff.getPageItems();
             assertEquals(4, journalEntries.size());
-            verifyJournalEntry(journalEntries.get(3), 1000.0, LocalDate.of(2022, Month.SEPTEMBER, 10),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(2), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 10),
-                    getAccounts().getFeeReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(1), 1000.0, LocalDate.of(2022, Month.SEPTEMBER, 10),
-                    getAccounts().getChargeOffExpenseAccount(), JournalEntry.TransactionType.DEBIT.name());
-            verifyJournalEntry(journalEntries.get(0), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 10), getAccounts().getFeeChargeOffAccount(),
+            verifyJournalEntry(journalEntries.get(3), 1000.0, LocalDate.of(2022, 9, 10), getAccounts().getLoansReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(2), 10.0, LocalDate.of(2022, 9, 10), getAccounts().getFeeReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(1), 1000.0, LocalDate.of(2022, 9, 10), getAccounts().getChargeOffExpenseAccount(),
+                    JournalEntry.TransactionType.DEBIT.name());
+            verifyJournalEntry(journalEntries.get(0), 10.0, LocalDate.of(2022, 9, 10), getAccounts().getFeeChargeOffAccount(),
                     JournalEntry.TransactionType.DEBIT.name());
         });
     }
@@ -140,7 +139,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             // apply charges
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -172,7 +171,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             assertTrue(loanDetails.getChargedOff());
 
             // verify amounts for charge-off transaction
-            verifyTransaction(LocalDate.of(2022, Month.SEPTEMBER, 10), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
+            verifyTransaction(LocalDate.of(2022, 9, 10), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
 
             Long reversedAndReplayedTransactionId = chargeOffTransaction.getResourceId();
 
@@ -193,7 +192,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             assertEquals("REPLAYED", transactionRelation.getRelationType());
 
             // verify amounts for charge-off transaction
-            verifyTransaction(LocalDate.of(2022, Month.SEPTEMBER, 10), 1020.0f, 1000.0f, 0.0f, 10.0f, 10.0f, loanId, "chargeoff");
+            verifyTransaction(LocalDate.of(2022, 9, 10), 1020.0f, 1000.0f, 0.0f, 10.0f, 10.0f, loanId, "chargeoff");
         });
     }
 
@@ -255,7 +254,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             updateBusinessDate("5 September 2022");
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -284,13 +283,13 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             List<JournalEntryTransactionItem> journalEntries = journalEntriesForChargeOff.getPageItems();
             assertEquals(4, journalEntries.size());
 
-            verifyJournalEntry(journalEntries.get(3), 1000.0, LocalDate.of(2022, Month.SEPTEMBER, 14),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(2), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 14),
-                    getAccounts().getFeeReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(1), 1000.0, LocalDate.of(2022, Month.SEPTEMBER, 14),
-                    getAccounts().getChargeOffExpenseAccount(), JournalEntry.TransactionType.DEBIT.name());
-            verifyJournalEntry(journalEntries.get(0), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 14), getAccounts().getFeeChargeOffAccount(),
+            verifyJournalEntry(journalEntries.get(3), 1000.0, LocalDate.of(2022, 9, 14), getAccounts().getLoansReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(2), 10.0, LocalDate.of(2022, 9, 14), getAccounts().getFeeReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(1), 1000.0, LocalDate.of(2022, 9, 14), getAccounts().getChargeOffExpenseAccount(),
+                    JournalEntry.TransactionType.DEBIT.name());
+            verifyJournalEntry(journalEntries.get(0), 10.0, LocalDate.of(2022, 9, 14), getAccounts().getFeeChargeOffAccount(),
                     JournalEntry.TransactionType.DEBIT.name());
 
             // make Repayment before chargeoff date - business date is still on 14 September 2022
@@ -311,11 +310,11 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             journalEntries = journalEntriesForRepayment.getPageItems();
             assertEquals(3, journalEntries.size());
 
-            verifyJournalEntry(journalEntries.get(2), 90.0, LocalDate.of(2022, Month.SEPTEMBER, 7),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(1), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFeeReceivableAccount(),
+            verifyJournalEntry(journalEntries.get(2), 90.0, LocalDate.of(2022, 9, 7), getAccounts().getLoansReceivableAccount(),
                     JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFundSource(),
+            verifyJournalEntry(journalEntries.get(1), 10.0, LocalDate.of(2022, 9, 7), getAccounts().getFeeReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, 9, 7), getAccounts().getFundSource(),
                     JournalEntry.TransactionType.DEBIT.name());
 
             // verify reverse replay of Charge-Off
@@ -331,7 +330,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             assertEquals("REPLAYED", transactionRelation.getRelationType());
 
             // verify amounts for charge-off transaction
-            verifyTransaction(LocalDate.of(2022, Month.SEPTEMBER, 14), 910.0f, 910.0f, 0.0f, 0.0f, 0.0f, loanId, "chargeoff");
+            verifyTransaction(LocalDate.of(2022, 9, 14), 910.0f, 910.0f, 0.0f, 0.0f, 0.0f, loanId, "chargeoff");
 
             // make Repayment after chargeoff date
             updateBusinessDate("15 September 2022");
@@ -351,9 +350,9 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             journalEntries = journalEntriesForRepayment.getPageItems();
             assertEquals(2, journalEntries.size());
 
-            verifyJournalEntry(journalEntries.get(1), 100.0, LocalDate.of(2022, Month.SEPTEMBER, 15), getAccounts().getRecoveriesAccount(),
+            verifyJournalEntry(journalEntries.get(1), 100.0, LocalDate.of(2022, 9, 15), getAccounts().getRecoveriesAccount(),
                     JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, Month.SEPTEMBER, 15), getAccounts().getFundSource(),
+            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, 9, 15), getAccounts().getFundSource(),
                     JournalEntry.TransactionType.DEBIT.name());
         });
     }
@@ -370,7 +369,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             // apply charges
             Long feeCharge = createLoanSpecifiedDueDateCharge(10.0);
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 5);
+            LocalDate targetDate = LocalDate.of(2022, 9, 5);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, feeCharge, feeCharge1AddedDate, 10.0);
 
@@ -391,11 +390,11 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             List<JournalEntryTransactionItem> journalEntries = journalEntriesForRepayment.getPageItems();
             assertEquals(3, journalEntries.size());
 
-            verifyJournalEntry(journalEntries.get(2), 90.0, LocalDate.of(2022, Month.SEPTEMBER, 7),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(1), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFeeReceivableAccount(),
+            verifyJournalEntry(journalEntries.get(2), 90.0, LocalDate.of(2022, 9, 7), getAccounts().getLoansReceivableAccount(),
                     JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFundSource(),
+            verifyJournalEntry(journalEntries.get(1), 10.0, LocalDate.of(2022, 9, 7), getAccounts().getFeeReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, 9, 7), getAccounts().getFundSource(),
                     JournalEntry.TransactionType.DEBIT.name());
 
             // set loan as chargeoff
@@ -422,10 +421,10 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             journalEntries = journalEntriesForChargeOff.getPageItems();
             assertEquals(2, journalEntries.size());
 
-            verifyJournalEntry(journalEntries.get(1), 910.0, LocalDate.of(2022, Month.SEPTEMBER, 7),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(0), 910.0, LocalDate.of(2022, Month.SEPTEMBER, 7),
-                    getAccounts().getChargeOffExpenseAccount(), JournalEntry.TransactionType.DEBIT.name());
+            verifyJournalEntry(journalEntries.get(1), 910.0, LocalDate.of(2022, 9, 7), getAccounts().getLoansReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(0), 910.0, LocalDate.of(2022, 9, 7), getAccounts().getChargeOffExpenseAccount(),
+                    JournalEntry.TransactionType.DEBIT.name());
 
             // reverse Repayment
             reverseRepayment(loanId, repaymentTransaction.getResourceId(), "7 September 2022");
@@ -440,17 +439,17 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             journalEntries = journalEntriesForRepayment.getPageItems();
             assertEquals(6, journalEntries.size());
 
-            verifyJournalEntry(journalEntries.get(5), 90.0, LocalDate.of(2022, Month.SEPTEMBER, 7),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(4), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFeeReceivableAccount(),
+            verifyJournalEntry(journalEntries.get(5), 90.0, LocalDate.of(2022, 9, 7), getAccounts().getLoansReceivableAccount(),
                     JournalEntry.TransactionType.CREDIT.name());
-            verifyJournalEntry(journalEntries.get(3), 100.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFundSource(),
+            verifyJournalEntry(journalEntries.get(4), 10.0, LocalDate.of(2022, 9, 7), getAccounts().getFeeReceivableAccount(),
+                    JournalEntry.TransactionType.CREDIT.name());
+            verifyJournalEntry(journalEntries.get(3), 100.0, LocalDate.of(2022, 9, 7), getAccounts().getFundSource(),
                     JournalEntry.TransactionType.DEBIT.name());
-            verifyJournalEntry(journalEntries.get(2), 90.0, LocalDate.of(2022, Month.SEPTEMBER, 7),
-                    getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.DEBIT.name());
-            verifyJournalEntry(journalEntries.get(1), 10.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFeeReceivableAccount(),
+            verifyJournalEntry(journalEntries.get(2), 90.0, LocalDate.of(2022, 9, 7), getAccounts().getLoansReceivableAccount(),
                     JournalEntry.TransactionType.DEBIT.name());
-            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, Month.SEPTEMBER, 7), getAccounts().getFundSource(),
+            verifyJournalEntry(journalEntries.get(1), 10.0, LocalDate.of(2022, 9, 7), getAccounts().getFeeReceivableAccount(),
+                    JournalEntry.TransactionType.DEBIT.name());
+            verifyJournalEntry(journalEntries.get(0), 100.0, LocalDate.of(2022, 9, 7), getAccounts().getFundSource(),
                     JournalEntry.TransactionType.CREDIT.name());
 
             // verify reverse replay of Charge-Off
@@ -466,7 +465,7 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
             assertEquals("REPLAYED", transactionRelation.getRelationType());
 
             // verify amounts for charge-off transaction
-            verifyTransaction(LocalDate.of(2022, Month.SEPTEMBER, 7), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
+            verifyTransaction(LocalDate.of(2022, 9, 7), 1010.0f, 1000.0f, 0.0f, 10.0f, 0.0f, loanId, "chargeoff");
         });
 
     }
@@ -505,8 +504,8 @@ public class LoanAccountChargeOffWithAdvancedPaymentAllocationTest extends Feign
                     .dateFormat(LoanTestData.DATETIME_PATTERN));
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 1), 164.95, 167.46, -2.51, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    0.0, 5.14, 2.63, 2.51, 170.09, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 164.95, 167.46, -2.51, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.14,
+                    2.63, 2.51, 170.09, 0.0);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 2, "01 March 2024", 170.09, 0, 0, 0.0);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2024", 170.09, 0, 0, 0.0);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2024", 170.09, 0, 0, 0.0);

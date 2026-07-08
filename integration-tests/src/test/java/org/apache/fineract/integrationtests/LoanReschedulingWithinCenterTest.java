@@ -28,7 +28,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -69,7 +68,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
     @Test
     public void testCenterReschedulingLoansWithInterestRecalculationEnabled() {
-        Long officeId = officeHelper.createOffice(LocalDate.of(2007, Month.JULY, 1)).getResourceId();
+        Long officeId = officeHelper.createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
         int staffId = FeignGroupCenterHelper.createStaff(officeId.intValue()).intValue();
@@ -139,7 +138,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
     @Test
     public void testCenterReschedulingMultiTrancheLoansWithInterestRecalculationEnabled() {
-        Long officeId = officeHelper.createOffice(LocalDate.of(2007, Month.JULY, 1)).getResourceId();
+        Long officeId = officeHelper.createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
         int staffId = FeignGroupCenterHelper.createStaff(officeId.intValue()).intValue();

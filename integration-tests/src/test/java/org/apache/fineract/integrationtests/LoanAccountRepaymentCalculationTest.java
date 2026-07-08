@@ -28,7 +28,6 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
@@ -72,7 +71,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -117,20 +116,20 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.MARCH, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 3, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -140,20 +139,20 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.MARCH, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.5, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 3, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 312.5, 2, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 312.5, 3, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.5, 4, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -167,7 +166,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -212,20 +211,20 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.MARCH, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 3, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -235,20 +234,20 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-03-03] down payment installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.MARCH, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 312.0, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 3, 3), false);
 
             // second period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 313.0, 2, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // third period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 313.0, 3, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // fourth period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 312.0, 4, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -262,7 +261,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -300,16 +299,16 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -319,16 +318,16 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 416.67, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 416.67, 2, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.66, 3, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -342,7 +341,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
         try {
 
             // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
@@ -380,16 +379,16 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
             // disbursement
             loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
@@ -399,16 +398,16 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // first period [2023-03-03 to 2023-04-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, Month.MARCH, 3),
-                    LocalDate.of(2023, Month.APRIL, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 417.0, 1, LocalDate.of(2023, 3, 3),
+                    LocalDate.of(2023, 4, 3), false);
 
             // second period [2023-04-03 to 2023-05-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, Month.APRIL, 3),
-                    LocalDate.of(2023, Month.MAY, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 417.0, 2, LocalDate.of(2023, 4, 3),
+                    LocalDate.of(2023, 5, 3), false);
 
             // third period [2023-05-03 to 2023-06-03] regular installment
-            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, Month.MAY, 3),
-                    LocalDate.of(2023, Month.JUNE, 3), false);
+            verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 416.0, 3, LocalDate.of(2023, 5, 3),
+                    LocalDate.of(2023, 6, 3), false);
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,

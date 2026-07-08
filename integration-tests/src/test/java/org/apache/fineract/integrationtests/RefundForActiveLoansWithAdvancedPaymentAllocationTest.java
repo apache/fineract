@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -70,11 +69,11 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             final double feePortion = 50.00;
             final double penaltyPortion = 100.00;
 
-            final String firstInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, Month.JANUARY, 3));
+            final String firstInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 1, 3));
             addCharge(loanId, false, feePortion, firstInstallmentChargeAddedDate);
             addCharge(loanId, true, penaltyPortion, firstInstallmentChargeAddedDate);
 
-            final String secondInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, Month.FEBRUARY, 3));
+            final String secondInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 2, 3));
             addCharge(loanId, false, feePortion, secondInstallmentChargeAddedDate);
             addCharge(loanId, true, penaltyPortion, secondInstallmentChargeAddedDate);
 
@@ -93,7 +92,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(250.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -101,7 +100,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(penaltyPortion, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -109,7 +108,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             updateBusinessDate("01 March 2023");
             makeRepayment("01 March 2023", 810.0f, loanId);
@@ -129,7 +128,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -137,7 +136,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -145,7 +144,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(240.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             makeRefundByCash("01 March 2023", 15.0f, loanId);
 
@@ -164,7 +163,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -174,7 +173,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(5.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(5.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -182,7 +181,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             makeRefundByCash("01 March 2023", 265.0f, loanId);
 
@@ -201,7 +200,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(20.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -211,7 +210,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(250.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(270.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -219,7 +218,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
         });
     }
 
@@ -247,11 +246,11 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             final double feePortion = 50.00;
             final double penaltyPortion = 100.00;
 
-            final String firstInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, Month.JANUARY, 3));
+            final String firstInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 1, 3));
             addCharge(loanId, false, feePortion, firstInstallmentChargeAddedDate);
             addCharge(loanId, true, penaltyPortion, firstInstallmentChargeAddedDate);
 
-            final String secondInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, Month.FEBRUARY, 3));
+            final String secondInstallmentChargeAddedDate = DATE_FORMATTER.format(LocalDate.of(2023, 2, 3));
             addCharge(loanId, false, feePortion, secondInstallmentChargeAddedDate);
             addCharge(loanId, true, penaltyPortion, secondInstallmentChargeAddedDate);
 
@@ -270,7 +269,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(250.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -278,7 +277,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(penaltyPortion, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -286,7 +285,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             updateBusinessDate("01 March 2023");
             makeRepayment("28 January 2023", 810.0f, loanId);
@@ -306,7 +305,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(50.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -314,7 +313,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(100.00, Utils.getDoubleValue(secondRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(150.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -322,7 +321,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(90.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             makeRefundByCash("28 January 2023", 15.0f, loanId);
 
@@ -341,7 +340,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(50.00, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -351,7 +350,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(150.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -359,7 +358,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(105.0, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
 
             makeRefundByCash("28 January 2023", 395.0f, loanId);
 
@@ -378,7 +377,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(0.00, Utils.getDoubleValue(firstRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 31), firstRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 31), firstRepaymentInstallment.getDueDate());
 
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesDue()));
             assertEquals(feePortion, Utils.getDoubleValue(secondRepaymentInstallment.getFeeChargesOutstanding()));
@@ -388,7 +387,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(250.00, Utils.getDoubleValue(secondRepaymentInstallment.getPrincipalOutstanding()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(400.00, Utils.getDoubleValue(secondRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.MARCH, 2), secondRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 3, 2), secondRepaymentInstallment.getDueDate());
 
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesDue()));
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getFeeChargesOutstanding()));
@@ -396,7 +395,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest extends Feign
             assertEquals(0.00, Utils.getDoubleValue(thirdRepaymentInstallment.getPenaltyChargesOutstanding()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalDueForPeriod()));
             assertEquals(250.00, Utils.getDoubleValue(thirdRepaymentInstallment.getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), thirdRepaymentInstallment.getDueDate());
+            assertEquals(LocalDate.of(2023, 4, 1), thirdRepaymentInstallment.getDueDate());
         });
     }
 

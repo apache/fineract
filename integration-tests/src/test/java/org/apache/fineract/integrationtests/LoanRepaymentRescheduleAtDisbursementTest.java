@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,8 +73,8 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
         GetLoansLoanIdRepaymentPeriod firstInstallment = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .filter(period -> period.getPeriod() != null && period.getPeriod() == 1).findFirst().orElseThrow();
 
-        LoanTestValidators.validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2015, Month.MARCH, 16), 834.71, 0.0, 834.71, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 49.32, 0.0, 49.32, 0, 0);
+        LoanTestValidators.validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2015, 3, 16), 834.71, 0.0, 834.71, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 49.32, 0.0, 49.32, 0, 0);
         assertEquals(884.03, Utils.getDoubleValue(firstInstallment.getTotalDueForPeriod()));
     }
 

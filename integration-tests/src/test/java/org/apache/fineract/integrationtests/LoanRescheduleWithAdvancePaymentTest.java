@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -146,7 +145,7 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
             req.dateFormat(LoanTestData.ISO_DATE_PATTERN);
             req.submittedOnDate(submittedDate);
             req.expectedDisbursementDate(submittedDate);
-            req.repaymentsStartingFromDate(LocalDate.of(2021, Month.JUNE, 14));
+            req.repaymentsStartingFromDate(LocalDate.of(2021, 6, 14));
         });
 
         this.loanId = applyForLoan(applyRequest);
@@ -189,7 +188,7 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
         GetLoansLoanIdRepaymentPeriod period = getLoanDetails(this.loanId).getRepaymentSchedule().getPeriods().get(4);
         LOG.info("period  {}", period);
 
-        assertEquals(LocalDate.of(2021, Month.AUGUST, 31), period.getDueDate(), "Checking for Due Date for 1st Month");
+        assertEquals(LocalDate.of(2021, 8, 31), period.getDueDate(), "Checking for Due Date for 1st Month");
 
     }
 
@@ -244,7 +243,7 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
             req.dateFormat(LoanTestData.ISO_DATE_PATTERN);
             req.submittedOnDate(submittedDate);
             req.expectedDisbursementDate(submittedDate);
-            req.repaymentsStartingFromDate(LocalDate.of(2022, Month.JANUARY, 3));
+            req.repaymentsStartingFromDate(LocalDate.of(2022, 1, 3));
         });
 
         this.loanId = applyForLoan(applyRequest);
@@ -272,7 +271,7 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
         GetLoansLoanIdRepaymentPeriod period = getLoanDetails(this.loanId).getRepaymentSchedule().getPeriods().get(3);
         LOG.info("period  {}", period);
 
-        assertEquals(LocalDate.of(2022, Month.JANUARY, 3), period.getDueDate(), "Checking for Due Date for 1st Month");
+        assertEquals(LocalDate.of(2022, 1, 3), period.getDueDate(), "Checking for Due Date for 1st Month");
         assertEquals(0, BigDecimal.valueOf(1177.13).compareTo(period.getPrincipalDue()));
         assertEquals(0, BigDecimal.valueOf(152.87).compareTo(period.getInterestDue()));
     }

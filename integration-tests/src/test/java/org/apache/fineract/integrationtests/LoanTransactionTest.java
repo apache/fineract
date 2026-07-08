@@ -115,7 +115,7 @@ public class LoanTransactionTest extends FeignLoanTestBase {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + capitalizedIncomeCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 415);
+            assertEquals(0, BigDecimal.valueOf(transactionTemplate.getAmount()).compareTo(new BigDecimal("415")));
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
             assertThat(transactionTemplate.getClassificationOptions().size() > 0);
         });
@@ -145,7 +145,7 @@ public class LoanTransactionTest extends FeignLoanTestBase {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + capitalizedIncomeCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 200);
+            assertEquals(0, BigDecimal.valueOf(transactionTemplate.getAmount()).compareTo(new BigDecimal("200")));
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
         });
     }
@@ -182,7 +182,7 @@ public class LoanTransactionTest extends FeignLoanTestBase {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + capitalizedIncomeAdjustmentCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 150);
+            assertEquals(0, BigDecimal.valueOf(transactionTemplate.getAmount()).compareTo(new BigDecimal("150")));
         });
     }
 
@@ -221,7 +221,7 @@ public class LoanTransactionTest extends FeignLoanTestBase {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + buyDownFeeAdjustmentCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 150);
+            assertEquals(0, BigDecimal.valueOf(transactionTemplate.getAmount()).compareTo(new BigDecimal("150")));
         });
     }
 
@@ -251,7 +251,7 @@ public class LoanTransactionTest extends FeignLoanTestBase {
 
             assertNotNull(transactionTemplate);
             assertEquals("loanTransactionType." + buyDownFeeCommand, transactionTemplate.getType().getCode());
-            assertEquals(transactionTemplate.getAmount(), 0);
+            assertEquals(0, BigDecimal.valueOf(transactionTemplate.getAmount()).compareTo(BigDecimal.ZERO));
             assertThat(transactionTemplate.getPaymentTypeOptions().size() > 0);
             assertThat(transactionTemplate.getClassificationOptions().size() > 0);
         });

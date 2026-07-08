@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -425,9 +424,8 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
                             && variation.getTermType().getId() == 1L)
                     .map(LoanTermVariationsData::getTermVariationApplicableFrom).collect(Collectors.toCollection(TreeSet::new));
 
-            Set<LocalDate> expectedEMIVariationDates = Set.of(LocalDate.of(2024, Month.APRIL, 1), LocalDate.of(2024, Month.MAY, 1),
-                    LocalDate.of(2024, Month.JUNE, 1), LocalDate.of(2024, Month.JULY, 1), LocalDate.of(2024, Month.AUGUST, 1),
-                    LocalDate.of(2024, Month.SEPTEMBER, 1));
+            Set<LocalDate> expectedEMIVariationDates = Set.of(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1),
+                    LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1));
             assertEquals(expectedEMIVariationDates, emiTermVariationDates,
                     "EMI term variations should include installment dates created by extra terms");
 
@@ -441,7 +439,7 @@ public class LoanRescheduleRequestTest extends FeignLoanTestBase {
 
             assertTrue(repaymentDueDates.containsAll(expectedEMIVariationDates),
                     "Repayment schedule should include all projected installment dates up to the EMI end date");
-            assertEquals(LocalDate.of(2024, Month.SEPTEMBER, 1), ((TreeSet<LocalDate>) repaymentDueDates).last(),
+            assertEquals(LocalDate.of(2024, 9, 1), ((TreeSet<LocalDate>) repaymentDueDates).last(),
                     "Repayment schedule should end on the EMI change end date when extra terms are applied");
         });
     }

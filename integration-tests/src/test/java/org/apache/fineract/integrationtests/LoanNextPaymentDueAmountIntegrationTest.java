@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -69,25 +68,25 @@ public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-02-01", 25.52d);
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
     }
 
@@ -125,31 +124,31 @@ public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-03-01", 25.52d);
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 March 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
             deleteAllExternalEvents();
             addRepaymentForLoan(loanId, 25.52d, "02 March 2023");
 
@@ -197,25 +196,25 @@ public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-02-01", 25.52d);
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.FEBRUARY, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
     }
 
@@ -256,26 +255,26 @@ public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
 
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
-            verifyNextPayment(loanDetails, LocalDate.of(2023, Month.MARCH, 1), BigDecimal.valueOf(25.52d));
+            verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
 
     }

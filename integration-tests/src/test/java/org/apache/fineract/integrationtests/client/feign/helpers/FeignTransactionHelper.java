@@ -32,7 +32,6 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.LoanScheduleData;
-import org.apache.fineract.client.models.LoanTransactionData;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -43,11 +42,9 @@ import org.apache.fineract.client.models.TransactionType;
 public class FeignTransactionHelper {
 
     private final FineractFeignClient fineractClient;
-    private final InternalLoanReAgeApi internalLoanReAgeApi;
 
     public FeignTransactionHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
-        this.internalLoanReAgeApi = fineractClient.create(InternalLoanReAgeApi.class);
     }
 
     public void executeInlineCOB(Long loanId) {
@@ -108,8 +105,8 @@ public class FeignTransactionHelper {
         return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "undoReAge")));
     }
 
-    public LoanTransactionData getReAgeTemplate(Long loanId) {
-        return ok(() -> internalLoanReAgeApi.retrieveReAgeTemplate(loanId));
+    public GetLoansLoanIdTransactionsTemplateResponse getReAgeTemplate(Long loanId) {
+        return ok(() -> fineractClient.loanTransactions().retrieveTemplateLoanTransaction(loanId, "reAge", null, null, null, null));
     }
 
     public LoanScheduleData previewReAgeSchedule(Long loanId, Map<String, Object> queryParams) {

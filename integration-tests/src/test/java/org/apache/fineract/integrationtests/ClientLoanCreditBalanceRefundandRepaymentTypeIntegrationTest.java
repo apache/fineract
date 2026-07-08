@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -694,7 +693,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
             GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 100.0, 0.0, 100.0, 0.0, null);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 0.0, 100.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 0.0, 100.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
             String repaymentExternalId = UUID.randomUUID().toString();
@@ -702,7 +701,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                     .transactionDate("24 February 2024").locale("en").transactionAmount(100.0).externalId(repaymentExternalId));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, null);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
             String mir1ExternalId = UUID.randomUUID().toString();
@@ -710,49 +709,49 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                     .dateFormat(DATETIME_PATTERN).transactionAmount(36.99).locale("en").externalId(mir1ExternalId));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 36.99);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("28 February 2024")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(18.94).locale("en"));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 55.93);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("28 February 2024")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(36.99).locale("en"));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 92.92);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("28 February 2024")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(31.99).locale("en"));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 124.91);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("01 March 2024")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(124.91).locale("en"));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, null);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
             makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("02 March 2024")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(19.99).locale("en"));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 19.99);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("02 March 2024")
                     .dateFormat(DATETIME_PATTERN).transactionAmount(19.99).locale("en"));
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 39.98);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             verifyTransactions(loanId, //
@@ -772,8 +771,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 224.91, 0.0, 224.91, 2.99);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, Month.MARCH, 1), 124.91, 124.91, 0.0, 0.0, 36.99);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 124.91, 124.91, 0.0, 0.0, 36.99);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             verifyTransactions(loanId, //
@@ -793,8 +792,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 224.91, 0.0, 224.91, 0.99);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, Month.MARCH, 1), 124.91, 124.91, 0.0, 0.0, 36.99);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 124.91, 124.91, 0.0, 0.0, 36.99);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             verifyTransactions(loanId, //
@@ -815,8 +814,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
             loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.01, 225.90, 0.01, 225.90, null);
-            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, Month.FEBRUARY, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
-            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, Month.MARCH, 6), 125.91, 125.90, 0.01, 0.0, 36.99);
+            validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
+            validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 6), 125.91, 125.90, 0.01, 0.0, 36.99);
             assertTrue(loanDetails.getStatus().getActive());
 
             verifyTransactions(loanId, //

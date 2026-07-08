@@ -25,11 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
@@ -56,6 +54,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -107,17 +106,17 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Long clientId = createClient();
 
             String loanExternalIdStr = UUID.randomUUID().toString();
-            final HashMap loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
-            Integer loanId = (Integer) loan.get("resourceId");
+            final PostLoansResponse loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
+            Integer loanId = loan.getResourceId().intValue();
 
             approveLoan("02 September 2022", loanId);
             String txnExternalIdStr = UUID.randomUUID().toString();
-            final HashMap disbursedLoanResult = disburseLoanAsMap("03 September 2022", loanId, "1000", txnExternalIdStr);
+            final PostLoansLoanIdResponse disbursedLoanResult = disburseLoan("03 September 2022", loanId, "1000", txnExternalIdStr);
 
             // Check whether the provided external id was retrieved
-            assertEquals(txnExternalIdStr, disbursedLoanResult.get("subResourceExternalId"));
+            assertEquals(txnExternalIdStr, disbursedLoanResult.getSubResourceExternalId());
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 7);
+            LocalDate targetDate = LocalDate.of(2022, 9, 7);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
@@ -404,7 +403,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
                     .withAccounting("1", null).build(null);
             final Integer loanProductWithInterestID = getLoanProductId(loanProductWithInterestJSON);
 
-            LocalDate aMonthBefore = LocalDate.of(2022, Month.AUGUST, 7);
+            LocalDate aMonthBefore = LocalDate.of(2022, 8, 7);
             String formattedDate = dateFormatter.format(aMonthBefore);
 
             final Integer savingsId = openSavingsAccount(clientId, "10000.0", "01 August 2022");
@@ -417,8 +416,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
                     .withExpectedDisbursementDate(formattedDate).withSubmittedOnDate(formattedDate).withLoanType("individual")
                     .withExternalId(loanExternalIdStr)
                     .build(clientId.toString(), loanProductWithInterestID.toString(), savingsId.toString());
-            final HashMap loanWithInterest = getLoanIdFromApplication(loanApplicationJSON);
-            Integer loanWithInterestId = (Integer) loanWithInterest.get("resourceId");
+            final PostLoansResponse loanWithInterest = getLoanIdFromApplication(loanApplicationJSON);
+            Integer loanWithInterestId = loanWithInterest.getResourceId().intValue();
 
             String chargeExternalId = UUID.randomUUID().toString();
             PostLoansLoanIdChargesResponse loanChargeForApprovedLoanResult = addLoanCharge(loanExternalIdStr,
@@ -483,9 +482,9 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
 
             approveLoan(formattedDate, loanWithInterestId);
 
-            final HashMap disbursedLoanWithInterestResult = disburseLoanAsMap(formattedDate, loanWithInterestId, "1000");
+            final PostLoansLoanIdResponse disbursedLoanWithInterestResult = disburseLoan(formattedDate, loanWithInterestId, "1000");
             // Check whether an external id was generated
-            assertNotNull(disbursedLoanWithInterestResult.get("subResourceExternalId"));
+            assertNotNull(disbursedLoanWithInterestResult.getSubResourceExternalId());
             LocalDate aMonthBeforePlus3Days = aMonthBefore.plusDays(3);
             formattedDate = dateFormatter.format(aMonthBeforePlus3Days);
 
@@ -675,25 +674,25 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Long clientId = createClient();
 
             String loanExternalIdStr = UUID.randomUUID().toString();
-            final HashMap loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
-            Integer loanId = (Integer) loan.get("resourceId");
+            final PostLoansResponse loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
+            Integer loanId = loan.getResourceId().intValue();
 
             approveLoan("02 September 2022", loanId);
             String txnExternalIdStr = UUID.randomUUID().toString();
-            final HashMap disbursedLoanResult = disburseLoanAsMap("03 September 2022", loanId, "1000", txnExternalIdStr);
+            final PostLoansLoanIdResponse disbursedLoanResult = disburseLoan("03 September 2022", loanId, "1000", txnExternalIdStr);
 
             // Check whether the provided external id was retrieved
-            assertEquals(txnExternalIdStr, disbursedLoanResult.get("subResourceExternalId"));
+            assertEquals(txnExternalIdStr, disbursedLoanResult.getSubResourceExternalId());
 
             // Second loan
-            final HashMap loan2 = applyForLoanApplication(clientId.intValue(), loanProductID, null);
-            Integer loan2Id = (Integer) loan2.get("resourceId");
+            final PostLoansResponse loan2 = applyForLoanApplication(clientId.intValue(), loanProductID, null);
+            Integer loan2Id = loan2.getResourceId().intValue();
             approveLoan("02 September 2022", loan2Id);
-            final HashMap disbursedLoan2Result = disburseLoan("03 September 2022", loan2Id, "1000", null);
+            final PostLoansLoanIdResponse disbursedLoan2Result = disburseLoan("03 September 2022", loan2Id, "1000", null);
 
             Long penalty = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(10.0).penalty(true)).getResourceId();
 
-            LocalDate targetDate = LocalDate.of(2022, Month.SEPTEMBER, 7);
+            LocalDate targetDate = LocalDate.of(2022, 9, 7);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
             String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
@@ -836,12 +835,12 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Long clientId = createClient();
 
             String loanExternalIdStr = UUID.randomUUID().toString();
-            final HashMap loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
-            Integer loanId = (Integer) loan.get("resourceId");
-            String resourceExternalId = (String) loan.get("resourceExternalId");
+            final PostLoansResponse loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
+            Integer loanId = loan.getResourceId().intValue();
+            String resourceExternalId = (String) loan.getResourceExternalId();
             assertEquals(loanExternalIdStr, resourceExternalId);
 
-            LocalDate actualDate = LocalDate.of(2022, Month.OCTOBER, 10);
+            LocalDate actualDate = LocalDate.of(2022, 10, 10);
 
             GetLoansApprovalTemplateResponse loanApprovalResult = getLoanApprovalTemplate(loanExternalIdStr);
             assertEquals(actualDate, loanApprovalResult.getApprovalDate());
@@ -859,21 +858,21 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
 
             GetLoansLoanIdTransactionsTemplateResponse disburseTemplate = retrieveTransactionTemplate(loanExternalIdStr, "disburse", null,
                     null, null);
-            assertEquals(1000.0, disburseTemplate.getAmount());
+            assertEquals(1000.0, disburseTemplate.getAmount().doubleValue());
             assertNotNull(disburseTemplate.getCurrency());
             assertNotNull(disburseTemplate.getCurrency().getCode());
             assertEquals("USD", disburseTemplate.getCurrency().getCode());
 
-            final HashMap disbursedLoanResult = disburseLoan("03 September 2022", loanId, "1000", txnExternalIdStr);
+            final PostLoansLoanIdResponse disbursedLoanResult = disburseLoan("03 September 2022", loanId, "1000", txnExternalIdStr);
 
             // Check whether the provided external id was retrieved
-            assertEquals(txnExternalIdStr, disbursedLoanResult.get("subResourceExternalId"));
+            assertEquals(txnExternalIdStr, disbursedLoanResult.getSubResourceExternalId());
 
             String txnExternalIdStr2 = UUID.randomUUID().toString();
-            final HashMap disbursedLoanResult2 = disburseLoan("04 September 2022", loanId, "1000", txnExternalIdStr2);
+            final PostLoansLoanIdResponse disbursedLoanResult2 = disburseLoan("04 September 2022", loanId, "1000", txnExternalIdStr2);
 
             // Check whether the provided external id was retrieved
-            assertEquals(txnExternalIdStr2, disbursedLoanResult2.get("subResourceExternalId"));
+            assertEquals(txnExternalIdStr2, disbursedLoanResult2.getSubResourceExternalId());
 
             PutLoansLoanIdResponse markLoanAsFraudResult = modifyLoanApplication(loanExternalIdStr, "markAsFraud",
                     new PutLoansLoanIdRequest().fraud(true));

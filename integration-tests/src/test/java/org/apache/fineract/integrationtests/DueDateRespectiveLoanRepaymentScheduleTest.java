@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
@@ -659,7 +658,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertTrue(response.getStatus().getActive());
 
             assertEquals(firstRepaymentId, response.getTransactions().get(1).getId());
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 28), response.getTransactions().get(1).getReversedOnDate());
+            assertEquals(LocalDate.of(2023, 1, 28), response.getTransactions().get(1).getReversedOnDate());
             assertTrue(response.getTransactions().get(1).getManuallyReversed());
             assertTrue(response.getTransactions().get(1).getTransactionRelations().isEmpty());
             assertTrue(response.getTransactions().get(1).getType().getRepayment());
@@ -791,7 +790,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertTrue(response.getStatus().getActive());
 
             assertEquals(firstRepaymentId, response.getTransactions().get(1).getId());
-            assertEquals(LocalDate.of(2023, Month.FEBRUARY, 15), response.getTransactions().get(1).getReversedOnDate());
+            assertEquals(LocalDate.of(2023, 2, 15), response.getTransactions().get(1).getReversedOnDate());
             assertTrue(response.getTransactions().get(1).getManuallyReversed());
             assertTrue(response.getTransactions().get(1).getTransactionRelations().isEmpty());
             assertTrue(response.getTransactions().get(1).getType().getRepayment());
@@ -988,7 +987,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
             assertTrue(response.getStatus().getActive());
 
             assertEquals(firstRepaymentId, response.getTransactions().get(1).getId());
-            assertEquals(LocalDate.of(2023, Month.FEBRUARY, 15), response.getTransactions().get(1).getReversedOnDate());
+            assertEquals(LocalDate.of(2023, 2, 15), response.getTransactions().get(1).getReversedOnDate());
             assertTrue(response.getTransactions().get(1).getManuallyReversed());
             assertTrue(response.getTransactions().get(1).getTransactionRelations().isEmpty());
             assertTrue(response.getTransactions().get(1).getType().getRepayment());

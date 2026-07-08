@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
@@ -119,7 +118,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
             Long penalty = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateAccountTransferFee(penaltyPortion, true))
                     .getResourceId();
 
-            LocalDate targetDate = LocalDate.of(2023, Month.JANUARY, 3);
+            LocalDate targetDate = LocalDate.of(2023, 1, 3);
             final String penaltyChargeAddedDate = DATE_FORMATTER.format(targetDate);
             addLoanCharge(loanId, fee, penaltyChargeAddedDate, feePortion);
             addLoanCharge(loanId, penalty, penaltyChargeAddedDate, penaltyPortion);
@@ -139,7 +138,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
             assertEquals(400.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod()));
             assertEquals(400.0d,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
 
             schedulerHelper.executeAndAwaitJob(jobName);
 
@@ -153,7 +152,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
             assertEquals(400.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalDueForPeriod()));
             assertEquals(250.0d,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod()));
-            assertEquals(LocalDate.of(2023, Month.JANUARY, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
+            assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
         });
     }
 

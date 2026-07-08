@@ -28,7 +28,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,9 +116,9 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
                     installment(250.0, false, "15 April 2023")//
             );
 
-            verifyTransactionIsAccountTransfer(LocalDate.of(2023, Month.MARCH, 1), 1000.0, loanId, "disbursement");
+            verifyTransactionIsAccountTransfer(LocalDate.of(2023, 3, 1), 1000.0, loanId, "disbursement");
 
-            verifyTransactionIsAccountTransfer(LocalDate.of(2023, Month.MARCH, 1), 250.0, loanId, "downPayment");
+            verifyTransactionIsAccountTransfer(LocalDate.of(2023, 3, 1), 250.0, loanId, "downPayment");
 
             verifySavingsTransactions(savingsAccountId);
 

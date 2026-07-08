@@ -290,7 +290,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
 
     protected Long verifyPrepayAmountByRepayment(Long loanId, String date) {
         GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepayAmount(loanId, date);
-        Double amountToPrepayLoan = prepayAmount.getAmount();
+        Double amountToPrepayLoan = prepayAmount.getAmount() != null ? prepayAmount.getAmount().doubleValue() : null;
         Long repaymentId = null;
         if (amountToPrepayLoan != null && amountToPrepayLoan > 0) {
             PostLoansLoanIdTransactionsResponse repayment = loanTransactionHelper.makeLoanRepayment(loanId, "repayment", date,

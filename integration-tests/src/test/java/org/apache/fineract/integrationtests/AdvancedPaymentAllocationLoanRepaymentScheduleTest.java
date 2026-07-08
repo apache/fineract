@@ -490,11 +490,11 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             final GetLoansLoanIdTransactionsTemplateResponse transactionTemplate = loanTransactionHelper
                     .retrieveTransactionTemplate(loanResponse.getLoanId(), "repayment", DATETIME_PATTERN, "16 January 2023", LOCALE);
             assertNotNull(transactionTemplate);
-            assertEquals(125.0, transactionTemplate.getAmount());
-            assertEquals(125.0, transactionTemplate.getPrincipalPortion());
-            assertEquals(0.0, transactionTemplate.getInterestPortion());
-            assertEquals(0.0, transactionTemplate.getFeeChargesPortion());
-            assertEquals(0.0, transactionTemplate.getPenaltyChargesPortion());
+            assertEquals(125.0, transactionTemplate.getAmount().doubleValue());
+            assertEquals(125.0, transactionTemplate.getPrincipalPortion().doubleValue());
+            assertEquals(0.0, transactionTemplate.getInterestPortion().doubleValue());
+            assertEquals(0.0, transactionTemplate.getFeeChargesPortion().doubleValue());
+            assertEquals(0.0, transactionTemplate.getPenaltyChargesPortion().doubleValue());
         });
     }
 
@@ -5935,20 +5935,20 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
             // Loan Prepayment (before) Charge-Off transaction - With Interest Recalculation
             GetLoansLoanIdTransactionsTemplateResponse transactionBefore = loanTransactionHelper
                     .retrieveTransactionTemplate(createdLoanId.get(), "prepayLoan", "dd MMMM yyyy", "15 February 2024", "en");
-            assertEquals(88.88, transactionBefore.getAmount());
-            assertEquals(86.11, transactionBefore.getPrincipalPortion());
-            assertEquals(2.77, transactionBefore.getInterestPortion());
-            assertEquals(0.00, transactionBefore.getFeeChargesPortion());
-            assertEquals(0.00, transactionBefore.getPenaltyChargesPortion());
+            assertEquals(88.88, transactionBefore.getAmount().doubleValue());
+            assertEquals(86.11, transactionBefore.getPrincipalPortion().doubleValue());
+            assertEquals(2.77, transactionBefore.getInterestPortion().doubleValue());
+            assertEquals(0.00, transactionBefore.getFeeChargesPortion().doubleValue());
+            assertEquals(0.00, transactionBefore.getPenaltyChargesPortion().doubleValue());
 
             // Loan Prepayment (after) Charge-Off transaction - WithOut Interest Recalculation
             GetLoansLoanIdTransactionsTemplateResponse transactionAfter = loanTransactionHelper
                     .retrieveTransactionTemplate(createdLoanId.get(), "prepayLoan", "dd MMMM yyyy", "01 March 2024", "en");
-            assertEquals(104.67, transactionAfter.getAmount());
-            assertEquals(86.11, transactionAfter.getPrincipalPortion());
-            assertEquals(18.56, transactionAfter.getInterestPortion());
-            assertEquals(0.00, transactionAfter.getFeeChargesPortion());
-            assertEquals(0.00, transactionAfter.getPenaltyChargesPortion());
+            assertEquals(104.67, transactionAfter.getAmount().doubleValue());
+            assertEquals(86.11, transactionAfter.getPrincipalPortion().doubleValue());
+            assertEquals(18.56, transactionAfter.getInterestPortion().doubleValue());
+            assertEquals(0.00, transactionAfter.getFeeChargesPortion().doubleValue());
+            assertEquals(0.00, transactionAfter.getPenaltyChargesPortion().doubleValue());
         });
 
     }

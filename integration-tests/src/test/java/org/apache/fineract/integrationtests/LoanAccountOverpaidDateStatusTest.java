@@ -30,7 +30,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
@@ -121,7 +120,7 @@ public class LoanAccountOverpaidDateStatusTest extends FeignLoanTestBase {
             GetLoansLoanIdResponse loanDetailsOverpaid = loanTransactionHelper.getLoanDetails((long) loanId);
             assertTrue(loanDetailsOverpaid.getStatus().getOverpaid());
             assertNotNull(loanDetailsOverpaid.getOverpaidOnDate());
-            assertEquals(loanDetailsOverpaid.getOverpaidOnDate(), LocalDate.of(2022, Month.SEPTEMBER, 9));
+            assertEquals(loanDetailsOverpaid.getOverpaidOnDate(), LocalDate.of(2022, 9, 9));
 
             // reverse repayment to make loan not overpaid and overpaid date is reset
             loanTransactionHelper.reverseRepayment(loanId, repaymentTransaction_4.getResourceId().intValue(), "10 September 2022");
@@ -138,7 +137,7 @@ public class LoanAccountOverpaidDateStatusTest extends FeignLoanTestBase {
             GetLoansLoanIdResponse loanDetailsOverpaid_1 = loanTransactionHelper.getLoanDetails((long) loanId);
             assertTrue(loanDetailsOverpaid_1.getStatus().getOverpaid());
             assertNotNull(loanDetailsOverpaid_1.getOverpaidOnDate());
-            assertEquals(loanDetailsOverpaid_1.getOverpaidOnDate(), LocalDate.of(2022, Month.SEPTEMBER, 11));
+            assertEquals(loanDetailsOverpaid_1.getOverpaidOnDate(), LocalDate.of(2022, 9, 11));
 
             // Credit balance refund to reset overpaid status
             loanTransactionHelper.creditBalanceRefund("12 September 2022", Float.valueOf("100"), null, loanId, "");
@@ -161,7 +160,7 @@ public class LoanAccountOverpaidDateStatusTest extends FeignLoanTestBase {
             GetLoansLoanIdResponse loanDetailsOverpaid_3 = loanTransactionHelper.getLoanDetails((long) loanId);
             assertTrue(loanDetailsOverpaid_3.getStatus().getOverpaid());
             assertNotNull(loanDetailsOverpaid_3.getOverpaidOnDate());
-            assertEquals(loanDetailsOverpaid_3.getOverpaidOnDate(), LocalDate.of(2022, Month.SEPTEMBER, 14));
+            assertEquals(loanDetailsOverpaid_3.getOverpaidOnDate(), LocalDate.of(2022, 9, 14));
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));

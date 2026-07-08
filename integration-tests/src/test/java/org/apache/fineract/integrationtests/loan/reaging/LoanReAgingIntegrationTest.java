@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,8 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.LoanScheduleData;
-import org.apache.fineract.client.models.LoanTransactionData;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -107,7 +106,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(312.5, false, "01 March 2023"), //
                     installment(312.5, false, "01 April 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.APRIL, 1), LocalDate.of(2023, Month.APRIL, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
             createdLoanId.set(loanId);
         });
 
@@ -132,7 +131,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(312.5, false, "01 April 2023"), //
                     installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.APRIL, 1), LocalDate.of(2023, Month.APRIL, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
         });
 
         runAt("12 April 2023", () -> {
@@ -160,7 +159,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(234.38, false, "12 June 2023"), //
                     installment(234.36, false, "12 July 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.JULY, 12), LocalDate.of(2023, Month.JULY, 12));
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
         });
 
         runAt("13 April 2023", () -> {
@@ -185,7 +184,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(312.5, false, "01 April 2023"), //
                     installment(0.0, 0.0, 10.0, 10.0, false, "11 April 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.APRIL, 1), LocalDate.of(2023, Month.APRIL, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
         });
         String repaymentExternalId = UUID.randomUUID().toString();
         runAt("13 April 2023", () -> {
@@ -236,7 +235,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(279.17, 0, 0, 0, 279.17, false, "13 May 2023"), //
                     installment(279.16, 0, 0, 0, 279.16, false, "12 June 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.JUNE, 12), LocalDate.of(2023, Month.JUNE, 12));
+            checkMaturityDates(loanId, LocalDate.of(2023, 6, 12), LocalDate.of(2023, 6, 12));
         });
 
         runAt("14 April 2023", () -> {
@@ -270,7 +269,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(316.67, 0, 0, 0, 316.67, false, "13 May 2023"), //
                     installment(316.66, 0, 0, 0, 316.66, false, "12 June 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.JUNE, 12), LocalDate.of(2023, Month.JUNE, 12));
+            checkMaturityDates(loanId, LocalDate.of(2023, 6, 12), LocalDate.of(2023, 6, 12));
         });
     }
 
@@ -328,7 +327,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(312.5, false, "01 March 2023"), //
                     installment(312.5, false, "01 April 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.APRIL, 1), LocalDate.of(2023, Month.APRIL, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
             createdLoanId.set(loanId);
         });
 
@@ -381,7 +380,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(312.5, 0, 0, 0, 312.5, false, "01 April 2023", 0.0), //
                     installment(100.0, 0.0, 0.0, 0.0, 100.0, false, "10 April 2023", 0.0) //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.APRIL, 1), LocalDate.of(2023, Month.APRIL, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 1));
         });
 
         runAt("12 April 2023", () -> {
@@ -411,7 +410,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(234.38, 0.0, 0.0, 0.0, 234.38, false, "12 June 2023", 234.36), //
                     installment(234.36, 0.0, 0.0, 0.0, 234.36, false, "12 July 2023", 0.0) //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.JULY, 12), LocalDate.of(2023, Month.JULY, 12));
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
         });
     }
 
@@ -469,7 +468,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(125.0, false, "31 January 2023"), //
                     installment(125.0, false, "15 February 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.FEBRUARY, 15), LocalDate.of(2023, Month.FEBRUARY, 15));
+            checkMaturityDates(loanId, LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 15));
             createdLoanId.set(loanId);
         });
 
@@ -500,7 +499,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(62.5, false, "01 July 2023"), //
                     installment(62.5, false, "01 August 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.AUGUST, 1), LocalDate.of(2023, Month.AUGUST, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
 
             makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
                     .transactionDate("01 February 2023").locale(LoanTestData.LOCALE).transactionAmount(125.0));
@@ -526,7 +525,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(41.67, false, "01 July 2023"), //
                     installment(41.65, false, "01 August 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.AUGUST, 1), LocalDate.of(2023, Month.AUGUST, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
         });
         runAt("28 February 2023", () -> {
 
@@ -557,7 +556,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(8.33, false, "01 July 2023"), //
                     installment(8.35, false, "01 August 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.AUGUST, 1), LocalDate.of(2023, Month.AUGUST, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
 
             verifyLoanStatus(loanId, LoanStatus.ACTIVE);
 
@@ -589,7 +588,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             );
 
             verifyLoanStatus(loanId, LoanStatus.ACTIVE);
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.AUGUST, 1), LocalDate.of(2023, Month.AUGUST, 1));
+            checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
         });
 
         runAt("01 March 2023", () -> {
@@ -614,7 +613,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     installment(125.0, false, "31 January 2023"), //
                     installment(125.0, false, "15 February 2023") //
             );
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.FEBRUARY, 15), LocalDate.of(2023, Month.FEBRUARY, 15));
+            checkMaturityDates(loanId, LocalDate.of(2023, 2, 15), LocalDate.of(2023, 2, 15));
         });
 
         runAt("02 March 2023", () -> {
@@ -676,7 +675,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4,
                     LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name());
 
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.JULY, 12), LocalDate.of(2023, Month.JULY, 12));
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
         });
     }
 
@@ -713,7 +712,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
         runAt("15 February 2023", () -> {
             long loanId = createdLoanId.get();
 
-            LoanTransactionData templateData = getReAgeTemplate(loanId);
+            GetLoansLoanIdTransactionsTemplateResponse templateData = getReAgeTemplate(loanId);
 
             assertNotNull(templateData, "ReAge template should not be null");
 
@@ -725,10 +724,9 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             assertEquals(2, numberOfPastInstallments, "Should have 2 past installments (Jan 1 downpayment and Feb 1)");
             assertEquals(2, numberOfFutureInstallments, "Should have 2 future installments (Mar 1 and Apr 1)");
             assertNotNull(nextInstallmentDueDate, "nextInstallmentDueDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.MARCH, 1), nextInstallmentDueDate, "Next installment due date should be March 1");
+            assertEquals(LocalDate.of(2023, 3, 1), nextInstallmentDueDate, "Next installment due date should be March 1");
             assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.MARCH, 15), calculatedStartDate,
-                    "Calculated start date should be business date + 1 month");
+            assertEquals(LocalDate.of(2023, 3, 15), calculatedStartDate, "Calculated start date should be business date + 1 month");
         });
     }
 
@@ -758,7 +756,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             approveLoan(loanId, approveLoanRequest(amount, "01 January 2023"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
 
-            LoanTransactionData templateData = getReAgeTemplate(loanId);
+            GetLoansLoanIdTransactionsTemplateResponse templateData = getReAgeTemplate(loanId);
 
             assertNotNull(templateData, "ReAge template should not be null");
 
@@ -770,10 +768,9 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             assertEquals(1, numberOfPastInstallments, "Should have 1 past installment (downpayment on same day counts as past)");
             assertEquals(3, numberOfFutureInstallments, "Should have 3 future installments");
             assertNotNull(nextInstallmentDueDate, "nextInstallmentDueDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.FEBRUARY, 1), nextInstallmentDueDate, "Next installment due date should be February 1");
+            assertEquals(LocalDate.of(2023, 2, 1), nextInstallmentDueDate, "Next installment due date should be February 1");
             assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.FEBRUARY, 1), calculatedStartDate,
-                    "Calculated start date should be business date + 1 month");
+            assertEquals(LocalDate.of(2023, 2, 1), calculatedStartDate, "Calculated start date should be business date + 1 month");
         });
     }
 
@@ -810,7 +807,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
         runAt("01 March 2023", () -> {
             long loanId = createdLoanId.get();
 
-            LoanTransactionData templateData = getReAgeTemplate(loanId);
+            GetLoansLoanIdTransactionsTemplateResponse templateData = getReAgeTemplate(loanId);
 
             assertNotNull(templateData, "ReAge template should not be null");
 
@@ -823,10 +820,9 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
                     "Should have 3 past installments (downpayment Jan 1, Feb 1, and Mar 1 - due on business date counts as past)");
             assertEquals(1, numberOfFutureInstallments, "Should have 1 future installment (Apr 1)");
             assertNotNull(nextInstallmentDueDate, "nextInstallmentDueDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), nextInstallmentDueDate, "Next installment due date should be April 1");
+            assertEquals(LocalDate.of(2023, 4, 1), nextInstallmentDueDate, "Next installment due date should be April 1");
             assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.APRIL, 1), calculatedStartDate,
-                    "Calculated start date should be business date + 1 month");
+            assertEquals(LocalDate.of(2023, 4, 1), calculatedStartDate, "Calculated start date should be business date + 1 month");
         });
     }
 
@@ -863,7 +859,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
         runAt("15 April 2023", () -> {
             long loanId = createdLoanId.get();
 
-            LoanTransactionData templateData = getReAgeTemplate(loanId);
+            GetLoansLoanIdTransactionsTemplateResponse templateData = getReAgeTemplate(loanId);
 
             assertNotNull(templateData, "ReAge template should not be null");
 
@@ -876,7 +872,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             assertEquals(0, numberOfFutureInstallments, "Should have 0 future installments");
             assertNull(nextInstallmentDueDate, "nextInstallmentDueDate should be null when no future installments");
             assertNotNull(calculatedStartDate, "calculatedStartDate should still be computed");
-            assertEquals(LocalDate.of(2023, Month.MAY, 15), calculatedStartDate, "Calculated start date should be business date + 1 month");
+            assertEquals(LocalDate.of(2023, 5, 15), calculatedStartDate, "Calculated start date should be business date + 1 month");
         });
     }
 
@@ -906,14 +902,14 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             approveLoan(loanId, approveLoanRequest(amount, "01 January 2023"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 January 2023");
 
-            LoanTransactionData templateData = getReAgeTemplate(loanId);
+            GetLoansLoanIdTransactionsTemplateResponse templateData = getReAgeTemplate(loanId);
 
             assertNotNull(templateData, "ReAge template should not be null");
 
             LocalDate calculatedStartDate = templateData.getCalculatedStartDate();
 
             assertNotNull(calculatedStartDate, "calculatedStartDate should not be null");
-            assertEquals(LocalDate.of(2023, Month.FEBRUARY, 1), calculatedStartDate,
+            assertEquals(LocalDate.of(2023, 2, 1), calculatedStartDate,
                     "Calculated start date should be business date + 1 month (not + 2 months based on repayEvery)");
         });
     }
@@ -985,7 +981,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             reAgeLoan(loanId, RepaymentFrequencyType.MONTHS_STRING, 1, "12 April 2023", 4,
                     LoanReAgeInterestHandlingType.EQUAL_AMORTIZATION_FULL_INTEREST.name(), 937.5);
 
-            checkMaturityDates(loanId, LocalDate.of(2023, Month.JULY, 12), LocalDate.of(2023, Month.JULY, 12));
+            checkMaturityDates(loanId, LocalDate.of(2023, 7, 12), LocalDate.of(2023, 7, 12));
         });
     }
 
@@ -1058,16 +1054,16 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
             assertEquals(8, periods.size(), "Expected 8 periods (1 disbursement + 1 stub + 6 re-aged) but got " + periods.size());
 
             // Verify due dates are correct
-            assertEquals(LocalDate.of(2026, Month.JANUARY, 28), periods.get(0).getDueDate()); // disbursement
-            assertEquals(LocalDate.of(2026, Month.JANUARY, 31), periods.get(1).getDueDate()); // stub
-            assertEquals(LocalDate.of(2026, Month.FEBRUARY, 28), periods.get(2).getDueDate()); // 1st re-aged
-            assertEquals(LocalDate.of(2026, Month.MARCH, 28), periods.get(3).getDueDate()); // 2nd re-aged
-            assertEquals(LocalDate.of(2026, Month.APRIL, 28), periods.get(4).getDueDate()); // 3rd re-aged
-            assertEquals(LocalDate.of(2026, Month.MAY, 28), periods.get(5).getDueDate()); // 4th re-aged
-            assertEquals(LocalDate.of(2026, Month.JUNE, 28), periods.get(6).getDueDate()); // 5th re-aged
-            assertEquals(LocalDate.of(2026, Month.JULY, 28), periods.get(7).getDueDate()); // 6th re-aged
+            assertEquals(LocalDate.of(2026, 1, 28), periods.get(0).getDueDate()); // disbursement
+            assertEquals(LocalDate.of(2026, 1, 31), periods.get(1).getDueDate()); // stub
+            assertEquals(LocalDate.of(2026, 2, 28), periods.get(2).getDueDate()); // 1st re-aged
+            assertEquals(LocalDate.of(2026, 3, 28), periods.get(3).getDueDate()); // 2nd re-aged
+            assertEquals(LocalDate.of(2026, 4, 28), periods.get(4).getDueDate()); // 3rd re-aged
+            assertEquals(LocalDate.of(2026, 5, 28), periods.get(5).getDueDate()); // 4th re-aged
+            assertEquals(LocalDate.of(2026, 6, 28), periods.get(6).getDueDate()); // 5th re-aged
+            assertEquals(LocalDate.of(2026, 7, 28), periods.get(7).getDueDate()); // 6th re-aged
 
-            checkMaturityDates(loanId, LocalDate.of(2026, Month.JULY, 28), LocalDate.of(2026, Month.JULY, 28));
+            checkMaturityDates(loanId, LocalDate.of(2026, 7, 28), LocalDate.of(2026, 7, 28));
         });
     }
 

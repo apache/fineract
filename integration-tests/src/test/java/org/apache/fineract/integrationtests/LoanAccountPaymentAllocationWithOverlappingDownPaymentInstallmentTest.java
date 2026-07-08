@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.UUID;
@@ -57,7 +56,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // Payment Strategy DEFAULT payment allocation strategy "Penalties, Fees, Interest, Principal order"
             // Overlapping down payment and regular installment
 
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -86,7 +85,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // add charge PENALTY with due date as overlapping installment due date
 
-            LocalDate targetDate = LocalDate.of(2023, Month.APRIL, 3);
+            LocalDate targetDate = LocalDate.of(2023, 4, 3);
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
             Long penalty1LoanChargeId = addCharge(loanId, true, 10.0, penaltyCharge1AddedDate);
@@ -96,7 +95,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // add charge FEE with due date as overlapping installment due date
             Long fee = createLoanSpecifiedDueDateCharge(10.0);
 
-            targetDate = LocalDate.of(2023, Month.APRIL, 3);
+            targetDate = LocalDate.of(2023, 4, 3);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
             Long feeLoanChargeId = addLoanCharge(loanId, fee, feeCharge1AddedDate, 5.15).getResourceId();
@@ -128,20 +127,20 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 500.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 500.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 125.0, 125.0, 125.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 187.5, 0.0, 0.0, 202.65, 5.15, 0.0, 10.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 3, 187.5, 0.0, 0.0, 187.5, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
-            disbursementDate = LocalDate.of(2023, Month.APRIL, 3);
+            disbursementDate = LocalDate.of(2023, 4, 3);
             updateBusinessDate("03 April 2023");
             disburseLoanWithAmount(loanId, "03 April 2023", 1000.0);
 
@@ -156,21 +155,21 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(6, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 500.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 500.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 125.0, 125.0, 125.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 1000.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 1000.0);
             // down payment period [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 2, 250.0, 250.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    true, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 3, 562.5, 0.0, 0.0, 577.65, 5.15, 0.0, 10.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 562.5, 0.0, 0.0, 562.5, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
 
@@ -185,21 +184,21 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(6, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 500.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 500.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 125.0, 125.0, 125.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 1000.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 1000.0);
             // down payment period [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 2, 250.0, 250.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    true, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 3, 562.5, 577.65, 562.5, 0.0, 5.15, 5.15, 10.0,
-                    10.0, true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    10.0, true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 562.5, 0.0, 0.0, 562.5, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         });
     }
@@ -215,7 +214,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // "interest-principal-penalties-fees-order-strategy"
             // Overlapping down payment and regular installment
 
-            LocalDate disbursementDate = LocalDate.of(2023, Month.MARCH, 3);
+            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -244,7 +243,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // add charge PENALTY with due date as overlapping installment due date
 
-            LocalDate targetDate = LocalDate.of(2023, Month.APRIL, 3);
+            LocalDate targetDate = LocalDate.of(2023, 4, 3);
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
             Long penalty1LoanChargeId = addCharge(loanId, true, 10.0, penaltyCharge1AddedDate);
@@ -254,7 +253,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // add charge FEE with due date as overlapping installment due date
             Long fee = createLoanSpecifiedDueDateCharge(10.0);
 
-            targetDate = LocalDate.of(2023, Month.APRIL, 3);
+            targetDate = LocalDate.of(2023, 4, 3);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
             Long feeLoanChargeId = addLoanCharge(loanId, fee, feeCharge1AddedDate, 5.15).getResourceId();
@@ -288,20 +287,20 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 500.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 500.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 125.0, 125.0, 125.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 187.5, 0.0, 0.0, 202.65, 5.15, 0.0, 10.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 3, 187.5, 0.0, 0.0, 187.5, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
-            disbursementDate = LocalDate.of(2023, Month.APRIL, 3);
+            disbursementDate = LocalDate.of(2023, 4, 3);
             updateBusinessDate("03 April 2023");
             disburseLoanWithAmount(loanId, "03 April 2023", 1000.0);
 
@@ -319,21 +318,21 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(6, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 500.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 500.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 125.0, 125.0, 125.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 1000.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 1000.0);
             // down payment period [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 2, 250.0, 250.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    true, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 3, 562.5, 0.0, 0.0, 577.65, 5.15, 0.0, 10.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 562.5, 0.0, 0.0, 562.5, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
 
@@ -348,21 +347,21 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(6, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 500.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 500.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 125.0, 125.0, 125.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 1000.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 1000.0);
             // down payment period [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 2, 250.0, 250.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    true, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 3, 562.5, 577.65, 562.5, 0.0, 5.15, 5.15, 10.0,
-                    10.0, true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    10.0, true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 562.5, 0.0, 0.0, 562.5, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         });
     }
@@ -428,16 +427,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 75.0, 0.0, 0.0, 75.0, 0.0, 0.0, 0.0, 0.0, false,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 3, 75.0, 0.0, 0.0, 75.0, 0.0, 0.0, 0.0, 0.0, false,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
@@ -458,21 +457,21 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(6, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 200.0);
             // down payment period [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 2, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 3, 150.0, 0.0, 0.0, 150.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 150.0, 0.0, 0.0, 150.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // same day third disbursement with overlapping installment i.e same due date as regular repayment due date
             // 3-April
@@ -492,26 +491,26 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(8, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 200.0);
             // disbursement period [3]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, 4, 3), 200.0);
             // down payment period [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 2, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // down payment period [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 3, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [6]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(6), 4, 225.0, 0.0, 0.0, 225.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [7]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(7), 5, 225.0, 0.0, 0.0, 225.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = makeLoanRepayment(loanExternalIdStr,
@@ -525,26 +524,26 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(8, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // disbursement period [2]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(2), LocalDate.of(2023, 4, 3), 200.0);
             // disbursement period [3]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, 4, 3), 200.0);
             // down payment period [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 2, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // down payment period [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 3, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [6]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(6), 4, 225.0, 225.0, 225.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    true, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    true, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [7]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(7), 5, 225.0, 0.0, 0.0, 225.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         });
     }
@@ -614,16 +613,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 75.0, 0.0, 0.0, 75.0, 0.0, 0.0, 0.0, 0.0, false,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // regular installment [3]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(3), 3, 75.0, 0.0, 0.0, 75.0, 0.0, 0.0, 0.0, 0.0, false,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
@@ -644,21 +643,21 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(6, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 75.0, 50.0, 50.0, 25.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // disbursement period [3]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, 4, 3), 200.0);
             // down payment period [4]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(4), 3, 50.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 0.0, false,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 225.0, 0.0, 0.0, 225.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // same day third disbursement with overlapping installment i.e same due date as regular repayment due date
             // 3-April
@@ -678,26 +677,26 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(8, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 75.0, 75.0, 75.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // disbursement period [3]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, 4, 3), 200.0);
             // disbursement period [4]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(4), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(4), LocalDate.of(2023, 4, 3), 200.0);
             // down payment period [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 3, 50.0, 25.0, 25.0, 25.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // down payment period [6]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(6), 4, 50.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 0.0, false,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [7]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(7), 5, 375.0, 0.0, 0.0, 375.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = makeLoanRepayment(loanExternalIdStr,
@@ -711,26 +710,26 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // periods
             assertEquals(8, loanDetails.getRepaymentSchedule().getPeriods().size());
             // disbursement period [0]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, Month.MARCH, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(0), LocalDate.of(2023, 3, 3), 200.0);
             // down payment period [1]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(1), 1, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.MARCH, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 3, 3));
             // regular installment [2]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(2), 2, 75.0, 75.0, 75.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.MARCH, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3));
             // disbursement period [3]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(3), LocalDate.of(2023, 4, 3), 200.0);
             // disbursement period [4]
-            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(4), LocalDate.of(2023, Month.APRIL, 3), 200.0);
+            verifyDisbursementPeriod(loanDetails.getRepaymentSchedule().getPeriods().get(4), LocalDate.of(2023, 4, 3), 200.0);
             // down payment period [5]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 3, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // down payment period [6]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(6), 4, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, true,
-                    LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.APRIL, 3));
+                    LocalDate.of(2023, 4, 3), LocalDate.of(2023, 4, 3));
             // regular installment [7]
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(7), 5, 375.0, 150.0, 150.0, 225.0, 0.0, 0.0, 0.0, 0.0,
-                    false, LocalDate.of(2023, Month.APRIL, 3), LocalDate.of(2023, Month.MAY, 3));
+                    false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
         });
     }

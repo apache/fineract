@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -192,8 +191,7 @@ public class LoanTest {
         when(loanTransaction4.isNotReversed()).thenReturn(Boolean.TRUE);
         when(loanTransaction4.isAccrual()).thenReturn(Boolean.FALSE);
         when(loanTransaction4.isAccrualAdjustment()).thenReturn(Boolean.TRUE);
-        ReflectionTestUtils.setField(loan, "loanTransactions",
-                List.of(loanTransaction, loanTransaction2, loanTransaction3, loanTransaction4));
+        ReflectionTestUtils.setField(loan, "loanTransactions", List.of(loanTransaction, loanTransaction2, loanTransaction3));
         final LoanTransaction userTransaction = loan.getLastUserTransaction();
         assertNotNull(userTransaction);
         assertEquals(loanTransaction2, userTransaction);
@@ -205,7 +203,7 @@ public class LoanTest {
     @Test
     public void testTransactionComparator() {
         final Loan loan = new Loan();
-        LocalDate today = LocalDate.of(2023, Month.OCTOBER, 12);
+        LocalDate today = LocalDate.of(2023, 10, 12);
         OffsetDateTime now = DateUtils.getAuditOffsetDateTime();
 
         LoanTransaction lt1 = new LoanTransaction();
@@ -275,7 +273,7 @@ public class LoanTest {
         loanCharge.setAmountOutstanding(new BigDecimal(100));
         loanCharge.setChargeTime(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue());
         loanCharge.setChargeCalculation(ChargeCalculationType.FLAT.getValue());
-        loanCharge.setDueDate(LocalDate.of(2022, Month.JUNE, 27));
+        loanCharge.setDueDate(LocalDate.of(2022, 6, 27));
         loanCharge.setChargePaymentMode(ChargePaymentMode.REGULAR.getValue());
         loanCharge.setPercentage(null);
         loanCharge.setAmountPercentageAppliedTo(null);

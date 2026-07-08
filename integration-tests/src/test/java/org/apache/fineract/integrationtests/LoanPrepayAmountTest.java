@@ -20,7 +20,6 @@ package org.apache.fineract.integrationtests;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
@@ -89,7 +88,7 @@ public class LoanPrepayAmountTest extends FeignLoanTestBase {
         });
         for (int i = 1; i < 4; i++) {
             executeInlineCOB(loanId);
-            LocalDate date = LocalDate.of(2025, Month.MARCH, 17).plusDays(i * 11);
+            LocalDate date = LocalDate.of(2025, 3, 17).plusDays(i * 11);
             String formattedDate = DateTimeFormatter.ofPattern(DATETIME_PATTERN).format(date);
             runAt(formattedDate, () -> {
                 GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);

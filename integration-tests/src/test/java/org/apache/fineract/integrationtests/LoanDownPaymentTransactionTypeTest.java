@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
@@ -70,7 +69,7 @@ public class LoanDownPaymentTransactionTypeTest extends FeignLoanTestBase {
         assertEquals(loanDownPaymentTransaction.getPrincipalPortion(), 100.0);
         assertEquals("loanTransactionType.downPayment", loanDownPaymentTransaction.getType().getCode());
 
-        LocalDate adjustmentDate = LocalDate.of(2022, Month.SEPTEMBER, 7);
+        LocalDate adjustmentDate = LocalDate.of(2022, 9, 7);
         String formattedDate = dateFormatter.format(adjustmentDate);
         PostLoansLoanIdTransactionsResponse adjustmentResult = reverseLoanTransaction(loanExternalIdStr, loanDownPaymentTransaction.getId(),
                 new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
@@ -95,7 +94,7 @@ public class LoanDownPaymentTransactionTypeTest extends FeignLoanTestBase {
         assertEquals(loanDownPaymentTransaction_1.getPrincipalPortion(), 200.0);
         assertEquals("loanTransactionType.downPayment", loanDownPaymentTransaction_1.getType().getCode());
 
-        adjustmentDate = LocalDate.of(2022, Month.SEPTEMBER, 12);
+        adjustmentDate = LocalDate.of(2022, 9, 12);
         formattedDate = dateFormatter.format(adjustmentDate);
         PostLoansLoanIdTransactionsResponse adjustmentResult_1 = reverseLoanTransaction(loanExternalIdStr, downPaymentExternalIdStr,
                 new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
