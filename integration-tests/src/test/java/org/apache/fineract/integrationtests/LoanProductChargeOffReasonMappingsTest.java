@@ -18,11 +18,9 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.common.funds.FundsResourceHandler.createFund;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
@@ -31,47 +29,44 @@ import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
 import org.apache.fineract.client.models.PostChargeOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFundHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
-import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.lang.NonNull;
 
-public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationTest {
-
-    private static final String CODE_VALUE_NAME = "ChargeOffReasons";
-    private final Account expenseAccount = accountHelper.createExpenseAccount();
-    private final Account otherExpenseAccount = accountHelper.createExpenseAccount();
+public class LoanProductChargeOffReasonMappingsTest extends FeignLoanTestBase {
 
     @Test
     public void testCreateAndUpdateLoanProductWithValidChargeOffReason() {
         runAt("15 January 2023", () -> {
-            Integer chargeOffReasons = createChargeOffReason();
-            Long localLoanProductId = loanTransactionHelper
-                    .createLoanProduct(loanProductsRequest(Long.valueOf(chargeOffReasons), expenseAccount.getAccountID().longValue()))
-                    .getResourceId();
+            final Account expenseAccount = accountHelper.createExpenseAccount("expense");
+            final Account otherExpenseAccount = accountHelper.createExpenseAccount("expense");
+            Long chargeOffReasons = createChargeOffReason();
+            Long localLoanProductId = createLoanProduct(loanProductsRequest(chargeOffReasons, expenseAccount.getAccountID().longValue()));
 
             Assertions.assertNotNull(localLoanProductId);
 
-            GetLoanProductsProductIdResponse loanProductDetails = loanTransactionHelper.getLoanProduct(localLoanProductId.intValue());
+            GetLoanProductsProductIdResponse loanProductDetails = retrieveLoanProduct(localLoanProductId);
             Assertions.assertEquals(expenseAccount.getAccountID().longValue(),
                     loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getExpenseAccount().getId());
-            Assertions.assertEquals(Long.valueOf(chargeOffReasons),
+            Assertions.assertEquals(chargeOffReasons,
                     loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getReasonCodeValue().getId());
 
             List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings = createPostChargeOffReasonToExpenseAccountMappings(
-                    Long.valueOf(chargeOffReasons), otherExpenseAccount.getAccountID().longValue());
+                    chargeOffReasons, otherExpenseAccount.getAccountID().longValue());
 
-            loanTransactionHelper.updateLoanProduct(localLoanProductId, new PutLoanProductsProductIdRequest().locale("en")
-                    .chargeOffReasonToExpenseAccountMappings(chargeOffReasonToExpenseAccountMappings)).getResourceId();
+            updateLoanProduct(localLoanProductId, new PutLoanProductsProductIdRequest().locale("en")
+                    .chargeOffReasonToExpenseAccountMappings(chargeOffReasonToExpenseAccountMappings));
 
-            loanProductDetails = loanTransactionHelper.getLoanProduct(localLoanProductId.intValue());
+            loanProductDetails = retrieveLoanProduct(localLoanProductId);
             Assertions.assertEquals(otherExpenseAccount.getAccountID().longValue(),
                     loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getExpenseAccount().getId());
-            Assertions.assertEquals(Long.valueOf(chargeOffReasons),
+            Assertions.assertEquals(chargeOffReasons,
                     loanProductDetails.getChargeOffReasonToExpenseAccountMappings().get(0).getReasonCodeValue().getId());
         });
     }
@@ -80,8 +75,8 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
     public void testCreateLoanProductWithInvalidGLAccount() {
         runAt("15 January 2023", () -> {
             try {
-                Integer chargeOffReasons = createChargeOffReason();
-                loanTransactionHelper.createLoanProduct(loanProductsRequest(Long.valueOf(chargeOffReasons), -1L));
+                Long chargeOffReasons = createChargeOffReason();
+                createLoanProduct(loanProductsRequest(chargeOffReasons, -1L));
             } catch (CallFailedRuntimeException e) {
                 Assertions.assertTrue(e.getMessage().contains("validation.msg.glaccount.not.found"));
             }
@@ -92,7 +87,8 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
     public void testCreateLoanProductWithInvalidChargeOffReason() {
         runAt("15 January 2023", () -> {
             try {
-                loanTransactionHelper.createLoanProduct(loanProductsRequest(-1L, expenseAccount.getAccountID().longValue()));
+                final Account expenseAccount = accountHelper.createExpenseAccount("expense");
+                createLoanProduct(loanProductsRequest(-1L, expenseAccount.getAccountID().longValue()));
             } catch (CallFailedRuntimeException e) {
                 Assertions.assertTrue(e.getMessage().contains("validation.msg.chargeoffreason.invalid"));
             }
@@ -115,14 +111,15 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
-        loanPaymentChannelToFundSourceMappings.fundSourceAccountId(fundSource.getAccountID().longValue());
+        loanPaymentChannelToFundSourceMappings.fundSourceAccountId(getAccounts().getFundSource().getAccountID().longValue());
         loanPaymentChannelToFundSourceMappings.paymentTypeId(1L);
         paymentChannelToFundSourceMappings.add(loanPaymentChannelToFundSourceMappings);
 
-        final Integer fundId = createFund(requestSpec, responseSpec);
+        final Long fundId = new FeignFundHelper(FineractFeignClientHelper.getFineractFeignClient()).createFund().getResourceId();
         Assertions.assertNotNull(fundId);
 
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
+        final Long delinquencyBucketId = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient())
+                .createDefaultBucket();
         Assertions.assertNotNull(delinquencyBucketId);
 
         return new PostLoanProductsRequest()//
@@ -185,27 +182,27 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
                 .charges(charges)//
                 .accountingRule(3)//
 
-                .fundSourceAccountId(suspenseAccount.getAccountID().longValue())//
-                .loanPortfolioAccountId(loansReceivableAccount.getAccountID().longValue())//
-                .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//
-                .interestOnLoanAccountId(interestIncomeAccount.getAccountID().longValue())//
-                .incomeFromFeeAccountId(feeIncomeAccount.getAccountID().longValue())//
-                .incomeFromPenaltyAccountId(penaltyIncomeAccount.getAccountID().longValue())//
-                .incomeFromRecoveryAccountId(recoveriesAccount.getAccountID().longValue())//
-                .writeOffAccountId(writtenOffAccount.getAccountID().longValue())//
-                .overpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())//
-                .receivableInterestAccountId(interestReceivableAccount.getAccountID().longValue())//
-                .receivableFeeAccountId(feeReceivableAccount.getAccountID().longValue())//
-                .receivablePenaltyAccountId(penaltyReceivableAccount.getAccountID().longValue())//
-                .goodwillCreditAccountId(goodwillExpenseAccount.getAccountID().longValue())//
-                .incomeFromGoodwillCreditInterestAccountId(interestIncomeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromGoodwillCreditFeesAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromGoodwillCreditPenaltyAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromChargeOffInterestAccountId(interestIncomeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromChargeOffFeesAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .chargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())//
-                .chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccount.getAccountID().longValue())//
-                .incomeFromChargeOffPenaltyAccountId(penaltyChargeOffAccount.getAccountID().longValue())//
+                .fundSourceAccountId(getAccounts().getSuspenseAccount().getAccountID().longValue())//
+                .loanPortfolioAccountId(getAccounts().getLoansReceivableAccount().getAccountID().longValue())//
+                .transfersInSuspenseAccountId(getAccounts().getSuspenseAccount().getAccountID().longValue())//
+                .interestOnLoanAccountId(getAccounts().getInterestIncomeAccount().getAccountID().longValue())//
+                .incomeFromFeeAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())//
+                .incomeFromPenaltyAccountId(getAccounts().getPenaltyIncomeAccount().getAccountID().longValue())//
+                .incomeFromRecoveryAccountId(getAccounts().getRecoveriesAccount().getAccountID().longValue())//
+                .writeOffAccountId(getAccounts().getWrittenOffAccount().getAccountID().longValue())//
+                .overpaymentLiabilityAccountId(getAccounts().getOverpaymentAccount().getAccountID().longValue())//
+                .receivableInterestAccountId(getAccounts().getInterestReceivableAccount().getAccountID().longValue())//
+                .receivableFeeAccountId(getAccounts().getFeeReceivableAccount().getAccountID().longValue())//
+                .receivablePenaltyAccountId(getAccounts().getPenaltyReceivableAccount().getAccountID().longValue())//
+                .goodwillCreditAccountId(getAccounts().getGoodwillExpenseAccount().getAccountID().longValue())//
+                .incomeFromGoodwillCreditInterestAccountId(getAccounts().getInterestIncomeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromGoodwillCreditFeesAccountId(getAccounts().getFeeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromGoodwillCreditPenaltyAccountId(getAccounts().getFeeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromChargeOffInterestAccountId(getAccounts().getInterestIncomeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromChargeOffFeesAccountId(getAccounts().getFeeChargeOffAccount().getAccountID().longValue())//
+                .chargeOffExpenseAccountId(getAccounts().getChargeOffExpenseAccount().getAccountID().longValue())//
+                .chargeOffFraudExpenseAccountId(getAccounts().getChargeOffFraudExpenseAccount().getAccountID().longValue())//
+                .incomeFromChargeOffPenaltyAccountId(getAccounts().getPenaltyChargeOffAccount().getAccountID().longValue())//
 
                 .dateFormat("dd MMMM yyyy")//
                 .locale("en")//
@@ -236,17 +233,7 @@ public class LoanProductChargeOffReasonMappingsTest extends BaseLoanIntegrationT
         return chargeOffReasonToExpenseAccountMappings;
     }
 
-    private Integer createChargeOffReason() {
-        Integer chargeOffReasonId;
-        HashMap<String, Object> codes = CodeHelper.getCodeByName(requestSpec, responseSpec, CODE_VALUE_NAME);
-        if (codes.isEmpty()) {
-            CodeHelper.createCode(requestSpec, responseSpec, CODE_VALUE_NAME, "");
-        }
-        codes = CodeHelper.getCodeByName(requestSpec, responseSpec, CODE_VALUE_NAME);
-        Integer codeId = (Integer) codes.get("id");
-        HashMap<String, Object> codeValues = CodeHelper.getOrCreateCodeValueByCodeIdAndCodeName(requestSpec, responseSpec, codeId,
-                CODE_VALUE_NAME, 1);
-        chargeOffReasonId = (Integer) codeValues.get("id");
-        return chargeOffReasonId;
+    private Long createChargeOffReason() {
+        return codeHelper.createChargeOffCodeValue(Utils.uniqueRandomStringGenerator("REASON_", 6), 1);
     }
 }
