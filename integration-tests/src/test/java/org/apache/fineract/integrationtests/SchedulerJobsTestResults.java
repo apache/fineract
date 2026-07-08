@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.GetHolidaysResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
@@ -328,7 +329,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
 
-        Integer holidayId = HolidayHelper.createHolidays(requestSpec, responseSpec);
+        Long holidayId = HolidayHelper.createHolidays();
         Assertions.assertNotNull(holidayId);
 
         final Integer loanProductID = createLoanProduct(null);
@@ -353,11 +354,11 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         String configName = GlobalConfigurationConstants.RESCHEDULE_REPAYMENTS_ON_HOLIDAYS;
         globalConfigurationHelper.updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().enabled(true));
 
-        holidayId = HolidayHelper.activateHolidays(requestSpec, responseSpec, holidayId.toString());
+        holidayId = HolidayHelper.activateHolidays(holidayId);
         Assertions.assertNotNull(holidayId);
 
-        HashMap holidayData = HolidayHelper.getHolidayById(requestSpec, responseSpec, holidayId.toString());
-        ArrayList<Integer> repaymentsRescheduledDate = (ArrayList<Integer>) holidayData.get("repaymentsRescheduledTo");
+        GetHolidaysResponse holidayData = HolidayHelper.getHolidayById(holidayId);
+        LocalDate repaymentsRescheduledDate = holidayData.getRepaymentsRescheduledTo();
         Assertions.assertNotNull(repaymentsRescheduledDate);
 
         // Loan Repayment Schedule Before Apply Holidays To Loans
@@ -369,9 +370,9 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             final ArrayList<Integer> fromDate = (ArrayList<Integer>) period.get("fromDate");
             if (fromDate != null) {
                 final Integer fromDateMonth = fromDate.get(1);
-                final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.get(1);
+                final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.getMonthValue();
                 if (Objects.equals(fromDateMonth, repaymentsRescheduledDateMonth)) {
-                    final Integer repaymentsRescheduledDateDay = repaymentsRescheduledDate.get(2);
+                    final Integer repaymentsRescheduledDateDay = repaymentsRescheduledDate.getDayOfMonth();
                     final Integer fromDateDay = fromDate.get(2);
                     Assertions.assertNotEquals(repaymentsRescheduledDateDay, fromDateDay,
                             "Verifying Repayment Rescheduled Day before Running Apply Holidays to Loans Scheduler Job");
@@ -398,7 +399,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 if (fromDateBefore != null && fromDateAfter != null) {
                     final Integer fromDateMonthBefore = fromDateBefore.get(1);
                     final Integer fromDateMonthAfter = fromDateAfter.get(1);
-                    final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.get(1);
+                    final Integer repaymentsRescheduledDateMonth = repaymentsRescheduledDate.getMonthValue();
 
                     if (Objects.equals(fromDateMonthAfter, repaymentsRescheduledDateMonth)) {
                         dateToApplyHolidays = fromDateAfter;
@@ -411,7 +412,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         }
 
         Assertions.assertNotNull(dateToApplyHolidays);
-        assertEqualDay(repaymentsRescheduledDate, dateToApplyHolidays,
+        Assertions.assertEquals(repaymentsRescheduledDate.getDayOfMonth(), dateToApplyHolidays.get(2),
                 "Verifying Repayment Rescheduled Day after Running Apply Holidays to Loans Scheduler Job");
     }
 
@@ -428,7 +429,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
 
-        Integer holidayId = HolidayHelper.createTyoe1Holidays(requestSpec, responseSpec);
+        Long holidayId = HolidayHelper.createTyoe1Holidays();
         Assertions.assertNotNull(holidayId);
 
         final Integer loanProductID = createLoanProduct(null);
@@ -451,10 +452,10 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         String configName = GlobalConfigurationConstants.RESCHEDULE_REPAYMENTS_ON_HOLIDAYS;
         globalConfigurationHelper.updateGlobalConfiguration(configName, new PutGlobalConfigurationsRequest().enabled(true));
 
-        holidayId = HolidayHelper.activateHolidays(requestSpec, responseSpec, holidayId.toString());
+        holidayId = HolidayHelper.activateHolidays(holidayId);
         Assertions.assertNotNull(holidayId);
 
-        HashMap holidayData = HolidayHelper.getHolidayById(requestSpec, responseSpec, holidayId.toString());
+        GetHolidaysResponse holidayData = HolidayHelper.getHolidayById(holidayId);
 
         LinkedHashMap repaymentScheduleHashMap = JsonPath.from(loanDetails).get("repaymentSchedule");
         ArrayList<LinkedHashMap> periods = (ArrayList<LinkedHashMap>) repaymentScheduleHashMap.get("periods");
@@ -540,7 +541,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 "Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job");
 
         // Remove the Holiday created
-        HolidayHelper.deleteHoliday(requestSpec, responseSpec, holidayId);
+        HolidayHelper.deleteHoliday(holidayId);
     }
 
     @Test
