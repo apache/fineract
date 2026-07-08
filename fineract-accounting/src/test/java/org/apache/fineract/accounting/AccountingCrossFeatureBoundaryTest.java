@@ -20,7 +20,9 @@ package org.apache.fineract.accounting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.base.Splitter;
 import com.tngtech.archunit.core.domain.JavaClass;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -34,27 +36,6 @@ import org.springframework.modulith.core.ApplicationModule;
 import org.springframework.modulith.core.ApplicationModuleDependency;
 import org.springframework.modulith.core.ApplicationModules;
 
-/**
- * Cross-feature boundary check for the accounting feature, using Spring Modulith.
- * <p>
- * The model is built with base {@code org.apache.fineract} so every other top-level Fineract area on the classpath is
- * visible. A referenced type is "allowed foundation" when it physically lives in {@code fineract-core} or
- * {@code fineract-command} — the two modules the outline lets every feature depend on. Crucially, this is decided by
- * the <em>artifact the referenced type is loaded from</em>, not by its package name: {@code fineract-core} contains
- * shared types under {@code infrastructure.*} but also under {@code organisation.*}, {@code portfolio.*}, etc.
- * (DTOs/enums that were relocated to core). A package-name check would wrongly flag those; an artifact check does not.
- * <p>
- * The owning artifact is read from each type's source location (ArchUnit records where every class was imported from).
- * When accounting is built, {@code fineract-core} and {@code fineract-command} are on the classpath as jars, so a core
- * type resolves to a URI containing {@code fineract-core} and a command type to one containing
- * {@code fineract-command}. Anything loaded from any other {@code fineract-*} artifact is a genuine cross-feature
- * dependency and is reported as a violation, to be fixed at the source (move the shared type into core, or reach the
- * feature via a core read-contract / command / event / by-id reference) rather than by widening an allow-list.
- * <p>
- * Because this test lives in the {@code fineract-accounting} module, it runs with only accounting and its own
- * dependencies on the classpath, so it reports exactly the cross-feature edges that originate in the
- * {@code fineract-accounting} jar (the work for FINERACT-2646).
- */
 class AccountingCrossFeatureBoundaryTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountingCrossFeatureBoundaryTest.class);
@@ -62,20 +43,10 @@ class AccountingCrossFeatureBoundaryTest {
     private static final String BASE = "org.apache.fineract";
     private static final String ACCOUNTING_PACKAGE = "org.apache.fineract.accounting";
 
-    /**
-     * The only artifacts every feature may depend on (outline: fineract-core + fineract-command). Membership is tested
-     * against the referenced type's NORMALISED owning artifact (exact set match), so a type counts as foundation purely
-     * by living in one of these jars/modules, whatever its package happens to be.
-     */
     private static final Set<String> FOUNDATION_ARTIFACTS = Set.of("fineract-core", "fineract-command");
 
-    // Match a real module path segment: "fineract-..." that begins right after a "/". This deliberately does
-    // NOT match the parent checkout folder (e.g. "apache-fineract-modulith"), where "fineract-modulith" is
-    // preceded by "apache-", not "/", and would otherwise become the first match for every type.
     private static final Pattern FINERACT_ARTIFACT = Pattern.compile("(?<=/)fineract-[a-z0-9-]+");
 
-    // Built lazily (not in a static initializer) so the one-time, memory-heavy classpath scan surfaces any
-    // failure as a normal test failure rather than a class-initialization error.
     private static ApplicationModules modules;
 
     private static ApplicationModules modules() {
@@ -92,26 +63,15 @@ class AccountingCrossFeatureBoundaryTest {
                 .orElseThrow(() -> new IllegalStateException("Accounting module not found in the model"));
     }
 
-    /**
-     * Granular feature key for a referenced type: the first two package segments under the base, so
-     * {@code org.apache.fineract.portfolio.charge.domain.Charge} becomes {@code portfolio.charge}. Used only to label
-     * violations in a readable way; it never decides whether something is allowed.
-     */
     private static String featureKey(String typeName) {
         String prefix = BASE + ".";
         if (!typeName.startsWith(prefix)) {
             return typeName;
         }
-        String[] parts = typeName.substring(prefix.length()).split("\\.");
-        return parts.length >= 2 ? parts[0] + "." + parts[1] : parts[0];
+        List<String> parts = Splitter.on('.').splitToList(typeName.substring(prefix.length()));
+        return parts.size() >= 2 ? parts.get(0) + "." + parts.get(1) : parts.get(0);
     }
 
-    /**
-     * The {@code fineract-*} artifact a referenced type was loaded from, derived from its source URI (e.g.
-     * {@code .../fineract-core/build/libs/fineract-core-1.15.0-SNAPSHOT.jar!/...} -> {@code fineract-core}). Takes the
-     * LAST {@code /fineract-*} path segment (the deepest module dir) and strips the trailing version. Returns
-     * {@code (unknown-source)} if the location can't be determined.
-     */
     private static String owningArtifact(JavaClass type) {
         return type.getSource() //
                 .map(source -> source.getUri().toString()) //
@@ -126,22 +86,10 @@ class AccountingCrossFeatureBoundaryTest {
                 .orElse("(unknown-source)");
     }
 
-    /**
-     * A referenced type is foundation iff it was loaded from fineract-core or fineract-command. The decision is an
-     * exact match against the normalised owning artifact, not a substring of the raw URI, so siblings such as
-     * {@code fineract-command-jdbc} are not mistaken for foundation. If the source location is unknown,
-     * {@code owningArtifact} returns a sentinel not in the set, so the type surfaces as NOT foundation rather than
-     * silently passing.
-     */
     private static boolean isFoundation(JavaClass type) {
         return FOUNDATION_ARTIFACTS.contains(owningArtifact(type));
     }
 
-    /**
-     * The "report": prints, per accounting source type, each referenced feature package together with the artifact it
-     * lives in and whether that counts as foundation. Always passes; its job is to make it obvious why any given edge
-     * is or isn't a violation, and to locate the source type responsible.
-     */
     @Test
     void printAccountingCrossFeatureDependencyReport() {
         Map<String, Set<String>> sourceTypeToTargets = new TreeMap<>();
@@ -174,11 +122,6 @@ class AccountingCrossFeatureBoundaryTest {
         LOG.info("  " + violationFeatures);
     }
 
-    /**
-     * The check: accounting may reference types only from fineract-core and fineract-command. Any referenced type
-     * loaded from a different feature module is a violation, labelled by its feature package, and fixed at the source
-     * per the outline.
-     */
     @Test
     void accountingMustNotImportOtherFeatureModules() {
         Set<String> featureDependencies = new TreeSet<>();
