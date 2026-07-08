@@ -944,6 +944,23 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
             return this;
         }
 
+        /**
+         * Repayment batch request using the pre-versioned {@code loans/{id}/transactions} relative URL (without the
+         * {@code v1/} prefix), to exercise the batch API's backward compatibility with legacy relative URLs.
+         */
+        public BatchRequestBuilder repayLoanLegacyRelativeUrl(Long requestId, Long loanId, String amount, String transactionDate) {
+            requests.add(new BatchRequest().requestId(requestId).relativeUrl("loans/" + loanId + "/transactions?command=repayment")
+                    .method("POST").body("""
+                                {
+                                    "locale": "en",
+                                    "dateFormat": "%s",
+                                    "transactionDate": "%s",
+                                    "transactionAmount": %s
+                                }
+                            """.formatted(DATETIME_PATTERN, transactionDate, amount)));
+            return this;
+        }
+
         public List<BatchResponse> executeEnclosingTransaction() {
             return batchHelper.executeEnclosingTransaction(requests);
         }
@@ -1255,6 +1272,10 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected List<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(String loanExternalId) {
         return loanHelper.getLoanDelinquencyTags(loanExternalId);
+    }
+
+    protected List<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(Long loanId) {
+        return loanHelper.getLoanDelinquencyTags(loanId);
     }
 
     protected DeleteLoansLoanIdResponse deleteLoanApplication(String loanExternalId) {
