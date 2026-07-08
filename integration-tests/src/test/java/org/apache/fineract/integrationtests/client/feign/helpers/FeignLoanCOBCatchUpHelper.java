@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.time.LocalDate;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
@@ -43,6 +44,11 @@ public class FeignLoanCOBCatchUpHelper {
 
     public boolean isLoanCOBCatchUpRunning() {
         return Boolean.TRUE.equals(executeGetLoanCatchUpStatus().getCatchUpRunning());
+    }
+
+    public boolean isLoanCOBCatchUpFinishedFor(LocalDate cobBusinessDate) {
+        return !Boolean.TRUE.equals(executeGetLoanCatchUpStatus().getCatchUpRunning())
+                && cobBusinessDate.equals(executeRetrieveOldestCOBProcessedLoan().getCobProcessedDate());
     }
 
     public OldestCOBProcessedLoanDTO executeRetrieveOldestCOBProcessedLoan() {
