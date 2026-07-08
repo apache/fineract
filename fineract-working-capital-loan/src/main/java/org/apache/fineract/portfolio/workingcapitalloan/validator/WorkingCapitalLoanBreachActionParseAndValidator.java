@@ -99,7 +99,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
             return parseAndValidateReschedule(json, workingCapitalLoan, dataValidator);
         }
         if (RESUME_ACTION.equalsIgnoreCase(actionString)) {
-            return parseAndValidateResume(json, existing, dataValidator);
+            return parseAndValidateResume(json, workingCapitalLoan, existing, dataValidator);
         }
         if (RESET_ACTION.equalsIgnoreCase(actionString)) {
             return parseAndValidateReset(json, workingCapitalLoan, dataValidator);
@@ -135,6 +135,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         action.setAction(WorkingCapitalLoanBreachActionType.PAUSE);
         action.setStartDate(startDate);
         action.setEndDate(endDate);
+        action.setWorkingCapitalLoan(workingCapitalLoan);
         return action;
     }
 
@@ -147,14 +148,14 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         action.setMinimumPaymentType(extractMinimumPaymentType(json, dataValidator));
         action.setFrequency(extractInteger(json, FREQUENCY));
         action.setFrequencyType(extractFrequencyType(json, dataValidator));
-
+        action.setWorkingCapitalLoan(workingCapitalLoan);
         validateReschedule(action, workingCapitalLoan, dataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidator);
         return action;
     }
 
-    private WorkingCapitalLoanBreachAction parseAndValidateResume(final JsonElement json,
+    private WorkingCapitalLoanBreachAction parseAndValidateResume(final JsonElement json, WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanBreachAction> existing, final DataValidatorBuilder dataValidator) {
         final LocalDate resumeDate = extractDate(json, START_DATE);
         dataValidator.reset().parameter(START_DATE).value(resumeDate).notNull();
@@ -175,10 +176,11 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         throwExceptionIfValidationWarningsExist(dataValidator);
 
-        final WorkingCapitalLoanBreachAction resume = new WorkingCapitalLoanBreachAction();
-        resume.setAction(WorkingCapitalLoanBreachActionType.RESUME);
-        resume.setStartDate(resumeDate);
-        return resume;
+        final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
+        action.setAction(WorkingCapitalLoanBreachActionType.RESUME);
+        action.setStartDate(resumeDate);
+        action.setWorkingCapitalLoan(workingCapitalLoan);
+        return action;
     }
 
     private WorkingCapitalLoanBreachAction parseAndValidateReset(final JsonElement json, final WorkingCapitalLoan workingCapitalLoan,
@@ -197,10 +199,11 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         throwExceptionIfValidationWarningsExist(dataValidator);
 
-        final WorkingCapitalLoanBreachAction resetAction = new WorkingCapitalLoanBreachAction();
-        resetAction.setAction(WorkingCapitalLoanBreachActionType.RESET);
-        resetAction.setStartDate(resetDate);
-        return resetAction;
+        final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
+        action.setAction(WorkingCapitalLoanBreachActionType.RESET);
+        action.setStartDate(resetDate);
+        action.setWorkingCapitalLoan(workingCapitalLoan);
+        return action;
     }
 
     private WorkingCapitalLoanBreachAction parseAndValidateUndoReset(final WorkingCapitalLoan workingCapitalLoan,
@@ -214,10 +217,11 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         throwExceptionIfValidationWarningsExist(dataValidator);
 
-        final WorkingCapitalLoanBreachAction undoReset = new WorkingCapitalLoanBreachAction();
-        undoReset.setAction(WorkingCapitalLoanBreachActionType.UNDO_RESET);
-        undoReset.setStartDate(DateUtils.getBusinessLocalDate());
-        return undoReset;
+        final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
+        action.setAction(WorkingCapitalLoanBreachActionType.UNDO_RESET);
+        action.setStartDate(DateUtils.getBusinessLocalDate());
+        action.setWorkingCapitalLoan(workingCapitalLoan);
+        return action;
     }
 
     private WorkingCapitalLoanBreachAction parseAndValidateDisableOrEnable(final JsonElement json,
@@ -243,6 +247,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
         action.setAction(isEnable ? WorkingCapitalLoanBreachActionType.ENABLE : WorkingCapitalLoanBreachActionType.DISABLE);
         action.setStartDate(startDate);
+        action.setWorkingCapitalLoan(workingCapitalLoan);
         return action;
     }
 

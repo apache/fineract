@@ -328,7 +328,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
     private void rebuildPaidAmountFromTransactions(final WorkingCapitalLoanBreachSchedule period, final Optional<LocalDate> lastResetDate) {
         final LocalDate fromDate = lastResetDate.filter(resetDate -> resetDate.isAfter(period.getFromDate())).orElse(period.getFromDate());
-        final BigDecimal paidAmount = transactionRepository.sumBreachRelevantPrincipalPaid(period.getLoan().getId(),
+        final BigDecimal paidAmount = transactionRepository.sumBreachRelevantPaid(period.getLoan().getId(),
                 LoanTransactionType.getRepaymentLikeTransactionTypes(), fromDate, period.getToDate());
         period.setPaidAmount(paidAmount);
         period.setOutstandingAmount(period.getMinPaymentAmount().subtract(paidAmount).max(BigDecimal.ZERO));

@@ -28,9 +28,9 @@ Feature: Working Capital Breach Disable
     When Admin sets the business date to "15 March 2026"
     And Admin initiate a Working Capital loan breach enable with startDate "15 March 2026"
     Then Working Capital loan breach disable action has the following data:
-      | action  | startDate  | endDate |
-      | DISABLE | 2026-02-28 |         |
-      | ENABLE  | 2026-03-15 |         |
+      | action  | startDate  | endDate    |
+      | DISABLE | 2026-02-28 | 2026-03-14 |
+      | ENABLE  | 2026-03-15 |            |
     And Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 110.70            | null       | true   |
@@ -343,10 +343,10 @@ Feature: Working Capital Breach Disable
     And Admin initiate a Working Capital loan breach enable with startDate "20 January 2026"
     And Admin initiate a Working Capital loan breach disable with startDate "20 January 2026"
     Then Working Capital loan breach disable action has the following data:
-      | action  | startDate  | endDate |
-      | DISABLE | 2026-01-10 |         |
-      | ENABLE  | 2026-01-20 |         |
-      | DISABLE | 2026-01-20 |         |
+      | action  | startDate  | endDate    |
+      | DISABLE | 2026-01-10 | 2026-01-19 |
+      | ENABLE  | 2026-01-20 |            |
+      | DISABLE | 2026-01-20 |            |
     When Admin closes the Working Capital loan with a full repayment on "20 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -470,11 +470,11 @@ Feature: Working Capital Breach Disable
     And Admin sets the business date to "31 January 2026"
     And Admin initiate a Working Capital loan breach enable with startDate "31 January 2026"
     Then Working Capital loan breach disable action has the following data:
-      | action  | startDate  | endDate |
-      | DISABLE | 2026-01-10 |         |
-      | ENABLE  | 2026-01-20 |         |
-      | DISABLE | 2026-01-25 |         |
-      | ENABLE  | 2026-01-31 |         |
+      | action  | startDate  | endDate    |
+      | DISABLE | 2026-01-10 | 2026-01-19 |
+      | ENABLE  | 2026-01-20 |            |
+      | DISABLE | 2026-01-25 | 2026-01-30 |
+      | ENABLE  | 2026-01-31 |            |
     When Admin closes the Working Capital loan with a full repayment on "31 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -530,9 +530,9 @@ Feature: Working Capital Breach Disable
     And Admin initiate a Working Capital loan breach disable with startDate "15 January 2026"
     And Admin initiate a Working Capital loan breach enable with startDate "15 January 2026"
     Then Working Capital loan breach disable action has the following data:
-      | action  | startDate  | endDate |
-      | DISABLE | 2026-01-15 |         |
-      | ENABLE  | 2026-01-15 |         |
+      | action  | startDate  | endDate    |
+      | DISABLE | 2026-01-15 | 2026-01-14 |
+      | ENABLE  | 2026-01-15 |            |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 

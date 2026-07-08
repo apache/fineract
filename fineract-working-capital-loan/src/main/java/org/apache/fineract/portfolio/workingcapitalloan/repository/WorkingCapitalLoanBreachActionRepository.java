@@ -37,11 +37,7 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
     @Query("""
             select case when count(action) > 0 then true else false end from WorkingCapitalLoanBreachAction action
             where action.action = org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE
-            and action.id = (select max(latest.id) from WorkingCapitalLoanBreachAction latest
-                where latest.workingCapitalLoan.id = :loanId
-                and latest.action in (org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE,
-                    org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.ENABLE)
-                and latest.startDate <= :date)
+            and action.workingCapitalLoan.id = :loanId and action.startDate <= :date and (action.endDate IS NULL OR action.endDate >= :date)
             """)
     boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
 

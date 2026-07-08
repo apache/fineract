@@ -79,14 +79,13 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     boolean existsByExternalId(ExternalId externalId);
 
     @Query("""
-            select coalesce(sum(allocation.principalPortion), 0)
+            select coalesce(sum(t.transactionAmount), 0)
             from WorkingCapitalLoanTransaction t
-            join t.allocation allocation
             where t.wcLoan.id = :wcLoanId and t.reversed = false
               and t.transactionType in :transactionTypes
               and t.transactionDate >= :fromDate and t.transactionDate <= :toDate
             """)
-    BigDecimal sumBreachRelevantPrincipalPaid(@Param("wcLoanId") Long wcLoanId,
+    BigDecimal sumBreachRelevantPaid(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionTypes") Collection<LoanTransactionType> transactionTypes, @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate);
 

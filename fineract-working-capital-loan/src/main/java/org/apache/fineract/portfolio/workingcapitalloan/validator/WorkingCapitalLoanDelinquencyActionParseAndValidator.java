@@ -67,7 +67,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     public WorkingCapitalLoanDelinquencyAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanDelinquencyAction> existing) {
         final DataValidatorBuilder dataValidator = createValidator();
-        final WorkingCapitalLoanDelinquencyAction parsedAction = parseCommand(command, dataValidator);
+        final WorkingCapitalLoanDelinquencyAction parsedAction = parseCommand(command, workingCapitalLoan, dataValidator);
         validateLoanIsActive(workingCapitalLoan, dataValidator);
 
         if (DelinquencyAction.PAUSE.equals(parsedAction.getAction())) {
@@ -161,10 +161,12 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         }
     }
 
-    private WorkingCapitalLoanDelinquencyAction parseCommand(final JsonCommand command, final DataValidatorBuilder dataValidator) {
+    private WorkingCapitalLoanDelinquencyAction parseCommand(final JsonCommand command, WorkingCapitalLoan workingCapitalLoan,
+            final DataValidatorBuilder dataValidator) {
         final JsonElement json = command.parsedJson();
         final WorkingCapitalLoanDelinquencyAction action = new WorkingCapitalLoanDelinquencyAction();
         action.setAction(extractAction(json, dataValidator));
+        action.setWorkingCapitalLoan(workingCapitalLoan);
 
         if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             action.setStartDate(extractDate(json, START_DATE));
