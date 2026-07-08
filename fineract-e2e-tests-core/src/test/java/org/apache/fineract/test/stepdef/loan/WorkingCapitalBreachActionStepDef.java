@@ -339,11 +339,15 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
                 assertThat(actual.getAction().name()).as(label).isEqualTo(expected);
             }
             case "startDate" -> assertThat(actual.getStartDate()).as(label).isEqualTo(LocalDate.parse(expected, DATE_FORMAT));
-            case "minimumPayment" -> assertThat(actual.getMinimumPayment()).as(label).isEqualByComparingTo(new BigDecimal(expected));
+            case "minimumPayment" ->
+                verifyOptionalField(expected, v -> assertThat(actual.getMinimumPayment()).as(label).isEqualByComparingTo(new BigDecimal(v)),
+                        () -> assertThat(actual.getMinimumPayment()).as(label).isNull());
             case "minimumPaymentType" ->
                 verifyOptionalField(expected, v -> assertThat(String.valueOf(actual.getMinimumPaymentType())).as(label).isEqualTo(v),
                         () -> assertThat(actual.getMinimumPaymentType()).as(label).isNull());
-            case "frequency" -> assertThat(actual.getFrequency()).as(label).isEqualTo(Integer.parseInt(expected));
+            case "frequency" ->
+                verifyOptionalField(expected, v -> assertThat(actual.getFrequency()).as(label).isEqualTo(Integer.parseInt(v)),
+                        () -> assertThat(actual.getFrequency()).as(label).isNull());
             case "frequencyType" ->
                 verifyOptionalField(expected, v -> assertThat(String.valueOf(actual.getFrequencyType())).as(label).isEqualTo(v),
                         () -> assertThat(actual.getFrequencyType()).as(label).isNull());

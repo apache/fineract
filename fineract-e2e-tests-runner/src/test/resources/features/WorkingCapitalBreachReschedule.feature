@@ -175,7 +175,7 @@ Feature: Working Capital Breach Reschedule Action
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
   @TestRailId:C85279
-  Scenario: Verify breach reschedule - UC8: payment-only reschedule after frequency reschedule falls back to product breach frequency
+  Scenario: Verify breach reschedule - UC8: payment-only reschedule after frequency reschedule inherits the previously rescheduled frequency
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
@@ -200,7 +200,8 @@ Feature: Working Capital Breach Reschedule Action
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 110.70            | null       | true   |
       | 2            | 2026-03-01 | 2026-04-30 | 61           | 110.70           | 110.70            | null       | true   |
       | 3            | 2026-05-01 | 2026-06-30 | 61           | 90               | 90                | null       | true   |
-      | 4            | 2026-07-01 | 2026-08-31 | 62           | 90               | 90                | null       | null   |
+      | 4            | 2026-07-01 | 2026-07-30 | 30           | 90               | 90                | null       | true   |
+      | 5            | 2026-07-31 | 2026-08-29 | 30           | 90               | 90                | null       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "15 August 2026"
 
   @TestRailId:C85280
@@ -321,3 +322,36 @@ Feature: Working Capital Breach Reschedule Action
       | 3            | 2019-05-01 | 2019-05-30 | 30           | 500.00           | 500.00            | null       | true   |
       | 4            | 2019-05-31 | 2019-06-29 | 30           | 500.00           | 500.00            | null       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "15 June 2019"
+
+  Scenario: Verify breach reschedule inherits each partial group from the latest action that set it
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin sets the business date to "01 June 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin creates WC breach reschedule action with the following parameters:
+      | minimumPayment | minimumPaymentType |
+      | 1              | PERCENTAGE         |
+    When Admin creates WC breach reschedule action with the following parameters:
+      | frequency | frequencyType |
+      | 30        | DAYS          |
+    Then WC loan breach actions have the following data:
+      | action     | startDate    | minimumPayment | minimumPaymentType | frequency | frequencyType |
+      | RESCHEDULE | 01 June 2026 | 1              | PERCENTAGE         |           |               |
+      | RESCHEDULE | 01 June 2026 |                |                    | 30        | DAYS          |
+    When Admin sets the business date to "15 August 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 110.70            | null       | true   |
+      | 2            | 2026-03-01 | 2026-04-30 | 61           | 110.70           | 110.70            | null       | true   |
+      | 3            | 2026-05-01 | 2026-06-30 | 61           | 90               | 90                | null       | true   |
+      | 4            | 2026-07-01 | 2026-07-30 | 30           | 90               | 90                | null       | true   |
+      | 5            | 2026-07-31 | 2026-08-29 | 30           | 90               | 90                | null       | null   |
+    Then Admin closes the Working Capital loan with a full repayment on "15 August 2026"

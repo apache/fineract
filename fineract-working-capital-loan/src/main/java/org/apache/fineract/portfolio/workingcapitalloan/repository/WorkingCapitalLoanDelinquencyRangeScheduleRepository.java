@@ -46,6 +46,16 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
     List<WorkingCapitalLoanDelinquencyRangeSchedule> findPastOpenPeriodsForRepayment(@Param("loanId") Long loanId,
             @Param("transactionDate") LocalDate transactionDate);
 
+    @Query("""
+            SELECT s FROM WorkingCapitalLoanDelinquencyRangeSchedule s
+            WHERE s.loan.id = :loanId
+              AND (s.minPaymentCriteriaMet IS NULL OR s.minPaymentCriteriaMet = FALSE)
+              AND s.expectedAmount IS NOT NULL
+              AND s.expectedAmount > COALESCE(s.paidAmount, 0) + :principalOutstanding
+            ORDER BY s.periodNumber ASC""")
+    List<WorkingCapitalLoanDelinquencyRangeSchedule> findOpenPeriodsExceedingRemainingBalanceCap(@Param("loanId") Long loanId,
+            @Param("principalOutstanding") BigDecimal principalOutstanding);
+
     Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(Long loanId,
             LocalDate date, LocalDate date2);
 
