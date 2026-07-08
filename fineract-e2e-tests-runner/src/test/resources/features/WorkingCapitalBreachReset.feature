@@ -28,16 +28,16 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
-      | action | startDate      |
-      | RESET  | 15 April 2026  |
+      | action | startDate     |
+      | RESET  | 15 April 2026 |
     When Admin sets the business date to "04 May 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | true   |
       | 3            | 2026-05-01 | 2026-06-29 | 60           | 400.00           | 400.00            | null   |
     Then Admin closes the Working Capital loan with a full repayment on "04 May 2026"
@@ -69,16 +69,16 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
-      | action | startDate      |
-      | RESET  | 15 April 2026  |
+      | action | startDate     |
+      | RESET  | 15 April 2026 |
     When Admin sets the business date to "04 May 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | true   |
       | 3            | 2026-05-01 | 2026-06-29 | 60           | 400.00           | 400.00            | null   |
     Then Admin closes the Working Capital loan with a full repayment on "04 May 2026"
@@ -110,16 +110,16 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
-      | action | startDate      |
-      | RESET  | 15 April 2026  |
+      | action | startDate     |
+      | RESET  | 15 April 2026 |
     When Admin sets the business date to "15 April 2026"
     And Customer makes repayment on "02 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
@@ -150,19 +150,19 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     When Admin sets the business date to "04 May 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin creates WC breach reset action
     Then WC loan breach actions have the following data:
-      | action | startDate      |
-      | RESET  | 15 April 2026  |
-      | RESET  | 04 May 2026    |
+      | action | startDate     |
+      | RESET  | 15 April 2026 |
+      | RESET  | 04 May 2026   |
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
-      | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
+      | 2            | 2026-03-02 | 2026-04-30 | 60           | null             | null              | null   |
       | 3            | 2026-05-01 | 2026-06-29 | 60           | 400.00           | 400.00            | null   |
     Then Admin closes the Working Capital loan with a full repayment on "04 May 2026"
 
@@ -193,7 +193,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     When Admin creates WC breach undo reset action
     Then Working Capital loan breach schedule has the following data:
@@ -201,9 +201,9 @@ Feature: Working Capital Breach Reset and Undo Reset
       | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 100.00            | true   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
-      | action     | startDate      |
-      | RESET      | 15 April 2026  |
-      | UNDO_RESET | 15 April 2026  |
+      | action     | startDate     |
+      | RESET      | 15 April 2026 |
+      | UNDO_RESET | 15 April 2026 |
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
   @TestRailId:C85431
@@ -234,8 +234,8 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
-      | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
+      | 2            | 2026-03-02 | 2026-04-30 | 60           | null             | null              | null   |
       | 3            | 2026-05-01 | 2026-06-29 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
       | action | startDate     |
@@ -245,7 +245,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     When Admin creates WC breach undo reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | false  |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | true   |
       | 3            | 2026-05-01 | 2026-06-29 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
@@ -293,13 +293,13 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Customer makes repayment on "02 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
-    # Undo restores the snapshot captured at reset time; the ignored backdated payment is NOT re-applied, so period 1 returns to 100 past due / breach (it does not become 0)
+    # After undo reset, period is recalculated, payment is applied
     When Admin creates WC breach undo reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 100.00            | true   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0                 | false  |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
       | action     | startDate     |
@@ -308,7 +308,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
   @TestRailId:C85433
-  Scenario: Verify a payment on the reset date counts but a payment before the reset date is ignored
+  Scenario: Verify a payment on the reset date or a payment before the reset date but still current period counts
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
@@ -332,14 +332,14 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Customer makes repayment on "15 April 2026" with 50.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 350.00            | null   |
     # Payment dated before the reset date (14 April) is ignored: period 2 outstanding stays 350
     And Customer makes repayment on "14 April 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
-      | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 350.00            | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
+      | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 250.00            | null   |
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
   @TestRailId:C85434
@@ -369,7 +369,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     # Reset clears period 1 even though it was not in breach (breach flag becomes null)
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     # Undo restores period 1 to its captured non-breached state (breach=false)
     When Admin creates WC breach undo reset action
@@ -430,7 +430,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     # Undo reopens the period's reset slot (only active resets are counted per period)
     When Admin creates WC breach undo reset action
@@ -442,7 +442,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     When Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | breach |
-      | 1            | 2026-01-01 | 2026-03-01 | 60           | 400.00           | 0.00              | null   |
+      | 1            | 2026-01-01 | 2026-03-01 | 60           | null             | null              | null   |
       | 2            | 2026-03-02 | 2026-04-30 | 60           | 400.00           | 400.00            | null   |
     And WC loan breach actions have the following data:
       | action     | startDate     |
@@ -600,15 +600,15 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin creates WC breach reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-03-31 | 900.00           | 0.00              | null       | null   |
+      | 1            | 2026-01-01 | 2026-03-31 | null             | null              | null       | null   |
       | 2            | 2026-04-01 | 2026-06-30 | 900.00           | 900.00            | null       | null   |
     When Admin creates WC breach undo reset action
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-03-31 | 900.00           | 900.00            | true       | true   |
+      | 1            | 2026-01-01 | 2026-03-31 | 900.00           | 900.00            | null       | true   |
       | 2            | 2026-04-01 | 2026-06-30 | 900.00           | 900.00            | null       | null   |
     And WC loan breach actions have the following data:
-      | action     | startDate      |
-      | RESET      | 15 April 2026  |
-      | UNDO_RESET | 15 April 2026  |
+      | action     | startDate     |
+      | RESET      | 15 April 2026 |
+      | UNDO_RESET | 15 April 2026 |
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"

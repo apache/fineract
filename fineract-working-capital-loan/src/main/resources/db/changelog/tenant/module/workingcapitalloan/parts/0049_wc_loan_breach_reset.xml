@@ -120,7 +120,9 @@
 
     <changeSet author="fineract" id="wcl-0049-7">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_WC_BREACH_RESET'</sqlCheck>
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM m_permission
+                                         WHERE code = 'CREATE_WC_BREACH_RESET'</sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio"/>
@@ -129,6 +131,20 @@
             <column name="action_name" value="CREATE"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0049-8">
+        <addColumn tableName="m_wc_loan_breach_schedule">
+            <column name="reset" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0049-9">
+        <addColumn tableName="m_wc_loan_breach_reset_history">
+            <column name="min_payment_amount" type="DECIMAL(19,6)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>
