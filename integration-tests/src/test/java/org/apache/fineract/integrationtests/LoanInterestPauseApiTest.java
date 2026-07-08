@@ -18,93 +18,55 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
-import org.apache.fineract.client.models.PostLoansLoanIdRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.client.models.InterestPauseRequestDto;
+import org.apache.fineract.client.models.InterestPauseResponseDto;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import retrofit2.Response;
+import org.junit.jupiter.api.function.Executable;
 
-@Slf4j
-public class LoanInterestPauseApiTest extends BaseLoanIntegrationTest {
+public class LoanInterestPauseApiTest extends FeignLoanTestBase {
 
-    private static RequestSpecification REQUEST_SPEC;
-    private static ResponseSpecification RESPONSE_SPEC;
-    private static ResponseSpecification RESPONSE_SPEC_403;
-    private static ResponseSpecification RESPONSE_SPEC_404;
-    private static ResponseSpecification RESPONSE_SPEC_204;
-    private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
-    private static LoanTransactionHelper LOAN_TRANSACTIONAL_HELPER_204;
-    private static LoanTransactionHelper LOAN_TRANSACTION_HELPER_403;
-    private static LoanTransactionHelper LOAN_TRANSACTION_HELPER_404;
-    private static AccountHelper ACCOUNT_HELPER;
-    private static final Integer nonExistLoanId = 99999;
-    private static String externalId;
-    private static final String nonExistExternalId = "7c4fb86f-a778-4d02-b7a8-ec3ec98941fa";
+    private static final Long NON_EXIST_LOAN_ID = 99999L;
+    private static final String NON_EXIST_EXTERNAL_ID = "7c4fb86f-a778-4d02-b7a8-ec3ec98941fa";
+    private static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String TEXT_DATE_FORMAT = "d MMMM yyyy";
+    private static final String LOAN_START_DATE = "01 January 2023";
+    private static final String LOAN_PRINCIPAL_AMOUNT = "10000.00";
+    private static final int NUMBER_OF_REPAYMENTS = 12;
+    private static final double INTEREST_RATE_PER_PERIOD = 18.0;
+
     private Long clientId;
-    private Integer loanProductId;
-    private Integer loanId;
-    private final String loanPrincipalAmount = "10000.00";
-    private final String numberOfRepayments = "12";
-    private final String interestRatePerPeriod = "18";
-    private final String dateString = "01 January 2023";
+    private Long loanProductId;
+    private Long loanId;
+    private String externalId;
+    private Long zeroInterestLoanId;
 
     @BeforeEach
     public void initialize() {
-        Utils.initializeRESTAssured();
-        REQUEST_SPEC = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        REQUEST_SPEC.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
-        RESPONSE_SPEC_403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        RESPONSE_SPEC_404 = new ResponseSpecBuilder().expectStatusCode(404).build();
-        RESPONSE_SPEC_204 = new ResponseSpecBuilder().expectStatusCode(204).build();
-        LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC);
-        LOAN_TRANSACTION_HELPER_403 = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC_403);
-        LOAN_TRANSACTION_HELPER_404 = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC_404);
-        LOAN_TRANSACTIONAL_HELPER_204 = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC_204);
-        ACCOUNT_HELPER = new AccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
-
+        clientId = createClient();
         externalId = UUID.randomUUID().toString();
-
-        createRequiredEntities();
+        loanProductId = createLoanProduct(create4IProgressive().numberOfRepayments(NUMBER_OF_REPAYMENTS)
+                .interestRatePerPeriod(INTEREST_RATE_PER_PERIOD).principal(Double.parseDouble(LOAN_PRINCIPAL_AMOUNT)));
+        loanId = createLoan();
 
         Assertions.assertNotNull(loanProductId, "Loan Product ID should not be null after creation");
         Assertions.assertNotNull(loanId, "Loan ID should not be null after creation");
         Assertions.assertNotNull(externalId, "External Loan ID should not be null after creation");
     }
 
-    /**
-     * Creates the client, loan product, and loan entities
-     **/
-    private void createRequiredEntities() {
-        this.createClientEntity();
-        this.createLoanProductEntity();
-        this.createLoanEntity();
-    }
-
     @Test
     public void testCreateInterestPauseByLoanId_validRequest_shouldSucceed() {
-        PostLoansLoanIdTransactionsResponse response = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-12",
-                "yyyy-MM-dd", "en", loanId);
+        CommandProcessingResult response = loanHelper.createInterestPause(loanId, pause("2023-01-01", "2023-01-12"));
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getResourceId());
@@ -112,65 +74,37 @@ public class LoanInterestPauseApiTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testCreateInterestPauseByLoanId_endDateBeforeStartDate_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.createInterestPauseByLoanId("2024-12-05", "2023-01-12", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.end.date.before.start.date"),
-                    "Response should contain the validation error message for end date before start date");
-        }
+        assertPauseFails(403, "interest.pause.end.date.before.start.date",
+                () -> loanHelper.createInterestPause(loanId, pause("2024-12-05", "2023-01-12")));
     }
 
     @Test
     public void testCreateInterestPauseByLoanId_startDateBeforeLoanStart_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.createInterestPauseByLoanId("2022-12-01", "2023-01-12", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.start.date.before.loan.start.date"),
-                    "Response should contain the validation error message for start date before loan start date");
-        }
+        assertPauseFails(403, "interest.pause.start.date.before.loan.start.date",
+                () -> loanHelper.createInterestPause(loanId, pause("2022-12-01", "2023-01-12")));
     }
 
     @Test
     public void testCreateInterestPauseByLoanId_endDateAfterLoanMaturity_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.createInterestPauseByLoanId("2024-12-01", "2025-12-05", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.end.date.after.loan.maturity.date"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.end.date.after.loan.maturity.date",
+                () -> loanHelper.createInterestPause(loanId, pause("2024-12-01", "2025-12-05")));
     }
 
     @Test
     public void testRetrieveInterestPausesByLoanId_noPauses_shouldReturnEmpty() {
-        String response = LOAN_TRANSACTION_HELPER.retrieveInterestPauseByLoanId(nonExistLoanId);
-
-        Assertions.assertNotNull(response, "Response should not be null");
-        Assertions.assertFalse(response.contains("id"));
-        Assertions.assertFalse(response.contains("startDate"));
-        Assertions.assertFalse(response.contains("endDate"));
+        Assertions.assertTrue(loanHelper.retrieveInterestPauses(NON_EXIST_LOAN_ID).isEmpty());
     }
 
     @Test
     public void testRetrieveInterestPausesByLoanId_shouldReturnData() {
-        LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-12", "yyyy-MM-dd", "en", loanId);
+        loanHelper.createInterestPause(loanId, pause("2023-01-01", "2023-01-12"));
 
-        String response = LOAN_TRANSACTION_HELPER.retrieveInterestPauseByLoanId(loanId);
-
-        Assertions.assertNotNull(response, "Response should not be null");
-        Assertions.assertTrue(response.contains("2023-01-01"));
-        Assertions.assertTrue(response.contains("2023-01-12"));
+        assertContainsPause(loanHelper.retrieveInterestPauses(loanId), "2023-01-01", "2023-01-12");
     }
 
     @Test
     public void testCreateInterestPauseByExternalLoanId_validRequest_shouldSucceed() {
-        PostLoansLoanIdTransactionsResponse response = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-01", "2023-01-12",
-                "yyyy-MM-dd", "en", externalId);
+        CommandProcessingResult response = loanHelper.createInterestPauseByExternalId(externalId, pause("2023-01-01", "2023-01-12"));
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getResourceId());
@@ -178,464 +112,220 @@ public class LoanInterestPauseApiTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testCreateInterestPauseByExternalLoanId_endDateBeforeStartDate_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.createInterestPauseByExternalId("2023-01-01", "2022-01-12", "yyyy-MM-dd", "en", externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.end.date.before.start.date"),
-                    "Response should contain the validation error message for end date before start date");
-        }
+        assertPauseFails(403, "interest.pause.end.date.before.start.date",
+                () -> loanHelper.createInterestPauseByExternalId(externalId, pause("2023-01-01", "2022-01-12")));
     }
 
     @Test
     public void testCreateInterestPauseByExternalLoanId_startDateBeforeLoanStart_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.createInterestPauseByExternalId("2022-12-01", "2024-12-05", "yyyy-MM-dd", "en", externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.start.date.before.loan.start.date"),
-                    "Response should contain the validation error message for start date before loan start date");
-        }
+        assertPauseFails(403, "interest.pause.start.date.before.loan.start.date",
+                () -> loanHelper.createInterestPauseByExternalId(externalId, pause("2022-12-01", "2024-12-05")));
     }
 
     @Test
     public void testCreateInterestPauseByExternalLoanId_endDateAfterLoanMaturity_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.createInterestPauseByExternalId("2024-12-01", "2025-12-05", "yyyy-MM-dd", "en", externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.end.date.after.loan.maturity.date"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.end.date.after.loan.maturity.date",
+                () -> loanHelper.createInterestPauseByExternalId(externalId, pause("2024-12-01", "2025-12-05")));
     }
 
     @Test
     public void testRetrieveInterestPausesByExternalLoanId_noPauses_shouldReturnEmpty() {
-        String response = LOAN_TRANSACTION_HELPER.retrieveInterestPauseByExternalId(nonExistExternalId);
-
-        Assertions.assertNotNull(response, "Response should not be null");
-        Assertions.assertFalse(response.contains("id"));
-        Assertions.assertFalse(response.contains("startDate"));
-        Assertions.assertFalse(response.contains("endDate"));
+        Assertions.assertTrue(loanHelper.retrieveInterestPausesByExternalId(NON_EXIST_EXTERNAL_ID).isEmpty());
     }
 
     @Test
     public void testRetrieveInterestPausesByExternalLoanId_shouldReturnData() {
-        LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-01", "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        loanHelper.createInterestPauseByExternalId(externalId, pause("2023-01-01", "2023-01-12"));
 
-        String response = LOAN_TRANSACTION_HELPER.retrieveInterestPauseByExternalId(externalId);
-
-        Assertions.assertNotNull(response, "Response should not be null");
-        Assertions.assertTrue(response.contains("2023-01-01"));
-        Assertions.assertTrue(response.contains("2023-01-12"));
+        assertContainsPause(loanHelper.retrieveInterestPausesByExternalId(externalId), "2023-01-01", "2023-01-12");
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_overlapping_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-03",
-                "yyyy-MM-dd", "en", loanId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-08",
-                "2023-01-10", "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-03");
+        loanHelper.createInterestPause(loanId, pause("2023-01-08", "2023-01-10"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByLoanId(variationId, "2023-01-01", "2023-01-12", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.overlapping",
+                () -> loanHelper.updateInterestPause(loanId, variationId, pause("2023-01-01", "2023-01-12")));
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_overlapping_shouldNotFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-03",
-                "yyyy-MM-dd", "en", loanId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-08",
-                "2023-01-10", "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-03");
+        loanHelper.createInterestPause(loanId, pause("2023-01-08", "2023-01-10"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
+        CommandProcessingResult updateResponse = loanHelper.updateInterestPause(loanId, variationId, pause("2023-01-01", "2023-01-07"));
 
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER.updateInterestPauseByLoanId(variationId, "2023-01-01", "2023-01-07", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        Assertions.assertNotNull(updateResponse.getResourceId());
+        Assertions.assertEquals(variationId, updateResponse.getResourceId());
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_overlapping_shouldFail2() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-06",
-                "yyyy-MM-dd", "en", loanId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-07",
-                "2023-01-12", "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-06");
+        loanHelper.createInterestPause(loanId, pause("2023-01-07", "2023-01-12"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByLoanId(variationId, "2023-01-02", "2023-01-13", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.overlapping",
+                () -> loanHelper.updateInterestPause(loanId, variationId, pause("2023-01-02", "2023-01-13")));
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_overlapping_shouldFail3() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-03", "2023-01-06",
-                "yyyy-MM-dd", "en", loanId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-07",
-                "2023-01-12", "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-03", "2023-01-06");
+        loanHelper.createInterestPause(loanId, pause("2023-01-07", "2023-01-12"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByLoanId(variationId, "2023-01-01", "2023-01-11", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.overlapping",
+                () -> loanHelper.updateInterestPause(loanId, variationId, pause("2023-01-01", "2023-01-11")));
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_validRequest_shouldSucceed() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-02",
-                "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-02");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
+        CommandProcessingResult updateResponse = loanHelper.updateInterestPause(loanId, variationId, pause("2023-01-03", "2023-01-04"));
 
-        Long variationId = createResponse.getResourceId();
-
-        PostLoansLoanIdTransactionsResponse updateResponse = LOAN_TRANSACTION_HELPER.updateInterestPauseByLoanId(variationId, "2023-01-03",
-                "2023-01-04", "yyyy-MM-dd", "en", loanId);
-
-        Assertions.assertNotNull(updateResponse);
         Assertions.assertNotNull(updateResponse.getResourceId());
         Assertions.assertEquals(variationId, updateResponse.getResourceId());
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_endDateBeforeStartDate_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-12",
-                "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByLoanId(variationId, "2023-03-01", "2023-01-12", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.end.date.before.start.date"),
-                    "Response should contain the validation error message for end date before start date");
-        }
+        assertPauseFails(403, "interest.pause.end.date.before.start.date",
+                () -> loanHelper.updateInterestPause(loanId, variationId, pause("2023-03-01", "2023-01-12")));
     }
 
     @Test
     public void testUpdateInterestPauseByLoanId_startDateBeforeLoanStart_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-12",
-                "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByLoanId(variationId, "2022-12-01", "2023-01-12", "yyyy-MM-dd", "en", loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.start.date.before.loan.start.date"),
-                    "Response should contain the validation error message for start date before loan start date");
-        }
+        assertPauseFails(403, "interest.pause.start.date.before.loan.start.date",
+                () -> loanHelper.updateInterestPause(loanId, variationId, pause("2022-12-01", "2023-01-12")));
     }
 
     @Test
     public void testDeleteInterestPauseByLoanId_validRequest_shouldSucceed() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-12",
-                "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse, "Create response should not be null");
-        Assertions.assertNotNull(createResponse.getResourceId(), "Resource ID should not be null");
+        loanHelper.deleteInterestPause(loanId, variationId);
 
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTIONAL_HELPER_204.deleteInterestPauseByLoanId(variationId, loanId);
-        } catch (Exception e) {
-            Assertions.fail("Delete operation failed: " + e.getMessage());
-        }
-
-        String response = LOAN_TRANSACTION_HELPER.retrieveInterestPauseByLoanId(loanId);
-        Assertions.assertFalse(response.contains(String.valueOf(variationId)), "Response should not contain the deleted variation ID");
+        assertDoesNotContainPause(loanHelper.retrieveInterestPauses(loanId), variationId);
     }
 
     @Test
     public void testDeleteInterestPauseByLoanId_nonExistentVariation_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.deleteInterestPauseByLoanId(99999L, loanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("error.msg.variation.not.found"),
-                    "Response should contain the validation error message for variation not found");
-        }
+        assertPauseFails(403, "error.msg.variation.not.found", () -> loanHelper.deleteInterestPause(loanId, NON_EXIST_LOAN_ID));
     }
 
     @Test
     public void testDeleteInterestPauseByLoanId_invalidLoanId_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByLoanId("2023-01-01", "2023-01-12",
-                "yyyy-MM-dd", "en", loanId);
+        Long variationId = createPauseByLoanId("2023-01-01", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_404.deleteInterestPauseByLoanId(variationId, nonExistLoanId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("error.msg.loan.id.invalid"),
-                    "Response should contain the validation error message for variation not found");
-        }
+        assertPauseFails(404, "error.msg.loan.id.invalid", () -> loanHelper.deleteInterestPause(NON_EXIST_LOAN_ID, variationId));
     }
 
     @Test
     public void testUpdateInterestPauseByExternalId_validRequest_shouldSucceed() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-01",
-                "2023-01-02", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-01", "2023-01-02");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
+        CommandProcessingResult updateResponse = loanHelper.updateInterestPauseByExternalId(externalId, variationId,
+                pause("2023-01-03", "2023-01-04"));
 
-        Long variationId = createResponse.getResourceId();
-
-        PostLoansLoanIdTransactionsResponse updateResponse = LOAN_TRANSACTION_HELPER.updateInterestPauseByExternalId(variationId,
-                "2023-01-03", "2023-01-04", "yyyy-MM-dd", "en", externalId);
-
-        Assertions.assertNotNull(updateResponse);
         Assertions.assertNotNull(updateResponse.getResourceId());
         Assertions.assertEquals(variationId, updateResponse.getResourceId());
     }
 
     @Test
     public void testUpdateInterestPauseByExternalId_overlapping_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-01",
-                "2023-01-06", "yyyy-MM-dd", "en", externalId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-07",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-01", "2023-01-06");
+        loanHelper.createInterestPauseByExternalId(externalId, pause("2023-01-07", "2023-01-12"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByExternalId(variationId, "2023-01-01", "2023-01-12", "yyyy-MM-dd", "en",
-                    externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.overlapping",
+                () -> loanHelper.updateInterestPauseByExternalId(externalId, variationId, pause("2023-01-01", "2023-01-12")));
     }
 
     @Test
     public void testUpdateInterestPauseByExternalId_overlapping_shouldFail2() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-01",
-                "2023-01-06", "yyyy-MM-dd", "en", externalId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-07",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-01", "2023-01-06");
+        loanHelper.createInterestPauseByExternalId(externalId, pause("2023-01-07", "2023-01-12"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByExternalId(variationId, "2023-01-02", "2023-01-13", "yyyy-MM-dd", "en",
-                    externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.overlapping",
+                () -> loanHelper.updateInterestPauseByExternalId(externalId, variationId, pause("2023-01-02", "2023-01-13")));
     }
 
     @Test
     public void testUpdateInterestPauseByExternalId_overlapping_shouldFail3() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-03",
-                "2023-01-06", "yyyy-MM-dd", "en", externalId);
-        PostLoansLoanIdTransactionsResponse createResponse2 = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-07",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-03", "2023-01-06");
+        loanHelper.createInterestPauseByExternalId(externalId, pause("2023-01-07", "2023-01-12"));
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByExternalId(variationId, "2023-01-01", "2023-01-11", "yyyy-MM-dd", "en",
-                    externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.overlapping"),
-                    "Response should contain the validation error message for end date after loan maturity date");
-        }
+        assertPauseFails(403, "interest.pause.overlapping",
+                () -> loanHelper.updateInterestPauseByExternalId(externalId, variationId, pause("2023-01-01", "2023-01-11")));
     }
 
     @Test
     public void testUpdateInterestPauseByExternalId_endDateBeforeStartDate_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-03",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-03", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByExternalId(variationId, "2023-03-01", "2023-01-12", "yyyy-MM-dd", "en",
-                    externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.end.date.before.start.date"),
-                    "Response should contain the validation error message for end date before start date");
-        }
+        assertPauseFails(403, "interest.pause.end.date.before.start.date",
+                () -> loanHelper.updateInterestPauseByExternalId(externalId, variationId, pause("2023-03-01", "2023-01-12")));
     }
 
     @Test
     public void testUpdateInterestPauseByExternalId_startDateBeforeLoanStart_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-03",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-03", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_403.updateInterestPauseByExternalId(variationId, "2022-12-01", "2023-01-12", "yyyy-MM-dd", "en",
-                    externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("interest.pause.start.date.before.loan.start.date"),
-                    "Response should contain the validation error message for start date before loan start date");
-        }
+        assertPauseFails(403, "interest.pause.start.date.before.loan.start.date",
+                () -> loanHelper.updateInterestPauseByExternalId(externalId, variationId, pause("2022-12-01", "2023-01-12")));
     }
 
     @Test
     public void testDeleteInterestPauseByExternalId_validRequest_shouldSucceed() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-03",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-03", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse, "Create response should not be null");
-        Assertions.assertNotNull(createResponse.getResourceId(), "Resource ID should not be null");
+        loanHelper.deleteInterestPauseByExternalId(externalId, variationId);
 
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTIONAL_HELPER_204.deleteInterestPauseByExternalId(variationId, externalId);
-        } catch (Exception e) {
-            Assertions.fail("Delete operation failed: " + e.getMessage());
-        }
-
-        String response = LOAN_TRANSACTION_HELPER.retrieveInterestPauseByExternalId(externalId);
-        Assertions.assertFalse(response.contains(String.valueOf(variationId)), "Response should not contain the deleted variation ID");
+        assertDoesNotContainPause(loanHelper.retrieveInterestPausesByExternalId(externalId), variationId);
     }
 
     @Test
     public void testDeleteInterestPauseByExternalId_nonExistentVariation_shouldFail() {
-        try {
-            LOAN_TRANSACTION_HELPER_403.deleteInterestPauseByExternalId(99999L, externalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("error.msg.variation.not.found"),
-                    "Response should contain the validation error message for variation not found");
-        }
+        assertPauseFails(403, "error.msg.variation.not.found",
+                () -> loanHelper.deleteInterestPauseByExternalId(externalId, NON_EXIST_LOAN_ID));
     }
 
     @Test
     public void testDeleteInterestPauseByExternalId_invalidExternalId_shouldFail() {
-        PostLoansLoanIdTransactionsResponse createResponse = LOAN_TRANSACTION_HELPER.createInterestPauseByExternalId("2023-01-03",
-                "2023-01-12", "yyyy-MM-dd", "en", externalId);
+        Long variationId = createPauseByExternalId("2023-01-03", "2023-01-12");
 
-        Assertions.assertNotNull(createResponse);
-        Assertions.assertNotNull(createResponse.getResourceId());
-
-        Long variationId = createResponse.getResourceId();
-
-        try {
-            LOAN_TRANSACTION_HELPER_404.deleteInterestPauseByExternalId(variationId, nonExistExternalId);
-        } catch (Exception e) {
-            String responseBody = e.getMessage();
-            Assertions.assertNotNull(responseBody, "Response body should not be null");
-            Assertions.assertTrue(responseBody.contains("error.msg.loan.external.id.invalid"),
-                    "Response should contain the validation error message for variation not found");
-        }
+        assertPauseFails(404, "error.msg.loan.external.id.invalid",
+                () -> loanHelper.deleteInterestPauseByExternalId(NON_EXIST_EXTERNAL_ID, variationId));
     }
-
-    Long loan;
 
     @Test
     public void testInterestPauseOnZeroInterestRate() {
         runAt("1 September 2019", () -> {
-            Long loanProductId = loanProductHelper.createLoanProduct(create4IProgressive()).getResourceId();
-            loan = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 September 2019", 1200.0, 0.0, 4, null);
-            disburseLoan(loan, BigDecimal.valueOf(1200.0), "1 September 2019");
+            Long loanProductId = createLoanProduct(create4IProgressive());
+            zeroInterestLoanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 September 2019", 1200.0, 0.0, 4, null);
+            disburseLoan(zeroInterestLoanId, BigDecimal.valueOf(1200.0), "1 September 2019");
         });
         runAt("1 October 2019", () -> {
-            loanTransactionHelper.makeLoanRepayment(loan, "Repayment", "1 October 2019", 300.0);
+            makeLoanRepayment(zeroInterestLoanId, "Repayment", "1 October 2019", 300.0);
         });
         runAt("1 November 2019", () -> {
-            loanTransactionHelper.makeLoanRepayment(loan, "Repayment", "1 November 2019", 300.0);
+            makeLoanRepayment(zeroInterestLoanId, "Repayment", "1 November 2019", 300.0);
         });
         runAt("1 December 2019", () -> {
-            loanTransactionHelper.makeLoanRepayment(loan, "Repayment", "1 December 2019", 300.0);
-            verifyTransactions(loan, //
+            makeLoanRepayment(zeroInterestLoanId, "Repayment", "1 December 2019", 300.0);
+            verifyTransactions(zeroInterestLoanId, //
                     transaction(1200.0, "Disbursement", "01 September 2019", 1200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0), //
                     transaction(300.0, "Repayment", "01 October 2019", 900.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(300.0, "Repayment", "01 November 2019", 600.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(300.0, "Repayment", "01 December 2019", 300.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
-            Response<CommandProcessingResult> response = loanTransactionHelper.createInterestPause(loan, "1 October 2019",
-                    "15 December 2019");
-            Assertions.assertEquals(403, response.code());
-            verifyTransactions(loan, //
+            assertPauseFails(403, "", () -> loanHelper.createInterestPause(zeroInterestLoanId,
+                    pause("1 October 2019", "15 December 2019", TEXT_DATE_FORMAT)));
+            verifyTransactions(zeroInterestLoanId, //
                     transaction(1200.0, "Disbursement", "01 September 2019", 1200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0), //
                     transaction(300.0, "Repayment", "01 October 2019", 900.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
                     transaction(300.0, "Repayment", "01 November 2019", 600.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -647,20 +337,19 @@ public class LoanInterestPauseApiTest extends BaseLoanIntegrationTest {
     @Test
     public void testInterestPauseOnZeroInterestRateRightAfterDisbursement() {
         runAt("1 September 2019", () -> {
-            Long loanProductId = loanProductHelper.createLoanProduct(create4IProgressive()).getResourceId();
-            loan = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 September 2019", 1200.0, 0.0, 4, null);
-            disburseLoan(loan, BigDecimal.valueOf(1200.0), "1 September 2019");
-            verifyRepaymentSchedule(loan, //
+            Long loanProductId = createLoanProduct(create4IProgressive());
+            zeroInterestLoanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 September 2019", 1200.0, 0.0, 4, null);
+            disburseLoan(zeroInterestLoanId, BigDecimal.valueOf(1200.0), "1 September 2019");
+            verifyRepaymentSchedule(zeroInterestLoanId, //
                     installment(1200.0, null, "01 September 2019"), //
                     installment(300.0, 0.0, 300.0, false, "01 October 2019"), //
                     installment(300.0, 0.0, 300.0, false, "01 November 2019"), //
                     installment(300.0, 0.0, 300.0, false, "01 December 2019"), //
                     installment(300.0, 0.0, 300.0, false, "01 January 2020") //
             );
-            Response<CommandProcessingResult> response = loanTransactionHelper.createInterestPause(loan, "1 October 2019",
-                    "15 December 2019");
-            Assertions.assertEquals(403, response.code());
-            verifyRepaymentSchedule(loan, //
+            assertPauseFails(403, "", () -> loanHelper.createInterestPause(zeroInterestLoanId,
+                    pause("1 October 2019", "15 December 2019", TEXT_DATE_FORMAT)));
+            verifyRepaymentSchedule(zeroInterestLoanId, //
                     installment(1200.0, null, "01 September 2019"), //
                     installment(300.0, 0.0, 300.0, false, "01 October 2019"), //
                     installment(300.0, 0.0, 300.0, false, "01 November 2019"), //
@@ -670,88 +359,56 @@ public class LoanInterestPauseApiTest extends BaseLoanIntegrationTest {
         });
     }
 
-    /**
-     * create a new client
-     **/
-    private void createClientEntity() {
-        this.clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getResourceId();
-        Assertions.assertNotNull(clientId);
-        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientId.intValue());
+    private Long createLoan() {
+        PostLoansRequest request = applyLP2ProgressiveLoanRequest(clientId, loanProductId, LOAN_START_DATE,
+                Double.parseDouble(LOAN_PRINCIPAL_AMOUNT), INTEREST_RATE_PER_PERIOD, NUMBER_OF_REPAYMENTS,
+                r -> r.repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)
+                        .loanTermFrequency(NUMBER_OF_REPAYMENTS).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)
+                        .externalId(externalId));
+        Long newLoanId = applyForLoan(request);
+        approveLoan(newLoanId, approveLoanRequest(Double.parseDouble(LOAN_PRINCIPAL_AMOUNT), LOAN_START_DATE));
+        disburseLoan(newLoanId, new BigDecimal(LOAN_PRINCIPAL_AMOUNT), LOAN_START_DATE);
+        return newLoanId;
     }
 
-    /**
-     * create a new loan product
-     **/
-    private void createLoanProductEntity() {
-        log.info("---------------------------------CREATING LOAN PRODUCT------------------------------------------");
-
-        final String interestRecalculationCompoundingMethod = LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE;
-        final String rescheduleStrategyMethod = LoanProductTestBuilder.RECALCULATION_STRATEGY_ADJUST_LAST_UNPAID_PERIOD;
-        final String preCloseInterestCalculationStrategy = LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE;
-
-        final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
-        final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
-        final Account expenseAccount = ACCOUNT_HELPER.createExpenseAccount();
-        final Account overpaymentAccount = ACCOUNT_HELPER.createLiabilityAccount();
-
-        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
-        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
-        String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount).withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
-                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).addAdvancedPaymentAllocation(defaultAllocation)
-                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
-                .withMultiDisburse().withDisallowExpectedDisbursements(true).withInterestRecalculationDetails(
-                        interestRecalculationCompoundingMethod, rescheduleStrategyMethod, preCloseInterestCalculationStrategy)
-                .build();
-
-        loanProductId = LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
-        log.info("Successfully created loan product  (ID:{}) ", loanProductId);
+    private Long createPauseByLoanId(String startDate, String endDate) {
+        CommandProcessingResult response = loanHelper.createInterestPause(loanId, pause(startDate, endDate));
+        Assertions.assertNotNull(response.getResourceId());
+        return response.getResourceId();
     }
 
-    /**
-     * submit a new loan application, approve and disburse the loan
-     **/
-    private void createLoanEntity() {
-        log.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
-
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsDays().withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsDays().withInterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
-                .withExpectedDisbursementDate(dateString).withSubmittedOnDate(dateString).withLoanType("individual")
-                .withExternalId(externalId).withRepaymentStrategy("advanced-payment-allocation-strategy")
-                .build(clientId.toString(), loanProductId.toString(), null);
-
-        loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
-
-        log.info("Sucessfully created loan (ID: {} )", loanId);
-
-        approveLoanApplication();
-        disburseLoan();
+    private Long createPauseByExternalId(String startDate, String endDate) {
+        CommandProcessingResult response = loanHelper.createInterestPauseByExternalId(externalId, pause(startDate, endDate));
+        Assertions.assertNotNull(response.getResourceId());
+        return response.getResourceId();
     }
 
-    /**
-     * approve the loan application
-     **/
-    private void approveLoanApplication() {
-
-        if (loanId != null) {
-            LOAN_TRANSACTION_HELPER.approveLoan(dateString, loanId);
-            log.info("Successfully approved loan (ID: {} )", loanId);
-        }
+    private static InterestPauseRequestDto pause(String startDate, String endDate) {
+        return pause(startDate, endDate, ISO_DATE_FORMAT);
     }
 
-    /**
-     * disburse the newly created loan
-     **/
-    private void disburseLoan() {
+    private static InterestPauseRequestDto pause(String startDate, String endDate, String dateFormat) {
+        return new InterestPauseRequestDto().startDate(startDate).endDate(endDate).dateFormat(dateFormat).locale("en");
+    }
 
-        if (loanId != null) {
-            LOAN_TRANSACTION_HELPER.disburseLoan(externalId, new PostLoansLoanIdRequest().actualDisbursementDate(dateString)
-                    .transactionAmount(new BigDecimal(loanPrincipalAmount)).locale("en").dateFormat("dd MMMM yyyy"));
-            log.info("Successfully disbursed loan (ID: {} )", loanId);
-        }
+    private static void assertPauseFails(int expectedStatus, String expectedError, Executable call) {
+        CallFailedRuntimeException exception = Assertions.assertThrows(CallFailedRuntimeException.class, call);
+        Assertions.assertEquals(expectedStatus, exception.getStatus());
+        Assertions.assertTrue(exception.getMessage().contains(expectedError),
+                "Expected error '" + expectedError + "' but was: " + exception.getMessage());
+    }
+
+    private static void assertContainsPause(List<InterestPauseResponseDto> pauses, String startDate, String endDate) {
+        Assertions
+                .assertTrue(
+                        pauses.stream()
+                                .anyMatch(p -> LocalDate.parse(startDate).equals(p.getStartDate())
+                                        && LocalDate.parse(endDate).equals(p.getEndDate())),
+                        "Expected a pause from " + startDate + " to " + endDate + " but found: " + pauses);
+    }
+
+    private static void assertDoesNotContainPause(List<InterestPauseResponseDto> pauses, Long variationId) {
+        Assertions.assertTrue(pauses.stream().noneMatch(p -> variationId.equals(p.getId())),
+                "Response should not contain the deleted variation ID " + variationId);
     }
 }

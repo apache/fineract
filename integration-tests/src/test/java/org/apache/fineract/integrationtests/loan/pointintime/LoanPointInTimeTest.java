@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.integrationtests.loan.pointintime;
 
-import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,17 +27,20 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansRequestChargeData;
 import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestRecalculationCompoundingMethod;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RescheduleStrategyMethod;
 import org.junit.jupiter.api.Test;
 
-public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
+public class LoanPointInTimeTest extends FeignLoanTestBase {
 
     @Test
     public void test_LoanPointInTimeDataWorks_ForPrincipalOutstandingCalculation() {
@@ -46,7 +48,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -79,8 +81,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .multiDisburseLoan(null)//
                     .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 5000.0;
@@ -97,9 +98,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                             new PostLoansRequestChargeData().chargeId(charge2Id).amount(BigDecimal.valueOf(charge2Amount))//
             ));//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -191,7 +192,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -218,8 +219,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .overAppliedCalculationType(null)//
                     .multiDisburseLoan(null);//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 5000.0;
@@ -233,9 +233,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .interestType(InterestType.DECLINING_BALANCE)//
                     .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -356,7 +356,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -382,8 +382,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .overAppliedCalculationType(null)//
                     .currencyCode("USD").multiDisburseLoan(null);//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 5000.0;
@@ -397,9 +396,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .interestType(InterestType.DECLINING_BALANCE)//
                     .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -521,7 +520,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -554,8 +553,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .multiDisburseLoan(null)//
                     .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 5000.0;
@@ -572,13 +570,13 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                             new PostLoansRequestChargeData().chargeId(charge2Id).amount(BigDecimal.valueOf(charge2Amount))//
             ));//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
-            PostLoansResponse postLoansResponse2 = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
+            PostLoansResponse postLoansResponse2 = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
-            PostLoansLoanIdResponse approvedLoanResult2 = loanTransactionHelper.approveLoan(postLoansResponse2.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult2 = approveLoan(postLoansResponse2.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -666,7 +664,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -698,8 +696,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .multiDisburseLoan(null)//
                     .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 5000.0;
@@ -716,9 +713,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                             new PostLoansRequestChargeData().chargeId(charge2Id).amount(BigDecimal.valueOf(charge2Amount))//
             ));//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -763,7 +760,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -796,8 +793,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .multiDisburseLoan(null)//
                     .charges(List.of(new LoanProductChargeData().id(charge1Id), new LoanProductChargeData().id(charge2Id)));//
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             // Apply and Approve Loan
             double amount = 5000.0;
@@ -814,9 +810,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                             new PostLoansRequestChargeData().chargeId(charge2Id).amount(BigDecimal.valueOf(charge2Amount))//
             ));//
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -868,7 +864,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         double installmentFeeAmount = 100.0;
 
         runAt("01 October 2025", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 6;
             int repaymentEvery = 1;
@@ -887,8 +883,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .overAppliedCalculationType(null).multiDisburseLoan(null)
                     .charges(List.of(new LoanProductChargeData().id(installmentFeeChargeId)));
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             double amount = 6000.0;
 
@@ -899,9 +894,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .charges(List.of(new PostLoansRequestChargeData().chargeId(installmentFeeChargeId)
                             .amount(BigDecimal.valueOf(installmentFeeAmount))));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 October 2025"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -939,7 +934,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     transaction(1100.0, "Repayment", "01 November 2025"), transaction(1100.0, "Repayment", "01 December 2025"),
                     transaction(1100.0, "Repayment", "01 January 2026"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             BigDecimal regularApiFeeChargesPaid = loanDetails.getSummary().getFeeChargesPaid();
             BigDecimal regularApiFeeChargesCharged = loanDetails.getSummary().getFeeChargesCharged();
 
@@ -974,7 +969,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         double installmentFeeAmount = 25.0;
 
         runAt("01 October 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 2;
             int repaymentEvery = 1;
@@ -989,8 +984,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .allowApprovedDisbursedAmountsOverApplied(false).overAppliedNumber(null).overAppliedCalculationType(null)
                     .multiDisburseLoan(null).charges(List.of(new LoanProductChargeData().id(installmentFeeChargeId)));
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             double amount = 2000.0;
 
@@ -1001,9 +995,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .charges(List.of(new PostLoansRequestChargeData().chargeId(installmentFeeChargeId)
                             .amount(BigDecimal.valueOf(installmentFeeAmount))));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 October 2023"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -1030,7 +1024,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
             // Second repayment: 1000 principal + 25 fee = 1025 (loan should close)
             addRepaymentForLoan(loanId, 1025.0, "01 December 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // Verify loan is closed
             assertThat(loanDetails.getStatus().getCode()).isEqualTo("loanStatusType.closed.obligations.met");
@@ -1077,7 +1071,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         double installmentFeeAmount = 100.0;
 
         runAt("01 October 2025", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 6;
             int repaymentEvery = 1;
@@ -1096,8 +1090,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .overAppliedCalculationType(null).multiDisburseLoan(null)
                     .charges(List.of(new LoanProductChargeData().id(installmentFeeChargeId)));
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             double amount = 6000.0;
 
@@ -1108,9 +1101,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .charges(List.of(new PostLoansRequestChargeData().chargeId(installmentFeeChargeId)
                             .amount(BigDecimal.valueOf(installmentFeeAmount))));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 October 2025"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -1134,7 +1127,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
             addRepaymentForLoan(loanId, 1100.0, "01 January 2026");
 
             // Verify regular API values (full schedule)
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             BigDecimal regularApiFeeChargesCharged = loanDetails.getSummary().getFeeChargesCharged();
             assertThat(regularApiFeeChargesCharged).as("Regular API should show full fees (600)")
                     .isEqualByComparingTo(BigDecimal.valueOf(600.0));
@@ -1176,7 +1169,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         double interestRatePerPeriod = 12.0;
 
         runAt("01 October 2025", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 4;
             int repaymentEvery = 1;
@@ -1191,8 +1184,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .allowApprovedDisbursedAmountsOverApplied(false).overAppliedNumber(null).overAppliedCalculationType(null)
                     .multiDisburseLoan(null).charges(List.of(new LoanProductChargeData().id(installmentFeeChargeId)));
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             double amount = 4000.0;
 
@@ -1203,9 +1195,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .interestRatePerPeriod(BigDecimal.valueOf(interestRatePerPeriod)).charges(List.of(new PostLoansRequestChargeData()
                             .chargeId(installmentFeeChargeId).amount(BigDecimal.valueOf(installmentFeeAmount))));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 October 2025"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -1227,7 +1219,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         runAt("08 December 2025", () -> {
             Long loanId = aLoanId.get();
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             BigDecimal regularApiInterestCharged = loanDetails.getSummary().getInterestCharged();
             BigDecimal regularApiInterestPaid = loanDetails.getSummary().getInterestPaid();
             BigDecimal regularApiInterestOutstanding = loanDetails.getSummary().getInterestOutstanding();
@@ -1258,7 +1250,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         double installmentPenaltyAmount = 25.0;
 
         runAt("01 October 2025", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 4;
             int repaymentEvery = 1;
@@ -1275,8 +1267,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .multiDisburseLoan(null).charges(List.of(new LoanProductChargeData().id(installmentFeeChargeId),
                             new LoanProductChargeData().id(installmentPenaltyChargeId)));
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             double amount = 4000.0;
 
@@ -1290,9 +1281,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                             new PostLoansRequestChargeData().chargeId(installmentPenaltyChargeId)
                                     .amount(BigDecimal.valueOf(installmentPenaltyAmount))));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 October 2025"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -1314,7 +1305,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         runAt("08 December 2025", () -> {
             Long loanId = aLoanId.get();
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             BigDecimal regularApiPenaltyCharged = loanDetails.getSummary().getPenaltyChargesCharged();
             BigDecimal regularApiPenaltyPaid = loanDetails.getSummary().getPenaltyChargesPaid();
             BigDecimal regularApiPenaltyOutstanding = loanDetails.getSummary().getPenaltyChargesOutstanding();
@@ -1345,7 +1336,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         double installmentFeeAmount = 100.0;
 
         runAt("01 October 2025", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -1360,8 +1351,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .allowApprovedDisbursedAmountsOverApplied(false).overAppliedNumber(null).overAppliedCalculationType(null)
                     .multiDisburseLoan(null).charges(List.of(new LoanProductChargeData().id(installmentFeeChargeId)));
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
+            Long loanProductId = createLoanProduct(product);
 
             double amount = 3000.0;
 
@@ -1372,9 +1362,9 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .charges(List.of(new PostLoansRequestChargeData().chargeId(installmentFeeChargeId)
                             .amount(BigDecimal.valueOf(installmentFeeAmount))));
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = loanHelper.applyForLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 October 2025"));
 
             aLoanId.getAndSet(approvedLoanResult.getLoanId());
@@ -1397,7 +1387,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
             Long loanId = aLoanId.get();
             addRepaymentForLoan(loanId, 1100.0, "01 January 2026");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertThat(loanDetails.getStatus().getCode()).isEqualTo("loanStatusType.closed.obligations.met");
         });
@@ -1405,7 +1395,7 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
         runAt("15 January 2026", () -> {
             Long loanId = aLoanId.get();
 
-            GetLoansLoanIdResponse regularApi = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse regularApi = getLoanDetails(loanId);
             LoanPointInTimeData pointInTimeApi = getPointInTimeData(loanId, "15 January 2026");
 
             assertThat(pointInTimeApi.getFee().getFeeChargesCharged())
@@ -1435,19 +1425,5 @@ public class LoanPointInTimeTest extends BaseLoanIntegrationTest {
                     .as("Closed loan: point-in-time totalOutstanding should match regular API")
                     .isEqualByComparingTo(regularApi.getSummary().getTotalOutstanding());
         });
-    }
-
-    private Long createInstallmentFeeCharge(double amount) {
-        Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(amount), false));
-        assertNotNull(chargeId);
-        return chargeId.longValue();
-    }
-
-    private Long createInstallmentPenaltyCharge(double amount) {
-        Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(amount), true));
-        assertNotNull(chargeId);
-        return chargeId.longValue();
     }
 }
