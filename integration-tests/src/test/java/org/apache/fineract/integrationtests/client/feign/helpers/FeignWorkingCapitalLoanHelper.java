@@ -42,6 +42,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -166,8 +167,15 @@ public class FeignWorkingCapitalLoanHelper {
         return ok(() -> fineractClient.workingCapitalLoanBreachSchedule().retrieveBreachSchedule(loanId));
     }
 
-    public void adjustCharge(Long loanId, Long loanChargeId, PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request) {
-        ok(() -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "adjustment"));
+    public Long adjustCharge(Long loanId, Long loanChargeId, PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request) {
+        PostWorkingCapitalLoansLoanIdChargesChargeIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "adjustment"));
+        return response.getSubResourceId();
+    }
+
+    public void undoLoanTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
+                transactionId, "undo", request));
     }
 
     /**

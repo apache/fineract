@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.client.feign.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
@@ -29,19 +30,24 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostPaymentAllocation;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -170,7 +176,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
         });
         businessDateHelper.runAt("2026-03-05", () -> {
             wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
-                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(60), "05 March 2026"));
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(60)));
 
             GetWorkingCapitalLoanTransactionIdResponse chargeAdjustment = findTransaction(wcLoanHelper.getTransactions(loanIdHolder[0]),
                     "loanTransactionType.chargeAdjustment", LocalDate.of(2026, Month.MARCH, 5), BigDecimal.valueOf(60));
@@ -185,6 +191,134 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
             WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
             assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid());
             assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountOutstanding());
+        });
+    }
+
+    @Test
+    void testUndoOfChargeAdjustmentThatTouchedPrincipalRestoresPrincipalAndCharge() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        final Long[] adjustmentTransactionIdHolder = new Long[1];
+        businessDateHelper.runAt("2026-04-01", () -> {
+            Long client = clientHelper.createClient("01 April 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(9000), "01 April 2026",
+                    createProductWithChargeAdjustmentOverride());
+            feeLoanChargeIdHolder[0] = addFeeCharge(loanIdHolder[0], 100, "01 April 2026");
+        });
+        businessDateHelper.runAt("2026-04-05", () -> {
+            adjustmentTransactionIdHolder[0] = wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(60)));
+        });
+        businessDateHelper.runAt("2026-04-10", () -> {
+            wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = wcLoanHelper.getTransactions(loanIdHolder[0]).stream()
+                    .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
+                    .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
+            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed());
+
+            GetBalance balance = balanceOf(loanIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, balance.getPrincipalPaid());
+            assertEqualBigDecimal(BigDecimal.valueOf(9000), balance.getPrincipalOutstanding());
+            assertEqualBigDecimal(BigDecimal.ZERO, balance.getFeePaid());
+
+            WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid());
+            assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountOutstanding());
+        });
+    }
+
+    @Test
+    void testUndoOfChargeAdjustmentThatClosedTheLoanReactivatesIt() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        final Long[] adjustmentTransactionIdHolder = new Long[1];
+        businessDateHelper.runAt("2026-05-01", () -> {
+            Long client = clientHelper.createClient("01 May 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(40), "01 May 2026",
+                    createProductWithChargeAdjustmentOverride());
+            feeLoanChargeIdHolder[0] = addFeeCharge(loanIdHolder[0], 40, "01 May 2026");
+
+            GetWorkingCapitalLoansLoanIdResponse loanDetails = wcLoanHelper.getLoanDetails(loanIdHolder[0]);
+            assertNotNull(loanDetails.getStatus());
+            assertEquals("loanStatusType.active", loanDetails.getStatus().getCode(), "Loan should start out active");
+        });
+        businessDateHelper.runAt("2026-05-05", () -> {
+            adjustmentTransactionIdHolder[0] = wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
+
+            GetBalance afterAdjustment = balanceOf(loanIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, afterAdjustment.getPrincipalOutstanding());
+            assertEqualBigDecimal(BigDecimal.valueOf(40), afterAdjustment.getPrincipalPaid());
+            assertEqualBigDecimal(BigDecimal.ZERO, afterAdjustment.getFeePaid());
+
+            GetWorkingCapitalLoansLoanIdResponse loanDetails = wcLoanHelper.getLoanDetails(loanIdHolder[0]);
+            assertNotNull(loanDetails.getStatus());
+            assertEquals("loanStatusType.closed.obligations.met", loanDetails.getStatus().getCode(),
+                    "Loan should be closed once the charge adjustment pays off the remaining principal");
+        });
+        businessDateHelper.runAt("2026-05-10", () -> {
+            wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = wcLoanHelper.getTransactions(loanIdHolder[0]).stream()
+                    .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
+                    .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
+            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed());
+
+            GetBalance afterUndo = balanceOf(loanIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, afterUndo.getPrincipalPaid());
+            assertEqualBigDecimal(BigDecimal.valueOf(40), afterUndo.getPrincipalOutstanding());
+
+            assertEquals("loanStatusType.active", wcLoanHelper.getLoanDetails(loanIdHolder[0]).getStatus().getCode(),
+                    "Loan must reactivate once the undo brings principal outstanding back above zero");
+
+            WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid());
+        });
+    }
+
+    @Test
+    void testUndoOfChargeAdjustmentTriggersABreach() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        final Long[] adjustmentTransactionIdHolder = new Long[1];
+        final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+        final Long breachId = breachHelper.create(breachHelper.createBreachRequest(
+                "WCL PayAlloc Breach " + Utils.uniqueRandomStringGenerator("", 8), 30, "DAYS", "PERCENTAGE", BigDecimal.TEN));
+
+        businessDateHelper.runAt("2026-06-01", () -> {
+            Long client = clientHelper.createClient("01 June 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(5000), "01 June 2026",
+                    createProductWithChargeAdjustmentOverrideAndBreach(breachId));
+            feeLoanChargeIdHolder[0] = addFeeCharge(loanIdHolder[0], 500, "01 June 2026");
+        });
+        businessDateHelper.runAt("2026-06-06", () -> {
+            FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanIdHolder[0])));
+
+            adjustmentTransactionIdHolder[0] = wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(500)));
+
+            List<WorkingCapitalLoanBreachScheduleData> breachSchedule = wcLoanHelper.getBreachSchedule(loanIdHolder[0]);
+            assertFalse(breachSchedule.isEmpty(), "Breach schedule should be populated");
+            WorkingCapitalLoanBreachScheduleData periodAfterAdjustment = breachSchedule.getFirst();
+            assertEqualBigDecimal(BigDecimal.ZERO, periodAfterAdjustment.getOutstandingAmount());
+            assertEquals(Boolean.FALSE, periodAfterAdjustment.getBreach(), "Breach period is fully covered, so not breached");
+        });
+        businessDateHelper.runAt("2026-08-30", () -> {
+            FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanIdHolder[0])));
+
+            wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            List<WorkingCapitalLoanBreachScheduleData> breachSchedule = wcLoanHelper.getBreachSchedule(loanIdHolder[0]);
+            assertFalse(breachSchedule.isEmpty(), "Breach schedule should be populated");
+            WorkingCapitalLoanBreachScheduleData periodAfterUndo = breachSchedule.getFirst();
+            assertEqualBigDecimal(BigDecimal.valueOf(500), periodAfterUndo.getOutstandingAmount());
+            assertEquals(Boolean.TRUE, periodAfterUndo.getBreach(), "Undo brought back the shortfall on an already-elapsed period");
         });
     }
 
@@ -241,6 +375,18 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
                                         PostPaymentAllocation.TransactionTypeEnum.CHARGE_ADJUSTMENT, PRINCIPAL_BEFORE_FEE_ORDER)
                                 .build())
                 .getResourceId();
+        createdProductIds.add(productId);
+        return productId;
+    }
+
+    private Long createProductWithChargeAdjustmentOverrideAndBreach(final Long breachId) {
+        String uniqueName = "WCL PayAlloc " + Utils.uniqueRandomStringGenerator("", 8);
+        String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).withPaymentAllocationTypes(FEE_BEFORE_PRINCIPAL_ORDER)
+                .withPaymentAllocationForTransactionType(PostPaymentAllocation.TransactionTypeEnum.CHARGE_ADJUSTMENT,
+                        PRINCIPAL_BEFORE_FEE_ORDER)
+                .withBreachId(breachId).build()).getResourceId();
         createdProductIds.add(productId);
         return productId;
     }

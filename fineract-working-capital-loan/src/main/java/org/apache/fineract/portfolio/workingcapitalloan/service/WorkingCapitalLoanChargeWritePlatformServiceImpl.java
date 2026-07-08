@@ -124,7 +124,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         }
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanChargeConstants.amountParamName);
-        final LocalDate transactionDate = resolveTransactionDate(command);
+        final LocalDate transactionDate = ThreadLocalContextUtil.getBusinessDate();
         final ExternalId externalId = externalIdFactory.createFromCommand(command, WorkingCapitalLoanChargeConstants.externalIdParamName);
 
         chargeAdjustmentEntranceValidation(loan, wcCharge, amount);
@@ -174,11 +174,6 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
-    }
-
-    private LocalDate resolveTransactionDate(final JsonCommand command) {
-        final LocalDate requested = command.localDateValueOfParameterNamed(WorkingCapitalLoanChargeConstants.transactionDateParamName);
-        return requested != null ? requested : ThreadLocalContextUtil.getBusinessDate();
     }
 
     private void chargeAdjustmentEntranceValidation(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge wcCharge,

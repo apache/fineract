@@ -84,8 +84,7 @@ public class FeignWorkingCapitalLoanReprocessingCorrectnessTest extends FeignInt
 
             // A 40 charge adjustment partially settles the 100 fee: amountPaid 40, outstanding 60.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-05");
-            wcLoanHelper.adjustCharge(loanId, feeLoanChargeId,
-                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40), "05 January 2026"));
+            wcLoanHelper.adjustCharge(loanId, feeLoanChargeId, WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
 
             // R1 on day 10: settles the remaining 60 of the fee, then the leftover would be nothing (60 == remaining).
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-20");

@@ -619,59 +619,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                         "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
         return switch (transaction.getTypeOf()) {
             case DISCOUNT_FEE_ADJUSTMENT -> undoDiscountFeeAdjustment(loan, transaction, command);
-            case CHARGE_ADJUSTMENT -> undoChargeAdjustment(loan, transaction, command);
-            case REPAYMENT, GOODWILL_CREDIT -> undoTransaction(loan, transaction, command);
+            case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT -> undoTransaction(loan, transaction, command);
             default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.undo.not.supported",
                     "Undo is not supported for transaction type " + transaction.getTypeOf(),
                     WorkingCapitalLoanConstants.transactionTypeParamName);
         };
-    }
-
-    private CommandProcessingResult undoChargeAdjustment(final WorkingCapitalLoan loan,
-            final WorkingCapitalLoanTransaction adjustmentTransaction, final JsonCommand command) {
-        if (adjustmentTransaction.isReversed()) {
-            throw new PlatformApiDataValidationException("validation.msg.wc.loan.charge.adjustment.already.reversed",
-                    "Charge adjustment transaction is already reversed", WorkingCapitalLoanConstants.transactionIdParamName);
-        }
-
-        final WorkingCapitalLoanTransactionRelation chargeRelation = adjustmentTransaction.getLoanTransactionRelations().stream()
-                .filter(r -> r.getToCharge() != null && r.getRelationType() == LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT)
-                .findFirst()
-                .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.charge.adjustment.relation.missing",
-                        "Charge adjustment transaction is missing the link to the charge",
-                        WorkingCapitalLoanConstants.transactionIdParamName));
-
-        final org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge wcCharge = chargeRelation.getToCharge();
-        final BigDecimal amount = adjustmentTransaction.getTransactionAmount();
-
-        reverseTransaction(adjustmentTransaction);
-        accountingProcessor.postReversalJournalEntries(loan, adjustmentTransaction);
-
-        final BigDecimal newPaid = MathUtil.subtract(MathUtil.nullToZero(wcCharge.getAmountPaid()), amount).max(BigDecimal.ZERO);
-        wcCharge.setAmountPaid(newPaid);
-        if (newPaid.compareTo(MathUtil.nullToZero(wcCharge.getAmount())) < 0) {
-            wcCharge.setPaid(false);
-        }
-
-        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
-                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
-        if (wcCharge.isPenaltyCharge()) {
-            balance.setPenaltyPaid(MathUtil.subtract(MathUtil.nullToZero(balance.getPenaltyPaid()), amount).max(BigDecimal.ZERO));
-        } else {
-            balance.setFeePaid(MathUtil.subtract(MathUtil.nullToZero(balance.getFeePaid()), amount).max(BigDecimal.ZERO));
-        }
-        balanceRepository.save(balance);
-
-        final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
-        createNote(noteText, loan);
-
-        final Map<String, Object> changes = new LinkedHashMap<>();
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
-        }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(adjustmentTransaction.getId())
-                .withEntityExternalId(adjustmentTransaction.getExternalId()).withOfficeId(loan.getOfficeId())
-                .withClientId(loan.getClientId()).withLoanId(loan.getId()).with(changes).build();
     }
 
     private CommandProcessingResult undoDiscountFeeAdjustment(final WorkingCapitalLoan loan,

@@ -119,8 +119,7 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .dateFormat(DATE_FORMAT);
     }
 
-    public static PostWorkingCapitalLoansLoanIdChargesChargeIdRequest chargeAdjustment(BigDecimal amount, String transactionDate) {
-        return new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest().amount(amount).transactionDate(transactionDate).locale(LOCALE)
-                .dateFormat(DATE_FORMAT);
+    public static PostWorkingCapitalLoansLoanIdChargesChargeIdRequest chargeAdjustment(BigDecimal amount) {
+        return new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest().amount(amount).locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 }

@@ -159,8 +159,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
   Scenario: Verify Working Capital charge adjustment - UC7: fee and penalty charges adjusted independently
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | LoanProduct                    | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_DUE_FEE_PENALTY_PRINCIPAL | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 80.0 transaction amount
@@ -184,8 +184,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
   Scenario: Verify Working Capital charge adjustment - UC8: fee and penalty charges adjusted independently on different days
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | LoanProduct                    | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_DUE_FEE_PENALTY_PRINCIPAL | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 80.0 transaction amount
@@ -301,10 +301,11 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
     And Admin reverts the last charge adjustment on working capital loan
     Then Reverting an already reversed charge adjustment on working capital loan results an error with the following data:
-      | httpCode | errorMessage                                      |
-      | 400      | Charge adjustment transaction is already reversed |
+      | httpCode | errorMessage                                               |
+      | 400      | Failed data validation due to: transaction.already.undone |
 
-  @TestRailId:C85233
+  #TODO should this be removed?
+  @Skip @TestRailId:C85233
   Scenario: Verify Working Capital charge adjustment - UC13: charge adjustment with explicit transaction date
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:

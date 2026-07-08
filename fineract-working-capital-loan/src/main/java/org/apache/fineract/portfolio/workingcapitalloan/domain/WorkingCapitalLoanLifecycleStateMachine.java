@@ -51,15 +51,20 @@ public class WorkingCapitalLoanLifecycleStateMachine {
         if (loan.getBalance() == null) {
             return;
         }
+        final LoanStatus currentStatus = loan.getLoanStatus();
         final BigDecimal overpaymentAmount = MathUtil.nullToZero(loan.getBalance().getOverpaymentAmount());
         final BigDecimal principalOutstanding = MathUtil.nullToZero(loan.getBalance().getPrincipalOutstanding());
         if (overpaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
-            transition(WorkingCapitalLoanEvent.LOAN_OVERPAID, loan);
+            if (currentStatus == null || !currentStatus.isOverpaid()) {
+                transition(WorkingCapitalLoanEvent.LOAN_OVERPAID, loan);
+            }
             if (loan.getMaturedOnDate() == null) {
                 loan.setMaturedOnDate(transactionDate);
             }
         } else if (principalOutstanding.compareTo(BigDecimal.ZERO) == 0) {
-            transition(WorkingCapitalLoanEvent.LOAN_REPAID_IN_FULL, loan);
+            if (currentStatus == null || !currentStatus.isClosedObligationsMet()) {
+                transition(WorkingCapitalLoanEvent.LOAN_REPAID_IN_FULL, loan);
+            }
             if (loan.getMaturedOnDate() == null) {
                 loan.setMaturedOnDate(transactionDate);
             }
