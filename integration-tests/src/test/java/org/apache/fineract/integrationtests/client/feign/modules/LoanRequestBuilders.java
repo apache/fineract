@@ -44,6 +44,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostUpdateRescheduleLoansRequest;
+import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 
 public final class LoanRequestBuilders {
 
@@ -430,6 +431,11 @@ public final class LoanRequestBuilders {
         AtomicInteger order = new AtomicInteger(1);
         return Stream.of(paymentAllocationRules)
                 .map(rule -> new PaymentAllocationOrder().paymentAllocationRule(rule).order(order.getAndIncrement())).toList();
+    }
+
+    /** Type-safe variant of {@link #paymentAllocationOrder(String...)}, ordered as given. */
+    public static List<PaymentAllocationOrder> paymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
+        return paymentAllocationOrder(Stream.of(paymentAllocationTypes).map(PaymentAllocationType::name).toArray(String[]::new));
     }
 
     public static CreditAllocationData creditAllocation(String transactionType, String... creditAllocationRules) {
