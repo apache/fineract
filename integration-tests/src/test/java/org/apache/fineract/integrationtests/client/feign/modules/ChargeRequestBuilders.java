@@ -31,9 +31,11 @@ public final class ChargeRequestBuilders {
     private static final int CHARGE_TIME_TYPE_INSTALLMENT_FEE = 8;
     private static final int CHARGE_TIME_TYPE_OVERDUE_INSTALLMENT_FEE = 9;
 
+    // Mirrors org.apache.fineract.portfolio.charge.domain.ChargeCalculationType
     private static final int CHARGE_CALCULATION_TYPE_FLAT = 1;
     private static final int CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = 2;
-    private static final int CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST = 4;
+    private static final int CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST = 3;
+    private static final int CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST = 4;
 
     private static final int CHARGE_PAYMENT_MODE_REGULAR = 0;
     private static final int CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER = 1;
@@ -81,10 +83,10 @@ public final class ChargeRequestBuilders {
                 .penalty(true);
     }
 
-    public static ChargeRequest loanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
-        return baseLoanCharge(amount, DEFAULT_CURRENCY)//
+    public static ChargeRequest loanSpecifiedDueDatePercentageOfInterestFee(double percentage) {
+        return baseLoanCharge(percentage, DEFAULT_CURRENCY)//
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE)//
-                .chargeCalculationType(CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
+                .chargeCalculationType(CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST);
     }
 
     public static ChargeRequest loanSpecifiedDueDateAccountTransferFee(double amount, boolean penalty) {
@@ -94,6 +96,10 @@ public final class ChargeRequestBuilders {
     public static ChargeRequest loanInstallmentFee(double amount) {
         return baseLoanCharge(amount, DEFAULT_CURRENCY)//
                 .chargeTimeType(CHARGE_TIME_TYPE_INSTALLMENT_FEE);
+    }
+
+    public static ChargeRequest loanOverdueFeePercentageOfAmountAndInterest(double percentage) {
+        return loanOverdueFee(percentage).chargeCalculationType(CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
     }
 
     public static ChargeRequest loanOverdueFee(double amount) {

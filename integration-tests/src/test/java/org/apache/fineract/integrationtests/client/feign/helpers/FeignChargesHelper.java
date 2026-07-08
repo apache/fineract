@@ -82,8 +82,12 @@ public class FeignChargesHelper {
         return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePenalty(amount));
     }
 
-    public PostChargesResponse createLoanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
-        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageAmountAndInterestFee(amount));
+    public PostChargesResponse createLoanSpecifiedDueDatePercentageOfInterestFee(double percentage) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageOfInterestFee(percentage));
+    }
+
+    public PostChargesResponse createLoanOverdueFeePercentageOfAmountAndInterest(double percentage) {
+        return createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(percentage));
     }
 
     public PostChargesResponse createClientSpecifiedDueDateCharge(double amount) {
