@@ -25,30 +25,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ExternalTransferOwnerData;
 import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalAssetOwnerHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.investor.InvestorHelper;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
-public class ExternalAssetOwnerTest extends BaseLoanIntegrationTest {
+public class ExternalAssetOwnerTest extends FeignLoanTestBase {
+
+    private final FeignExternalAssetOwnerHelper externalAssetOwnerHelper = new FeignExternalAssetOwnerHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testCreateExternalAssetOwnerSuccessfully() {
         final String ownerExternalId = Utils.uniqueRandomStringGenerator("eao", 20);
         final PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(ownerExternalId);
 
-        final PostExternalAssetOwnerResponse response = InvestorHelper.createExternalAssetOwner(request);
+        final PostExternalAssetOwnerResponse response = externalAssetOwnerHelper.createExternalAssetOwner(request);
 
         assertNotNull(response);
         assertNotNull(response.getResourceId());
 
-        List<ExternalTransferOwnerData> externalAssetOwners = InvestorHelper.retrieveExternalAssetOwners();
+        List<ExternalTransferOwnerData> externalAssetOwners = externalAssetOwnerHelper.retrieveExternalAssetOwners();
         assertTrue(externalAssetOwners.size() > 0);
         Optional<ExternalTransferOwnerData> optExternalTransferOwnerData = externalAssetOwners.stream()
                 .filter(eao -> eao.getExternalId().equals(ownerExternalId)).findFirst();
@@ -60,8 +62,8 @@ public class ExternalAssetOwnerTest extends BaseLoanIntegrationTest {
         final PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(null);
 
         final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> InvestorHelper.createExternalAssetOwner(request));
-        assertEquals(400, exception.getResponse().code());
+                () -> externalAssetOwnerHelper.createExternalAssetOwner(request));
+        assertEquals(400, exception.getStatus());
         assertTrue(exception.getMessage().contains("validation.msg.externalAssetOwner.ownerExternalId.cannot.be.blank"));
     }
 
@@ -70,13 +72,13 @@ public class ExternalAssetOwnerTest extends BaseLoanIntegrationTest {
         final String ownerExternalId = Utils.uniqueRandomStringGenerator("eao", 20);
         final PostExternalAssetOwnerRequest request = new PostExternalAssetOwnerRequest().ownerExternalId(ownerExternalId);
 
-        final PostExternalAssetOwnerResponse firstResponse = InvestorHelper.createExternalAssetOwner(request);
+        final PostExternalAssetOwnerResponse firstResponse = externalAssetOwnerHelper.createExternalAssetOwner(request);
         assertNotNull(firstResponse);
         assertNotNull(firstResponse.getResourceId());
 
         final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> InvestorHelper.createExternalAssetOwner(request));
-        assertEquals(403, exception.getResponse().code());
+                () -> externalAssetOwnerHelper.createExternalAssetOwner(request));
+        assertEquals(403, exception.getStatus());
         assertTrue(exception.getMessage().contains("error.msg.provided.external.id.already.exists"));
     }
 }
