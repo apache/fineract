@@ -722,6 +722,10 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loans().retrieveDelinquencyTagHistoryLoanByExternalId(loanExternalId));
     }
 
+    public List<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(Long loanId) {
+        return ok(() -> fineractClient.loans().retrieveDelinquencyTagHistoryLoan(loanId));
+    }
+
     public PostLoansLoanIdChargesResponse addLoanCharge(String loanExternalId, PostLoansLoanIdChargesRequest request) {
         return ok(() -> fineractClient.loanCharges().executeLoanChargeByLoanExternalId(loanExternalId, request, (String) null));
     }
