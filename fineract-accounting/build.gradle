@@ -48,6 +48,11 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
+test {
+    maxHeapSize = '2g'
+    jvmArgs += ['-XX:MaxMetaspaceSize=1g']
+}
+
 // Configuration for the modernizer plugin
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
