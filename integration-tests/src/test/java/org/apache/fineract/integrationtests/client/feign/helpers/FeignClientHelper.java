@@ -107,6 +107,10 @@ public class FeignClientHelper {
         return ok(() -> fineractClient.clients().retrieveAllClientAccounts(clientId));
     }
 
+    public GetClientsClientIdAccountsResponse getClientAccounts(String externalId) {
+        return ok(() -> fineractClient.clients().retrieveAllClientAccountsByExternalId(externalId));
+    }
+
     public PageClientSearchData searchClients(String text) {
         ClientTextSearch clientTextSearch = new ClientTextSearch();
         clientTextSearch.setText(text);
