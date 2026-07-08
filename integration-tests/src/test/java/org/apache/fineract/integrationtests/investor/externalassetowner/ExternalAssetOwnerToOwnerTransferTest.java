@@ -49,8 +49,8 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             setInitialBusinessDate(java.time.LocalDate.parse("2020-03-02"));
 
             // Step 1: Create client and loan
-            Integer clientID = createClient();
-            Integer loanID = createLoanForClient(clientID, "02 March 2020");
+            Long clientID = createClient();
+            Long loanID = createLoanForClient(clientID, "02 March 2020");
             addPenaltyForLoan(loanID, "10");
 
             // Step 2: Sell loan to Owner A
@@ -82,7 +82,7 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             validateResponse(saleBResponse, loanID);
 
             // Verify the new PENDING transfer was created for Owner B
-            PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+            PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID);
             assertNotNull(transfers.getContent());
 
             // Find the new PENDING transfer for Owner B
@@ -95,7 +95,7 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             updateBusinessDateAndExecuteCOBJob("2020-03-04");
 
             // Verify final state: Owner A's ACTIVE transfer is expired, Owner B is now ACTIVE
-            transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+            transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID);
             assertNotNull(transfers.getContent());
 
             // Owner A's ACTIVE transfer should now have effectiveDateTo = 2020-03-03 (settlement date of Owner B)
@@ -117,7 +117,7 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
 
             // Verify active mapping now points to Owner B (use direct API, not getAndValidateThereIsActiveMapping
             // which assumes only one ACTIVE transfer)
-            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID.longValue());
+            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID);
             assertNotNull(activeTransfer, "There should be an active transfer mapping");
             assertEquals(saleBTransferExternalId, activeTransfer.getTransferExternalId(),
                     "Active mapping should point to Owner B's transfer");
@@ -133,8 +133,8 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             setInitialBusinessDate(java.time.LocalDate.parse("2020-03-02"));
 
             // Setup
-            Integer clientID = createClient();
-            Integer loanID = createLoanForClient(clientID, "02 March 2020");
+            Long clientID = createClient();
+            Long loanID = createLoanForClient(clientID, "02 March 2020");
             addPenaltyForLoan(loanID, "10");
 
             // Sell to Owner A and activate via COB
@@ -151,7 +151,7 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             updateBusinessDateAndExecuteCOBJob("2020-03-04");
 
             // Verify Owner B is active
-            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID.longValue());
+            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID);
             assertEquals(saleBExternalId, activeTransfer.getTransferExternalId());
 
             // Sell from Owner B to Owner C (settlementDate = current business date 2020-03-04)
@@ -161,12 +161,12 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             updateBusinessDateAndExecuteCOBJob("2020-03-05");
 
             // Verify Owner C is now active
-            activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID.longValue());
+            activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID);
             assertEquals(saleCExternalId, activeTransfer.getTransferExternalId(),
                     "Owner C should be the active owner after chained transfers");
 
             // Verify Owner B's transfer is expired
-            PageExternalTransferData allTransfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+            PageExternalTransferData allTransfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID);
             ExternalTransferData ownerBActive = allTransfers.getContent().stream()
                     .filter(t -> saleBExternalId.equals(t.getTransferExternalId()) && ACTIVE.equals(t.getStatus())).findFirst()
                     .orElse(null);
@@ -185,8 +185,8 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             setInitialBusinessDate(java.time.LocalDate.parse("2020-03-02"));
 
             // Setup: create loan and sell to Owner A
-            Integer clientID = createClient();
-            Integer loanID = createLoanForClient(clientID, "02 March 2020");
+            Long clientID = createClient();
+            Long loanID = createLoanForClient(clientID, "02 March 2020");
             addPenaltyForLoan(loanID, "10");
 
             String ownerAExternalId = UUID.randomUUID().toString();
@@ -206,13 +206,13 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             EXTERNAL_ASSET_OWNER_HELPER.cancelTransferByTransferExternalId(saleBExternalId);
 
             // Verify Owner A is still the active owner — ACTIVE transfer with effectiveDateTo = 9999-12-31
-            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID.longValue());
+            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID);
             assertNotNull(activeTransfer, "Owner A should still be the active owner after cancel");
             assertEquals(saleAExternalId, activeTransfer.getTransferExternalId(),
                     "Active mapping should still point to Owner A after cancel");
 
             // Verify Owner A's ACTIVE transfer is untouched (effectiveDateTo = 9999-12-31)
-            PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+            PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID);
             ExternalTransferData ownerAActive = transfers.getContent().stream()
                     .filter(t -> saleAExternalId.equals(t.getTransferExternalId()) && ACTIVE.equals(t.getStatus())
                             && java.time.LocalDate.parse("9999-12-31").equals(t.getEffectiveTo()))
@@ -236,8 +236,8 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
             setInitialBusinessDate(java.time.LocalDate.parse("2020-03-02"));
 
             // Setup: create loan and sell to Owner A
-            Integer clientID = createClient();
-            Integer loanID = createLoanForClient(clientID, "02 March 2020");
+            Long clientID = createClient();
+            Long loanID = createLoanForClient(clientID, "02 March 2020");
             addPenaltyForLoan(loanID, "10");
 
             String ownerAExternalId = UUID.randomUUID().toString();
@@ -253,15 +253,15 @@ public class ExternalAssetOwnerToOwnerTransferTest extends ExternalAssetOwnerTra
 
             // Write off the loan — this will trigger decline when COB processes the PENDING transfer
             updateBusinessDateAndExecuteCOBJob("2020-03-04");
-            LOAN_TRANSACTION_HELPER.writeOffLoan("04 March 2020", loanID);
+            writeOffLoan("04 March 2020", loanID);
 
             // Verify Owner A is still the active owner (PENDING for Owner B should be declined, not yet settled)
-            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID.longValue());
+            ExternalTransferData activeTransfer = EXTERNAL_ASSET_OWNER_HELPER.retrieveActiveTransferByLoanId(loanID);
             assertNotNull(activeTransfer, "Owner A should still be the active owner before settlement date");
             assertEquals(saleAExternalId, activeTransfer.getTransferExternalId(), "Active mapping should still point to Owner A");
 
             // Verify Owner B's PENDING transfer is declined
-            PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
+            PageExternalTransferData transfers = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID);
             ExternalTransferData ownerBDeclined = transfers.getContent().stream()
                     .filter(t -> saleBExternalId.equals(t.getTransferExternalId()) && DECLINED.equals(t.getStatus())).findFirst()
                     .orElse(null);

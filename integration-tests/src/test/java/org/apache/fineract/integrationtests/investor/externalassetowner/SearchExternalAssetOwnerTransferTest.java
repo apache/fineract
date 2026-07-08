@@ -46,8 +46,8 @@ public class SearchExternalAssetOwnerTransferTest extends ExternalAssetOwnerTran
         try {
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
             setInitialBusinessDate(LocalDate.of(2020, 2, 29));
-            Integer clientID = createClient();
-            Integer loanID = createLoanForClient(clientID, "29 February 2020");
+            Long clientID = createClient();
+            Long loanID = createLoanForClient(clientID, "29 February 2020");
             addPenaltyForLoan(loanID, "10");
 
             PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, baseDate);
