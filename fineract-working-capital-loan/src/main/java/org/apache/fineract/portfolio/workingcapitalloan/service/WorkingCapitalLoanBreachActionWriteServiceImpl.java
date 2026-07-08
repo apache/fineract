@@ -53,21 +53,26 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
 
         final List<WorkingCapitalLoanBreachAction> existing = actionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
 
-        final WorkingCapitalLoanBreachAction action = validator.validateAndParse(command, workingCapitalLoan, existing);
-        action.setWorkingCapitalLoan(workingCapitalLoan);
+        final WorkingCapitalLoanBreachAction breachAction = validator.validateAndParse(command, workingCapitalLoan, existing);
 
-        final WorkingCapitalLoanBreachAction saved = actionRepository.saveAndFlush(action);
-        log.debug("Created WC loan breach action {} for loan {}", action.getAction(), workingCapitalLoanId);
+        final WorkingCapitalLoanBreachAction saved = actionRepository.saveAndFlush(breachAction);
+        log.debug("Created WC loan breach action {} for loan {}", breachAction.getAction(), workingCapitalLoanId);
 
-        if (WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction())
-                || WorkingCapitalLoanBreachActionType.RESUME.equals(action.getAction())) {
+        if (WorkingCapitalLoanBreachActionType.PAUSE.equals(breachAction.getAction())
+                || WorkingCapitalLoanBreachActionType.RESUME.equals(breachAction.getAction())) {
             breachScheduleService.recalculatePeriodsForPauses(workingCapitalLoan);
-        } else if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(action.getAction())) {
-            breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan, action);
-        } else if (WorkingCapitalLoanBreachActionType.RESET.equals(action.getAction())) {
+        } else if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(breachAction.getAction())) {
+            breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan, breachAction);
+        } else if (WorkingCapitalLoanBreachActionType.RESET.equals(breachAction.getAction())) {
             breachResetService.resetBreach(workingCapitalLoan, saved);
-        } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(action.getAction())) {
+        } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(breachAction.getAction())) {
             breachResetService.undoResetBreach(workingCapitalLoan, saved);
+        } else if (WorkingCapitalLoanBreachActionType.ENABLE.equals(breachAction.getAction())) {
+            existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.DISABLE == action.getAction())
+                    .reduce((first, second) -> second).ifPresent(action -> {
+                        action.setEndDate(breachAction.getStartDate().minusDays(1));
+                    });
+            breachScheduleService.reEvaluateAfterEnable(workingCapitalLoan, breachAction.getStartDate());
         }
 
         return new CommandProcessingResultBuilder() //

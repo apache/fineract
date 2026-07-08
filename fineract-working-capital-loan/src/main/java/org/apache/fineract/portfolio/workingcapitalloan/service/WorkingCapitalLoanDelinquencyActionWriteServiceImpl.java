@@ -56,7 +56,6 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
                 .findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
 
         final WorkingCapitalLoanDelinquencyAction action = validator.validateAndParse(command, workingCapitalLoan, existing);
-        action.setWorkingCapitalLoan(workingCapitalLoan);
 
         final WorkingCapitalLoanDelinquencyAction saved = actionRepository.saveAndFlush(action);
         log.debug("Created WC loan delinquency action {} for loan {}", action.getAction(), workingCapitalLoanId);

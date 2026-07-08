@@ -52,6 +52,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionT
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,7 @@ public class WorkingCapitalLoanDataValidator {
     private final ExpectedDisbursementDateValidator expectedDisbursementDateValidator;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final CodeValueRepository codeValueRepository;
+    private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
     // Per requirement: only principal, discount, approved date, expected disbursement date, and notes
     private static final Set<String> APPROVAL_SUPPORTED_PARAMETERS = new HashSet<>(
@@ -804,6 +806,10 @@ public class WorkingCapitalLoanDataValidator {
         if (loan.getLoanProductRelatedDetails().getNearBreach() == null) {
             baseDataValidator.reset()
                     .failWithCodeNoParameterAddedToErrorCode("near.breach.action.not.allowed.loan.has.no.near.breach.configuration");
+        }
+
+        if (breachActionRepository.isBreachDisabledAsOf(loan.getId(), DateUtils.getBusinessLocalDate())) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.is.disabled");
         }
 
         final String actionStr = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.nearBreachActionParamName, element);

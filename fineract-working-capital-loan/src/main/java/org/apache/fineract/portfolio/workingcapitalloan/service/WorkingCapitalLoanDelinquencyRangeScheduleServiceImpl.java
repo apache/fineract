@@ -154,7 +154,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     public void reprocessDelinquencySchedule(final WorkingCapitalLoan loan) {
         final List<WorkingCapitalLoanTransaction> replayableTransactions = transactionRepository
                 .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId()).stream()
-                .filter(txn -> !txn.isReversed() && txn.isRepaymentLike()).toList();
+                .filter(txn -> !txn.isReversed() && txn.getTransactionType().isRepaymentType()).toList();
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         resetAllPeriodsForReprocessing(loan.getId());

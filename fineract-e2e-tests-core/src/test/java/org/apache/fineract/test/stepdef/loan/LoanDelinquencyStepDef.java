@@ -49,7 +49,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.test.api.ApiProperties;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.DelinquencyRange;
 import org.apache.fineract.test.data.LoanStatus;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
@@ -69,20 +69,9 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     private final FineractFeignClient fineractClient;
-    private final ApiProperties apiProperties;
+    private final FineractClientConfiguration fineractClientConfiguration;
     private final EventAssertion eventAssertion;
     private final EventCheckHelper eventCheckHelper;
-
-    private FineractFeignClient createClientForUser(String username, String password) {
-        String baseUrl = apiProperties.getBaseUrl();
-        String tenantId = apiProperties.getTenantId();
-        long readTimeout = apiProperties.getReadTimeout();
-        String apiBaseUrl = baseUrl + "/fineract-provider/api/";
-
-        return FineractFeignClient.builder().baseUrl(apiBaseUrl).credentials(username, password).tenantId(tenantId)
-                .disableSslVerification(true).connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout((int) readTimeout, java.util.concurrent.TimeUnit.SECONDS).build();
-    }
 
     @Then("Admin checks that delinquency range is: {string} and has delinquentDate {string}")
     public void checkDelinquencyRange(String range, String delinquentDateExpected) {
@@ -209,7 +198,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
         String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
         String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
-        FineractFeignClient userClient = createClientForUser(username, password);
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
 
         PostLoansDelinquencyActionResponse response = ok(() -> userClient.loans().createDelinquencyActionLoan(loanId, request));
         testContext().set(TestContextKey.LOAN_DELINQUENCY_ACTION_RESPONSE, response);
@@ -233,7 +222,7 @@ public class LoanDelinquencyStepDef extends AbstractStepDef {
 
         String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
         String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
-        FineractFeignClient userClient = createClientForUser(username, password);
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
 
         CallFailedRuntimeException exception = fail(() -> userClient.loans().createDelinquencyActionLoan(loanId, request));
 

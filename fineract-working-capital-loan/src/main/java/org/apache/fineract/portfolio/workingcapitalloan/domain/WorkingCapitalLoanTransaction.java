@@ -208,8 +208,4 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         this.reversalExternalId = null;
         this.reversedOnDate = null;
     }
-
-    public boolean isRepaymentLike() {
-        return transactionType == LoanTransactionType.REPAYMENT || transactionType == LoanTransactionType.GOODWILL_CREDIT;
-    }
 }

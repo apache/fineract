@@ -23,5 +23,7 @@ public enum WorkingCapitalLoanBreachActionType {
     RESUME, //
     RESCHEDULE, //
     RESET, //
-    UNDO_RESET //
+    UNDO_RESET, //
+    DISABLE, //
+    ENABLE //
 }

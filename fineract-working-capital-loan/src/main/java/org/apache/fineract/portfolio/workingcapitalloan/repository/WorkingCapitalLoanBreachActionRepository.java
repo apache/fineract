@@ -18,11 +18,14 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<WorkingCapitalLoanBreachAction, Long> {
 
@@ -30,5 +33,12 @@ public interface WorkingCapitalLoanBreachActionRepository extends JpaRepository<
 
     Optional<WorkingCapitalLoanBreachAction> findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             WorkingCapitalLoanBreachActionType action);
+
+    @Query("""
+            select case when count(action) > 0 then true else false end from WorkingCapitalLoanBreachAction action
+            where action.action = org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType.DISABLE
+            and action.workingCapitalLoan.id = :loanId and action.startDate <= :date and (action.endDate IS NULL OR action.endDate >= :date)
+            """)
+    boolean isBreachDisabledAsOf(@Param("loanId") Long loanId, @Param("date") LocalDate date);
 
 }
