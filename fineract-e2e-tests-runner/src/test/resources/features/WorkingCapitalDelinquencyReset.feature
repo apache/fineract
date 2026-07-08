@@ -485,3 +485,26 @@ Feature: Working Capital Delinquency Reset Action
     #    --- Close loan ---
     Then Admin closes the Working Capital loan with a full repayment on "11 April 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:TODO_ADD_4
+  Scenario: Verify multiple Reset Delinquency Action with start new period
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 10000           | 10000              | 1                 | 0.0      |
+    When Admin successfully approves the working capital loan on "01 January 2026" with "10000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "10000" EUR transaction amount
+
+    When Admin sets the business date to "15 February 2026"
+    When Admin runs inline COB job for Working Capital Loan
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 300            | 0          | 300               | false                 |
+      | 2            | 31 January 2026 | 01 March 2026   | 300            | 0          | 300               |                       |
+    When Admin creates WC delinquency reset action with start new period
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate         | toDate           | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026  | 30 January 2026  |                |            |                   |                       |
+      | 2            | 31 January 2026  | 14 February 2026 |                |            |                   |                       |
+      | 3            | 15 February 2026 | 16 March 2026    | 300            | 0          | 300               |                       |

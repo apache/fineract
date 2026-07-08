@@ -144,6 +144,16 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         executeRescheduleAction(request);
     }
 
+    @When("Admin creates WC delinquency reset action with start new period")
+    public void createResetActionWithStartNewPeriod() {
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = new PostWorkingCapitalLoansDelinquencyActionRequest();
+        request.setAction("reset");
+        request.setLocale("en");
+        request.setStartNewPeriod(true);
+
+        executeRescheduleAction(request);
+    }
+
     @When("Admin creates WC delinquency reschedule action with the following parameters:")
     public void createRescheduleAction(final DataTable table) {
         final Map<String, String> params = table.asMaps().get(0);

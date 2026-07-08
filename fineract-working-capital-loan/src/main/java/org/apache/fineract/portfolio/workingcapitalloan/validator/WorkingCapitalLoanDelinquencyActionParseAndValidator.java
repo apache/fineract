@@ -61,6 +61,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     private static final String MINIMUM_PAYMENT_TYPE = "minimumPaymentType";
     private static final String FREQUENCY = "frequency";
     private static final String FREQUENCY_TYPE = "frequencyType";
+    private static final String START_NEW_PERIOD = "startNewPeriod";
 
     private final FromJsonHelper jsonHelper;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository rangeScheduleRepository;
@@ -271,6 +272,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             action.setStartDate(extractDate(json, START_DATE));
         } else if (DelinquencyAction.RESET.equals(action.getAction())) {
             action.setStartDate(extractDate(json, START_DATE));
+            action.setStartNewPeriod(jsonHelper.extractBooleanNamed(START_NEW_PERIOD, json));
         } else if (DelinquencyAction.UNDO_RESET.equals(action.getAction())) {
             action.setStartDate(extractDate(json, START_DATE));
         }
