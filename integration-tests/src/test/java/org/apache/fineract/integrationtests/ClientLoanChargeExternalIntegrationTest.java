@@ -52,7 +52,7 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
         approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
         disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12,000.00");
 
-        final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageAmountAndInterestFee(1.0).getResourceId();
+        final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageOfInterestFee(1.0).getResourceId();
 
         final String externalId = "extId" + loanId.toString();
         PostLoansLoanIdChargesResponse chargeResponse = addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeDefId)
@@ -74,7 +74,7 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
         approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
         disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12,000.00");
 
-        final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageAmountAndInterestFee(1.0).getResourceId();
+        final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageOfInterestFee(1.0).getResourceId();
 
         final String externalId = "extId" + loanId.toString();
         PostLoansLoanIdChargesResponse chargeResponse = addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeDefId)
