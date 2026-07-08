@@ -44,6 +44,14 @@ public class FeignBatchHelper {
     }
 
     /**
+     * Posts the batch requests with {@code enclosingTransaction=false}; each request is committed independently.
+     * Returns the individual {@link BatchResponse}s (inspect their {@code statusCode}).
+     */
+    public List<BatchResponse> executeWithoutEnclosingTransaction(List<BatchRequest> requests) {
+        return ok(() -> fineractClient.batch().handleBatchRequests(requests, false));
+    }
+
+    /**
      * Posts the batch requests with {@code enclosingTransaction=false} expecting the call itself to fail (e.g. the loan
      * is locked). Returns the parsed {@link ErrorResponse} carrying the HTTP status code.
      */
