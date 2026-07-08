@@ -76,6 +76,10 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             validateReschedule(parsedAction, workingCapitalLoan, dataValidator);
         } else if (DelinquencyAction.RESUME.equals(parsedAction.getAction())) {
             validateResume(parsedAction, existing, dataValidator);
+        } else if (DelinquencyAction.RESET.equals(parsedAction.getAction())) {
+            validateReset(parsedAction, dataValidator);
+        } else if (DelinquencyAction.UNDO_RESET.equals(parsedAction.getAction())) {
+            validateUndoReset(parsedAction, dataValidator);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidator);
@@ -117,6 +121,22 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         if (!dataValidator.hasError()) {
             final WorkingCapitalLoanDelinquencyAction activePause = findActivePauseForResume(existing, businessDate);
             validateResumeShortensActivePause(action, activePause, dataValidator);
+        }
+    }
+
+    private void validateReset(WorkingCapitalLoanDelinquencyAction action, DataValidatorBuilder dataValidator) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        dataValidator.reset().parameter(START_DATE).value(action.getStartDate()).ignoreIfNull().isOneOfTheseValues(businessDate);
+        if (action.getEndDate() == null) {
+            action.setStartDate(businessDate);
+        }
+    }
+
+    private void validateUndoReset(WorkingCapitalLoanDelinquencyAction action, DataValidatorBuilder dataValidator) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        dataValidator.reset().parameter(START_DATE).value(action.getStartDate()).ignoreIfNull().isOneOfTheseValues(businessDate);
+        if (action.getEndDate() == null) {
+            action.setStartDate(businessDate);
         }
     }
 
@@ -179,6 +199,10 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             action.setFrequencyType(extractFrequencyType(json, dataValidator));
         } else if (DelinquencyAction.RESUME.equals(action.getAction())) {
             action.setStartDate(extractDate(json, START_DATE));
+        } else if (DelinquencyAction.RESET.equals(action.getAction())) {
+            action.setStartDate(extractDate(json, START_DATE));
+        } else if (DelinquencyAction.UNDO_RESET.equals(action.getAction())) {
+            action.setStartDate(extractDate(json, START_DATE));
         }
 
         return action;
@@ -196,6 +220,10 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             return DelinquencyAction.RESCHEDULE;
         } else if ("resume".equalsIgnoreCase(actionString)) {
             return DelinquencyAction.RESUME;
+        } else if ("reset".equalsIgnoreCase(actionString)) {
+            return DelinquencyAction.RESET;
+        } else if ("undo_reset".equalsIgnoreCase(actionString)) {
+            return DelinquencyAction.UNDO_RESET;
         }
         failParameterValidation(dataValidator, ACTION, "invalid.action",
                 "Invalid Delinquency Action: " + actionString + ". Supported actions: pause, reschedule, resume");

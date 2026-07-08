@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
@@ -40,10 +41,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements WorkingCapitalLoanDelinquencyActionWriteService {
 
+    private static final String RESET_RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_RESET";
+    private static final String UNDO_RESET_RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_UNDO_RESET";
+
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository actionRepository;
     private final WorkingCapitalLoanDelinquencyActionParseAndValidator validator;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
+    private final PlatformSecurityContext context;
 
     @Transactional
     @Override
@@ -68,6 +73,15 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
             final WorkingCapitalLoanDelinquencyAction activePause = validator.findActivePauseForResume(existing,
                     DateUtils.getBusinessLocalDate());
             rangeScheduleService.resumeActivePause(workingCapitalLoan, activePause, action);
+        } else if (DelinquencyAction.RESET.equals(action.getAction())) {
+            context.authenticatedUser().validateHasCreatePermission(RESET_RESOURCE_NAME_FOR_PERMISSIONS);
+            rangeScheduleService.resetPeriods(workingCapitalLoan, action);
+        } else if (DelinquencyAction.UNDO_RESET.equals(action.getAction())) {
+            context.authenticatedUser().validateHasCreatePermission(UNDO_RESET_RESOURCE_NAME_FOR_PERMISSIONS);
+            List<WorkingCapitalLoanDelinquencyAction> byWorkingCapitalLoanIdOrderById = actionRepository
+                    .findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
+            rangeScheduleService.undoResetPeriods(workingCapitalLoan, action, byWorkingCapitalLoanIdOrderById);
+            rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
         }
 
         return new CommandProcessingResultBuilder() //

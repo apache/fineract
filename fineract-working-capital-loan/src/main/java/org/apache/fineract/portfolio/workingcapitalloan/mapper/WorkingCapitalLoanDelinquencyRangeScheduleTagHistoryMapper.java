@@ -45,7 +45,9 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper {
     @AfterMapping
     default void calculateTotal(WorkingCapitalLoanDelinquencyRangeScheduleTagHistory source,
             @MappingTarget WorkingCapitalLoanDelinquencyTagHistoryData target) {
-        target.setDelinquentDays(source.getRangeSchedule().getDelinquentDays() - source.getDelinquencyRange().getMinimumAgeDays() + 1);
+        if (source.getRangeSchedule().getDelinquentDays() != null) {
+            target.setDelinquentDays(source.getRangeSchedule().getDelinquentDays() - source.getDelinquencyRange().getMinimumAgeDays() + 1);
+        }
     }
 
     @Mapping(target = "rangeId", source = "delinquencyRange.id")
