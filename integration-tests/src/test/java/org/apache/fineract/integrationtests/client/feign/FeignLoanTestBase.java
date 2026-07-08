@@ -931,8 +931,25 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
             return this;
         }
 
+        public BatchRequestBuilder repayLoan(Long requestId, Long loanId, String amount, String transactionDate) {
+            requests.add(new BatchRequest().requestId(requestId).relativeUrl("v1/loans/" + loanId + "/transactions?command=repayment")
+                    .method("POST").body("""
+                                {
+                                    "locale": "en",
+                                    "dateFormat": "%s",
+                                    "transactionDate": "%s",
+                                    "transactionAmount": %s
+                                }
+                            """.formatted(DATETIME_PATTERN, transactionDate, amount)));
+            return this;
+        }
+
         public List<BatchResponse> executeEnclosingTransaction() {
             return batchHelper.executeEnclosingTransaction(requests);
+        }
+
+        public List<BatchResponse> executeWithoutEnclosingTransaction() {
+            return batchHelper.executeWithoutEnclosingTransaction(requests);
         }
 
         public ErrorResponse executeEnclosingTransactionError() {

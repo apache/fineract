@@ -41,6 +41,10 @@ public class FeignLoanCOBCatchUpHelper {
         return ok(() -> fineractClient.loanCobCatchUp().isCatchUpRunning());
     }
 
+    public boolean isLoanCOBCatchUpRunning() {
+        return Boolean.TRUE.equals(executeGetLoanCatchUpStatus().getCatchUpRunning());
+    }
+
     public OldestCOBProcessedLoanDTO executeRetrieveOldestCOBProcessedLoan() {
         return ok(() -> fineractClient.loanCobCatchUp().getOldestCOBProcessedLoan());
     }
