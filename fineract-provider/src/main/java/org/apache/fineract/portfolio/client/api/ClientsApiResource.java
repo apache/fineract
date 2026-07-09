@@ -49,6 +49,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
@@ -102,6 +103,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Client Details Template", operationId = "retrieveTemplateClient", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n" + "clients/template")
+    @AlternativeOperationId("retrieveTemplate_5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsTemplateResponse.class)))
     public String retrieveTemplate(@Context final UriInfo uriInfo,
             @Parameter(description = "officeId") @QueryParam("officeId") final Long officeId,
@@ -132,6 +134,7 @@ public class ClientsApiResource {
     @Operation(summary = "List Clients", operationId = "retrieveAllClients", description = "The list capability of clients can support pagination and sorting.\n\n"
             + "Example Requests:\n" + "\n" + "clients\n" + "\n" + "clients?fields=displayName,officeName,timeline\n" + "\n"
             + "clients?offset=10&limit=50\n" + "\n" + "clients?orderBy=displayName&sortOrder=DESC")
+    @AlternativeOperationId("retrieveAll_21")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsResponse.class)))
     public String retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
@@ -158,6 +161,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Client", operationId = "retrieveOneClient", description = "Example Requests:\n" + "\n" + "clients/1\n"
             + "\n" + "\n" + "clients/1?template=true\n" + "\n" + "\n" + "clients/1?fields=id,displayName,officeName")
+    @AlternativeOperationId("retrieveOne_11")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)))
     public String retrieveOne(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Context final UriInfo uriInfo,
@@ -173,6 +177,7 @@ public class ClientsApiResource {
             + "\n" + "2.If address is enable(enable-address=true), then additional field called address has to be passed.\n\n"
             + "Mandatory Fields: firstname and lastname OR fullname, officeId, active=true and activationDate OR active=false, if(address enabled) address\n\n"
             + "Optional Fields: groupId, externalId, accountNo, staffId, mobileNo, savingsProductId, genderId, clientTypeId, clientClassificationId")
+    @AlternativeOperationId("create_6")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsResponse.class)))
     public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -195,6 +200,7 @@ public class ClientsApiResource {
             + "\n"
             + "Changing the relationship between a client and its office is not supported through this API. An API specific to handling transfers of clients between offices is available for the same.\n"
             + "\n" + "The relationship between a client and a group must be removed through the Groups API.")
+    @AlternativeOperationId("update_10")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdResponse.class)))
     public String update(@Parameter(description = "clientId") @PathParam("clientId") final Long clientId,
@@ -206,6 +212,7 @@ public class ClientsApiResource {
     @Path("{clientId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Client", operationId = "deleteClient", description = "If a client is in Pending state, you are allowed to Delete it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with them, you cannot delete the client but you may Close the client if they have left the program.")
+    @AlternativeOperationId("delete_8")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.DeleteClientsClientIdResponse.class)))
     public String delete(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
         return deleteClient(clientId, null);
@@ -245,6 +252,7 @@ public class ClientsApiResource {
             + "Propose and Accept a Client Transfer:\n\n"
             + "Abstraction over the Propose and Accept Client Transfer API's which enable a user with Data Scope over both the Target and Destination Branches to directly transfer a Client to the destination Office.\n\n"
             + "Showing request/response for 'Reject a Client Transfer'")
+    @AlternativeOperationId("activate_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdResponse.class)))
     public String activate(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
@@ -259,6 +267,7 @@ public class ClientsApiResource {
     @Operation(summary = "Retrieve client accounts overview", operationId = "retrieveAllClientAccounts", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n "
             + "\n" + "clients/1/accounts\n" + "\n" + "clients/1/accounts?fields=loanAccounts,savingsAccounts")
+    @AlternativeOperationId("retrieveAssociatedAccounts")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveAssociatedAccounts(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
@@ -293,6 +302,7 @@ public class ClientsApiResource {
     @Path("{clientId}/obligeedetails")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client obligee details", operationId = "retrieveClientObligeeDetails", description = "Retrieve client obligee details")
+    @AlternativeOperationId("retrieveObligeeDetails")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientObligeeDetailsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
@@ -303,6 +313,7 @@ public class ClientsApiResource {
     @Path("{clientId}/transferproposaldate")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client transfer template", operationId = "retrieveClientTransferTemplate", description = "Retrieve client transfer template")
+    @AlternativeOperationId("retrieveTransferTemplate")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientTransferProposalDateResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
@@ -315,6 +326,7 @@ public class ClientsApiResource {
     @Operation(summary = "Retrieve a Client by External Id", operationId = "retrieveOneClientByExternalId", description = "Example Requests:\n"
             + "\n" + "clients/123-456\n" + "\n" + "\n" + "clients/123-456?template=true\n" + "\n" + "\n"
             + "clients/123-456?fields=id,displayName,officeName")
+    @AlternativeOperationId("retrieveOne_12")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)))
     public String retrieveOne(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
             @Context final UriInfo uriInfo,
@@ -328,6 +340,7 @@ public class ClientsApiResource {
     @Operation(summary = "Retrieve client accounts overview", operationId = "retrieveAllClientAccountsByExternalId", description = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n"
             + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n "
             + "\n" + "clients/123-456/accounts\n" + "\n" + "clients/123-456/accounts?fields=loanAccounts,savingsAccounts")
+    @AlternativeOperationId("retrieveAssociatedAccounts_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveAssociatedAccounts(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -343,6 +356,7 @@ public class ClientsApiResource {
             + "\n"
             + "Changing the relationship between a client and its office is not supported through this API. An API specific to handling transfers of clients between offices is available for the same.\n"
             + "\n" + "The relationship between a client and a group must be removed through the Groups API.")
+    @AlternativeOperationId("update_11")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PutClientsClientIdResponse.class)))
     public String update(@Parameter(description = "externalId") @PathParam("externalId") final String externalId,
@@ -384,6 +398,7 @@ public class ClientsApiResource {
             + "Propose and Accept a Client Transfer:\n\n"
             + "Abstraction over the Propose and Accept Client Transfer API's which enable a user with Data Scope over both the Target and Destination Branches to directly transfer a Client to the destination Office.\n\n"
             + "Showing request/response for 'Reject a Client Transfer'")
+    @AlternativeOperationId("applyCommand")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.PostClientsClientIdResponse.class)))
     public String applyCommand(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -396,6 +411,7 @@ public class ClientsApiResource {
     @Path("/external-id/{externalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Client", operationId = "deleteClientByExternalId", description = "If a client is in Pending state, you are allowed to Delete it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with them, you cannot delete the client but you may Close the client if they have left the program.")
+    @AlternativeOperationId("delete_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.DeleteClientsClientIdResponse.class)))
     public String delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
         return deleteClient(null, externalId);
@@ -405,6 +421,7 @@ public class ClientsApiResource {
     @Path("/external-id/{externalId}/obligeedetails")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client obligee details", operationId = "retrieveClientObligeeDetailsByExternalId", description = "Retrieve client obligee details using the client external Id")
+    @AlternativeOperationId("retrieveObligeeDetails_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientObligeeDetailsResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveObligeeDetails(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {
@@ -415,6 +432,7 @@ public class ClientsApiResource {
     @Path("/external-id/{externalId}/transferproposaldate")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client transfer template", operationId = "retrieveClientTransferTemplateByExternalId", description = "Retrieve client transfer template using the client external Id")
+    @AlternativeOperationId("retrieveTransferTemplate_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientsApiResourceSwagger.GetClientTransferProposalDateResponse.class)))
     @ApiResponse(responseCode = "400", description = "Bad Request")
     public String retrieveTransferTemplate(@PathParam("externalId") final String externalId, @Context final UriInfo uriInfo) {

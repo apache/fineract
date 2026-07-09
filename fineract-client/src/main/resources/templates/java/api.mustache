@@ -73,6 +73,36 @@ public interface {{classname}} {
     @{{httpMethod}}("{{{path}}}")
     {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{operationId}}({{^allParams}});{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{#isBodyParam}}@retrofit2.http.Body {{{dataType}}} {{paramName}}{{/isBodyParam}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}});{{/-last}}{{/allParams}}
 
+{{#vendorExtensions.x-alternative-operation-id}}
+    /**
+    * {{summary}}
+    * Alias for <code>{{operationId}}</code>.
+    {{#allParams}}
+        * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}
+    {{/allParams}}
+    * @return {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}&gt;{{/doNotUseRx}}
+    * @deprecated Use <code>{{operationId}}</code> instead.
+    */
+    @Deprecated
+    {{#formParams}}
+        {{#-first}}
+            {{#isMultipart}}@retrofit2.http.Multipart{{/isMultipart}}{{^isMultipart}}@retrofit2.http.FormUrlEncoded{{/isMultipart}}
+        {{/-first}}
+    {{/formParams}}
+    {{^formParams}}
+        {{#prioritizedContentTypes}}
+            {{#-first}}
+                @Headers({
+                "Content-Type:{{{mediaType}}}"
+                })
+            {{/-first}}
+        {{/prioritizedContentTypes}}
+    {{/formParams}}
+    @{{httpMethod}}("{{{path}}}")
+    {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{vendorExtensions.x-alternative-operation-id}}({{^allParams}});{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{#isBodyParam}}@retrofit2.http.Body {{{dataType}}} {{paramName}}{{/isBodyParam}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}});{{/-last}}{{/allParams}}
+
+{{/vendorExtensions.x-alternative-operation-id}}
+
 {{/operation}}
 
 {{#operation}}
@@ -113,6 +143,35 @@ public interface {{classname}} {
     {{/formParams}}
     @{{httpMethod}}("{{{path}}}")
     {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{operationId}}({{^allParams}});{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}});{{/-last}}{{/allParams}}
+{{#vendorExtensions.x-alternative-operation-id}}
+        /**
+        * {{summary}}
+        * Alias for <code>{{operationId}}</code>.
+    {{#allParams}}
+            * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}
+    {{/allParams}}
+        * @return {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}&gt;{{/doNotUseRx}}
+        * @deprecated Use <code>{{operationId}}</code> instead.
+        */
+        @Deprecated
+    {{#formParams}}
+        {{#-first}}
+            {{#isMultipart}}@retrofit2.http.Multipart{{/isMultipart}}{{^isMultipart}}@retrofit2.http.FormUrlEncoded{{/isMultipart}}
+        {{/-first}}
+    {{/formParams}}
+    {{^formParams}}
+        {{#prioritizedContentTypes}}
+            {{#-first}}
+                    @Headers({
+                    "Content-Type:{{{mediaType}}}"
+                    })
+            {{/-first}}
+        {{/prioritizedContentTypes}}
+    {{/formParams}}
+    @{{httpMethod}}("{{{path}}}")
+    {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{vendorExtensions.x-alternative-operation-id}}({{^allParams}});{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}});{{/-last}}{{/allParams}}
+
+{{/vendorExtensions.x-alternative-operation-id}}
             {{/required}}
         {{/isBodyParam}}
     {{/allParams}}
@@ -154,6 +213,37 @@ public interface {{classname}} {
     @{{httpMethod}}("{{{path}}}")
     {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{operationId}}({{^allParams}}@HeaderMap Map<String, String> headers);{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{#isBodyParam}}@retrofit2.http.Body {{{dataType}}} {{paramName}}{{/isBodyParam}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}}{{^first}}, {{/first}}@HeaderMap Map<String, String> headers);{{/-last}}{{/allParams}}
 
+{{#vendorExtensions.x-alternative-operation-id}}
+        /**
+        * {{summary}}
+        * Alias for <code>{{operationId}}</code> with request headers.
+    {{#allParams}}
+            * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}
+    {{/allParams}}
+        * @param headers Custom headers to include in the request
+        * @return {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}&gt;{{/doNotUseRx}}
+        * @deprecated Use <code>{{operationId}}</code> instead.
+        */
+        @Deprecated
+    {{#formParams}}
+        {{#-first}}
+            {{#isMultipart}}@retrofit2.http.Multipart{{/isMultipart}}{{^isMultipart}}@retrofit2.http.FormUrlEncoded{{/isMultipart}}
+        {{/-first}}
+    {{/formParams}}
+    {{^formParams}}
+        {{#prioritizedContentTypes}}
+            {{#-first}}
+                    @Headers({
+                    "Content-Type:{{{mediaType}}}"
+                    })
+            {{/-first}}
+        {{/prioritizedContentTypes}}
+    {{/formParams}}
+    @{{httpMethod}}("{{{path}}}")
+    {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{vendorExtensions.x-alternative-operation-id}}({{^allParams}}@HeaderMap Map<String, String> headers);{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{#isBodyParam}}@retrofit2.http.Body {{{dataType}}} {{paramName}}{{/isBodyParam}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}}{{^first}}, {{/first}}@HeaderMap Map<String, String> headers);{{/-last}}{{/allParams}}
+
+{{/vendorExtensions.x-alternative-operation-id}}
+
 {{/operation}}
 
 {{#operation}}
@@ -194,6 +284,36 @@ public interface {{classname}} {
     {{/formParams}}
     @{{httpMethod}}("{{{path}}}")
     {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{operationId}}({{^allParams}}@HeaderMap Map<String, String> headers);{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}}{{^first}}, {{/first}}@HeaderMap Map<String, String> headers);{{/-last}}{{/allParams}}
+{{#vendorExtensions.x-alternative-operation-id}}
+        /**
+        * {{summary}}
+        * Alias for <code>{{operationId}}</code> with request headers.
+    {{#allParams}}
+            * @param {{paramName}} {{description}}{{#required}} (required){{/required}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}
+    {{/allParams}}
+        * @param headers Custom headers to include in the request
+        * @return {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{/isResponseFile}}&gt;{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call&lt;{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{returnType}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}&gt;{{/doNotUseRx}}
+        * @deprecated Use <code>{{operationId}}</code> instead.
+        */
+        @Deprecated
+    {{#formParams}}
+        {{#-first}}
+            {{#isMultipart}}@retrofit2.http.Multipart{{/isMultipart}}{{^isMultipart}}@retrofit2.http.FormUrlEncoded{{/isMultipart}}
+        {{/-first}}
+    {{/formParams}}
+    {{^formParams}}
+        {{#prioritizedContentTypes}}
+            {{#-first}}
+                    @Headers({
+                    "Content-Type:{{{mediaType}}}"
+                    })
+            {{/-first}}
+        {{/prioritizedContentTypes}}
+    {{/formParams}}
+    @{{httpMethod}}("{{{path}}}")
+    {{^doNotUseRx}}{{#useRxJava2}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava2}}{{#useRxJava3}}{{#returnType}}Observable<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{/isResponseFile}}>{{/returnType}}{{^returnType}}Completable{{/returnType}}{{/useRxJava3}}{{/doNotUseRx}}{{#doNotUseRx}}Call<{{#isResponseFile}}ResponseBody{{/isResponseFile}}{{^isResponseFile}}{{{returnType}}}{{^returnType}}Void{{/returnType}}{{/isResponseFile}}>{{/doNotUseRx}} {{vendorExtensions.x-alternative-operation-id}}({{^allParams}}@HeaderMap Map<String, String> headers);{{/allParams}}{{#allParams}}{{>libraries/retrofit2/queryParams}}{{>libraries/retrofit2/pathParams}}{{>libraries/retrofit2/headerParams}}{{>libraries/retrofit2/formParams}}{{^-last}}, {{/-last}}{{#-last}}{{^first}}, {{/first}}@HeaderMap Map<String, String> headers);{{/-last}}{{/allParams}}
+
+{{/vendorExtensions.x-alternative-operation-id}}
             {{/required}}
         {{/isBodyParam}}
     {{/allParams}}

@@ -55,6 +55,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -107,6 +108,7 @@ public class RecurringDepositAccountsApiResource {
     @Operation(summary = "Retrieve recurring Deposit Account Template", operationId = "retrieveTemplateRecurringDepositAccount", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for recurring deposit applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n"
             + "recurringdepositaccounts/template?clientId=1\n" + "\n" + "\n" + "recurringdepositaccounts/template?clientId=1&productId=1")
+    @AlternativeOperationId("template_13")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsTemplateResponse.class))) })
     public String template(@QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
@@ -129,6 +131,7 @@ public class RecurringDepositAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Recurring deposit applications/accounts", operationId = "retrieveAllRecurringDepositAccounts", description = "Lists Recurring deposit applications/accounts\n\n"
             + "Example Requests:\n" + "\n" + "recurringdepositaccounts\n" + "\n" + "\n" + "recurringdepositaccounts?fields=name")
+    @AlternativeOperationId("retrieveAll_31")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("paged") @Parameter(description = "paged") final Boolean paged,
@@ -165,6 +168,7 @@ public class RecurringDepositAccountsApiResource {
             + "Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId\n\n"
             + "Optional Fields: accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )\n\n"
             + "Inherited from Product (if not provided): interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts, withHoldTax")
+    @AlternativeOperationId("submitApplication_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsResponse.class))) })
@@ -183,6 +187,7 @@ public class RecurringDepositAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a recurring deposit application/account", operationId = "retrieveOneRecurringDepositAccount", description = "Retrieves a recurring deposit application/account\n\n"
             + "Example Requests :\n" + "\n" + "recurringdepositaccounts/1\n" + "\n" + "\n" + "recurringdepositaccounts/1?associations=all")
+    @AlternativeOperationId("retrieveOne_22")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsAccountIdResponse.class))) })
     public String retrieveOne(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
@@ -259,6 +264,7 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Modify a recurring deposit application", operationId = "updateRecurringDepositAccount", description = "Recurring deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
+    @AlternativeOperationId("update_18")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdResponse.class))) })
@@ -301,6 +307,7 @@ public class RecurringDepositAccountsApiResource {
             + "Post Interest on recurring Deposit Account:\n\n"
             + "Calculates and Posts interest earned on a recurring deposit account based on todays date and whether an interest posting or crediting event is due.\n\n"
             + "Showing request/response for 'Post Interest on recurring Deposit Account'", operationId = "handleCommandsRecurringDepositAccount")
+    @AlternativeOperationId("handleCommands_5")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdResponse.class))) })
@@ -374,6 +381,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("{accountId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a recurring deposit application", operationId = "deleteRecurringDepositAccount", description = "At present we support hard delete of recurring deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the recurring deposit account.")
+    @AlternativeOperationId("delete_16")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositAccountsApiResourceSwagger.DeleteRecurringDepositAccountsResponse.class))) })
     public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
@@ -389,6 +397,7 @@ public class RecurringDepositAccountsApiResource {
     @Path("{accountId}/template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve recurring deposit account closure template", operationId = "accountClosureTemplateRecurringDepositAccount")
+    @AlternativeOperationId("accountClosureTemplate_1")
     public String accountClosureTemplate(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo) {
 

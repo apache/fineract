@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.template.command.TemplateCreateCommand;
 import org.apache.fineract.template.command.TemplateDeleteCommand;
 import org.apache.fineract.template.command.TemplateUpdateCommand;
@@ -78,7 +79,7 @@ public class TemplatesApiResource {
     private final CommandDispatcher dispatcher;
 
     @GET
-    @Operation(summary = "Retrieve all UGDs", description = """
+    @Operation(operationId = "retrieveAllTemplates", summary = "Retrieve all UGDs", description = """
             It is possible to get specific UGDs by entity and type:
 
             templates?type=0&entity=0
@@ -93,6 +94,7 @@ public class TemplatesApiResource {
             - Document: 0
             - E-Mail (not yet): 1
             - SMS: 2""")
+    @AlternativeOperationId("retrieveAll_40")
     public List<TemplateData> retrieveAllTemplates(
             @DefaultValue("-1") @QueryParam("typeId") @Parameter(description = "typeId") final int typeId,
             @DefaultValue("-1") @QueryParam("entityId") @Parameter(description = "entityId") final int entityId) {
@@ -105,7 +107,7 @@ public class TemplatesApiResource {
 
     @GET
     @Path(PARAM_TEMPLATE)
-    @Operation(summary = "Retrieve UGD Details Template", description = """
+    @Operation(operationId = "retrieveTemplateDetails", summary = "Retrieve UGD Details Template", description = """
             This is a convenience resource. It can be useful when building maintenance user interface screens for UGDs. The UGD data returned consists of any or all of:
 
             - name
@@ -118,6 +120,7 @@ public class TemplatesApiResource {
 
             templates/template
             """)
+    @AlternativeOperationId("template_20")
     public TemplateData retrieveTemplateDetails() {
         // TODO: why?!? The original code was also limited to return only the ID attribute...
         // which we don't have; the parser will remove all null values
@@ -126,16 +129,19 @@ public class TemplatesApiResource {
 
     @GET
     @Path("{templateId}")
-    @Operation(summary = "Retrieve a UGD", description = """
+    @Operation(operationId = "retrieveOneTemplate", summary = "Retrieve a UGD", description = """
             Example Requests:
 
             - templates/1""")
+    @AlternativeOperationId("retrieveOne_30")
     public TemplateData retrieveOneTemplate(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId) {
         return templateService.findOneById(templateId);
     }
 
     @GET
     @Path("{templateId}/template")
+    @Operation(operationId = "retrieveTemplateById")
+    @AlternativeOperationId("getTemplateByTemplate")
     public TemplateData retrieveTemplateById(@PathParam("templateId") final Long templateId) {
         return templateService.findOneById(templateId);
     }

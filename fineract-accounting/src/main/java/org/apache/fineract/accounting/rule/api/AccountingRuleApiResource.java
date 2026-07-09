@@ -55,6 +55,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -102,6 +103,7 @@ public class AccountingRuleApiResource {
             Example Request:
 
             accountingrules/template""")
+    @AlternativeOperationId("retrieveTemplate_1")
     public AccountingRuleData retrieveTemplate() {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         return handleTemplate(null);
@@ -136,6 +138,7 @@ public class AccountingRuleApiResource {
             Example Requests:
 
             accountingrules/1""")
+    @AlternativeOperationId("retreiveAccountingRule")
     public AccountingRuleData retreiveAccountingRule(
             @PathParam("accountingRuleId") @Parameter(description = "accountingRuleId") final Long accountingRuleId,
             @Context final UriInfo uriInfo) {

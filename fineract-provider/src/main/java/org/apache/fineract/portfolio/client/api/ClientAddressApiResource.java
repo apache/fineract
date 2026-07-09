@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -64,6 +65,7 @@ public class ClientAddressApiResource {
     @Path("addresses/template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client address template", operationId = "retrieveTemplateClientAddress")
+    @AlternativeOperationId("getAddressesTemplate")
     public AddressData getAddressesTemplate() {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return readPlatformService.retrieveTemplate();
@@ -76,6 +78,7 @@ public class ClientAddressApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an address for a Client", operationId = "createClientAddress", description = "Mandatory Fields : \n"
             + "type and clientId")
+    @AlternativeOperationId("addClientAddress")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientAddressRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesResponse.class)))
     public CommandProcessingResult addClientAddress(@QueryParam("type") @Parameter(description = "type") final long addressTypeId,
@@ -97,6 +100,7 @@ public class ClientAddressApiResource {
 
 
             clients/1/addresses?status=false,true&&type=1,2,3""")
+    @AlternativeOperationId("getAddresses_1")
     public List<AddressData> getAddresses(@QueryParam("status") @Parameter(description = "status") final String status,
             @QueryParam("type") @Parameter(description = "type") final long addressTypeId,
             @PathParam("clientid") @Parameter(description = "clientId") final long clientid) {

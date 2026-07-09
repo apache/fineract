@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.adhocquery.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
@@ -40,6 +41,7 @@ import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -64,6 +66,8 @@ public class AdHocApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "retrieveAll_1")
+    @AlternativeOperationId("retrieveAll_2")
     public List<AdHocData> retrieveAll() {
 
         this.context.authenticatedUser();

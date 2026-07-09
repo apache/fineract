@@ -45,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -85,6 +86,7 @@ public class FixedDepositAccountTransactionsApiResource {
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Fixed Deposit Account Transaction Template", operationId = "retrieveTemplateFixedDepositAccountTransaction")
+    @AlternativeOperationId("retrieveTemplate_14")
     public String retrieveTemplate(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             // @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
@@ -120,6 +122,7 @@ public class FixedDepositAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a fixed deposit account transaction", operationId = "retrieveOneFixedDepositAccountTransaction")
+    @AlternativeOperationId("retrieveOne_18")
     public String retrieveOne(@PathParam("fixedDepositAccountId") final Long fixedDepositAccountId,
             @PathParam("transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
 
@@ -167,6 +170,7 @@ public class FixedDepositAccountTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Adjust Transaction | Undo transaction", operationId = "handleCommandsFixedDepositAccountTransaction", description = "Adjust Transaction:\n\nThis command modifies the given transaction.\n\n"
             + "Undo transaction:\n\nThis command reverses the given transaction.\n\n" + "Showing request/response for 'Adjust Transaction'")
+    @AlternativeOperationId("adjustTransaction")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositAccountTransactionsApiResourceSwagger.PostFixedDepositAccountsFixedDepositAccountIdTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositAccountTransactionsApiResourceSwagger.PostFixedDepositAccountsFixedDepositAccountIdTransactionsTransactionIdResponse.class))),

@@ -26,6 +26,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.service.MixTaxonomyReadService;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,7 @@ public class MixTaxonomyApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Mix Taxonomies", operationId = "retrieveAllMixTaxonomies")
+    @AlternativeOperationId("retrieveAll_14")
     public List<MixTaxonomyData> retrieveAll() {
         return readTaxonomyService.retrieveAll();
     }

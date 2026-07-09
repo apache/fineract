@@ -40,6 +40,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailReadPlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -155,6 +156,7 @@ public class EmailApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an email message", operationId = "createEmail")
+    @AlternativeOperationId("create_1")
     public String create(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createEmail().withJson(apiRequestBodyAsJson).build();
@@ -167,6 +169,7 @@ public class EmailApiResource {
     @GET
     @Path("{resourceId}")
     @Operation(summary = "Retrieve an email message", operationId = "retrieveOneEmail")
+    @AlternativeOperationId("retrieveOne_1")
     public String retrieveOne(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
 
         final EmailData emailMessage = readPlatformService.retrieveOne(resourceId);
@@ -179,6 +182,7 @@ public class EmailApiResource {
     @Path("{resourceId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update an email message", operationId = "updateEmail")
+    @AlternativeOperationId("update_2")
     public String update(@PathParam("resourceId") final Long resourceId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateEmail(resourceId).withJson(apiRequestBodyAsJson).build();
@@ -191,6 +195,7 @@ public class EmailApiResource {
     @DELETE
     @Path("{resourceId}")
     @Operation(summary = "Delete an email message", operationId = "deleteEmail")
+    @AlternativeOperationId("delete_1")
     public String delete(@PathParam("resourceId") final Long resourceId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteEmail(resourceId).build();

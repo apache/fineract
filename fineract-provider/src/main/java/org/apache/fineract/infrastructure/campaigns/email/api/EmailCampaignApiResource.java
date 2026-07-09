@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData
 import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignReadPlatformService;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -84,6 +85,7 @@ public class EmailCampaignApiResource {
     @Path("{resourceId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve an email campaign", operationId = "retrieveOneEmailCampaign")
+    @AlternativeOperationId("retrieveOneCampaign")
     public String retrieveOneCampaign(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -96,6 +98,7 @@ public class EmailCampaignApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all email campaigns", operationId = "retrieveAllEmailCampaigns")
+    @AlternativeOperationId("retrieveAllCampaign")
     public String retrieveAllCampaign(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -110,6 +113,7 @@ public class EmailCampaignApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an email campaign", operationId = "createEmailCampaign")
+    @AlternativeOperationId("createCampaign")
     public String createCampaign(final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createEmailCampaign().withJson(apiRequestBodyAsJson).build();
@@ -124,6 +128,7 @@ public class EmailCampaignApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update an email campaign", operationId = "updateEmailCampaign")
+    @AlternativeOperationId("updateCampaign")
     public String updateCampaign(@PathParam("resourceId") final Long campaignId, final String apiRequestBodyAsJson,
             @Context final UriInfo uriInfo) {
 
@@ -140,6 +145,7 @@ public class EmailCampaignApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Activate, close, or reactivate an email campaign", operationId = "handleCommandsEmailCampaign")
+    @AlternativeOperationId("activate")
     public String activate(@PathParam("resourceId") final Long campaignId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
@@ -164,6 +170,7 @@ public class EmailCampaignApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Preview email campaign message", operationId = "previewEmailCampaign")
+    @AlternativeOperationId("preview")
     public String preview(final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -179,6 +186,7 @@ public class EmailCampaignApiResource {
     @GET
     @Path("template")
     @Operation(summary = "Retrieve email campaign template", operationId = "retrieveAllTemplatesEmailCampaign")
+    @AlternativeOperationId("template_1")
     public String template(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -191,6 +199,7 @@ public class EmailCampaignApiResource {
     @GET
     @Path("template/{resourceId}")
     @Operation(summary = "Retrieve an email campaign template detail by ID", operationId = "retrieveOneTemplateEmailCampaign")
+    @AlternativeOperationId("retrieveOneTemplate")
     public String retrieveOneTemplate(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -203,6 +212,7 @@ public class EmailCampaignApiResource {
     @DELETE
     @Path("{resourceId}")
     @Operation(summary = "Delete an email campaign", operationId = "deleteEmailCampaign")
+    @AlternativeOperationId("delete_2")
     public String delete(@PathParam("resourceId") final Long resourceId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteEmailCampaign(resourceId).build();

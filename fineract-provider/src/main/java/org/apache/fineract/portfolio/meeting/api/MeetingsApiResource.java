@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -76,6 +77,7 @@ public class MeetingsApiResource {
     @GET
     @Path("template")
     @Operation(summary = "Retrieve Meeting Template", operationId = "retrieveTemplateMeeting")
+    @AlternativeOperationId("template_11")
     public MeetingData template(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
             @QueryParam("calendarId") final Long calendarId) {
 
@@ -110,6 +112,7 @@ public class MeetingsApiResource {
 
     @GET
     @Operation(summary = "List Meetings", operationId = "retrieveAllMeetings")
+    @AlternativeOperationId("retrieveMeetings")
     public Collection<MeetingData> retrieveMeetings(@PathParam("entityType") final String entityType,
             @PathParam("entityId") final Long entityId, @QueryParam("limit") final Integer limit) {
 
@@ -120,6 +123,7 @@ public class MeetingsApiResource {
     @GET
     @Path("{meetingId}")
     @Operation(summary = "Retrieve a Meeting", operationId = "retrieveOneMeeting")
+    @AlternativeOperationId("retrieveMeeting")
     public MeetingData retrieveMeeting(@PathParam("meetingId") final Long meetingId, @PathParam("entityType") final String entityType,
             @PathParam("entityId") final Long entityId) {
 
@@ -204,6 +208,7 @@ public class MeetingsApiResource {
     @Path("{meetingId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Meeting Attendance", operationId = "updateMeetingAttendance")
+    @AlternativeOperationId("performMeetingCommands")
     public MeetingAttendanceUpdateResponse updateMeetingAttendance(@PathParam("entityType") final String entityType,
             @PathParam("entityId") final Long entityId, @PathParam("meetingId") final Long meetingId,
             @QueryParam("command") final String commandParam, final MeetingAttendanceUpdateRequest request) {

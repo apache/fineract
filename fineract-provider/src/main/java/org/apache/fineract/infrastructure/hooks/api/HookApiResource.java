@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.hooks.command.HookCreateCommand;
 import org.apache.fineract.infrastructure.hooks.command.HookDeleteCommand;
 import org.apache.fineract.infrastructure.hooks.command.HookUpdateCommand;
@@ -68,6 +69,7 @@ public class HookApiResource {
 
     @GET
     @Operation(summary = "Retrieve Hooks", operationId = "retrieveAllHooks", description = "Returns the list of hooks")
+    @AlternativeOperationId("retrieveHooks")
     public Collection<HookData> retrieveHooks(@Context final UriInfo uriInfo) {
         return readPlatformService.retrieveAllHooks();
     }
@@ -75,6 +77,7 @@ public class HookApiResource {
     @GET
     @Path("{hookId}")
     @Operation(summary = "Retrieve a Hook", operationId = "retrieveOneHook", description = "Returns the details of a Hook.")
+    @AlternativeOperationId("retrieveHook")
     public HookData retrieveHook(@PathParam("hookId") @Parameter(description = "hookId") final Long hookId,
             @QueryParam("template") @DefaultValue("false") @Parameter(description = "template") Boolean template) {
         var hook = readPlatformService.retrieveHook(hookId);
@@ -92,6 +95,7 @@ public class HookApiResource {
     @GET
     @Path("template")
     @Operation(summary = "Retrieve Hooks Template", operationId = "retrieveTemplateHook", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications.")
+    @AlternativeOperationId("template_3")
     public HookDetailsData template() {
         return readPlatformService.retrieveNewHookDetails(null);
     }

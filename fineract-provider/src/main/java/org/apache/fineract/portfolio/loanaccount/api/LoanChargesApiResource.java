@@ -47,6 +47,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -108,6 +109,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Loan Charges", operationId = "retrieveAllLoanChargesByLoanExternalId", description = "It lists all the Loan Charges specific to a Loan \n\n"
             + "Example Requests:\n" + "\n" + "loans/1/charges\n" + "\n" + "\n" + "loans/1/charges?fields=name,amountOrPercentage")
+    @AlternativeOperationId("retrieveAllLoanCharges_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class))))
     public String retrieveAllLoanCharges(
             @PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
@@ -121,6 +123,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Loan Charges Template", operationId = "retrieveTemplateLoanCharge", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "loans/1/charges/template\n" + "\n")
+    @AlternativeOperationId("retrieveTemplate_8")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.class)))
     public String retrieveTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @Context final UriInfo uriInfo) {
@@ -133,6 +136,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Loan Charges Template", operationId = "retrieveTemplateLoanChargeByLoanExternalId", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "loans/1/charges/template\n" + "\n")
+    @AlternativeOperationId("retrieveTemplate_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesTemplateResponse.class)))
     public String retrieveTemplate(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @Context final UriInfo uriInfo) {
@@ -145,6 +149,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanCharge", description = "Retrieves Loan Charge according to the Loan ID and Loan Charge ID"
             + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+    @AlternativeOperationId("retrieveLoanCharge")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
     public String retrieveLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId, @Context final UriInfo uriInfo) {
@@ -158,6 +163,7 @@ public class LoanChargesApiResource {
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanChargeByChargeExternalId", description = "Retrieves Loan Charge according to the Loan ID and Loan Charge External ID"
             + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n"
             + "/loans/1/charges/external-id/1?fields=name,amountOrPercentage")
+    @AlternativeOperationId("retrieveLoanCharge_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
     public String retrieveLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
@@ -171,6 +177,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanChargeByLoanExternalId", description = "Retrieves Loan Charge according to the Loan external ID and Loan Charge ID"
             + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+    @AlternativeOperationId("retrieveLoanCharge_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
     public String retrieveLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId, @Context final UriInfo uriInfo) {
@@ -183,6 +190,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Loan Charge", operationId = "retrieveOneLoanChargeByLoanAndChargeExternalId", description = "Retrieves Loan Charge according to the Loan External ID and Loan Charge External ID"
             + "Example Requests:\n" + "\n" + "/loans/1/charges/1\n" + "\n" + "\n" + "/loans/1/charges/1?fields=name,amountOrPercentage")
+    @AlternativeOperationId("retrieveLoanCharge_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.GetLoansLoanIdChargesChargeIdResponse.class)))
     public String retrieveLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId,
@@ -196,6 +204,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Loan Charge (no command provided) or Pay a charge (command=pay)", operationId = "createOrPayLoanCharge", description = "Creates a Loan Charge | Pay a Loan Charge")
+    @AlternativeOperationId("executeLoanCharge")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesResponse.class)))
     public String executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -210,6 +219,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Loan Charge (no command provided) or Pay a charge (command=pay)", operationId = "executeLoanChargeByLoanExternalId", description = "Creates a Loan Charge | Pay a Loan Charge")
+    @AlternativeOperationId("executeLoanCharge_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesResponse.class)))
     public String executeLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
@@ -224,6 +234,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Pay / Waive / Adjustment for Loan Charge", operationId = "executeLoanChargeOnExistingCharge", description = "Loan Charge will be paid if the loan is linked with a savings account | Waive Loan Charge | Add Charge Adjustment")
+    @AlternativeOperationId("executeLoanCharge_2")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
     public String executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -239,6 +250,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Pay / Waive / Adjustment for Loan Charge", operationId = "executeLoanChargeByChargeExternalId", description = "Loan Charge will be paid if the loan is linked with a savings account | Waive Loan Charge | Add Charge Adjustment")
+    @AlternativeOperationId("executeLoanCharge_3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
     public String executeLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -254,6 +266,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Pay / Waive / Adjustment for Loan Charge", operationId = "executeLoanChargeByLoanExternalIdOnExistingCharge", description = "Loan Charge will be paid if the loan is linked with a savings account | Waive Loan Charge | Add Charge Adjustment")
+    @AlternativeOperationId("executeLoanCharge_4")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
     public String executeLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
@@ -269,6 +282,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Pay / Waive / Adjustment for Loan Charge", operationId = "executeLoanChargeByLoanAndChargeExternalId", description = "Loan Charge will be paid if the loan is linked with a savings account | Waive Loan Charge | Add Charge Adjustment")
+    @AlternativeOperationId("executeLoanCharge_5")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PostLoansLoanIdChargesChargeIdResponse.class)))
     public String executeLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
@@ -298,6 +312,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Loan Charge", operationId = "updateLoanChargeByChargeExternalId", description = "Currently Loan Charges may be updated only if the Loan is not yet approved")
+    @AlternativeOperationId("updateLoanCharge_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
     public String updateLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -312,6 +327,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Loan Charge", operationId = "updateLoanChargeByLoanExternalId", description = "Currently Loan Charges may be updated only if the Loan is not yet approved")
+    @AlternativeOperationId("updateLoanCharge_2")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
     public String updateLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
@@ -326,6 +342,7 @@ public class LoanChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Loan Charge", operationId = "updateLoanChargeByLoanAndChargeExternalId", description = "Currently Loan Charges may be updated only if the Loan is not yet approved")
+    @AlternativeOperationId("updateLoanCharge_3")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.PutLoansLoanIdChargesChargeIdResponse.class)))
     public String updateLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
@@ -350,6 +367,7 @@ public class LoanChargesApiResource {
     @Path("{loanId}/charges/external-id/{loanChargeExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanChargeByChargeExternalId", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
+    @AlternativeOperationId("deleteLoanCharge_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
     public String deleteLoanCharge(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId) {
@@ -361,6 +379,7 @@ public class LoanChargesApiResource {
     @Path("external-id/{loanExternalId}/charges/{loanChargeId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanChargeByLoanExternalId", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
+    @AlternativeOperationId("deleteLoanCharge_2")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
     public String deleteLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeId") @Parameter(description = "loanChargeId") final Long loanChargeId) {
@@ -372,6 +391,7 @@ public class LoanChargesApiResource {
     @Path("external-id/{loanExternalId}/charges/external-id/{loanChargeExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Loan Charge", operationId = "deleteLoanChargeByLoanAndChargeExternalId", description = "Note: Currently, A Loan Charge may only be removed from Loans that are not yet approved.")
+    @AlternativeOperationId("deleteLoanCharge_3")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanChargesApiResourceSwagger.DeleteLoansLoanIdChargesChargeIdResponse.class)))
     public String deleteLoanCharge(@PathParam("loanExternalId") @Parameter(description = "loanExternalId") final String loanExternalId,
             @PathParam("loanChargeExternalId") @Parameter(description = "loanChargeExternalId") final String loanChargeExternalId) {

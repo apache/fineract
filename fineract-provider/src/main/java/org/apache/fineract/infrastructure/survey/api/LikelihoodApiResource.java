@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.survey.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -55,6 +57,8 @@ public class LikelihoodApiResource {
     @GET
     @Path("{ppiName}")
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "retrieveAll_5")
+    @AlternativeOperationId("retrieveAll_11")
     public String retrieveAll(@PathParam("ppiName") final String ppiName) {
 
         this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
@@ -67,6 +71,8 @@ public class LikelihoodApiResource {
     @GET
     @Path("{ppiName}/{likelihoodId}")
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "retrieve_1")
+    @AlternativeOperationId("retrieve")
     public String retrieve(@PathParam("likelihoodId") final Long likelihoodId, @PathParam("ppiName") final String ppiName) {
 
         this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
@@ -80,6 +86,8 @@ public class LikelihoodApiResource {
     @Path("{ppiName}/{likelihoodId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "update_2")
+    @AlternativeOperationId("update_4")
     public String update(@PathParam("likelihoodId") final Long likelihoodId, final String apiRequestBodyAsJson,
             @PathParam("ppiName") final String ppiName) {
 

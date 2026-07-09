@@ -51,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -115,6 +116,7 @@ public class SavingsAccountChargesApiResource {
     @Operation(summary = "Retrieve Savings Charges Template", operationId = "retrieveTemplateSavingsAccountCharge", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n"
             + "savingsaccounts/1/charges/template")
+    @AlternativeOperationId("retrieveTemplate_18")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesTemplateResponse.class))) })
     public String retrieveTemplate(@PathParam("savingsAccountId") @Parameter(description = "savingsAccountId") final Long savingsAccountId,
@@ -137,6 +139,7 @@ public class SavingsAccountChargesApiResource {
     @Operation(summary = "Retrieve a Savings account Charge", operationId = "retrieveOneSavingsAccountCharge", description = "Retrieves a Savings account Charge\n\n"
             + "Example Requests:\n" + "\n" + "/savingsaccounts/1/charges/5\n" + "\n" + "\n"
             + "/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
+    @AlternativeOperationId("retrieveSavingsAccountCharge")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })
     public String retrieveSavingsAccountCharge(
@@ -160,6 +163,7 @@ public class SavingsAccountChargesApiResource {
     @Operation(summary = "Create a Savings account Charge", operationId = "createSavingsAccountCharge", description = "Creates a Savings account Charge\n\n"
             + "Mandatory Fields for Savings account Charges: chargeId, amount\n\n" + "chargeId, amount, dueDate, dateFormat, locale\n\n"
             + "chargeId, amount, feeOnMonthDay, monthDayFormat, locale")
+    @AlternativeOperationId("addSavingsAccountCharge")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesResponse.class))) })
@@ -206,6 +210,7 @@ public class SavingsAccountChargesApiResource {
             + "Inactivate a Savings account Charge:\n\n"
             + "A charge will be allowed to inactivate when savings account is active and not having any dues as of today. If charge is overpaid, corresponding charge payment transactions will be reversed.\n\n"
             + "Showing request/response for 'Pay a Savings account Charge'")
+    @AlternativeOperationId("payOrWaiveSavingsAccountCharge")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountChargesApiResourceSwagger.PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse.class))) })

@@ -34,6 +34,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -56,6 +57,7 @@ public class EmailConfigurationApiResource {
 
     @GET
     @Operation(summary = "List all email configurations", operationId = "retrieveAllEmailConfigurations")
+    @AlternativeOperationId("retrieveAll_5")
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
@@ -69,6 +71,7 @@ public class EmailConfigurationApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update email configuration", operationId = "updateEmailConfiguration")
+    @AlternativeOperationId("updateConfiguration")
     public String updateConfiguration(@Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateEmailConfiguration().withJson(apiRequestBodyAsJson).build();

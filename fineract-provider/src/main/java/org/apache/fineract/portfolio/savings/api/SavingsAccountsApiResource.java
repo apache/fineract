@@ -51,6 +51,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -101,6 +102,7 @@ public class SavingsAccountsApiResource {
     @Operation(summary = "Retrieve Savings Account Template", operationId = "retrieveSavingsAccountTemplate", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "savingsaccounts/template?clientId=1\n"
             + "\n" + "\n" + "savingsaccounts/template?clientId=1&productId=1")
+    @AlternativeOperationId("template_14")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsTemplateResponse.class)))
     public String template(@QueryParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @QueryParam("groupId") @Parameter(description = "groupId") final Long groupId,
@@ -121,6 +123,7 @@ public class SavingsAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List savings applications/accounts", operationId = "retrieveAllSavingsAccounts", description = "Lists savings applications/accounts\n\n"
             + "Example Requests:\n" + "\n" + "savingsaccounts\n" + "\n" + "\n" + "savingsaccounts?fields=name")
+    @AlternativeOperationId("retrieveAll_33")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.GetSavingsAccountsResponse.class)))
     public String retrieveAll(@Context final UriInfo uriInfo,
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -152,6 +155,7 @@ public class SavingsAccountsApiResource {
             + "Optional Fields: accountNo, externalId, fieldOfficerId\n\n"
             + "Inherited from Product (if not provided): nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax\n\n"
             + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type Savings: datatables")
+    @AlternativeOperationId("submitApplication_2")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsResponse.class)))
     public String submitApplication(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -180,6 +184,7 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a savings account", operationId = "retrieveSavingsAccount")
+    @AlternativeOperationId("retrieveOne_25")
     public SavingsAccountData retrieveOne(@PathParam("accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
@@ -192,6 +197,7 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a savings account by external ID", operationId = "retrieveSavingsAccountByExternalId")
+    @AlternativeOperationId("retrieveOne_26")
     public SavingsAccountData retrieveOne(@PathParam("externalId") final String externalId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
@@ -209,6 +215,7 @@ public class SavingsAccountsApiResource {
             + "Modify savings account withhold tax applicability:\n\n"
             + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
             + "Showing request/response for 'Modify a savings application'")
+    @AlternativeOperationId("update_20")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
     public String update(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
@@ -227,6 +234,7 @@ public class SavingsAccountsApiResource {
             + "Modify savings account withhold tax applicability:\n\n"
             + "Savings application's withhold tax can be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa"
             + "Showing request/response for 'Modify a savings application'")
+    @AlternativeOperationId("update_21")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PutSavingsAccountsAccountIdResponse.class)))
     public String update(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -340,6 +348,7 @@ public class SavingsAccountsApiResource {
             + "Unblock Savings Account debit transactions:\n\n"
             + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
             + "Showing request/response for 'Unassign Savings Officer'", operationId = "handleCommandsSavingsAccount")
+    @AlternativeOperationId("handleCommands_6")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
     public String handleCommands(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
@@ -385,6 +394,7 @@ public class SavingsAccountsApiResource {
             + "Unblock Savings Account debit transactions:\n\n"
             + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
             + "Showing request/response for 'Unassign Savings Officer'", operationId = "handleCommandsSavingsAccountByExternalId")
+    @AlternativeOperationId("handleCommands_7")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdResponse.class)))
     public String handleCommands(@PathParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -402,6 +412,7 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a savings application", operationId = "deleteSavingsAccount", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
+    @AlternativeOperationId("delete_18")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
     public String delete(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId) {
 
@@ -412,6 +423,7 @@ public class SavingsAccountsApiResource {
     @Path("/external-id/{externalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a savings application by externalId", operationId = "deleteSavingsAccountByExternalId", description = "At present we support hard delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.")
+    @AlternativeOperationId("delete_19")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.DeleteSavingsAccountsAccountIdResponse.class)))
     public String delete(@PathParam("externalId") @Parameter(description = "externalId") final String externalId) {
 

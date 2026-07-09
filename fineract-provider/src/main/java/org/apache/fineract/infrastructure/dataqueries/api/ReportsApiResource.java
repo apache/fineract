@@ -45,6 +45,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -76,6 +77,7 @@ public class ReportsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Reports", operationId = "retrieveAllReports", description = "Lists all reports and their parameters.\n"
             + "\n" + "Example Request:\n" + "\n" + "reports")
+    @AlternativeOperationId("retrieveReportList")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class))))
     public String retrieveReportList(@Context final UriInfo uriInfo) {
 
@@ -92,6 +94,7 @@ public class ReportsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Report\n", operationId = "retrieveOneReport", description = "Example Requests:\n" + "\n"
             + "reports/1\n" + "\n" + "\n" + "reports/1?template=true")
+    @AlternativeOperationId("retrieveReport")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class)))
     public String retrieveReport(@PathParam("id") @Parameter(description = "id") final Long id, @Context final UriInfo uriInfo) {
 
@@ -113,6 +116,7 @@ public class ReportsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Report Template", operationId = "retrieveTemplateReport", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "\n" + "Example Request : \n" + "\n" + "reports/template")
+    @AlternativeOperationId("retrieveOfficeTemplate")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsTemplateResponse.class)))
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
 

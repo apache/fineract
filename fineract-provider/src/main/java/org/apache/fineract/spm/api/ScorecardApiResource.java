@@ -35,6 +35,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -79,8 +80,9 @@ public class ScorecardApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @Operation(summary = "Create a Scorecard entry", description = "Add a new entry to a survey.\n" + "\n" + "Mandatory Fields\n"
-            + "clientId, createdOn, questionId, responseId, staffId")
+    @Operation(operationId = "createScorecard", summary = "Create a Scorecard entry", description = "Add a new entry to a survey.\n" + "\n"
+            + "Mandatory Fields\n" + "clientId, createdOn, questionId, responseId, staffId")
+    @AlternativeOperationId("createScorecard_1")
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public void createScorecard(@PathParam("surveyId") @Parameter(description = "Enter surveyId") final Long surveyId,
             @Parameter(description = "scorecardData") final ScorecardData scorecardData) {
@@ -107,6 +109,8 @@ public class ScorecardApiResource {
     @Path("clients/{clientId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
+    @Operation(operationId = "findByClient")
+    @AlternativeOperationId("findByClient_1")
     public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {
         this.securityContext.authenticatedUser();
         this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);

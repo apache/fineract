@@ -32,6 +32,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.beans.factory.InitializingBean;
@@ -63,6 +64,7 @@ public class InstanceModeApiResource implements InitializingBean {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Changes the Fineract instance mode", operationId = "updateInstanceMode", description = "")
+    @AlternativeOperationId("changeMode")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = InstanceModeApiResourceSwagger.ChangeInstanceModeRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK")
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")

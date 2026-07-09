@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartSlabsCreateCommand;
 import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartSlabsDeleteCommand;
 import org.apache.fineract.portfolio.interestratechart.command.InterestRateChartSlabsUpdateCommand;
@@ -65,6 +66,7 @@ public class InterestRateChartSlabsApiResource {
     @GET
     @Path("template")
     @Operation(summary = "Retrieve Chart Slab Template", operationId = "retrieveTemplateInterestRateChartSlab")
+    @AlternativeOperationId("template_8")
     public InterestRateChartSlabData template(@PathParam("chartId") final Long chartId) {
         return interestRateChartSlabsReadService.retrieveTemplate();
     }
@@ -72,6 +74,7 @@ public class InterestRateChartSlabsApiResource {
     @GET
     @Operation(summary = "Retrieve all Slabs", operationId = "retrieveAllInterestRateChartSlabs", description = "Retrieve list of slabs associated with a chart\n"
             + "\n" + "Example Requests:\n" + "\n" + "interestratecharts/1/chartslabs")
+    @AlternativeOperationId("retrieveAll_25")
     public List<InterestRateChartSlabData> retrieveAll(@PathParam("chartId") final Long chartId) {
         return interestRateChartSlabsReadService.retrieveAll(chartId);
     }
@@ -85,6 +88,7 @@ public class InterestRateChartSlabsApiResource {
 
             - interestratecharts/1/chartslabs/1
             """)
+    @AlternativeOperationId("retrieveOne_16")
     public InterestRateChartSlabData retrieveOne(@PathParam("chartId") final Long chartId,
             @PathParam("chartSlabId") final Long chartSlabId) {
         return interestRateChartSlabsReadService.retrieveOne(chartId, chartSlabId);
@@ -110,6 +114,7 @@ public class InterestRateChartSlabsApiResource {
 
             - interestratecharts/1/chartslabs
             """)
+    @AlternativeOperationId("create_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsCreateResponse.class)))
     public InterestRateChartSlabsCreateResponse create(@PathParam("chartId") final Long chartId,
             final InterestRateChartSlabsCreateRequest request) {
@@ -124,6 +129,7 @@ public class InterestRateChartSlabsApiResource {
     @Path("{chartSlabId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Slab", operationId = "updateInterestRateChartSlab", description = "It updates the Slab from chart")
+    @AlternativeOperationId("update_14")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsUpdateResponse.class)))
     public InterestRateChartSlabsUpdateResponse update(@PathParam("chartId") final Long chartId,
             @PathParam("chartSlabId") final Long chartSlabId, final InterestRateChartSlabsUpdateRequest request) {
@@ -141,6 +147,7 @@ public class InterestRateChartSlabsApiResource {
     @DELETE
     @Path("{chartSlabId}")
     @Operation(summary = "Delete a Slab", operationId = "deleteInterestRateChartSlab", description = "Delete a Slab from a chart")
+    @AlternativeOperationId("delete_12")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InterestRateChartSlabsDeleteResponse.class)))
     public InterestRateChartSlabsDeleteResponse delete(@PathParam("chartId") final Long chartId,
             @PathParam("chartSlabId") final Long chartSlabId) {

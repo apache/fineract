@@ -53,6 +53,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToG
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -118,6 +119,7 @@ public class RecurringDepositProductsApiResource {
             + "Mandatory Fields: name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, accountingRule, depositAmount, charts\n\n"
             + "Mandatory Fields for Cash based accounting (accountingRule = 2): savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId\n\n"
             + "Optional Fields: lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, minDepositAmount, maxDepositAmount, withHoldTax, taxGroupId")
+    @AlternativeOperationId("create_12")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.PostRecurringDepositProductsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.PostRecurringDepositProductsResponse.class))) })
@@ -136,6 +138,7 @@ public class RecurringDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Recurring Deposit Product", operationId = "updateRecurringDepositProduct", description = "Updates a Recurring Deposit Product")
+    @AlternativeOperationId("update_19")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.PutRecurringDepositProductsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.PutRecurringDepositProductsResponse.class))) })
@@ -155,6 +158,7 @@ public class RecurringDepositProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Recuring Deposit Products", operationId = "retrieveAllRecurringDepositProducts", description = "Lists Recuring Deposit Products\n\n"
             + "Example Requests:\n" + "\n" + "recurringdepositproducts\n" + "\n" + "\n" + "recurringdepositproducts?fields=name")
+    @AlternativeOperationId("retrieveAll_32")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.GetRecurringDepositProductsResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo) {
@@ -176,6 +180,7 @@ public class RecurringDepositProductsApiResource {
     @Operation(summary = "Retrieve a Recurring Deposit Product", operationId = "retrieveOneRecurringDepositProduct", description = "Retrieves a Recurring Deposit Product\n\n"
             + "Example Requests:\n" + "\n" + "recurringdepositproducts/1\n" + "\n" + "\n" + "recurringdepositproducts/1?template=true\n"
             + "\n" + "\n" + "recurringdepositproducts/1?fields=name,description")
+    @AlternativeOperationId("retrieveOne_23")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.GetRecurringDepositProductsProductIdResponse.class))) })
     public String retrieveOne(@PathParam("productId") @Parameter(description = "productId") final Long productId,
@@ -219,6 +224,7 @@ public class RecurringDepositProductsApiResource {
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Recurring Deposit Product Template", operationId = "retrieveTemplateRecurringDepositProduct")
+    @AlternativeOperationId("retrieveTemplate_17")
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
@@ -315,6 +321,7 @@ public class RecurringDepositProductsApiResource {
     @Path("{productId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Recurring Deposit Product", operationId = "deleteRecurringDepositProduct", description = "Deletes a Recurring Deposit Product")
+    @AlternativeOperationId("delete_17")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RecurringDepositProductsApiResourceSwagger.DeleteRecurringDepositProductsProductIdResponse.class))) })
     public String delete(@PathParam("productId") @Parameter(description = "productId") final Long productId) {

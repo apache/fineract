@@ -37,6 +37,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.portfolio.collateralmanagement.command.ClientCollateralCreateCommand;
 import org.apache.fineract.portfolio.collateralmanagement.command.ClientCollateralDeleteCommand;
 import org.apache.fineract.portfolio.collateralmanagement.command.ClientCollateralUpdateCommand;
@@ -64,6 +65,7 @@ public class ClientCollateralManagementApiResource {
 
     @GET
     @Operation(summary = "Get Clients Collateral Products", operationId = "getClientCollateralProducts", description = "Get Collateral Product of a Client")
+    @AlternativeOperationId("getClientCollateral")
     public List<ClientCollateralManagementData> getClientCollateral(
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @QueryParam("prodId") @Parameter(description = "prodId") final Long prodId) {
@@ -89,6 +91,7 @@ public class ClientCollateralManagementApiResource {
 
     @POST
     @Operation(summary = "Add New Collateral For a Client", operationId = "addClientCollateral", description = "Add New Collateral For a Client")
+    @AlternativeOperationId("addCollateral")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientCollateralCreateResponse.class)))
     public ClientCollateralCreateResponse addCollateral(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             ClientCollateralCreateRequest request) {
@@ -101,6 +104,7 @@ public class ClientCollateralManagementApiResource {
     @PUT
     @Path("{collateralId}")
     @Operation(summary = "Update New Collateral of a Client", operationId = "updateClientCollateral", description = "Update New Collateral of a Client")
+    @AlternativeOperationId("updateCollateral_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientCollateralUpdateResponse.class)))
     public ClientCollateralUpdateResponse updateCollateral(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId,
@@ -115,6 +119,7 @@ public class ClientCollateralManagementApiResource {
     @DELETE
     @Path("{collateralId}")
     @Operation(summary = "Delete Client Collateral", operationId = "deleteClientCollateral", description = "Delete Client Collateral")
+    @AlternativeOperationId("deleteCollateral_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientCollateralDeleteResponse.class)))
     public ClientCollateralDeleteResponse deleteCollateral(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
