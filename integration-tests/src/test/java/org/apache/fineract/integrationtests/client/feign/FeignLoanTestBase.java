@@ -769,6 +769,12 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         LoanTestValidators.validateRepaymentPeriod(loanDetails, index, dueDate, principalDue, feeDue, penaltyDue, interestDue);
     }
 
+    protected void validateRepaymentPeriod(GetLoansLoanIdResponse loanDetails, Integer index, double principalDue, double principalPaid,
+            double principalOutstanding, double paidInAdvance, double paidLate) {
+        LoanTestValidators.validateRepaymentPeriod(loanDetails, index, principalDue, principalPaid, principalOutstanding, paidInAdvance,
+                paidLate);
+    }
+
     protected void verifyLoanStatus(GetLoansLoanIdResponse loanDetails, Function<GetLoansLoanIdStatus, Boolean> extractor) {
         LoanTestValidators.verifyLoanStatus(loanDetails, extractor);
     }
@@ -1783,6 +1789,13 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     protected Long addChargebackForLoan(Long loanId, Long transactionId, Double amount) {
         return applyChargebackTransaction(loanId, transactionId, amount, getPaymentTypeId(0));
+    }
+
+    protected Long addInterestPaymentWaiverForLoan(Long loanId, Double amount, String date) {
+        PostLoansLoanIdTransactionsResponse response = makeInterestPaymentWaiver(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate(date).locale("en")
+                        .transactionAmount(amount).externalId(UUID.randomUUID().toString()));
+        return response.getResourceId();
     }
 
     protected void validateLoanPrincipalOustandingBalance(GetLoansLoanIdResponse loanDetails, Double amountExpected) {
