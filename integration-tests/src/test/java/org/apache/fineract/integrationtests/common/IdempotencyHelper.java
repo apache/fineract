@@ -18,106 +18,57 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.data.BusinessStep;
-import org.apache.fineract.cob.data.JobBusinessStepConfigData;
-import org.apache.fineract.cob.data.JobBusinessStepDetail;
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-@Slf4j
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ApiResponse;
+import org.apache.fineract.client.models.BusinessStep;
+import org.apache.fineract.client.models.BusinessStepRequest;
+import org.apache.fineract.client.models.JobBusinessStepConfigData;
+import org.apache.fineract.client.models.JobBusinessStepDetail;
+
 public final class IdempotencyHelper {
 
-    private static final String BUSINESS_STEPS_API_URL_START = "/fineract-provider/api/v1/jobs/";
-    private static final String BUSINESS_STEPS_API_URL_END = "/steps?" + Utils.TENANT_IDENTIFIER;
-    private static final String GET_AVAILABLE_BUSINESS_STEPS_API_URL_END = "/available-steps?" + Utils.TENANT_IDENTIFIER;
+    public static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 
     private IdempotencyHelper() {
 
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String toJsonString(final List<BusinessStep> batchRequests) {
-        return new Gson().toJson(new BusinessStepWrapper(batchRequests));
+    public static JobBusinessStepConfigData getConfiguredBusinessStepsByJobName(final String jobName) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().businessStepConfiguration()
+                .retrieveAllConfiguredBusinessStep(jobName));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static JobBusinessStepConfigData configuredBusinessStepFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {}.getType());
+    public static JobBusinessStepDetail getAvailableBusinessStepsByJobName(final String jobName) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().businessStepConfiguration()
+                .retrieveAllAvailableBusinessStep(jobName));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static JobBusinessStepDetail availableBusinessStepFromJsonString(final String json) {
-        return new Gson().fromJson(json, new TypeToken<JobBusinessStepDetail>() {}.getType());
+    /**
+     * Updates the business step order for a job, expecting success. Returns the raw {@link ApiResponse} (rather than
+     * just the body, which is empty for this 204 endpoint) so the caller can inspect response headers, in particular
+     * the idempotency cache-hit header.
+     */
+    public static ApiResponse<Void> updateBusinessStepOrder(final String jobName, final List<BusinessStep> businessSteps,
+            final String idempotencyKey) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().businessStepConfiguration()
+                .updateJobBusinessStepConfigWithHttpInfo(jobName, new BusinessStepRequest().businessSteps(businessSteps),
+                        Map.of(IDEMPOTENCY_KEY_HEADER, idempotencyKey)));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static JobBusinessStepConfigData getConfiguredBusinessStepsByJobName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName) {
-        final String response = Utils.performServerGet(requestSpec, responseSpec,
-                BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END);
-        log.info("BusinessStepConfigurationHelper Response: {}", response);
-        return configuredBusinessStepFromJsonString(response);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static JobBusinessStepDetail getAvailableBusinessStepsByJobName(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName) {
-        final String response = Utils.performServerGet(requestSpec, responseSpec,
-                BUSINESS_STEPS_API_URL_START + jobName + GET_AVAILABLE_BUSINESS_STEPS_API_URL_END);
-        log.info("BusinessStepConfigurationHelper Response: {}", response);
-        return availableBusinessStepFromJsonString(response);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Response updateBusinessStepOrder(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            String jobName, String jsonBodyToSend, String idempotencyKey) {
-        Response response = Utils.performServerPutRaw(requestSpec, responseSpec,
-                BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END,
-                request -> request.header("Idempotency-Key", idempotencyKey).body(jsonBodyToSend));
-        log.info("BusinessStepConfigurationHelper Response: {}", response.getBody().asString());
-        return response;
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Response updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend, String idempotencyKey) {
-        String url = BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END;
-        return Utils.performServerPutRaw(requestSpec, responseSpec, url,
-                request -> request.header("Idempotency-Key", idempotencyKey).body(jsonBodyToSend));
-    }
-
-    private static final class BusinessStepWrapper {
-
-        private List<BusinessStep> businessSteps;
-
-        private BusinessStepWrapper(List<BusinessStep> businessSteps) {
-            this.businessSteps = businessSteps;
-        }
+    /**
+     * Same call as {@link #updateBusinessStepOrder}, but expecting the call to fail (for negative/idempotent-error
+     * tests). Returns the {@link CallFailedRuntimeException}, which exposes status, developer message, response
+     * headers, and the raw response body.
+     */
+    public static CallFailedRuntimeException updateBusinessStepOrderExpectingFailure(final String jobName,
+            final List<BusinessStep> businessSteps, final String idempotencyKey) {
+        return fail(() -> FineractFeignClientHelper.getFineractFeignClient().businessStepConfiguration()
+                .updateJobBusinessStepConfigWithHttpInfo(jobName, new BusinessStepRequest().businessSteps(businessSteps),
+                        Map.of(IDEMPOTENCY_KEY_HEADER, idempotencyKey)));
     }
 }

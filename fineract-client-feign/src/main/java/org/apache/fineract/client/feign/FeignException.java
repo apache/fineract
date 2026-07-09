@@ -21,6 +21,8 @@ package org.apache.fineract.client.feign;
 import feign.Request;
 import java.io.Serial;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Map;
 import lombok.Getter;
 
 /**
@@ -40,6 +42,7 @@ public class FeignException extends RuntimeException {
     private final String userMessage;
     @Getter
     private final String userMessageGlobalisationCode;
+    private final Map<String, Collection<String>> headers;
 
     protected FeignException(int status, String message, Request request) {
         this(status, message, request, (byte[]) null);
@@ -57,6 +60,7 @@ public class FeignException extends RuntimeException {
         this.developerMessage = null;
         this.userMessage = null;
         this.userMessageGlobalisationCode = null;
+        this.headers = Map.of();
     }
 
     protected FeignException(int status, String message, Request request, byte[] responseBody, Throwable cause) {
@@ -67,14 +71,27 @@ public class FeignException extends RuntimeException {
         this.developerMessage = null;
         this.userMessage = null;
         this.userMessageGlobalisationCode = null;
+        this.headers = Map.of();
     }
 
     public FeignException(int status, String message, Request request, byte[] responseBody, String developerMessage, String userMessage) {
-        this(status, message, request, responseBody, developerMessage, userMessage, null);
+        this(status, message, request, responseBody, developerMessage, userMessage, null, Map.of());
     }
 
     public FeignException(final int status, final String message, final Request request, final byte[] responseBody,
             final String developerMessage, final String userMessage, final String userMessageGlobalisationCode) {
+        this(status, message, request, responseBody, developerMessage, userMessage, userMessageGlobalisationCode, Map.of());
+    }
+
+    /**
+     * @param headers
+     *            the HTTP response headers, as returned by {@code feign.Response#headers()}. Only populated by
+     *            {@link FineractErrorDecoder}; other construction paths (e.g. transport-level failures with no HTTP
+     *            response at all) have none, hence the other constructors default this to an empty map.
+     */
+    public FeignException(final int status, final String message, final Request request, final byte[] responseBody,
+            final String developerMessage, final String userMessage, final String userMessageGlobalisationCode,
+            final Map<String, Collection<String>> headers) {
         super(message);
         this.status = status;
         this.request = request;
@@ -82,6 +99,7 @@ public class FeignException extends RuntimeException {
         this.developerMessage = developerMessage;
         this.userMessage = userMessage;
         this.userMessageGlobalisationCode = userMessageGlobalisationCode;
+        this.headers = headers != null ? headers : Map.of();
     }
 
     public int status() {
@@ -94,6 +112,14 @@ public class FeignException extends RuntimeException {
 
     public byte[] responseBody() {
         return responseBody;
+    }
+
+    /**
+     * The HTTP response headers. Empty (never null) if this exception was not built from an actual HTTP response (see
+     * constructor note above).
+     */
+    public Map<String, Collection<String>> headers() {
+        return headers;
     }
 
     public String responseBodyAsString() {
