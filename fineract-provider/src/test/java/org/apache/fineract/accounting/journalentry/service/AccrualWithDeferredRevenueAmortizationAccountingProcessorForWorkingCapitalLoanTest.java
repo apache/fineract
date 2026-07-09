@@ -185,6 +185,27 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     }
 
     @Test
+    void testRegularRepaymentOnAlreadyClosedOrOverpaidLoanPostsOnlyOverpaymentCredit() {
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("750"));
+        when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(fundSourceGLAccount), eq(LOAN_ID), eq(TXN_ID),
+                any(), eq(new BigDecimal("750")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(overpaymentGLAccount), eq(LOAN_ID), eq(TXN_ID),
+                any(), eq(new BigDecimal("750")), isNull());
+        verify(helper, org.mockito.Mockito.never()).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), eq(loanPortfolioGLAccount), any(),
+                any(), any(), any(), any());
+        verify(helper, org.mockito.Mockito.never()).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), eq(feesReceivableGLAccount), any(),
+                any(), any(), any(), any());
+        verify(helper, org.mockito.Mockito.never()).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), eq(penaltiesReceivableGLAccount),
+                any(), any(), any(), any(), any());
+    }
+
+    @Test
     void testChargedOffRepaymentCreatesSeparateRecoveryEntries() {
         when(txn.getTransactionAmount()).thenReturn(new BigDecimal("1500"));
         when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("1000"));

@@ -132,21 +132,24 @@ public class WorkingCapitalLoanHelper {
         FeignCalls.ok(() -> api().stateTransitionWorkingCapitalLoanById(loanId, "undodisbursal", request));
     }
 
-    public void makeRepaymentByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
-        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "repayment", request));
+    public Long makeRepaymentByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "repayment", request))
+                .getResourceId();
     }
 
-    public void makeRepaymentByLoanExternalId(final String loanExternalId, final PostWorkingCapitalLoanTransactionsRequest request) {
-        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, request,
-                Map.of("command", "repayment")));
+    public Long makeRepaymentByLoanExternalId(final String loanExternalId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, request,
+                Map.of("command", "repayment"))).getResourceId();
     }
 
-    public void makeCreditBalanceRefundByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
-        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
+    public Long makeCreditBalanceRefundByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request))
+                .getResourceId();
     }
 
-    public void makeGoodwillCreditByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
-        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "goodwillCredit", request));
+    public Long makeGoodwillCreditByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "goodwillCredit", request))
+                .getResourceId();
     }
 
     public CallFailedRuntimeException runCreditBalanceRefundByLoanIdExpectingFailure(final Long loanId,

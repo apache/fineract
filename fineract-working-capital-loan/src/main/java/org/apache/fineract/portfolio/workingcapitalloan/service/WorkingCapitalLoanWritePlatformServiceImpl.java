@@ -789,11 +789,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         notifyPostBusinessEvent(transactionType, transaction, loan);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanId)
-                .withEntityExternalId(loan.getExternalId()).withSubEntityId(transaction.getId())
-                .withSubEntityExternalId(transaction.getExternalId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
-                .withLoanId(loanId).with(changes).build();
-
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(transaction.getId()) //
+                .withEntityExternalId(transaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withLoanId(loanId) //
+                .withLoanExternalId(loan.getExternalId()) //
+                .with(changes) //
+                .build();
     }
 
     private void notifyPostBusinessEvent(LoanTransactionType transactionType, WorkingCapitalLoanTransaction transaction,
@@ -939,10 +944,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         businessEventNotifierService.notifyPostBusinessEvent(
                 new WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent(creditBalanceRefundTransaction, loan.getId()));
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanId)
-                .withEntityExternalId(loan.getExternalId()).withSubEntityId(creditBalanceRefundTransaction.getId())
-                .withSubEntityExternalId(creditBalanceRefundTransaction.getExternalId()).withOfficeId(loan.getOfficeId())
-                .withClientId(loan.getClientId()).withLoanId(loanId).with(changes).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(creditBalanceRefundTransaction.getId()) //
+                .withEntityExternalId(creditBalanceRefundTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withLoanId(loanId) //
+                .withLoanExternalId(loan.getExternalId()) //
+                .with(changes) //
+                .build();
     }
 
     @Override
