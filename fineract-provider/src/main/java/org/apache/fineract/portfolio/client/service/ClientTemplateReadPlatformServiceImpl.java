@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
-import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -41,12 +40,13 @@ import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsProductLookupReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -58,9 +58,9 @@ public class ClientTemplateReadPlatformServiceImpl implements ClientTemplateRead
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final SavingsProductReadPlatformService savingsProductReadPlatformService;
+    private final ClientSavingsProductLookupReadService savingsProductReadPlatformService;
     // data mappers
-    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
+    private final ClientDatatableChecksReadService entityDatatableChecksReadService;
 
     private final AddressReadPlatformService addressReadPlatformService;
     private final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService;
@@ -75,7 +75,8 @@ public class ClientTemplateReadPlatformServiceImpl implements ClientTemplateRead
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
-        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(null);
+        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService
+                .retrieveAllSavingsProductsForClientLookup();
 
         final Boolean isAddressEnabled = configurationDomainService.isAddressEnabled();
         if (isAddressEnabled) {

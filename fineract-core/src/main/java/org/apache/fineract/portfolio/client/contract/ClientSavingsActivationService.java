@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.client.contract;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import java.time.format.DateTimeFormatter;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.client.domain.Client;
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
+/**
+ * Core write-contract that creates the default savings account for a client being activated, so that the client module
+ * does not need a compile-time dependency on the savings application-process types. Implemented by the savings module.
+ */
+public interface ClientSavingsActivationService {
 
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+    CommandProcessingResult createSavingsForClientActivation(Client client, DateTimeFormatter fmt);
 }

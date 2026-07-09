@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.client.contract;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import java.util.Map;
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
+/**
+ * Core write-contract exposing only the journal-entry posting behaviour required by the client feature, so that the
+ * client module does not need a compile-time dependency on the full {@code JournalEntryWritePlatformService} (which
+ * references loan/investor/provisioning types). Implemented by the accounting module.
+ */
+public interface ClientJournalEntryWriteService {
 
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+    void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData);
 }

@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
-
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
-
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
-}
+/**
+ * Declares the client feature as a Spring Modulith application module so its outbound dependencies can be verified
+ * against the modularization outline. No {@code allowedDependencies} are declared: the boundary is checked by detecting
+ * references to other feature modules' types, and any violation is fixed at the source (fineract-core DTOs /
+ * read-services per the outline) rather than by widening an allow-list here.
+ */
+@org.springframework.modulith.ApplicationModule(displayName = "Client")
+package org.apache.fineract.portfolio.client;

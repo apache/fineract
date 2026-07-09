@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.collateralmanagement.service;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import java.util.Set;
+import org.apache.fineract.portfolio.client.data.ClientCollateralManagementData;
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
+/**
+ * Core read-contract returning a client's collateral as DTOs, so that the client feature does not need a compile-time
+ * dependency on the collateral-management domain/repository types. Implemented by the collateral-management module.
+ */
+public interface ClientCollateralReadService {
 
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+    Set<ClientCollateralManagementData> retrieveCollateralDataForClient(Long clientId);
 }

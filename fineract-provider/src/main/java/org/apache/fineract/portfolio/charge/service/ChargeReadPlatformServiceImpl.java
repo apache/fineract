@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
+import org.apache.fineract.portfolio.client.contract.ClientApplicableChargeReadService;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -59,7 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
+public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService, ClientApplicableChargeReadService {
 
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;

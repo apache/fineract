@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsProductLookupReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
@@ -39,7 +40,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 @RequiredArgsConstructor
-public class SavingsProductReadPlatformServiceImpl implements SavingsProductReadPlatformService {
+public class SavingsProductReadPlatformServiceImpl implements SavingsProductReadPlatformService, ClientSavingsProductLookupReadService {
+
+    @Override
+    public Collection<SavingsProductData> retrieveAllSavingsProductsForClientLookup() {
+        return retrieveAllForLookupByType(null);
+    }
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;

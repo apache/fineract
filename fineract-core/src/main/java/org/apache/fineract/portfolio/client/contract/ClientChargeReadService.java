@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.client.contract;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+/**
+ * Core read-contract exposing the charge-definition data required by the client feature, so that the client module does
+ * not need a compile-time dependency on the charge domain/repository types. Implemented by the charge module.
+ */
+public interface ClientChargeReadService {
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
-
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+    ClientChargeDefinitionData retrieveClientChargeDefinition(Long chargeId);
 }

@@ -44,7 +44,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.client.mapper.ClientMapper;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
+import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralReadService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -71,7 +71,7 @@ class ClientReadPlatformServiceImplTest {
     @Mock
     private ColumnValidator columnValidator;
     @Mock
-    private ClientCollateralManagementRepositoryWrapper collateralRepoWrapper;
+    private ClientCollateralReadService clientCollateralReadService;
     @Mock
     private ClientRepositoryWrapper clientRepositoryWrapper;
     @Mock
@@ -94,7 +94,7 @@ class ClientReadPlatformServiceImplTest {
         when(context.officeHierarchy()).thenReturn(mockHierarchy);
         when(clientRepositoryWrapper.getClientByClientIdAndHierarchy(clientId, mockHierarchy + "%")).thenReturn(mockClientEntity);
         when(clientMapper.map(mockClientEntity)).thenReturn(mockClientData);
-        when(collateralRepoWrapper.getCollateralsPerClient(clientId)).thenReturn(Collections.emptyList());
+        when(clientCollateralReadService.retrieveCollateralDataForClient(clientId)).thenReturn(Collections.emptySet());
 
         // Mock the groups query to return an empty list
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyLong())).thenReturn(Collections.emptyList());

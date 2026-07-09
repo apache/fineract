@@ -45,7 +45,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.filter.ClientAddressSearchParam;
-import org.apache.fineract.portfolio.address.service.AddressReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientAddressRequest;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +57,7 @@ public class ClientAddressApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
     private final PlatformSecurityContext context;
-    private final AddressReadPlatformServiceImpl readPlatformService;
+    private final AddressReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 

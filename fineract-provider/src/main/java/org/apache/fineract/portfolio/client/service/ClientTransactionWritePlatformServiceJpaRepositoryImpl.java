@@ -18,13 +18,15 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
+import org.apache.fineract.portfolio.client.contract.ClientChargeReadService;
+import org.apache.fineract.portfolio.client.contract.ClientJournalEntryWriteService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientCharge;
 import org.apache.fineract.portfolio.client.domain.ClientChargePaidBy;
@@ -42,7 +44,8 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
 
     private final ClientRepositoryWrapper clientRepository;
     private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final ClientJournalEntryWriteService journalEntryWritePlatformService;
+    private final ClientChargeReadService clientChargeReadService;
 
     @Override
     public CommandProcessingResult undo(Long clientId, Long transactionId) {
@@ -65,8 +68,9 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
             final Set<ClientChargePaidBy> chargesPaidBy = clientTransaction.getClientChargePaidByCollection();
             for (final ClientChargePaidBy clientChargePaidBy : chargesPaidBy) {
                 final ClientCharge clientCharge = clientChargePaidBy.getClientCharge();
-                clientCharge.setCurrency(
-                        organisationCurrencyRepository.findOneWithNotFoundDetection(clientCharge.getCharge().getCurrencyCode()));
+                final String currencyCode = this.clientChargeReadService.retrieveClientChargeDefinition(clientCharge.getChargeId())
+                        .currencyCode();
+                clientCharge.setCurrency(organisationCurrencyRepository.findOneWithNotFoundDetection(currencyCode));
                 if (clientTransaction.isPayChargeTransaction()) {
                     clientCharge.undoPayment(clientTransaction.getAmount());
                 } else if (clientTransaction.isWaiveChargeTransaction()) {
@@ -87,8 +91,20 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
     }
 
     private void generateAccountingEntries(ClientTransaction clientTransaction) {
-        Map<String, Object> accountingBridgeData = clientTransaction.toMapData();
+        Map<String, Object> accountingBridgeData = clientTransaction.toMapData(incomeAccountIdByChargeId(clientTransaction));
         journalEntryWritePlatformService.createJournalEntriesForClientTransactions(accountingBridgeData);
+    }
+
+    private Map<Long, Long> incomeAccountIdByChargeId(final ClientTransaction clientTransaction) {
+        final Map<Long, Long> incomeAccountIdByChargeId = new HashMap<>();
+        for (final ClientChargePaidBy clientChargePaidBy : clientTransaction.getClientChargePaidByCollection()) {
+            final Long chargeId = clientChargePaidBy.getClientCharge().getChargeId();
+            if (!incomeAccountIdByChargeId.containsKey(chargeId)) {
+                incomeAccountIdByChargeId.put(chargeId,
+                        this.clientChargeReadService.retrieveClientChargeDefinition(chargeId).incomeAccountId());
+            }
+        }
+        return incomeAccountIdByChargeId;
     }
 
 }
