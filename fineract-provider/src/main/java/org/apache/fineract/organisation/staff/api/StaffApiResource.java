@@ -46,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.command.StaffCreateCommand;
@@ -89,6 +90,7 @@ public class StaffApiResource {
             By default it Returns all the ACTIVE Staff. Otherwise a status can be provided like e.g. status=INACTIVE,
             then it returns all INACTIVE staff or status=ALL returns both ACTIVE and INACTIVE staff.
             """)
+    @AlternativeOperationId("retrieveAll_16")
     public List<StaffData> retrieveAll(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") @Parameter(description = "staffInOfficeHierarchy") final boolean staffInOfficeHierarchy,
             @DefaultValue("false") @QueryParam("loanOfficersOnly") @Parameter(description = "loanOfficersOnly") final boolean loanOfficersOnly,
@@ -106,6 +108,7 @@ public class StaffApiResource {
 
             - /staff/1
             """)
+    @AlternativeOperationId("retrieveOne_8")
     public StaffData retrieveOne(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @DefaultValue("false") @QueryParam("template") @Parameter(description = "template", hidden = true) boolean template) {
         StaffData staff = readPlatformService.retrieveStaff(staffId);
@@ -126,6 +129,7 @@ public class StaffApiResource {
     @Path("downloadtemplate")
     @Produces("application/vnd.ms-excel")
     @Operation(summary = "Download bulk import template", operationId = "getBulkTemplateStaff")
+    @AlternativeOperationId("getTemplate_1")
     public Response getTemplate(@QueryParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.STAFF.toString(), officeId, null, dateFormat);
@@ -147,6 +151,7 @@ public class StaffApiResource {
             - isLoanOfficer
             - isActive
             """)
+    @AlternativeOperationId("create_3")
     public StaffCreateResponse createStaff(@RequestBody(required = true) @Valid StaffCreateRequest request) {
         final var command = new StaffCreateCommand();
 
@@ -161,6 +166,7 @@ public class StaffApiResource {
     @Path("{staffId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Staff Member", operationId = "updateStaff", description = "Updates the details of a staff member.")
+    @AlternativeOperationId("update_7")
     public StaffUpdateResponse updateStaff(@PathParam("staffId") @Parameter(description = "staffId") final Long staffId,
             @RequestBody(required = true) @Valid StaffUpdateRequest request) {
         request.setId(staffId);

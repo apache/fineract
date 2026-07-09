@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -75,6 +76,7 @@ public class TaxComponentApiResource {
     @Path("{taxComponentId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Tax Component", operationId = "retrieveOneTaxComponent", description = "Retrieve Tax Component")
+    @AlternativeOperationId("retrieveTaxComponent")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TaxComponentApiResourceSwagger.GetTaxesComponentsResponse.class))) })
     public TaxComponentData retrieveTaxComponent(
@@ -87,6 +89,7 @@ public class TaxComponentApiResource {
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Tax Component Template", operationId = "retrieveTemplateTaxComponent")
+    @AlternativeOperationId("retrieveTemplate_21")
     public TaxComponentData retrieveTemplate() {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return readPlatformService.retrieveTaxComponentTemplate();
@@ -112,6 +115,7 @@ public class TaxComponentApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Tax Component", operationId = "updateTaxComponent", description = "Updates Tax component. Debit and credit account details cannot be modified. All the future tax components would be replaced with the new percentage.")
+    @AlternativeOperationId("updateTaxCompoent")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = TaxComponentApiResourceSwagger.PutTaxesComponentsTaxComponentIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TaxComponentApiResourceSwagger.PutTaxesComponentsTaxComponentIdResponse.class))) })

@@ -36,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -60,6 +61,7 @@ public class ClientFamilyMembersApiResource {
     @Path("/{familyMemberId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a client family member", operationId = "retrieveOneClientFamilyMember")
+    @AlternativeOperationId("getFamilyMember")
     public ClientFamilyMembersData getFamilyMember(@PathParam("familyMemberId") final Long familyMemberId,
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
@@ -71,6 +73,7 @@ public class ClientFamilyMembersApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all client family members", operationId = "retrieveAllClientFamilyMembers")
+    @AlternativeOperationId("getFamilyMembers")
     public List<ClientFamilyMembersData> getFamilyMembers(@PathParam("clientId") final long clientId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return this.readPlatformService.getClientFamilyMembers(clientId);
@@ -80,6 +83,7 @@ public class ClientFamilyMembersApiResource {
     @Path("/template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve client family member template", operationId = "retrieveTemplateClientFamilyMember")
+    @AlternativeOperationId("getTemplate_2")
     public ClientFamilyMembersData getTemplate(@PathParam("clientId") final long clientId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return this.readPlatformService.retrieveTemplate();
@@ -90,6 +94,7 @@ public class ClientFamilyMembersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a client family member", operationId = "updateClientFamilyMember")
+    @AlternativeOperationId("updateClientFamilyMembers")
     public CommandProcessingResult updateClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId,
             ClientFamilyMemberRequest clientFamilyMemberRequest,
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
@@ -103,6 +108,7 @@ public class ClientFamilyMembersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Add a client family member", operationId = "createClientFamilyMember")
+    @AlternativeOperationId("addClientFamilyMembers")
     public CommandProcessingResult addClientFamilyMembers(@PathParam("clientId") final long clientid,
             ClientFamilyMemberRequest clientFamilyMemberRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().addFamilyMembers(clientid)
@@ -115,6 +121,7 @@ public class ClientFamilyMembersApiResource {
     @Path("/{familyMemberId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a client family member", operationId = "deleteClientFamilyMember")
+    @AlternativeOperationId("deleteClientFamilyMembers")
     public CommandProcessingResult deleteClientFamilyMembers(@PathParam("familyMemberId") final long familyMemberId,
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteFamilyMembers(familyMemberId).build();

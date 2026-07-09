@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.cache.data.CacheData;
 import org.apache.fineract.infrastructure.cache.data.CacheSwitchRequest;
 import org.apache.fineract.infrastructure.cache.data.CacheSwitchResponse;
 import org.apache.fineract.infrastructure.cache.service.RuntimeDelegatingCacheManager;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -59,13 +60,14 @@ public class CacheApiResource {
     private final CommandDispatcher dispatcher;
 
     @GET
-    @Operation(summary = "Retrieve Cache Types", description = """
+    @Operation(operationId = "retrieveAll_2", summary = "Retrieve Cache Types", description = """
             Returns the list of caches.
 
             Example Requests:
 
             caches
             """)
+    @AlternativeOperationId("retrieveAll_4")
     public Collection<CacheData> retrieveAll() {
         return cacheService.retrieveAll();
     }

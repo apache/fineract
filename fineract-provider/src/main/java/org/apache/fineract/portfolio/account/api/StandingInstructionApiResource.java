@@ -46,6 +46,7 @@ import org.apache.fineract.batch.command.CommandHandlerRegistry;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -94,6 +95,7 @@ public class StandingInstructionApiResource {
             + "Example Requests:\n" + "\n" + "standinginstructions/template?fromAccountType=2&fromOfficeId=1\n" + "\n"
             + "standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1\n" + "\n"
             + "standinginstructions/template?fromClientId=1&fromAccountType=2&fromAccountId=1&transferType=1")
+    @AlternativeOperationId("template_6")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsTemplateResponse.class)))
     public StandingInstructionData template(@BeanParam StandingInstructionSearchParam instructionParam) {
         context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
@@ -108,6 +110,7 @@ public class StandingInstructionApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create new Standing Instruction", operationId = "createStandingInstruction", description = "Ability to create new instruction for transfer of monetary funds from one account to another")
+    @AlternativeOperationId("create_5")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = StandingInstructionCreationRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PostStandingInstructionsResponse.class)))
     public CommandProcessingResult create(@Parameter(hidden = true) StandingInstructionCreationRequest creationRequest) {
@@ -125,6 +128,7 @@ public class StandingInstructionApiResource {
             + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=update\n" + "\n\n"
             + "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n"
             + "PUT https://DomainName/api/v1/standinginstructions/1?command=delete")
+    @AlternativeOperationId("update_9")
     @RequestBody(content = @Content(schema = @Schema(implementation = StandingInstructionUpdatesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdResponse.class)))
     public CommandProcessingResult update(
@@ -143,6 +147,7 @@ public class StandingInstructionApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Standing Instructions", operationId = "retrieveAllStandingInstructions", description = "Example Requests:\n"
             + "\n" + "standinginstructions")
+    @AlternativeOperationId("retrieveAll_19")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.class)))
     public Page<StandingInstructionData> retrieveAll(
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
@@ -177,6 +182,7 @@ public class StandingInstructionApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Standing Instruction", operationId = "retrieveOneStandingInstruction", description = "Example Requests :\n"
             + "\n" + "standinginstructions/1")
+    @AlternativeOperationId("retrieveOne_10")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionApiResourceSwagger.GetStandingInstructionsStandingInstructionIdResponse.class)))
     public StandingInstructionData retrieveOne(
             @PathParam("standingInstructionId") @Parameter(description = "standingInstructionId") final Long standingInstructionId,

@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -69,6 +70,7 @@ public class SmsApiResource {
 
     @GET
     @Operation(summary = "List all SMS messages", operationId = "retrieveAllSms")
+    @AlternativeOperationId("retrieveAll_10")
     public List<SmsData> retrieveAll() {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         return readPlatformService.retrieveAll();
@@ -77,6 +79,7 @@ public class SmsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a SMS message", operationId = "createSms")
+    @AlternativeOperationId("create_2")
     public CommandProcessingResult create(final SmsCreationRequest smsCreationRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSms()
                 .withJson(apiJsonSerializer.serialize(smsCreationRequest)).build();
@@ -86,6 +89,7 @@ public class SmsApiResource {
     @GET
     @Path("{resourceId}")
     @Operation(summary = "Retrieve a SMS message", operationId = "retrieveOneSms")
+    @AlternativeOperationId("retrieveOne_6")
     public SmsData retrieveOne(@PathParam("resourceId") final Long resourceId) {
         return readPlatformService.retrieveOne(resourceId);
     }
@@ -114,6 +118,7 @@ public class SmsApiResource {
     @Path("{resourceId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a SMS message", operationId = "updateSms")
+    @AlternativeOperationId("update_3")
     public CommandProcessingResult update(@PathParam("resourceId") final Long resourceId, final SmsUpdateRequest smsUpdateRequest) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSms(resourceId)
                 .withJson(apiJsonSerializer.serialize(smsUpdateRequest)).build();
@@ -123,6 +128,7 @@ public class SmsApiResource {
     @DELETE
     @Path("{resourceId}")
     @Operation(summary = "Delete a SMS message", operationId = "deleteSms")
+    @AlternativeOperationId("delete_5")
     public CommandProcessingResult delete(@PathParam("resourceId") final Long resourceId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSms(resourceId).build();
         return commandsSourceWritePlatformService.logCommandSource(commandRequest);

@@ -47,6 +47,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.codes.data.CodeData;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -78,6 +79,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Codes", operationId = "retrieveAllCodes", description = "Returns the list of codes.\n" + "\n"
             + "Example Requests:\n" + "\n" + "codes")
+    @AlternativeOperationId("retrieveCodes")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class))))
     public String retrieveCodes(@Context final UriInfo uriInfo) {
 
@@ -109,6 +111,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Code", operationId = "retrieveOneCode", description = "Returns the details of a Code.\n" + "\n"
             + "Example Requests:\n" + "\n" + "codes/1")
+    @AlternativeOperationId("retrieveCode")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))
     public String retrieveCode(@PathParam("codeId") @Parameter(description = "codeId") final Long codeId, @Context final UriInfo uriInfo) {
 
@@ -123,6 +126,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Code", operationId = "retrieveOneCodeByName", description = "Returns the details of a Code.\n" + "\n"
             + "Example Requests:\n" + "\n" + "codes/1")
+    @AlternativeOperationId("retrieveCodeByName")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))
     public String retrieveCodeByName(@PathParam("codeName") @Parameter(description = "codeName") final String codeName,
             @Context final UriInfo uriInfo) {

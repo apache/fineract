@@ -35,6 +35,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -69,6 +70,7 @@ public class SchedulerApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Scheduler Status", operationId = "retrieveSchedulerStatus", description = "Returns the scheduler status.\n"
             + "\n" + "Example Requests:\n" + "\n" + "scheduler")
+    @AlternativeOperationId("retrieveStatus")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SchedulerApiResourceSwagger.GetSchedulerResponse.class)))
     public String retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
@@ -83,6 +85,7 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Activate Scheduler Jobs | Suspend Scheduler Jobs", operationId = "handleCommandsScheduler", description = "Activates the scheduler job service. | Suspends the scheduler job service.")
+    @AlternativeOperationId("changeSchedulerStatus")
     @ApiResponse(responseCode = "200", description = "POST :  scheduler?command=start\n\n" + "\n" + "POST : scheduler?command=stop")
     public Response changeSchedulerStatus(
             @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam) {

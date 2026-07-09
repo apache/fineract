@@ -52,6 +52,7 @@ import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformS
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
@@ -98,6 +99,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Offices", operationId = "retrieveAllOffices", description = "Example Requests:\n" + "\n" + "offices\n" + "\n"
             + "\n" + "offices?fields=id,name,openingDate")
+    @AlternativeOperationId("retrieveOffices")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class))))
     public String retrieveOffices(@Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("includeAllOffices") @Parameter(description = "includeAllOffices") final boolean onlyManualEntries,
@@ -118,6 +120,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Office Details Template", operationId = "retrieveTemplateOffice", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
             + "\n" + "Field Defaults\n" + "Allowed description Lists\n" + "Example Request:\n" + "\n" + "offices/template")
+    @AlternativeOperationId("retrieveOfficeTemplate_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesTemplateResponse.class)))
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -149,6 +152,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve an Office", operationId = "retrieveOneOffice", description = "Example Requests:\n" + "\n" + "offices/1\n"
             + "\n" + "\n" + "offices/1?template=true\n" + "\n" + "\n" + "offices/1?fields=id,name,parentName")
+    @AlternativeOperationId("retrieveOffice")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesResponse.class)))
     public String retrieveOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @Context final UriInfo uriInfo) {
@@ -168,6 +172,7 @@ public class OfficesApiResource {
     @Operation(summary = "Retrieve an Office using external id", operationId = "retrieveOneOfficeByExternalId", description = "Example Requests:\n"
             + "\n" + "offices/external-id/asd123\n" + "\n" + "\n" + "offices/external-id/asd123?template=true\n" + "\n" + "\n"
             + "offices/external-id/asd123?fields=id,name,parentName")
+    @AlternativeOperationId("retrieveOfficeByExternalId")
     public OfficesApiResourceSwagger.GetOfficesResponse retrieveOfficeByExternalId(
             @PathParam("externalId") @Parameter(description = "externalId") final String externalId, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -202,6 +207,7 @@ public class OfficesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Office", operationId = "updateOfficeByExternalId", description = "")
+    @AlternativeOperationId("updateOfficeWithExternalId")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.PutOfficesOfficeIdRequest.class)))
     public OfficesApiResourceSwagger.PutOfficesOfficeIdResponse updateOfficeWithExternalId(
             @Parameter(description = "externalId") @PathParam("externalId") final String externalId,

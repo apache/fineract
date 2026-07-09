@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -34,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -97,6 +99,8 @@ public class TwoFactorApiResource {
     @Path("invalidate")
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "updateConfiguration")
+    @AlternativeOperationId("updateConfiguration_2")
     public String updateConfiguration(final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().invalidateTwoFactorAccessToken().withJson(apiRequestBodyAsJson)
                 .build();

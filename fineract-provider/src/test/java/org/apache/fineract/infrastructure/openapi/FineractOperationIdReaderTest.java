@@ -64,11 +64,14 @@ class FineractOperationIdReaderTest {
     }
 
     @Test
-    void rejectsAlternativeOperationIdConflictingWithImplicitOperationId() {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> new FineractOperationIdReader()
-                .read(Set.of(ResourceWithAlternativeOperationIdConflict.class, ResourceWithImplicitOperationId.class), Map.of()));
+    void allowsAlternativeOperationIdMatchingAnotherOperationId() {
+        OpenAPI openAPI = new FineractOperationIdReader()
+                .read(Set.of(ResourceWithAlternativeOperationIdConflict.class, ResourceWithImplicitOperationId.class), Map.of());
 
-        assertTrue(exception.getMessage().contains("alternativeOperationIds conflict with operationIds"));
+        Object alternativeOperationId = openAPI.getPaths().get("/conflict").getGet().getExtensions()
+                .get(FineractOperationIdReader.ALTERNATIVE_OPERATION_ID_EXTENSION);
+
+        assertEquals("retrieveImplicitConflict", alternativeOperationId);
     }
 
     @Test

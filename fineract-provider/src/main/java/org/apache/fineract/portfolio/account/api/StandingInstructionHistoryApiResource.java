@@ -32,6 +32,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -56,6 +57,7 @@ public class StandingInstructionHistoryApiResource {
     @Operation(summary = "Standing Instructions Logged History", operationId = "retrieveAllStandingInstructionHistory", description = "The list capability of history can support pagination and sorting \n\n"
             + "Example Requests :\n" + "\n" + "standinginstructionrunhistory\n" + "\n"
             + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n" + "\n" + "standinginstructionrunhistory?offset=10&limit=50")
+    @AlternativeOperationId("retrieveAll_20")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse.class)))
     public Page<StandingInstructionHistoryData> retrieveAll(
             @QueryParam("externalId") @Parameter(description = "externalId") final String externalId,

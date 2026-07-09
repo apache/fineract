@@ -34,6 +34,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.command.CollateralProductCreateCommand;
@@ -92,7 +93,8 @@ public class CollateralManagementApiResource {
 
     @PUT
     @Path("{collateralId}")
-    @Operation(summary = "Update Collateral", description = "Update Collateral")
+    @Operation(operationId = "updateCollateral_1", summary = "Update Collateral", description = "Update Collateral")
+    @AlternativeOperationId("updateCollateral_2")
     public CollateralProductUpdateResponse updateCollateral(
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId,
             @Valid CollateralProductUpdateRequest request) {
@@ -104,7 +106,8 @@ public class CollateralManagementApiResource {
 
     @DELETE
     @Path("{collateralId}")
-    @Operation(summary = "Delete a Collateral", description = "Delete Collateral")
+    @Operation(operationId = "deleteCollateral_1", summary = "Delete a Collateral", description = "Delete Collateral")
+    @AlternativeOperationId("deleteCollateral_2")
     public CollateralProductDeleteResponse deleteCollateral(
             @PathParam("collateralId") @Parameter(description = "collateralId") final Long collateralId) {
         final var request = CollateralProductDeleteRequest.builder().collateralId(collateralId).build();

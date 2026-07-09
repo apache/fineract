@@ -46,6 +46,7 @@ import org.apache.fineract.batch.command.CommandHandlerRegistry;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -147,6 +148,7 @@ public class ExternalAssetOwnersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Transfer external asset by external ID", operationId = "transferRequestWithIdByExternalId")
+    @AlternativeOperationId("transferRequestWithId_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExternalAssetOwnersApiResourceSwagger.PostInitiateTransferResponse.class)))
     @ApiResponse(responseCode = "403", description = "Transfer cannot be initiated")
     public CommandProcessingResult transferRequestWithId(@PathParam("externalId") final String externalId,

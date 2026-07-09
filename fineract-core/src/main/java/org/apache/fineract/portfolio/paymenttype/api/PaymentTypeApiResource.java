@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.paymenttype.command.PaymentTypeCreateCommand;
 import org.apache.fineract.portfolio.paymenttype.command.PaymentTypeDeleteCommand;
@@ -110,6 +111,7 @@ public class PaymentTypeApiResource {
     @Path("{paymentTypeId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Payment Type", operationId = "deleteCodePaymentType", description = "Deletes payment type")
+    @AlternativeOperationId("deleteCode_1")
     public PaymentTypeDeleteResponse deleteCode(@PathParam("paymentTypeId") final Long paymentTypeId) {
 
         final var command = new PaymentTypeDeleteCommand();

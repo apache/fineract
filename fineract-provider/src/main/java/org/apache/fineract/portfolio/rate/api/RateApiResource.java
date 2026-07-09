@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -66,6 +67,7 @@ public class RateApiResource {
     @Path("{rateId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a rate", operationId = "retrieveOneRate")
+    @AlternativeOperationId("retrieveRate")
     public RateData retrieveRate(@PathParam("rateId") Long rateId) {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
@@ -87,6 +89,7 @@ public class RateApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List all rates", operationId = "retrieveAllRates")
+    @AlternativeOperationId("getAllRates")
     public List<RateData> getAllRates() {
 
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);

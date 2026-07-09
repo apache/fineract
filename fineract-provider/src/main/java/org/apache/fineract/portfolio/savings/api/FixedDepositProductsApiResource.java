@@ -52,6 +52,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToG
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -123,6 +124,7 @@ public class FixedDepositProductsApiResource {
 
 
             Mandatory Fields for Cash based accounting (accountingRule = 2): savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId""")
+    @AlternativeOperationId("create_11")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsResponse.class)))
     public String create(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -140,6 +142,7 @@ public class FixedDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Fixed Deposit Product", operationId = "updateFixedDepositProduct", description = "Updates a Fixed Deposit Product")
+    @AlternativeOperationId("update_17")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdResponse.class)))
     public String update(@PathParam("productId") @Parameter(description = "productId") final Long productId,
@@ -165,6 +168,7 @@ public class FixedDepositProductsApiResource {
 
 
             fixeddepositproducts?fields=name""")
+    @AlternativeOperationId("retrieveAll_30")
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.GetFixedDepositProductsResponse.class))))
     public String retrieveAll(@Context final UriInfo uriInfo) {
@@ -194,6 +198,7 @@ public class FixedDepositProductsApiResource {
 
 
             fixeddepositproducts/1?fields=name,description""")
+    @AlternativeOperationId("retrieveOne_20")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.GetFixedDepositProductsProductIdResponse.class)))
     public String retrieveOne(@PathParam("productId") @Parameter(description = "productId") final Long productId,
             @Context final UriInfo uriInfo) {
@@ -236,6 +241,7 @@ public class FixedDepositProductsApiResource {
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Fixed Deposit Product Template", operationId = "retrieveTemplateFixedDepositProduct")
+    @AlternativeOperationId("retrieveTemplate_15")
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
@@ -336,6 +342,7 @@ public class FixedDepositProductsApiResource {
     @Path("{productId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Fixed Deposit Product", operationId = "deleteFixedDepositProduct", description = "Deletes a Fixed Deposit Product")
+    @AlternativeOperationId("delete_15")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FixedDepositProductsApiResourceSwagger.DeleteFixedDepositProductsProductIdResponse.class)))
     public String delete(@PathParam("productId") @Parameter(description = "productId") final Long productId) {
 

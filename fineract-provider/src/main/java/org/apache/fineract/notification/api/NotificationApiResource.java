@@ -34,6 +34,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -89,6 +90,7 @@ public class NotificationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Notification Read Status", operationId = "updateNotificationReadStatus", description = "Updates the read status of all notifications for the authenticated user.", tags = {
             "Notification" })
+    @AlternativeOperationId("update_5")
     public void update() {
         this.context.authenticatedUser();
         this.notificationReadPlatformService.updateNotificationReadStatus();

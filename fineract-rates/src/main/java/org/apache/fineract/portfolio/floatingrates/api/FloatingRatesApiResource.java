@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -75,6 +76,7 @@ public class FloatingRatesApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Floating Rates", operationId = "retrieveAllFloatingRates", description = "Lists Floating Rates")
+    @AlternativeOperationId("retrieveAll_22")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FloatingRatesApiResourceSwagger.GetFloatingRatesResponse.class))))
     public List<FloatingRateData> retrieveAll() {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME);
@@ -85,6 +87,7 @@ public class FloatingRatesApiResource {
     @Path("{floatingRateId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Floating Rate", operationId = "retrieveOneFloatingRate", description = "Retrieves Floating Rate")
+    @AlternativeOperationId("retrieveOne_13")
     public FloatingRateData retrieveOne(@PathParam("floatingRateId") @Parameter(description = "floatingRateId") final Long floatingRateId) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME);
         return floatingRatesReadPlatformService.retrieveOne(floatingRateId);

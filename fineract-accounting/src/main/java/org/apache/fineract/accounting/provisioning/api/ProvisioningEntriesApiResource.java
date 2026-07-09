@@ -44,6 +44,7 @@ import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesRe
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -110,6 +111,7 @@ public class ProvisioningEntriesApiResource {
     @Path("{entryId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves a Provisioning Entry Metadata", operationId = "retrieveOneProvisioningEntry", description = "Returns the metadata of a generated Provisioning Entry.")
+    @AlternativeOperationId("retrieveProvisioningEntry")
     public ProvisioningEntryData retrieveProvisioningEntry(@PathParam("entryId") @Parameter(description = "entryId") final Long entryId) {
         platformSecurityContext.authenticatedUser();
         return provisioningEntriesReadPlatformService.retrieveProvisioningEntryData(entryId);
@@ -119,6 +121,7 @@ public class ProvisioningEntriesApiResource {
     @Path("entries")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Provisioning Entries Loan Products Given a Query", operationId = "retrieveProvisioningEntriesLoanProducts")
+    @AlternativeOperationId("retrieveProviioningEntries")
     public Page<LoanProductProvisioningEntryData> retrieveProviioningEntries(@QueryParam("entryId") final Long entryId,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("officeId") final Long officeId, @QueryParam("productId") final Long productId,

@@ -31,6 +31,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -71,6 +72,7 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{loanId}/model")
     @Operation(summary = "Fetch ProgressiveLoanInterestScheduleModel", operationId = "retrieveOneInternalProgressiveLoan", description = "DO NOT USE THIS IN PRODUCTION!")
+    @AlternativeOperationId("fetchModel")
     public ProgressiveLoanInterestScheduleModel fetchModel(@PathParam("loanId") @Parameter(description = "loanId") long loanId) {
         Loan loan = loanRepository.findOneWithNotFoundDetection(loanId);
         if (!loan.isProgressiveSchedule()) {
@@ -90,6 +92,7 @@ public class InternalProgressiveLoanApiResource implements InitializingBean {
     @Path("{loanId}/model")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update and Save ProgressiveLoanInterestScheduleModel", operationId = "updateInternalProgressiveLoan", description = "DO NOT USE THIS IN PRODUCTION!")
+    @AlternativeOperationId("updateModel")
     @Transactional
     public ProgressiveLoanInterestScheduleModel updateModel(@PathParam("loanId") @Parameter(description = "loanId") long loanId) {
         Loan loan = loanRepository.findOneWithNotFoundDetection(loanId);

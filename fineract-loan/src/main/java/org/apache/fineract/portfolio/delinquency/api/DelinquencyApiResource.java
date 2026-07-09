@@ -41,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -72,6 +73,7 @@ public class DelinquencyApiResource {
     @Path("ranges")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "List all Delinquency Ranges", description = "", operationId = "getRanges")
+    @AlternativeOperationId("getDelinquencyRanges")
     public List<DelinquencyRangeResponse> getDelinquencyRanges() {
         securityContext.authenticatedUser().validateHasReadPermission(DELINQUENCY_BUCKET);
         return delinquencyResponseMapper.mapRange(this.readPlatformService.retrieveAllDelinquencyRanges());
@@ -81,6 +83,7 @@ public class DelinquencyApiResource {
     @Path("ranges/{delinquencyRangeId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Delinquency Range based on the Id", description = "", operationId = "getRange")
+    @AlternativeOperationId("getDelinquencyRange")
     public DelinquencyRangeResponse getDelinquencyRange(
             @PathParam("delinquencyRangeId") @Parameter(description = "delinquencyRangeId") final Long delinquencyRangeId) {
         securityContext.authenticatedUser().validateHasReadPermission(DELINQUENCY_BUCKET);
@@ -92,6 +95,7 @@ public class DelinquencyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create Delinquency Range", description = "", operationId = "createRange")
+    @AlternativeOperationId("createDelinquencyRange")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DelinquencyRangeRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PostDelinquencyRangeResponse.class)))
     public CommandProcessingResult createDelinquencyRange(final DelinquencyRangeRequest delinquencyRangeRequest) {
@@ -107,6 +111,7 @@ public class DelinquencyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Delinquency Range based on the Id", description = "", operationId = "updateRange")
+    @AlternativeOperationId("updateDelinquencyRange")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DelinquencyRangeRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PutDelinquencyRangeResponse.class)))
     public CommandProcessingResult updateDelinquencyRange(
@@ -123,6 +128,7 @@ public class DelinquencyApiResource {
     @Path("ranges/{delinquencyRangeId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Delinquency Range based on the Id", description = "", operationId = "deleteRange")
+    @AlternativeOperationId("deleteDelinquencyRange")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.DeleteDelinquencyRangeResponse.class)))
     public CommandProcessingResult deleteDelinquencyRange(
             @PathParam("delinquencyRangeId") @Parameter(description = "delinquencyRangeId") final Long delinquencyRangeId) {
@@ -145,6 +151,7 @@ public class DelinquencyApiResource {
     @Path("buckets")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "List all Delinquency Buckets", description = "", operationId = "getBuckets")
+    @AlternativeOperationId("getDelinquencyBuckets")
     public List<DelinquencyBucketResponse> getDelinquencyBuckets() {
         securityContext.authenticatedUser().validateHasReadPermission(DELINQUENCY_BUCKET);
         return delinquencyResponseMapper.mapBucket(this.readPlatformService.retrieveAllDelinquencyBuckets());
@@ -154,6 +161,7 @@ public class DelinquencyApiResource {
     @Path("buckets/{delinquencyBucketId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Retrieve a specific Delinquency Bucket based on the Id", description = "", operationId = "getBucket")
+    @AlternativeOperationId("getDelinquencyBucket")
     public DelinquencyBucketResponse getDelinquencyBucket(
             @PathParam("delinquencyBucketId") @Parameter(description = "delinquencyBucketId") final Long delinquencyBucketId,
             @Context final UriInfo uriInfo) {
@@ -177,6 +185,7 @@ public class DelinquencyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create Delinquency Bucket", description = "", operationId = "createBucket")
+    @AlternativeOperationId("createDelinquencyBucket")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DelinquencyBucketRequest.class)))
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PostDelinquencyBucketResponse.class)))
@@ -193,6 +202,7 @@ public class DelinquencyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Delinquency Bucket based on the Id", description = "", operationId = "updateBucket")
+    @AlternativeOperationId("updateDelinquencyBucket")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DelinquencyBucketRequest.class)))
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.PutDelinquencyBucketResponse.class)))
@@ -210,6 +220,7 @@ public class DelinquencyApiResource {
     @Path("buckets/{delinquencyBucketId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete Delinquency Bucket based on the Id", description = "", operationId = "deleteBucket")
+    @AlternativeOperationId("deleteDelinquencyBucket")
 
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.DeleteDelinquencyBucketResponse.class)))
     public CommandProcessingResult deleteDelinquencyBucket(

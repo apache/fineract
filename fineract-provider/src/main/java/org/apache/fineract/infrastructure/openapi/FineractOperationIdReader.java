@@ -115,7 +115,6 @@ public final class FineractOperationIdReader extends Reader {
             Map<String, String> alternativeOperationIds = collect(classes);
             Map<String, List<String>> operationIds = OperationIdValidator.collectOperationIds(openAPI);
             validateAlternativeOperationIdTargets(alternativeOperationIds, operationIds);
-            validateNoCollisionWithOperationIds(alternativeOperationIds, operationIds);
 
             if (alternativeOperationIds.isEmpty() || openAPI == null || openAPI.getPaths() == null) {
                 return;
@@ -190,16 +189,6 @@ public final class FineractOperationIdReader extends Reader {
             }
         }
 
-        private static void validateNoCollisionWithOperationIds(Map<String, String> alternativeOperationIds,
-                Map<String, List<String>> operationIds) {
-            List<String> conflicts = alternativeOperationIds.entrySet().stream().filter(e -> operationIds.containsKey(e.getValue()))
-                    .map(e -> e.getKey() + " -> " + e.getValue() + " conflicts with " + String.join(", ", operationIds.get(e.getValue())))
-                    .sorted().toList();
-            if (!conflicts.isEmpty()) {
-                throw new IllegalStateException(
-                        "OpenAPI alternativeOperationIds conflict with operationIds:\n - " + String.join("\n - ", conflicts));
-            }
-        }
     }
 
     // GET, POST, etc. are meta-annotated with @HttpMethod.

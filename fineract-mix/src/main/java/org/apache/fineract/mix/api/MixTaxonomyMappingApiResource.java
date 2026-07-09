@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.mix.command.MixTaxonomyMappingUpdateCommand;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingUpdateRequest;
@@ -48,6 +49,7 @@ public class MixTaxonomyMappingApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Mix Taxonomy Mapping", operationId = "retrieveMixTaxonomyMapping")
+    @AlternativeOperationId("retrieveTaxonomyMapping")
     public MixTaxonomyMappingData retrieveTaxonomyMapping() {
         return this.readTaxonomyMappingService.retrieveTaxonomyMapping();
     }
@@ -56,6 +58,7 @@ public class MixTaxonomyMappingApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Mix Taxonomy Mapping", operationId = "updateMixTaxonomyMapping")
+    @AlternativeOperationId("updateTaxonomyMapping")
     public MixTaxonomyMappingUpdateResponse updateTaxonomyMapping(final MixTaxonomyMappingUpdateRequest request) {
         // TODO support multiple configuration file loading; this is the legacy behavior
         if (request.getId() == null) {

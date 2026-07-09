@@ -58,6 +58,7 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -184,6 +185,7 @@ public class GLAccountsApiResource {
                     Mandatory Fields:
                     name, glCode, type, usage and manualEntriesAllowed
                     """)
+    @AlternativeOperationId("createGLAccount_1")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PostGLAccountsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PostGLAccountsResponse.class)))
     public CommandProcessingResult createGLAccount(@Parameter(hidden = true) GLAccountCommand glAccountCommand) {
@@ -198,6 +200,7 @@ public class GLAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(tags = {
             "General Ledger Account" }, summary = "Update a GL Account", operationId = "updateGLAccount", description = "Updates a GL Account")
+    @AlternativeOperationId("updateGLAccount_1")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class)))
     public CommandProcessingResult updateGLAccount(@PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId,
@@ -212,6 +215,7 @@ public class GLAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(tags = {
             "General Ledger Account" }, summary = "Delete a GL Account", operationId = "deleteGLAccount", description = "Deletes a GL Account")
+    @AlternativeOperationId("deleteGLAccount_1")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.DeleteGLAccountsResponse.class)))
     public CommandProcessingResult deleteGLAccount(
             @PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId) {

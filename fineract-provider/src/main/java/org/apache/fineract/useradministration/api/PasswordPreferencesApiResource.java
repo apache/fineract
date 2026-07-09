@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -69,6 +70,7 @@ public class PasswordPreferencesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class))) })
     @Operation(summary = "List Password Preferences", operationId = "retrieveAllPasswordPreferences", description = "Returns the password policies and their current status (active/inactive).", tags = {
             "Password preferences" })
+    @AlternativeOperationId("retrieve_1")
     public String retrieve(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
@@ -86,6 +88,7 @@ public class PasswordPreferencesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update password preferences", operationId = "updatePasswordPreferences", tags = {
             "Password preferences" }, description = "")
+    @AlternativeOperationId("update_25")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -105,6 +108,7 @@ public class PasswordPreferencesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List Application Password validation policies", operationId = "retrieveTemplatePasswordPreferences", tags = {
             "Password preferences" }, description = "ARGUMENTS\n" + "Example Requests:\n" + "\n" + "passwordpreferences")
+    @AlternativeOperationId("template_21")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class)))) })
     public String template(@Context final UriInfo uriInfo) {

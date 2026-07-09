@@ -42,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -66,6 +67,8 @@ public class ProvisioningCriteriaApiResource {
     @GET
     @Path("template")
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "retrieveTemplate_1")
+    @AlternativeOperationId("retrieveTemplate_3")
     public ProvisioningCriteriaData retrieveTemplate() {
         platformSecurityContext.authenticatedUser();
         return provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate();
@@ -75,6 +78,7 @@ public class ProvisioningCriteriaApiResource {
     @Path("{criteriaId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves a Provisioning Criteria", operationId = "retrieveOneProvisioningCriteria", description = "Retrieves a Provisioning Criteria")
+    @AlternativeOperationId("retrieveProvisioningCriteria")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaCriteriaIdResponse.class)))
     public ProvisioningCriteriaData retrieveProvisioningCriteria(
             @PathParam("criteriaId") @Parameter(description = "criteriaId") final Long criteriaId, @Context final UriInfo uriInfo) {
@@ -90,6 +94,7 @@ public class ProvisioningCriteriaApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieves all created Provisioning Criterias", operationId = "retrieveAllProvisioningCriteria", description = "Retrieves all created Provisioning Criterias")
+    @AlternativeOperationId("retrieveAllProvisioningCriterias")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaResponse.class))))
     public List<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
         platformSecurityContext.authenticatedUser();

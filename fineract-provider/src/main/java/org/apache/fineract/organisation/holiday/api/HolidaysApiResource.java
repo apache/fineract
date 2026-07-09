@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -82,6 +83,7 @@ public class HolidaysApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Holiday", operationId = "createHoliday", description = "Mandatory Fields: "
             + "name, description, fromDate, toDate, repaymentsRescheduledTo, offices")
+    @AlternativeOperationId("createNewHoliday")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysResponse.class)))
     public String createNewHoliday(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -99,6 +101,7 @@ public class HolidaysApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Activate a Holiday", operationId = "handleCommandsHoliday", description = "Always Holidays are created in pending state. This API allows to activate a holiday.\n"
             + "\n" + "Only the active holidays are considered for rescheduling the loan repayment.")
+    @AlternativeOperationId("handleCommands_1")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysHolidayIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PostHolidaysHolidayIdResponse.class)))
     public String handleCommands(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId,
@@ -130,6 +133,7 @@ public class HolidaysApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a Holiday", operationId = "retrieveOneHoliday", description = "Example Requests:\n" + "\n"
             + "holidays/1")
+    @AlternativeOperationId("retrieveOne_7")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.GetHolidaysResponse.class)))
     public String retrieveOne(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId,
             @Context final UriInfo uriInfo) {
@@ -148,6 +152,7 @@ public class HolidaysApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Holiday", operationId = "updateHoliday", description = "If a holiday is in pending state (created and not activated) then all fields are allowed to modify. Once holidays become active only name and descriptions are allowed to modify.")
+    @AlternativeOperationId("update_6")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PutHolidaysHolidayIdRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.PutHolidaysHolidayIdResponse.class)))
     public String update(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId,
@@ -164,6 +169,7 @@ public class HolidaysApiResource {
     @Path("{holidayId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Holiday", operationId = "deleteHoliday", description = "This API allows to delete a holiday. This is a soft delete the deleted holiday status is marked as deleted.")
+    @AlternativeOperationId("delete_6")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HolidaysApiResourceSwagger.DeleteHolidaysHolidayIdResponse.class)))
     public String delete(@PathParam("holidayId") @Parameter(description = "holidayId") final Long holidayId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteHoliday(holidayId).build();

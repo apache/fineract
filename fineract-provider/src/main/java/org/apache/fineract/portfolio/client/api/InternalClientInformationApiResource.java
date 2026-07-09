@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -74,6 +75,7 @@ public class InternalClientInformationApiResource implements InitializingBean {
     @Path("{clientId}/audit")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Get internal client audit fields", operationId = "getInternalClientAuditFields")
+    @AlternativeOperationId("getClientAuditFields")
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public String getClientAuditFields(@Context final UriInfo uriInfo, @PathParam("clientId") Long clientId) {
         log.warn("------------------------------------------------------------");

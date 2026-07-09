@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.provisioning.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
@@ -51,6 +53,8 @@ public class ProvisioningCategoryApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "retrieveAll_8")
+    @AlternativeOperationId("retrieveAll_15")
     public List<ProvisioningCategoryData> retrieveAll() {
         platformSecurityContext.authenticatedUser();
         return provisioningCategoryReadPlatformService.retrieveAllProvisionCategories();

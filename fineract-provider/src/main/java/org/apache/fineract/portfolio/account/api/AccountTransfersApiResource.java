@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -68,6 +69,7 @@ public class AccountTransfersApiResource {
             + "accounttransfers/template?fromAccountType=2&fromOfficeId=1\n\n" + "\n\n"
             + "accounttransfers/template?fromAccountType=2&fromOfficeId=1&fromClientId=1\n\n" + "\n\n"
             + "accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1")
+    @AlternativeOperationId("template_5")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersTemplateResponse.class)))
     public AccountTransferData template(@BeanParam AccountTransSearchParam accountTransSearchParam) {
 
@@ -84,6 +86,7 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create new Transfer", operationId = "createAccountTransfer", description = "Ability to create new transfer of monetary funds from one account to another.")
+    @AlternativeOperationId("create_4")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersResponse.class)))
     public CommandProcessingResult create(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {
@@ -97,6 +100,7 @@ public class AccountTransfersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "List account transfers", operationId = "retrieveAllAccountTransfers", description = "Lists account's transfers\n\n"
             + "Example Requests:\n\n" + "\n\n" + "accounttransfers")
+    @AlternativeOperationId("retrieveAll_18")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersResponse.class)))
     public Page<AccountTransferData> retrieveAll(@QueryParam("externalId") @Parameter(description = "externalId") final String externalId,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -118,6 +122,7 @@ public class AccountTransfersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve account transfer", operationId = "retrieveOneAccountTransfer", description = "Retrieves account transfer\n\n"
             + "Example Requests :\n\n" + "\n\n" + "accounttransfers/1")
+    @AlternativeOperationId("retrieveOne_9")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersResponse.GetAccountTransfersPageItems.class)))
     public AccountTransferData retrieveOne(@PathParam("transferId") @Parameter(description = "transferId") final Long transferId) {
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
@@ -130,6 +135,7 @@ public class AccountTransfersApiResource {
     @Operation(summary = "Retrieve Refund of an Active Loan by Transfer Template", operationId = "retrieveTemplateRefundByTransfer", description = "Retrieves Refund of an Active Loan by Transfer Template"
             + "Example Requests :\n\n" + "\n\n"
             + "accounttransfers/templateRefundByTransfer?fromAccountId=2&fromAccountType=1& toAccountId=1&toAccountType=2&toClientId=1&toOfficeId=1")
+    @AlternativeOperationId("templateRefundByTransfer")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.GetAccountTransfersTemplateRefundByTransferResponse.class)))
     public AccountTransferData templateRefundByTransfer(@BeanParam AccountTransSearchParam accountTransSearchParam) {
         context.authenticatedUser().validateHasReadPermission(AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME);
@@ -145,6 +151,7 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Refund of an Active Loan by Transfer", operationId = "refundByTransfer", description = "Ability to refund an active loan by transferring to a savings account.")
+    @AlternativeOperationId("templateRefundByTransferPost")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountTransferRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountTransfersApiResourceSwagger.PostAccountTransfersRefundByTransferResponse.class)))
     public CommandProcessingResult templateRefundByTransferPost(@Parameter(hidden = true) AccountTransferRequest accountTransferRequest) {
