@@ -28,6 +28,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.core.ApplicationModule;
@@ -41,8 +42,6 @@ class ClientCrossFeatureBoundaryTest {
     private static final String BASE = "org.apache.fineract";
     private static final String CLIENT_PACKAGE = "org.apache.fineract.portfolio.client";
 
-    // fineract-validation is a foundation module (fineract-core itself depends on it), so shared validation
-    // constraints/utilities are allowed alongside fineract-core and fineract-command.
     private static final Set<String> FOUNDATION_ARTIFACTS = Set.of("fineract-core", "fineract-command", "fineract-validation");
 
     private static final Pattern FINERACT_ARTIFACT = Pattern.compile("fineract-[a-z0-9-]+");
@@ -94,7 +93,7 @@ class ClientCrossFeatureBoundaryTest {
                 .orElse(false);
     }
 
-    @org.junit.jupiter.api.Disabled("Diagnostic report; enable locally when investigating Client module boundary dependencies")
+    @EnabledIfSystemProperty(named = "client.boundary.report", matches = "true")
     @Test
     void printClientCrossFeatureDependencyReport() {
         Map<String, Set<String>> sourceTypeToTargets = new TreeMap<>();
