@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.client.feign.util;
 
+import java.util.Collection;
+import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FeignException;
@@ -32,12 +34,16 @@ public class CallFailedRuntimeException extends RuntimeException {
     private final int status;
     private final String developerMessage;
     private final String userMessageGlobalisationCode;
+    private final Map<String, Collection<String>> headers;
+    private final String responseBody;
 
     public CallFailedRuntimeException(FeignException cause) {
         super(createMessage(cause), cause);
         this.status = cause.status();
         this.developerMessage = extractDeveloperMessage(cause);
         this.userMessageGlobalisationCode = cause.getUserMessageGlobalisationCode();
+        this.headers = cause.headers();
+        this.responseBody = cause.responseBodyAsString();
     }
 
     private static String createMessage(FeignException e) {

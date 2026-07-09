@@ -50,7 +50,8 @@ public class FineractErrorDecoder implements ErrorDecoder {
                             enhancedDeveloperMessage = validationErrors;
                         }
                         return new FeignException(response.status(), userMessage != null ? userMessage : enhancedDeveloperMessage,
-                                response.request(), bodyData, enhancedDeveloperMessage, userMessage, userMessageGlobalisationCode);
+                                response.request(), bodyData, enhancedDeveloperMessage, userMessage, userMessageGlobalisationCode,
+                                response.headers());
                     }
                 } catch (IOException e) {
                     return defaultDecoder.decode(methodKey, response);
