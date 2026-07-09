@@ -51,6 +51,7 @@ import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdDiscountReq
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
 
 public class FeignWorkingCapitalLoanHelper {
@@ -176,6 +177,10 @@ public class FeignWorkingCapitalLoanHelper {
     public void undoLoanTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
         ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
                 transactionId, "undo", request));
+    }
+
+    public List<WorkingCapitalLoanDelinquencyRangeScheduleData> getDelinquencyRangeSchedule(Long loanId) {
+        return ok(() -> fineractClient.workingCapitalLoanDelinquencyRangeSchedule().retrieveDelinquencyRangeSchedule(loanId));
     }
 
     /**

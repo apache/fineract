@@ -153,6 +153,18 @@ public final class ProjectedAmortizationScheduleModel {
         return projectedPayments;
     }
 
+    /**
+     * The scheduled maturity is the date of the last real projected payment (a period with {@code paymentNo > 0}, i.e.
+     * excluding the disbursement row). Returns {@code null} when the schedule has no real payments.
+     */
+    public LocalDate scheduledMaturityDate() {
+        if (projectedPayments == null) {
+            return null;
+        }
+        return projectedPayments.stream().filter(payment -> payment.paymentNo() > 0).map(ProjectedPayment::date).filter(Objects::nonNull)
+                .max(Comparator.naturalOrder()).orElse(null);
+    }
+
     public List<ProjectedPayment> originalProjectedPayments() {
         return originalProjectedPayments;
     }
