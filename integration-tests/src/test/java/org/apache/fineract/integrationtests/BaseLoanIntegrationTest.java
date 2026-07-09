@@ -943,6 +943,7 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                     return;
                 }
 
+                // The API omits manuallyReversed for non-reversed transactions, so null and false are the same state.
                 final boolean found = transactionsByDate.stream()
                         .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
                                 && Objects.equals(item.getType().getValue(), tr.type)
@@ -952,7 +953,8 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
                                 && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion)
                                 && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion)
                                 && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion)
-                                && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion));
+                                && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion)
+                                && Boolean.TRUE.equals(item.getManuallyReversed()) == Boolean.TRUE.equals(tr.reversed));
 
                 if (!found) {
                     final StringBuilder errorMessage = new StringBuilder();
