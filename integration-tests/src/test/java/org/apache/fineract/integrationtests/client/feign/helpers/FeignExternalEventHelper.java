@@ -43,6 +43,14 @@ public class FeignExternalEventHelper {
         configurationHelper.updateConfigurations(Map.of(eventName, false));
     }
 
+    public void configureBusinessEvent(String eventName, boolean enabled) {
+        if (enabled) {
+            enableBusinessEvent(eventName);
+        } else {
+            disableBusinessEvent(eventName);
+        }
+    }
+
     public List<ExternalEventResponse> getExternalEventsByType(String type) {
         return ok(() -> internalEventsApi.getAllExternalEvents(Map.of("type", type)));
     }
