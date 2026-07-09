@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
 import org.apache.fineract.commands.data.ProcessingResultLookup;
+import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -68,6 +69,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformS
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -257,9 +259,11 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final String sql = "select " + rm.schema(true, hierarchy) + " where aud.id = ? ";
 
-        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, auditId); // NOSONAR
-
-        return replaceIdsOnAuditData(auditResult);
+        try {
+            return replaceIdsOnAuditData(this.jdbcTemplate.queryForObject(sql, rm, auditId)); // NOSONAR
+        } catch (final EmptyResultDataAccessException e) {
+            throw new CommandNotFoundException(auditId, e);
+        }
     }
 
     private AuditData replaceIdsOnAuditData(final AuditData auditResult) {

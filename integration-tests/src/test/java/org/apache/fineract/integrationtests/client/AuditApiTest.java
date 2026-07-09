@@ -16,21 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.exception;
+package org.apache.fineract.integrationtests.client;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
-import org.springframework.dao.EmptyResultDataAccessException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.junit.jupiter.api.Test;
 
 /**
- * A {@link RuntimeException} thrown when command (audit) resources are not found.
+ * Tests for {@code /audits/{auditId}} (FINERACT-2673).
  */
-public class CommandNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class AuditApiTest extends IntegrationTest {
 
-    public CommandNotFoundException(final Long id) {
-        super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
-    }
+    @Test
+    public void retrieveAuditEntryReturns404WhenNotExisting() {
+        CallFailedRuntimeException e = assertThrows(CallFailedRuntimeException.class,
+                () -> ok(fineractClient().audits.retrieveAuditEntry(999999L)));
 
-    public CommandNotFoundException(final Long id, final EmptyResultDataAccessException e) {
-        super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id, e);
+        assertEquals(404, e.getResponse().code());
+        assertTrue(e.getMessage().contains("error.msg.command.id.invalid"));
     }
 }
