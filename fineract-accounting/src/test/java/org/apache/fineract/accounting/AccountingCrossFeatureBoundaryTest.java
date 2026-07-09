@@ -110,13 +110,19 @@ class AccountingCrossFeatureBoundaryTest {
             }
         });
 
-        LOG.info("==== Accounting cross-feature dependency report (base = {}) ====", BASE);
+        LOG.info("==== Accounting cross-feature dependency report ====");
+        LOG.info("base package         : {}", BASE);
         LOG.info("-- source type -> referenced feature packages [owning artifact : status] --");
-        sourceTypeToTargets.forEach((source, targets) -> LOG.info("  " + source + "  ->  " + targets));
-        LOG.info("-- allowed (in fineract-core / fineract-command) --");
-        LOG.info("  " + allowedFromCore);
-        LOG.info("-- VIOLATIONS (in some other fineract-* module) --");
-        LOG.info("  " + violationFeatures);
+
+        sourceTypeToTargets.forEach((source, targets) -> {
+            LOG.info("source type          : {}", source);
+            LOG.info("referenced targets   : {}", targets);
+        });
+
+        LOG.info("-- allowed dependencies --");
+        LOG.info("allowed from core    : {}", allowedFromCore);
+        LOG.info("-- dependency violations --");
+        LOG.info("violation features   : {}", violationFeatures);
     }
 
     @Test
