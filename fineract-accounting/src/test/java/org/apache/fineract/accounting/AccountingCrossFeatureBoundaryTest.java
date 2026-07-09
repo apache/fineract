@@ -73,17 +73,14 @@ class AccountingCrossFeatureBoundaryTest {
     }
 
     private static String owningArtifact(JavaClass type) {
-        return type.getSource() //
-                .map(source -> source.getUri().toString()) //
-                .map(uri -> {
-                    Matcher matcher = FINERACT_ARTIFACT.matcher(uri);
-                    String artifact = null;
-                    while (matcher.find()) {
-                        artifact = matcher.group();
-                    }
-                    return artifact == null ? uri : artifact.replaceAll("-\\d.*$", "");
-                }) //
-                .orElse("(unknown-source)");
+        return type.getSource().map(source -> source.getUri().toString()).map(uri -> {
+            Matcher matcher = FINERACT_ARTIFACT.matcher(uri);
+            String artifact = null;
+            while (matcher.find()) {
+                artifact = matcher.group();
+            }
+            return artifact == null ? uri : artifact.replaceAll("-\\d.*$", "");
+        }).orElse("(unknown-source)");
     }
 
     private static boolean isFoundation(JavaClass type) {

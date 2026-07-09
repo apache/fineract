@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -47,9 +48,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
             final GLAccountRepositoryWrapper accountRepositoryWrapper, final PaymentTypeRepository paymentTypeRepository,
-            final CodeValueRepository codeValueRepository) {
+            final CodeValueRepository codeValueRepository, final JdbcTemplate jdbcTemplate) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountRepositoryWrapper, paymentTypeRepository,
-                codeValueRepository);
+                codeValueRepository, jdbcTemplate);
     }
 
     /***
