@@ -127,7 +127,7 @@ public class SurveyApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
 
-        List<ClientScoresOverview> scores = this.readSurveyService.retrieveClientSurveyScoreOverview(clientId);
+        List<ClientScoresOverview> scores = this.readSurveyService.retrieveClientSurveyScoreOverview(surveyName, clientId);
 
         return this.toApiJsonClientScoreOverviewSerializer.serialize(scores);
     }
