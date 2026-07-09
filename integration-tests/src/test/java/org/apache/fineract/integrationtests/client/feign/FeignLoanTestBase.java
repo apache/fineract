@@ -864,6 +864,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING");
     }
 
+    /** A lock that carries an error message is a hard lock: it stays until a catch-up COB clears it. */
+    protected void placeHardLockOnLoan(Long loanId, String error) {
+        LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING", error);
+    }
+
     protected void verifyLastClosedBusinessDate(Long loanId, String lastClosedBusinessDate) {
         GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails.getLastClosedBusinessDate());
@@ -1546,6 +1551,22 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         LoanTestValidators.verifyRepaymentSchedule(loanDetails, installments);
     }
 
+    protected PostLoanProductsRequest createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocationAndInterestRecalculation(
+            double interestRatePerPeriod, Integer rescheduleStrategyMethod) {
+        return createOnePeriod30DaysPeriodicAccrualProduct(interestRatePerPeriod)//
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                .loanScheduleType("PROGRESSIVE")//
+                .loanScheduleProcessingType("HORIZONTAL")//
+                .addPaymentAllocationItem(createDefaultPaymentAllocation("NEXT_INSTALLMENT"))//
+                .enableDownPayment(false)//
+                .isInterestRecalculationEnabled(true)//
+                .interestRecalculationCompoundingMethod(LoanTestData.InterestRecalculationCompoundingMethod.NONE)//
+                .preClosureInterestCalculationStrategy(1)//
+                .recalculationRestFrequencyType(LoanTestData.RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD)//
+                .allowPartialPeriodInterestCalculation(true)//
+                .rescheduleStrategyMethod(rescheduleStrategyMethod);
+    }
+
     protected PostLoanProductsRequest createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation() {
         return createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct()
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy").loanScheduleType("PROGRESSIVE")
@@ -1819,16 +1840,28 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return installment(principalAmount, interestAmount, totalOutstanding, false, dueDate);
     }
 
-    protected AdvancedPaymentData createDefaultPaymentAllocation() {
+    protected static AdvancedPaymentData createDefaultPaymentAllocation() {
         return LoanRequestBuilders.defaultPaymentAllocation();
     }
 
-    protected AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
+    protected static AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
         return LoanRequestBuilders.paymentAllocation("DEFAULT", futureInstallmentAllocationRule);
     }
 
-    protected AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule) {
+    protected static AdvancedPaymentData createPaymentAllocation(String transactionType, String futureInstallmentAllocationRule) {
         return LoanRequestBuilders.paymentAllocation(transactionType, futureInstallmentAllocationRule);
+    }
+
+    protected Account loansReceivableAccount() {
+        return getAccounts().getLoansReceivableAccount();
+    }
+
+    protected Account fundSource() {
+        return getAccounts().getFundSource();
+    }
+
+    protected Account overpaymentAccount() {
+        return getAccounts().getOverpaymentAccount();
     }
 
     protected List<AdvancedPaymentData> getAdvancedPaymentAllocationRules(Long loanId) {
