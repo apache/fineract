@@ -62,6 +62,10 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
                     effectiveDate);
             return;
         }
+        if (period.isReset()) {
+            log.debug("Skipping near breach evaluation for WC loan {} - breach period got reset {}", loan.getId(), period.getId());
+            return;
+        }
         final WorkingCapitalNearBreach config = loan.getLoanProductRelatedDetails().getNearBreach();
 
         final BigDecimal effectiveThreshold;
@@ -83,7 +87,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
 
     private boolean evaluatePeriod(final Long loanId, final WorkingCapitalLoanBreachSchedule period, final BigDecimal threshold,
             final Integer frequency, final WorkingCapitalLoanPeriodFrequencyType frequencyType, final LocalDate effectiveDate) {
-        if (period.getMinPaymentAmount().compareTo(BigDecimal.ZERO) == 0) {
+        if (period.getMinPaymentAmount() == null || period.getMinPaymentAmount().compareTo(BigDecimal.ZERO) == 0) {
             return false;
         }
         final LocalDate firstEvalDate = addFrequency(period.getFromDate(), frequency, frequencyType);

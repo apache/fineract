@@ -752,10 +752,6 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.balanceRepository.saveAndFlush(balance);
         this.allocationRepository.saveAndFlush(allocation);
 
-        // Only the principal portion affects the amortization and delinquency/breach schedules; fee and penalty
-        // portions settle charges.
-        final BigDecimal principalPortion = allocationPlan.principalPortion();
-
         // A backdated transaction can change how the other transactions allocate across charges, so it triggers
         // reprocessing. When the loan has charges, reprocessing rebuilds the amortization schedule from scratch, so
         // the incremental apply below would be immediately overwritten and is skipped. For a charge-free loan
@@ -766,16 +762,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final boolean reprocessingWillRebuildSchedule = backdated && !charges.isEmpty();
         if (!reprocessingWillRebuildSchedule) {
             // The amortization model records the principal on its actual day and recalculates forward.
-            amortizationScheduleWriteService.applyRepayment(loan, transactionDate, principalPortion);
+            amortizationScheduleWriteService.applyRepayment(loan, transactionDate, allocationPlan.principalPortion());
         }
         if (backdated) {
             transactionReprocessingService.reprocessTransactions(loan, allTransactions);
             delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
         } else {
-            delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, principalPortion);
+            delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
         }
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
-        breachScheduleService.applyRepayment(loanId, transactionDate, principalPortion);
+        breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
 
         handleStateChanges(loan, transactionDate);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
@@ -1021,14 +1017,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             } else {
                 amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
                         transaction.getAllocation().getPrincipalPortion());
-                updateBalanceOnUndoRepayment(loan, transaction.getTransactionAmount());
+                updateBalanceOnUndoRepayment(loan, transaction.getAllocation().getPrincipalPortion());
             }
         } else {
             transactionReprocessingService.reprocessTransactions(loan);
         }
 
-        breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(),
-                transaction.getAllocation().getPrincipalPortion());
+        breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {

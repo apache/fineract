@@ -20,11 +20,11 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,14 +79,13 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     boolean existsByExternalId(ExternalId externalId);
 
     @Query("""
-            select coalesce(sum(t.transactionAmount), 0)
-            from WorkingCapitalLoanTransaction t
-            where t.wcLoan.id = :wcLoanId and t.reversed = false
-              and t.transactionType in :transactionTypes
-              and t.transactionDate >= :fromDate and t.transactionDate <= :toDate
+            SELECT t.transactionDate, SUM(t.transactionAmount)
+            FROM WorkingCapitalLoanTransaction t
+            WHERE t.reversed = FALSE
+            AND t.wcLoan.id = :wcLoanId
+            AND t.transactionType in :transactionTypes
+            GROUP BY t.transactionDate
             """)
-    BigDecimal sumBreachRelevantPaid(@Param("wcLoanId") Long wcLoanId,
-            @Param("transactionTypes") Collection<LoanTransactionType> transactionTypes, @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate);
-
+    List<TransactionDateAndAmountHolder> fetchTransactionDateAndAmount(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
 }

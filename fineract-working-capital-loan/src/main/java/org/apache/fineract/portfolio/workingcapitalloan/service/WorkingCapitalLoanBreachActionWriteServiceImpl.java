@@ -72,7 +72,7 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
                     .reduce((first, second) -> second).ifPresent(action -> {
                         action.setEndDate(breachAction.getStartDate().minusDays(1));
                     });
-            breachScheduleService.reEvaluateAfterEnable(workingCapitalLoan, breachAction.getStartDate());
+            breachScheduleService.reprocessBreachSchedule(workingCapitalLoan);
         }
 
         return new CommandProcessingResultBuilder() //

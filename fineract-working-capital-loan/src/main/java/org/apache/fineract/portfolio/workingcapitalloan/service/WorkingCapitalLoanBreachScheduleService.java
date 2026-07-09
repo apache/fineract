@@ -48,5 +48,5 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
 
-    void reEvaluateAfterEnable(WorkingCapitalLoan loan, LocalDate enableDate);
+    void reprocessBreachSchedule(WorkingCapitalLoan loan);
 }

@@ -1438,7 +1438,7 @@ Feature: Working Capital Loan Repayment
     Then Working Capital loan status will be "OVERPAID"
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 9000.0     | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 9100.0     | 0.0               | true                  | 0.0              | 0              |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 100.0             |
@@ -1479,7 +1479,7 @@ Feature: Working Capital Loan Repayment
     Then Working Capital loan status will be "OVERPAID"
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 9000.0     | 0.0               | true                  | 0.0              | 0              |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 9100.0     | 0.0               | true                  | 0.0              | 0              |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 100.0             |

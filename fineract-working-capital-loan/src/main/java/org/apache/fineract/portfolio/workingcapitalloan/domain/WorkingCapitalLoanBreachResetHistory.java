@@ -45,6 +45,9 @@ public class WorkingCapitalLoanBreachResetHistory extends AbstractAuditableWithU
     @JoinColumn(name = "breach_schedule_id", nullable = false)
     private WorkingCapitalLoanBreachSchedule breachSchedule;
 
+    @Column(name = "min_payment_amount", scale = 6, precision = 19)
+    private BigDecimal minPaymentAmount;
+
     @Column(name = "outstanding_amount", scale = 6, precision = 19)
     private BigDecimal outstandingAmount;
 
@@ -54,4 +57,12 @@ public class WorkingCapitalLoanBreachResetHistory extends AbstractAuditableWithU
     @Column(name = "near_breach")
     private Boolean nearBreach;
 
+    public WorkingCapitalLoanBreachResetHistory(WorkingCapitalLoanBreachAction resetAction, WorkingCapitalLoanBreachSchedule period) {
+        setBreachAction(resetAction);
+        setBreachSchedule(period);
+        setOutstandingAmount(period.getOutstandingAmount());
+        setBreach(period.getBreach());
+        setNearBreach(period.getNearBreach());
+        setMinPaymentAmount(period.getMinPaymentAmount());
+    }
 }

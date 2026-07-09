@@ -37,30 +37,30 @@ public class BreachScheduleBusinessStep extends WorkingCapitalLoanCOBBusinessSte
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     @Override
-    public WorkingCapitalLoan execute(final WorkingCapitalLoan input) {
-        final boolean isDisbursed = input.getDisbursementDetails().stream()
+    public WorkingCapitalLoan execute(final WorkingCapitalLoan loan) {
+        final boolean isDisbursed = loan.getDisbursementDetails().stream()
                 .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate).anyMatch(Objects::nonNull);
         if (!isDisbursed) {
-            log.debug("Skipping breach schedule for WC loan {} - not yet disbursed", input.getId());
-            return input;
+            log.debug("Skipping breach schedule for WC loan {} - not yet disbursed", loan.getId());
+            return loan;
         }
 
-        final WorkingCapitalLoanProductRelatedDetails details = input.getLoanProductRelatedDetails();
+        final WorkingCapitalLoanProductRelatedDetails details = loan.getLoanProductRelatedDetails();
         if (details == null || details.getBreach() == null) {
-            log.debug("Skipping breach schedule for WC loan {} - no breach configuration", input.getId());
-            return input;
+            log.debug("Skipping breach schedule for WC loan {} - no breach configuration", loan.getId());
+            return loan;
         }
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
-        if (!breachScheduleService.hasSchedule(input.getId())) {
-            breachScheduleService.generateInitialPeriod(input);
+        if (!breachScheduleService.hasSchedule(loan.getId())) {
+            breachScheduleService.generateInitialPeriod(loan);
         }
 
-        breachScheduleService.generateNextPeriodIfNeeded(input, businessDate);
-        breachScheduleService.evaluateBreach(input, businessDate);
+        breachScheduleService.generateNextPeriodIfNeeded(loan, businessDate);
+        breachScheduleService.evaluateBreach(loan, businessDate);
 
-        return input;
+        return loan;
     }
 
     @Override

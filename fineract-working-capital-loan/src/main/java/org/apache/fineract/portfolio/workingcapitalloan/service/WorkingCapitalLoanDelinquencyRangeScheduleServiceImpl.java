@@ -22,11 +22,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -39,18 +36,17 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRule;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyPauseUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
@@ -67,7 +63,6 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     private final WorkingCapitalLoanDelinquencyRangeScheduleMapper capitalLoanDelinquencyRangeScheduleMapper;
     private final DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
     private final WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
-    private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
 
     @Override
@@ -152,42 +147,32 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     @Override
     public void reprocessDelinquencySchedule(final WorkingCapitalLoan loan) {
-        final List<WorkingCapitalLoanTransaction> replayableTransactions = transactionRepository
-                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId()).stream()
-                .filter(txn -> !txn.isReversed() && txn.getTransactionType().isRepaymentType()).toList();
-
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        resetAllPeriodsForReprocessing(loan.getId());
         generateNextPeriodIfNeeded(loan, businessDate);
+        List<WorkingCapitalLoanDelinquencyRangeSchedule> delinquencyRangePeriods = resetAllPeriodsForReprocessing(loan.getId());
 
-        if (replayableTransactions.isEmpty()) {
-            evaluateExpiredPeriods(loan, businessDate);
-            delinquencyClassificationService.classifyDelinquency(loan, businessDate);
-            return;
-        }
+        final List<TransactionDateAndAmountHolder> transactionDateAndAmountHolderList = transactionRepository
+                .fetchTransactionDateAndAmount(loan.getId(), LoanTransactionType.getRepaymentLikeTransactionTypes());
+        if (!transactionDateAndAmountHolderList.isEmpty()) {
+            List<TransactionDateAndAmountHolder> remappedTransactionDateAndAmountHolderList = new ArrayList<>();
+            delinquencyRangePeriods.forEach(period -> {
+                BigDecimal sumAmount = transactionDateAndAmountHolderList.stream().parallel().filter(
+                        holder -> DateUtils.isDateInRangeInclusive(holder.transactionDate(), period.getFromDate(), period.getToDate()))
+                        .map(TransactionDateAndAmountHolder::transactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                remappedTransactionDateAndAmountHolderList.add(new TransactionDateAndAmountHolder(period.getToDate(), sumAmount));
+            });
 
-        final Map<Long, WorkingCapitalLoanTransactionAllocation> allocationsByTxnId = allocationRepository
-                .findByWcLoanTransactionIdIn(replayableTransactions.stream().map(WorkingCapitalLoanTransaction::getId).toList()).stream()
-                .collect(Collectors.toMap(allocation -> allocation.getWcLoanTransaction().getId(), Function.identity()));
-
-        for (final WorkingCapitalLoanTransaction txn : replayableTransactions) {
-            final WorkingCapitalLoanTransactionAllocation allocation = allocationsByTxnId.get(txn.getId());
-            if (allocation == null) {
-                continue;
-            }
-            final BigDecimal principalPortion = allocation.getPrincipalPortion();
-            if (principalPortion != null && principalPortion.compareTo(BigDecimal.ZERO) > 0) {
-                allocateRepayment(loan, txn.getTransactionDate(), principalPortion);
-            }
+            remappedTransactionDateAndAmountHolderList.forEach(transactionDateAndAmountHolder -> {
+                allocateRepayment(loan, transactionDateAndAmountHolder.transactionDate(),
+                        transactionDateAndAmountHolder.transactionAmount());
+            });
         }
 
         evaluateExpiredPeriods(loan, businessDate);
         delinquencyClassificationService.classifyDelinquency(loan, businessDate);
-        log.debug("Reprocessed delinquency range schedule for WC loan {} from {} repayment transaction(s)", loan.getId(),
-                replayableTransactions.size());
     }
 
-    private void resetAllPeriodsForReprocessing(final Long loanId) {
+    private List<WorkingCapitalLoanDelinquencyRangeSchedule> resetAllPeriodsForReprocessing(final Long loanId) {
         final List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = loanDelinquencyRangeScheduleRepository
                 .findByLoanIdOrderByPeriodNumberAsc(loanId);
         for (final WorkingCapitalLoanDelinquencyRangeSchedule period : periods) {
@@ -197,7 +182,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
             period.setDelinquentAmount(null);
             period.setDelinquentDays(null);
         }
-        loanDelinquencyRangeScheduleRepository.saveAll(periods);
+        return periods;
     }
 
     private void allocateRepayment(final WorkingCapitalLoan loan, final LocalDate transactionDate, final BigDecimal amount) {
