@@ -85,6 +85,8 @@ final class HolidaysApiResourceSwagger {
         public LocalDate toDate;
         @Schema(example = "26 October 2013")
         public LocalDate repaymentsRescheduledTo;
+        @Schema(example = "2")
+        public Integer reschedulingType;
         public List<PostHolidaysRequestOffices> offices;
     }
 
