@@ -18,107 +18,57 @@
  */
 package org.apache.fineract.integrationtests.common.rates;
 
-import com.google.gson.Gson;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.fineract.integrationtests.common.CommonConstants;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
+import java.math.BigDecimal;
+import java.util.List;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.RateData;
+import org.apache.fineract.client.models.RateRequest;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class RatesHelper {
 
     private RatesHelper() {
 
     }
 
-    private static final String RATES_URL = "/fineract-provider/api/v1/rates";
-    private static final String CREATE_RATES_URL = RATES_URL + "?" + Utils.TENANT_IDENTIFIER;
-    private static final String PERCENTAGE = "10";
+    private static final BigDecimal PERCENTAGE = BigDecimal.valueOf(10);
     private static final Integer PRODUCT_APPLY_LOAN = 1;
     private static final Boolean ACTIVE = true;
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static ArrayList<HashMap> getRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, RATES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
+    public static List<RateData> getRates() {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rate().retrieveAllRates());
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static Integer createRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String request) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_RATES_URL, request, "resourceId");
+    public static CommandProcessingResult createRates(final RateRequest request) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rate().createRate(request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static HashMap getRateById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer rateId) {
-        return Utils.performServerGet(requestSpec, responseSpec, RATES_URL + "/" + rateId + "?" + Utils.TENANT_IDENTIFIER, "");
+    public static RateData getRateById(final Long rateId) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rate().retrieveOneRate(rateId));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static HashMap updateRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer rateId, final String request) {
-        return Utils.performServerPut(requestSpec, responseSpec, RATES_URL + "/" + rateId + "?" + Utils.TENANT_IDENTIFIER, request,
-                CommonConstants.RESPONSE_CHANGES);
+    public static CommandProcessingResult updateRates(final Long rateId, final RateRequest request) {
+        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().rate().updateRate(rateId, request));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getLoanRateJSON() {
-        return getLoanRateJSON(RatesHelper.PRODUCT_APPLY_LOAN, RatesHelper.PERCENTAGE);
+    public static RateRequest getLoanRateRequest() {
+        return getLoanRateRequest(RatesHelper.PRODUCT_APPLY_LOAN, RatesHelper.PERCENTAGE);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getLoanRateJSON(final Integer productApply, final String percentage) {
-        final HashMap<String, Object> map = populateDefaultsForLoan();
-        map.put("percentage", percentage);
-        map.put("productApply", productApply);
-        String crateRateJSON = new Gson().toJson(map);
-        return crateRateJSON;
+    public static RateRequest getLoanRateRequest(final Integer productApply, final BigDecimal percentage) {
+        return populateDefaultsForLoan().percentage(percentage).productApply(productApply);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static HashMap<String, Object> populateDefaultsForLoan() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", RatesHelper.ACTIVE);
-        map.put("percentage", RatesHelper.PERCENTAGE);
-        map.put("locale", "en");
-        map.put("productApply", RatesHelper.PRODUCT_APPLY_LOAN);
-        map.put("name", Utils.uniqueRandomStringGenerator("Rate_Loans_", 6));
-        return map;
+    public static RateRequest populateDefaultsForLoan() {
+        return new RateRequest().active(RatesHelper.ACTIVE).percentage(RatesHelper.PERCENTAGE).locale("en")
+                .productApply(RatesHelper.PRODUCT_APPLY_LOAN).name(Utils.uniqueRandomStringGenerator("Rate_Loans_", 6));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public static String getModifyRateJSON() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("percentage", "15.0");
-        map.put("locale", "en");
-        String json = new Gson().toJson(map);
-        return json;
+    public static RateRequest getModifyRateRequest() {
+        return new RateRequest().percentage(BigDecimal.valueOf(15.0)).locale("en");
     }
 
 }
