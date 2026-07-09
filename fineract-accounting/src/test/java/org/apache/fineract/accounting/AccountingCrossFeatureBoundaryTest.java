@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.core.ApplicationModule;
@@ -88,6 +89,7 @@ class AccountingCrossFeatureBoundaryTest {
     }
 
     @Test
+    @EnabledIfSystemProperty(named = "accounting.boundary.report", matches = "true")
     void printAccountingCrossFeatureDependencyReport() {
         Map<String, Set<String>> sourceTypeToTargets = new TreeMap<>();
         Set<String> violationFeatures = new TreeSet<>();
