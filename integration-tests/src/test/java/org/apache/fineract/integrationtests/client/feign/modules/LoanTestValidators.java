@@ -96,8 +96,9 @@ public final class LoanTestValidators {
                             && Objects.equals(Utils.getDoubleValue(item.getFeeChargesPortion()), tr.feePortion)
                             && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion)
                             && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion)
-                            && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion)
-                            && (tr.reversed == null || Objects.equals(item.getManuallyReversed(), tr.reversed)));
+                            && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion));
+            // NOTE: intentionally does NOT match on the `reversed` flag, mirroring
+            // BaseLoanIntegrationTest#verifyTransactions(Long, TransactionExt...) which ignores it.
 
             if (!found) {
                 StringBuilder errorMessage = new StringBuilder();
