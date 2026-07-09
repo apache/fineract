@@ -39,6 +39,22 @@ public class FeignAccountHelper {
         this.fineractClient = fineractClient;
     }
 
+    public Account createAssetAccount() {
+        return createAssetAccount("ASSET");
+    }
+
+    public Account createLiabilityAccount() {
+        return createLiabilityAccount("LIABILITY");
+    }
+
+    public Account createIncomeAccount() {
+        return createIncomeAccount("INCOME");
+    }
+
+    public Account createExpenseAccount() {
+        return createExpenseAccount("EXPENSE");
+    }
+
     public Account createAssetAccount(String name) {
         return createAccount(name, "1", "ASSET");
     }

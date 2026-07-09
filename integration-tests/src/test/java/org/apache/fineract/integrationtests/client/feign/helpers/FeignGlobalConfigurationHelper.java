@@ -29,9 +29,19 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 public class FeignGlobalConfigurationHelper {
 
     private final FineractFeignClient fineractClient;
+    private final InternalConfigurationsApi internalConfigurationsApi;
 
     public FeignGlobalConfigurationHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.internalConfigurationsApi = fineractClient.create(InternalConfigurationsApi.class);
+    }
+
+    /** Sets a numeric global configuration value and applies it immediately, without a tenant refresh. */
+    public void updateGlobalConfigurationInternal(String configName, Long value) {
+        ok(() -> {
+            internalConfigurationsApi.updateInternalGlobalConfiguration(configName, value);
+            return null;
+        });
     }
 
     public void enableOriginatorCreationDuringLoanApplication() {

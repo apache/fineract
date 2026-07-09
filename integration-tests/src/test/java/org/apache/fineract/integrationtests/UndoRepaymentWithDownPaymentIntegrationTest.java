@@ -32,8 +32,8 @@ import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappin
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.LoanProductChargeData;
-import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostChargeToGLAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -116,8 +116,8 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends FeignLoanTestBa
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);

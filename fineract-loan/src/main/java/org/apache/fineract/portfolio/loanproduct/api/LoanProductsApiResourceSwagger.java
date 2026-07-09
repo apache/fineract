@@ -236,6 +236,12 @@ public final class LoanProductsApiResourceSwagger {
         public Integer recalculationCompoundingFrequencyInterval;
         @Schema(example = "1")
         public Integer recalculationCompoundingFrequencyOnDayType;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyDayOfWeekType;
+        @Schema(example = "1")
+        public Integer recalculationRestFrequencyOnDayType;
+        @Schema(example = "1")
+        public Integer recalculationRestFrequencyDayOfWeekType;
         @Schema(example = "false")
         public Boolean isArrearsBasedOnOriginalSchedule;
         @Schema(example = "false")
@@ -299,12 +305,12 @@ public final class LoanProductsApiResourceSwagger {
         @Schema(example = "38")
         public Long incomeFromBuyDownAccountId;
         public List<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
-        public List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
+        public List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings;
         public List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings;
         public List<PostWriteOffReasonToExpenseAccountMappings> writeOffReasonsToExpenseMappings;
         public List<PostLoanProductsRequest.PostClassificationToIncomeAccountMappings> buydownfeeClassificationToIncomeAccountMappings;
         public List<PostLoanProductsRequest.PostClassificationToIncomeAccountMappings> capitalizedIncomeClassificationToIncomeAccountMappings;
-        public List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+        public List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings;
 
         // Multi Disburse
         @Schema(example = "true")
@@ -374,6 +380,17 @@ public final class LoanProductsApiResourceSwagger {
         public List<String> supportedInterestRefundTypes;
         @Schema(example = "REGULAR")
         public String chargeOffBehaviour;
+
+        @Schema(description = "PostChargeToGLAccountMappings")
+        public static final class PostChargeToGLAccountMappings {
+
+            private PostChargeToGLAccountMappings() {}
+
+            @Schema(example = "1")
+            public Long chargeId;
+            @Schema(example = "1")
+            public Long incomeAccountId;
+        }
 
         public static final class PostChargeOffReasonToExpenseAccountMappings {
 

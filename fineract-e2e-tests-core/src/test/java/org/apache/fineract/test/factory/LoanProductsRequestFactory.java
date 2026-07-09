@@ -30,8 +30,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.LoanProductChargeData;
-import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
 import org.apache.fineract.client.models.PostChargeOffReasonToExpenseAccountMappings;
+import org.apache.fineract.client.models.PostChargeToGLAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.test.data.AccountingRule;
 import org.apache.fineract.test.data.AdvancePaymentsAdjustmentType;
@@ -137,8 +137,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -247,8 +247,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -355,8 +355,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -463,8 +463,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -576,8 +576,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -682,8 +682,8 @@ public class LoanProductsRequestFactory {
         final String name = Utils.randomStringGenerator(NAME_PREFIX_INTEREST_RECALCULATION, 10);
         final String shortName = generateShortNameSafely();
 
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -801,8 +801,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -914,8 +914,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -1025,8 +1025,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -1135,8 +1135,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -1265,8 +1265,8 @@ public class LoanProductsRequestFactory {
         final List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         final List<LoanProductChargeData> charges = new ArrayList<>();
-        final List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        final List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        final List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        final List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         final List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         final GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -1387,8 +1387,8 @@ public class LoanProductsRequestFactory {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
@@ -1513,8 +1513,8 @@ public class LoanProductsRequestFactory {
         final List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         final List<LoanProductChargeData> charges = new ArrayList<>();
-        final List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        final List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        final List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        final List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
         final List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         final GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
         loanPaymentChannelToFundSourceMappings.fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES));
@@ -1662,8 +1662,8 @@ public class LoanProductsRequestFactory {
         final List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         final List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         final List<LoanProductChargeData> charges = new ArrayList<>();
-        final List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        final List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        final List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        final List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
         final List<GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings = new ArrayList<>();
         final GetLoanPaymentChannelToFundSourceMappings loanPaymentChannelToFundSourceMappings = new GetLoanPaymentChannelToFundSourceMappings();
         loanPaymentChannelToFundSourceMappings.fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES));

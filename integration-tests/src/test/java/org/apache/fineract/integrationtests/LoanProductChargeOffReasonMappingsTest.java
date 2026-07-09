@@ -25,8 +25,8 @@ import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.LoanProductChargeData;
-import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
 import org.apache.fineract.client.models.PostChargeOffReasonToExpenseAccountMappings;
+import org.apache.fineract.client.models.PostChargeToGLAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -103,8 +103,8 @@ public class LoanProductChargeOffReasonMappingsTest extends FeignLoanTestBase {
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         List<PostChargeOffReasonToExpenseAccountMappings> chargeOffReasonToExpenseAccountMappings = createPostChargeOffReasonToExpenseAccountMappings(
                 chargeOffReasonId, glAccountId);

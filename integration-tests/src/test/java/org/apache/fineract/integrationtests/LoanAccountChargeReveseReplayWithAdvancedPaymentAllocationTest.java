@@ -33,8 +33,8 @@ import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetLoanPaymentChannelToFundSourceMappings;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.LoanProductChargeData;
-import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostChargeToGLAccountMappings;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -241,8 +241,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
         List<Integer> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
         List<Integer> interestRateVariationsForBorrowerCycle = new ArrayList<>();
         List<LoanProductChargeData> charges = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings = new ArrayList<>();
-        List<LoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> penaltyToIncomeAccountMappings = new ArrayList<>();
+        List<PostChargeToGLAccountMappings> feeToIncomeAccountMappings = new ArrayList<>();
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
