@@ -1,0 +1,162 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+= Modelo de datos
+
+.Modelo entidad-relación del módulo Party
+[plantuml,format=svg]
+....
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "m_client" as client {
+  * id : bigint
+  --
+  account_no : varchar
+  status_enum : smallint
+  legal_form_enum : int
+  firstname / lastname / fullname
+  display_name : varchar
+  office_id : bigint <<FK>>
+  staff_id : bigint <<FK>>
+  default_savings_product : bigint
+}
+entity "m_client_non_person" as nonperson {
+  * id : bigint
+  client_id : bigint <<FK>>
+}
+entity "m_client_identifier" as identifier {
+  * id : bigint
+  client_id : bigint <<FK>>
+  document_type_id : bigint <<FK CodeValue>>
+  document_key : varchar
+}
+entity "m_client_charge" as charge {
+  * id : bigint
+  client_id : bigint <<FK>>
+  charge_id : bigint <<FK m_charge>>
+  amount / amount_paid_derived / amount_outstanding_derived
+  is_paid_derived / waived / is_active
+}
+entity "m_client_transaction" as ctxn {
+  * id : bigint
+  client_id : bigint <<FK>>
+  transaction_type_enum : int
+  office_id : bigint <<FK>>
+  payment_detail_id : bigint <<FK>>
+  amount : decimal
+}
+entity "m_family_members" as family {
+  * id : bigint
+  client_id : bigint <<FK>>
+}
+entity "m_address" as address {
+  * id : bigint
+}
+entity "m_client_address" as caddr {
+  * id : bigint
+  client_id : bigint <<FK>>
+  address_id : bigint <<FK>>
+  address_type_id : bigint <<FK CodeValue>>
+}
+entity "m_group" as grp {
+  * id : bigint
+  status_enum : smallint
+  level_id : bigint <<FK>>
+  parent_id : bigint <<FK self>>
+  office_id : bigint <<FK>>
+  staff_id : bigint <<FK>>
+}
+entity "m_group_level" as glevel {
+  * id : bigint
+  level_name : varchar
+  can_have_clients : boolean
+  super_parent : boolean
+}
+entity "m_group_roles" as grole {
+  * id : bigint
+  group_id : bigint <<FK>>
+  client_id : bigint <<FK>>
+  role_cv_id : bigint <<FK CodeValue>>
+}
+entity "m_group_client" as gclient {
+  group_id : bigint <<FK>>
+  client_id : bigint <<FK>>
+}
+
+client ||--o{ identifier
+client ||--o| nonperson
+client ||--o{ charge
+client ||--o{ ctxn
+client ||--o{ family
+client ||--o{ caddr
+caddr }o--|| address
+charge ||--o{ ctxn : "paga / condona"
+grp }o--|| glevel
+grp ||--o{ grp : "parent (centro→grupo)"
+grp ||--o{ grole
+grp }o--o{ client : "m_group_client"
+@enduml
+....
+
+== Entidad `Client` (`m_client`)
+
+Definida en `fineract-party/src/main/java/org/apache/fineract/portfolio/client/domain/Client.java:58`.
+
+[cols="2,1,3"]
+|===
+|*Columna* |*Tipo* |*Descripción*
+
+|`account_no` |varchar(20), único |Número de cuenta del cliente.
+|`status_enum` |smallint |Estado (`ClientStatus`).
+|`legal_form_enum` |int |Forma jurídica (`LegalForm`).
+|`display_name` |varchar(160) |Nombre a mostrar (derivado de nombres o `fullname`).
+|`mobile_no` / `email_address` |varchar, únicos |Contacto.
+|`external_id` |varchar(100), único |Identificador externo.
+|`office_id` |FK `m_office` |Oficina propietaria.
+|`staff_id` |FK `m_staff` |Oficial de crédito asignado.
+|`default_savings_product` / `default_savings_account` |FK |Producto/cuenta de ahorro por defecto.
+|`activation_date` / `closedon_date` / `rejectedon_date` / `withdrawn_on_date` |date |Fechas del ciclo de vida.
+|===
+
+== Entidad `ClientCharge` (`m_client_charge`)
+
+Definida en `...client/domain/ClientCharge.java`.
+
+[cols="2,1,3"]
+|===
+|*Columna* |*Tipo* |*Descripción*
+
+|`charge_id` |FK `m_charge` |Definición de cargo (del módulo `fineract-charge`).
+|`amount` |decimal(19,6) |Monto del cargo.
+|`amount_paid_derived` |decimal |Monto pagado acumulado.
+|`amount_waived_derived` |decimal |Monto condonado.
+|`amount_outstanding_derived` |decimal |Saldo pendiente.
+|`charge_time_enum` |smallint |Momento de aplicación del cargo.
+|`charge_due_date` |date |Fecha de vencimiento.
+|`is_penalty` |boolean |Indica si es penalización.
+|`is_paid_derived` / `waived` / `is_active` |boolean |Banderas de estado.
+|===
+
+== Entidad `Group` / Centro (`m_group`, `m_group_level`)
+
+Definida en `...group/domain/Group.java:63`. El discriminador Centro vs. Grupo
+vive en `GroupLevel` (`m_group_level`), con `isCenter()` / `isGroup()`
+(`...group/domain/GroupLevel.java:89`). La relación `parent_id` permite la jerarquía
+*Centro → Grupos* y la tabla de unión `m_group_client` la membresía *Grupo → Clientes*.

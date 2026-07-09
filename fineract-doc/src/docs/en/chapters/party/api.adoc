@@ -1,0 +1,130 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+= Contrato de API
+
+Prefijo común: `\{baseUrl\}/fineract-provider/api` + cabecera `Fineract-Platform-TenantId`.
+Las rutas se declaran en los `*ApiResource` con `@Path`.
+
+[cols="2,2,2"]
+|===
+|*Recurso* |*Ruta (`@Path`)* |*Resource (file)*
+
+|Clientes |`/v1/clients` |`ClientsApiResource.java:79`
+|Cargos de cliente |`/v1/clients/{clientId}/charges` |`ClientChargesApiResource.java:66`
+|Identificaciones |`/v1/clients/{clientId}/identifiers` |`ClientIdentifiersApiResource.java:63`
+|Miembros de familia |`/v1/clients/{clientId}/familymembers` |`ClientFamilyMembersApiResource.java:47`
+|Transacciones de cliente |`/v1/clients/...` |`ClientTransactionsApiResource.java:61`
+|Configuración de campos (direcciones) |`/v1/fieldconfiguration/{entity}` |`EntityFieldConfigurationApiResource.java:36`
+|Grupos |`/v1/groups` |`GroupsApiResource.java:103`
+|Centros |`/v1/centers` |`CentersApiResource.java:95`
+|Niveles de grupo |`/v1/grouplevels` |`GroupsLevelApiResource.java:34`
+|===
+
+== `POST /v1/clients`
+
+Crea un cliente. Comando `CLIENT / CREATE`.
+
+.Request (campos principales)
+[source,json]
+----
+{
+  "officeId": "Long, requerido",
+  "legalFormId": "Integer (1=PERSON, 2=ENTITY)",
+  "firstname": "String (PERSON)",
+  "lastname": "String (PERSON)",
+  "fullname": "String (ENTITY)",
+  "mobileNo": "String, único",
+  "externalId": "String, único",
+  "active": "boolean",
+  "activationDate": "yyyy-MM-dd (si active=true)",
+  "dateFormat": "yyyy-MM-dd",
+  "locale": "es"
+}
+----
+
+.Response
+[source,json]
+----
+{ "officeId": 1, "clientId": 123, "resourceId": 123 }
+----
+
+== `POST /v1/clients/{clientId}?command=activate`
+
+Activa un cliente `PENDING`. Comandos disponibles vía `command=`:
+`activate`, `close`, `reject`, `withdraw`, `reactivate`, `undoRejection`,
+`undoWithdrawal`, `assignStaff`, `unassignStaff`, `proposeTransfer`, `acceptTransfer`.
+
+.Request
+[source,json]
+----
+{ "activationDate": "2026-01-15", "dateFormat": "yyyy-MM-dd", "locale": "es" }
+----
+
+== `POST /v1/clients/{clientId}/charges`
+
+Crea un cargo/comisión. Sobre el cargo creado, `command=`:
+`pay` (paga), `waive` (condona). Comandos `CLIENTCHARGE / CREATE|PAY|WAIVE|DELETE`.
+
+.Request (crear)
+[source,json]
+----
+{ "chargeId": 7, "amount": "50.00", "dueDate": "2026-02-01",
+  "dateFormat": "yyyy-MM-dd", "locale": "es" }
+----
+
+.Request (pagar — incluye detalle de pago)
+[source,json]
+----
+{ "amount": "50.00", "transactionDate": "2026-02-01",
+  "paymentTypeId": 1, "dateFormat": "yyyy-MM-dd", "locale": "es" }
+----
+
+== `POST /v1/clients/{clientId}/identifiers`
+
+Registra una identificación. Comando `CLIENTIDENTIFIER / CREATE`.
+
+.Request
+[source,json]
+----
+{ "documentTypeId": 4, "documentKey": "1-2345-6789", "status": "ACTIVE" }
+----
+
+== `POST /v1/groups` y `POST /v1/centers`
+
+Crean grupo y centro respectivamente. Comandos `GROUP / CREATE`, `CENTER / CREATE`.
+Asociaciones vía `command=associateClients` (grupo) / `command=associateGroups` (centro).
+
+.Request (grupo)
+[source,json]
+----
+{ "officeId": 1, "name": "Grupo Solidario A", "active": false }
+----
+
+== Errores comunes
+
+[cols="1,2,2"]
+|===
+|*HTTP* |*Razón* |*Excepción / código*
+
+|400 |Datos inválidos |`PlatformApiDataValidationException` (`validation.msg.*`)
+|403 |Sin permiso |`Permiso` del comando (`CREATE_CLIENT`, `ACTIVATE_CLIENT`, …)
+|404 |Cliente/grupo/centro inexistente |`ClientNotFoundException`, `GroupNotFoundException`, `CenterNotFoundException`
+|409 |Identificación duplicada |`DuplicateClientIdentifierException`
+|409 |Transición de estado inválida |`InvalidClientStateTransitionException`
+|===
