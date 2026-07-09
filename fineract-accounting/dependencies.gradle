@@ -26,6 +26,7 @@ dependencies {
     //
     implementation(project(path: ':fineract-core'))
     testImplementation 'org.springframework.modulith:spring-modulith-core'
+    testImplementation("org.osgi:org.osgi.core:6.0.0")
     implementation('org.apache.avro:avro')
     implementation(
             project(path: ':fineract-avro-schemas')
