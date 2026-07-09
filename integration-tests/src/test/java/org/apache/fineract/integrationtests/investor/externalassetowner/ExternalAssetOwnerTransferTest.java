@@ -45,6 +45,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 
@@ -61,6 +62,9 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
     protected static final FeignExternalAssetOwnerHelper EXTERNAL_ASSET_OWNER_HELPER = new FeignExternalAssetOwnerHelper(
             FineractFeignClientHelper.getFineractFeignClient());
 
+    /** The GL account the ASSET_TRANSFER financial activity is mapped to; every sale and buyback books against it. */
+    protected static Account transferAccount;
+
     public String ownerExternalId;
 
     @BeforeAll
@@ -70,7 +74,7 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
                 "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
                 "EXTERNAL_ASSET_OWNER_TRANSFER");
 
-        Account transferAccount = accountHelper.createAssetAccount(Utils.uniqueRandomStringGenerator("TRANSFER_", 5));
+        transferAccount = accountHelper.createAssetAccount(Utils.uniqueRandomStringGenerator("TRANSFER_", 5));
         EXTERNAL_ASSET_OWNER_HELPER.setProperFinancialActivity(transferAccount);
     }
 
@@ -114,12 +118,20 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
     }
 
     protected Long createLoanForClient(Long clientId, String transactionDate) {
-        PostLoanProductsRequest productRequest = createOnePeriod30DaysPeriodicAccrualProduct(2.0)//
+        return createLoanForClient(clientId, transactionDate, transferrableLoanProduct());
+    }
+
+    /** The loan product shape every transfer test relies on: 15000 principal over 4 monthly installments at 2%. */
+    protected PostLoanProductsRequest transferrableLoanProduct() {
+        return createOnePeriod30DaysPeriodicAccrualProduct(2.0)//
                 .numberOfRepayments(LOAN_REPAYMENTS)//
                 .repaymentEvery(1)//
                 .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS_L)//
                 .installmentAmountInMultiplesOf(null)//
                 .principal(LOAN_PRINCIPAL);
+    }
+
+    protected Long createLoanForClient(Long clientId, String transactionDate, PostLoanProductsRequest productRequest) {
         Long loanProductId = createLoanProduct(productRequest);
 
         PostLoansRequest loanRequest = applyLoanRequest(clientId, loanProductId, transactionDate, LOAN_PRINCIPAL, LOAN_REPAYMENTS,
@@ -130,8 +142,11 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
                         .loanTermFrequency(LOAN_REPAYMENTS)//
                         .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS));
         Long loanId = applyForLoan(loanRequest);
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
         approveLoan(loanId, approveLoanRequest(LOAN_PRINCIPAL, transactionDate));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
         disburseLoan(loanId, transactionDate, LOAN_PRINCIPAL);
+        verifyLoanStatus(loanId, LoanStatus.ACTIVE);
         return loanId;
     }
 
@@ -170,6 +185,9 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
                 assertEquals(expected.totalFeeOutstanding, etd.getDetails().getTotalFeeChargesOutstanding());
                 assertEquals(expected.totalOverpaid, etd.getDetails().getTotalOverpaid());
             }
+            if (expected.subStatus != null) {
+                assertEquals(expected.subStatus, etd.getSubStatus());
+            }
         }
     }
 
@@ -199,6 +217,7 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
         private final String settlementDate;
         private final String effectiveFrom;
         private final String effectiveTo;
+        private final ExternalTransferData.SubStatusEnum subStatus;
         private final boolean detailsExpected;
         private final BigDecimal totalOutstanding;
         private final BigDecimal totalPrincipalOutstanding;
@@ -211,9 +230,23 @@ public class ExternalAssetOwnerTransferTest extends FeignLoanTestBase {
                 String settlementDate, String effectiveFrom, String effectiveTo, boolean detailsExpected, BigDecimal totalOutstanding,
                 BigDecimal totalPrincipalOutstanding, BigDecimal totalInterestOutstanding, BigDecimal totalPenaltyOutstanding,
                 BigDecimal totalFeeOutstanding, BigDecimal totalOverpaid) {
-            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, detailsExpected,
-                    totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding, totalPenaltyOutstanding, totalFeeOutstanding,
-                    totalOverpaid);
+            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null,
+                    detailsExpected, totalOutstanding, totalPrincipalOutstanding, totalInterestOutstanding, totalPenaltyOutstanding,
+                    totalFeeOutstanding, totalOverpaid);
+        }
+
+        /** Expects a transfer that carries no captured loan details; its sub-status is not asserted. */
+        static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
+                String settlementDate, String effectiveFrom, String effectiveTo) {
+            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, null, false,
+                    null, null, null, null, null, null);
+        }
+
+        /** Expects a transfer that carries no captured loan details, and asserts the reason it reached its status. */
+        static ExpectedExternalTransferData expected(ExternalTransferData.StatusEnum status, String transferExternalId,
+                String settlementDate, String effectiveFrom, String effectiveTo, ExternalTransferData.SubStatusEnum subStatus) {
+            return new ExpectedExternalTransferData(status, transferExternalId, settlementDate, effectiveFrom, effectiveTo, subStatus,
+                    false, null, null, null, null, null, null);
         }
     }
 }
