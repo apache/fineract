@@ -1,6 +1,13 @@
+@SerialChargeAccrualConfig
 @WorkingCapital
 @WorkingCapitalTransactionAllocationFeature
 Feature: Working Capital Transaction Allocation
+
+  # Pin the charge accrual date to due-date so the scenarios do not depend on the global config value left behind by a
+  # previously executed feature. The transaction assertions below expect the charge accrual to be posted by the COB on
+  # the charge due date; a leaked submitted-date value would instead accrue at charge-add time and break them.
+  Background:
+    Given Global config "charge-accrual-date" value set to "due-date"
 
   @TestRailId:C85412
   Scenario: Verify Working Capital Repayment transaction with fee and penalty added with DUE_FEE_PENALTY_PRINCIPAL allocation - UC1
@@ -224,6 +231,7 @@ Feature: Working Capital Transaction Allocation
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
       | 20 January 2026 | Repayment         | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
@@ -236,6 +244,7 @@ Feature: Working Capital Transaction Allocation
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
       | 10 January 2026 | Repayment         | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
       | 20 January 2026 | Repayment         | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
@@ -263,6 +272,7 @@ Feature: Working Capital Transaction Allocation
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
       | 11 January 2026 | Charge Adjustment | 70.0              | 0.0              | 70.0              | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |

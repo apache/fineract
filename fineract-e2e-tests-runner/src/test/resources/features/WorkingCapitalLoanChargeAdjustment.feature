@@ -196,6 +196,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 80.0              | 0.0              | 80.0              | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
       | 11 January 2026 | Charge Adjustment | 80.0              | 0.0              | 80.0              | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
       | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
@@ -210,6 +212,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 80.0              | 0.0              | 80.0              | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
       | 11 January 2026 | Charge Adjustment | 80.0              | 0.0              | 80.0              | 0.0                   | false    |
       | 12 January 2026 | Charge Adjustment | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
     And Working Capital Loan has charges with the following data:
@@ -451,6 +455,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 500.0             | 0.0              | 500.0             | 0.0                   | false    |
+      | 10 January 2026 | Accrual           | 500.0             | 0.0              | 500.0             | 0.0                   | false    |
       | 10 January 2026 | Repayment         | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
     And Customer makes repayment on "20 January 2026" with 8500.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -460,6 +465,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 500.0             | 0.0              | 500.0             | 0.0                   | true     |
+      | 10 January 2026 | Accrual           | 500.0             | 0.0              | 500.0             | 0.0                   | false    |
       | 10 January 2026 | Repayment         | 500.0             | 0.0              | 500.0             | 0.0                   | false    |
       | 20 January 2026 | Repayment         | 8500.0            | 8500.0           | 0.0               | 0.0                   | false    |
     And Working Capital loan balance payload contains the following fields:

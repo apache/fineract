@@ -1,3 +1,4 @@
+@SerialChargeAccrualConfig
 @LoanAccrualFeature
 Feature: LoanAccrualTransaction
 

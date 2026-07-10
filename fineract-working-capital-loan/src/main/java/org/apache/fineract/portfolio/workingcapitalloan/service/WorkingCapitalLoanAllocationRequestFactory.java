@@ -52,6 +52,22 @@ public class WorkingCapitalLoanAllocationRequestFactory {
                 getAllocationRule(loan, transactionType).getAllocationTypes(), balance.getPrincipalOutstanding(), chargeBalances);
     }
 
+    /**
+     * Builds the allocation request for a charge adjustment. Unlike a repayment, an adjustment settles one specific
+     * charge, so the request is scoped to that single charge and exposes no principal outstanding. This keeps the
+     * amount on the charge's fee/penalty bucket and prevents the configured order (which ranks DUE_PRINCIPAL ahead of
+     * the IN_ADVANCE buckets) from diverting a not-yet-due charge onto principal.
+     */
+    public WorkingCapitalLoanAllocationRequest buildForChargeAdjustment(@NonNull final WorkingCapitalLoan loan,
+            @NonNull final WorkingCapitalLoanCharge adjustedCharge, @NonNull final LocalDate transactionDate,
+            @NonNull final BigDecimal amount) {
+        final ChargeBalance chargeBalance = new ChargeBalance(adjustedCharge.getId(), adjustedCharge.getAmountOutstanding(),
+                adjustedCharge.getDueDate(), adjustedCharge.isPenaltyCharge());
+        return new WorkingCapitalLoanAllocationRequest(transactionDate, amount,
+                getAllocationRule(loan, LoanTransactionType.CHARGE_ADJUSTMENT).getAllocationTypes(), BigDecimal.ZERO,
+                List.of(chargeBalance));
+    }
+
     @NonNull
     private WorkingCapitalLoanPaymentAllocationRule getAllocationRule(@NonNull final WorkingCapitalLoan loan,
             @NonNull final LoanTransactionType transactionType) {

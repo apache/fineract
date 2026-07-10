@@ -118,6 +118,8 @@ Feature: Working Capital Loan Payout Refund
       | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Payout Refund | 9140.0            | 9000.0           | 15.0              | 25.0                  | false    |
+      | 10 January 2026 | Accrual       | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
+      | 10 January 2026 | Accrual       | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
     And Working Capital loan status will be "OVERPAID"
     And Working Capital Loan Transactions tab has a "PAYOUT_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
@@ -132,6 +134,8 @@ Feature: Working Capital Loan Payout Refund
       | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Payout Refund | 9140.0            | 9000.0           | 15.0              | 25.0                  | true     |
+      | 10 January 2026 | Accrual       | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
+      | 10 January 2026 | Accrual       | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
     And Working Capital loan status will be "ACTIVE"
     And Working Capital Loan Transactions tab has a reversed "PAYOUT_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |

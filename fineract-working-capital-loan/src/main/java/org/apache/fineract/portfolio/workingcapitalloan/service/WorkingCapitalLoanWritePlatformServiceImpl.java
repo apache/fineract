@@ -33,7 +33,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -75,7 +74,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
@@ -109,15 +107,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final WorkingCapitalLoanTransactionRelationRepository relationRepository;
     private final WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
-    private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanTransactionReprocessingService transactionReprocessingService;
     private final WorkingCapitalLoanChargeRepository chargeRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
-    private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
-    private final WorkingCapitalLoanDelinquencyClassificationService delinquencyClassificationService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
     private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
+    private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
 
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
@@ -594,6 +590,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
         stateMachine.determineAndTransition(loan, transactionDate, activeCharges);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
+        // A discount-fee adjustment can pay down principal and close the loan, so accrue any pending charge income.
+        chargeAccrualService.accrueOnClosure(loan, transactionDate);
         changes.put("status", loan.getLoanStatus());
 
         loanRepository.save(loan);
@@ -811,6 +809,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             }
         }
 
+        // Closing an overpaid loan via a full credit balance refund must still recognize any pending charge accrual.
+        chargeAccrualService.accrueOnClosure(loan, transactionDate);
         changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
 
@@ -1038,9 +1038,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         final WorkingCapitalLoanTransaction txn = activeDisbursements.getFirst();
 
+        final List<WorkingCapitalLoanTransaction> accrualsToReverse = transactions.stream()
+                .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL && !t.isReversed()).toList();
+
         transactions.forEach(this::markReversed);
         this.transactionRepository.saveAll(transactions);
         this.transactionRepository.flush();
+
+        // Reverse the journal entries of any charge accrual so the recognized income/receivable is backed out with the
+        // disbursement; marking the transaction reversed alone would leave the GL postings in place.
+        accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
 
         // Operate on loan.getBalance() directly: it is the single managed balance instance that
         // recalculateRealizedIncome writes to, so all updates here apply to the same object that gets persisted.
@@ -1068,7 +1075,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             if (txn.getTypeOf() != LoanTransactionType.DISBURSEMENT && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE
                     && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT
                     && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_AMORTIZATION
-                    && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT) {
+                    && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT
+                    && txn.getTypeOf() != LoanTransactionType.ACCRUAL) {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.undo.disbursal.not.allowed",
                         "Undo disbursal is not allowed when there are other monetary transactions on the loan", "loanId");
             }

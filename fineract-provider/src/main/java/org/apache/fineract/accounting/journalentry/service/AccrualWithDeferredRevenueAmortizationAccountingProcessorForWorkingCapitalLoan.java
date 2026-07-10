@@ -95,6 +95,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.CREDIT_BALANCE_REFUND -> postCreditBalanceRefundJournalEntries(loan, txn);
             case LoanTransactionType.CHARGE_ADJUSTMENT -> postChargeAdjustmentJournalEntries(loan, txn, principalPortion, feesPortion,
                     penaltiesPortion, overpaymentPortion, isChargedOff);
+            case LoanTransactionType.ACCRUAL -> postChargeAccrualJournalEntries(loan, txn, feesPortion, penaltiesPortion);
             default -> {
                 throw new NotImplementedException(
                         "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
@@ -139,6 +140,19 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
+    }
+
+    private void postChargeAccrualJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+
+        // Debit receivable when the charge becomes accrued.
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+
+        // Credit the corresponding income account.
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_FEES, feesPortion);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_PENALTIES, penaltiesPortion);
     }
 
     private void postGoodwillCreditJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, BigDecimal principalPortion,

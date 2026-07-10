@@ -202,6 +202,13 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return transaction;
     }
 
+    public static WorkingCapitalLoanTransaction accrual(final WorkingCapitalLoan loan, final ExternalId externalId, final BigDecimal amount,
+            final LocalDate transactionDate) {
+        final WorkingCapitalLoanTransaction transaction = new WorkingCapitalLoanTransaction();
+        transaction.initialize(loan, LoanTransactionType.ACCRUAL, transactionDate, amount, null, null, externalId);
+        return transaction;
+    }
+
     private void initialize(final WorkingCapitalLoan loan, final LoanTransactionType transactionType, final LocalDate transactionDate,
             final BigDecimal amount, final PaymentDetail paymentDetail, final CodeValue classification, final ExternalId externalId) {
         this.wcLoan = loan;
