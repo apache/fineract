@@ -1,5 +1,6 @@
 name: Fineract Publish to DockerHub
 on:
+  workflow_dispatch:
   workflow_call:
     secrets:
       DEVELOCITY_ACCESS_KEY:
