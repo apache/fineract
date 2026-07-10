@@ -123,6 +123,10 @@ Feature: WorkingCapitalLoanProduct
   Scenario: Verify Working capital Loan Product create with invalid data shall outcome with error - validation check with payment allocation rules - UC11
     Then Admin failed to create a new Working Capital Loan Product with invalid value of payment allocation rules
 
+  @TestRailId:C85531
+  Scenario: Verify Working capital Loan Product create with invalid data shall outcome with error - validation check with payment allocation rules missing DEFAULT transaction type
+    Then Admin failed to create a new Working Capital Loan Product with payment allocation rules missing DEFAULT transaction type
+
   @TestRailId:C70219
   Scenario: Verify Working capital Loan Product update with invalid data shall outcome with error - validation check with number of payment allocation rules - UC12
     When Admin creates a new Working Capital Loan Product

@@ -237,6 +237,12 @@ public class WorkingCapitalRequestFactory {
                         List.of(DUE_FEE, DUE_PRINCIPAL, "INTEREST", IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_PENALTY)));//
     }
 
+    public List<PostPaymentAllocation> paymentAllocationRulesWithoutDefaultForWorkingCapitalLoanProductCreateRequest() {
+        return List.of(//
+                createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.GOODWILL_CREDIT.getValue(), //
+                        List.of(DUE_PRINCIPAL, DUE_FEE, DUE_PENALTY, IN_ADVANCE_PRINCIPAL, IN_ADVANCE_FEE, IN_ADVANCE_PENALTY)));//
+    }
+
     public List<PostPaymentAllocation> invalidNumberOfPaymentAllocationRulesForWorkingCapitalLoanProductUpdateRequest() {
         return List.of(//
                 createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(), //

@@ -233,3 +233,21 @@ Feature: Working Capital Goodwill Credit Accounting Entries
       | ASSET     | 112601       | Loans Receivable         | 9000.0  |         |
       | LIABILITY | 245000       | Other Credit Liability   | 1000.0  |         |
 
+  @TestRailId:C85530
+  Scenario: Verify Working Capital loan Goodwill Credit transaction GL entries - UC9: GOODWILL_CREDIT specific rule (DUE_PRINCIPAL first) skips the due fee
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct                     | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_GOODWILL_CREDIT_ALLOCATION | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 50.0 transaction amount
+# --- the goodwill credit follows the GOODWILL_CREDIT rule (DUE_PRINCIPAL first): the due fee is skipped, so no fee income/receivable legs are posted --- #
+    And Customer makes "GOODWILL_CREDIT" transaction on "10 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "GOODWILL_CREDIT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name             | Debit | Credit |
+      | EXPENSE | 744003       | Goodwill Expense Account | 100.0 |        |
+      | ASSET   | 112601       | Loans Receivable         |       | 100.0  |
+

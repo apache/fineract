@@ -1054,6 +1054,10 @@ public final class ErrorMessageHelper {
         return "The list of provided payment allocation rules must not contain any duplicates";
     }
 
+    public static String paymentAllocationRulesWithoutDefaultFailure() {
+        return "At least one DEFAULT payment allocation must be provided";
+    }
+
     public static String workingCapitalLoanProductIdentifiedDoesNotExistFailure(String identifierId) {
         return String.format("Working Capital Loan Product with identifier %s does not exist", identifierId);
     }

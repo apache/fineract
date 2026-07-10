@@ -2,7 +2,8 @@
 @WorkingCapitalGoodwillCreditPaymentAllocationFeature
 Feature: Working Capital Goodwill Credit Payment Allocation
 
-  Scenario: Verify Working Capital Goodwill Credit falls back to DEFAULT payment allocation rule with DUE_FEE_PENALTY_PRINCIPAL order - UC1
+  @TestRailId:C85511
+  Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_FEE_PENALTY_PRINCIPAL allocation - UC1
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct                    | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -32,6 +33,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85512
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_PENALTY_FEE_PRINCIPAL allocation - UC2
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -47,21 +49,22 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | Working Capital Loan Penalty | 12 January 2026 | 25.0   | EUR      | true      | Specified due date | Flat                    | Regular             |
     When Admin sets the business date to "12 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 270.0 transaction amount on Working Capital loan
+    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 30.0 transaction amount on Working Capital loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 9000.0    | 230.0              | 100000.0           | 0.0            | 0.0              | 0.0               |
+      | 9000.0    | 0.0                | 100000.0           | 0.0            | 0.0              | 0.0               |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
+      | 15.0       | 10.0            | 5.0      | 25.0           | 0.0                 | 25.0         |
     And Working Capital Loan has transactions:
       | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 12 January 2026 | Goodwill Credit | 270.0             | 230.0            | 15.0              | 25.0                  | false    |
+      | 12 January 2026 | Goodwill Credit | 30.0              | 0.0              | 5.0               | 25.0                  | false    |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85513
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_PRINCIPAL_FEE_PENALTY allocation - UC3
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -92,6 +95,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85514
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with DUE_FEE_PRINCIPAL_PENALTY allocation - UC4
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -122,6 +126,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85515
   Scenario: Verify Working Capital Goodwill Credit transaction with fee and penalty added with IN_ADVANCE_PENALTY_FEE_PRINCIPAL allocation - UC5
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -150,6 +155,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85516
   Scenario: Verify Working Capital Goodwill Credit transaction that closes loan with fee and penalty added with DUE_PRINCIPAL_FEE_PENALTY allocation - UC6
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -177,6 +183,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Goodwill Credit | 9040.0            | 9000.0           | 15.0              | 25.0                  | false    |
 
+  @TestRailId:C85517
   Scenario: Verify Working Capital Goodwill Credit transaction that overpays loan with following CBR trn and with fee and penalty added with DUE_PRINCIPAL_FEE_PENALTY allocation - UC7
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -214,6 +221,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit       | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
       | 12 January 2026 | Credit Balance Refund | 160.0             | 160.0            | 0.0               | 0.0                   | false    |
 
+  @TestRailId:C85518
   Scenario: Verify Working Capital Goodwill Credit transaction allocation with charges has been reprocessed successfully after additional backdated goodwill credit - UC8
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -255,6 +263,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "25 January 2026"
 
+  @TestRailId:C85519
   Scenario: Verify Working Capital Goodwill Credit and fee charge adjustment transaction allocation is processed successfully - UC9
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -285,6 +294,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "20 February 2026"
 
+  @TestRailId:C85520
   Scenario: Verify Working Capital Goodwill Credit transaction with charge within amortization schedule with DUE_PENALTY_FEE_PRINCIPAL allocation - UC10
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -501,6 +511,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85521
   Scenario: Verify Working Capital Goodwill Credit with fee and penalty charges within amortization schedule with DUE_FEE_PENALTY_PRINCIPAL allocation - UC11
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -724,6 +735,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85522
   Scenario: Verify Working Capital Goodwill Credit uses GOODWILL_CREDIT specific payment allocation rule (DUE_PRINCIPAL_FEE_PENALTY) - UC12
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -754,6 +766,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
 
+  @TestRailId:C85523
   Scenario: Verify Working Capital Goodwill Credit (DUE_PRINCIPAL_FEE_PENALTY) and Repayment (DUE_FEE_PENALTY_PRINCIPAL) apply different payment allocation rules on the same loan - UC13
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -786,3 +799,195 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     When Admin sets the business date to "20 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "20 February 2026"
+
+  @TestRailId:C85524
+  Scenario: Verify Working Capital Goodwill Credit paid in full follows the GOODWILL_CREDIT specific payment allocation rule - UC14
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                     | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_GOODWILL_CREDIT_ALLOCATION | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "12 January 2026" due date and 15.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "12 January 2026" due date and 25.0 transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 9040.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit | 9040.0            | 9000.0           | 15.0              | 25.0                  | false    |
+
+  @TestRailId:C85525
+  Scenario: Verify Working Capital Goodwill Credit paid in excess follows the GOODWILL_CREDIT specific payment allocation rule with following CBR transaction - UC15
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                     | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_GOODWILL_CREDIT_ALLOCATION | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "12 January 2026" due date and 15.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "12 January 2026" due date and 25.0 transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 9200.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 160.0             |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
+# --- make CBR transaction to refund overpaid amount --- #
+    And Customer makes credit balance refund on "12 January 2026" with 160.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit       | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
+      | 12 January 2026 | Credit Balance Refund | 160.0             | 160.0            | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C85526
+  Scenario: Verify Working Capital Goodwill Credit falls back to DEFAULT rule (DUE_PRINCIPAL first) and not to REPAYMENT rule (DUE_FEE first) when no GOODWILL_CREDIT rule is configured - UC16
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                 | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_REPAYMENT_DIFF_DEFAULT | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "12 January 2026" due date and 15.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "12 January 2026" due date and 25.0 transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- goodwill credit ignores the REPAYMENT (DUE_FEE first) rule and follows DEFAULT (DUE_PRINCIPAL first): all 100 goes to principal --- #
+    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 100.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 100.0              | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 15.0            | 0.0      | 25.0           | 25.0                | 0.0          |
+# --- repayment on the same loan still follows the REPAYMENT (DUE_FEE first) rule: charges are settled, no principal --- #
+    When Admin sets the business date to "13 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "13 January 2026" with 40.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 100.0              | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 13 January 2026 | Repayment       | 40.0              | 0.0              | 15.0              | 25.0                  | false    |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+
+  @TestRailId:C85527
+  Scenario: Verify backdated Working Capital Goodwill Credit reprocessing replays each transaction with its own payment allocation rule - UC17
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                     | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_GOODWILL_CREDIT_ALLOCATION | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- repayment follows the REPAYMENT (DUE_FEE first) rule: settles the fee --- #
+    And Customer makes repayment on "20 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+# --- backdated goodwill credit triggers reprocessing: goodwill keeps its own DUE_PRINCIPAL-first rule (principal 100), repayment keeps DUE_FEE-first (fee 100) --- #
+    And Customer makes "GOODWILL_CREDIT" transaction on "15 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Goodwill Credit | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment       | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 100.0              | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+    When Admin sets the business date to "25 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin closes the Working Capital loan with a full repayment on "25 January 2026"
+
+  @TestRailId:C85528
+  Scenario: Verify undo of Working Capital Goodwill Credit re-allocates the remaining transactions with their own payment allocation rules - UC18
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                     | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_GOODWILL_CREDIT_ALLOCATION | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "12 January 2026" due date and 15.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "12 January 2026" due date and 25.0 transaction amount
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes "GOODWILL_CREDIT" transaction on "12 January 2026" with 270.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "15 January 2026" with 40.0 transaction amount on Working Capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit | 270.0             | 270.0            | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Repayment       | 40.0              | 0.0              | 15.0              | 25.0                  | false    |
+# --- undo the goodwill credit: the repayment is replayed with its own REPAYMENT (DUE_FEE first) rule and keeps its portions --- #
+    When Customer undo "1"th "GOODWILL_CREDIT" transaction made on "12 January 2026" on Working Capital loan
+    Then Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Goodwill Credit | 270.0             | 270.0            | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Repayment       | 40.0              | 0.0              | 15.0              | 25.0                  | false    |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 0.0                | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+
+  @TestRailId:C85529
+  Scenario: Verify Working Capital Goodwill Credit allocates to in advance fee and penalty buckets of the GOODWILL_CREDIT specific rule - UC19
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct                     | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_GOODWILL_CREDIT_ALLOCATION | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 January 2026" due date and 15.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "20 January 2026" due date and 25.0 transaction amount
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- charges are due only on 20 Jan: principal is settled first (DUE_PRINCIPAL), then IN_ADVANCE_FEE fully, then IN_ADVANCE_PENALTY partially --- #
+    And Customer makes "GOODWILL_CREDIT" transaction on "15 January 2026" with 9020.0 transaction amount on Working Capital loan
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 0.0               |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 20.0                | 5.0          |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Goodwill Credit | 9020.0            | 9000.0           | 15.0              | 5.0                   | false    |
