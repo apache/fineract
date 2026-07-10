@@ -114,7 +114,7 @@ You can try it out with the following instructions (it's still in a private repo
 ```
 git clone git@github.com:vidakovic/fineract.git
 cd fineract
-git checkout feature/FINERACT-2169
+git switch feature/FINERACT-2169
 ./gradlew :fineract-command:build
 ./gradlew :fineract-command:jmh
 ```

@@ -6,7 +6,7 @@ Next, you create a git tag from the HEAD of the release's git branch.
 
 [source,bash,subs="attributes+,+macros"]
 ----
-git checkout -b release/{revnumber} <1>
+git switch -c release/{revnumber} <1>
 git tag -a {revnumber} -m "Fineract {revnumber} release" -s <2>
 git push origin tag {revnumber}
 ----

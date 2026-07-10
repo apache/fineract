@@ -16,7 +16,7 @@ Develop currently represents work toward Apache Fineract 1.0.0. Please submit al
 
 [source]
 ----
-git checkout develop
+git switch develop
 ----
 
 === Use short branch names
@@ -24,7 +24,7 @@ Branches used when submitting pull requests should preferably be named according
 
 [source]
 ----
-git checkout -b [topic]
+git switch -c [topic]
 ----
 
 === Pull in changes
@@ -36,7 +36,7 @@ To pull in upstream changes from repository you forked:
 
 [source]
 ----
-git checkout develop
+git switch develop
 git fetch upstream
 git merge upstream/develop
 ----
@@ -55,7 +55,7 @@ After you pulled all changes from upstream you need to rebase your topic branch 
 
 [source]
 ----
-git checkout [topic]
+git switch [topic]
 git rebase develop
 ----
 

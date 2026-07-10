@@ -6,7 +6,7 @@ As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-115
 
 [source,bash,subs="attributes+,+macros"]
 ----
-git checkout develop
+git switch develop
 git merge release/{revnumber} <1>
 git push origin develop
 git branch -D release/{revnumber}

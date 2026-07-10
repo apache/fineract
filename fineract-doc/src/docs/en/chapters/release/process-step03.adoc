@@ -26,7 +26,7 @@ git log <1>
 +
 [source,bash,subs="attributes+,+macros"]
 ----
-git checkout -b release/{revnumber}
+git switch -c release/{revnumber}
 ----
 
 4. Push new branch to Apache Fineract repository

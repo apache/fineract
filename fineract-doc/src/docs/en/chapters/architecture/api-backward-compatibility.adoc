@@ -112,10 +112,10 @@ To run the check locally, you need a baseline spec to compare against:
 ----
 # 1. Generate the baseline from develop
 git stash
-git checkout develop
+git switch develop
 ./gradlew :fineract-provider:resolve --no-daemon
 cp fineract-provider/build/resources/main/static/fineract.json /tmp/baseline.json
-git checkout -
+git switch -
 git stash pop
 
 # 2. Generate your current spec and compare

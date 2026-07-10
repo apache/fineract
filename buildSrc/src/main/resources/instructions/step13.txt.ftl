@@ -25,7 +25,7 @@
 As discussed in https://issues.apache.org/jira/browse/FINERACT-1154, now that everything is final, please do the following to remove the release branch (and just keep the tag),
 and make sure that everything on the release tag is merged to develop and that e.g. git describe works:
 
->> git checkout develop
+>> git switch develop
 >> git merge release/${project['fineract.release.version']}
 >> git push origin develop
 >> git branch -D release/${project['fineract.release.version']}
