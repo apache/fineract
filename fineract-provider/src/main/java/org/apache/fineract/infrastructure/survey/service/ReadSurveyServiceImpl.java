@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -47,6 +48,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     private final SqlValidator sqlValidator;
     private final GenericDataService genericDataService;
     private final DatatableReadService datatableReadService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Override
     public List<SurveyDataTableData> retrieveAllSurveys() {
@@ -120,8 +122,8 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             return List.of();
         }
 
-        final String sql = "SELECT  tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM " + registeredSurveyName + " tz"
-                + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = ? AND enabled = ? "
+        final String sql = "SELECT  tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM "
+                + sqlGenerator.escape(registeredSurveyName) + " tz" + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = ? AND enabled = ? "
                 + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                 + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
                 + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ? ";
