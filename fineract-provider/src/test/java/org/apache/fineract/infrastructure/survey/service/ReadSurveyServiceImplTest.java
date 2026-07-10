@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -64,6 +65,8 @@ class ReadSurveyServiceImplTest {
     @Mock
     private DatatableReadService datatableReadService;
     @Mock
+    private DatabaseSpecificSQLGenerator sqlGenerator;
+    @Mock
     private AppUser appUser;
 
     private ReadSurveyServiceImpl underTest;
@@ -72,11 +75,11 @@ class ReadSurveyServiceImplTest {
     void setUp() {
         when(context.authenticatedUser()).thenReturn(appUser);
         when(appUser.getId()).thenReturn(USER_ID);
-        underTest = new ReadSurveyServiceImpl(context, jdbcTemplate, sqlValidator, genericDataService, datatableReadService);
+        underTest = new ReadSurveyServiceImpl(context, jdbcTemplate, sqlValidator, genericDataService, datatableReadService, sqlGenerator);
     }
 
     @Test
-    void retrieveClientSurveyScoreOverviewUsesRegisteredSurveyNameAsSqlIdentifier() {
+    void retrieveClientSurveyScoreOverviewEscapesRegisteredSurveyNameAsSqlIdentifier() {
         SqlRowSet surveyNames = Mockito.mock(SqlRowSet.class);
         when(surveyNames.next()).thenReturn(true);
         when(surveyNames.getString("name")).thenReturn(SURVEY_NAME);
@@ -85,6 +88,7 @@ class ReadSurveyServiceImplTest {
         when(scoreRows.next()).thenReturn(false);
 
         when(jdbcTemplate.queryForRowSet(anyString(), any(Object[].class))).thenReturn(surveyNames, scoreRows);
+        when(sqlGenerator.escape(SURVEY_NAME)).thenReturn("\"" + SURVEY_NAME + "\"");
 
         List<ClientScoresOverview> result = underTest.retrieveClientSurveyScoreOverview(SURVEY_NAME, CLIENT_ID);
 
@@ -97,7 +101,7 @@ class ReadSurveyServiceImplTest {
         String scoreSql = sqlCaptor.getAllValues().get(1);
         Object[] scoreParams = paramsCaptor.getAllValues().get(1);
 
-        assertThat(scoreSql).contains("FROM " + SURVEY_NAME + " tz");
+        assertThat(scoreSql).contains("FROM \"" + SURVEY_NAME + "\" tz");
         assertThat(scoreSql).doesNotContain("FROM ? tz");
         assertThat(scoreParams).containsExactly(SURVEY_NAME, LikelihoodStatus.ENABLED, CLIENT_ID);
         verify(sqlValidator, times(2)).validate(SURVEY_NAME);
