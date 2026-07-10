@@ -28,7 +28,41 @@ cd ..
 diff -r fineract apache-fineract-src-{revnumber}
 ----
 
-Make sure the code compiles and tests pass on the uncompressed source. You should at the very least do exactly what you will ask the community to do in <<Step 9: Verify Distribution Staging>>.
+The diff won't be perfectly clean... some things are excluded from the source tarball on purpose. If you see something like this, it's OK to proceed:
+
+[source,text]
+----
+Only in fineract: .atr-rat-excludes-bin.txt
+Only in fineract: .atr-rat-excludes-src.txt
+Only in fineract: .dockerignore
+Only in fineract/fineract-branch/src/test/java: .gitkeep
+Only in fineract/fineract-branch/src/test/resources: .gitkeep
+Only in fineract/fineract-client/src/main/resources: .gitkeep
+Only in fineract/fineract-core/src/main/java/org/apache/fineract/infrastructure/businessdate/validation: .gitkeep
+Only in fineract/fineract-core/src/test/java: .gitkeep
+Only in fineract/fineract-core/src/test/resources: .gitkeep
+Only in fineract/fineract-doc/src/resources/fonts: .gitkeep
+Only in fineract/fineract-doc/src/resources/themes/fineract: .gitkeep
+Only in fineract/fineract-investor/src/test/java: .gitkeep
+Only in fineract/fineract-investor/src/test/resources: .gitkeep
+Only in fineract/fineract-loan/src/test/java: .gitkeep
+Only in fineract/fineract-loan/src/test/resources: .gitkeep
+Only in fineract: .git
+Only in fineract: .github
+Only in fineract: .gitignore
+Only in apache-fineract-src-1.15.0/integration-tests/src: integrationTest
+Only in apache-fineract-src-1.15.0: LICENSE
+Only in fineract: LICENSE_RELEASE
+Only in fineract: LICENSE_SOURCE
+Only in apache-fineract-src-1.15.0: NOTICE
+Only in fineract: NOTICE_RELEASE
+Only in fineract: NOTICE_SOURCE
+Only in apache-fineract-src-1.15.0: .rat-excludes
+Only in apache-fineract-src-1.15.0: test-results
+Only in fineract: .theia
+----
+
+Make sure the code compiles and tests pass on the uncompressed source. You should at the very least do exactly what you will ask the community to do in <<Build from source>>.
 
 Ideally you'd build code and docs and run every possible test and check, but https://github.com/apache/fineract/actions[running everything has complex dependencies, caches, and takes many hours]. It is rarely done in practice offline / local / on developer machines. But please, go ahead and run the test and doc tasks, and more! Grab a cup of coffee and run everything you can. See the various builds in `.github/workflows/` and try the same things on your own. We should all hammer on a release candidate as much as we can to see if it breaks and fix it if so. All that of course improves our final release.
 
