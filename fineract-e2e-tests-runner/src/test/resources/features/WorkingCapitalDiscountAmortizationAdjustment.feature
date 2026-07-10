@@ -1191,4 +1191,4 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 02 January 2026 | Discount Fee Amortization            | 999.83            |                  |                   |                       | false    |
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.83            |                  |                   |                       | false    |
-      | 04 January 2026 | Credit Balance Refund                | 400.0             | 400.0            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Credit Balance Refund                | 400.0             | 0.0              | 0.0               | 0.0                   | false    |

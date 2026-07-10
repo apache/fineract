@@ -1181,4 +1181,8 @@ public final class ErrorMessageHelper {
     public static String workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure() {
         return "validation.msg.WORKINGCAPITALLOAN.principalAmount.unable.to.calculate.valid.eir";
     }
+
+    public static String creditBalanceRefundBackdatedForbiddenFailure() {
+        return "Backdated credit balance refund is not allowed";
+    }
 }
