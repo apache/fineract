@@ -298,8 +298,8 @@ Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more t
 
 ### Pull Requests
 
-We request that your commit message includes a FINERACT JIRA issue and a one-liner that describes the changes.
-Start with an upper case imperative verb (not past form), and a short but concise clear description. (E.g. "FINERACT-821: Add enforced HideUtilityClassConstructor checkstyle").
+Your PR title must include a JIRA issue and a one-liner that describes the changes.
+Start your one-liner after the JIRA issue id. Use an upper case present-tense imperative verb and a short but concise clear description. (E.g. "FINERACT-821: Add enforced HideUtilityClassConstructor checkstyle").
 
 If your PR is failing to pass our CI build due to a test failure, then:
 
@@ -337,6 +337,7 @@ We have an automated bot which marks pull requests as "stale" after a while, and
 
 After PR review and passing CI build, a committer will merge your PR branch into our primary integration branch, `develop`, either locally or on GitHub using "Merge pull request - Create a merge commit" (not "Squash and merge" and not "Rebase and merge").
 
+If merging the PR resolved a JIRA issue, mark that issue as resolved and set "Fix Version/s" to the next unreleased version. These fix versions only apply to the `apache/fineract` repository. Other repositories should set "Fix Version/s" to "Unknown".
 
 ### Signing Your Commits
 

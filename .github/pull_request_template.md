@@ -12,5 +12,6 @@ Please make sure these boxes are checked before submitting your pull request - t
 - [ ] Follow our [coding conventions](https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions).
 - [ ] Add required Swagger annotation and update API documentation at fineract-provider/src/main/resources/static/legacy-docs/apiLive.htm with details of any API changes
 - [ ] [This PR must not be a "code dump"](https://cwiki.apache.org/confluence/display/FINERACT/Pull+Request+Size+Limit). Large changes can be made in a branch, with assistance. Ask for help on the [developer mailing list](https://fineract.apache.org/#contribute).
+- [ ] If merging this PR resolves a JIRA issue, I will mark that issue as resolved and set "Fix Version/s" appropriately.
 
 Your assigned reviewer(s) will follow our [guidelines for code reviews](https://cwiki.apache.org/confluence/display/FINERACT/Code+Review+Guide).
