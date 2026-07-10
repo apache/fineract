@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.template.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
@@ -31,17 +30,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class TemplateData implements Serializable {
+public final class TemplateDetailsData implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-    private String name;
-    private String text;
-    @Schema(implementation = Integer.class)
-    private String entity;
-    @Schema(implementation = Integer.class)
-    private String type;
-    private List<TemplateMapperData> mappers;
+    private List<TemplateItemData> entities;
+    private List<TemplateItemData> types;
+    private TemplateData template;
 }

@@ -20,7 +20,10 @@ package org.apache.fineract.template.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -41,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
@@ -52,6 +56,8 @@ import org.apache.fineract.template.data.TemplateCreateResponse;
 import org.apache.fineract.template.data.TemplateData;
 import org.apache.fineract.template.data.TemplateDeleteRequest;
 import org.apache.fineract.template.data.TemplateDeleteResponse;
+import org.apache.fineract.template.data.TemplateDetailsData;
+import org.apache.fineract.template.data.TemplateItemData;
 import org.apache.fineract.template.data.TemplateUpdateRequest;
 import org.apache.fineract.template.data.TemplateUpdateResponse;
 import org.apache.fineract.template.domain.TemplateEntity;
@@ -99,7 +105,7 @@ public class TemplatesApiResource {
             @DefaultValue("-1") @QueryParam("typeId") @Parameter(description = "typeId") final int typeId,
             @DefaultValue("-1") @QueryParam("entityId") @Parameter(description = "entityId") final int entityId) {
         if (typeId != -1 && entityId != -1) {
-            return templateService.getAllByEntityAndType(TemplateEntity.values()[entityId], TemplateType.values()[typeId]);
+            return templateService.getAllByEntityAndType(findTemplateEntity(entityId), findTemplateType(typeId));
         } else {
             return templateService.getAll();
         }
@@ -119,12 +125,10 @@ public class TemplatesApiResource {
             Example Request:
 
             templates/template
-            """)
+            """, responses = @ApiResponse(responseCode = "default", content = @Content(schema = @Schema(implementation = TemplateData.class))))
     @AlternativeOperationId("template_20")
-    public TemplateData retrieveTemplateDetails() {
-        // TODO: why?!? The original code was also limited to return only the ID attribute...
-        // which we don't have; the parser will remove all null values
-        return new TemplateData();
+    public TemplateDetailsData retrieveTemplateDetails() {
+        return templateDetails(null);
     }
 
     @GET
@@ -140,10 +144,10 @@ public class TemplatesApiResource {
 
     @GET
     @Path("{templateId}/template")
-    @Operation(operationId = "retrieveTemplateById")
+    @Operation(operationId = "retrieveTemplateById", responses = @ApiResponse(responseCode = "default", content = @Content(schema = @Schema(implementation = TemplateData.class))))
     @AlternativeOperationId("getTemplateByTemplate")
-    public TemplateData retrieveTemplateById(@PathParam("templateId") final Long templateId) {
-        return templateService.findOneById(templateId);
+    public TemplateDetailsData retrieveTemplateById(@PathParam("templateId") final Long templateId) {
+        return templateDetails(templateService.findOneById(templateId));
     }
 
     @POST
@@ -212,5 +216,29 @@ public class TemplatesApiResource {
         parametersMap.putAll(result);
 
         return this.templateMergeService.compile(template, parametersMap);
+    }
+
+    private TemplateDetailsData templateDetails(final TemplateData template) {
+        return TemplateDetailsData.builder().entities(retrieveEntities()).types(retrieveTypes()).template(template).build();
+    }
+
+    private List<TemplateItemData> retrieveEntities() {
+        return Stream.of(TemplateEntity.values())
+                .map(entity -> TemplateItemData.builder().id(entity.getId()).name(entity.getName()).build()).toList();
+    }
+
+    private List<TemplateItemData> retrieveTypes() {
+        return Stream.of(TemplateType.values()).map(type -> TemplateItemData.builder().id(type.getId()).name(type.getName()).build())
+                .toList();
+    }
+
+    private TemplateEntity findTemplateEntity(final int entityId) {
+        return Stream.of(TemplateEntity.values()).filter(entity -> entity.getId() == entityId).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid template entity id: " + entityId));
+    }
+
+    private TemplateType findTemplateType(final int typeId) {
+        return Stream.of(TemplateType.values()).filter(type -> type.getId() == typeId).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid template type id: " + typeId));
     }
 }
