@@ -28,6 +28,7 @@ import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
+import org.apache.fineract.client.models.SavingsAccountSummaryData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 
 public class FeignSavingsHelper {
@@ -77,6 +78,10 @@ public class FeignSavingsHelper {
 
     public SavingsAccountData getSavingsDetails(Long savingsId, String associations) {
         return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of("associations", associations)));
+    }
+
+    public SavingsAccountSummaryData getSavingsSummary(Long savingsId) {
+        return getSavingsDetails(savingsId, "summary").getSummary();
     }
 
     public DeleteSavingsAccountsAccountIdResponse deleteSavingsApplication(Long savingsId) {

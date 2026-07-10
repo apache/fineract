@@ -347,6 +347,11 @@ public class FeignLoanHelper {
                 Map.of("associations", "all", "exclude", "guarantors,futureSchedule")));
     }
 
+    /** Retrieves the loan with an explicit {@code associations} list, e.g. to include {@code futureSchedule}. */
+    public GetLoansLoanIdResponse getLoanDetails(Long loanId, String associations) {
+        return ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", associations)));
+    }
+
     public GetLoansLoanIdResponse getLoanDetailsByExternalId(String loanExternalId) {
         return ok(() -> fineractClient.loans().retrieveOneLoanByExternalId(loanExternalId, false, "all", null, null));
     }
