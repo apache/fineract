@@ -1519,6 +1519,12 @@ public final class LoanProductsApiResourceSwagger {
         public Integer overDueDaysForRepaymentEvent;
         @Schema(example = "3")
         public Integer inArrearsTolerance;
+        @Schema(example = "1")
+        public Integer graceOnPrincipalPayment;
+        @Schema(example = "1")
+        public Integer graceOnInterestPayment;
+        @Schema(example = "1")
+        public Integer graceOnArrearsAgeing;
         @Schema(example = "false")
         public Boolean enableDownPayment;
         @Schema(example = "5.5")

@@ -28,7 +28,7 @@ import org.springframework.data.domain.Page;
 /**
  * Created by Chirag Gupta on 12/30/17.
  */
-final class LoanTransactionsApiResourceSwagger {
+public final class LoanTransactionsApiResourceSwagger {
 
     private LoanTransactionsApiResourceSwagger() {}
 

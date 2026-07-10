@@ -315,7 +315,7 @@ public class FeignLoanHelper {
     }
 
     public PutLoansLoanIdResponse modifyLoanApplication(Long loanId, String command, PutLoansLoanIdRequest request) {
-        return ok(() -> fineractClient.loans().updateLoanApplication(loanId, request, Map.of("command", command)));
+        return ok(() -> fineractClient.loans().updateLoanApplication(loanId, request, command));
     }
 
     public PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
@@ -345,6 +345,11 @@ public class FeignLoanHelper {
     public GetLoansLoanIdResponse getLoanDetails(Long loanId) {
         return ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("associations", "all", "exclude", "guarantors,futureSchedule")));
+    }
+
+    /** Retrieves the loan with an explicit {@code associations} list, e.g. to include {@code futureSchedule}. */
+    public GetLoansLoanIdResponse getLoanDetails(Long loanId, String associations) {
+        return ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", associations)));
     }
 
     public GetLoansLoanIdResponse getLoanDetailsByExternalId(String loanExternalId) {
