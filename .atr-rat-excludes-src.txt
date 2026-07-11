@@ -35,20 +35,20 @@
 # with en_US.UTF-8 lang/locale
 **/META-INF/fineract-test.config
 **/legacy-docs/
-*.adoc
-*.avsc
-*.feature
-*.html
-*.md
-*.mustache
-*.puml
-*.txt
-.openapi-generator-ignore
+**/*.adoc
+**/*.avsc
+**/features/**
+**/*.html
+**/*.md
+**/*.mustache
+**/*.puml
+**/*.txt
+**/.openapi-generator-ignore
 /.asf.yaml
 /.rat-excludes
 /config/fineractdev-eclipse-preferences.epf
 /fineract-provider/src/test/resources/results/xbrl.xml
 /gradle/wrapper/gradle-wrapper.properties
-org.springframework.boot.autoconfigure.AutoConfiguration.imports
+**/org.springframework.boot.autoconfigure.AutoConfiguration.imports
 
 # vim:ft=conf
