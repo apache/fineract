@@ -4,6 +4,8 @@
 
 Initiate voting with https://release-test.apache.org[the ATR (ASF Trusted Releases) tool].
 
+Disable "Automatically publish to SVN when this vote resolves".
+
 == Gradle Task
 
 .Command
