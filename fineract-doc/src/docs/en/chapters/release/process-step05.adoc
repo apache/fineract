@@ -7,11 +7,11 @@ Next, you create a git tag from the HEAD of the release's git branch.
 [source,bash,subs="attributes+,+macros"]
 ----
 git switch -c release/{revnumber} <1>
-git tag -a {revnumber} -m "Fineract {revnumber} release" -s <2>
-git push origin tag {revnumber}
+git tag -a {revnumber} -m "Fineract {revnumber} release" -s
+git push origin tag {revnumber} <2>
 ----
 <1> Ensure all tests pass for this commit both in CI and locally.
-<2> `-s` is optional but recommended: GPG signatures on tags are useful for trust and integrity.
+<2> You may opt to wait to push the tag until just before <<Step 10: Start Vote>>. By that time you'll be done with <<Step 9: Verify Distribution Staging>>, so it's less likely you'd need to try to move the tag. Git tags are meant to be immutable and they tend to spread like viruses. Moving them can be painful or tricky.
 
 CAUTION: It is important to create so called annotated tags (vs. lightweight) for releases.
 
