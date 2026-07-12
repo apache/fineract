@@ -42,6 +42,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.FeignCalls;
+import org.apache.fineract.client.models.AddressCreateResponse;
 import org.apache.fineract.client.models.AddressData;
 import org.apache.fineract.client.models.ClientAddressRequest;
 import org.apache.fineract.client.models.ClientTextSearch;
@@ -55,7 +56,6 @@ import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
-import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsClientIdRequest;
@@ -265,14 +265,14 @@ public class ClientHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static PostClientClientIdAddressesResponse createClientAddress(final RequestSpecification requestSpec,
+    public static AddressCreateResponse createClientAddress(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, long clientId, long addressTypeId, ClientAddressRequest request) {
         final String CREATE_CLIENT_ADDRESS_URL = "/fineract-provider/api/v1/client/" + clientId + "/addresses?type=" + addressTypeId + "&"
                 + Utils.TENANT_IDENTIFIER;
         log.info("---------------------------------CREATING A CLIENT ADDRESS ---------------------------------------------");
         String requestBody = GSON.toJson(request);
         String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_ADDRESS_URL, requestBody);
-        return GSON.fromJson(response, PostClientClientIdAddressesResponse.class);
+        return GSON.fromJson(response, AddressCreateResponse.class);
     }
 
     public static void updateClientAddress(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, long clientId,
