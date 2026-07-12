@@ -28,15 +28,6 @@ final class ClientAddressApiResourcesSwagger {
 
     private ClientAddressApiResourcesSwagger() {}
 
-    @Schema(description = "PostClientClientIdAddressesResponse")
-    public static final class PostClientClientIdAddressesResponse {
-
-        private PostClientClientIdAddressesResponse() {}
-
-        @Schema(example = "15")
-        public Long resourceId;
-    }
-
     @Schema(description = "PutClientClientIdAddressesResponse")
     public static final class PutClientClientIdAddressesResponse {
 

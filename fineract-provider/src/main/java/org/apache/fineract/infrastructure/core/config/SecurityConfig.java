@@ -439,6 +439,10 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups/*/command/unassign_staff"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UNASSIGNSTAFF_GROUP")
 
+                    // client address
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/client/*/addresses"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_ADDRESS")
+
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));

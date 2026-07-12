@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.AddressCreateResponse;
 import org.apache.fineract.client.models.AddressData;
 import org.apache.fineract.client.models.ApiResponse;
 import org.apache.fineract.client.models.ClientAddressRequest;
@@ -43,7 +44,6 @@ import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
-import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdChanges;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
 import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
@@ -298,8 +298,12 @@ public class FeignClientHelper {
         return ok(() -> fineractClient.clients().deleteClientByExternalId(externalId));
     }
 
-    public PostClientClientIdAddressesResponse createClientAddress(Long clientId, Long addressTypeId, ClientAddressRequest request) {
+    public AddressCreateResponse createClientAddress(Long clientId, Long addressTypeId, ClientAddressRequest request) {
         return ok(() -> fineractClient.clientsAddress().createClientAddress(clientId, request, addressTypeId));
+    }
+
+    public CallFailedRuntimeException createClientAddressExpectingError(Long clientId, Long addressTypeId, ClientAddressRequest request) {
+        return fail(() -> fineractClient.clientsAddress().createClientAddress(clientId, request, addressTypeId));
     }
 
     public PutClientClientIdAddressesResponse updateClientAddress(Long clientId, ClientAddressRequest request) {
