@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.portfolio.address.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
+import org.apache.fineract.portfolio.address.data.AddressCreateResponse;
 
-public interface AddressWritePlatformService {
+public interface AddressDomainService {
 
-    CommandProcessingResult updateClientAddress(Long clientId, JsonCommand command);
+    AddressCreateResponse create(AddressCreateRequest request);
 }
