@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPaymentAllocationRule;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,42 +40,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkingCapitalLoanAllocationRequestFactory {
 
-    public WorkingCapitalLoanAllocationRequest build(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance,
-            final List<WorkingCapitalLoanCharge> charges, final LocalDate transactionDate, final BigDecimal amount,
-            final LoanTransactionType transactionType) {
+    @NonNull
+    public WorkingCapitalLoanAllocationRequest build(@NonNull final WorkingCapitalLoan loan,
+            @NonNull final WorkingCapitalLoanBalance balance, @NonNull final List<WorkingCapitalLoanCharge> charges,
+            @NonNull final LocalDate transactionDate, @NonNull final BigDecimal amount,
+            @NonNull final LoanTransactionType transactionType) {
         final List<ChargeBalance> chargeBalances = charges.stream().map(
                 charge -> new ChargeBalance(charge.getId(), charge.getAmountOutstanding(), charge.getDueDate(), charge.isPenaltyCharge()))
                 .toList();
-        return new WorkingCapitalLoanAllocationRequest(transactionDate, amount, resolveAllocationOrder(loan, transactionType),
-                balance.getPrincipalOutstanding(), chargeBalances);
+        return new WorkingCapitalLoanAllocationRequest(transactionDate, amount,
+                getAllocationRule(loan, transactionType).getAllocationTypes(), balance.getPrincipalOutstanding(), chargeBalances);
     }
 
-    private List<WorkingCapitalPaymentAllocationType> resolveAllocationOrder(final WorkingCapitalLoan loan,
-            final LoanTransactionType transactionType) {
-        final WorkingCapitalLoanPaymentAllocationRule rule = transactionType == null ? getDefaultAllocationRule(loan)
-                : getAllocationRule(loan, transactionType);
-        if (rule != null && rule.getAllocationTypes() != null && !rule.getAllocationTypes().isEmpty()) {
-            return rule.getAllocationTypes();
-        }
-        // No configured order: keep the legacy principal-only behaviour.
-        return List.of(WorkingCapitalPaymentAllocationType.DUE_PRINCIPAL);
-    }
-
-    private WorkingCapitalLoanPaymentAllocationRule getAllocationRule(final WorkingCapitalLoan loan,
-            final LoanTransactionType transactionType) {
-        final List<WorkingCapitalLoanPaymentAllocationRule> rules = loan.getPaymentAllocationRules();
-        if (rules == null || rules.isEmpty()) {
-            return null;
-        }
-        return rules.stream().filter(rule -> transactionType.equals(rule.getTransactionType().getLoanTransactionType())).findFirst()
+    @NonNull
+    private WorkingCapitalLoanPaymentAllocationRule getAllocationRule(@NonNull final WorkingCapitalLoan loan,
+            @NonNull final LoanTransactionType transactionType) {
+        return loan.getPaymentAllocationRules().stream()
+                .filter(rule -> transactionType.equals(rule.getTransactionType().getLoanTransactionType())).findFirst()
                 .orElseGet(() -> getDefaultAllocationRule(loan));
     }
 
-    private WorkingCapitalLoanPaymentAllocationRule getDefaultAllocationRule(final WorkingCapitalLoan loan) {
-        final List<WorkingCapitalLoanPaymentAllocationRule> rules = loan.getPaymentAllocationRules();
-        if (rules == null || rules.isEmpty()) {
-            return null;
-        }
-        return rules.stream().filter(rule -> rule.getTransactionType().isDefault()).findFirst().orElse(null);
+    @NonNull
+    private WorkingCapitalLoanPaymentAllocationRule getDefaultAllocationRule(@NonNull final WorkingCapitalLoan loan) {
+        return loan.getPaymentAllocationRules().stream().filter(rule -> rule.getTransactionType().isDefault()).findFirst().get();
     }
 }
